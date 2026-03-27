@@ -157,20 +157,12 @@ struct NoJourneyView: View {
 struct SettingsView: View {
     @ObservedObject var viewModel: JourneyViewModel
 
-    @AppStorage("odptConsumerKey") private var consumerKey = ""
     @AppStorage("showEnglish") private var showEnglish = true
     @AppStorage("pollingInterval") private var pollingInterval = 30.0
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("Settings.Section.OdptAPI") {
-                    SecureField("Settings.SecureField.ConsumerKey", text: $consumerKey)
-                        .font(.system(.body, design: .monospaced))
-
-                    Link(String(localized: "Settings.Link.DeveloperRegistration"), destination: URL(string: "https://developer-dc.odpt.org/")!)
-                }
-
                 Section("Settings.Section.Display") {
                     Toggle("Settings.Toggle.ShowEnglish", isOn: $showEnglish)
 
