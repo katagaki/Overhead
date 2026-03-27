@@ -120,16 +120,24 @@ final class ODPTClient {
     // MARK: - Fetch Train Timetables
 
     func fetchTrainTimetables(railwayId: String) async throws -> [TrainService] {
-        // Determine current calendar type
-        let calendar = currentCalendarType()
+        // Determine current calendar type (JR-East uses prefixed calendars)
+        let calendar = currentCalendarType(forStationId: railwayId)
 
-        let timetables: [ODPTTrainTimetable] = try await fetch(
+        var timetables: [ODPTTrainTimetable] = try await fetch(
             endpoint: "odpt:TrainTimetable",
             params: [
                 "odpt:railway": railwayId,
                 "odpt:calendar": calendar
             ]
         )
+
+        // Fallback: if calendar-specific query returned nothing, fetch without calendar filter
+        if timetables.isEmpty {
+            timetables = try await fetch(
+                endpoint: "odpt:TrainTimetable",
+                params: ["odpt:railway": railwayId]
+            )
+        }
 
         return timetables.compactMap { tt -> TrainService? in
             let entries = tt.trainTimetableObject.enumerated().map { (i, obj) -> TimetableEntry in
@@ -183,15 +191,23 @@ final class ODPTClient {
     // MARK: - Fetch Station Timetable
 
     func fetchStationTimetable(stationId: String) async throws -> [StationTimetableData] {
-        let calendar = currentCalendarType()
+        let calendar = currentCalendarType(forStationId: stationId)
 
-        let timetables: [ODPTStationTimetable] = try await fetch(
+        var timetables: [ODPTStationTimetable] = try await fetch(
             endpoint: "odpt:StationTimetable",
             params: [
                 "odpt:station": stationId,
                 "odpt:calendar": calendar
             ]
         )
+
+        // Fallback: if calendar-specific query returned nothing, fetch without calendar filter
+        if timetables.isEmpty {
+            timetables = try await fetch(
+                endpoint: "odpt:StationTimetable",
+                params: ["odpt:station": stationId]
+            )
+        }
 
         // Collect all unique destination station IDs to resolve names
         var allDestinationIds = Set<String>()
@@ -317,16 +333,27 @@ final class ODPTClient {
 
     // MARK: - Calendar Type
 
-    private func currentCalendarType() -> String {
+    /// Returns the ODPT calendar ID for the current day.
+    /// JR-East uses operator-prefixed calendars (e.g. "odpt.Calendar:JR-East.Weekday"),
+    /// while Metro/Toei use generic ones (e.g. "odpt.Calendar:Weekday").
+    private func currentCalendarType(forStationId stationId: String? = nil) -> String {
         let tz = TimeZone(identifier: "Asia/Tokyo")!
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = tz
         let weekday = cal.component(.weekday, from: Date())
         // 1 = Sunday, 7 = Saturday
-        if weekday == 1 || weekday == 7 {
-            return "odpt.Calendar:SaturdayHoliday"
+        let isWeekend = weekday == 1 || weekday == 7
+
+        // JR-East stations use operator-prefixed calendar IDs
+        if let stationId, stationId.contains("JR-East") {
+            return isWeekend
+                ? "odpt.Calendar:JR-East.SaturdayHoliday"
+                : "odpt.Calendar:JR-East.Weekday"
         }
-        return "odpt.Calendar:Weekday"
+
+        return isWeekend
+            ? "odpt.Calendar:SaturdayHoliday"
+            : "odpt.Calendar:Weekday"
     }
 
     // MARK: - Parsing Helpers

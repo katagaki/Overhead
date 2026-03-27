@@ -64,7 +64,7 @@ struct StationNumberBadge: View {
 
     @ViewBuilder
     private func jrBadge(prefix: String, number: String) -> some View {
-        let w = badgeDimension * 1.15
+        let w = badgeDimension
         let h = badgeDimension
 
         VStack(spacing: 0) {

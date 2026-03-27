@@ -29,7 +29,7 @@ struct LineSymbolBadge: View {
         Text(symbol)
             .font(.system(size: 14, weight: .heavy))
             .foregroundColor(.black)
-            .frame(width: 38, height: 32)
+            .frame(width: 32, height: 32)
             .background(Color.white)
             .clipShape(RoundedRectangle(cornerRadius: 5))
             .overlay(
