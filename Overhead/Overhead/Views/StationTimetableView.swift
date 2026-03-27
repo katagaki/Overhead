@@ -82,8 +82,8 @@ struct StationTimetableView: View {
             Spacer()
 
             // Destination
-            if !departure.destinationName.isEmpty {
-                Text(shortStationName(departure.destinationName))
+            if !departure.localizedDestination.isEmpty {
+                Text(departure.localizedDestination)
                     .font(.system(size: 14))
                     .foregroundColor(.secondary)
             }
@@ -162,11 +162,6 @@ struct StationTimetableView: View {
         }
 
         return Array(upcoming.prefix(20))
-    }
-
-    private func shortStationName(_ fullId: String) -> String {
-        // Extract the last component from "odpt.Station:Operator.Line.StationName"
-        fullId.components(separatedBy: ".").last ?? fullId
     }
 
     private func busynessColor(_ level: Int) -> Color {

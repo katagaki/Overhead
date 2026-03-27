@@ -90,6 +90,12 @@ final class ODPTClient {
                         longitude: obj.lon
                     ))
                 }
+                // Sort JR stations by station code number (e.g. JC05 → 05)
+                stations.sort { a, b in
+                    let aNum = Int(a.stationCode.drop(while: \.isLetter)) ?? 0
+                    let bNum = Int(b.stationCode.drop(while: \.isLetter)) ?? 0
+                    return aNum < bNum
+                }
             }
 
             // Determine color: use API color if available, else fall back to LineColors
@@ -187,27 +193,65 @@ final class ODPTClient {
             ]
         )
 
+        // Collect all unique destination station IDs to resolve names
+        var allDestinationIds = Set<String>()
+        for tt in timetables {
+            for obj in tt.stationTimetableObject {
+                if let destIds = obj.destinationStation {
+                    allDestinationIds.formUnion(destIds)
+                }
+            }
+        }
+
+        // Fetch station objects for destination name resolution
+        var stationNameMap: [String: (ja: String, en: String)] = [:]
+        for destId in allDestinationIds {
+            let stations: [ODPTStation] = try await fetch(
+                endpoint: "odpt:Station",
+                params: ["owl:sameAs": destId]
+            )
+            if let station = stations.first {
+                stationNameMap[destId] = (
+                    ja: station.stationTitle?["ja"] ?? station.title,
+                    en: station.stationTitle?["en"] ?? ""
+                )
+            }
+        }
+
+        // Fetch rail directions for enriching direction names
+        let directions = try? await fetchRailDirections()
+
         return timetables.map { tt in
             let departures = tt.stationTimetableObject.enumerated().map { (i, obj) -> StationDeparture in
-                StationDeparture(
+                let destId = obj.destinationStation?.first ?? ""
+                let destNames = stationNameMap[destId]
+                return StationDeparture(
                     id: "\(tt.sameAs)_\(i)",
                     departureTime: obj.departureTime ?? "",
                     trainType: parseTrainType(obj.trainType),
-                    destinationName: obj.destinationStation?.first ?? "",
-                    destinationNameEn: "",
+                    destinationName: destNames?.ja ?? shortStationName(destId),
+                    destinationNameEn: destNames?.en ?? "",
                     trainNumber: obj.trainNumber ?? "",
                     isLast: obj.isLast ?? false
                 )
             }
 
+            let dirId = tt.railDirection ?? ""
+            let dirNames = directions?[dirId]
+
             return StationTimetableData(
                 stationId: stationId,
-                railDirection: tt.railDirection ?? "",
-                railDirectionName: tt.railDirection ?? "",
-                railDirectionNameEn: "",
+                railDirection: dirId,
+                railDirectionName: dirNames?.ja ?? dirId,
+                railDirectionNameEn: dirNames?.en ?? "",
                 departures: departures
             )
         }
+    }
+
+    /// Extract a readable name from an ODPT station ID as a fallback
+    private func shortStationName(_ fullId: String) -> String {
+        fullId.components(separatedBy: ".").last ?? fullId
     }
 
     // MARK: - Fetch Rail Directions
@@ -290,11 +334,12 @@ final class ODPTClient {
     private func parseTrainType(_ raw: String?) -> TrainService.TrainType {
         guard let raw else { return .local }
         let lower = raw.lowercased()
-        if lower.contains("rapid") || lower.contains("kaisoku") { return .rapid }
-        if lower.contains("limitedexpress") || lower.contains("tokkyu") { return .limitedExpress }
-        if lower.contains("express") { return .express }
+        // Check specific types before generic "rapid" to avoid misclassification
         if lower.contains("commuterrapid") { return .commuterRapid }
         if lower.contains("specialrapid") { return .specialRapid }
+        if lower.contains("limitedexpress") || lower.contains("tokkyu") { return .limitedExpress }
+        if lower.contains("express") { return .express }
+        if lower.contains("rapid") || lower.contains("kaisoku") { return .rapid }
         return .local
     }
 
