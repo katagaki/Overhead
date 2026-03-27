@@ -156,6 +156,7 @@ struct MoreView: View {
 
     @AppStorage("showEnglish") private var showEnglish = true
     @AppStorage("pollingInterval") private var pollingInterval = 30.0
+    @AppStorage("disableGPS") private var disableGPS = false
 
     var body: some View {
         NavigationStack {
@@ -170,6 +171,18 @@ struct MoreView: View {
                             .font(.system(size: 12, design: .monospaced))
                             .foregroundColor(.secondary)
                     }
+                }
+
+                Section("Settings.Section.Location") {
+                    Toggle("Settings.Toggle.DisableGPS", isOn: $disableGPS)
+                    if disableGPS {
+                        Text("Settings.Label.GPSDisabledDescription")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .onChange(of: disableGPS) { _, newValue in
+                    viewModel.gpsDisabled = newValue
                 }
 
                 if viewModel.activeJourney != nil {
@@ -228,6 +241,9 @@ struct MoreView: View {
                 }
             }
             .navigationTitle("ViewTitle.More")
+            .onAppear {
+                viewModel.gpsDisabled = disableGPS
+            }
             .navigationDestination(for: ViewPath.self) { path in
                 switch path {
                 case .attributions:

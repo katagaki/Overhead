@@ -64,12 +64,12 @@ struct StationNumberBadge: View {
 
     @ViewBuilder
     private func jrBadge(prefix: String, number: String) -> some View {
-        let w = badgeDimension * 1.15
+        let w = badgeDimension
         let h = badgeDimension
 
         VStack(spacing: 0) {
             Text(prefix)
-                .font(.system(size: prefixFontSize, weight: .heavy))
+                .font(.custom("HelveticaNeue-Bold", size: prefixFontSize))
                 .frame(maxWidth: .infinity)
                 .padding(.top, 2)
 
@@ -79,7 +79,7 @@ struct StationNumberBadge: View {
                 .padding(.horizontal, 3)
 
             Text(number)
-                .font(.system(size: numberFontSize, weight: .black, design: .rounded))
+                .font(.custom("HelveticaNeue-Bold", size: numberFontSize))
                 .frame(maxWidth: .infinity)
                 .padding(.bottom, 2)
         }
@@ -101,11 +101,11 @@ struct StationNumberBadge: View {
 
         VStack(spacing: -1) {
             Text(prefix)
-                .font(.system(size: prefixFontSize, weight: .heavy))
+                .font(.system(size: prefixFontSize, weight: .heavy, design: .default))
                 .padding(.top, 1)
 
             Text(number)
-                .font(.system(size: numberFontSize, weight: .black, design: .rounded))
+                .font(.system(size: numberFontSize, weight: .black, design: .default))
                 .padding(.bottom, 1)
         }
         .foregroundColor(Color.black.opacity(opacity))

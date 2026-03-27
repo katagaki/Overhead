@@ -24,6 +24,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
     @Published var trackingMode: TrackingMode = .timetable
     @Published var isTracking = false
     @Published var locationError: String?
+    @Published var gpsDisabled = false
 
     // MARK: - Config
 
@@ -81,15 +82,19 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         // Always start the timetable tick — it's the baseline
         startTimetableTick()
 
-        // Attempt GPS on top
-        let status = locationManager.authorizationStatus
-        if status == .notDetermined {
-            locationManager.requestWhenInUseAuthorization()
-        } else if status == .authorizedWhenInUse || status == .authorizedAlways {
-            beginGPSUpdates()
-        } else {
-            locationError = "\(String(localized: "LocationError.NotAuthorized"))"
+        // Attempt GPS on top (unless disabled by user)
+        if gpsDisabled {
             trackingMode = .timetable
+        } else {
+            let status = locationManager.authorizationStatus
+            if status == .notDetermined {
+                locationManager.requestWhenInUseAuthorization()
+            } else if status == .authorizedWhenInUse || status == .authorizedAlways {
+                beginGPSUpdates()
+            } else {
+                locationError = "\(String(localized: "LocationError.NotAuthorized"))"
+                trackingMode = .timetable
+            }
         }
 
         isTracking = true
@@ -107,6 +112,13 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         stationCoordinates = []
         recentAccuracies = []
         lastGoodGPSTime = nil
+    }
+
+    func stopGPS() {
+        locationManager.stopUpdatingLocation()
+        trackingMode = .timetable
+        lastGoodGPSTime = nil
+        recentAccuracies = []
     }
 
     func updateDelay(_ delay: DelayInfo?) {
@@ -167,7 +179,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let location = locations.last, journey != nil else { return }
+        guard let location = locations.last, journey != nil, !gpsDisabled else { return }
 
         // Reject stale readings
         let age = -location.timestamp.timeIntervalSinceNow
