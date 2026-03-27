@@ -60,7 +60,7 @@ struct LinePickerView: View {
                             .frame(width: 6, height: 36)
 
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(line.name)
+                            Text(line.localizedName)
                                 .font(.system(size: 16, weight: .semibold))
                             Text(line.nameEn)
                                 .font(.system(size: 12))
@@ -98,7 +98,7 @@ struct StationPickerView: View {
                                 )
                             }
                             VStack(alignment: .leading) {
-                                Text(station.name)
+                                Text(station.localizedName)
                                 Text(station.nameEn)
                                     .font(.system(size: 11))
                                     .foregroundColor(.secondary)
@@ -128,7 +128,7 @@ struct StationPickerView: View {
                                 )
                             }
                             VStack(alignment: .leading) {
-                                Text(station.name)
+                                Text(station.localizedName)
                                 Text(station.nameEn)
                                     .font(.system(size: 11))
                                     .foregroundColor(.secondary)
@@ -178,6 +178,6 @@ struct StationPickerView: View {
                 }
             }
         }
-        .navigationTitle(line.name)
+        .navigationTitle(line.localizedName)
     }
 }

@@ -72,7 +72,7 @@ struct JourneyView: View {
                     .frame(width: 6, height: 28)
 
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(journey.line.name)
+                    Text(journey.line.localizedName)
                         .font(.system(size: 20, weight: .bold))
                     Text(journey.line.nameEn)
                         .font(.system(size: 13))
@@ -440,7 +440,7 @@ struct VerticalLCDLine: View {
                     )
                 }
 
-                Text(station.name)
+                Text(station.localizedName)
                     .font(.system(size: isCurrent || isTerminal ? 18 : 15,
                                   weight: isCurrent || isTerminal ? .bold : .medium))
                     .foregroundColor(isPast && !isCurrent ? .secondary : .primary)

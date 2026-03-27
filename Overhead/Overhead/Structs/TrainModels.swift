@@ -7,12 +7,44 @@ struct Station: Identifiable, Codable, Hashable {
     let id: String          // e.g. "odpt.Station:JR-East.ChuoRapid.Shinjuku"
     let name: String        // Japanese name
     let nameEn: String      // English/Romaji name
+    let nameKo: String      // Korean name
+    let nameZhHans: String  // Simplified Chinese name
+    let nameZhHant: String  // Traditional Chinese name
     let stationCode: String // e.g. "JC05"
     let latitude: Double?
     let longitude: Double?
 
+    /// Convenience initializer for cases that don't have multilingual data
+    init(id: String, name: String, nameEn: String, nameKo: String = "", nameZhHans: String = "", nameZhHant: String = "", stationCode: String, latitude: Double?, longitude: Double?) {
+        self.id = id
+        self.name = name
+        self.nameEn = nameEn
+        self.nameKo = nameKo
+        self.nameZhHans = nameZhHans
+        self.nameZhHant = nameZhHant
+        self.stationCode = stationCode
+        self.latitude = latitude
+        self.longitude = longitude
+    }
+
     var displayCode: String {
         stationCode.isEmpty ? "" : stationCode
+    }
+
+    /// Returns the station name for the user's current language
+    var localizedName: String {
+        let lang = Locale.current.language.languageCode?.identifier ?? "ja"
+        switch lang {
+        case "en": return nameEn.isEmpty ? name : nameEn
+        case "ko": return nameKo.isEmpty ? name : nameKo
+        case "zh":
+            let script = Locale.current.language.script?.identifier ?? ""
+            if script == "Hant" {
+                return nameZhHant.isEmpty ? name : nameZhHant
+            }
+            return nameZhHans.isEmpty ? name : nameZhHans
+        default: return name
+        }
     }
 }
 
@@ -22,12 +54,44 @@ struct TrainLine: Identifiable, Codable, Hashable {
     let id: String           // e.g. "odpt.Railway:JR-East.ChuoRapid"
     let name: String
     let nameEn: String
+    let nameKo: String
+    let nameZhHans: String
+    let nameZhHant: String
     let operatorId: String   // e.g. "odpt.Operator:JR-East"
     let stations: [Station]
     let colorHex: String     // Primary accent color
 
+    /// Convenience initializer for cases that don't have multilingual data
+    init(id: String, name: String, nameEn: String, nameKo: String = "", nameZhHans: String = "", nameZhHant: String = "", operatorId: String, stations: [Station], colorHex: String) {
+        self.id = id
+        self.name = name
+        self.nameEn = nameEn
+        self.nameKo = nameKo
+        self.nameZhHans = nameZhHans
+        self.nameZhHant = nameZhHant
+        self.operatorId = operatorId
+        self.stations = stations
+        self.colorHex = colorHex
+    }
+
     var color: Color {
         Color(hex: colorHex)
+    }
+
+    /// Returns the line name for the user's current language
+    var localizedName: String {
+        let lang = Locale.current.language.languageCode?.identifier ?? "ja"
+        switch lang {
+        case "en": return nameEn.isEmpty ? name : nameEn
+        case "ko": return nameKo.isEmpty ? name : nameKo
+        case "zh":
+            let script = Locale.current.language.script?.identifier ?? ""
+            if script == "Hant" {
+                return nameZhHant.isEmpty ? name : nameZhHant
+            }
+            return nameZhHans.isEmpty ? name : nameZhHans
+        default: return name
+        }
     }
 }
 

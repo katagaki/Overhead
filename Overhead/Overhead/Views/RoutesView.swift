@@ -45,19 +45,19 @@ struct RoutesView: View {
                             Text(LocalizedStringKey(label.localizationKey))
                                 .font(.system(size: 17, weight: .semibold))
 
-                            Text(line.name)
+                            Text(line.localizedName)
                                 .font(.system(size: 13))
                                 .foregroundColor(line.color)
 
                             HStack(spacing: 4) {
                                 StationNumberBadge(code: from.stationCode, color: line.color, size: .regular)
-                                Text(from.name)
+                                Text(from.localizedName)
                                     .font(.system(size: 13))
                                 Image(systemName: "arrow.right")
                                     .font(.system(size: 10))
                                     .foregroundColor(.secondary)
                                 StationNumberBadge(code: to.stationCode, color: line.color, size: .regular)
-                                Text(to.name)
+                                Text(to.localizedName)
                                     .font(.system(size: 13))
                             }
                         }
@@ -225,7 +225,7 @@ struct RouteEditorView: View {
                                 .frame(width: 6, height: 28)
 
                             VStack(alignment: .leading, spacing: 1) {
-                                Text(line.name)
+                                Text(line.localizedName)
                                     .font(.system(size: 15, weight: .medium))
                                 Text(line.nameEn)
                                     .font(.system(size: 11))
@@ -256,7 +256,7 @@ struct RouteEditorView: View {
                                     StationNumberBadge(code: station.stationCode, color: line.color, size: .compact)
                                 }
                                 VStack(alignment: .leading) {
-                                    Text(station.name)
+                                    Text(station.localizedName)
                                     Text(station.nameEn)
                                         .font(.system(size: 11))
                                         .foregroundColor(.secondary)
@@ -283,7 +283,7 @@ struct RouteEditorView: View {
                                     StationNumberBadge(code: station.stationCode, color: line.color, size: .compact)
                                 }
                                 VStack(alignment: .leading) {
-                                    Text(station.name)
+                                    Text(station.localizedName)
                                     Text(station.nameEn)
                                         .font(.system(size: 11))
                                         .foregroundColor(.secondary)

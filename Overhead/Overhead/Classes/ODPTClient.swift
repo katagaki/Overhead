@@ -1,18 +1,21 @@
 import Foundation
 
 // MARK: - ODPT API Client
-// Stub implementation — replace with real API calls using your ODPT consumer key.
 
 final class ODPTClient {
 
     private let consumerKey: String
+    private let baseURL = "https://api.odpt.org/api/v4"
+    private let session: URLSession
 
     init(consumerKey: String) {
         self.consumerKey = consumerKey
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 30
+        self.session = URLSession(configuration: config)
     }
 
     /// Read the ODPT consumer key from the bundled ODPTKey.plist.
-    /// Copy ODPTKey-Sample.plist to ODPTKey.plist and replace the placeholder value.
     static func consumerKeyFromPlist() -> String {
         guard let url = Bundle.main.url(forResource: "ODPTKey", withExtension: "plist"),
               let data = try? Data(contentsOf: url),
@@ -25,24 +28,328 @@ final class ODPTClient {
         return key
     }
 
-    /// Fetch railway lines for a given operator
+    // MARK: - Fetch Railways
+
     func fetchRailways(operatorId: String) async throws -> [TrainLine] {
-        // TODO: Implement real ODPT API call
-        // GET https://api.odpt.org/api/v4/odpt:Railway?odpt:operator=<operatorId>&acl:consumerKey=<key>
-        return []
+        let railways: [ODPTRailway] = try await fetch(
+            endpoint: "odpt:Railway",
+            params: ["odpt:operator": operatorId]
+        )
+
+        // For each railway, fetch stations to get lat/lon and station codes
+        var lines: [TrainLine] = []
+        for railway in railways {
+            let railwayId = railway.sameAs
+
+            // Build stations from stationOrder (Metro/Toei) or from Station endpoint (JR)
+            var stations: [Station] = []
+
+            if !railway.stationOrder.isEmpty {
+                // Metro/Toei: stationOrder is populated
+                // Also fetch Station objects for lat/lon and codes
+                let stationObjects: [ODPTStation] = try await fetch(
+                    endpoint: "odpt:Station",
+                    params: ["odpt:railway": railwayId]
+                )
+                let stationMap = Dictionary(
+                    stationObjects.map { ($0.sameAs, $0) },
+                    uniquingKeysWith: { first, _ in first }
+                )
+
+                for order in railway.stationOrder.sorted(by: { $0.index < $1.index }) {
+                    let stationId = order.station
+                    let obj = stationMap[stationId]
+                    stations.append(Station(
+                        id: stationId,
+                        name: order.stationTitle?["ja"] ?? obj?.stationTitle?["ja"] ?? railway.title,
+                        nameEn: order.stationTitle?["en"] ?? obj?.stationTitle?["en"] ?? "",
+                        nameKo: order.stationTitle?["ko"] ?? obj?.stationTitle?["ko"] ?? "",
+                        nameZhHans: order.stationTitle?["zh-Hans"] ?? obj?.stationTitle?["zh-Hans"] ?? "",
+                        nameZhHant: order.stationTitle?["zh-Hant"] ?? obj?.stationTitle?["zh-Hant"] ?? "",
+                        stationCode: obj?.stationCode ?? "",
+                        latitude: obj?.lat,
+                        longitude: obj?.lon
+                    ))
+                }
+            } else {
+                // JR-East: stationOrder is empty, fetch stations
+                let stationObjects: [ODPTStation] = try await fetch(
+                    endpoint: "odpt:Station",
+                    params: ["odpt:railway": railwayId]
+                )
+                for obj in stationObjects {
+                    stations.append(Station(
+                        id: obj.sameAs,
+                        name: obj.stationTitle?["ja"] ?? obj.title,
+                        nameEn: obj.stationTitle?["en"] ?? "",
+                        nameKo: obj.stationTitle?["ko"] ?? "",
+                        nameZhHans: obj.stationTitle?["zh-Hans"] ?? "",
+                        nameZhHant: obj.stationTitle?["zh-Hant"] ?? "",
+                        stationCode: obj.stationCode ?? "",
+                        latitude: obj.lat,
+                        longitude: obj.lon
+                    ))
+                }
+            }
+
+            // Determine color: use API color if available, else fall back to LineColors
+            let colorHex = railway.color ?? lineColorFallback(railwayId: railwayId)
+
+            lines.append(TrainLine(
+                id: railwayId,
+                name: railway.railwayTitle?["ja"] ?? railway.title,
+                nameEn: railway.railwayTitle?["en"] ?? "",
+                nameKo: railway.railwayTitle?["ko"] ?? "",
+                nameZhHans: railway.railwayTitle?["zh-Hans"] ?? "",
+                nameZhHant: railway.railwayTitle?["zh-Hant"] ?? "",
+                operatorId: railway.operatorId,
+                stations: stations,
+                colorHex: colorHex
+            ))
+        }
+
+        return lines
     }
 
-    /// Fetch train timetables for a given railway
+    // MARK: - Fetch Train Timetables
+
     func fetchTrainTimetables(railwayId: String) async throws -> [TrainService] {
-        // TODO: Implement real ODPT API call
-        // GET https://api.odpt.org/api/v4/odpt:TrainTimetable?odpt:railway=<railwayId>&acl:consumerKey=<key>
-        return []
+        // Determine current calendar type
+        let calendar = currentCalendarType()
+
+        let timetables: [ODPTTrainTimetable] = try await fetch(
+            endpoint: "odpt:TrainTimetable",
+            params: [
+                "odpt:railway": railwayId,
+                "odpt:calendar": calendar
+            ]
+        )
+
+        return timetables.compactMap { tt -> TrainService? in
+            let entries = tt.trainTimetableObject.enumerated().map { (i, obj) -> TimetableEntry in
+                let stationId = obj.departureStation ?? obj.arrivalStation ?? ""
+                return TimetableEntry(
+                    id: "\(tt.sameAs)_\(i)",
+                    stationId: stationId,
+                    arrivalTime: obj.arrivalTime,
+                    departureTime: obj.departureTime
+                )
+            }
+
+            guard !entries.isEmpty else { return nil }
+
+            let trainType = parseTrainType(tt.trainType)
+            let direction = parseDirection(tt.railDirection)
+
+            return TrainService(
+                id: tt.trainNumber ?? tt.sameAs,
+                lineId: tt.railway,
+                trainType: trainType,
+                direction: direction,
+                timetable: entries,
+                destinationStationId: tt.destinationStation?.first ?? ""
+            )
+        }
     }
 
-    /// Fetch current delay information for a given railway
+    // MARK: - Fetch Delay / Train Information
+
     func fetchDelayInfo(railwayId: String) async throws -> [DelayInfo] {
-        // TODO: Implement real ODPT API call
-        // GET https://api.odpt.org/api/v4/odpt:TrainInformation?odpt:railway=<railwayId>&acl:consumerKey=<key>
-        return []
+        let infos: [ODPTTrainInformation] = try await fetch(
+            endpoint: "odpt:TrainInformation",
+            params: ["odpt:railway": railwayId]
+        )
+
+        return infos.map { info in
+            let text = info.trainInformationText?["ja"] ?? ""
+            let isNormal = text.contains("平常") || text.contains("運転しています")
+            let delayMinutes = isNormal ? 0 : parseDelayMinutes(from: text)
+
+            return DelayInfo(
+                lineId: info.railway,
+                delayMinutes: delayMinutes,
+                cause: isNormal ? nil : text,
+                updatedAt: info.date ?? Date()
+            )
+        }
+    }
+
+    // MARK: - Generic Fetch
+
+    private func fetch<T: Decodable>(endpoint: String, params: [String: String]) async throws -> [T] {
+        var components = URLComponents(string: "\(baseURL)/\(endpoint)")!
+        var queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }
+        queryItems.append(URLQueryItem(name: "acl:consumerKey", value: consumerKey))
+        components.queryItems = queryItems
+
+        let (data, response) = try await session.data(from: components.url!)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode == 200 else {
+            throw ODPTError.requestFailed
+        }
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode([T].self, from: data)
+    }
+
+    // MARK: - Calendar Type
+
+    private func currentCalendarType() -> String {
+        let tz = TimeZone(identifier: "Asia/Tokyo")!
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = tz
+        let weekday = cal.component(.weekday, from: Date())
+        // 1 = Sunday, 7 = Saturday
+        if weekday == 1 || weekday == 7 {
+            return "odpt.Calendar:SaturdayHoliday"
+        }
+        return "odpt.Calendar:Weekday"
+    }
+
+    // MARK: - Parsing Helpers
+
+    private func parseTrainType(_ raw: String?) -> TrainService.TrainType {
+        guard let raw else { return .local }
+        let lower = raw.lowercased()
+        if lower.contains("rapid") || lower.contains("kaisoku") { return .rapid }
+        if lower.contains("limitedexpress") || lower.contains("tokkyu") { return .limitedExpress }
+        if lower.contains("express") { return .express }
+        if lower.contains("commuterrapid") { return .commuterRapid }
+        if lower.contains("specialrapid") { return .specialRapid }
+        return .local
+    }
+
+    private func parseDirection(_ raw: String?) -> TrainService.Direction {
+        guard let raw else { return .outbound }
+        // Convention: lower index → outbound; but ODPT doesn't have a clear standard
+        return raw.contains("Inbound") ? .inbound : .outbound
+    }
+
+    private func parseDelayMinutes(from text: String) -> Int {
+        // Try to extract delay minutes from Japanese text like "約10分の遅れ"
+        let pattern = #"(\d+)\s*分"#
+        if let match = text.range(of: pattern, options: .regularExpression),
+           let minutes = Int(text[match].filter(\.isNumber)) {
+            return minutes
+        }
+        // If we can't parse but it's not normal, assume minor delay
+        return 5
+    }
+
+    private func lineColorFallback(railwayId: String) -> String {
+        let colorMap: [String: String] = [
+            "odpt.Railway:JR-East.Yamanote": LineColors.yamanote,
+            "odpt.Railway:JR-East.ChuoRapid": LineColors.chuoRapid,
+            "odpt.Railway:JR-East.KeihinTohoku": LineColors.keihinTohoku,
+            "odpt.Railway:Toei.Asakusa": LineColors.toeiAsakusa,
+            "odpt.Railway:Toei.Oedo": LineColors.toeiOedo,
+        ]
+        return colorMap[railwayId] ?? "#808080"
+    }
+
+    // MARK: - Error
+
+    enum ODPTError: Error {
+        case requestFailed
+    }
+}
+
+// MARK: - ODPT Response Models
+
+private struct ODPTRailway: Decodable {
+    let sameAs: String
+    let title: String
+    let railwayTitle: [String: String]?
+    let operatorId: String
+    let stationOrder: [ODPTStationOrder]
+    let color: String?
+
+    enum CodingKeys: String, CodingKey {
+        case sameAs = "owl:sameAs"
+        case title = "dc:title"
+        case railwayTitle = "odpt:railwayTitle"
+        case operatorId = "odpt:operator"
+        case stationOrder = "odpt:stationOrder"
+        case color = "odpt:color"
+    }
+}
+
+private struct ODPTStationOrder: Decodable {
+    let index: Int
+    let station: String
+    let stationTitle: [String: String]?
+
+    enum CodingKeys: String, CodingKey {
+        case index = "odpt:index"
+        case station = "odpt:station"
+        case stationTitle = "odpt:stationTitle"
+    }
+}
+
+private struct ODPTStation: Decodable {
+    let sameAs: String
+    let title: String
+    let stationTitle: [String: String]?
+    let stationCode: String?
+    let lat: Double?
+    let lon: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case sameAs = "owl:sameAs"
+        case title = "dc:title"
+        case stationTitle = "odpt:stationTitle"
+        case stationCode = "odpt:stationCode"
+        case lat = "geo:lat"
+        case lon = "geo:long"
+    }
+}
+
+private struct ODPTTrainTimetable: Decodable {
+    let sameAs: String
+    let railway: String
+    let trainNumber: String?
+    let trainType: String?
+    let railDirection: String?
+    let destinationStation: [String]?
+    let trainTimetableObject: [ODPTTimetableObject]
+
+    enum CodingKeys: String, CodingKey {
+        case sameAs = "owl:sameAs"
+        case railway = "odpt:railway"
+        case trainNumber = "odpt:trainNumber"
+        case trainType = "odpt:trainType"
+        case railDirection = "odpt:railDirection"
+        case destinationStation = "odpt:destinationStation"
+        case trainTimetableObject = "odpt:trainTimetableObject"
+    }
+}
+
+private struct ODPTTimetableObject: Decodable {
+    let departureStation: String?
+    let arrivalStation: String?
+    let departureTime: String?
+    let arrivalTime: String?
+
+    enum CodingKeys: String, CodingKey {
+        case departureStation = "odpt:departureStation"
+        case arrivalStation = "odpt:arrivalStation"
+        case departureTime = "odpt:departureTime"
+        case arrivalTime = "odpt:arrivalTime"
+    }
+}
+
+private struct ODPTTrainInformation: Decodable {
+    let sameAs: String
+    let railway: String
+    let trainInformationText: [String: String]?
+    let date: Date?
+
+    enum CodingKeys: String, CodingKey {
+        case sameAs = "owl:sameAs"
+        case railway = "odpt:railway"
+        case trainInformationText = "odpt:trainInformationText"
+        case date = "dc:date"
     }
 }

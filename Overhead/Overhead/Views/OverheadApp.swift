@@ -115,15 +115,6 @@ struct NoJourneyView: View {
                     .foregroundColor(.blue)
             }
 
-            VStack(spacing: 8) {
-                Text("App.Title")
-                    .font(.system(size: 28, weight: .bold))
-
-                Text("App.Subtitle")
-                    .font(.system(size: 15))
-                    .foregroundColor(.secondary)
-            }
-
             Text("Onboarding.Description")
                 .font(.system(size: 14))
                 .foregroundColor(.secondary)
