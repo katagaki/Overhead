@@ -4,6 +4,7 @@ import SwiftUI
 
 struct LinePickerView: View {
     @ObservedObject var viewModel: JourneyViewModel
+    @AppStorage("showJRLines") private var showJRLines = false
     @State private var selectedLine: TrainLine?
     @State private var boardingStation: Station?
     @State private var alightingStation: Station?
@@ -19,7 +20,7 @@ struct LinePickerView: View {
                     lineList
                 }
             }
-            .navigationTitle("路線")
+            .navigationTitle("ViewTitle.Lines")
             .task {
                 await viewModel.loadLines()
             }
@@ -46,11 +47,13 @@ struct LinePickerView: View {
     @ViewBuilder
     private var lineList: some View {
         let grouped = Dictionary(grouping: viewModel.availableLines) { $0.operatorId }
-        let sectionOrder = [
-            "odpt.Operator:JR-East",
+        var sectionOrder = [
             "odpt.Operator:TokyoMetro",
             "odpt.Operator:Toei"
         ]
+        if showJRLines {
+            sectionOrder.insert("odpt.Operator:JR-East", at: 0)
+        }
         let sectionTitles: [String: String] = [
             "odpt.Operator:JR-East": "JR",
             "odpt.Operator:TokyoMetro": "東京メトロ",

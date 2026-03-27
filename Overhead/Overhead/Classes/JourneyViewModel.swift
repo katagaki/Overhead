@@ -23,6 +23,16 @@ final class JourneyViewModel: ObservableObject {
     @Published var isLoadingTimetable = false
     @Published var passengerSurveys: [String: PassengerSurveyData] = [:]  // keyed by station ID
     @Published var railDirections: [String: (ja: String, en: String)] = [:]
+    @Published var showJRLines: Bool = false {
+        didSet {
+            // Re-filter available lines when toggled
+            if !isDemoMode {
+                linesLoaded = false
+                Task { await loadLines() }
+            }
+        }
+    }
+
     @Published var gpsDisabled: Bool = false {
         didSet {
             locationTracker.gpsDisabled = gpsDisabled
@@ -126,8 +136,11 @@ final class JourneyViewModel: ObservableObject {
 
     func startDemoMode() {
         isDemoMode = true
-        availableLines = DemoDataProvider.demoLines
-        let line = DemoDataProvider.demoLines[0]
+        let demoLines = showJRLines
+            ? DemoDataProvider.demoLines
+            : DemoDataProvider.demoLines.filter { $0.operatorId != "odpt.Operator:JR-East" }
+        availableLines = demoLines
+        let line = demoLines[0]
         let stations = line.stations
         guard let from = stations.first, let to = stations.last else { return }
 
@@ -167,7 +180,9 @@ final class JourneyViewModel: ObservableObject {
 
     func loadLines() async {
         if isDemoMode {
-            availableLines = DemoDataProvider.demoLines
+            availableLines = showJRLines
+                ? DemoDataProvider.demoLines
+                : DemoDataProvider.demoLines.filter { $0.operatorId != "odpt.Operator:JR-East" }
             linesLoaded = true
             return
         }
@@ -178,11 +193,13 @@ final class JourneyViewModel: ObservableObject {
         errorMessage = nil
 
         do {
-            let operators = [
-                "odpt.Operator:JR-East",
+            var operators = [
                 "odpt.Operator:TokyoMetro",
                 "odpt.Operator:Toei"
             ]
+            if showJRLines {
+                operators.insert("odpt.Operator:JR-East", at: 0)
+            }
 
             // Fetch rail directions in parallel with railways
             async let directionsTask: () = loadRailDirections()
