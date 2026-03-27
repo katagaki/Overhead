@@ -19,7 +19,7 @@ struct OverheadApp: App {
 
     /// Handle deep links from Live Activity buttons
     private func handleDeepLink(_ url: URL) {
-        guard url.scheme == "tokyorail" else { return }
+        guard url.scheme == "overhead" else { return }
 
         switch url.host {
         case "refresh-delay":
@@ -59,7 +59,7 @@ struct RootView: View {
             }
             .tabItem {
                 Image(systemName: "tram.fill")
-                Text("\u{65C5}\u{7A0B}")
+                Text("Tab.Journey")
             }
             .tag(Tab.journey)
 
@@ -67,7 +67,7 @@ struct RootView: View {
             LinePickerView(viewModel: viewModel)
                 .tabItem {
                     Image(systemName: "map")
-                    Text("\u{8DEF}\u{7DDA}")
+                    Text("Tab.Lines")
                 }
                 .tag(Tab.lines)
 
@@ -75,7 +75,7 @@ struct RootView: View {
             SettingsView(viewModel: viewModel)
                 .tabItem {
                     Image(systemName: "gearshape")
-                    Text("\u{8A2D}\u{5B9A}")
+                    Text("Tab.Settings")
                 }
                 .tag(Tab.settings)
         }
@@ -108,15 +108,15 @@ struct NoJourneyView: View {
             }
 
             VStack(spacing: 8) {
-                Text("\u{6771}\u{4EAC}\u{30EC}\u{30FC}\u{30EB}")
+                Text("App.Title")
                     .font(.system(size: 28, weight: .bold))
 
-                Text("Tokyo Rail Tracker")
+                Text("App.Subtitle")
                     .font(.system(size: 15))
                     .foregroundColor(.secondary)
             }
 
-            Text("\u{8DEF}\u{7DDA}\u{3068}\u{99C5}\u{3092}\u{9078}\u{3093}\u{3067}\u{3001}\u{30EA}\u{30A2}\u{30EB}\u{30BF}\u{30A4}\u{30E0}\u{3067}\n\u{65C5}\u{7A0B}\u{3092}\u{8FFD}\u{8DE1}\u{3057}\u{307E}\u{3057}\u{3087}\u{3046}")
+            Text("Onboarding.Description")
                 .font(.system(size: 14))
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -127,7 +127,7 @@ struct NoJourneyView: View {
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "plus.circle.fill")
-                    Text("\u{65C5}\u{7A0B}\u{3092}\u{958B}\u{59CB} / Start Journey")
+                    Text("Button.StartJourney")
                 }
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.white)
@@ -156,55 +156,74 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("ODPT API") {
-                    SecureField("Consumer Key", text: $consumerKey)
+                Section("Settings.Section.OdptAPI") {
+                    SecureField("Settings.SecureField.ConsumerKey", text: $consumerKey)
                         .font(.system(.body, design: .monospaced))
 
-                    Link("\u{958B}\u{767A}\u{8005}\u{767B}\u{9332} / Register", destination: URL(string: "https://developer-dc.odpt.org/")!)
+                    Link(String(localized: "Settings.Link.DeveloperRegistration"), destination: URL(string: "https://developer-dc.odpt.org/")!)
                 }
 
-                Section("\u{8868}\u{793A} / Display") {
-                    Toggle("\u{82F1}\u{8A9E}\u{540D}\u{3092}\u{8868}\u{793A} / Show English", isOn: $showEnglish)
+                Section("Settings.Section.Display") {
+                    Toggle("Settings.Toggle.ShowEnglish", isOn: $showEnglish)
 
                     VStack(alignment: .leading) {
-                        Text("\u{66F4}\u{65B0}\u{9593}\u{9694} / Polling Interval")
+                        Text("Settings.Label.PollingInterval")
                         Slider(value: $pollingInterval, in: 10...120, step: 10)
-                        Text("\(Int(pollingInterval))\u{79D2}")
+                        Text("Settings.Unit.Seconds \(Int(pollingInterval))")
                             .font(.system(size: 12, design: .monospaced))
                             .foregroundColor(.secondary)
                     }
                 }
 
                 if viewModel.activeJourney != nil {
-                    Section("\u{73FE}\u{5728}\u{306E}\u{65C5}\u{7A0B} / Current Journey") {
+                    Section("Settings.Section.CurrentJourney") {
                         Button(role: .destructive) {
                             viewModel.stopJourney()
                         } label: {
                             HStack {
                                 Image(systemName: "stop.circle.fill")
-                                Text("\u{65C5}\u{7A0B}\u{3092}\u{7D42}\u{4E86} / End Journey")
+                                Text("Button.EndJourney")
                             }
                         }
                     }
                 }
 
-                Section("\u{60C5}\u{5831} / About") {
+                Section("Settings.Section.Demo") {
+                    Toggle("Settings.Toggle.DemoMode", isOn: Binding(
+                        get: { viewModel.isDemoMode },
+                        set: { newValue in
+                            if newValue {
+                                viewModel.startDemoMode()
+                            } else {
+                                viewModel.stopDemoMode()
+                            }
+                        }
+                    ))
+
+                    if viewModel.isDemoMode {
+                        Text("Settings.Label.RunningSimulation")
+                            .font(.system(size: 12))
+                            .foregroundColor(.orange)
+                    }
+                }
+
+                Section("Settings.Section.About") {
                     HStack {
-                        Text("\u{30C7}\u{30FC}\u{30BF}\u{63D0}\u{4F9B}")
+                        Text("Settings.Label.DataProvider")
                         Spacer()
-                        Text("\u{516C}\u{5171}\u{4EA4}\u{901A}\u{30AA}\u{30FC}\u{30D7}\u{30F3}\u{30C7}\u{30FC}\u{30BF}\u{30BB}\u{30F3}\u{30BF}\u{30FC}")
+                        Text("Settings.Label.ODPTCenter")
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
                     }
                     HStack {
-                        Text("Version")
+                        Text("Settings.Label.Version")
                         Spacer()
                         Text("1.0.0")
                             .foregroundColor(.secondary)
                     }
                 }
             }
-            .navigationTitle("\u{8A2D}\u{5B9A}")
+            .navigationTitle("NavigationTitle.Settings")
         }
     }
 }

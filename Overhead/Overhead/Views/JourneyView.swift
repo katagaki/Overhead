@@ -100,7 +100,7 @@ struct JourneyView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.system(size: 12))
-                    Text("遅延 約\(state.delayMinutes)分")
+                    Text("Journey.Delay.Banner \(state.delayMinutes)")
                         .font(.system(size: 14, weight: .bold))
                     if let cause = viewModel.currentDelay?.cause {
                         Text("(\(cause))")
@@ -134,7 +134,7 @@ struct JourneyView: View {
             .foregroundColor(modeColor(mode))
 
             if mode == .timetable {
-                Text("GPS信号が弱いため時刻表で位置を推定中")
+                Text("Status.WeakGPSSignal")
                     .font(.system(size: 10))
                     .foregroundColor(.secondary)
                     .lineLimit(1)
@@ -154,7 +154,7 @@ struct JourneyView: View {
                         Image(systemName: "arrow.clockwise")
                             .font(.system(size: 10, weight: .semibold))
                     }
-                    Text("更新")
+                    Text("Button.Refresh")
                         .font(.system(size: 10, weight: .medium))
                 }
                 .foregroundColor(lineColor)
@@ -180,11 +180,11 @@ struct JourneyView: View {
         }
     }
 
-    private func modeLabel(_ mode: TrackingMode) -> String {
+    private func modeLabel(_ mode: TrackingMode) -> LocalizedStringKey {
         switch mode {
-        case .gps: return "GPS追跡中"
-        case .timetable: return "時刻表モード"
-        case .blended: return "GPS+時刻表"
+        case .gps: return "TrackingMode.GPS"
+        case .timetable: return "TrackingMode.Timetable"
+        case .blended: return "TrackingMode.Blended"
         }
     }
 
@@ -203,7 +203,7 @@ struct JourneyView: View {
         HStack {
             // Next station
             VStack(alignment: .leading, spacing: 2) {
-                Text("次は / Next")
+                Text("Label.NextStation")
                     .font(.system(size: 10))
                     .foregroundColor(.secondary)
                 Text(state.nextStationName)
@@ -217,7 +217,7 @@ struct JourneyView: View {
 
             // ETA
             VStack(alignment: .trailing, spacing: 2) {
-                Text("到着予定")
+                Text("Label.EstimatedArrival")
                     .font(.system(size: 10))
                     .foregroundColor(.secondary)
                 Text(formatTime(state.estimatedArrival))
@@ -225,7 +225,7 @@ struct JourneyView: View {
                     .foregroundColor(state.isDelayed ? .red : lineColor)
 
                 if state.isDelayed {
-                    Text("+\(state.delayMinutes)分遅れ")
+                    Text("Journey.Delay.Minutes \(state.delayMinutes)")
                         .font(.system(size: 11, weight: .bold, design: .monospaced))
                         .foregroundColor(.red)
                 }
@@ -250,10 +250,10 @@ struct JourneyView: View {
             Image(systemName: "tram.fill")
                 .font(.system(size: 48))
                 .foregroundColor(.secondary)
-            Text("旅程が選択されていません")
+            Text("Status.NoJourneySelected")
                 .font(.system(size: 16, weight: .medium))
                 .foregroundColor(.secondary)
-            Text("No active journey")
+            Text("Status.NoActiveJourney")
                 .font(.system(size: 13))
                 .foregroundStyle(.tertiary)
         }
@@ -452,14 +452,14 @@ struct VerticalLCDLine: View {
                 .foregroundColor(.secondary)
 
             if isCurrent {
-                Text("現在地 / You are here")
+                Text("Label.CurrentLocation")
                     .font(.system(size: 10, weight: .bold))
                     .foregroundColor(lineColor)
                     .padding(.top, 2)
             }
 
             if isNext {
-                Text("次の駅 / Next stop")
+                Text("Label.NextStop")
                     .font(.system(size: 10, weight: .medium))
                     .foregroundColor(lineColor.opacity(0.8))
                     .padding(.top, 2)

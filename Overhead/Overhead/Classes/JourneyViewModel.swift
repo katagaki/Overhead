@@ -18,10 +18,12 @@ final class JourneyViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var locationError: String?
     @Published var isRefreshing = false
+    @Published var isDemoMode = false
 
     // Services
     private let apiClient: ODPTClient
     private let locationTracker = LocationTracker()
+    private let demoProvider = DemoDataProvider()
     private var cancellables = Set<AnyCancellable>()
     private var delayPollingTask: Task<Void, Never>?
     private var timetableCache: [String: [TrainService]] = [:]
@@ -29,6 +31,7 @@ final class JourneyViewModel: ObservableObject {
     init(consumerKey: String) {
         self.apiClient = ODPTClient(consumerKey: consumerKey)
         bindLocationTracker()
+        bindDemoProvider()
     }
 
     /// Reads the ODPT key from ODPTKey.plist (or falls back to empty string).
@@ -47,23 +50,95 @@ final class JourneyViewModel: ObservableObject {
         locationTracker.$positionState
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
-                guard let self, let state else { return }
+                guard let self, let state, !self.isDemoMode else { return }
                 self.positionState = state
             }
             .store(in: &cancellables)
 
         locationTracker.$trackingMode
             .receive(on: DispatchQueue.main)
-            .assign(to: &$trackingMode)
+            .sink { [weak self] mode in
+                guard let self, !self.isDemoMode else { return }
+                self.trackingMode = mode
+            }
+            .store(in: &cancellables)
 
         locationTracker.$locationError
             .receive(on: DispatchQueue.main)
             .assign(to: &$locationError)
     }
 
+    /// Subscribe to DemoDataProvider's published state
+    private func bindDemoProvider() {
+        demoProvider.$positionState
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in
+                guard let self, self.isDemoMode, let state else { return }
+                self.positionState = state
+            }
+            .store(in: &cancellables)
+
+        demoProvider.$trackingMode
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] mode in
+                guard let self, self.isDemoMode else { return }
+                self.trackingMode = mode
+            }
+            .store(in: &cancellables)
+
+        demoProvider.$currentDelay
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] delay in
+                guard let self, self.isDemoMode else { return }
+                self.currentDelay = delay
+            }
+            .store(in: &cancellables)
+    }
+
+    // MARK: - Demo Mode
+
+    func startDemoMode() {
+        isDemoMode = true
+        availableLines = DemoDataProvider.demoLines
+        let line = DemoDataProvider.demoLines[0]
+        let stations = line.stations
+        guard let from = stations.first, let to = stations.last else { return }
+
+        selectedLine = line
+        let journey = demoProvider.buildJourney(line: line, from: from, to: to)
+        activeJourney = journey
+        demoProvider.startSimulation(journey: journey)
+    }
+
+    func stopDemoMode() {
+        demoProvider.stopSimulation()
+        isDemoMode = false
+        activeJourney = nil
+        positionState = nil
+        currentDelay = nil
+        selectedLine = nil
+        availableLines = []
+    }
+
+    func startDemoJourney(
+        line: TrainLine,
+        from boardingStation: Station,
+        to alightingStation: Station
+    ) {
+        selectedLine = line
+        let journey = demoProvider.buildJourney(line: line, from: boardingStation, to: alightingStation)
+        activeJourney = journey
+        demoProvider.startSimulation(journey: journey)
+    }
+
     // MARK: - Load Lines
 
     func loadLines() async {
+        if isDemoMode {
+            availableLines = DemoDataProvider.demoLines
+            return
+        }
+
         isLoading = true
         errorMessage = nil
 
@@ -187,10 +262,14 @@ final class JourneyViewModel: ObservableObject {
     // MARK: - Stop Journey
 
     func stopJourney() {
-        delayPollingTask?.cancel()
-        delayPollingTask = nil
-        locationTracker.stopTracking()
-        LiveActivityManager.shared.endActivity()
+        if isDemoMode {
+            demoProvider.stopSimulation()
+        } else {
+            delayPollingTask?.cancel()
+            delayPollingTask = nil
+            locationTracker.stopTracking()
+            LiveActivityManager.shared.endActivity()
+        }
         activeJourney = nil
         positionState = nil
         currentDelay = nil

@@ -58,7 +58,7 @@ final class LiveActivityManager {
     private init() {}
 
     /// The URL scheme that the Live Activity refresh button opens
-    static let refreshURLScheme = "tokyorail://refresh-delay"
+    static let refreshURLScheme = "overhead://refresh-delay"
 
     private var currentActivity: Activity<TrainJourneyAttributes>?
     private var lastDelayFetchTime = Date()

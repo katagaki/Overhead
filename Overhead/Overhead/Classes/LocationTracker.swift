@@ -88,7 +88,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         } else if status == .authorizedWhenInUse || status == .authorizedAlways {
             beginGPSUpdates()
         } else {
-            locationError = "位置情報が許可されていません。時刻表モードで運行します。"
+            locationError = "\(String(localized: "LocationError.NotAuthorized"))"
             trackingMode = .timetable
         }
 
@@ -159,7 +159,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         case .authorizedWhenInUse, .authorizedAlways:
             if journey != nil { beginGPSUpdates() }
         case .denied, .restricted:
-            locationError = "位置情報が許可されていません。時刻表モードで運行します。"
+            locationError = "\(String(localized: "LocationError.NotAuthorized"))"
             trackingMode = .timetable
         default:
             break
@@ -180,7 +180,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         if let clError = error as? CLError, clError.code == .denied {
-            locationError = "位置情報が拒否されました。"
+            locationError = "\(String(localized: "LocationError.Denied"))"
             trackingMode = .timetable
         }
     }

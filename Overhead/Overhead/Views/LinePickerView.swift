@@ -12,14 +12,14 @@ struct LinePickerView: View {
         NavigationStack {
             Group {
                 if viewModel.isLoading {
-                    ProgressView("Loading lines...")
+                    ProgressView("Loading.Lines")
                 } else if viewModel.availableLines.isEmpty {
                     emptyState
                 } else {
                     lineList
                 }
             }
-            .navigationTitle("\u{8DEF}\u{7DDA}\u{9078}\u{629E}")
+            .navigationTitle("NavigationTitle.LineSelection")
             .task {
                 if viewModel.availableLines.isEmpty {
                     await viewModel.loadLines()
@@ -33,13 +33,13 @@ struct LinePickerView: View {
             Image(systemName: "tram")
                 .font(.system(size: 48))
                 .foregroundColor(.secondary)
-            Text("No lines available")
+            Text("Error.NoLinesAvailable")
                 .font(.headline)
                 .foregroundColor(.secondary)
-            Text("Configure your ODPT API key in Settings")
+            Text("Error.ConfigureAPIKey")
                 .font(.subheadline)
                 .foregroundStyle(.tertiary)
-            Button("Retry") {
+            Button("Button.Retry") {
                 Task { await viewModel.loadLines() }
             }
         }
@@ -84,7 +84,7 @@ struct StationPickerView: View {
 
     var body: some View {
         Form {
-            Section("\u{4E57}\u{8ECA}\u{99C5} / Boarding Station") {
+            Section("Section.BoardingStation") {
                 ForEach(line.stations) { station in
                     Button {
                         boardingStation = station
@@ -116,7 +116,7 @@ struct StationPickerView: View {
                 }
             }
 
-            Section("\u{964D}\u{8ECA}\u{99C5} / Alighting Station") {
+            Section("Section.AlightingStation") {
                 ForEach(line.stations) { station in
                     Button {
                         alightingStation = station
@@ -152,18 +152,27 @@ struct StationPickerView: View {
                boarding.id != alighting.id {
                 Section {
                     Button {
-                        Task {
-                            await viewModel.startJourney(
+                        if viewModel.isDemoMode {
+                            viewModel.startDemoJourney(
                                 line: line,
                                 from: boarding,
                                 to: alighting
                             )
                             dismiss()
+                        } else {
+                            Task {
+                                await viewModel.startJourney(
+                                    line: line,
+                                    from: boarding,
+                                    to: alighting
+                                )
+                                dismiss()
+                            }
                         }
                     } label: {
                         HStack {
                             Spacer()
-                            Text("\u{65C5}\u{7A0B}\u{3092}\u{958B}\u{59CB} / Start Journey")
+                            Text("Button.StartJourney")
                                 .font(.system(size: 16, weight: .semibold))
                             Spacer()
                         }

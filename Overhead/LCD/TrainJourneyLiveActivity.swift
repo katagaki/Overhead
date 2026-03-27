@@ -23,7 +23,7 @@ struct TrainJourneyLiveActivity: Widget {
                                 .font(.system(size: 10))
                                 .foregroundColor(.secondary)
                             if context.state.isTimetableMode {
-                                Text("\u{6642}\u{523B}\u{8868}")
+                                Text("Badge.Timetable")
                                     .font(.system(size: 8, weight: .bold))
                                     .foregroundColor(.orange)
                                     .padding(.horizontal, 4)
@@ -39,11 +39,11 @@ struct TrainJourneyLiveActivity: Widget {
                 DynamicIslandExpandedRegion(.trailing) {
                     VStack(alignment: .trailing, spacing: 2) {
                         if context.state.isDelayed {
-                            Text("+\(context.state.delayMinutes)\u{5206}")
+                            Text("LiveActivity.Delay.Minutes \(context.state.delayMinutes)")
                                 .font(.system(size: 13, weight: .bold, design: .monospaced))
                                 .foregroundColor(.red)
                         } else {
-                            Text("\u{5B9A}\u{523B}")
+                            Text("Status.OnTime")
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundColor(.green)
                         }
@@ -65,7 +65,7 @@ struct TrainJourneyLiveActivity: Widget {
                             Image(systemName: "arrow.right")
                                 .font(.system(size: 10))
                                 .foregroundColor(.secondary)
-                            Text("\u{6B21}\u{306F} \(context.state.nextStationName)")
+                            Text("LiveActivity.NextIs \(context.state.nextStationName)")
                                 .font(.system(size: 13, weight: .semibold))
                         }
 
@@ -130,10 +130,10 @@ struct TrainJourneyLiveActivity: Widget {
 
     private func refreshAgeText(_ lastRefresh: Date) -> String {
         let seconds = Int(-lastRefresh.timeIntervalSinceNow)
-        if seconds < 30 { return "\u{4ECA}" }
+        if seconds < 30 { return String(localized: "Time.Now") }
         let minutes = seconds / 60
-        if minutes < 1 { return "<1\u{5206}\u{524D}" }
-        return "\(minutes)\u{5206}\u{524D}"
+        if minutes < 1 { return String(localized: "Time.LessThanOneMinuteAgo") }
+        return String(localized: "Time.MinutesAgo \(minutes)")
     }
 }
 
@@ -159,7 +159,7 @@ struct LockScreenLiveActivityView: View {
                                 .font(.system(size: 14, weight: .bold))
                             trackingModeBadge
                         }
-                        Text(context.attributes.trainType + " " + context.attributes.destinationName + "\u{884C}")
+                        Text("Destination.Suffix \(context.attributes.trainType) \(context.attributes.destinationName)")
                             .font(.system(size: 10))
                             .foregroundColor(.secondary)
                     }
@@ -171,7 +171,7 @@ struct LockScreenLiveActivityView: View {
                     HStack(spacing: 3) {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .font(.system(size: 10))
-                        Text("\u{9045}\u{5EF6} +\(context.state.delayMinutes)\u{5206}")
+                        Text("LiveActivity.Delay.Badge \(context.state.delayMinutes)")
                             .font(.system(size: 12, weight: .bold, design: .monospaced))
                     }
                     .foregroundColor(.white)
@@ -180,7 +180,7 @@ struct LockScreenLiveActivityView: View {
                     .background(Color.red.opacity(0.9))
                     .clipShape(Capsule())
                 } else {
-                    Text("\u{5B9A}\u{523B}\u{904B}\u{8EE2}")
+                    Text("Status.OnTimeOperation")
                         .font(.system(size: 11, weight: .medium))
                         .foregroundColor(.green)
                 }
@@ -202,7 +202,7 @@ struct LockScreenLiveActivityView: View {
             // Footer: next station + ETA + refresh button
             HStack {
                 VStack(alignment: .leading, spacing: 1) {
-                    Text("\u{6B21}\u{306F}")
+                    Text("Label.NextStation")
                         .font(.system(size: 9))
                         .foregroundColor(.secondary)
                     Text(context.state.nextStationName)
@@ -216,7 +216,7 @@ struct LockScreenLiveActivityView: View {
 
                 VStack(alignment: .trailing, spacing: 4) {
                     VStack(alignment: .trailing, spacing: 1) {
-                        Text("\u{5230}\u{7740}\u{4E88}\u{5B9A}")
+                        Text("Label.EstimatedArrival")
                             .font(.system(size: 9))
                             .foregroundColor(.secondary)
                         Text(formatTime(context.state.estimatedArrival))
@@ -228,7 +228,7 @@ struct LockScreenLiveActivityView: View {
                         HStack(spacing: 3) {
                             Image(systemName: "arrow.clockwise")
                                 .font(.system(size: 9, weight: .semibold))
-                            Text("\u{9045}\u{5EF6}\u{60C5}\u{5831}\u{3092}\u{66F4}\u{65B0}")
+                            Text("Button.RefreshDelayInfo")
                                 .font(.system(size: 9, weight: .medium))
                             Text("(\(refreshAgeText(context.state.lastRefresh)))")
                                 .font(.system(size: 8))
@@ -258,7 +258,7 @@ struct LockScreenLiveActivityView: View {
             HStack(spacing: 2) {
                 Image(systemName: "clock.fill")
                     .font(.system(size: 7))
-                Text("\u{6642}\u{523B}\u{8868}")
+                Text("Badge.Timetable")
                     .font(.system(size: 8, weight: .bold))
             }
             .foregroundColor(.orange)
@@ -270,7 +270,7 @@ struct LockScreenLiveActivityView: View {
             HStack(spacing: 2) {
                 Image(systemName: "location.fill")
                     .font(.system(size: 7))
-                Text("GPS")
+                Text("Badge.GPS")
                     .font(.system(size: 8, weight: .bold))
             }
             .foregroundColor(.green)
@@ -282,7 +282,7 @@ struct LockScreenLiveActivityView: View {
             HStack(spacing: 2) {
                 Image(systemName: "location.fill")
                     .font(.system(size: 7))
-                Text("GPS+\u{6642}\u{523B}\u{8868}")
+                Text("Badge.GPSPlusTimetable")
                     .font(.system(size: 8, weight: .bold))
             }
             .foregroundColor(.blue)
@@ -302,10 +302,10 @@ struct LockScreenLiveActivityView: View {
 
     private func refreshAgeText(_ lastRefresh: Date) -> String {
         let seconds = Int(-lastRefresh.timeIntervalSinceNow)
-        if seconds < 30 { return "\u{4ECA}" }
+        if seconds < 30 { return String(localized: "Time.Now") }
         let minutes = seconds / 60
-        if minutes < 1 { return "<1\u{5206}\u{524D}" }
-        return "\(minutes)\u{5206}\u{524D}"
+        if minutes < 1 { return String(localized: "Time.LessThanOneMinuteAgo") }
+        return String(localized: "Time.MinutesAgo \(minutes)")
     }
 }
 
