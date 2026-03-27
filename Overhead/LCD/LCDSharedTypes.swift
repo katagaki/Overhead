@@ -38,6 +38,7 @@ struct TrainJourneyAttributes: ActivityAttributes {
     let lineName: String
     let lineNameEn: String
     let lineColorHex: String
+    let lineSymbol: String
     let originName: String
     let originNameEn: String
     let destinationName: String

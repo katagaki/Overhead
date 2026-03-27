@@ -87,7 +87,7 @@ struct RootView: View {
                 }
                 .tag(Tab.more)
         }
-        .tint(viewModel.selectedLine?.color ?? .primary)
+        .tint(viewModel.selectedLine?.color ?? Color.accentColor)
         .onChange(of: viewModel.activeJourney != nil) { _, hasJourney in
             if hasJourney {
                 selectedTab = .journey
@@ -132,7 +132,7 @@ struct NoJourneyView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(Color.primary)
+                .background(Color.accentColor)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .padding(.horizontal, 48)

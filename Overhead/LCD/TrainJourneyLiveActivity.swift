@@ -33,7 +33,7 @@ struct TrainJourneyLiveActivity: Widget {
                             }
                         }
                     }
-                    .padding(.leading, 2)
+                    .padding(.leading, 6)
                 }
 
                 DynamicIslandExpandedRegion(.trailing) {
@@ -51,7 +51,7 @@ struct TrainJourneyLiveActivity: Widget {
                             .font(.system(size: 10, design: .monospaced))
                             .foregroundColor(.secondary)
                     }
-                    .padding(.trailing, 2)
+                    .padding(.trailing, 6)
                 }
 
                 DynamicIslandExpandedRegion(.center) {
@@ -148,10 +148,13 @@ struct LockScreenLiveActivityView: View {
         VStack(spacing: 0) {
             // Header: line name + tracking mode + delay
             HStack {
-                HStack(spacing: 6) {
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(lineColor)
-                        .frame(width: 4, height: 20)
+                HStack(spacing: 8) {
+                    if !context.attributes.lineSymbol.isEmpty {
+                        LCDLineSymbolBadge(
+                            symbol: context.attributes.lineSymbol,
+                            color: lineColor
+                        )
+                    }
 
                     VStack(alignment: .leading, spacing: 0) {
                         HStack(spacing: 6) {
@@ -348,7 +351,7 @@ struct LCDLineView: View {
                     .frame(width: max(0, lineWidth * progress), height: trackHeight)
                     .offset(x: padding, y: centerY - trackHeight / 2)
 
-                // Station circles
+                // Station circles + labels (positioned independently so circles stay centered on track)
                 ForEach(0..<stationCount, id: \.self) { i in
                     let frac = stationCount > 1 ? Double(i) / Double(stationCount - 1) : 0
                     let x = padding + lineWidth * frac
@@ -359,22 +362,9 @@ struct LCDLineView: View {
                     let isEmphasized = isCurrent || isNext || isTerminal
                     let r = isEmphasized ? emphasisRadius : baseRadius
 
-                    VStack(spacing: 1) {
-                        // Station label (shown for emphasized + adaptive density)
-                        if shouldShowLabel(index: i, isCurrent: isCurrent, isNext: isNext) {
-                            Text(truncatedName(stationNames[i]))
-                                .font(.system(size: isCurrent || isNext ? 9 : 8,
-                                              weight: isCurrent || isNext ? .bold : .regular))
-                                .foregroundColor(isCurrent ? lineColor : isNext ? lineColor.opacity(0.8) : .secondary)
-                                .lineLimit(1)
-                                .frame(width: 40)
-                                .offset(y: -1)
-                        } else {
-                            Spacer().frame(height: 10)
-                        }
-
+                    Group {
+                        // Station circle — centered on track
                         ZStack {
-                            // Terminal: outline style
                             if isTerminal {
                                 Circle()
                                     .fill(Color(.systemBackground))
@@ -388,26 +378,34 @@ struct LCDLineView: View {
                                     .frame(width: r * 2, height: r * 2)
                             }
 
-                            // Current station: white inner dot
                             if isCurrent {
                                 Circle()
                                     .fill(Color.white)
                                     .frame(width: r, height: r)
-                                // Outer pulse ring
                                 Circle()
                                     .strokeBorder(lineColor.opacity(0.4), lineWidth: 1.5)
                                     .frame(width: r * 2 + 6, height: r * 2 + 6)
                             }
 
-                            // Next station: highlight ring
                             if isNext && !isCurrent {
                                 Circle()
                                     .strokeBorder(lineColor.opacity(0.6), lineWidth: 1.5)
                                     .frame(width: r * 2 + 4, height: r * 2 + 4)
                             }
                         }
+                        .position(x: x, y: centerY)
+
+                        // Station label — positioned above the circle
+                        if shouldShowLabel(index: i, isCurrent: isCurrent, isNext: isNext) {
+                            Text(truncatedName(stationNames[i]))
+                                .font(.system(size: isCurrent || isNext ? 9 : 8,
+                                              weight: isCurrent || isNext ? .bold : .regular))
+                                .foregroundColor(isCurrent ? lineColor : isNext ? lineColor.opacity(0.8) : .secondary)
+                                .lineLimit(1)
+                                .frame(width: 40)
+                                .position(x: x, y: centerY - r - 9)
+                        }
                     }
-                    .position(x: x, y: centerY)
                 }
 
                 // Train indicator
@@ -511,5 +509,41 @@ struct ExpandedIslandLineView: View {
             .frame(height: 12)
         }
         .frame(height: 12)
+    }
+}
+
+// MARK: - LCD Line Symbol Badge
+
+/// Compact line symbol badge for Live Activity (self-contained, no dependency on main app target)
+struct LCDLineSymbolBadge: View {
+    let symbol: String
+    let color: Color
+
+    private var isJR: Bool { symbol.hasPrefix("J") }
+
+    var body: some View {
+        if isJR {
+            Text(symbol)
+                .font(.system(size: 10, weight: .heavy))
+                .foregroundColor(.black)
+                .frame(width: 28, height: 22)
+                .background(Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: 4))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 4)
+                        .strokeBorder(color, lineWidth: 2)
+                )
+        } else {
+            Text(symbol)
+                .font(.system(size: 12, weight: .heavy))
+                .foregroundColor(.black)
+                .frame(width: 24, height: 24)
+                .background(Color.white)
+                .clipShape(Circle())
+                .overlay(
+                    Circle()
+                        .strokeBorder(color, lineWidth: 2)
+                )
+        }
     }
 }

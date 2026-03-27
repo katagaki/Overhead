@@ -28,7 +28,7 @@ struct LineSymbolBadge: View {
     private var jrBadge: some View {
         Text(symbol)
             .font(.system(size: 14, weight: .heavy))
-            .foregroundColor(color)
+            .foregroundColor(.black)
             .frame(width: 38, height: 32)
             .background(Color.white)
             .clipShape(RoundedRectangle(cornerRadius: 5))
@@ -43,7 +43,7 @@ struct LineSymbolBadge: View {
     private var metroBadge: some View {
         Text(symbol)
             .font(.system(size: 16, weight: .heavy))
-            .foregroundColor(color)
+            .foregroundColor(.black)
             .frame(width: 32, height: 32)
             .background(Color.white)
             .clipShape(Circle())

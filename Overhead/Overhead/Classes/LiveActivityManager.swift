@@ -38,6 +38,7 @@ struct TrainJourneyAttributes: ActivityAttributes {
     let lineName: String
     let lineNameEn: String
     let lineColorHex: String
+    let lineSymbol: String
     let originName: String
     let originNameEn: String
     let destinationName: String
@@ -78,6 +79,7 @@ final class LiveActivityManager {
             lineName: journey.line.name,
             lineNameEn: journey.line.nameEn,
             lineColorHex: lineColorHex,
+            lineSymbol: journey.line.lineSymbol,
             originName: stations.first?.name ?? "",
             originNameEn: stations.first?.nameEn ?? "",
             destinationName: stations.last?.name ?? "",

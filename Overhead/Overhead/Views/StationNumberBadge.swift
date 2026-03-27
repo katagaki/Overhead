@@ -83,7 +83,7 @@ struct StationNumberBadge: View {
                 .frame(maxWidth: .infinity)
                 .padding(.bottom, 2)
         }
-        .foregroundColor(color.opacity(opacity))
+        .foregroundColor(Color.black.opacity(opacity))
         .frame(width: w, height: h)
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 5))
@@ -108,7 +108,7 @@ struct StationNumberBadge: View {
                 .font(.system(size: numberFontSize, weight: .black, design: .rounded))
                 .padding(.bottom, 1)
         }
-        .foregroundColor(color.opacity(opacity))
+        .foregroundColor(Color.black.opacity(opacity))
         .frame(width: d, height: d)
         .background(Color.white)
         .clipShape(Circle())
