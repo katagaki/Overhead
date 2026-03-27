@@ -43,6 +43,7 @@ struct LinePickerView: View {
         }
     }
 
+    @ViewBuilder
     private var lineList: some View {
         let grouped = Dictionary(grouping: viewModel.availableLines) { $0.operatorId }
         let sectionOrder = [
