@@ -53,9 +53,16 @@ struct LinePickerView: View {
                     )
                 } label: {
                     HStack(spacing: 12) {
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(line.color)
-                            .frame(width: 6, height: 36)
+                        if !line.lineSymbol.isEmpty {
+                            LineSymbolBadge(
+                                symbol: line.lineSymbol,
+                                color: line.color
+                            )
+                        } else {
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(line.color)
+                                .frame(width: 6, height: 36)
+                        }
 
                         VStack(alignment: .leading, spacing: 2) {
                             Text(line.localizedName)

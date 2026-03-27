@@ -78,6 +78,68 @@ struct TrainLine: Identifiable, Codable, Hashable {
         Color(hex: colorHex)
     }
 
+    /// Line symbol prefix derived from station codes (e.g. "JC", "G", "C")
+    var lineSymbol: String {
+        // Try to extract from first station with a code
+        if let station = stations.first(where: { !$0.stationCode.isEmpty }) {
+            let letters = station.stationCode.prefix(while: \.isLetter)
+            if !letters.isEmpty { return String(letters) }
+        }
+        // Fallback mapping from railway ID
+        return Self.symbolForRailwayId[id] ?? ""
+    }
+
+    /// Whether this line uses JR-style badges (rounded rectangle)
+    var isJR: Bool {
+        lineSymbol.hasPrefix("J")
+    }
+
+    /// Comprehensive fallback mapping from railway ID to line symbol
+    private static let symbolForRailwayId: [String: String] = [
+        // JR East
+        "odpt.Railway:JR-East.Yamanote": "JY",
+        "odpt.Railway:JR-East.KeihinTohoku": "JK",
+        "odpt.Railway:JR-East.ChuoRapid": "JC",
+        "odpt.Railway:JR-East.ChuoSobuLocal": "JB",
+        "odpt.Railway:JR-East.SaikyoKawagoe": "JA",
+        "odpt.Railway:JR-East.Keiyo": "JE",
+        "odpt.Railway:JR-East.Yokohama": "JH",
+        "odpt.Railway:JR-East.Nambu": "JN",
+        "odpt.Railway:JR-East.YokosukaSobu": "JO",
+        "odpt.Railway:JR-East.Tokaido": "JT",
+        "odpt.Railway:JR-East.Utsunomiya": "JU",
+        "odpt.Railway:JR-East.Takasaki": "JU",
+        "odpt.Railway:JR-East.ShonanShinjuku": "JS",
+        "odpt.Railway:JR-East.JobanRapid": "JJ",
+        "odpt.Railway:JR-East.JobanLocal": "JL",
+        "odpt.Railway:JR-East.Musashino": "JM",
+        "odpt.Railway:JR-East.Tsurumi": "JI",
+        "odpt.Railway:JR-East.Ome": "JC",
+        "odpt.Railway:JR-East.Itsukaichi": "JC",
+        "odpt.Railway:JR-East.NaritaExpress": "JO",
+        "odpt.Railway:JR-East.Uchibo": "JR",
+        "odpt.Railway:JR-East.Sotobo": "JR",
+        "odpt.Railway:JR-East.Sagami": "JR",
+        // Tokyo Metro
+        "odpt.Railway:TokyoMetro.Ginza": "G",
+        "odpt.Railway:TokyoMetro.Marunouchi": "M",
+        "odpt.Railway:TokyoMetro.MarunouchiBranch": "Mb",
+        "odpt.Railway:TokyoMetro.Hibiya": "H",
+        "odpt.Railway:TokyoMetro.Tozai": "T",
+        "odpt.Railway:TokyoMetro.Chiyoda": "C",
+        "odpt.Railway:TokyoMetro.Yurakucho": "Y",
+        "odpt.Railway:TokyoMetro.Hanzomon": "Z",
+        "odpt.Railway:TokyoMetro.Namboku": "N",
+        "odpt.Railway:TokyoMetro.Fukutoshin": "F",
+        // Toei
+        "odpt.Railway:Toei.Asakusa": "A",
+        "odpt.Railway:Toei.Mita": "I",
+        "odpt.Railway:Toei.Shinjuku": "S",
+        "odpt.Railway:Toei.Oedo": "E",
+        "odpt.Railway:Toei.NipporiToneri": "NT",
+        "odpt.Railway:Toei.Toden": "SA",
+    ]
+
     /// Returns the line name for the user's current language
     var localizedName: String {
         let lang = Locale.current.language.languageCode?.identifier ?? "ja"
