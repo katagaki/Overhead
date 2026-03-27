@@ -318,79 +318,114 @@ struct LCDLineView: View {
     let currentStationIndex: Int?
     let lineColor: Color
 
+    /// Next station index derived from current
+    private var nextStationIndex: Int? {
+        guard let current = currentStationIndex, current + 1 < stationCount else { return nil }
+        return current + 1
+    }
+
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
-            let h: CGFloat = 40
-            let circleRadius: CGFloat = stationCount > 10 ? 4.5 : 6
-            let padding: CGFloat = circleRadius + 2
+            let h: CGFloat = 44
+            let baseRadius: CGFloat = stationCount > 10 ? 4 : 5
+            let emphasisRadius: CGFloat = baseRadius + 2
+            let padding: CGFloat = emphasisRadius + 3
             let lineWidth = w - padding * 2
+            let trackHeight: CGFloat = 2
+            let centerY: CGFloat = h / 2 + 4 // offset down to leave room for labels above
 
             ZStack(alignment: .topLeading) {
-                RoundedRectangle(cornerRadius: 2)
+                // Background track — thin line centered through circles
+                RoundedRectangle(cornerRadius: 1)
                     .fill(Color.gray.opacity(0.3))
-                    .frame(width: lineWidth, height: 4)
-                    .offset(x: padding, y: h / 2 - 2)
+                    .frame(width: lineWidth, height: trackHeight)
+                    .offset(x: padding, y: centerY - trackHeight / 2)
 
-                RoundedRectangle(cornerRadius: 2)
+                // Filled progress track
+                RoundedRectangle(cornerRadius: 1)
                     .fill(lineColor)
-                    .frame(width: max(0, lineWidth * progress), height: 4)
-                    .offset(x: padding, y: h / 2 - 2)
+                    .frame(width: max(0, lineWidth * progress), height: trackHeight)
+                    .offset(x: padding, y: centerY - trackHeight / 2)
 
+                // Station circles
                 ForEach(0..<stationCount, id: \.self) { i in
                     let frac = stationCount > 1 ? Double(i) / Double(stationCount - 1) : 0
                     let x = padding + lineWidth * frac
                     let isPast = frac <= progress + 0.01
                     let isCurrent = currentStationIndex == i
+                    let isNext = nextStationIndex == i
+                    let isTerminal = i == 0 || i == stationCount - 1
+                    let isEmphasized = isCurrent || isNext || isTerminal
+                    let r = isEmphasized ? emphasisRadius : baseRadius
 
-                    VStack(spacing: 2) {
-                        if shouldShowLabel(index: i) {
+                    VStack(spacing: 1) {
+                        // Station label (shown for emphasized + adaptive density)
+                        if shouldShowLabel(index: i, isCurrent: isCurrent, isNext: isNext) {
                             Text(truncatedName(stationNames[i]))
-                                .font(.system(size: 8, weight: isCurrent ? .bold : .regular))
-                                .foregroundColor(isCurrent ? lineColor : .secondary)
+                                .font(.system(size: isCurrent || isNext ? 9 : 8,
+                                              weight: isCurrent || isNext ? .bold : .regular))
+                                .foregroundColor(isCurrent ? lineColor : isNext ? lineColor.opacity(0.8) : .secondary)
                                 .lineLimit(1)
-                                .frame(width: 36)
-                                .offset(y: -2)
+                                .frame(width: 40)
+                                .offset(y: -1)
                         } else {
                             Spacer().frame(height: 10)
                         }
 
                         ZStack {
-                            Circle()
-                                .fill(isPast ? lineColor : Color.gray.opacity(0.3))
-                                .frame(width: circleRadius * 2, height: circleRadius * 2)
+                            // Terminal: outline style
+                            if isTerminal {
+                                Circle()
+                                    .fill(Color(.systemBackground))
+                                    .frame(width: r * 2, height: r * 2)
+                                Circle()
+                                    .strokeBorder(isPast ? lineColor : Color.gray.opacity(0.4), lineWidth: 2)
+                                    .frame(width: r * 2, height: r * 2)
+                            } else {
+                                Circle()
+                                    .fill(isPast ? lineColor : Color.gray.opacity(0.3))
+                                    .frame(width: r * 2, height: r * 2)
+                            }
 
+                            // Current station: white inner dot
                             if isCurrent {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: circleRadius, height: circleRadius)
+                                    .frame(width: r, height: r)
+                                // Outer pulse ring
+                                Circle()
+                                    .strokeBorder(lineColor.opacity(0.4), lineWidth: 1.5)
+                                    .frame(width: r * 2 + 6, height: r * 2 + 6)
                             }
 
-                            if i == 0 || i == stationCount - 1 {
+                            // Next station: highlight ring
+                            if isNext && !isCurrent {
                                 Circle()
-                                    .strokeBorder(isPast ? lineColor : Color.gray.opacity(0.5), lineWidth: 2)
-                                    .frame(width: circleRadius * 2 + 4, height: circleRadius * 2 + 4)
+                                    .strokeBorder(lineColor.opacity(0.6), lineWidth: 1.5)
+                                    .frame(width: r * 2 + 4, height: r * 2 + 4)
                             }
                         }
                     }
-                    .position(x: x, y: h / 2)
+                    .position(x: x, y: centerY)
                 }
 
+                // Train indicator
                 let trainX = padding + lineWidth * progress
                 Image(systemName: "arrowtriangle.up.fill")
-                    .font(.system(size: 8))
+                    .font(.system(size: 7))
                     .foregroundColor(lineColor)
-                    .position(x: trainX, y: h / 2 + circleRadius + 10)
+                    .position(x: trainX, y: centerY + emphasisRadius + 8)
             }
             .frame(height: h)
         }
-        .frame(height: 40)
+        .frame(height: 44)
     }
 
-    private func shouldShowLabel(index: Int) -> Bool {
-        if stationCount <= 6 { return true }
+    private func shouldShowLabel(index: Int, isCurrent: Bool, isNext: Bool) -> Bool {
         if index == 0 || index == stationCount - 1 { return true }
-        if index == currentStationIndex { return true }
+        if isCurrent || isNext { return true }
+        if stationCount <= 6 { return true }
         let step = max(2, stationCount / 5)
         return index % step == 0
     }
@@ -408,40 +443,69 @@ struct ExpandedIslandLineView: View {
 
     private var lineColor: Color { Color(hex: context.attributes.lineColorHex) }
 
+    /// Next station index derived from current
+    private var nextStationIndex: Int? {
+        guard let current = context.state.currentStationIndex,
+              current + 1 < context.attributes.stationCount else { return nil }
+        return current + 1
+    }
+
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
             let count = context.attributes.stationCount
-            let r: CGFloat = count > 8 ? 3.0 : 4.0
-            let pad: CGFloat = r + 1
+            let baseR: CGFloat = count > 8 ? 2.5 : 3.5
+            let emphR: CGFloat = baseR + 1.5
+            let pad: CGFloat = emphR + 2
+            let trackHeight: CGFloat = 1.5
 
             ZStack(alignment: .leading) {
+                // Background track
                 Capsule()
                     .fill(Color.gray.opacity(0.3))
-                    .frame(width: w - pad * 2, height: 3)
+                    .frame(width: w - pad * 2, height: trackHeight)
                     .offset(x: pad)
 
+                // Filled track
                 Capsule()
                     .fill(lineColor)
-                    .frame(width: max(0, (w - pad * 2) * context.state.progress), height: 3)
+                    .frame(width: max(0, (w - pad * 2) * context.state.progress), height: trackHeight)
                     .offset(x: pad)
 
+                // Station dots
                 ForEach(0..<count, id: \.self) { i in
                     let frac = count > 1 ? Double(i) / Double(count - 1) : 0
                     let x = pad + (w - pad * 2) * frac
                     let isPast = frac <= context.state.progress + 0.01
+                    let isCurrent = context.state.currentStationIndex == i
+                    let isNext = nextStationIndex == i
+                    let isTerminal = i == 0 || i == count - 1
+                    let r = (isCurrent || isNext || isTerminal) ? emphR : baseR
 
-                    Circle()
-                        .fill(isPast ? lineColor : Color.gray.opacity(0.4))
-                        .frame(width: r * 2, height: r * 2)
-                        .overlay {
-                            if i == 0 || i == count - 1 {
-                                Circle()
-                                    .strokeBorder(isPast ? lineColor : Color.gray.opacity(0.4), lineWidth: 1.5)
-                                    .frame(width: r * 2 + 3, height: r * 2 + 3)
-                            }
+                    ZStack {
+                        Circle()
+                            .fill(isPast ? lineColor : Color.gray.opacity(0.4))
+                            .frame(width: r * 2, height: r * 2)
+
+                        if isTerminal {
+                            Circle()
+                                .strokeBorder(isPast ? lineColor : Color.gray.opacity(0.4), lineWidth: 1.5)
+                                .frame(width: r * 2 + 3, height: r * 2 + 3)
                         }
-                        .position(x: x, y: 6)
+
+                        if isCurrent {
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: r, height: r)
+                        }
+
+                        if isNext && !isCurrent {
+                            Circle()
+                                .strokeBorder(lineColor.opacity(0.5), lineWidth: 1)
+                                .frame(width: r * 2 + 3, height: r * 2 + 3)
+                        }
+                    }
+                    .position(x: x, y: 6)
                 }
             }
             .frame(height: 12)

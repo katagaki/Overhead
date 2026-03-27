@@ -126,7 +126,6 @@ struct RoutesView: View {
 
                         Image(systemName: "plus.circle")
                             .font(.system(size: 22))
-                            .foregroundColor(.blue)
                     }
                     .padding(.vertical, 4)
                 }
@@ -204,104 +203,93 @@ struct RouteEditorView: View {
     @State private var toStation: Station?
     @Environment(\.dismiss) private var dismiss
 
+    /// The effective line: explicitly selected, or auto-detected from the From station
+    private var effectiveLine: TrainLine? {
+        if let selectedLine { return selectedLine }
+        guard let from = fromStation else { return nil }
+        return availableLines.first(where: { $0.stations.contains(where: { $0.id == from.id }) })
+    }
+
     var body: some View {
         Form {
-            // Line selection
+            // Line selection (optional — auto-detected from station)
             Section("Route.Section.Line") {
-                ForEach(availableLines) { line in
-                    Button {
-                        selectedLine = line
-                        // Reset stations when line changes
-                        if fromStation != nil && !line.stations.contains(where: { $0.id == fromStation?.id }) {
+                Picker(selection: $selectedLine) {
+                    Text("Picker.AllLines").tag(nil as TrainLine?)
+                    ForEach(availableLines) { line in
+                        Text(line.localizedName).tag(line as TrainLine?)
+                    }
+                } label: {
+                    HStack(spacing: 8) {
+                        if let line = effectiveLine {
+                            RoundedRectangle(cornerRadius: 3)
+                                .fill(line.color)
+                                .frame(width: 4, height: 20)
+                        }
+                        Text("Route.Section.Line")
+                    }
+                }
+                .onChange(of: selectedLine) { _, newLine in
+                    // Reset stations when line changes if they don't belong to the new line
+                    if let newLine {
+                        if let from = fromStation, !newLine.stations.contains(where: { $0.id == from.id }) {
                             fromStation = nil
                         }
-                        if toStation != nil && !line.stations.contains(where: { $0.id == toStation?.id }) {
+                        if let to = toStation, !newLine.stations.contains(where: { $0.id == to.id }) {
                             toStation = nil
                         }
-                    } label: {
-                        HStack(spacing: 12) {
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(line.color)
-                                .frame(width: 6, height: 28)
-
-                            VStack(alignment: .leading, spacing: 1) {
-                                Text(line.localizedName)
-                                    .font(.system(size: 15, weight: .medium))
-                                Text(line.nameEn)
-                                    .font(.system(size: 11))
-                                    .foregroundColor(.secondary)
-                            }
-
-                            Spacer()
-
-                            if selectedLine?.id == line.id {
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(line.color)
-                            }
-                        }
                     }
-                    .foregroundColor(.primary)
                 }
             }
 
-            if let line = selectedLine {
-                // From station
-                Section("Section.BoardingStation") {
-                    ForEach(line.stations) { station in
-                        Button {
-                            fromStation = station
-                        } label: {
-                            HStack {
-                                if !station.stationCode.isEmpty {
-                                    StationNumberBadge(code: station.stationCode, color: line.color, size: .compact)
-                                }
-                                VStack(alignment: .leading) {
-                                    Text(station.localizedName)
-                                    Text(station.nameEn)
-                                        .font(.system(size: 11))
-                                        .foregroundColor(.secondary)
-                                }
-                                Spacer()
-                                if fromStation?.id == station.id {
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(line.color)
+            // From station
+            Section("Section.BoardingStation") {
+                Picker(selection: $fromStation) {
+                    Text("Picker.SelectStation").tag(nil as Station?)
+                    if let line = selectedLine {
+                        // Show only the selected line's stations
+                        ForEach(line.stations) { station in
+                            stationPickerLabel(station: station, line: line).tag(station as Station?)
+                        }
+                    } else {
+                        // Show all stations grouped by line
+                        ForEach(availableLines) { line in
+                            Section(line.localizedName) {
+                                ForEach(line.stations) { station in
+                                    stationPickerLabel(station: station, line: line).tag(station as Station?)
                                 }
                             }
                         }
-                        .foregroundColor(.primary)
+                    }
+                } label: {
+                    HStack {
+                        Image(systemName: "arrow.up.circle.fill")
+                            .foregroundColor(effectiveLine?.color ?? .secondary)
+                        Text("Section.BoardingStation")
                     }
                 }
+            }
 
-                // To station
+            // To station (shown once we know which line)
+            if let line = effectiveLine {
                 Section("Section.AlightingStation") {
-                    ForEach(line.stations) { station in
-                        Button {
-                            toStation = station
-                        } label: {
-                            HStack {
-                                if !station.stationCode.isEmpty {
-                                    StationNumberBadge(code: station.stationCode, color: line.color, size: .compact)
-                                }
-                                VStack(alignment: .leading) {
-                                    Text(station.localizedName)
-                                    Text(station.nameEn)
-                                        .font(.system(size: 11))
-                                        .foregroundColor(.secondary)
-                                }
-                                Spacer()
-                                if toStation?.id == station.id {
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(line.color)
-                                }
-                            }
+                    Picker(selection: $toStation) {
+                        Text("Picker.SelectStation").tag(nil as Station?)
+                        ForEach(line.stations) { station in
+                            stationPickerLabel(station: station, line: line).tag(station as Station?)
                         }
-                        .foregroundColor(.primary)
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrow.down.circle.fill")
+                                .foregroundColor(line.color)
+                            Text("Section.AlightingStation")
+                        }
                     }
                 }
             }
 
             // Save button
-            if let line = selectedLine,
+            if let line = effectiveLine,
                let from = fromStation,
                let to = toStation,
                from.id != to.id {
@@ -325,7 +313,7 @@ struct RouteEditorView: View {
                         }
                     }
                     .foregroundColor(.white)
-                    .listRowBackground(selectedLine?.color ?? .blue)
+                    .listRowBackground(line.color)
                 }
             }
         }
@@ -336,6 +324,15 @@ struct RouteEditorView: View {
                 fromStation = selectedLine?.stations.first(where: { $0.id == existing.fromStationId })
                 toStation = selectedLine?.stations.first(where: { $0.id == existing.toStationId })
             }
+        }
+    }
+
+    @ViewBuilder
+    private func stationPickerLabel(station: Station, line: TrainLine) -> some View {
+        if station.stationCode.isEmpty {
+            Text(station.localizedName)
+        } else {
+            Text("\(station.stationCode) \(station.localizedName)")
         }
     }
 }

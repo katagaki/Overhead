@@ -87,7 +87,7 @@ struct RootView: View {
                 }
                 .tag(Tab.more)
         }
-        .tint(viewModel.selectedLine?.color ?? .blue)
+        .tint(viewModel.selectedLine?.color ?? .primary)
         .onChange(of: viewModel.activeJourney != nil) { _, hasJourney in
             if hasJourney {
                 selectedTab = .journey
@@ -107,12 +107,12 @@ struct NoJourneyView: View {
 
             ZStack {
                 Circle()
-                    .fill(Color.blue.opacity(0.1))
+                    .fill(Color.primary.opacity(0.1))
                     .frame(width: 100, height: 100)
 
                 Image(systemName: "tram.fill")
                     .font(.system(size: 40))
-                    .foregroundColor(.blue)
+                    .foregroundColor(.primary)
             }
 
             Text("Onboarding.Description")
@@ -132,7 +132,7 @@ struct NoJourneyView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(Color.blue)
+                .background(Color.primary)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .padding(.horizontal, 48)

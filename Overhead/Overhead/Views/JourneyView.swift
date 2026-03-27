@@ -37,7 +37,9 @@ struct JourneyView: View {
 
                             Spacer(minLength: 40)
                         }
-                        .padding(.top, 16)
+                    }
+                    .safeAreaInset(edge: .top) {
+                        nextStationBar(state: state, journey: journey)
                     }
                     .onAppear {
                         // Scroll to approximate current position
@@ -47,12 +49,6 @@ struct JourneyView: View {
                             }
                         }
                     }
-                }
-
-                // Floating top bar — next station + ETA
-                VStack {
-                    nextStationBar(state: state, journey: journey)
-                    Spacer()
                 }
             } else {
                 emptyState
@@ -232,12 +228,8 @@ struct JourneyView: View {
             }
         }
         .padding(.horizontal, 24)
-        .padding(.vertical, 16)
-        .background(
-            Rectangle()
-                .fill(.ultraThinMaterial)
-                .ignoresSafeArea(edges: .top)
-        )
+        .padding(.vertical, 12)
+        .background(.ultraThinMaterial)
         .overlay(alignment: .bottom) {
             lineColor.frame(height: 2).opacity(0.6)
         }
@@ -272,7 +264,9 @@ struct JourneyView: View {
 }
 
 // MARK: - Vertical LCD Line
-/// Portrait-optimized vertical line with station dots, mimicking LCD
+/// Portrait-optimized vertical station line inspired by the JR East app.
+/// Thin track centered through station dots, hollow future stations,
+/// prominent current/next station indicators.
 
 struct VerticalLCDLine: View {
     let journey: Journey
@@ -280,9 +274,10 @@ struct VerticalLCDLine: View {
     let lineColor: Color
 
     private let stationSpacing: CGFloat = 72
-    private let trackWidth: CGFloat = 6
-    private let circleRadius: CGFloat = 10
-    private let terminalRadius: CGFloat = 14
+    private let trackWidth: CGFloat = 3
+    private let circleRadius: CGFloat = 9
+    private let terminalRadius: CGFloat = 12
+    private let currentRadius: CGFloat = 12
 
     var body: some View {
         let stations = journey.journeyStations
@@ -301,7 +296,7 @@ struct VerticalLCDLine: View {
 
                 HStack(alignment: .top, spacing: 0) {
                     // Left side: time
-                    timeColumn(for: station, timetable: timetable, isPast: isPast)
+                    timeColumn(for: station, timetable: timetable, isPast: isPast, isCurrent: isCurrent)
                         .frame(width: 56)
 
                     // Track + circle
@@ -311,7 +306,7 @@ struct VerticalLCDLine: View {
                             let segFrac = segmentFillFraction(stationIndex: index, totalStations: stations.count)
                             trackSegment(filled: isPast, fillFraction: segFrac)
                                 .frame(width: trackWidth, height: stationSpacing)
-                                .offset(y: isTerminal ? terminalRadius : circleRadius)
+                                .offset(y: stationDotRadius(isTerminal: isTerminal, isCurrent: isCurrent))
                         }
 
                         // Station circle
@@ -341,21 +336,26 @@ struct VerticalLCDLine: View {
         }
     }
 
+    private func stationDotRadius(isTerminal: Bool, isCurrent: Bool) -> CGFloat {
+        if isCurrent { return currentRadius }
+        if isTerminal { return terminalRadius }
+        return circleRadius
+    }
+
     // MARK: - Time Column
 
     @ViewBuilder
-    private func timeColumn(for station: Station, timetable: [TimetableEntry], isPast: Bool) -> some View {
+    private func timeColumn(for station: Station, timetable: [TimetableEntry], isPast: Bool, isCurrent: Bool) -> some View {
         if let entry = timetable.first(where: { $0.stationId == station.id }) {
             let timeStr = entry.departureTime ?? entry.arrivalTime ?? ""
             let delayMins = state.delayMinutes
 
             VStack(spacing: 1) {
                 Text(timeStr)
-                    .font(.system(size: 13, weight: .medium, design: .monospaced))
-                    .foregroundColor(isPast ? .secondary : .primary)
+                    .font(.system(size: 13, weight: isCurrent ? .bold : .medium, design: .monospaced))
+                    .foregroundColor(isPast && !isCurrent ? .secondary : .primary)
 
                 if delayMins > 0 {
-                    // Adjusted time
                     Text(adjustedTime(timeStr, delayMinutes: delayMins))
                         .font(.system(size: 11, design: .monospaced))
                         .foregroundColor(.red)
@@ -369,7 +369,7 @@ struct VerticalLCDLine: View {
     @ViewBuilder
     private func trackSegment(filled: Bool, fillFraction: Double) -> some View {
         ZStack(alignment: .top) {
-            // Background track
+            // Background track — thin and subtle
             RoundedRectangle(cornerRadius: trackWidth / 2)
                 .fill(Color.gray.opacity(0.2))
 
@@ -386,40 +386,52 @@ struct VerticalLCDLine: View {
 
     @ViewBuilder
     private func stationCircle(isPast: Bool, isCurrent: Bool, isTerminal: Bool, isNext: Bool) -> some View {
-        let r = isTerminal ? terminalRadius : circleRadius
+        let r = isCurrent ? currentRadius : (isTerminal ? terminalRadius : circleRadius)
 
         ZStack {
-            // Outer ring for terminals
-            if isTerminal {
+            if isCurrent {
+                // Current station: filled colored circle with white inner dot
+                Circle()
+                    .fill(lineColor)
+                    .frame(width: r * 2, height: r * 2)
+                Circle()
+                    .fill(Color.white)
+                    .frame(width: r * 0.7, height: r * 0.7)
+                    .shadow(color: lineColor.opacity(0.5), radius: 3)
+                // Pulse ring
+                Circle()
+                    .strokeBorder(lineColor.opacity(0.3), lineWidth: 2)
+                    .frame(width: r * 2 + 10, height: r * 2 + 10)
+            } else if isTerminal {
+                // Terminal: double circle (outline with colored/gray border)
+                Circle()
+                    .fill(Color(.systemBackground))
+                    .frame(width: r * 2, height: r * 2)
                 Circle()
                     .strokeBorder(isPast ? lineColor : Color.gray.opacity(0.3), lineWidth: 3)
                     .frame(width: r * 2, height: r * 2)
                 Circle()
-                    .fill(isPast ? lineColor : Color(.systemBackground))
-                    .frame(width: r * 2 - 8, height: r * 2 - 8)
-            } else {
+                    .fill(isPast ? lineColor : Color.gray.opacity(0.15))
+                    .frame(width: r * 2 - 10, height: r * 2 - 10)
+            } else if isPast {
+                // Past station: small filled dot
                 Circle()
-                    .fill(isPast ? lineColor : Color.gray.opacity(0.25))
+                    .fill(lineColor)
+                    .frame(width: r * 2, height: r * 2)
+            } else {
+                // Future station: hollow circle (white fill, gray outline)
+                Circle()
+                    .fill(Color(.systemBackground))
+                    .frame(width: r * 2, height: r * 2)
+                Circle()
+                    .strokeBorder(Color.gray.opacity(0.3), lineWidth: 2)
                     .frame(width: r * 2, height: r * 2)
             }
 
-            // Current station: pulsing white inner dot
-            if isCurrent {
-                Circle()
-                    .fill(Color.white)
-                    .frame(width: r * 0.8, height: r * 0.8)
-                    .shadow(color: lineColor.opacity(0.6), radius: 4)
-
-                // Pulse ring
-                Circle()
-                    .strokeBorder(lineColor.opacity(0.4), lineWidth: 2)
-                    .frame(width: r * 2 + 8, height: r * 2 + 8)
-            }
-
-            // Next station: ring highlight
+            // Next station: colored ring highlight
             if isNext && !isCurrent {
                 Circle()
-                    .strokeBorder(lineColor.opacity(0.5), lineWidth: 2)
+                    .strokeBorder(lineColor.opacity(0.6), lineWidth: 2)
                     .frame(width: r * 2 + 6, height: r * 2 + 6)
             }
         }
@@ -435,7 +447,7 @@ struct VerticalLCDLine: View {
                     StationNumberBadge(
                         code: station.stationCode,
                         color: lineColor,
-                        opacity: isPast && !isCurrent ? 0.4 : 0.9,
+                        opacity: isPast && !isCurrent ? 0.4 : 1.0,
                         size: .regular
                     )
                 }
@@ -448,19 +460,27 @@ struct VerticalLCDLine: View {
 
             Text(station.nameEn)
                 .font(.system(size: 11))
-                .foregroundColor(.secondary)
+                .foregroundColor(isPast && !isCurrent ? .secondary.opacity(0.5) : .secondary)
 
             if isCurrent {
                 Text("Label.CurrentLocation")
                     .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(lineColor)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(lineColor)
+                    .clipShape(Capsule())
                     .padding(.top, 2)
             }
 
-            if isNext {
+            if isNext && !isCurrent {
                 Text("Label.NextStop")
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundColor(lineColor.opacity(0.8))
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundColor(lineColor)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(lineColor.opacity(0.1))
+                    .clipShape(Capsule())
                     .padding(.top, 2)
             }
         }

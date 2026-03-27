@@ -21,9 +21,7 @@ struct LinePickerView: View {
             }
             .navigationTitle("NavigationTitle.LineSelection")
             .task {
-                if viewModel.availableLines.isEmpty {
-                    await viewModel.loadLines()
-                }
+                await viewModel.loadLines()
             }
         }
     }
@@ -84,40 +82,31 @@ struct StationPickerView: View {
 
     var body: some View {
         Form {
-            Section("Section.BoardingStation") {
-                ForEach(line.stations) { station in
-                    Button {
-                        boardingStation = station
-                    } label: {
-                        stationRow(station: station, selected: boardingStation?.id == station.id)
+            // Station selection via menus
+            Section {
+                Picker(selection: $boardingStation) {
+                    Text("Picker.SelectStation").tag(nil as Station?)
+                    ForEach(line.stations) { station in
+                        stationPickerLabel(station: station).tag(station as Station?)
                     }
-                    .foregroundColor(.primary)
-                    .swipeActions(edge: .trailing) {
-                        NavigationLink {
-                            StationTimetableView(station: station, line: line, viewModel: viewModel)
-                        } label: {
-                            Label("Button.Timetable", systemImage: "clock")
-                        }
-                        .tint(line.color)
+                } label: {
+                    HStack {
+                        Image(systemName: "arrow.up.circle.fill")
+                            .foregroundColor(line.color)
+                        Text("Section.BoardingStation")
                     }
                 }
-            }
 
-            Section("Section.AlightingStation") {
-                ForEach(line.stations) { station in
-                    Button {
-                        alightingStation = station
-                    } label: {
-                        stationRow(station: station, selected: alightingStation?.id == station.id)
+                Picker(selection: $alightingStation) {
+                    Text("Picker.SelectStation").tag(nil as Station?)
+                    ForEach(line.stations) { station in
+                        stationPickerLabel(station: station).tag(station as Station?)
                     }
-                    .foregroundColor(.primary)
-                    .swipeActions(edge: .trailing) {
-                        NavigationLink {
-                            StationTimetableView(station: station, line: line, viewModel: viewModel)
-                        } label: {
-                            Label("Button.Timetable", systemImage: "clock")
-                        }
-                        .tint(line.color)
+                } label: {
+                    HStack {
+                        Image(systemName: "arrow.down.circle.fill")
+                            .foregroundColor(line.color)
+                        Text("Section.AlightingStation")
                     }
                 }
             }
@@ -155,14 +144,36 @@ struct StationPickerView: View {
                     .listRowBackground(line.color)
                 }
             }
+
+            // Station list for timetable access
+            Section("Section.Stations") {
+                ForEach(line.stations) { station in
+                    NavigationLink {
+                        StationTimetableView(station: station, line: line, viewModel: viewModel)
+                    } label: {
+                        stationRow(station: station)
+                    }
+                }
+            }
         }
         .navigationTitle(line.localizedName)
+    }
+
+    // MARK: - Picker Label
+
+    @ViewBuilder
+    private func stationPickerLabel(station: Station) -> some View {
+        if station.stationCode.isEmpty {
+            Text(station.localizedName)
+        } else {
+            Text("\(station.stationCode) \(station.localizedName)")
+        }
     }
 
     // MARK: - Station Row
 
     @ViewBuilder
-    private func stationRow(station: Station, selected: Bool) -> some View {
+    private func stationRow(station: Station) -> some View {
         HStack {
             if !station.stationCode.isEmpty {
                 StationNumberBadge(
@@ -185,10 +196,9 @@ struct StationPickerView: View {
                 busynessDots(level: survey.busynessLevel)
             }
 
-            if selected {
-                Image(systemName: "checkmark")
-                    .foregroundColor(line.color)
-            }
+            Image(systemName: "clock")
+                .font(.system(size: 12))
+                .foregroundColor(.secondary)
         }
     }
 

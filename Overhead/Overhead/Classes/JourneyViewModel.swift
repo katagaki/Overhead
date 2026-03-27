@@ -31,6 +31,7 @@ final class JourneyViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private var delayPollingTask: Task<Void, Never>?
     private var timetableCache: [String: [TrainService]] = [:]
+    private var linesLoaded = false
 
     init(consumerKey: String) {
         self.apiClient = ODPTClient(consumerKey: consumerKey)
@@ -136,6 +137,7 @@ final class JourneyViewModel: ObservableObject {
         currentDelay = nil
         selectedLine = nil
         availableLines = []
+        linesLoaded = false
     }
 
     func startDemoJourney(
@@ -157,8 +159,11 @@ final class JourneyViewModel: ObservableObject {
     func loadLines() async {
         if isDemoMode {
             availableLines = DemoDataProvider.demoLines
+            linesLoaded = true
             return
         }
+
+        guard !linesLoaded else { return }
 
         isLoading = true
         errorMessage = nil
@@ -179,7 +184,13 @@ final class JourneyViewModel: ObservableObject {
                 let lines = try await apiClient.fetchRailways(operatorId: op)
                 allLines.append(contentsOf: lines)
             }
-            availableLines = allLines.sorted { $0.nameEn < $1.nameEn }
+            availableLines = allLines.sorted {
+                if $0.operatorId != $1.operatorId {
+                    return $0.operatorId < $1.operatorId
+                }
+                return $0.nameEn < $1.nameEn
+            }
+            linesLoaded = true
 
             _ = await (directionsTask, surveysTask)
         } catch {

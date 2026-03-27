@@ -2,8 +2,8 @@ import SwiftUI
 
 // MARK: - Station Number Badge
 /// Renders station number badges matching the real Tokyo rail signage:
-/// - JR East: Rounded rectangle with line letters on top, number below
-/// - Tokyo Metro: Circle with line letter on top, number below
+/// - JR East: Rounded rectangle with colored outline, white inner, colored text
+/// - Tokyo Metro: Circle with colored outline, white inner, colored text
 /// - Toei: Circle (same style as Metro)
 
 struct StationNumberBadge: View {
@@ -74,7 +74,7 @@ struct StationNumberBadge: View {
                 .padding(.top, 2)
 
             Rectangle()
-                .fill(Color.white.opacity(0.5))
+                .fill(color.opacity(opacity * 0.4))
                 .frame(height: 0.5)
                 .padding(.horizontal, 3)
 
@@ -83,13 +83,13 @@ struct StationNumberBadge: View {
                 .frame(maxWidth: .infinity)
                 .padding(.bottom, 2)
         }
-        .foregroundColor(.white)
+        .foregroundColor(color.opacity(opacity))
         .frame(width: w, height: h)
-        .background(color.opacity(opacity))
+        .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 5))
         .overlay(
             RoundedRectangle(cornerRadius: 5)
-                .strokeBorder(Color.white.opacity(0.3), lineWidth: 0.5)
+                .strokeBorder(color.opacity(opacity), lineWidth: 2)
         )
     }
 
@@ -108,13 +108,13 @@ struct StationNumberBadge: View {
                 .font(.system(size: numberFontSize, weight: .black, design: .rounded))
                 .padding(.bottom, 1)
         }
-        .foregroundColor(.white)
+        .foregroundColor(color.opacity(opacity))
         .frame(width: d, height: d)
-        .background(color.opacity(opacity))
+        .background(Color.white)
         .clipShape(Circle())
         .overlay(
             Circle()
-                .strokeBorder(Color.white.opacity(0.3), lineWidth: 0.5)
+                .strokeBorder(color.opacity(opacity), lineWidth: 2)
         )
     }
 }
