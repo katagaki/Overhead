@@ -27,7 +27,7 @@ struct LineSymbolBadge: View {
 
     private var jrBadge: some View {
         Text(symbol)
-            .font(.system(size: 14, weight: .heavy))
+            .font(.custom("HelveticaNeue-Bold", size: 14))
             .foregroundColor(.black)
             .frame(width: 32, height: 32)
             .background(Color.white)
@@ -42,7 +42,7 @@ struct LineSymbolBadge: View {
 
     private var metroBadge: some View {
         Text(symbol)
-            .font(.system(size: 16, weight: .heavy))
+            .font(.system(size: 16, weight: .heavy, design: .default))
             .foregroundColor(.black)
             .frame(width: 32, height: 32)
             .background(Color.white)
