@@ -19,7 +19,7 @@ struct LinePickerView: View {
                     lineList
                 }
             }
-            .navigationTitle("NavigationTitle.LineSelection")
+            .navigationTitle("路線")
             .task {
                 await viewModel.loadLines()
             }
@@ -44,35 +44,59 @@ struct LinePickerView: View {
     }
 
     private var lineList: some View {
-        List {
-            ForEach(viewModel.availableLines) { line in
-                NavigationLink {
-                    StationPickerView(
-                        line: line,
-                        viewModel: viewModel
-                    )
-                } label: {
-                    HStack(spacing: 12) {
-                        if !line.lineSymbol.isEmpty {
-                            LineSymbolBadge(
-                                symbol: line.lineSymbol,
-                                color: line.color
-                            )
-                        } else {
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(line.color)
-                                .frame(width: 6, height: 36)
-                        }
+        let grouped = Dictionary(grouping: viewModel.availableLines) { $0.operatorId }
+        let sectionOrder = [
+            "odpt.Operator:JR-East",
+            "odpt.Operator:TokyoMetro",
+            "odpt.Operator:Toei"
+        ]
+        let sectionTitles: [String: String] = [
+            "odpt.Operator:JR-East": "JR",
+            "odpt.Operator:TokyoMetro": "東京メトロ",
+            "odpt.Operator:Toei": "都営"
+        ]
 
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(line.localizedName)
-                                .font(.system(size: 16, weight: .semibold))
-                            Text(line.nameEn)
-                                .font(.system(size: 12))
-                                .foregroundColor(.secondary)
+        List {
+            ForEach(sectionOrder, id: \.self) { operatorId in
+                if let lines = grouped[operatorId] {
+                    Section(sectionTitles[operatorId] ?? operatorId) {
+                        ForEach(lines) { line in
+                            NavigationLink {
+                                StationPickerView(
+                                    line: line,
+                                    viewModel: viewModel
+                                )
+                            } label: {
+                                lineRow(line: line)
+                            }
                         }
                     }
                 }
+            }
+        }
+        .listStyle(.grouped)
+    }
+
+    private func lineRow(line: TrainLine) -> some View {
+        HStack(spacing: 12) {
+            if !line.lineSymbol.isEmpty {
+                LineSymbolBadge(
+                    symbol: line.lineSymbol,
+                    color: line.color
+                )
+            } else {
+                // Placeholder to keep text aligned with badged rows
+                RoundedRectangle(cornerRadius: 5)
+                    .fill(line.color)
+                    .frame(width: 32, height: 32)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(line.localizedName)
+                    .font(.system(size: 16, weight: .semibold))
+                Text(line.nameEn)
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary)
             }
         }
     }
