@@ -60,8 +60,10 @@ final class LiveActivityManager {
     /// The URL scheme that the Live Activity refresh button opens
     static let refreshURLScheme = "overhead://refresh-delay"
 
-    private var currentActivity: Activity<TrainJourneyAttributes>?
+    private(set) var currentActivity: Activity<TrainJourneyAttributes>?
     private var lastDelayFetchTime = Date()
+
+    var hasActiveActivity: Bool { currentActivity != nil }
 
     func startActivity(
         journey: Journey,

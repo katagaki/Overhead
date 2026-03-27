@@ -75,6 +75,19 @@ final class JourneyViewModel: ObservableObject {
             .sink { [weak self] state in
                 guard let self, self.isDemoMode, let state else { return }
                 self.positionState = state
+
+                // Drive Live Activity from demo state
+                if let journey = self.activeJourney {
+                    if LiveActivityManager.shared.hasActiveActivity {
+                        LiveActivityManager.shared.updateActivity(positionState: state)
+                    } else {
+                        LiveActivityManager.shared.startActivity(
+                            journey: journey,
+                            positionState: state,
+                            lineColorHex: journey.line.colorHex
+                        )
+                    }
+                }
             }
             .store(in: &cancellables)
 
@@ -112,6 +125,7 @@ final class JourneyViewModel: ObservableObject {
 
     func stopDemoMode() {
         demoProvider.stopSimulation()
+        LiveActivityManager.shared.endActivity()
         isDemoMode = false
         activeJourney = nil
         positionState = nil
@@ -125,6 +139,9 @@ final class JourneyViewModel: ObservableObject {
         from boardingStation: Station,
         to alightingStation: Station
     ) {
+        // End any existing Live Activity before starting a new one
+        LiveActivityManager.shared.endActivity()
+
         selectedLine = line
         let journey = demoProvider.buildJourney(line: line, from: boardingStation, to: alightingStation)
         activeJourney = journey

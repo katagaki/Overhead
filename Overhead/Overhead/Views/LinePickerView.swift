@@ -91,13 +91,11 @@ struct StationPickerView: View {
                     } label: {
                         HStack {
                             if !station.stationCode.isEmpty {
-                                Text(station.stationCode)
-                                    .font(.system(size: 11, weight: .bold, design: .monospaced))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 2)
-                                    .background(line.color)
-                                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                                StationNumberBadge(
+                                    code: station.stationCode,
+                                    color: line.color,
+                                    size: .compact
+                                )
                             }
                             VStack(alignment: .leading) {
                                 Text(station.name)
@@ -123,13 +121,11 @@ struct StationPickerView: View {
                     } label: {
                         HStack {
                             if !station.stationCode.isEmpty {
-                                Text(station.stationCode)
-                                    .font(.system(size: 11, weight: .bold, design: .monospaced))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 2)
-                                    .background(line.color)
-                                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                                StationNumberBadge(
+                                    code: station.stationCode,
+                                    color: line.color,
+                                    size: .compact
+                                )
                             }
                             VStack(alignment: .leading) {
                                 Text(station.name)

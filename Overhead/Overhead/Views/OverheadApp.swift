@@ -10,7 +10,6 @@ struct OverheadApp: App {
     var body: some Scene {
         WindowGroup {
             RootView(viewModel: viewModel)
-                .preferredColorScheme(.dark)  // Train LCDs are dark-themed
                 .onOpenURL { url in
                     handleDeepLink(url)
                 }
@@ -41,6 +40,7 @@ struct RootView: View {
 
     enum Tab: Hashable {
         case journey
+        case routes
         case lines
         case settings
     }
@@ -62,6 +62,14 @@ struct RootView: View {
                 Text("Tab.Journey")
             }
             .tag(Tab.journey)
+
+            // Routes tab
+            RoutesView(viewModel: viewModel)
+                .tabItem {
+                    Image(systemName: "bookmark.fill")
+                    Text("Tab.Routes")
+                }
+                .tag(Tab.routes)
 
             // Lines tab
             LinePickerView(viewModel: viewModel)

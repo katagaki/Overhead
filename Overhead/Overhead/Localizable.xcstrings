@@ -590,6 +590,106 @@
           "stringUnit" : { "state" : "translated", "value" : "Location access denied." }
         }
       }
+    },
+    "Tab.Routes" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : { "state" : "translated", "value" : "ルート" }
+        },
+        "en" : {
+          "stringUnit" : { "state" : "translated", "value" : "Routes" }
+        }
+      }
+    },
+    "NavigationTitle.Routes" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : { "state" : "translated", "value" : "クイックルート" }
+        },
+        "en" : {
+          "stringUnit" : { "state" : "translated", "value" : "Quick Routes" }
+        }
+      }
+    },
+    "Route.Home" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : { "state" : "translated", "value" : "自宅" }
+        },
+        "en" : {
+          "stringUnit" : { "state" : "translated", "value" : "Home" }
+        }
+      }
+    },
+    "Route.Work" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : { "state" : "translated", "value" : "職場" }
+        },
+        "en" : {
+          "stringUnit" : { "state" : "translated", "value" : "Work" }
+        }
+      }
+    },
+    "Route.School" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : { "state" : "translated", "value" : "学校" }
+        },
+        "en" : {
+          "stringUnit" : { "state" : "translated", "value" : "School" }
+        }
+      }
+    },
+    "Route.NotConfigured" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : { "state" : "translated", "value" : "タップして設定" }
+        },
+        "en" : {
+          "stringUnit" : { "state" : "translated", "value" : "Tap to configure" }
+        }
+      }
+    },
+    "Route.Section.Line" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : { "state" : "translated", "value" : "路線" }
+        },
+        "en" : {
+          "stringUnit" : { "state" : "translated", "value" : "Line" }
+        }
+      }
+    },
+    "Button.SaveRoute" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : { "state" : "translated", "value" : "ルートを保存" }
+        },
+        "en" : {
+          "stringUnit" : { "state" : "translated", "value" : "Save Route" }
+        }
+      }
+    },
+    "Button.EditRoute" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : { "state" : "translated", "value" : "編集" }
+        },
+        "en" : {
+          "stringUnit" : { "state" : "translated", "value" : "Edit" }
+        }
+      }
+    },
+    "Button.DeleteRoute" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : { "state" : "translated", "value" : "削除" }
+        },
+        "en" : {
+          "stringUnit" : { "state" : "translated", "value" : "Delete" }
+        }
+      }
     }
   },
   "version" : "1.0"

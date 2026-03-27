@@ -1,0 +1,120 @@
+import SwiftUI
+
+// MARK: - Station Number Badge
+/// Renders station number badges matching the real Tokyo rail signage:
+/// - JR East: Rounded rectangle with line letters on top, number below
+/// - Tokyo Metro: Circle with line letter on top, number below
+/// - Toei: Circle (same style as Metro)
+
+struct StationNumberBadge: View {
+    let code: String
+    let color: Color
+    var opacity: Double = 1.0
+    var size: BadgeSize = .regular
+
+    enum BadgeSize {
+        case compact  // For list rows
+        case regular  // For journey view station labels
+    }
+
+    /// Parse "JC05" → ("JC", "05"), "G01" → ("G", "01"), "M08" → ("M", "08")
+    private var parsed: (prefix: String, number: String) {
+        let letters = code.prefix(while: \.isLetter)
+        let digits = code.drop(while: \.isLetter)
+        return (String(letters), String(digits))
+    }
+
+    /// JR station codes start with "J" (JC, JY, JK, JB, JA, JE, JH, etc.)
+    private var isJR: Bool {
+        parsed.prefix.hasPrefix("J")
+    }
+
+    private var badgeDimension: CGFloat {
+        switch size {
+        case .compact: return 32
+        case .regular: return 28
+        }
+    }
+
+    private var prefixFontSize: CGFloat {
+        switch size {
+        case .compact: return 9
+        case .regular: return 8
+        }
+    }
+
+    private var numberFontSize: CGFloat {
+        switch size {
+        case .compact: return 12
+        case .regular: return 10
+        }
+    }
+
+    var body: some View {
+        let (prefix, number) = parsed
+
+        if isJR {
+            jrBadge(prefix: prefix, number: number)
+        } else {
+            metroBadge(prefix: prefix, number: number)
+        }
+    }
+
+    // MARK: - JR Style: Rounded Rectangle
+
+    @ViewBuilder
+    private func jrBadge(prefix: String, number: String) -> some View {
+        let w = badgeDimension * 1.15
+        let h = badgeDimension
+
+        VStack(spacing: 0) {
+            Text(prefix)
+                .font(.system(size: prefixFontSize, weight: .heavy))
+                .frame(maxWidth: .infinity)
+                .padding(.top, 2)
+
+            Rectangle()
+                .fill(Color.white.opacity(0.5))
+                .frame(height: 0.5)
+                .padding(.horizontal, 3)
+
+            Text(number)
+                .font(.system(size: numberFontSize, weight: .black, design: .rounded))
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, 2)
+        }
+        .foregroundColor(.white)
+        .frame(width: w, height: h)
+        .background(color.opacity(opacity))
+        .clipShape(RoundedRectangle(cornerRadius: 5))
+        .overlay(
+            RoundedRectangle(cornerRadius: 5)
+                .strokeBorder(Color.white.opacity(0.3), lineWidth: 0.5)
+        )
+    }
+
+    // MARK: - Metro / Toei Style: Circle
+
+    @ViewBuilder
+    private func metroBadge(prefix: String, number: String) -> some View {
+        let d = badgeDimension
+
+        VStack(spacing: -1) {
+            Text(prefix)
+                .font(.system(size: prefixFontSize, weight: .heavy))
+                .padding(.top, 1)
+
+            Text(number)
+                .font(.system(size: numberFontSize, weight: .black, design: .rounded))
+                .padding(.bottom, 1)
+        }
+        .foregroundColor(.white)
+        .frame(width: d, height: d)
+        .background(color.opacity(opacity))
+        .clipShape(Circle())
+        .overlay(
+            Circle()
+                .strokeBorder(Color.white.opacity(0.3), lineWidth: 0.5)
+        )
+    }
+}

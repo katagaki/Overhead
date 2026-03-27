@@ -49,10 +49,10 @@ struct JourneyView: View {
                     }
                 }
 
-                // Floating bottom bar
+                // Floating top bar — next station + ETA
                 VStack {
+                    nextStationBar(state: state, journey: journey)
                     Spacer()
-                    bottomBar(state: state, journey: journey)
                 }
             } else {
                 emptyState
@@ -196,10 +196,10 @@ struct JourneyView: View {
         }
     }
 
-    // MARK: - Bottom Bar
+    // MARK: - Next Station Bar (Top)
 
     @ViewBuilder
-    private func bottomBar(state: TrainPositionState, journey: Journey) -> some View {
+    private func nextStationBar(state: TrainPositionState, journey: Journey) -> some View {
         HStack {
             // Next station
             VStack(alignment: .leading, spacing: 2) {
@@ -236,9 +236,9 @@ struct JourneyView: View {
         .background(
             Rectangle()
                 .fill(.ultraThinMaterial)
-                .ignoresSafeArea(edges: .bottom)
+                .ignoresSafeArea(edges: .top)
         )
-        .overlay(alignment: .top) {
+        .overlay(alignment: .bottom) {
             lineColor.frame(height: 2).opacity(0.6)
         }
     }
@@ -431,20 +431,19 @@ struct VerticalLCDLine: View {
     private func stationLabel(station: Station, isPast: Bool, isCurrent: Bool, isNext: Bool, isTerminal: Bool) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 6) {
+                if !station.stationCode.isEmpty {
+                    StationNumberBadge(
+                        code: station.stationCode,
+                        color: lineColor,
+                        opacity: isPast && !isCurrent ? 0.4 : 0.9,
+                        size: .regular
+                    )
+                }
+
                 Text(station.name)
                     .font(.system(size: isCurrent || isTerminal ? 18 : 15,
                                   weight: isCurrent || isTerminal ? .bold : .medium))
                     .foregroundColor(isPast && !isCurrent ? .secondary : .primary)
-
-                if !station.stationCode.isEmpty {
-                    Text(station.stationCode)
-                        .font(.system(size: 10, weight: .bold, design: .monospaced))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 2)
-                        .background(lineColor.opacity(isPast && !isCurrent ? 0.4 : 0.9))
-                        .clipShape(RoundedRectangle(cornerRadius: 3))
-                }
             }
 
             Text(station.nameEn)
