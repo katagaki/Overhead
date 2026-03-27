@@ -1,0 +1,18 @@
+# Xcode
+*.xcuserstate
+*.xcuserdatad/
+xcuserdata/
+DerivedData/
+*.xcworkspace/xcuserdata/
+
+# Build
+build/
+
+# macOS
+.DS_Store
+
+# Secrets
+Overhead/Overhead/ODPTKey.plist
+
+# Claude Code
+.claude/settings.local.json
