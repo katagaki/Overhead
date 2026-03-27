@@ -42,7 +42,7 @@ struct RootView: View {
         case journey
         case routes
         case lines
-        case settings
+        case more
     }
 
     var body: some View {
@@ -79,13 +79,13 @@ struct RootView: View {
                 }
                 .tag(Tab.lines)
 
-            // Settings
-            SettingsView(viewModel: viewModel)
+            // More
+            MoreView(viewModel: viewModel)
                 .tabItem {
-                    Image(systemName: "gearshape")
-                    Text("Tab.Settings")
+                    Image(systemName: "ellipsis")
+                    Text("Tab.More")
                 }
-                .tag(Tab.settings)
+                .tag(Tab.more)
         }
         .tint(viewModel.selectedLine?.color ?? .blue)
         .onChange(of: viewModel.activeJourney != nil) { _, hasJourney in
@@ -152,9 +152,15 @@ struct NoJourneyView: View {
     }
 }
 
-// MARK: - Settings View
+// MARK: - View Path
 
-struct SettingsView: View {
+enum ViewPath: Hashable {
+    case attributions
+}
+
+// MARK: - More View
+
+struct MoreView: View {
     @ObservedObject var viewModel: JourneyViewModel
 
     @AppStorage("showEnglish") private var showEnglish = true
@@ -215,15 +221,42 @@ struct SettingsView: View {
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
                     }
-                    HStack {
-                        Text("Settings.Label.Version")
-                        Spacer()
-                        Text("1.0.0")
-                            .foregroundColor(.secondary)
+                }
+
+                Section {
+                    Link(destination: URL(string: "https://github.com/katagaki/Overhead")!) {
+                        HStack {
+                            Text(String(localized: "More.GitHub"))
+                            Spacer()
+                            Text("katagaki/Overhead")
+                                .foregroundStyle(.secondary)
+                        }
                     }
+                    .tint(.primary)
+                    NavigationLink("More.Attributions", value: ViewPath.attributions)
                 }
             }
-            .navigationTitle("NavigationTitle.Settings")
+            .navigationTitle("ViewTitle.More")
+            .navigationDestination(for: ViewPath.self) { path in
+                switch path {
+                case .attributions:
+                    MoreAttributionsView()
+                }
+            }
         }
+    }
+}
+
+// MARK: - Attributions View
+
+struct MoreAttributionsView: View {
+    var body: some View {
+        List {
+            Section {
+                Text("More.Attributions.Placeholder")
+                    .foregroundColor(.secondary)
+            }
+        }
+        .navigationTitle("More.Attributions")
     }
 }

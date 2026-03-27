@@ -1,693 +1,1119 @@
 {
   "sourceLanguage" : "ja",
   "strings" : {
-    "Tab.Journey" : {
+    "App.Subtitle" : {
       "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "旅程" }
-        },
         "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Journey" }
-        }
-      }
-    },
-    "Tab.Lines" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "路線" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tokyo Rail Tracker"
+          }
         },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Lines" }
-        }
-      }
-    },
-    "Tab.Settings" : {
-      "localizations" : {
         "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "設定" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Settings" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "東京鉄道トラッカー"
+          }
         }
       }
     },
     "App.Title" : {
       "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "Overhead" }
-        },
         "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Overhead" }
-        }
-      }
-    },
-    "App.Subtitle" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "東京鉄道トラッカー" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overhead"
+          }
         },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Tokyo Rail Tracker" }
-        }
-      }
-    },
-    "Onboarding.Description" : {
-      "localizations" : {
         "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "路線と駅を選んで、リアルタイムで\n旅程を追跡しましょう" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Select a line and stations to track\nyour journey in real time" }
-        }
-      }
-    },
-    "Button.StartJourney" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "旅程を開始" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Start Journey" }
-        }
-      }
-    },
-    "Button.EndJourney" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "旅程を終了" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "End Journey" }
-        }
-      }
-    },
-    "Button.Refresh" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "更新" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Refresh" }
-        }
-      }
-    },
-    "Button.Retry" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "再試行" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Retry" }
-        }
-      }
-    },
-    "Button.RefreshDelayInfo" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "遅延情報を更新" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Refresh delay info" }
-        }
-      }
-    },
-    "Settings.Section.OdptAPI" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "ODPT API" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "ODPT API" }
-        }
-      }
-    },
-    "Settings.SecureField.ConsumerKey" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "コンシューマーキー" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Consumer Key" }
-        }
-      }
-    },
-    "Settings.Link.DeveloperRegistration" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "開発者登録" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Developer Registration" }
-        }
-      }
-    },
-    "Settings.Section.Display" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "表示" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Display" }
-        }
-      }
-    },
-    "Settings.Toggle.ShowEnglish" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "英語名を表示" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Show English Names" }
-        }
-      }
-    },
-    "Settings.Label.PollingInterval" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "更新間隔" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Polling Interval" }
-        }
-      }
-    },
-    "Settings.Unit.Seconds %lld" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "%lld秒" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "%llds" }
-        }
-      }
-    },
-    "Settings.Section.CurrentJourney" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "現在の旅程" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Current Journey" }
-        }
-      }
-    },
-    "Settings.Section.Demo" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "デモ" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Demo" }
-        }
-      }
-    },
-    "Settings.Toggle.DemoMode" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "デモモード" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Demo Mode" }
-        }
-      }
-    },
-    "Settings.Label.RunningSimulation" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "シミュレーションデータで動作中" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Running with simulated data" }
-        }
-      }
-    },
-    "Settings.Section.About" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "情報" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "About" }
-        }
-      }
-    },
-    "Settings.Label.DataProvider" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "データ提供" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Data Provider" }
-        }
-      }
-    },
-    "Settings.Label.ODPTCenter" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "公共交通オープンデータセンター" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Public Transport Open Data Center" }
-        }
-      }
-    },
-    "Settings.Label.Version" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "バージョン" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Version" }
-        }
-      }
-    },
-    "NavigationTitle.Settings" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "設定" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Settings" }
-        }
-      }
-    },
-    "NavigationTitle.LineSelection" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "路線選択" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Select Line" }
-        }
-      }
-    },
-    "Loading.Lines" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "路線を読み込み中..." }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Loading lines..." }
-        }
-      }
-    },
-    "Error.NoLinesAvailable" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "利用可能な路線がありません" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "No lines available" }
-        }
-      }
-    },
-    "Error.ConfigureAPIKey" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "設定でODPT APIキーを設定してください" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Configure your ODPT API key in Settings" }
-        }
-      }
-    },
-    "Section.BoardingStation" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "乗車駅" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Boarding Station" }
-        }
-      }
-    },
-    "Section.AlightingStation" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "降車駅" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Alighting Station" }
-        }
-      }
-    },
-    "Journey.Delay.Banner %lld" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "遅延 約%lld分" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Delayed ~%lld min" }
-        }
-      }
-    },
-    "Journey.Delay.Minutes %lld" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "+%lld分遅れ" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "+%lld min late" }
-        }
-      }
-    },
-    "Status.WeakGPSSignal" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "GPS信号が弱いため時刻表で位置を推定中" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Weak GPS — estimating position from timetable" }
-        }
-      }
-    },
-    "TrackingMode.GPS" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "GPS追跡中" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "GPS Tracking" }
-        }
-      }
-    },
-    "TrackingMode.Timetable" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "時刻表モード" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Timetable Mode" }
-        }
-      }
-    },
-    "TrackingMode.Blended" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "GPS+時刻表" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "GPS + Timetable" }
-        }
-      }
-    },
-    "Label.NextStation" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "次は" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Next" }
-        }
-      }
-    },
-    "Label.EstimatedArrival" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "到着予定" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "ETA" }
-        }
-      }
-    },
-    "Status.NoJourneySelected" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "旅程が選択されていません" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "No journey selected" }
-        }
-      }
-    },
-    "Status.NoActiveJourney" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "アクティブな旅程がありません" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "No active journey" }
-        }
-      }
-    },
-    "Label.CurrentLocation" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "現在地" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "You are here" }
-        }
-      }
-    },
-    "Label.NextStop" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "次の駅" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Next stop" }
-        }
-      }
-    },
-    "Badge.Timetable" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "時刻表" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Timetable" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overhead"
+          }
         }
       }
     },
     "Badge.GPS" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "GPS" }
-        },
         "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "GPS" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS"
+          }
         }
       }
     },
     "Badge.GPSPlusTimetable" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "GPS+時刻表" }
-        },
         "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "GPS+Timetable" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS+Timetable"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS+時刻表"
+          }
         }
       }
     },
-    "Status.OnTime" : {
+    "Badge.Timetable" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "定刻" }
-        },
         "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "On Time" }
-        }
-      }
-    },
-    "Status.OnTimeOperation" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "定刻運転" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timetable"
+          }
         },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "On Schedule" }
-        }
-      }
-    },
-    "LiveActivity.Delay.Badge %lld" : {
-      "localizations" : {
         "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "遅延 +%lld分" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Delayed +%lld min" }
-        }
-      }
-    },
-    "LiveActivity.Delay.Minutes %lld" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "+%lld分" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "+%lld min" }
-        }
-      }
-    },
-    "LiveActivity.NextIs %@" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "次は %@" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Next: %@" }
-        }
-      }
-    },
-    "Destination.Suffix %@ %@" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "%1$@ %2$@行" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "%1$@ to %2$@" }
-        }
-      }
-    },
-    "Time.Now" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "今" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Now" }
-        }
-      }
-    },
-    "Time.LessThanOneMinuteAgo" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "<1分前" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "<1 min ago" }
-        }
-      }
-    },
-    "Time.MinutesAgo %lld" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "%lld分前" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "%lld min ago" }
-        }
-      }
-    },
-    "LocationError.NotAuthorized" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "位置情報が許可されていません。時刻表モードで運行します。" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Location access denied. Using timetable mode." }
-        }
-      }
-    },
-    "LocationError.Denied" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "位置情報が拒否されました。" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Location access denied." }
-        }
-      }
-    },
-    "Tab.Routes" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "ルート" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Routes" }
-        }
-      }
-    },
-    "NavigationTitle.Routes" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "クイックルート" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Quick Routes" }
-        }
-      }
-    },
-    "Route.Home" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "自宅" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Home" }
-        }
-      }
-    },
-    "Route.Work" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "職場" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Work" }
-        }
-      }
-    },
-    "Route.School" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "学校" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "School" }
-        }
-      }
-    },
-    "Route.NotConfigured" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "タップして設定" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Tap to configure" }
-        }
-      }
-    },
-    "Route.Section.Line" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "路線" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Line" }
-        }
-      }
-    },
-    "Button.SaveRoute" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "ルートを保存" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Save Route" }
-        }
-      }
-    },
-    "Button.EditRoute" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "編集" }
-        },
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Edit" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時刻表"
+          }
         }
       }
     },
     "Button.DeleteRoute" : {
       "localizations" : {
-        "ja" : {
-          "stringUnit" : { "state" : "translated", "value" : "削除" }
-        },
         "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Delete" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除"
+          }
+        }
+      }
+    },
+    "Button.EditRoute" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編集"
+          }
+        }
+      }
+    },
+    "Button.EndJourney" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End Journey"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旅程を終了"
+          }
+        }
+      }
+    },
+    "Button.Refresh" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refresh"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新"
+          }
+        }
+      }
+    },
+    "Button.RefreshDelayInfo" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refresh delay info"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遅延情報を更新"
+          }
+        }
+      }
+    },
+    "Button.Retry" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retry"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再試行"
+          }
+        }
+      }
+    },
+    "Button.SaveRoute" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save Route"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルートを保存"
+          }
+        }
+      }
+    },
+    "Button.StartJourney" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start Journey"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旅程を開始"
+          }
+        }
+      }
+    },
+    "Destination.Suffix %@ %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ to %2$@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@行"
+          }
+        }
+      }
+    },
+    "Error.ConfigureAPIKey" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configure your ODPT API key in Settings"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定でODPT APIキーを設定してください"
+          }
+        }
+      }
+    },
+    "Error.NoLinesAvailable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No lines available"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "利用可能な路線がありません"
+          }
+        }
+      }
+    },
+    "Journey.Delay.Banner %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delayed ~%lld min"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遅延 約%lld分"
+          }
+        }
+      }
+    },
+    "Journey.Delay.Minutes %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld min late"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld分遅れ"
+          }
+        }
+      }
+    },
+    "katagaki/Overhead" : {
+
+    },
+    "Label.CurrentLocation" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You are here"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在地"
+          }
+        }
+      }
+    },
+    "Label.EstimatedArrival" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ETA"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "到着予定"
+          }
+        }
+      }
+    },
+    "Label.NextStation" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次は"
+          }
+        }
+      }
+    },
+    "Label.NextStop" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next stop"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次の駅"
+          }
+        }
+      }
+    },
+    "LiveActivity.Delay.Badge %lld" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delayed +%lld min"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遅延 +%lld分"
+          }
+        }
+      }
+    },
+    "LiveActivity.Delay.Minutes %lld" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld min"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld分"
+          }
+        }
+      }
+    },
+    "LiveActivity.NextIs %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next: %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次は %@"
+          }
+        }
+      }
+    },
+    "Loading.Lines" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading lines..."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "路線を読み込み中..."
+          }
+        }
+      }
+    },
+    "LocationError.Denied" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location access denied."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "位置情報が拒否されました。"
+          }
+        }
+      }
+    },
+    "LocationError.NotAuthorized" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location access denied. Using timetable mode."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "位置情報が許可されていません。時刻表モードで運行します。"
+          }
+        }
+      }
+    },
+    "More.Attributions" : {
+
+    },
+    "More.Attributions.Placeholder" : {
+
+    },
+    "More.GitHub" : {
+
+    },
+    "NavigationTitle.LineSelection" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select Line"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "路線選択"
+          }
+        }
+      }
+    },
+    "NavigationTitle.Routes" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quick Routes"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クイックルート"
+          }
+        }
+      }
+    },
+    "Onboarding.Description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select a line and stations to track\nyour journey in real time"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "路線と駅を選んで、リアルタイムで\n旅程を追跡しましょう"
+          }
+        }
+      }
+    },
+    "Route.Home" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自宅"
+          }
+        }
+      }
+    },
+    "Route.NotConfigured" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to configure"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タップして設定"
+          }
+        }
+      }
+    },
+    "Route.School" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "School"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学校"
+          }
+        }
+      }
+    },
+    "Route.Section.Line" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Line"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "路線"
+          }
+        }
+      }
+    },
+    "Route.Work" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Work"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "職場"
+          }
+        }
+      }
+    },
+    "Section.AlightingStation" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alighting Station"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "降車駅"
+          }
+        }
+      }
+    },
+    "Section.BoardingStation" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boarding Station"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "乗車駅"
+          }
+        }
+      }
+    },
+    "Settings.Label.DataProvider" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data Provider"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "データ提供"
+          }
+        }
+      }
+    },
+    "Settings.Label.ODPTCenter" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Public Transport Open Data Center"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公共交通オープンデータセンター"
+          }
+        }
+      }
+    },
+    "Settings.Label.PollingInterval" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Polling Interval"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新間隔"
+          }
+        }
+      }
+    },
+    "Settings.Label.RunningSimulation" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Running with simulated data"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シミュレーションデータで動作中"
+          }
+        }
+      }
+    },
+    "Settings.Section.About" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "情報"
+          }
+        }
+      }
+    },
+    "Settings.Section.CurrentJourney" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current Journey"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在の旅程"
+          }
+        }
+      }
+    },
+    "Settings.Section.Demo" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "デモ"
+          }
+        }
+      }
+    },
+    "Settings.Section.Display" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Display"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "表示"
+          }
+        }
+      }
+    },
+    "Settings.Toggle.DemoMode" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demo Mode"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "デモモード"
+          }
+        }
+      }
+    },
+    "Settings.Toggle.ShowEnglish" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show English Names"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "英語名を表示"
+          }
+        }
+      }
+    },
+    "Settings.Unit.Seconds %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%llds"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld秒"
+          }
+        }
+      }
+    },
+    "Status.NoActiveJourney" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No active journey"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アクティブな旅程がありません"
+          }
+        }
+      }
+    },
+    "Status.NoJourneySelected" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No journey selected"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旅程が選択されていません"
+          }
+        }
+      }
+    },
+    "Status.OnTime" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On Time"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "定刻"
+          }
+        }
+      }
+    },
+    "Status.OnTimeOperation" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On Schedule"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "定刻運転"
+          }
+        }
+      }
+    },
+    "Status.WeakGPSSignal" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weak GPS — estimating position from timetable"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS信号が弱いため時刻表で位置を推定中"
+          }
+        }
+      }
+    },
+    "Tab.Journey" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Journey"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旅程"
+          }
+        }
+      }
+    },
+    "Tab.Lines" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lines"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "路線"
+          }
+        }
+      }
+    },
+    "Tab.More" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "その他"
+          }
+        }
+      }
+    },
+    "Tab.Routes" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Routes"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルート"
+          }
+        }
+      }
+    },
+    "Time.LessThanOneMinuteAgo" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "<1 min ago"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "<1分前"
+          }
+        }
+      }
+    },
+    "Time.MinutesAgo %lld" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld min ago"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld分前"
+          }
+        }
+      }
+    },
+    "Time.Now" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Now"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今"
+          }
+        }
+      }
+    },
+    "TrackingMode.Blended" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS + Timetable"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS+時刻表"
+          }
+        }
+      }
+    },
+    "TrackingMode.GPS" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS Tracking"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS追跡中"
+          }
+        }
+      }
+    },
+    "TrackingMode.Timetable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timetable Mode"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時刻表モード"
+          }
+        }
+      }
+    },
+    "ViewTitle.More" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "その他"
+          }
+        }
+      }
+    },
+    "More.GitHub" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source Code"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ソースコード"
+          }
+        }
+      }
+    },
+    "More.Attributions" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attributions"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "著作権表記"
+          }
+        }
+      }
+    },
+    "More.Attributions.Placeholder" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No attributions yet."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "著作権表記はまだありません。"
+          }
         }
       }
     }

@@ -21,7 +21,7 @@
 			<string>com.tsubuzaki.Overhead.deeplink</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>tokyorail</string>
+				<string>overhead</string>
 			</array>
 		</dict>
 	</array>
