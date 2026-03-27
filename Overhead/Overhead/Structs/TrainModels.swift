@@ -162,6 +162,74 @@ struct TrainService: Identifiable, Codable {
     }
 }
 
+// MARK: - Station Departure
+
+struct StationDeparture: Identifiable, Codable {
+    let id: String
+    let departureTime: String       // "HH:mm"
+    let trainType: TrainService.TrainType
+    let destinationName: String     // Localized destination name
+    let destinationNameEn: String
+    let trainNumber: String
+    let isLast: Bool
+
+    var localizedDestination: String {
+        let lang = Locale.current.language.languageCode?.identifier ?? "ja"
+        switch lang {
+        case "en": return destinationNameEn.isEmpty ? destinationName : destinationNameEn
+        default: return destinationName
+        }
+    }
+}
+
+// MARK: - Station Timetable
+
+struct StationTimetableData: Codable {
+    let stationId: String
+    let railDirection: String
+    let railDirectionName: String
+    let railDirectionNameEn: String
+    let departures: [StationDeparture]
+
+    var localizedDirectionName: String {
+        let lang = Locale.current.language.languageCode?.identifier ?? "ja"
+        switch lang {
+        case "en": return railDirectionNameEn.isEmpty ? railDirectionName : railDirectionNameEn
+        default: return railDirectionName
+        }
+    }
+}
+
+// MARK: - Passenger Survey
+
+struct PassengerSurveyData: Identifiable, Codable {
+    let id: String               // Station ID
+    let stationName: String
+    let surveys: [AnnualSurvey]
+
+    struct AnnualSurvey: Codable {
+        let year: Int
+        let passengerJourneys: Int
+    }
+
+    /// Most recent year's passenger count
+    var latestJourneys: Int? {
+        surveys.max(by: { $0.year < $1.year })?.passengerJourneys
+    }
+
+    /// Busyness level from 1-5 based on ridership
+    var busynessLevel: Int {
+        guard let journeys = latestJourneys else { return 0 }
+        switch journeys {
+        case ..<20_000: return 1
+        case 20_000..<50_000: return 2
+        case 50_000..<100_000: return 3
+        case 100_000..<200_000: return 4
+        default: return 5
+        }
+    }
+}
+
 // MARK: - Delay Info
 
 struct DelayInfo: Codable {

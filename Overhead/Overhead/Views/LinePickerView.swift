@@ -89,28 +89,17 @@ struct StationPickerView: View {
                     Button {
                         boardingStation = station
                     } label: {
-                        HStack {
-                            if !station.stationCode.isEmpty {
-                                StationNumberBadge(
-                                    code: station.stationCode,
-                                    color: line.color,
-                                    size: .compact
-                                )
-                            }
-                            VStack(alignment: .leading) {
-                                Text(station.localizedName)
-                                Text(station.nameEn)
-                                    .font(.system(size: 11))
-                                    .foregroundColor(.secondary)
-                            }
-                            Spacer()
-                            if boardingStation?.id == station.id {
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(line.color)
-                            }
-                        }
+                        stationRow(station: station, selected: boardingStation?.id == station.id)
                     }
                     .foregroundColor(.primary)
+                    .swipeActions(edge: .trailing) {
+                        NavigationLink {
+                            StationTimetableView(station: station, line: line, viewModel: viewModel)
+                        } label: {
+                            Label("Button.Timetable", systemImage: "clock")
+                        }
+                        .tint(line.color)
+                    }
                 }
             }
 
@@ -119,28 +108,17 @@ struct StationPickerView: View {
                     Button {
                         alightingStation = station
                     } label: {
-                        HStack {
-                            if !station.stationCode.isEmpty {
-                                StationNumberBadge(
-                                    code: station.stationCode,
-                                    color: line.color,
-                                    size: .compact
-                                )
-                            }
-                            VStack(alignment: .leading) {
-                                Text(station.localizedName)
-                                Text(station.nameEn)
-                                    .font(.system(size: 11))
-                                    .foregroundColor(.secondary)
-                            }
-                            Spacer()
-                            if alightingStation?.id == station.id {
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(line.color)
-                            }
-                        }
+                        stationRow(station: station, selected: alightingStation?.id == station.id)
                     }
                     .foregroundColor(.primary)
+                    .swipeActions(edge: .trailing) {
+                        NavigationLink {
+                            StationTimetableView(station: station, line: line, viewModel: viewModel)
+                        } label: {
+                            Label("Button.Timetable", systemImage: "clock")
+                        }
+                        .tint(line.color)
+                    }
                 }
             }
 
@@ -179,5 +157,60 @@ struct StationPickerView: View {
             }
         }
         .navigationTitle(line.localizedName)
+    }
+
+    // MARK: - Station Row
+
+    @ViewBuilder
+    private func stationRow(station: Station, selected: Bool) -> some View {
+        HStack {
+            if !station.stationCode.isEmpty {
+                StationNumberBadge(
+                    code: station.stationCode,
+                    color: line.color,
+                    size: .compact
+                )
+            }
+            VStack(alignment: .leading) {
+                Text(station.localizedName)
+                Text(station.nameEn)
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+
+            // Busyness indicator
+            if let survey = viewModel.passengerSurveys[station.id] {
+                busynessDots(level: survey.busynessLevel)
+            }
+
+            if selected {
+                Image(systemName: "checkmark")
+                    .foregroundColor(line.color)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func busynessDots(level: Int) -> some View {
+        HStack(spacing: 2) {
+            ForEach(1...3, id: \.self) { i in
+                Circle()
+                    .fill(i <= min(level, 3)
+                          ? busynessColor(level)
+                          : Color.gray.opacity(0.2))
+                    .frame(width: 6, height: 6)
+            }
+        }
+    }
+
+    private func busynessColor(_ level: Int) -> Color {
+        switch level {
+        case 1, 2: return .green
+        case 3: return .yellow
+        case 4: return .orange
+        default: return .red
+        }
     }
 }

@@ -19,6 +19,10 @@ final class JourneyViewModel: ObservableObject {
     @Published var locationError: String?
     @Published var isRefreshing = false
     @Published var isDemoMode = false
+    @Published var stationTimetable: [StationTimetableData] = []
+    @Published var isLoadingTimetable = false
+    @Published var passengerSurveys: [String: PassengerSurveyData] = [:]  // keyed by station ID
+    @Published var railDirections: [String: (ja: String, en: String)] = [:]
 
     // Services
     private let apiClient: ODPTClient
@@ -166,12 +170,18 @@ final class JourneyViewModel: ObservableObject {
                 "odpt.Operator:Toei"
             ]
 
+            // Fetch rail directions in parallel with railways
+            async let directionsTask: () = loadRailDirections()
+            async let surveysTask: () = loadPassengerSurveys()
+
             var allLines: [TrainLine] = []
             for op in operators {
                 let lines = try await apiClient.fetchRailways(operatorId: op)
                 allLines.append(contentsOf: lines)
             }
             availableLines = allLines.sorted { $0.nameEn < $1.nameEn }
+
+            _ = await (directionsTask, surveysTask)
         } catch {
             errorMessage = "Failed to load lines: \(error.localizedDescription)"
         }
@@ -312,6 +322,76 @@ final class JourneyViewModel: ObservableObject {
         }
 
         isRefreshing = false
+    }
+
+    // MARK: - Station Timetable
+
+    func loadStationTimetable(stationId: String) async {
+        guard !isDemoMode else { return }
+        isLoadingTimetable = true
+        stationTimetable = []
+
+        do {
+            let data = try await apiClient.fetchStationTimetable(stationId: stationId)
+
+            // Enrich direction names from cached rail directions
+            stationTimetable = data.map { tt in
+                let dirNames = railDirections[tt.railDirection]
+                return StationTimetableData(
+                    stationId: tt.stationId,
+                    railDirection: tt.railDirection,
+                    railDirectionName: dirNames?.ja ?? tt.railDirectionName,
+                    railDirectionNameEn: dirNames?.en ?? tt.railDirectionNameEn,
+                    departures: tt.departures
+                )
+            }
+        } catch {
+            stationTimetable = []
+        }
+
+        isLoadingTimetable = false
+    }
+
+    // MARK: - Passenger Surveys
+
+    func loadPassengerSurveys() async {
+        guard !isDemoMode, passengerSurveys.isEmpty else { return }
+
+        // Only TokyoMetro provides passenger survey data
+        do {
+            let surveys = try await apiClient.fetchPassengerSurvey(operatorId: "odpt.Operator:TokyoMetro")
+            var map: [String: PassengerSurveyData] = [:]
+            for survey in surveys {
+                map[survey.id] = survey
+            }
+            passengerSurveys = map
+        } catch {
+            // Silently fail — survey data is supplementary
+        }
+    }
+
+    // MARK: - Rail Directions
+
+    func loadRailDirections() async {
+        guard !isDemoMode, railDirections.isEmpty else { return }
+
+        do {
+            railDirections = try await apiClient.fetchRailDirections()
+        } catch {
+            // Silently fail — will fall back to generic names
+        }
+    }
+
+    /// Returns a localized direction name for a rail direction ID
+    func directionName(for directionId: String) -> String {
+        guard let names = railDirections[directionId] else {
+            return directionId
+        }
+        let lang = Locale.current.language.languageCode?.identifier ?? "ja"
+        switch lang {
+        case "en": return names.en.isEmpty ? names.ja : names.en
+        default: return names.ja
+        }
     }
 
     // MARK: - Train Matching

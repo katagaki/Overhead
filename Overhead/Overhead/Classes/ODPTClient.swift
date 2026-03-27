@@ -174,6 +174,83 @@ final class ODPTClient {
         }
     }
 
+    // MARK: - Fetch Station Timetable
+
+    func fetchStationTimetable(stationId: String) async throws -> [StationTimetableData] {
+        let calendar = currentCalendarType()
+
+        let timetables: [ODPTStationTimetable] = try await fetch(
+            endpoint: "odpt:StationTimetable",
+            params: [
+                "odpt:station": stationId,
+                "odpt:calendar": calendar
+            ]
+        )
+
+        return timetables.map { tt in
+            let departures = tt.stationTimetableObject.enumerated().map { (i, obj) -> StationDeparture in
+                StationDeparture(
+                    id: "\(tt.sameAs)_\(i)",
+                    departureTime: obj.departureTime ?? "",
+                    trainType: parseTrainType(obj.trainType),
+                    destinationName: obj.destinationStation?.first ?? "",
+                    destinationNameEn: "",
+                    trainNumber: obj.trainNumber ?? "",
+                    isLast: obj.isLast ?? false
+                )
+            }
+
+            return StationTimetableData(
+                stationId: stationId,
+                railDirection: tt.railDirection ?? "",
+                railDirectionName: tt.railDirection ?? "",
+                railDirectionNameEn: "",
+                departures: departures
+            )
+        }
+    }
+
+    // MARK: - Fetch Rail Directions
+
+    func fetchRailDirections() async throws -> [String: (ja: String, en: String)] {
+        let directions: [ODPTRailDirection] = try await fetch(
+            endpoint: "odpt:RailDirection",
+            params: [:]
+        )
+
+        var map: [String: (ja: String, en: String)] = [:]
+        for d in directions {
+            let ja = d.railDirectionTitle?["ja"] ?? d.title
+            let en = d.railDirectionTitle?["en"] ?? ""
+            map[d.sameAs] = (ja: ja, en: en)
+        }
+        return map
+    }
+
+    // MARK: - Fetch Passenger Survey
+
+    func fetchPassengerSurvey(operatorId: String) async throws -> [PassengerSurveyData] {
+        let surveys: [ODPTPassengerSurvey] = try await fetch(
+            endpoint: "odpt:PassengerSurvey",
+            params: ["odpt:operator": operatorId]
+        )
+
+        return surveys.map { survey in
+            let annuals = survey.passengerSurveyObject.map {
+                PassengerSurveyData.AnnualSurvey(
+                    year: $0.surveyYear,
+                    passengerJourneys: $0.passengerJourneys
+                )
+            }
+
+            return PassengerSurveyData(
+                id: survey.station?.first ?? survey.sameAs,
+                stationName: "",
+                surveys: annuals
+            )
+        }
+    }
+
     // MARK: - Generic Fetch
 
     private func fetch<T: Decodable>(endpoint: String, params: [String: String]) async throws -> [T] {
@@ -351,5 +428,77 @@ private struct ODPTTrainInformation: Decodable {
         case railway = "odpt:railway"
         case trainInformationText = "odpt:trainInformationText"
         case date = "dc:date"
+    }
+}
+
+private struct ODPTStationTimetable: Decodable {
+    let sameAs: String
+    let station: String
+    let railway: String
+    let railDirection: String?
+    let calendar: String?
+    let stationTimetableObject: [ODPTStationTimetableObject]
+
+    enum CodingKeys: String, CodingKey {
+        case sameAs = "owl:sameAs"
+        case station = "odpt:station"
+        case railway = "odpt:railway"
+        case railDirection = "odpt:railDirection"
+        case calendar = "odpt:calendar"
+        case stationTimetableObject = "odpt:stationTimetableObject"
+    }
+}
+
+private struct ODPTStationTimetableObject: Decodable {
+    let train: String?
+    let trainType: String?
+    let trainNumber: String?
+    let departureTime: String?
+    let destinationStation: [String]?
+    let isLast: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case train = "odpt:train"
+        case trainType = "odpt:trainType"
+        case trainNumber = "odpt:trainNumber"
+        case departureTime = "odpt:departureTime"
+        case destinationStation = "odpt:destinationStation"
+        case isLast = "odpt:isLast"
+    }
+}
+
+private struct ODPTRailDirection: Decodable {
+    let sameAs: String
+    let title: String
+    let railDirectionTitle: [String: String]?
+
+    enum CodingKeys: String, CodingKey {
+        case sameAs = "owl:sameAs"
+        case title = "dc:title"
+        case railDirectionTitle = "odpt:railDirectionTitle"
+    }
+}
+
+private struct ODPTPassengerSurvey: Decodable {
+    let sameAs: String
+    let station: [String]?
+    let railway: [String]?
+    let passengerSurveyObject: [ODPTPassengerSurveyObject]
+
+    enum CodingKeys: String, CodingKey {
+        case sameAs = "owl:sameAs"
+        case station = "odpt:station"
+        case railway = "odpt:railway"
+        case passengerSurveyObject = "odpt:passengerSurveyObject"
+    }
+}
+
+private struct ODPTPassengerSurveyObject: Decodable {
+    let surveyYear: Int
+    let passengerJourneys: Int
+
+    enum CodingKeys: String, CodingKey {
+        case surveyYear = "odpt:surveyYear"
+        case passengerJourneys = "odpt:passengerJourneys"
     }
 }
