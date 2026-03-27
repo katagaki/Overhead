@@ -90,6 +90,12 @@ final class ODPTClient {
                         longitude: obj.lon
                     ))
                 }
+                // Sort JR stations by station code number (e.g. JC05 → 05)
+                stations.sort { a, b in
+                    let aNum = Int(a.stationCode.drop(while: \.isLetter)) ?? 0
+                    let bNum = Int(b.stationCode.drop(while: \.isLetter)) ?? 0
+                    return aNum < bNum
+                }
             }
 
             // Determine color: use API color if available, else fall back to LineColors
@@ -114,16 +120,24 @@ final class ODPTClient {
     // MARK: - Fetch Train Timetables
 
     func fetchTrainTimetables(railwayId: String) async throws -> [TrainService] {
-        // Determine current calendar type
-        let calendar = currentCalendarType()
+        // Determine current calendar type (JR-East uses prefixed calendars)
+        let calendar = currentCalendarType(forStationId: railwayId)
 
-        let timetables: [ODPTTrainTimetable] = try await fetch(
+        var timetables: [ODPTTrainTimetable] = try await fetch(
             endpoint: "odpt:TrainTimetable",
             params: [
                 "odpt:railway": railwayId,
                 "odpt:calendar": calendar
             ]
         )
+
+        // Fallback: if calendar-specific query returned nothing, fetch without calendar filter
+        if timetables.isEmpty {
+            timetables = try await fetch(
+                endpoint: "odpt:TrainTimetable",
+                params: ["odpt:railway": railwayId]
+            )
+        }
 
         return timetables.compactMap { tt -> TrainService? in
             let entries = tt.trainTimetableObject.enumerated().map { (i, obj) -> TimetableEntry in
@@ -177,9 +191,9 @@ final class ODPTClient {
     // MARK: - Fetch Station Timetable
 
     func fetchStationTimetable(stationId: String) async throws -> [StationTimetableData] {
-        let calendar = currentCalendarType()
+        let calendar = currentCalendarType(forStationId: stationId)
 
-        let timetables: [ODPTStationTimetable] = try await fetch(
+        var timetables: [ODPTStationTimetable] = try await fetch(
             endpoint: "odpt:StationTimetable",
             params: [
                 "odpt:station": stationId,
@@ -187,27 +201,73 @@ final class ODPTClient {
             ]
         )
 
+        // Fallback: if calendar-specific query returned nothing, fetch without calendar filter
+        if timetables.isEmpty {
+            timetables = try await fetch(
+                endpoint: "odpt:StationTimetable",
+                params: ["odpt:station": stationId]
+            )
+        }
+
+        // Collect all unique destination station IDs to resolve names
+        var allDestinationIds = Set<String>()
+        for tt in timetables {
+            for obj in tt.stationTimetableObject {
+                if let destIds = obj.destinationStation {
+                    allDestinationIds.formUnion(destIds)
+                }
+            }
+        }
+
+        // Fetch station objects for destination name resolution
+        var stationNameMap: [String: (ja: String, en: String)] = [:]
+        for destId in allDestinationIds {
+            let stations: [ODPTStation] = try await fetch(
+                endpoint: "odpt:Station",
+                params: ["owl:sameAs": destId]
+            )
+            if let station = stations.first {
+                stationNameMap[destId] = (
+                    ja: station.stationTitle?["ja"] ?? station.title,
+                    en: station.stationTitle?["en"] ?? ""
+                )
+            }
+        }
+
+        // Fetch rail directions for enriching direction names
+        let directions = try? await fetchRailDirections()
+
         return timetables.map { tt in
             let departures = tt.stationTimetableObject.enumerated().map { (i, obj) -> StationDeparture in
-                StationDeparture(
+                let destId = obj.destinationStation?.first ?? ""
+                let destNames = stationNameMap[destId]
+                return StationDeparture(
                     id: "\(tt.sameAs)_\(i)",
                     departureTime: obj.departureTime ?? "",
                     trainType: parseTrainType(obj.trainType),
-                    destinationName: obj.destinationStation?.first ?? "",
-                    destinationNameEn: "",
+                    destinationName: destNames?.ja ?? shortStationName(destId),
+                    destinationNameEn: destNames?.en ?? "",
                     trainNumber: obj.trainNumber ?? "",
                     isLast: obj.isLast ?? false
                 )
             }
 
+            let dirId = tt.railDirection ?? ""
+            let dirNames = directions?[dirId]
+
             return StationTimetableData(
                 stationId: stationId,
-                railDirection: tt.railDirection ?? "",
-                railDirectionName: tt.railDirection ?? "",
-                railDirectionNameEn: "",
+                railDirection: dirId,
+                railDirectionName: dirNames?.ja ?? dirId,
+                railDirectionNameEn: dirNames?.en ?? "",
                 departures: departures
             )
         }
+    }
+
+    /// Extract a readable name from an ODPT station ID as a fallback
+    private func shortStationName(_ fullId: String) -> String {
+        fullId.components(separatedBy: ".").last ?? fullId
     }
 
     // MARK: - Fetch Rail Directions
@@ -273,16 +333,27 @@ final class ODPTClient {
 
     // MARK: - Calendar Type
 
-    private func currentCalendarType() -> String {
+    /// Returns the ODPT calendar ID for the current day.
+    /// JR-East uses operator-prefixed calendars (e.g. "odpt.Calendar:JR-East.Weekday"),
+    /// while Metro/Toei use generic ones (e.g. "odpt.Calendar:Weekday").
+    private func currentCalendarType(forStationId stationId: String? = nil) -> String {
         let tz = TimeZone(identifier: "Asia/Tokyo")!
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = tz
         let weekday = cal.component(.weekday, from: Date())
         // 1 = Sunday, 7 = Saturday
-        if weekday == 1 || weekday == 7 {
-            return "odpt.Calendar:SaturdayHoliday"
+        let isWeekend = weekday == 1 || weekday == 7
+
+        // JR-East stations use operator-prefixed calendar IDs
+        if let stationId, stationId.contains("JR-East") {
+            return isWeekend
+                ? "odpt.Calendar:JR-East.SaturdayHoliday"
+                : "odpt.Calendar:JR-East.Weekday"
         }
-        return "odpt.Calendar:Weekday"
+
+        return isWeekend
+            ? "odpt.Calendar:SaturdayHoliday"
+            : "odpt.Calendar:Weekday"
     }
 
     // MARK: - Parsing Helpers
@@ -290,11 +361,12 @@ final class ODPTClient {
     private func parseTrainType(_ raw: String?) -> TrainService.TrainType {
         guard let raw else { return .local }
         let lower = raw.lowercased()
-        if lower.contains("rapid") || lower.contains("kaisoku") { return .rapid }
-        if lower.contains("limitedexpress") || lower.contains("tokkyu") { return .limitedExpress }
-        if lower.contains("express") { return .express }
+        // Check specific types before generic "rapid" to avoid misclassification
         if lower.contains("commuterrapid") { return .commuterRapid }
         if lower.contains("specialrapid") { return .specialRapid }
+        if lower.contains("limitedexpress") || lower.contains("tokkyu") { return .limitedExpress }
+        if lower.contains("express") { return .express }
+        if lower.contains("rapid") || lower.contains("kaisoku") { return .rapid }
         return .local
     }
 
