@@ -14,44 +14,11 @@ struct TrainJourneyLiveActivity: Widget {
             DynamicIsland {
                 // Expanded Dynamic Island
                 DynamicIslandExpandedRegion(.leading) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(context.attributes.lineName)
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(Color(hex: context.attributes.lineColorHex))
-                        HStack(spacing: 4) {
-                            Text(context.attributes.trainType)
-                                .font(.system(size: 10))
-                                .foregroundColor(.secondary)
-                            if context.state.isTimetableMode {
-                                Text("Badge.Timetable")
-                                    .font(.system(size: 8, weight: .bold))
-                                    .foregroundColor(.orange)
-                                    .padding(.horizontal, 4)
-                                    .padding(.vertical, 1)
-                                    .background(Color.orange.opacity(0.2))
-                                    .clipShape(Capsule())
-                            }
-                        }
-                    }
-                    .padding(.leading, 6)
+                    EmptyView()
                 }
 
                 DynamicIslandExpandedRegion(.trailing) {
-                    VStack(alignment: .trailing, spacing: 2) {
-                        if context.state.isDelayed {
-                            Text("LiveActivity.Delay.Minutes \(context.state.delayMinutes)")
-                                .font(.system(size: 13, weight: .bold, design: .monospaced))
-                                .foregroundColor(.red)
-                        } else {
-                            Text("Status.OnTime")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(.green)
-                        }
-                        Text(formatTime(context.state.estimatedArrival))
-                            .font(.system(size: 10, design: .monospaced))
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.trailing, 6)
+                    EmptyView()
                 }
 
                 DynamicIslandExpandedRegion(.center) {
@@ -60,29 +27,82 @@ struct TrainJourneyLiveActivity: Widget {
                 }
 
                 DynamicIslandExpandedRegion(.bottom) {
-                    HStack {
-                        HStack(spacing: 4) {
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 10))
-                                .foregroundColor(.secondary)
-                            Text("LiveActivity.NextIs \(context.state.nextStationName)")
-                                .font(.system(size: 13, weight: .semibold))
+                    VStack(spacing: 8) {
+                        // Two-column info row
+                        HStack {
+                            // Left column: line info
+                            HStack(spacing: 6) {
+                                if !context.attributes.lineSymbol.isEmpty {
+                                    LCDLineSymbolBadge(
+                                        symbol: context.attributes.lineSymbol,
+                                        color: Color(hex: context.attributes.lineColorHex)
+                                    )
+                                }
+                                VStack(alignment: .leading, spacing: 1) {
+                                    Text(context.attributes.lineName)
+                                        .font(.system(size: 13, weight: .bold))
+                                        .foregroundColor(Color(hex: context.attributes.lineColorHex))
+                                    HStack(spacing: 4) {
+                                        Text(context.attributes.trainType)
+                                            .font(.system(size: 10))
+                                            .foregroundColor(.secondary)
+                                        if context.state.isTimetableMode {
+                                            Text("Badge.Timetable")
+                                                .font(.system(size: 8, weight: .bold))
+                                                .foregroundColor(.orange)
+                                                .padding(.horizontal, 4)
+                                                .padding(.vertical, 1)
+                                                .background(Color.orange.opacity(0.2))
+                                                .clipShape(Capsule())
+                                        }
+                                    }
+                                }
+                            }
+
+                            Spacer()
+
+                            // Right column: status + ETA
+                            VStack(alignment: .trailing, spacing: 1) {
+                                if context.state.isDelayed {
+                                    Text("LiveActivity.Delay.Minutes \(context.state.delayMinutes)")
+                                        .font(.system(size: 13, weight: .bold, design: .monospaced))
+                                        .foregroundColor(.red)
+                                } else {
+                                    Text("Status.OnTime")
+                                        .font(.system(size: 13, weight: .medium))
+                                        .foregroundColor(.green)
+                                }
+                                Text(formatTime(context.state.estimatedArrival))
+                                    .font(.system(size: 10, design: .monospaced))
+                                    .foregroundColor(.secondary)
+                            }
                         }
 
-                        Spacer()
-
-                        Link(destination: URL(string: context.attributes.refreshURLString)!) {
-                            HStack(spacing: 3) {
-                                Image(systemName: "arrow.clockwise")
-                                    .font(.system(size: 10, weight: .semibold))
-                                Text(refreshAgeText(context.state.lastRefresh))
-                                    .font(.system(size: 9))
+                        // Next station + refresh row
+                        HStack {
+                            HStack(spacing: 4) {
+                                Image(systemName: "arrow.right")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.secondary)
+                                Text("LiveActivity.NextIs \(context.state.nextStationName)")
+                                    .font(.system(size: 13, weight: .semibold))
                             }
-                            .foregroundColor(Color(hex: context.attributes.lineColorHex))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color(hex: context.attributes.lineColorHex).opacity(0.15))
-                            .clipShape(Capsule())
+
+                            Spacer()
+
+                            Link(destination: URL(string: context.attributes.refreshURLString)!) {
+                                HStack(spacing: 3) {
+                                    Image(systemName: "arrow.clockwise")
+                                        .font(.system(size: 10, weight: .semibold))
+                                    Text(refreshAgeText(context.state.lastRefresh))
+                                        .font(.system(size: 9))
+                                }
+                                .foregroundColor(Color(hex: context.attributes.lineColorHex))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color(hex: context.attributes.lineColorHex).opacity(0.15))
+                                .clipShape(Capsule())
+                            }
                         }
                     }
                     .padding(.horizontal, 4)
@@ -198,7 +218,8 @@ struct LockScreenLiveActivityView: View {
                 stationCount: context.attributes.stationCount,
                 progress: context.state.progress,
                 currentStationIndex: context.state.currentStationIndex,
-                lineColor: lineColor
+                lineColor: lineColor,
+                stationStops: context.attributes.stationStops
             )
             .padding(.horizontal, 16)
 
@@ -320,6 +341,7 @@ struct LCDLineView: View {
     let progress: Double
     let currentStationIndex: Int?
     let lineColor: Color
+    var stationStops: [Bool] = []
 
     /// Next station index derived from current
     private var nextStationIndex: Int? {
@@ -327,11 +349,17 @@ struct LCDLineView: View {
         return current + 1
     }
 
+    private func stopsAt(_ index: Int) -> Bool {
+        guard !stationStops.isEmpty, index < stationStops.count else { return true }
+        return stationStops[index]
+    }
+
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
             let h: CGFloat = 44
             let baseRadius: CGFloat = stationCount > 10 ? 4 : 5
+            let skippedRadius: CGFloat = max(2, baseRadius - 1.5)
             let emphasisRadius: CGFloat = baseRadius + 2
             let padding: CGFloat = emphasisRadius + 3
             let lineWidth = w - padding * 2
@@ -359,8 +387,9 @@ struct LCDLineView: View {
                     let isCurrent = currentStationIndex == i
                     let isNext = nextStationIndex == i
                     let isTerminal = i == 0 || i == stationCount - 1
+                    let stops = stopsAt(i)
                     let isEmphasized = isCurrent || isNext || isTerminal
-                    let r = isEmphasized ? emphasisRadius : baseRadius
+                    let r = isEmphasized ? emphasisRadius : (stops ? baseRadius : skippedRadius)
 
                     Group {
                         // Station circle — centered on track
@@ -371,6 +400,11 @@ struct LCDLineView: View {
                                     .frame(width: r * 2, height: r * 2)
                                 Circle()
                                     .strokeBorder(isPast ? lineColor : Color.gray.opacity(0.4), lineWidth: 2)
+                                    .frame(width: r * 2, height: r * 2)
+                            } else if !stops {
+                                // Skipped station: small hollow dot
+                                Circle()
+                                    .strokeBorder(isPast ? lineColor.opacity(0.4) : Color.gray.opacity(0.2), lineWidth: 1)
                                     .frame(width: r * 2, height: r * 2)
                             } else {
                                 Circle()
@@ -395,8 +429,8 @@ struct LCDLineView: View {
                         }
                         .position(x: x, y: centerY)
 
-                        // Station label — positioned above the circle
-                        if shouldShowLabel(index: i, isCurrent: isCurrent, isNext: isNext) {
+                        // Station label — positioned above the circle (only for stopping stations)
+                        if stops, shouldShowLabel(index: i, isCurrent: isCurrent, isNext: isNext) {
                             Text(truncatedName(stationNames[i]))
                                 .font(.system(size: isCurrent || isNext ? 9 : 8,
                                               weight: isCurrent || isNext ? .bold : .regular))
@@ -448,11 +482,18 @@ struct ExpandedIslandLineView: View {
         return current + 1
     }
 
+    private func stopsAt(_ index: Int) -> Bool {
+        let stops = context.attributes.stationStops
+        guard !stops.isEmpty, index < stops.count else { return true }
+        return stops[index]
+    }
+
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
             let count = context.attributes.stationCount
             let baseR: CGFloat = count > 8 ? 2.5 : 3.5
+            let skippedR: CGFloat = max(1.5, baseR - 1)
             let emphR: CGFloat = baseR + 1.5
             let pad: CGFloat = emphR + 2
             let trackHeight: CGFloat = 1.5
@@ -478,12 +519,20 @@ struct ExpandedIslandLineView: View {
                     let isCurrent = context.state.currentStationIndex == i
                     let isNext = nextStationIndex == i
                     let isTerminal = i == 0 || i == count - 1
-                    let r = (isCurrent || isNext || isTerminal) ? emphR : baseR
+                    let stops = stopsAt(i)
+                    let r = (isCurrent || isNext || isTerminal) ? emphR : (stops ? baseR : skippedR)
 
                     ZStack {
-                        Circle()
-                            .fill(isPast ? lineColor : Color.gray.opacity(0.4))
-                            .frame(width: r * 2, height: r * 2)
+                        if !stops && !isTerminal && !isCurrent && !isNext {
+                            // Skipped station: small hollow dot
+                            Circle()
+                                .strokeBorder(isPast ? lineColor.opacity(0.4) : Color.gray.opacity(0.2), lineWidth: 1)
+                                .frame(width: r * 2, height: r * 2)
+                        } else {
+                            Circle()
+                                .fill(isPast ? lineColor : Color.gray.opacity(0.4))
+                                .frame(width: r * 2, height: r * 2)
+                        }
 
                         if isTerminal {
                             Circle()

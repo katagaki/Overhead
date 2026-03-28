@@ -346,8 +346,8 @@ struct VerticalLCDLine: View {
 
     @ViewBuilder
     private func timeColumn(for station: Station, timetable: [TimetableEntry], isPast: Bool, isCurrent: Bool) -> some View {
-        if let entry = timetable.first(where: { $0.stationId == station.id }) {
-            let timeStr = entry.departureTime ?? entry.arrivalTime ?? ""
+        if let entry = timetable.first(where: { $0.stationId == station.id }),
+           let timeStr = entry.departureTime ?? entry.arrivalTime, !timeStr.isEmpty {
             let delayMins = state.delayMinutes
 
             VStack(spacing: 1) {
@@ -361,6 +361,8 @@ struct VerticalLCDLine: View {
                         .foregroundColor(.red)
                 }
             }
+        } else {
+            Color.clear
         }
     }
 
