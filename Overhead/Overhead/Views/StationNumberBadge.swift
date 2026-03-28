@@ -89,7 +89,7 @@ struct StationNumberBadge: View {
         .clipShape(RoundedRectangle(cornerRadius: 5))
         .overlay(
             RoundedRectangle(cornerRadius: 5)
-                .strokeBorder(color.opacity(opacity), lineWidth: 2)
+                .strokeBorder(color.opacity(opacity), lineWidth: 3)
         )
     }
 
@@ -114,7 +114,7 @@ struct StationNumberBadge: View {
         .clipShape(Circle())
         .overlay(
             Circle()
-                .strokeBorder(color.opacity(opacity), lineWidth: 2)
+                .strokeBorder(color.opacity(opacity), lineWidth: 3)
         )
     }
 }

@@ -155,8 +155,8 @@ struct MoreView: View {
     @ObservedObject var viewModel: JourneyViewModel
 
     @AppStorage("showEnglish") private var showEnglish = true
+    @AppStorage("showJRLines") private var showJRLines = false
     @AppStorage("pollingInterval") private var pollingInterval = 30.0
-    @AppStorage("disableGPS") private var disableGPS = false
 
     var body: some View {
         NavigationStack {
@@ -173,16 +173,14 @@ struct MoreView: View {
                     }
                 }
 
-                Section("Settings.Section.Location") {
-                    Toggle("Settings.Toggle.DisableGPS", isOn: $disableGPS)
-                    if disableGPS {
-                        Text("Settings.Label.GPSDisabledDescription")
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
-                    }
+                Section("Settings.Section.Data") {
+                    Toggle("Settings.Toggle.ShowJRLines", isOn: $showJRLines)
+                    Text("Settings.Label.JRLinesDescription")
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
                 }
-                .onChange(of: disableGPS) { _, newValue in
-                    viewModel.gpsDisabled = newValue
+                .onChange(of: showJRLines) { _, newValue in
+                    viewModel.showJRLines = newValue
                 }
 
                 if viewModel.activeJourney != nil {
@@ -242,7 +240,7 @@ struct MoreView: View {
             }
             .navigationTitle("ViewTitle.More")
             .onAppear {
-                viewModel.gpsDisabled = disableGPS
+                viewModel.showJRLines = showJRLines
             }
             .navigationDestination(for: ViewPath.self) { path in
                 switch path {

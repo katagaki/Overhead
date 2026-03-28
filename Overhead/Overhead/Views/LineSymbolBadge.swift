@@ -27,14 +27,14 @@ struct LineSymbolBadge: View {
 
     private var jrBadge: some View {
         Text(symbol)
-            .font(.custom("HelveticaNeue-Bold", size: 14))
+            .font(.custom("HelveticaNeue-Bold", fixedSize: 16))
             .foregroundColor(.black)
             .frame(width: 32, height: 32)
             .background(Color.white)
             .clipShape(RoundedRectangle(cornerRadius: 5))
             .overlay(
                 RoundedRectangle(cornerRadius: 5)
-                    .strokeBorder(color, lineWidth: 2.5)
+                    .strokeBorder(color, lineWidth: 4)
             )
     }
 
@@ -42,14 +42,14 @@ struct LineSymbolBadge: View {
 
     private var metroBadge: some View {
         Text(symbol)
-            .font(.system(size: 16, weight: .heavy, design: .default))
+            .font(.system(size: 18, weight: .heavy, design: .default))
             .foregroundColor(.black)
             .frame(width: 32, height: 32)
             .background(Color.white)
             .clipShape(Circle())
             .overlay(
                 Circle()
-                    .strokeBorder(color, lineWidth: 2.5)
+                    .strokeBorder(color, lineWidth: 4)
             )
     }
 }
