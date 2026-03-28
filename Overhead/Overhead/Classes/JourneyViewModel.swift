@@ -446,7 +446,7 @@ final class JourneyViewModel: ObservableObject {
             return (svc, dep)
         }.sorted { $0.1 < $1.1 }
 
-        return sorted.first(where: { $0.1 >= nowSec - 300 })?.0 ?? sorted.first?.0
+        return sorted.first(where: { $0.1 >= nowSec })?.0 ?? sorted.first?.0
     }
 
     // MARK: - Preview Data
