@@ -34,7 +34,7 @@ struct LineSymbolBadge: View {
             .clipShape(RoundedRectangle(cornerRadius: 5))
             .overlay(
                 RoundedRectangle(cornerRadius: 5)
-                    .strokeBorder(color, lineWidth: 2.5)
+                    .strokeBorder(color, lineWidth: 4)
             )
     }
 
@@ -49,7 +49,7 @@ struct LineSymbolBadge: View {
             .clipShape(Circle())
             .overlay(
                 Circle()
-                    .strokeBorder(color, lineWidth: 2.5)
+                    .strokeBorder(color, lineWidth: 4)
             )
     }
 }
