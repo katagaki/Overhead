@@ -24,6 +24,9 @@ struct LinePickerView: View {
             .task {
                 await viewModel.loadLines()
             }
+            .refreshable {
+                await viewModel.forceRefreshLines()
+            }
         }
     }
 
@@ -47,13 +50,16 @@ struct LinePickerView: View {
     @ViewBuilder
     private var lineList: some View {
         let grouped = Dictionary(grouping: viewModel.availableLines) { $0.operatorId }
-        var sectionOrder = [
-            "odpt.Operator:TokyoMetro",
-            "odpt.Operator:Toei"
-        ]
-        if showJRLines {
-            sectionOrder.insert("odpt.Operator:JR-East", at: 0)
-        }
+        let sectionOrder: [String] = {
+            var order = [
+                "odpt.Operator:TokyoMetro",
+                "odpt.Operator:Toei"
+            ]
+            if showJRLines {
+                order.insert("odpt.Operator:JR-East", at: 0)
+            }
+            return order
+        }()
         let sectionTitles: [String: String] = [
             "odpt.Operator:JR-East": "JR",
             "odpt.Operator:TokyoMetro": "東京メトロ",
