@@ -47,6 +47,7 @@ struct TrainJourneyAttributes: ActivityAttributes {
     let stationNames: [String]
     let stationNamesEn: [String]
     let stationCount: Int
+    let stationStops: [Bool]
     let refreshURLString: String
 }
 
