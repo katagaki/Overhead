@@ -47,6 +47,8 @@ struct TrainJourneyAttributes: ActivityAttributes {
     let stationNames: [String]
     let stationNamesEn: [String]
     let stationCount: Int
+    /// Whether the train stops at each station (false = express skip)
+    let stationStops: [Bool]
     /// URL scheme for the refresh deep link
     let refreshURLString: String
 }
@@ -74,6 +76,8 @@ final class LiveActivityManager {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
 
         let stations = journey.journeyStations
+        let timetableIds = Set(journey.journeyTimetable.map(\.stationId))
+        let stationStops = stations.map { timetableIds.contains($0.id) }
 
         let attributes = TrainJourneyAttributes(
             lineName: journey.line.name,
@@ -88,6 +92,7 @@ final class LiveActivityManager {
             stationNames: stations.map(\.name),
             stationNamesEn: stations.map(\.nameEn),
             stationCount: stations.count,
+            stationStops: stationStops,
             refreshURLString: Self.refreshURLScheme
         )
 

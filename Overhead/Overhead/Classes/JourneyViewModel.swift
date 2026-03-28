@@ -15,6 +15,7 @@ final class JourneyViewModel: ObservableObject {
     @Published var currentDelay: DelayInfo?
     @Published var trackingMode: TrackingMode = .timetable
     @Published var isLoading = false
+    @Published var isStartingJourney = false
     @Published var errorMessage: String?
     @Published var locationError: String?
     @Published var isRefreshing = false
@@ -262,7 +263,7 @@ final class JourneyViewModel: ObservableObject {
         from boardingStation: Station,
         to alightingStation: Station
     ) async {
-        isLoading = true
+        isStartingJourney = true
 
         do {
             // Fetch or use cached timetable
@@ -272,7 +273,7 @@ final class JourneyViewModel: ObservableObject {
 
             guard let services = timetableCache[line.id] else {
                 errorMessage = "No timetable data available"
-                isLoading = false
+                isStartingJourney = false
                 return
             }
 
@@ -286,7 +287,7 @@ final class JourneyViewModel: ObservableObject {
 
             guard let service else {
                 errorMessage = "No matching train found for this time"
-                isLoading = false
+                isStartingJourney = false
                 return
             }
 
@@ -330,7 +331,7 @@ final class JourneyViewModel: ObservableObject {
             errorMessage = "Failed to start journey: \(error.localizedDescription)"
         }
 
-        isLoading = false
+        isStartingJourney = false
     }
 
     // MARK: - Delay Polling

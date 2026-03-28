@@ -346,8 +346,8 @@ struct VerticalLCDLine: View {
 
     @ViewBuilder
     private func timeColumn(for station: Station, timetable: [TimetableEntry], isPast: Bool, isCurrent: Bool) -> some View {
-        if let entry = timetable.first(where: { $0.stationId == station.id }) {
-            let timeStr = entry.departureTime ?? entry.arrivalTime ?? ""
+        if let entry = timetable.first(where: { $0.stationId == station.id }),
+           let timeStr = entry.departureTime ?? entry.arrivalTime, !timeStr.isEmpty {
             let delayMins = state.delayMinutes
 
             VStack(spacing: 1) {
@@ -361,6 +361,8 @@ struct VerticalLCDLine: View {
                         .foregroundColor(.red)
                 }
             }
+        } else {
+            Color.clear
         }
     }
 
@@ -371,7 +373,7 @@ struct VerticalLCDLine: View {
         ZStack(alignment: .top) {
             // Background track — thin and subtle
             RoundedRectangle(cornerRadius: trackWidth / 2)
-                .fill(Color.gray.opacity(0.2))
+                .fill(Color(.quaternarySystemFill))
 
             // Filled portion
             GeometryReader { geo in
@@ -397,10 +399,10 @@ struct VerticalLCDLine: View {
                 Circle()
                     .fill(Color.white)
                     .frame(width: r * 0.7, height: r * 0.7)
-                    .shadow(color: lineColor.opacity(0.5), radius: 3)
+                    .shadow(color: lineColor, radius: 3)
                 // Pulse ring
                 Circle()
-                    .strokeBorder(lineColor.opacity(0.3), lineWidth: 2)
+                    .strokeBorder(lineColor, lineWidth: 2)
                     .frame(width: r * 2 + 10, height: r * 2 + 10)
             } else if isTerminal {
                 // Terminal: double circle (outline with colored/gray border)
@@ -408,10 +410,10 @@ struct VerticalLCDLine: View {
                     .fill(Color(.systemBackground))
                     .frame(width: r * 2, height: r * 2)
                 Circle()
-                    .strokeBorder(isPast ? lineColor : Color.gray.opacity(0.3), lineWidth: 3)
+                    .strokeBorder(isPast ? lineColor : Color(.systemGray3), lineWidth: 3)
                     .frame(width: r * 2, height: r * 2)
                 Circle()
-                    .fill(isPast ? lineColor : Color.gray.opacity(0.15))
+                    .fill(isPast ? lineColor : Color(.systemGray5))
                     .frame(width: r * 2 - 10, height: r * 2 - 10)
             } else if isPast {
                 // Past station: small filled dot
@@ -424,14 +426,14 @@ struct VerticalLCDLine: View {
                     .fill(Color(.systemBackground))
                     .frame(width: r * 2, height: r * 2)
                 Circle()
-                    .strokeBorder(Color.gray.opacity(0.3), lineWidth: 2)
+                    .strokeBorder(Color(.systemGray3), lineWidth: 2)
                     .frame(width: r * 2, height: r * 2)
             }
 
             // Next station: colored ring highlight
             if isNext && !isCurrent {
                 Circle()
-                    .strokeBorder(lineColor.opacity(0.6), lineWidth: 2)
+                    .strokeBorder(lineColor, lineWidth: 2)
                     .frame(width: r * 2 + 6, height: r * 2 + 6)
             }
         }
