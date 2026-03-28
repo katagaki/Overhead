@@ -179,9 +179,45 @@ final class JourneyViewModel: ObservableObject {
 
         guard !linesLoaded else { return }
 
+        // Try loading from disk cache first
+        if let cached = TrainLineCache.load(includesJR: showJRLines) {
+            availableLines = cached
+            linesLoaded = true
+
+            // Kick off background directions/surveys load
+            async let directionsTask: () = loadRailDirections()
+            async let surveysTask: () = loadPassengerSurveys()
+            _ = await (directionsTask, surveysTask)
+
+            // If cache is still fresh, skip network fetch entirely
+            if TrainLineCache.isFresh(includesJR: showJRLines) {
+                return
+            }
+
+            // Cache is stale — silently refresh in background
+            await fetchAndCacheLines()
+            return
+        }
+
+        // No cache — must fetch from network
         isLoading = true
         errorMessage = nil
+        await fetchAndCacheLines()
+        isLoading = false
+    }
 
+    /// Pull-to-refresh: always fetches fresh data from the network.
+    func forceRefreshLines() async {
+        guard !isDemoMode else { return }
+        isLoading = true
+        errorMessage = nil
+        linesLoaded = false
+        await fetchAndCacheLines()
+        isLoading = false
+    }
+
+    /// Fetches lines from the API and persists them to disk cache.
+    private func fetchAndCacheLines() async {
         do {
             var operators = [
                 "odpt.Operator:TokyoMetro",
@@ -191,7 +227,6 @@ final class JourneyViewModel: ObservableObject {
                 operators.insert("odpt.Operator:JR-East", at: 0)
             }
 
-            // Fetch rail directions in parallel with railways
             async let directionsTask: () = loadRailDirections()
             async let surveysTask: () = loadPassengerSurveys()
 
@@ -200,20 +235,24 @@ final class JourneyViewModel: ObservableObject {
                 let lines = try await apiClient.fetchRailways(operatorId: op)
                 allLines.append(contentsOf: lines)
             }
-            availableLines = allLines.sorted {
+            let sorted = allLines.sorted {
                 if $0.operatorId != $1.operatorId {
                     return $0.operatorId < $1.operatorId
                 }
                 return $0.nameEn < $1.nameEn
             }
+            availableLines = sorted
             linesLoaded = true
+
+            TrainLineCache.save(lines: sorted, includesJR: showJRLines)
 
             _ = await (directionsTask, surveysTask)
         } catch {
-            errorMessage = "Failed to load lines: \(error.localizedDescription)"
+            // Only show error if we have no cached data to fall back on
+            if availableLines.isEmpty {
+                errorMessage = "Failed to load lines: \(error.localizedDescription)"
+            }
         }
-
-        isLoading = false
     }
 
     // MARK: - Start Journey
