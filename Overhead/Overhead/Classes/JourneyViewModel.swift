@@ -33,16 +33,6 @@ final class JourneyViewModel: ObservableObject {
         }
     }
 
-    @Published var gpsDisabled: Bool = false {
-        didSet {
-            locationTracker.gpsDisabled = gpsDisabled
-            if gpsDisabled {
-                locationTracker.stopGPS()
-                trackingMode = .timetable
-            }
-        }
-    }
-
     // Services
     private let apiClient: ODPTClient
     private let locationTracker = LocationTracker()
