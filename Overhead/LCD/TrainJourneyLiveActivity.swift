@@ -270,7 +270,7 @@ struct LockScreenLiveActivityView: View {
             .padding(.top, 8)
             .padding(.bottom, 12)
         }
-        .background(Color(.systemBackground).opacity(0.95))
+        .background(.clear)
     }
 
     // MARK: - Tracking Mode Badge
@@ -369,7 +369,7 @@ struct LCDLineView: View {
             ZStack(alignment: .topLeading) {
                 // Background track — thin line centered through circles
                 RoundedRectangle(cornerRadius: 1)
-                    .fill(Color.gray.opacity(0.3))
+                    .fill(Color(white: 0.3))
                     .frame(width: lineWidth, height: trackHeight)
                     .offset(x: padding, y: centerY - trackHeight / 2)
 
@@ -396,19 +396,19 @@ struct LCDLineView: View {
                         ZStack {
                             if isTerminal {
                                 Circle()
-                                    .fill(Color(.systemBackground))
+                                    .fill(Color.black)
                                     .frame(width: r * 2, height: r * 2)
                                 Circle()
-                                    .strokeBorder(isPast ? lineColor : Color.gray.opacity(0.4), lineWidth: 2)
+                                    .strokeBorder(isPast ? lineColor : Color(white: 0.4), lineWidth: 2)
                                     .frame(width: r * 2, height: r * 2)
                             } else if !stops {
-                                // Skipped station: small hollow dot
+                                // Skipped station: small solid dot
                                 Circle()
-                                    .strokeBorder(isPast ? lineColor.opacity(0.4) : Color.gray.opacity(0.2), lineWidth: 1)
+                                    .fill(isPast ? Color(white: 0.35) : Color(white: 0.2))
                                     .frame(width: r * 2, height: r * 2)
                             } else {
                                 Circle()
-                                    .fill(isPast ? lineColor : Color.gray.opacity(0.3))
+                                    .fill(isPast ? lineColor : Color(white: 0.35))
                                     .frame(width: r * 2, height: r * 2)
                             }
 
@@ -417,13 +417,13 @@ struct LCDLineView: View {
                                     .fill(Color.white)
                                     .frame(width: r, height: r)
                                 Circle()
-                                    .strokeBorder(lineColor.opacity(0.4), lineWidth: 1.5)
+                                    .strokeBorder(lineColor, lineWidth: 1.5)
                                     .frame(width: r * 2 + 6, height: r * 2 + 6)
                             }
 
                             if isNext && !isCurrent {
                                 Circle()
-                                    .strokeBorder(lineColor.opacity(0.6), lineWidth: 1.5)
+                                    .strokeBorder(lineColor, lineWidth: 1.5)
                                     .frame(width: r * 2 + 4, height: r * 2 + 4)
                             }
                         }
@@ -434,7 +434,7 @@ struct LCDLineView: View {
                             Text(truncatedName(stationNames[i]))
                                 .font(.system(size: isCurrent || isNext ? 9 : 8,
                                               weight: isCurrent || isNext ? .bold : .regular))
-                                .foregroundColor(isCurrent ? lineColor : isNext ? lineColor.opacity(0.8) : .secondary)
+                                .foregroundColor(isCurrent ? lineColor : isNext ? lineColor : .secondary)
                                 .lineLimit(1)
                                 .frame(width: 40)
                                 .position(x: x, y: centerY - r - 9)
@@ -501,7 +501,7 @@ struct ExpandedIslandLineView: View {
             ZStack(alignment: .leading) {
                 // Background track
                 Capsule()
-                    .fill(Color.gray.opacity(0.3))
+                    .fill(Color(white: 0.3))
                     .frame(width: w - pad * 2, height: trackHeight)
                     .offset(x: pad)
 
@@ -524,19 +524,19 @@ struct ExpandedIslandLineView: View {
 
                     ZStack {
                         if !stops && !isTerminal && !isCurrent && !isNext {
-                            // Skipped station: small hollow dot
+                            // Skipped station: small solid dot
                             Circle()
-                                .strokeBorder(isPast ? lineColor.opacity(0.4) : Color.gray.opacity(0.2), lineWidth: 1)
+                                .fill(isPast ? Color(white: 0.35) : Color(white: 0.2))
                                 .frame(width: r * 2, height: r * 2)
                         } else {
                             Circle()
-                                .fill(isPast ? lineColor : Color.gray.opacity(0.4))
+                                .fill(isPast ? lineColor : Color(white: 0.4))
                                 .frame(width: r * 2, height: r * 2)
                         }
 
                         if isTerminal {
                             Circle()
-                                .strokeBorder(isPast ? lineColor : Color.gray.opacity(0.4), lineWidth: 1.5)
+                                .strokeBorder(isPast ? lineColor : Color(white: 0.4), lineWidth: 1.5)
                                 .frame(width: r * 2 + 3, height: r * 2 + 3)
                         }
 
@@ -548,7 +548,7 @@ struct ExpandedIslandLineView: View {
 
                         if isNext && !isCurrent {
                             Circle()
-                                .strokeBorder(lineColor.opacity(0.5), lineWidth: 1)
+                                .strokeBorder(lineColor, lineWidth: 1)
                                 .frame(width: r * 2 + 3, height: r * 2 + 3)
                         }
                     }
