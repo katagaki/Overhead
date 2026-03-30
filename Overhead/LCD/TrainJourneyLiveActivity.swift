@@ -9,6 +9,7 @@ struct TrainJourneyLiveActivity: Widget {
         ActivityConfiguration(for: TrainJourneyAttributes.self) { context in
             // Lock Screen / Banner presentation
             LockScreenLiveActivityView(context: context)
+                .containerBackground(.clear, for: .widget)
 
         } dynamicIsland: { context in
             DynamicIsland {
