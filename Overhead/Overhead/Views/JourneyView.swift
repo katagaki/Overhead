@@ -35,6 +35,23 @@ struct JourneyView: View {
                             )
                             .padding(.horizontal, 24)
 
+                            // End Journey button
+                            Button(role: .destructive) {
+                                viewModel.stopJourney()
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "stop.circle.fill")
+                                    Text("Button.EndJourney")
+                                }
+                                .font(.system(size: 16, weight: .semibold))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.red)
+                            .padding(.horizontal, 24)
+                            .padding(.top, 24)
+
                             Spacer(minLength: 40)
                         }
                     }

@@ -26,6 +26,8 @@ struct OverheadApp: App {
             Task {
                 await viewModel.forceRefreshDelay()
             }
+        case "end-journey":
+            viewModel.stopJourney()
         default:
             break
         }

@@ -51,6 +51,8 @@ struct TrainJourneyAttributes: ActivityAttributes {
     let stationStops: [Bool]
     /// URL scheme for the refresh deep link
     let refreshURLString: String
+    /// URL scheme for the end journey deep link
+    let endURLString: String
 }
 
 // MARK: - Live Activity Manager
@@ -62,6 +64,7 @@ final class LiveActivityManager {
 
     /// The URL scheme that the Live Activity refresh button opens
     static let refreshURLScheme = "overhead://refresh-delay"
+    static let endURLScheme = "overhead://end-journey"
 
     private(set) var currentActivity: Activity<TrainJourneyAttributes>?
     private var lastDelayFetchTime = Date()
@@ -93,7 +96,8 @@ final class LiveActivityManager {
             stationNamesEn: stations.map(\.nameEn),
             stationCount: stations.count,
             stationStops: stationStops,
-            refreshURLString: Self.refreshURLScheme
+            refreshURLString: Self.refreshURLScheme,
+            endURLString: Self.endURLScheme
         )
 
         lastDelayFetchTime = Date()

@@ -49,6 +49,7 @@ struct TrainJourneyAttributes: ActivityAttributes {
     let stationCount: Int
     let stationStops: [Bool]
     let refreshURLString: String
+    let endURLString: String
 }
 
 // MARK: - Train Position Status (widget-side mirror)

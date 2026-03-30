@@ -249,21 +249,37 @@ struct LockScreenLiveActivityView: View {
                             .foregroundColor(context.state.isDelayed ? .red : .primary)
                     }
 
-                    Link(destination: URL(string: context.attributes.refreshURLString)!) {
-                        HStack(spacing: 3) {
-                            Image(systemName: "arrow.clockwise")
-                                .font(.system(size: 9, weight: .semibold))
-                            Text("Button.RefreshDelayInfo")
-                                .font(.system(size: 9, weight: .medium))
-                            Text("(\(refreshAgeText(context.state.lastRefresh)))")
-                                .font(.system(size: 8))
-                                .foregroundColor(.secondary)
+                    HStack(spacing: 6) {
+                        Link(destination: URL(string: context.attributes.refreshURLString)!) {
+                            HStack(spacing: 3) {
+                                Image(systemName: "arrow.clockwise")
+                                    .font(.system(size: 9, weight: .semibold))
+                                Text("Button.RefreshDelayInfo")
+                                    .font(.system(size: 9, weight: .medium))
+                                Text("(\(refreshAgeText(context.state.lastRefresh)))")
+                                    .font(.system(size: 8))
+                                    .foregroundColor(.secondary)
+                            }
+                            .foregroundColor(lineColor)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(lineColor.opacity(0.1))
+                            .clipShape(Capsule())
                         }
-                        .foregroundColor(lineColor)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(lineColor.opacity(0.1))
-                        .clipShape(Capsule())
+
+                        Link(destination: URL(string: context.attributes.endURLString)!) {
+                            HStack(spacing: 3) {
+                                Image(systemName: "stop.circle.fill")
+                                    .font(.system(size: 9, weight: .semibold))
+                                Text("Button.EndJourney")
+                                    .font(.system(size: 9, weight: .medium))
+                            }
+                            .foregroundColor(.red)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.red.opacity(0.1))
+                            .clipShape(Capsule())
+                        }
                     }
                 }
             }
