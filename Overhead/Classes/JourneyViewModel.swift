@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import Combine
+import Backbone
 
 // MARK: - Journey View Model (Location-Driven)
 
@@ -18,45 +19,23 @@ final class JourneyViewModel: ObservableObject {
     @Published var isStartingJourney = false
     @Published var errorMessage: String?
     @Published var locationError: String?
-    @Published var isRefreshing = false
     @Published var isDemoMode = false
     @Published var stationTimetable: [StationTimetableData] = []
     @Published var isLoadingTimetable = false
-    @Published var passengerSurveys: [String: PassengerSurveyData] = [:]  // keyed by station ID
     @Published var railDirections: [String: (ja: String, en: String)] = [:]
-    @Published var showJRLines: Bool = false {
-        didSet {
-            // Re-filter available lines when toggled
-            if !isDemoMode {
-                linesLoaded = false
-                Task { await loadLines() }
-            }
-        }
-    }
 
     // Services
-    private let apiClient: ODPTClient
     private let locationTracker = LocationTracker()
     private let demoProvider = DemoDataProvider()
     private var cancellables = Set<AnyCancellable>()
-    private var delayPollingTask: Task<Void, Never>?
     private var timetableCache: [String: [TrainService]] = [:]
     private var linesLoaded = false
 
-    init(consumerKey: String) {
-        self.apiClient = ODPTClient(consumerKey: consumerKey)
+    init(previewMode: Bool = false) {
         bindLocationTracker()
         bindDemoProvider()
-    }
-
-    /// Reads the ODPT key from ODPTKey.plist (or falls back to empty string).
-    convenience init(previewMode: Bool) {
         if previewMode {
-            self.init(consumerKey: "PREVIEW")
             loadPreviewData()
-        } else {
-            let key = ODPTClient.consumerKeyFromPlist()
-            self.init(consumerKey: key)
         }
     }
 
@@ -127,9 +106,7 @@ final class JourneyViewModel: ObservableObject {
 
     func startDemoMode() {
         isDemoMode = true
-        let demoLines = showJRLines
-            ? DemoDataProvider.demoLines
-            : DemoDataProvider.demoLines.filter { $0.operatorId != "odpt.Operator:JR-East" }
+        let demoLines = DemoDataProvider.demoLines
         availableLines = demoLines
         let line = demoLines[0]
         let stations = line.stations
@@ -171,20 +148,17 @@ final class JourneyViewModel: ObservableObject {
 
     func loadLines() async {
         if isDemoMode {
-            availableLines = showJRLines
-                ? DemoDataProvider.demoLines
-                : DemoDataProvider.demoLines.filter { $0.operatorId != "odpt.Operator:JR-East" }
+            availableLines = DemoDataProvider.demoLines
             linesLoaded = true
             return
         }
 
         guard !linesLoaded else { return }
 
-        availableLines = StaticTrainData.trainLines(includeJR: showJRLines)
+        availableLines = StaticTrainData.trainLines()
         linesLoaded = true
         errorMessage = nil
         loadRailDirections()
-        await loadPassengerSurveys()
     }
 
     func forceRefreshLines() async {
@@ -202,97 +176,63 @@ final class JourneyViewModel: ObservableObject {
     ) async {
         isStartingJourney = true
 
-        do {
-            if timetableCache[line.id] == nil {
-                if let staticLine = StaticTrainData.line(withId: line.id) {
-                    timetableCache[line.id] = StaticTimetableGenerator.services(
-                        for: staticLine, calendar: .current()
-                    )
-                } else {
-                    timetableCache[line.id] = try await apiClient.fetchTrainTimetables(railwayId: line.id)
-                }
-            }
-
-            guard let services = timetableCache[line.id] else {
-                errorMessage = "No timetable data available"
-                isStartingJourney = false
-                return
-            }
-
-            // Find the best matching service
-            let service = findBestService(
-                services: services,
-                from: boardingStation.id,
-                to: alightingStation.id,
-                at: Date()
+        if timetableCache[line.id] == nil,
+           let staticLine = StaticTrainData.line(withId: line.id) {
+            timetableCache[line.id] = StaticTimetableGenerator.services(
+                for: staticLine, calendar: .current()
             )
+        }
 
-            guard let service else {
-                errorMessage = "No matching train found for this time"
-                isStartingJourney = false
-                return
-            }
+        guard let services = timetableCache[line.id] else {
+            errorMessage = "No timetable data available"
+            isStartingJourney = false
+            return
+        }
 
-            let journey = Journey(
-                id: UUID(),
-                service: service,
-                line: line,
-                boardingStationId: boardingStation.id,
-                alightingStationId: alightingStation.id,
-                startedAt: Date()
+        // Find the best matching service
+        let service = findBestService(
+            services: services,
+            from: boardingStation.id,
+            to: alightingStation.id,
+            at: Date()
+        )
+
+        guard let service else {
+            errorMessage = "No matching train found for this time"
+            isStartingJourney = false
+            return
+        }
+
+        let journey = Journey(
+            id: UUID(),
+            service: service,
+            line: line,
+            boardingStationId: boardingStation.id,
+            alightingStationId: alightingStation.id,
+            startedAt: Date()
+        )
+
+        activeJourney = journey
+        selectedLine = line
+
+        // Start location-based tracking — this drives everything
+        locationTracker.startTracking(journey: journey, delay: nil)
+
+        // Compute initial position from timetable while GPS locks on
+        positionState = TrainPositionEngine.computePosition(
+            journey: journey, delay: nil
+        )
+
+        // Start Live Activity
+        if let state = positionState {
+            LiveActivityManager.shared.startActivity(
+                journey: journey,
+                positionState: state,
+                lineColorHex: line.colorHex
             )
-
-            activeJourney = journey
-            selectedLine = line
-
-            // Fetch initial delay info
-            let delays = try? await apiClient.fetchDelayInfo(railwayId: line.id)
-            currentDelay = delays?.first(where: { $0.lineId == line.id })
-
-            // Start location-based tracking — this drives everything
-            locationTracker.startTracking(journey: journey, delay: currentDelay)
-
-            // Compute initial position from timetable while GPS locks on
-            positionState = TrainPositionEngine.computePosition(
-                journey: journey, delay: currentDelay
-            )
-
-            // Start Live Activity
-            if let state = positionState {
-                LiveActivityManager.shared.startActivity(
-                    journey: journey,
-                    positionState: state,
-                    lineColorHex: line.colorHex
-                )
-            }
-
-            // Poll delay info only (every 2 min) — position comes from GPS
-            startDelayPolling(lineId: line.id)
-
-        } catch {
-            errorMessage = "Failed to start journey: \(error.localizedDescription)"
         }
 
         isStartingJourney = false
-    }
-
-    // MARK: - Delay Polling
-
-    /// Lightweight: only fetches delay info, not position
-    private func startDelayPolling(lineId: String) {
-        delayPollingTask?.cancel()
-        delayPollingTask = Task { [weak self] in
-            while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 120_000_000_000) // 2 minutes
-                guard let self else { continue }
-
-                if let delays = try? await self.apiClient.fetchDelayInfo(railwayId: lineId) {
-                    let delay = delays.first(where: { $0.lineId == lineId })
-                    self.currentDelay = delay
-                    self.locationTracker.updateDelay(delay)
-                }
-            }
-        }
     }
 
     // MARK: - Stop Journey
@@ -301,8 +241,6 @@ final class JourneyViewModel: ObservableObject {
         if isDemoMode {
             demoProvider.stopSimulation()
         } else {
-            delayPollingTask?.cancel()
-            delayPollingTask = nil
             locationTracker.stopTracking()
             LiveActivityManager.shared.endActivity()
         }
@@ -314,28 +252,16 @@ final class JourneyViewModel: ObservableObject {
     // MARK: - Force Refresh (from Live Activity button)
 
     /// Triggered by the Live Activity refresh deep link.
-    /// Fetches fresh delay data, updates the tracker, and re-pushes to Live Activity.
-    func forceRefreshDelay() async {
-        guard let journey = activeJourney else { return }
-        isRefreshing = true
-
-        do {
-            let delays = try await apiClient.fetchDelayInfo(railwayId: journey.line.id)
-            let delay = delays.first(where: { $0.lineId == journey.line.id })
-            currentDelay = delay
-            locationTracker.updateDelay(delay)
-            locationTracker.forceRefresh()
-            LiveActivityManager.shared.markDelayRefreshed()
-        } catch {
-            // Silently fail — the timetable tick keeps things moving
-        }
-
-        isRefreshing = false
+    /// Recomputes the position and re-pushes to Live Activity.
+    func forceRefresh() {
+        guard activeJourney != nil else { return }
+        locationTracker.forceRefresh()
+        LiveActivityManager.shared.markDelayRefreshed()
     }
 
     // MARK: - Station Timetable
 
-    func loadStationTimetable(stationId: String) async {
+    func loadStationTimetable(stationId: String) {
         guard !isDemoMode else { return }
         isLoadingTimetable = true
         stationTimetable = []
@@ -347,48 +273,9 @@ final class JourneyViewModel: ObservableObject {
                 stationId: stationId,
                 calendar: .current()
             )
-            isLoadingTimetable = false
-            return
-        }
-
-        // Fallback to the API for stations that aren't bundled
-        do {
-            let data = try await apiClient.fetchStationTimetable(stationId: stationId)
-
-            // Enrich direction names from cached rail directions
-            stationTimetable = data.map { tt in
-                let dirNames = railDirections[tt.railDirection]
-                return StationTimetableData(
-                    stationId: tt.stationId,
-                    railDirection: tt.railDirection,
-                    railDirectionName: dirNames?.ja ?? tt.railDirectionName,
-                    railDirectionNameEn: dirNames?.en ?? tt.railDirectionNameEn,
-                    departures: tt.departures
-                )
-            }
-        } catch {
-            stationTimetable = []
         }
 
         isLoadingTimetable = false
-    }
-
-    // MARK: - Passenger Surveys
-
-    func loadPassengerSurveys() async {
-        guard !isDemoMode, passengerSurveys.isEmpty else { return }
-
-        // Only TokyoMetro provides passenger survey data
-        do {
-            let surveys = try await apiClient.fetchPassengerSurvey(operatorId: "odpt.Operator:TokyoMetro")
-            var map: [String: PassengerSurveyData] = [:]
-            for survey in surveys {
-                map[survey.id] = survey
-            }
-            passengerSurveys = map
-        } catch {
-            // Silently fail — survey data is supplementary
-        }
     }
 
     // MARK: - Rail Directions

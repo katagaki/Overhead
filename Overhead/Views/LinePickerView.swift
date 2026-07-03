@@ -1,10 +1,10 @@
 import SwiftUI
+import Backbone
 
 // MARK: - Line & Station Picker
 
 struct LinePickerView: View {
     @ObservedObject var viewModel: JourneyViewModel
-    @AppStorage("showJRLines") private var showJRLines = false
     @State private var selectedLine: TrainLine?
     @State private var boardingStation: Station?
     @State private var alightingStation: Station?
@@ -38,9 +38,6 @@ struct LinePickerView: View {
             Text("Error.NoLinesAvailable")
                 .font(.headline)
                 .foregroundColor(.secondary)
-            Text("Error.ConfigureAPIKey")
-                .font(.subheadline)
-                .foregroundStyle(.tertiary)
             Button("Button.Retry") {
                 Task { await viewModel.loadLines() }
             }
@@ -50,18 +47,13 @@ struct LinePickerView: View {
     @ViewBuilder
     private var lineList: some View {
         let grouped = Dictionary(grouping: viewModel.availableLines) { $0.operatorId }
-        let sectionOrder: [String] = {
-            var order = [
-                "odpt.Operator:TokyoMetro",
-                "odpt.Operator:Toei",
-                "odpt.Operator:Keisei",
-                "odpt.Operator:Tobu"
-            ]
-            if showJRLines {
-                order.insert("odpt.Operator:JR-East", at: 0)
-            }
-            return order
-        }()
+        let sectionOrder = [
+            "odpt.Operator:JR-East",
+            "odpt.Operator:TokyoMetro",
+            "odpt.Operator:Toei",
+            "odpt.Operator:Keisei",
+            "odpt.Operator:Tobu"
+        ]
         let sectionTitles: [String: String] = [
             "odpt.Operator:JR-East": "JR",
             "odpt.Operator:TokyoMetro": "東京メトロ",
@@ -236,36 +228,9 @@ struct StationPickerView: View {
 
             Spacer()
 
-            // Busyness indicator
-            if let survey = viewModel.passengerSurveys[station.id] {
-                busynessDots(level: survey.busynessLevel)
-            }
-
             Image(systemName: "clock")
                 .font(.system(size: 12))
                 .foregroundColor(.secondary)
-        }
-    }
-
-    @ViewBuilder
-    private func busynessDots(level: Int) -> some View {
-        HStack(spacing: 2) {
-            ForEach(1...3, id: \.self) { i in
-                Circle()
-                    .fill(i <= min(level, 3)
-                          ? busynessColor(level)
-                          : Color.gray.opacity(0.2))
-                    .frame(width: 6, height: 6)
-            }
-        }
-    }
-
-    private func busynessColor(_ level: Int) -> Color {
-        switch level {
-        case 1, 2: return .green
-        case 3: return .yellow
-        case 4: return .orange
-        default: return .red
         }
     }
 }

@@ -1,4 +1,5 @@
 import SwiftUI
+import Backbone
 
 // MARK: - Journey View (In-App, Vertical/Portrait)
 /// Full-screen vertical route display mimicking the in-train LCD panels
@@ -140,16 +141,11 @@ struct JourneyView: View {
 
             // Refresh button
             Button {
-                Task { await viewModel.forceRefreshDelay() }
+                viewModel.forceRefresh()
             } label: {
                 HStack(spacing: 3) {
-                    if viewModel.isRefreshing {
-                        ProgressView()
-                            .scaleEffect(0.6)
-                    } else {
-                        Image(systemName: "arrow.clockwise")
-                            .font(.system(size: 10, weight: .semibold))
-                    }
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 10, weight: .semibold))
                     Text("Button.Refresh")
                         .font(.system(size: 10, weight: .medium))
                 }
@@ -159,7 +155,6 @@ struct JourneyView: View {
                 .background(lineColor.opacity(0.1))
                 .clipShape(Capsule())
             }
-            .disabled(viewModel.isRefreshing)
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 6)
@@ -217,12 +212,12 @@ struct JourneyView: View {
                     .font(.system(size: 10))
                     .foregroundColor(.secondary)
                 Text(formatTime(state.estimatedArrival))
-                    .font(.system(size: 28, weight: .bold, design: .monospaced))
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
                     .foregroundColor(state.isDelayed ? .red : lineColor)
 
                 if state.isDelayed {
                     Text("Journey.Delay.Minutes \(state.delayMinutes)")
-                        .font(.system(size: 11, weight: .bold, design: .monospaced))
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
                         .foregroundColor(.red)
                 }
             }
@@ -352,12 +347,12 @@ struct VerticalLCDLine: View {
 
             VStack(spacing: 1) {
                 Text(timeStr)
-                    .font(.system(size: 13, weight: isCurrent ? .bold : .medium, design: .monospaced))
+                    .font(.system(size: 13, weight: isCurrent ? .bold : .medium, design: .rounded))
                     .foregroundColor(isPast && !isCurrent ? .secondary : .primary)
 
                 if delayMins > 0 {
                     Text(adjustedTime(timeStr, delayMinutes: delayMins))
-                        .font(.system(size: 11, design: .monospaced))
+                        .font(.system(size: 11, design: .rounded))
                         .foregroundColor(.red)
                 }
             }

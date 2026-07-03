@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import Backbone
 
 // MARK: - Demo Data Provider
 /// Provides simulated journey data for demo mode.

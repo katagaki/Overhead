@@ -3,19 +3,19 @@ import SwiftUI
 
 // MARK: - Station
 
-struct Station: Identifiable, Codable, Hashable {
-    let id: String          // e.g. "odpt.Station:JR-East.ChuoRapid.Shinjuku"
-    let name: String        // Japanese name
-    let nameEn: String      // English/Romaji name
-    let nameKo: String      // Korean name
-    let nameZhHans: String  // Simplified Chinese name
-    let nameZhHant: String  // Traditional Chinese name
-    let stationCode: String // e.g. "JC05"
-    let latitude: Double?
-    let longitude: Double?
+public struct Station: Identifiable, Codable, Hashable {
+    public let id: String          // e.g. "odpt.Station:JR-East.ChuoRapid.Shinjuku"
+    public let name: String        // Japanese name
+    public let nameEn: String      // English/Romaji name
+    public let nameKo: String      // Korean name
+    public let nameZhHans: String  // Simplified Chinese name
+    public let nameZhHant: String  // Traditional Chinese name
+    public let stationCode: String // e.g. "JC05"
+    public let latitude: Double?
+    public let longitude: Double?
 
     /// Convenience initializer for cases that don't have multilingual data
-    init(id: String, name: String, nameEn: String, nameKo: String = "", nameZhHans: String = "", nameZhHant: String = "", stationCode: String, latitude: Double?, longitude: Double?) {
+    public init(id: String, name: String, nameEn: String, nameKo: String = "", nameZhHans: String = "", nameZhHant: String = "", stationCode: String, latitude: Double?, longitude: Double?) {
         self.id = id
         self.name = name
         self.nameEn = nameEn
@@ -27,12 +27,12 @@ struct Station: Identifiable, Codable, Hashable {
         self.longitude = longitude
     }
 
-    var displayCode: String {
+    public var displayCode: String {
         stationCode.isEmpty ? "" : stationCode
     }
 
     /// Returns the station name for the user's current language
-    var localizedName: String {
+    public var localizedName: String {
         let lang = Locale.current.language.languageCode?.identifier ?? "ja"
         switch lang {
         case "en": return nameEn.isEmpty ? name : nameEn
@@ -50,19 +50,19 @@ struct Station: Identifiable, Codable, Hashable {
 
 // MARK: - Train Line
 
-struct TrainLine: Identifiable, Codable, Hashable {
-    let id: String           // e.g. "odpt.Railway:JR-East.ChuoRapid"
-    let name: String
-    let nameEn: String
-    let nameKo: String
-    let nameZhHans: String
-    let nameZhHant: String
-    let operatorId: String   // e.g. "odpt.Operator:JR-East"
-    let stations: [Station]
-    let colorHex: String     // Primary accent color
+public struct TrainLine: Identifiable, Codable, Hashable {
+    public let id: String           // e.g. "odpt.Railway:JR-East.ChuoRapid"
+    public let name: String
+    public let nameEn: String
+    public let nameKo: String
+    public let nameZhHans: String
+    public let nameZhHant: String
+    public let operatorId: String   // e.g. "odpt.Operator:JR-East"
+    public let stations: [Station]
+    public let colorHex: String     // Primary accent color
 
     /// Convenience initializer for cases that don't have multilingual data
-    init(id: String, name: String, nameEn: String, nameKo: String = "", nameZhHans: String = "", nameZhHant: String = "", operatorId: String, stations: [Station], colorHex: String) {
+    public init(id: String, name: String, nameEn: String, nameKo: String = "", nameZhHans: String = "", nameZhHant: String = "", operatorId: String, stations: [Station], colorHex: String) {
         self.id = id
         self.name = name
         self.nameEn = nameEn
@@ -74,12 +74,12 @@ struct TrainLine: Identifiable, Codable, Hashable {
         self.colorHex = colorHex
     }
 
-    var color: Color {
+    public var color: Color {
         Color(hex: colorHex)
     }
 
     /// Line symbol prefix derived from station codes (e.g. "JC", "G", "C")
-    var lineSymbol: String {
+    public var lineSymbol: String {
         // Try to extract from first station with a code
         if let station = stations.first(where: { !$0.stationCode.isEmpty }) {
             let letters = station.stationCode.prefix(while: \.isLetter)
@@ -90,7 +90,7 @@ struct TrainLine: Identifiable, Codable, Hashable {
     }
 
     /// Whether this line uses JR-style badges (rounded rectangle)
-    var isJR: Bool {
+    public var isJR: Bool {
         lineSymbol.hasPrefix("J")
     }
 
@@ -141,7 +141,7 @@ struct TrainLine: Identifiable, Codable, Hashable {
     ]
 
     /// Returns the line name for the user's current language
-    var localizedName: String {
+    public var localizedName: String {
         let lang = Locale.current.language.languageCode?.identifier ?? "ja"
         switch lang {
         case "en": return nameEn.isEmpty ? name : nameEn
@@ -159,26 +159,33 @@ struct TrainLine: Identifiable, Codable, Hashable {
 
 // MARK: - Timetable Entry
 
-struct TimetableEntry: Identifiable, Codable {
-    let id: String
-    let stationId: String
-    let arrivalTime: String?   // "HH:mm" — may be >24:00
-    let departureTime: String? // "HH:mm"
+public struct TimetableEntry: Identifiable, Codable {
+    public let id: String
+    public let stationId: String
+    public let arrivalTime: String?   // "HH:mm" — may be >24:00
+    public let departureTime: String? // "HH:mm"
+
+    public init(id: String, stationId: String, arrivalTime: String?, departureTime: String?) {
+        self.id = id
+        self.stationId = stationId
+        self.arrivalTime = arrivalTime
+        self.departureTime = departureTime
+    }
 
     /// Parse a Japanese rail time string (supports 25:30 etc.)
-    func arrivalSeconds() -> Int? {
+    public func arrivalSeconds() -> Int? {
         guard let t = arrivalTime else { return nil }
         return Self.parseRailTime(t)
     }
 
-    func departureSeconds() -> Int? {
+    public func departureSeconds() -> Int? {
         guard let t = departureTime else { return nil }
         return Self.parseRailTime(t)
     }
 
     /// Parses "HH:mm" where HH can exceed 23 (Japanese rail convention).
     /// Returns seconds since midnight of the service day.
-    static func parseRailTime(_ timeStr: String) -> Int? {
+    public static func parseRailTime(_ timeStr: String) -> Int? {
         let parts = timeStr.split(separator: ":")
         guard parts.count == 2,
               let h = Int(parts[0]),
@@ -189,15 +196,24 @@ struct TimetableEntry: Identifiable, Codable {
 
 // MARK: - Train Service
 
-struct TrainService: Identifiable, Codable {
-    let id: String              // Train number / service ID
-    let lineId: String
-    let trainType: TrainType
-    let direction: Direction
-    let timetable: [TimetableEntry]
-    let destinationStationId: String
+public struct TrainService: Identifiable, Codable {
+    public let id: String              // Train number / service ID
+    public let lineId: String
+    public let trainType: TrainType
+    public let direction: Direction
+    public let timetable: [TimetableEntry]
+    public let destinationStationId: String
 
-    enum TrainType: String, Codable {
+    public init(id: String, lineId: String, trainType: TrainType, direction: Direction, timetable: [TimetableEntry], destinationStationId: String) {
+        self.id = id
+        self.lineId = lineId
+        self.trainType = trainType
+        self.direction = direction
+        self.timetable = timetable
+        self.destinationStationId = destinationStationId
+    }
+
+    public enum TrainType: String, Codable {
         case local = "Local"
         case rapid = "Rapid"
         case express = "Express"
@@ -205,8 +221,8 @@ struct TrainService: Identifiable, Codable {
         case commuterRapid = "CommuterRapid"
         case specialRapid = "SpecialRapid"
 
-        var displayName: String { rawValue }
-        var displayNameJa: String {
+        public var displayName: String { rawValue }
+        public var displayNameJa: String {
             switch self {
             case .local: return "各停"
             case .rapid: return "快速"
@@ -218,7 +234,7 @@ struct TrainService: Identifiable, Codable {
         }
     }
 
-    enum Direction: String, Codable {
+    public enum Direction: String, Codable {
         case inbound = "Inbound"
         case outbound = "Outbound"
     }
@@ -226,16 +242,26 @@ struct TrainService: Identifiable, Codable {
 
 // MARK: - Station Departure
 
-struct StationDeparture: Identifiable, Codable {
-    let id: String
-    let departureTime: String       // "HH:mm"
-    let trainType: TrainService.TrainType
-    let destinationName: String     // Localized destination name
-    let destinationNameEn: String
-    let trainNumber: String
-    let isLast: Bool
+public struct StationDeparture: Identifiable, Codable {
+    public let id: String
+    public let departureTime: String       // "HH:mm"
+    public let trainType: TrainService.TrainType
+    public let destinationName: String     // Localized destination name
+    public let destinationNameEn: String
+    public let trainNumber: String
+    public let isLast: Bool
 
-    var localizedDestination: String {
+    public init(id: String, departureTime: String, trainType: TrainService.TrainType, destinationName: String, destinationNameEn: String, trainNumber: String, isLast: Bool) {
+        self.id = id
+        self.departureTime = departureTime
+        self.trainType = trainType
+        self.destinationName = destinationName
+        self.destinationNameEn = destinationNameEn
+        self.trainNumber = trainNumber
+        self.isLast = isLast
+    }
+
+    public var localizedDestination: String {
         let lang = Locale.current.language.languageCode?.identifier ?? "ja"
         switch lang {
         case "en": return destinationNameEn.isEmpty ? destinationName : destinationNameEn
@@ -246,14 +272,22 @@ struct StationDeparture: Identifiable, Codable {
 
 // MARK: - Station Timetable
 
-struct StationTimetableData: Codable {
-    let stationId: String
-    let railDirection: String
-    let railDirectionName: String
-    let railDirectionNameEn: String
-    let departures: [StationDeparture]
+public struct StationTimetableData: Codable {
+    public let stationId: String
+    public let railDirection: String
+    public let railDirectionName: String
+    public let railDirectionNameEn: String
+    public let departures: [StationDeparture]
 
-    var localizedDirectionName: String {
+    public init(stationId: String, railDirection: String, railDirectionName: String, railDirectionNameEn: String, departures: [StationDeparture]) {
+        self.stationId = stationId
+        self.railDirection = railDirection
+        self.railDirectionName = railDirectionName
+        self.railDirectionNameEn = railDirectionNameEn
+        self.departures = departures
+    }
+
+    public var localizedDirectionName: String {
         let lang = Locale.current.language.languageCode?.identifier ?? "ja"
         switch lang {
         case "en": return railDirectionNameEn.isEmpty ? railDirectionName : railDirectionNameEn
@@ -262,59 +296,45 @@ struct StationTimetableData: Codable {
     }
 }
 
-// MARK: - Passenger Survey
-
-struct PassengerSurveyData: Identifiable, Codable {
-    let id: String               // Station ID
-    let stationName: String
-    let surveys: [AnnualSurvey]
-
-    struct AnnualSurvey: Codable {
-        let year: Int
-        let passengerJourneys: Int
-    }
-
-    /// Most recent year's passenger count
-    var latestJourneys: Int? {
-        surveys.max(by: { $0.year < $1.year })?.passengerJourneys
-    }
-
-    /// Busyness level from 1-5 based on ridership
-    var busynessLevel: Int {
-        guard let journeys = latestJourneys else { return 0 }
-        switch journeys {
-        case ..<20_000: return 1
-        case 20_000..<50_000: return 2
-        case 50_000..<100_000: return 3
-        case 100_000..<200_000: return 4
-        default: return 5
-        }
-    }
-}
-
 // MARK: - Delay Info
 
-struct DelayInfo: Codable {
-    let lineId: String
-    let delayMinutes: Int
-    let cause: String?
-    let updatedAt: Date
+public struct DelayInfo: Codable {
+    public let lineId: String
+    public let delayMinutes: Int
+    public let cause: String?
+    public let updatedAt: Date
 
-    var isDelayed: Bool { delayMinutes > 0 }
+    public init(lineId: String, delayMinutes: Int, cause: String?, updatedAt: Date) {
+        self.lineId = lineId
+        self.delayMinutes = delayMinutes
+        self.cause = cause
+        self.updatedAt = updatedAt
+    }
+
+    public var isDelayed: Bool { delayMinutes > 0 }
 }
 
 // MARK: - Journey
 
-struct Journey: Identifiable, Codable {
-    let id: UUID
-    let service: TrainService
-    let line: TrainLine
-    let boardingStationId: String
-    let alightingStationId: String
-    let startedAt: Date
+public struct Journey: Identifiable, Codable {
+    public let id: UUID
+    public let service: TrainService
+    public let line: TrainLine
+    public let boardingStationId: String
+    public let alightingStationId: String
+    public let startedAt: Date
+
+    public init(id: UUID, service: TrainService, line: TrainLine, boardingStationId: String, alightingStationId: String, startedAt: Date) {
+        self.id = id
+        self.service = service
+        self.line = line
+        self.boardingStationId = boardingStationId
+        self.alightingStationId = alightingStationId
+        self.startedAt = startedAt
+    }
 
     /// Subset of stations the user travels through
-    var journeyStations: [Station] {
+    public var journeyStations: [Station] {
         guard let startIdx = line.stations.firstIndex(where: { $0.id == boardingStationId }),
               let endIdx = line.stations.firstIndex(where: { $0.id == alightingStationId }) else {
             return []
@@ -327,7 +347,7 @@ struct Journey: Identifiable, Codable {
     }
 
     /// Subset of timetable entries for this journey
-    var journeyTimetable: [TimetableEntry] {
+    public var journeyTimetable: [TimetableEntry] {
         let stationIds = Set(journeyStations.map(\.id))
         return service.timetable.filter { stationIds.contains($0.stationId) }
     }
@@ -335,28 +355,42 @@ struct Journey: Identifiable, Codable {
 
 // MARK: - Position State
 
-struct TrainPositionState: Codable {
-    let progress: Double           // 0.0 ... 1.0 along the full journey
-    let segmentFrom: Int           // Index into journeyStations
-    let segmentTo: Int
-    let segmentProgress: Double    // 0.0 ... 1.0 within current segment
-    let currentStationIndex: Int?  // Non-nil if dwelling at a station
-    let nextStationName: String
-    let nextStationNameEn: String
-    let delayMinutes: Int
-    let estimatedArrival: Date     // ETA at final destination
-    let status: Status
-    let trackingModeRaw: String    // "GPS", "Timetable", or "Blended"
+public struct TrainPositionState: Codable {
+    public let progress: Double           // 0.0 ... 1.0 along the full journey
+    public let segmentFrom: Int           // Index into journeyStations
+    public let segmentTo: Int
+    public let segmentProgress: Double    // 0.0 ... 1.0 within current segment
+    public let currentStationIndex: Int?  // Non-nil if dwelling at a station
+    public let nextStationName: String
+    public let nextStationNameEn: String
+    public let delayMinutes: Int
+    public let estimatedArrival: Date     // ETA at final destination
+    public let status: Status
+    public let trackingModeRaw: String    // "GPS", "Timetable", or "Blended"
 
-    var isTimetableMode: Bool {
+    public init(progress: Double, segmentFrom: Int, segmentTo: Int, segmentProgress: Double, currentStationIndex: Int?, nextStationName: String, nextStationNameEn: String, delayMinutes: Int, estimatedArrival: Date, status: Status, trackingModeRaw: String) {
+        self.progress = progress
+        self.segmentFrom = segmentFrom
+        self.segmentTo = segmentTo
+        self.segmentProgress = segmentProgress
+        self.currentStationIndex = currentStationIndex
+        self.nextStationName = nextStationName
+        self.nextStationNameEn = nextStationNameEn
+        self.delayMinutes = delayMinutes
+        self.estimatedArrival = estimatedArrival
+        self.status = status
+        self.trackingModeRaw = trackingModeRaw
+    }
+
+    public var isTimetableMode: Bool {
         trackingModeRaw == "Timetable"
     }
 
-    var isBlendedMode: Bool {
+    public var isBlendedMode: Bool {
         trackingModeRaw == "Blended"
     }
 
-    enum Status: String, Codable {
+    public enum Status: String, Codable {
         case onTime = "onTime"
         case delayed = "delayed"
         case arrived = "arrived"
@@ -367,7 +401,7 @@ struct TrainPositionState: Codable {
 
 // MARK: - Color Extension
 
-extension Color {
+public extension Color {
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet(charactersIn: "#"))
         var int: UInt64 = 0

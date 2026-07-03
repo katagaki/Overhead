@@ -1,4 +1,5 @@
 import SwiftUI
+import Backbone
 
 // MARK: - Station Timetable View
 /// Shows upcoming departures from a station, grouped by direction.
@@ -19,8 +20,8 @@ struct StationTimetableView: View {
             }
         }
         .navigationTitle(station.localizedName)
-        .task {
-            await viewModel.loadStationTimetable(stationId: station.id)
+        .onAppear {
+            viewModel.loadStationTimetable(stationId: station.id)
         }
     }
 
@@ -28,13 +29,6 @@ struct StationTimetableView: View {
 
     private var timetableList: some View {
         List {
-            // Passenger survey badge if available
-            if let survey = viewModel.passengerSurveys[station.id] {
-                Section {
-                    busynessRow(survey: survey)
-                }
-            }
-
             ForEach(viewModel.stationTimetable, id: \.railDirection) { timetable in
                 Section {
                     // Show upcoming departures (from now onwards, limited)
@@ -147,7 +141,7 @@ struct StationTimetableView: View {
         HStack(spacing: 12) {
             // Time
             Text(departure.departureTime)
-                .font(.system(size: 17, weight: .semibold, design: .monospaced))
+                .font(.system(size: 17, weight: .semibold, design: .rounded))
                 .foregroundColor(departure.isLast ? .red : .primary)
 
             // Train type pill
@@ -182,38 +176,6 @@ struct StationTimetableView: View {
         .padding(.vertical, 2)
     }
 
-    // MARK: - Busyness Row
-
-    @ViewBuilder
-    private func busynessRow(survey: PassengerSurveyData) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: "person.3.fill")
-                .foregroundColor(busynessColor(survey.busynessLevel))
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text("StationTimetable.Busyness")
-                    .font(.system(size: 13, weight: .medium))
-                HStack(spacing: 3) {
-                    ForEach(1...5, id: \.self) { level in
-                        RoundedRectangle(cornerRadius: 2)
-                            .fill(level <= survey.busynessLevel
-                                  ? busynessColor(survey.busynessLevel)
-                                  : Color.gray.opacity(0.2))
-                            .frame(width: 20, height: 8)
-                    }
-                }
-            }
-
-            Spacer()
-
-            if let journeys = survey.latestJourneys {
-                Text(formatJourneys(journeys))
-                    .font(.system(size: 11, design: .monospaced))
-                    .foregroundColor(.secondary)
-            }
-        }
-    }
-
     // MARK: - No Data
 
     private var noDataView: some View {
@@ -242,24 +204,5 @@ struct StationTimetableView: View {
         }
 
         return Array(upcoming.prefix(20))
-    }
-
-    private func busynessColor(_ level: Int) -> Color {
-        switch level {
-        case 1: return .green
-        case 2: return .mint
-        case 3: return .yellow
-        case 4: return .orange
-        default: return .red
-        }
-    }
-
-    private func formatJourneys(_ count: Int) -> String {
-        if count >= 1_000_000 {
-            return String(format: "%.1fM", Double(count) / 1_000_000)
-        } else if count >= 1_000 {
-            return String(format: "%dK", count / 1_000)
-        }
-        return "\(count)"
     }
 }

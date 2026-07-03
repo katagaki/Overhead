@@ -66,7 +66,7 @@ struct TrainJourneyLiveActivity: Widget {
                             VStack(alignment: .trailing, spacing: 1) {
                                 if context.state.isDelayed {
                                     Text("LiveActivity.Delay.Minutes \(context.state.delayMinutes)")
-                                        .font(.system(size: 13, weight: .bold, design: .monospaced))
+                                        .font(.system(size: 13, weight: .bold, design: .rounded))
                                         .foregroundColor(.red)
                                 } else {
                                     Text("Status.OnTime")
@@ -74,7 +74,7 @@ struct TrainJourneyLiveActivity: Widget {
                                         .foregroundColor(.green)
                                 }
                                 Text(formatTime(context.state.estimatedArrival))
-                                    .font(.system(size: 10, design: .monospaced))
+                                    .font(.system(size: 10, design: .rounded))
                                     .foregroundColor(.secondary)
                             }
                         }
@@ -122,11 +122,11 @@ struct TrainJourneyLiveActivity: Widget {
             } compactTrailing: {
                 if context.state.isDelayed {
                     Text("+\(context.state.delayMinutes)")
-                        .font(.system(size: 12, weight: .bold, design: .monospaced))
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
                         .foregroundColor(.red)
                 } else {
                     Text(formatTime(context.state.estimatedArrival))
-                        .font(.system(size: 12, design: .monospaced))
+                        .font(.system(size: 12, design: .rounded))
                 }
 
             } minimal: {
@@ -196,7 +196,7 @@ struct LockScreenLiveActivityView: View {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .font(.system(size: 10))
                         Text("LiveActivity.Delay.Badge \(context.state.delayMinutes)")
-                            .font(.system(size: 12, weight: .bold, design: .monospaced))
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
                     }
                     .foregroundColor(.white)
                     .padding(.horizontal, 8)
@@ -245,7 +245,7 @@ struct LockScreenLiveActivityView: View {
                             .font(.system(size: 9))
                             .foregroundColor(.secondary)
                         Text(formatTime(context.state.estimatedArrival))
-                            .font(.system(size: 20, weight: .bold, design: .monospaced))
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
                             .foregroundColor(context.state.isDelayed ? .red : .primary)
                     }
 
@@ -564,36 +564,54 @@ struct ExpandedIslandLineView: View {
 
 // MARK: - LCD Line Symbol Badge
 
-/// Compact line symbol badge for Live Activity (self-contained, no dependency on main app target)
+/// Compact line symbol badge for Live Activity (self-contained, no dependency on main app target).
+/// Mirrors the operator styles of the app's LineSymbolBadge at 24pt.
 struct LCDLineSymbolBadge: View {
     let symbol: String
     let color: Color
 
-    private var isJR: Bool { symbol.hasPrefix("J") }
+    private static let tobuSymbols: Set<String> = ["TS", "TI", "TN", "TD", "TJ"]
 
     var body: some View {
-        if isJR {
-            Text(symbol)
-                .font(.system(size: 10, weight: .heavy))
-                .foregroundColor(.black)
-                .frame(width: 28, height: 22)
-                .background(Color.white)
-                .clipShape(RoundedRectangle(cornerRadius: 4))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 4)
-                        .strokeBorder(color, lineWidth: 2)
-                )
-        } else {
-            Text(symbol)
-                .font(.system(size: 12, weight: .heavy))
-                .foregroundColor(.black)
-                .frame(width: 24, height: 24)
-                .background(Color.white)
-                .clipShape(Circle())
-                .overlay(
-                    Circle()
-                        .strokeBorder(color, lineWidth: 2)
-                )
+        switch symbol {
+        case "KS":
+            circleBadge(ringWidth: 2.4, textColor: color)
+        case _ where Self.tobuSymbols.contains(symbol):
+            squareBadge(cornerRadius: 5.5, borderWidth: 2.6)
+        case _ where symbol.hasPrefix("J"):
+            squareBadge(cornerRadius: 3, borderWidth: 2.6)
+        default:
+            circleBadge(ringWidth: 5, textColor: .black)
         }
+    }
+
+    private func circleBadge(ringWidth: CGFloat, textColor: Color) -> some View {
+        symbolText(color: textColor, inset: ringWidth + 1)
+            .frame(width: 24, height: 24)
+            .background(Color.white, in: Circle())
+            .overlay(
+                Circle()
+                    .strokeBorder(color, lineWidth: ringWidth)
+            )
+    }
+
+    private func squareBadge(cornerRadius: CGFloat, borderWidth: CGFloat) -> some View {
+        symbolText(color: .black, inset: borderWidth + 1)
+            .frame(width: 24, height: 24)
+            .background(Color.white, in: RoundedRectangle(cornerRadius: cornerRadius))
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .strokeBorder(color, lineWidth: borderWidth)
+            )
+    }
+
+    private func symbolText(color: Color, inset: CGFloat) -> some View {
+        Text(symbol)
+            .font(.custom("HelveticaNeue-Bold", fixedSize: symbol.count > 1 ? 10 : 12))
+            .kerning(symbol.count > 1 ? -0.4 : 0)
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
+            .foregroundColor(color)
+            .padding(.horizontal, inset)
     }
 }

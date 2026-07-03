@@ -4,11 +4,11 @@ import Foundation
 
 // MARK: - Schedule Calendar
 
-enum ScheduleCalendar: String, Codable, CaseIterable {
+public enum ScheduleCalendar: String, Codable, CaseIterable {
     case weekday = "Weekday"
     case saturdayHoliday = "SaturdayHoliday"
 
-    static func current(at date: Date = Date()) -> ScheduleCalendar {
+    public static func current(at date: Date = Date()) -> ScheduleCalendar {
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
         let weekday = cal.component(.weekday, from: date)
@@ -19,19 +19,19 @@ enum ScheduleCalendar: String, Codable, CaseIterable {
 
 // MARK: - Delay Check Info
 
-struct DelayCheckInfo: Codable, Hashable {
-    let statusPageURL: String
-    let statusPageURLEn: String
-    let xAccount: String?
-    let checkMethodJa: String
-    let checkMethodEn: String
+public struct DelayCheckInfo: Codable, Hashable {
+    public let statusPageURL: String
+    public let statusPageURLEn: String
+    public let xAccount: String?
+    public let checkMethodJa: String
+    public let checkMethodEn: String
 
-    var localizedCheckMethod: String {
+    public var localizedCheckMethod: String {
         let lang = Locale.current.language.languageCode?.identifier ?? "ja"
         return lang == "ja" ? checkMethodJa : checkMethodEn
     }
 
-    var localizedStatusPageURL: String {
+    public var localizedStatusPageURL: String {
         let lang = Locale.current.language.languageCode?.identifier ?? "ja"
         return lang == "ja" ? statusPageURL : statusPageURLEn
     }
@@ -39,18 +39,18 @@ struct DelayCheckInfo: Codable, Hashable {
 
 // MARK: - Headway Band
 
-struct HeadwayBand: Codable, Hashable {
-    let from: String          // "HH:mm"
-    let headwayMinutes: Double
+public struct HeadwayBand: Codable, Hashable {
+    public let from: String          // "HH:mm"
+    public let headwayMinutes: Double
 }
 
 // MARK: - Service Pattern
 
-struct ServicePattern: Codable, Hashable {
-    let firstDeparture: String  // "HH:mm" at the origin of the direction
-    let lastDeparture: String   // "HH:mm", may exceed 24:00
-    let bands: [HeadwayBand]    // ordered by time
-    let trainType: TrainService.TrainType
+public struct ServicePattern: Codable, Hashable {
+    public let firstDeparture: String  // "HH:mm" at the origin of the direction
+    public let lastDeparture: String   // "HH:mm", may exceed 24:00
+    public let bands: [HeadwayBand]    // ordered by time
+    public let trainType: TrainService.TrainType
 
     init(first: String, last: String, bands: [HeadwayBand], trainType: TrainService.TrainType = .local) {
         self.firstDeparture = first
@@ -62,15 +62,15 @@ struct ServicePattern: Codable, Hashable {
 
 // MARK: - Line Direction
 
-struct StaticLineDirection: Codable, Hashable {
-    let id: String        // e.g. "static.RailDirection:TokyoMetro.Ginza.Asakusa"
-    let nameJa: String    // e.g. "浅草方面"
-    let nameEn: String    // e.g. "For Asakusa"
-    let isAscending: Bool // true: trains run through `stations` in array order; false: reversed
-    let weekday: ServicePattern
-    let saturdayHoliday: ServicePattern
+public struct StaticLineDirection: Codable, Hashable {
+    public let id: String        // e.g. "static.RailDirection:TokyoMetro.Ginza.Asakusa"
+    public let nameJa: String    // e.g. "浅草方面"
+    public let nameEn: String    // e.g. "For Asakusa"
+    public let isAscending: Bool // true: trains run through `stations` in array order; false: reversed
+    public let weekday: ServicePattern
+    public let saturdayHoliday: ServicePattern
 
-    func pattern(for calendar: ScheduleCalendar) -> ServicePattern {
+    public func pattern(for calendar: ScheduleCalendar) -> ServicePattern {
         calendar == .weekday ? weekday : saturdayHoliday
     }
 }
@@ -79,26 +79,26 @@ struct StaticLineDirection: Codable, Hashable {
 
 /// A through-running connection (直通運転): trains that continue past a
 /// junction station onto another line's or operator's tracks.
-struct ThroughService: Codable, Hashable {
+public struct ThroughService: Codable, Hashable {
 
-    enum LineEnd: String, Codable {
+    public enum LineEnd: String, Codable {
         case ascending  // trains travelling in stations-array order continue on
         case descending // trains travelling in reverse array order continue on
     }
 
-    let junctionStationId: String
-    let end: LineEnd
-    let lineNameJa: String   // e.g. "東急東横線"
-    let lineNameEn: String   // e.g. "Tokyu Toyoko Line"
-    let towardJa: String     // e.g. "元町・中華街方面"
-    let towardEn: String     // e.g. "for Motomachi-Chukagai"
+    public let junctionStationId: String
+    public let end: LineEnd
+    public let lineNameJa: String   // e.g. "東急東横線"
+    public let lineNameEn: String   // e.g. "Tokyu Toyoko Line"
+    public let towardJa: String     // e.g. "元町・中華街方面"
+    public let towardEn: String     // e.g. "for Motomachi-Chukagai"
 
-    var localizedLineName: String {
+    public var localizedLineName: String {
         let lang = Locale.current.language.languageCode?.identifier ?? "ja"
         return lang == "ja" ? lineNameJa : lineNameEn
     }
 
-    var localizedToward: String {
+    public var localizedToward: String {
         let lang = Locale.current.language.languageCode?.identifier ?? "ja"
         return lang == "ja" ? towardJa : towardEn
     }
@@ -106,19 +106,19 @@ struct ThroughService: Codable, Hashable {
 
 // MARK: - Static Train Line
 
-struct StaticTrainLine {
-    let id: String          // ODPT-compatible, e.g. "odpt.Railway:JR-East.Yamanote"
-    let nameJa: String
-    let nameEn: String
-    let operatorId: String  // e.g. "odpt.Operator:JR-East"
-    let colorHex: String
-    let stations: [Station]
-    let hopTimesMinutes: [Double] // count == stations.count - 1
-    let directions: [StaticLineDirection]
-    let delayInfo: DelayCheckInfo
-    var throughServices: [ThroughService] = [] // 直通運転
+public struct StaticTrainLine {
+    public let id: String          // ODPT-compatible, e.g. "odpt.Railway:JR-East.Yamanote"
+    public let nameJa: String
+    public let nameEn: String
+    public let operatorId: String  // e.g. "odpt.Operator:JR-East"
+    public let colorHex: String
+    public let stations: [Station]
+    public let hopTimesMinutes: [Double] // count == stations.count - 1
+    public let directions: [StaticLineDirection]
+    public let delayInfo: DelayCheckInfo
+    public var throughServices: [ThroughService] = [] // 直通運転
 
-    var trainLine: TrainLine {
+    public var trainLine: TrainLine {
         TrainLine(
             id: id,
             name: nameJa,
@@ -132,7 +132,7 @@ struct StaticTrainLine {
 
 // MARK: - Static Train Data Store
 
-enum StaticTrainData {
+public enum StaticTrainData {
 
     static let allLines: [StaticTrainLine] =
         JREastLineData.lines
@@ -156,21 +156,20 @@ enum StaticTrainData {
         return map
     }()
 
-    static func line(withId id: String) -> StaticTrainLine? {
+    public static func line(withId id: String) -> StaticTrainLine? {
         linesById[id]
     }
 
-    static func line(containingStationId stationId: String) -> StaticTrainLine? {
+    public static func line(containingStationId stationId: String) -> StaticTrainLine? {
         linesByStationId[stationId]
     }
 
-    static func delayCheckInfo(forLineId lineId: String) -> DelayCheckInfo? {
+    public static func delayCheckInfo(forLineId lineId: String) -> DelayCheckInfo? {
         linesById[lineId]?.delayInfo
     }
 
-    static func trainLines(includeJR: Bool) -> [TrainLine] {
+    public static func trainLines() -> [TrainLine] {
         allLines
-            .filter { includeJR || $0.operatorId != "odpt.Operator:JR-East" }
             .map(\.trainLine)
             .sorted {
                 if $0.operatorId != $1.operatorId {
@@ -180,7 +179,7 @@ enum StaticTrainData {
             }
     }
 
-    static var railDirections: [String: (ja: String, en: String)] {
+    public static var railDirections: [String: (ja: String, en: String)] {
         var map: [String: (ja: String, en: String)] = [:]
         for line in allLines {
             for direction in line.directions {
@@ -193,11 +192,11 @@ enum StaticTrainData {
 
 // MARK: - Static Timetable Generator
 
-enum StaticTimetableGenerator {
+public enum StaticTimetableGenerator {
 
     // MARK: Train Services
 
-    static func services(for line: StaticTrainLine, calendar: ScheduleCalendar) -> [TrainService] {
+    public static func services(for line: StaticTrainLine, calendar: ScheduleCalendar) -> [TrainService] {
         line.directions.flatMap { services(for: line, direction: $0, calendar: calendar) }
     }
 
@@ -235,7 +234,7 @@ enum StaticTimetableGenerator {
 
     // MARK: Station Timetables
 
-    static func stationTimetables(
+    public static func stationTimetables(
         for line: StaticTrainLine,
         stationId: String,
         calendar: ScheduleCalendar

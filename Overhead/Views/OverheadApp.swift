@@ -1,4 +1,5 @@
 import SwiftUI
+import Backbone
 
 // MARK: - App Entry Point
 
@@ -22,10 +23,7 @@ struct OverheadApp: App {
 
         switch url.host {
         case "refresh-delay":
-            // Force refresh delay data and recalculate position
-            Task {
-                await viewModel.forceRefreshDelay()
-            }
+            viewModel.forceRefresh()
         default:
             break
         }
@@ -155,32 +153,12 @@ struct MoreView: View {
     @ObservedObject var viewModel: JourneyViewModel
 
     @AppStorage("showEnglish") private var showEnglish = true
-    @AppStorage("showJRLines") private var showJRLines = false
-    @AppStorage("pollingInterval") private var pollingInterval = 30.0
 
     var body: some View {
         NavigationStack {
             Form {
                 Section("Settings.Section.Display") {
                     Toggle("Settings.Toggle.ShowEnglish", isOn: $showEnglish)
-
-                    VStack(alignment: .leading) {
-                        Text("Settings.Label.PollingInterval")
-                        Slider(value: $pollingInterval, in: 10...120, step: 10)
-                        Text("Settings.Unit.Seconds \(Int(pollingInterval))")
-                            .font(.system(size: 12, design: .monospaced))
-                            .foregroundColor(.secondary)
-                    }
-                }
-
-                Section("Settings.Section.Data") {
-                    Toggle("Settings.Toggle.ShowJRLines", isOn: $showJRLines)
-                    Text("Settings.Label.JRLinesDescription")
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
-                }
-                .onChange(of: showJRLines) { _, newValue in
-                    viewModel.showJRLines = newValue
                 }
 
                 if viewModel.activeJourney != nil {
@@ -215,16 +193,6 @@ struct MoreView: View {
                     }
                 }
 
-                Section("Settings.Section.About") {
-                    HStack {
-                        Text("Settings.Label.DataProvider")
-                        Spacer()
-                        Text("Settings.Label.ODPTCenter")
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
-                    }
-                }
-
                 Section {
                     Link(destination: URL(string: "https://github.com/katagaki/Overhead")!) {
                         HStack {
@@ -239,9 +207,6 @@ struct MoreView: View {
                 }
             }
             .navigationTitle("ViewTitle.More")
-            .onAppear {
-                viewModel.showJRLines = showJRLines
-            }
             .navigationDestination(for: ViewPath.self) { path in
                 switch path {
                 case .attributions:
