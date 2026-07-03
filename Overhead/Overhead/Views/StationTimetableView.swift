@@ -60,7 +60,6 @@ struct StationTimetableView: View {
                 }
             }
 
-            // Where and how to check for delays on this line
             if let delayInfo = viewModel.delayCheckInfo(for: line.id) {
                 serviceStatusSection(delayInfo: delayInfo)
             }
@@ -69,8 +68,6 @@ struct StationTimetableView: View {
 
     // MARK: - Through Services
 
-    /// Footer describing through-running (直通運転) onto other lines in
-    /// this direction of travel.
     @ViewBuilder
     private func throughServiceFooter(for timetable: StationTimetableData) -> some View {
         let throughs = throughServices(for: timetable)
@@ -89,7 +86,6 @@ struct StationTimetableView: View {
         }
     }
 
-    /// Through services that apply to the direction of the given timetable.
     private func throughServices(for timetable: StationTimetableData) -> [ThroughService] {
         guard let staticLine = StaticTrainData.line(withId: line.id),
               let direction = staticLine.directions.first(where: { $0.id == timetable.railDirection })

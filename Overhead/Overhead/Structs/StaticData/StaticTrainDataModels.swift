@@ -1,14 +1,6 @@
 import Foundation
 
 // MARK: - Static Train Data Models
-//
-// Bundled train line data sourced from publicly available information
-// (operator websites, published timetables and route maps), so the app
-// works without relying on the unreliable transit API.
-//
-// Timetables are encoded as service patterns (first/last train plus
-// time-of-day headway bands) per direction and per calendar, from which
-// a full day of departures is generated for every station on the line.
 
 // MARK: - Schedule Calendar
 
@@ -16,7 +8,6 @@ enum ScheduleCalendar: String, Codable, CaseIterable {
     case weekday = "Weekday"
     case saturdayHoliday = "SaturdayHoliday"
 
-    /// The calendar in effect right now in Japan.
     static func current(at date: Date = Date()) -> ScheduleCalendar {
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
@@ -28,17 +19,11 @@ enum ScheduleCalendar: String, Codable, CaseIterable {
 
 // MARK: - Delay Check Info
 
-/// Where and how to check for delays on a line.
 struct DelayCheckInfo: Codable, Hashable {
-    /// Official service status page (Japanese)
     let statusPageURL: String
-    /// Official service status page (English)
     let statusPageURLEn: String
-    /// Official service information account on X (formerly Twitter), if any
     let xAccount: String?
-    /// How to check for delays, in Japanese
     let checkMethodJa: String
-    /// How to check for delays, in English
     let checkMethodEn: String
 
     var localizedCheckMethod: String {
@@ -54,8 +39,6 @@ struct DelayCheckInfo: Codable, Hashable {
 
 // MARK: - Headway Band
 
-/// A period of the day with a constant interval between trains.
-/// Applies from `from` until the next band starts (or the last train).
 struct HeadwayBand: Codable, Hashable {
     let from: String          // "HH:mm"
     let headwayMinutes: Double
@@ -63,7 +46,6 @@ struct HeadwayBand: Codable, Hashable {
 
 // MARK: - Service Pattern
 
-/// Describes a full day of service in one direction for one calendar.
 struct ServicePattern: Codable, Hashable {
     let firstDeparture: String  // "HH:mm" at the origin of the direction
     let lastDeparture: String   // "HH:mm", may exceed 24:00
@@ -84,8 +66,7 @@ struct StaticLineDirection: Codable, Hashable {
     let id: String        // e.g. "static.RailDirection:TokyoMetro.Ginza.Asakusa"
     let nameJa: String    // e.g. "浅草方面"
     let nameEn: String    // e.g. "For Asakusa"
-    /// true: trains run through `stations` in array order; false: reversed
-    let isAscending: Bool
+    let isAscending: Bool // true: trains run through `stations` in array order; false: reversed
     let weekday: ServicePattern
     let saturdayHoliday: ServicePattern
 
@@ -100,15 +81,11 @@ struct StaticLineDirection: Codable, Hashable {
 /// junction station onto another line's or operator's tracks.
 struct ThroughService: Codable, Hashable {
 
-    /// Which travel direction of this line the through service extends.
     enum LineEnd: String, Codable {
-        /// Trains travelling in stations-array order continue on
-        case ascending
-        /// Trains travelling in reverse array order continue on
-        case descending
+        case ascending  // trains travelling in stations-array order continue on
+        case descending // trains travelling in reverse array order continue on
     }
 
-    /// Station on this line where trains leave for the connecting line
     let junctionStationId: String
     let end: LineEnd
     let lineNameJa: String   // e.g. "東急東横線"
@@ -136,14 +113,11 @@ struct StaticTrainLine {
     let operatorId: String  // e.g. "odpt.Operator:JR-East"
     let colorHex: String
     let stations: [Station]
-    /// Run time in minutes between adjacent stations; count == stations.count - 1
-    let hopTimesMinutes: [Double]
+    let hopTimesMinutes: [Double] // count == stations.count - 1
     let directions: [StaticLineDirection]
     let delayInfo: DelayCheckInfo
-    /// Through-running connections onto other lines (直通運転)
-    var throughServices: [ThroughService] = []
+    var throughServices: [ThroughService] = [] // 直通運転
 
-    /// Converts to the app-facing TrainLine model.
     var trainLine: TrainLine {
         TrainLine(
             id: id,
@@ -194,7 +168,6 @@ enum StaticTrainData {
         linesById[lineId]?.delayInfo
     }
 
-    /// App-facing line list, sorted the same way the network path sorted them.
     static func trainLines(includeJR: Bool) -> [TrainLine] {
         allLines
             .filter { includeJR || $0.operatorId != "odpt.Operator:JR-East" }
@@ -207,7 +180,6 @@ enum StaticTrainData {
             }
     }
 
-    /// Direction ID → localized names, for the view model's direction lookup.
     static var railDirections: [String: (ja: String, en: String)] {
         var map: [String: (ja: String, en: String)] = [:]
         for line in allLines {
@@ -221,13 +193,10 @@ enum StaticTrainData {
 
 // MARK: - Static Timetable Generator
 
-/// Generates full-day timetables (per train and per station) from the
-/// encoded service patterns.
 enum StaticTimetableGenerator {
 
     // MARK: Train Services
 
-    /// All train services for a line on the given calendar (both directions).
     static func services(for line: StaticTrainLine, calendar: ScheduleCalendar) -> [TrainService] {
         line.directions.flatMap { services(for: line, direction: $0, calendar: calendar) }
     }
@@ -266,7 +235,6 @@ enum StaticTimetableGenerator {
 
     // MARK: Station Timetables
 
-    /// Full-day departures from one station, grouped by direction.
     static func stationTimetables(
         for line: StaticTrainLine,
         stationId: String,
@@ -311,7 +279,6 @@ enum StaticTimetableGenerator {
         direction.isAscending ? line.stations : Array(line.stations.reversed())
     }
 
-    /// Cumulative travel time from the direction's origin to each station.
     private static func cumulativeMinutes(hopTimes: [Double], ascending: Bool) -> [Double] {
         let hops = ascending ? hopTimes : Array(hopTimes.reversed())
         var result: [Double] = [0]
@@ -322,7 +289,6 @@ enum StaticTimetableGenerator {
         return result
     }
 
-    /// All origin departure times (minutes since midnight) for a pattern.
     private static func departureMinutes(for pattern: ServicePattern) -> [Int] {
         guard let first = parseMinutes(pattern.firstDeparture),
               let last = parseMinutes(pattern.lastDeparture),

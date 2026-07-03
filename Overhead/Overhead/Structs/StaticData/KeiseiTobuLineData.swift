@@ -2,11 +2,8 @@ import Foundation
 
 // MARK: - Keisei & Tobu Line Data
 //
-// Station lists, run times and service patterns for Keisei and Tobu
-// commuter lines, compiled from publicly available route maps and
-// published timetables. Branch lines (Kanamachi, Chiba, Chihara,
-// Higashi-Narita, Sky Access; Tobu Kameido, Daishi, Urban Park, Nikko)
-// are not included.
+// Branch lines not included: Keisei Kanamachi, Chiba, Chihara,
+// Higashi-Narita and Sky Access; Tobu Kameido, Daishi, Urban Park and Nikko.
 
 private func st(_ path: String, _ suffix: String, _ ja: String, _ en: String,
                 _ code: String, _ lat: Double, _ lon: Double) -> Station {

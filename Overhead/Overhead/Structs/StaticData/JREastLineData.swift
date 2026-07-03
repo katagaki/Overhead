@@ -1,9 +1,6 @@
 import Foundation
 
 // MARK: - JR East Line Data
-//
-// Station lists, run times and service patterns compiled from publicly
-// available JR East route maps and published timetables.
 
 private func st(_ line: String, _ suffix: String, _ ja: String, _ en: String,
                 _ code: String, _ lat: Double, _ lon: Double) -> Station {
@@ -29,8 +26,7 @@ enum JREastLineData {
 
     // MARK: Delay Check
 
-    /// JR East posts delays of 15 minutes or more on its Train Operation
-    /// Information page (updated continuously, 24 hours a day).
+    // Delays of 15+ minutes are posted on the Train Operation Information page
     static let delayInfo = DelayCheckInfo(
         statusPageURL: "https://traininfo.jreast.co.jp/train_info/kanto.aspx",
         statusPageURLEn: "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx",

@@ -1,10 +1,6 @@
 import Foundation
 
 // MARK: - Tokyo Metro Line Data
-//
-// Station lists, run times and service patterns for all nine Tokyo Metro
-// lines, compiled from publicly available Tokyo Metro route maps and
-// published timetables.
 
 private func st(_ line: String, _ suffix: String, _ ja: String, _ en: String,
                 _ code: String, _ lat: Double, _ lon: Double) -> Station {
@@ -48,8 +44,7 @@ enum TokyoMetroLineData {
 
     // MARK: Delay Check
 
-    /// Tokyo Metro posts delays of 15 minutes or more on its service
-    /// information page and the official X account.
+    // Delays of 15+ minutes are posted on the service information page
     static let delayInfo = DelayCheckInfo(
         statusPageURL: "https://www.tokyometro.jp/unkou/",
         statusPageURLEn: "https://www.tokyometro.jp/lang_en/unkou/index.html",

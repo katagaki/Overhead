@@ -1,10 +1,6 @@
 import Foundation
 
 // MARK: - JR East Line Data (Extended)
-//
-// Additional JR East lines beyond the initial six, compiled from publicly
-// available JR East route maps, station numbering lists and published
-// timetables.
 
 private func st(_ line: String, _ suffix: String, _ ja: String, _ en: String,
                 _ code: String, _ lat: Double, _ lon: Double) -> Station {

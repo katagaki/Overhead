@@ -2,10 +2,7 @@ import Foundation
 
 // MARK: - Toei Line Data
 //
-// Station lists, run times and service patterns for the four Toei subway
-// lines and the Nippori-Toneri Liner, compiled from publicly available
-// Tokyo Metropolitan Bureau of Transportation route maps and published
-// timetables. The Toden Arakawa streetcar is not included.
+// The Toden Arakawa streetcar is not included.
 
 private func st(_ line: String, _ suffix: String, _ ja: String, _ en: String,
                 _ code: String, _ lat: Double, _ lon: Double) -> Station {
@@ -221,12 +218,8 @@ enum ToeiLineData {
     )
 
     // MARK: - Oedo Line (E)
-    //
-    // The Oedo Line is shaped like a "6": the radial section from
-    // Hikarigaoka joins the loop at Tochomae, and trains continue around
-    // the loop (Roppongi, Daimon, Ryogoku, Iidabashi) back to
-    // Shinjuku-nishiguchi, one stop short of Tochomae. It is modelled
-    // here as a linear line in that running order.
+    // Route is shaped like a "6": modelled as a single linear line in the
+    // actual running order (Hikarigaoka -> loop via Roppongi/Daimon/Ryogoku -> Shinjuku-nishiguchi).
 
     static let oedo = StaticTrainLine(
         id: "odpt.Railway:Toei.Oedo",

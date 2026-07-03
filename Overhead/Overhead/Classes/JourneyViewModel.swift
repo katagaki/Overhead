@@ -180,18 +180,13 @@ final class JourneyViewModel: ObservableObject {
 
         guard !linesLoaded else { return }
 
-        // Lines, stations and timetables ship with the app as static data,
-        // so no network fetch (and no disk cache) is needed.
         availableLines = StaticTrainData.trainLines(includeJR: showJRLines)
         linesLoaded = true
         errorMessage = nil
         loadRailDirections()
-
-        // Passenger surveys are supplementary and still come from the network
         await loadPassengerSurveys()
     }
 
-    /// Pull-to-refresh: rebuilds the line list from bundled data.
     func forceRefreshLines() async {
         guard !isDemoMode else { return }
         linesLoaded = false
@@ -208,8 +203,6 @@ final class JourneyViewModel: ObservableObject {
         isStartingJourney = true
 
         do {
-            // Generate from bundled data, falling back to the API for
-            // lines that aren't bundled
             if timetableCache[line.id] == nil {
                 if let staticLine = StaticTrainData.line(withId: line.id) {
                     timetableCache[line.id] = StaticTimetableGenerator.services(
