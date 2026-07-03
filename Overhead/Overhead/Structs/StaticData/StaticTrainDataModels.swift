@@ -141,31 +141,7 @@ struct StaticTrainLine {
     let directions: [StaticLineDirection]
     let delayInfo: DelayCheckInfo
     /// Through-running connections onto other lines (直通運転)
-    let throughServices: [ThroughService]
-
-    init(
-        id: String,
-        nameJa: String,
-        nameEn: String,
-        operatorId: String,
-        colorHex: String,
-        stations: [Station],
-        hopTimesMinutes: [Double],
-        directions: [StaticLineDirection],
-        delayInfo: DelayCheckInfo,
-        throughServices: [ThroughService] = []
-    ) {
-        self.id = id
-        self.nameJa = nameJa
-        self.nameEn = nameEn
-        self.operatorId = operatorId
-        self.colorHex = colorHex
-        self.stations = stations
-        self.hopTimesMinutes = hopTimesMinutes
-        self.directions = directions
-        self.delayInfo = delayInfo
-        self.throughServices = throughServices
-    }
+    var throughServices: [ThroughService] = []
 
     /// Converts to the app-facing TrainLine model.
     var trainLine: TrainLine {
