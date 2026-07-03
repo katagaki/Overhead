@@ -12,7 +12,7 @@ final class ODPTClient {
         self.consumerKey = consumerKey
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 30
-        self.session = URLSession(configuration: config)
+        self.session = URLSession(configuration: AppUserAgent.applying(to: config))
     }
 
     /// Read the ODPT consumer key from the bundled ODPTKey.plist.

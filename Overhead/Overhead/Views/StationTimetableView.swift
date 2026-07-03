@@ -57,6 +57,49 @@ struct StationTimetableView: View {
                     }
                 }
             }
+
+            // Where and how to check for delays on this line
+            if let delayInfo = viewModel.delayCheckInfo(for: line.id) {
+                serviceStatusSection(delayInfo: delayInfo)
+            }
+        }
+    }
+
+    // MARK: - Service Status
+
+    @ViewBuilder
+    private func serviceStatusSection(delayInfo: DelayCheckInfo) -> some View {
+        Section {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(delayInfo.localizedCheckMethod)
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary)
+
+                if let url = URL(string: delayInfo.localizedStatusPageURL) {
+                    Link(destination: url) {
+                        Label("StationTimetable.ServiceStatus.Open", systemImage: "arrow.up.right.square")
+                            .font(.system(size: 13, weight: .medium))
+                    }
+                }
+
+                if let account = delayInfo.xAccount {
+                    HStack(spacing: 4) {
+                        Image(systemName: "at")
+                            .font(.system(size: 11))
+                        Text(account)
+                            .font(.system(size: 12, design: .monospaced))
+                    }
+                    .foregroundColor(.secondary)
+                }
+            }
+            .padding(.vertical, 2)
+        } header: {
+            HStack(spacing: 6) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundColor(.orange)
+                Text("StationTimetable.ServiceStatus")
+                    .font(.system(size: 14, weight: .semibold))
+            }
         }
     }
 

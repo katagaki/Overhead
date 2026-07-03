@@ -180,80 +180,22 @@ final class JourneyViewModel: ObservableObject {
 
         guard !linesLoaded else { return }
 
-        // Try loading from disk cache first
-        if let cached = TrainLineCache.load(includesJR: showJRLines) {
-            availableLines = cached
-            linesLoaded = true
-
-            // Kick off background directions/surveys load
-            async let directionsTask: () = loadRailDirections()
-            async let surveysTask: () = loadPassengerSurveys()
-            _ = await (directionsTask, surveysTask)
-
-            // If cache is still fresh, skip network fetch entirely
-            if TrainLineCache.isFresh(includesJR: showJRLines) {
-                return
-            }
-
-            // Cache is stale — silently refresh in background
-            await fetchAndCacheLines()
-            return
-        }
-
-        // No cache — must fetch from network
-        isLoading = true
+        // Lines, stations and timetables ship with the app as static data,
+        // so no network fetch (and no disk cache) is needed.
+        availableLines = StaticTrainData.trainLines(includeJR: showJRLines)
+        linesLoaded = true
         errorMessage = nil
-        await fetchAndCacheLines()
-        isLoading = false
+        loadRailDirections()
+
+        // Passenger surveys are supplementary and still come from the network
+        await loadPassengerSurveys()
     }
 
-    /// Pull-to-refresh: always fetches fresh data from the network.
+    /// Pull-to-refresh: rebuilds the line list from bundled data.
     func forceRefreshLines() async {
         guard !isDemoMode else { return }
-        isLoading = true
-        errorMessage = nil
         linesLoaded = false
-        await fetchAndCacheLines()
-        isLoading = false
-    }
-
-    /// Fetches lines from the API and persists them to disk cache.
-    private func fetchAndCacheLines() async {
-        do {
-            var operators = [
-                "odpt.Operator:TokyoMetro",
-                "odpt.Operator:Toei"
-            ]
-            if showJRLines {
-                operators.insert("odpt.Operator:JR-East", at: 0)
-            }
-
-            async let directionsTask: () = loadRailDirections()
-            async let surveysTask: () = loadPassengerSurveys()
-
-            var allLines: [TrainLine] = []
-            for op in operators {
-                let lines = try await apiClient.fetchRailways(operatorId: op)
-                allLines.append(contentsOf: lines)
-            }
-            let sorted = allLines.sorted {
-                if $0.operatorId != $1.operatorId {
-                    return $0.operatorId < $1.operatorId
-                }
-                return $0.nameEn < $1.nameEn
-            }
-            availableLines = sorted
-            linesLoaded = true
-
-            TrainLineCache.save(lines: sorted, includesJR: showJRLines)
-
-            _ = await (directionsTask, surveysTask)
-        } catch {
-            // Only show error if we have no cached data to fall back on
-            if availableLines.isEmpty {
-                errorMessage = "Failed to load lines: \(error.localizedDescription)"
-            }
-        }
+        await loadLines()
     }
 
     // MARK: - Start Journey
@@ -266,9 +208,16 @@ final class JourneyViewModel: ObservableObject {
         isStartingJourney = true
 
         do {
-            // Fetch or use cached timetable
+            // Generate from bundled data, falling back to the API for
+            // lines that aren't bundled
             if timetableCache[line.id] == nil {
-                timetableCache[line.id] = try await apiClient.fetchTrainTimetables(railwayId: line.id)
+                if let staticLine = StaticTrainData.line(withId: line.id) {
+                    timetableCache[line.id] = StaticTimetableGenerator.services(
+                        for: staticLine, calendar: .current()
+                    )
+                } else {
+                    timetableCache[line.id] = try await apiClient.fetchTrainTimetables(railwayId: line.id)
+                }
             }
 
             guard let services = timetableCache[line.id] else {
@@ -398,6 +347,18 @@ final class JourneyViewModel: ObservableObject {
         isLoadingTimetable = true
         stationTimetable = []
 
+        // Generate from bundled data whenever the station is covered
+        if let staticLine = StaticTrainData.line(containingStationId: stationId) {
+            stationTimetable = StaticTimetableGenerator.stationTimetables(
+                for: staticLine,
+                stationId: stationId,
+                calendar: .current()
+            )
+            isLoadingTimetable = false
+            return
+        }
+
+        // Fallback to the API for stations that aren't bundled
         do {
             let data = try await apiClient.fetchStationTimetable(stationId: stationId)
 
@@ -439,14 +400,16 @@ final class JourneyViewModel: ObservableObject {
 
     // MARK: - Rail Directions
 
-    func loadRailDirections() async {
-        guard !isDemoMode, railDirections.isEmpty else { return }
+    func loadRailDirections() {
+        guard railDirections.isEmpty else { return }
+        railDirections = StaticTrainData.railDirections
+    }
 
-        do {
-            railDirections = try await apiClient.fetchRailDirections()
-        } catch {
-            // Silently fail — will fall back to generic names
-        }
+    // MARK: - Delay Check Sources
+
+    /// Where and how to check for delays on a line (from bundled data).
+    func delayCheckInfo(for lineId: String) -> DelayCheckInfo? {
+        StaticTrainData.delayCheckInfo(forLineId: lineId)
     }
 
     /// Returns a localized direction name for a rail direction ID
