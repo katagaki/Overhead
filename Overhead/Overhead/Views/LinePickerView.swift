@@ -53,7 +53,9 @@ struct LinePickerView: View {
         let sectionOrder: [String] = {
             var order = [
                 "odpt.Operator:TokyoMetro",
-                "odpt.Operator:Toei"
+                "odpt.Operator:Toei",
+                "odpt.Operator:Keisei",
+                "odpt.Operator:Tobu"
             ]
             if showJRLines {
                 order.insert("odpt.Operator:JR-East", at: 0)
@@ -63,7 +65,9 @@ struct LinePickerView: View {
         let sectionTitles: [String: String] = [
             "odpt.Operator:JR-East": "JR",
             "odpt.Operator:TokyoMetro": "東京メトロ",
-            "odpt.Operator:Toei": "都営"
+            "odpt.Operator:Toei": "都営",
+            "odpt.Operator:Keisei": "京成",
+            "odpt.Operator:Tobu": "東武"
         ]
 
         List {

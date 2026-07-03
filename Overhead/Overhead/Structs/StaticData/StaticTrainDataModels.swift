@@ -160,7 +160,12 @@ struct StaticTrainLine {
 
 enum StaticTrainData {
 
-    static let allLines: [StaticTrainLine] = JREastLineData.lines + TokyoMetroLineData.lines
+    static let allLines: [StaticTrainLine] =
+        JREastLineData.lines
+        + TokyoMetroLineData.lines
+        + ToeiLineData.lines
+        + KeiseiLineData.lines
+        + TobuLineData.lines
 
     private static let linesById: [String: StaticTrainLine] = Dictionary(
         allLines.map { ($0.id, $0) },
