@@ -14,6 +14,17 @@ private func st(_ line: String, _ suffix: String, _ ja: String, _ en: String,
     )
 }
 
+private func through(_ line: String, _ junctionSuffix: String, _ end: ThroughService.LineEnd,
+                     _ lineJa: String, _ lineEn: String,
+                     _ towardJa: String, _ towardEn: String) -> ThroughService {
+    ThroughService(
+        junctionStationId: "odpt.Station:JR-East.\(line).\(junctionSuffix)",
+        end: end,
+        lineNameJa: lineJa, lineNameEn: lineEn,
+        towardJa: towardJa, towardEn: towardEn
+    )
+}
+
 enum JREastLineData {
 
     // MARK: Delay Check
@@ -35,7 +46,7 @@ enum JREastLineData {
         keihinTohoku,
         saikyo,
         keiyo,
-    ]
+    ] + extendedLines
 
     // MARK: - Yamanote Line (JY)
 
@@ -238,7 +249,13 @@ enum JREastLineData {
                 )
             ),
         ],
-        delayInfo: delayInfo
+        delayInfo: delayInfo,
+        throughServices: [
+            through("ChuoRapid", "Tachikawa", .ascending,
+                    "青梅線", "JR Ome Line", "青梅方面", "for Ome"),
+            through("ChuoRapid", "Takao", .ascending,
+                    "中央本線", "JR Chuo Main Line", "大月方面", "for Otsuki"),
+        ]
     )
 
     // MARK: - Chuo-Sobu Line Local (JB)
@@ -559,7 +576,15 @@ enum JREastLineData {
                 )
             ),
         ],
-        delayInfo: delayInfo
+        delayInfo: delayInfo,
+        throughServices: [
+            through("SaikyoKawagoe", "Osaki", .descending,
+                    "りんかい線", "Rinkai Line", "新木場方面", "for Shin-Kiba"),
+            through("SaikyoKawagoe", "Osaki", .descending,
+                    "相鉄線", "Sotetsu Line", "海老名方面", "for Ebina"),
+            through("SaikyoKawagoe", "Omiya", .ascending,
+                    "川越線", "JR Kawagoe Line", "川越方面", "for Kawagoe"),
+        ]
     )
 
     // MARK: - Keiyo Line (JE)
@@ -647,6 +672,11 @@ enum JREastLineData {
                 )
             ),
         ],
-        delayInfo: delayInfo
+        delayInfo: delayInfo,
+        throughServices: [
+            through("Keiyo", "Soga", .ascending,
+                    "内房線・外房線", "JR Uchibo & Sotobo Lines",
+                    "君津・上総一ノ宮方面", "for Kimitsu & Kazusa-Ichinomiya"),
+        ]
     )
 }

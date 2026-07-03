@@ -94,6 +94,39 @@ struct StaticLineDirection: Codable, Hashable {
     }
 }
 
+// MARK: - Through Service
+
+/// A through-running connection (直通運転): trains that continue past a
+/// junction station onto another line's or operator's tracks.
+struct ThroughService: Codable, Hashable {
+
+    /// Which travel direction of this line the through service extends.
+    enum LineEnd: String, Codable {
+        /// Trains travelling in stations-array order continue on
+        case ascending
+        /// Trains travelling in reverse array order continue on
+        case descending
+    }
+
+    /// Station on this line where trains leave for the connecting line
+    let junctionStationId: String
+    let end: LineEnd
+    let lineNameJa: String   // e.g. "東急東横線"
+    let lineNameEn: String   // e.g. "Tokyu Toyoko Line"
+    let towardJa: String     // e.g. "元町・中華街方面"
+    let towardEn: String     // e.g. "for Motomachi-Chukagai"
+
+    var localizedLineName: String {
+        let lang = Locale.current.language.languageCode?.identifier ?? "ja"
+        return lang == "ja" ? lineNameJa : lineNameEn
+    }
+
+    var localizedToward: String {
+        let lang = Locale.current.language.languageCode?.identifier ?? "ja"
+        return lang == "ja" ? towardJa : towardEn
+    }
+}
+
 // MARK: - Static Train Line
 
 struct StaticTrainLine {
@@ -107,6 +140,32 @@ struct StaticTrainLine {
     let hopTimesMinutes: [Double]
     let directions: [StaticLineDirection]
     let delayInfo: DelayCheckInfo
+    /// Through-running connections onto other lines (直通運転)
+    let throughServices: [ThroughService]
+
+    init(
+        id: String,
+        nameJa: String,
+        nameEn: String,
+        operatorId: String,
+        colorHex: String,
+        stations: [Station],
+        hopTimesMinutes: [Double],
+        directions: [StaticLineDirection],
+        delayInfo: DelayCheckInfo,
+        throughServices: [ThroughService] = []
+    ) {
+        self.id = id
+        self.nameJa = nameJa
+        self.nameEn = nameEn
+        self.operatorId = operatorId
+        self.colorHex = colorHex
+        self.stations = stations
+        self.hopTimesMinutes = hopTimesMinutes
+        self.directions = directions
+        self.delayInfo = delayInfo
+        self.throughServices = throughServices
+    }
 
     /// Converts to the app-facing TrainLine model.
     var trainLine: TrainLine {

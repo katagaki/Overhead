@@ -55,6 +55,8 @@ struct StationTimetableView: View {
                         Text(timetable.localizedDirectionName)
                             .font(.system(size: 14, weight: .semibold))
                     }
+                } footer: {
+                    throughServiceFooter(for: timetable)
                 }
             }
 
@@ -63,6 +65,45 @@ struct StationTimetableView: View {
                 serviceStatusSection(delayInfo: delayInfo)
             }
         }
+    }
+
+    // MARK: - Through Services
+
+    /// Footer describing through-running (直通運転) onto other lines in
+    /// this direction of travel.
+    @ViewBuilder
+    private func throughServiceFooter(for timetable: StationTimetableData) -> some View {
+        let throughs = throughServices(for: timetable)
+        if !throughs.isEmpty {
+            VStack(alignment: .leading, spacing: 4) {
+                ForEach(throughs, id: \.self) { through in
+                    HStack(alignment: .top, spacing: 4) {
+                        Image(systemName: "arrow.triangle.branch")
+                            .font(.system(size: 10))
+                        Text("StationTimetable.ThroughService \(junctionName(for: through)) \(through.localizedLineName) \(through.localizedToward)")
+                            .font(.system(size: 12))
+                    }
+                    .foregroundColor(.secondary)
+                }
+            }
+        }
+    }
+
+    /// Through services that apply to the direction of the given timetable.
+    private func throughServices(for timetable: StationTimetableData) -> [ThroughService] {
+        guard let staticLine = StaticTrainData.line(withId: line.id),
+              let direction = staticLine.directions.first(where: { $0.id == timetable.railDirection })
+        else { return [] }
+
+        return staticLine.throughServices.filter {
+            ($0.end == .ascending) == direction.isAscending
+        }
+    }
+
+    private func junctionName(for through: ThroughService) -> String {
+        line.stations.first(where: { $0.id == through.junctionStationId })?.localizedName
+            ?? through.junctionStationId.components(separatedBy: ".").last
+            ?? through.junctionStationId
     }
 
     // MARK: - Service Status

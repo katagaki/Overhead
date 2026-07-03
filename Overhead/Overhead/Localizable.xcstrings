@@ -2787,6 +2787,41 @@
         }
       }
     },
+    "StationTimetable.ThroughService %@ %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@から%2$@（%3$@）へ直通運転する列車があります"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Some trains continue past %1$@ onto the %2$@ (%3$@)"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@에서 %2$@(%3$@)(으)로 직통 운행하는 열차가 있습니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "部分列车从%1$@直通运行至%2$@（%3$@）"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "部分列車從%1$@直通運行至%2$@（%3$@）"
+          }
+        }
+      }
+    },
     "StationTimetable.LastTrain": {
       "localizations": {
         "en": {
