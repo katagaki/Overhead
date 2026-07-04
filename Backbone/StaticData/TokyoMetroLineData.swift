@@ -31,12 +31,14 @@ private func direction(_ line: String, _ suffix: String, _ ja: String, _ en: Str
 
 private func through(_ line: String, _ junctionSuffix: String, _ end: ThroughService.LineEnd,
                      _ lineJa: String, _ lineEn: String,
-                     _ towardJa: String, _ towardEn: String) -> ThroughService {
+                     _ towardJa: String, _ towardEn: String,
+                     to connectingLineId: String? = nil) -> ThroughService {
     ThroughService(
         junctionStationId: "odpt.Station:TokyoMetro.\(line).\(junctionSuffix)",
         end: end,
         lineNameJa: lineJa, lineNameEn: lineEn,
-        towardJa: towardJa, towardEn: towardEn
+        towardJa: towardJa, towardEn: towardEn,
+        connectingLineId: connectingLineId
     )
 }
 
@@ -205,7 +207,8 @@ enum TokyoMetroLineData {
         throughServices: [
             through("Hibiya", "KitaSenju", .ascending,
                     "東武スカイツリーライン", "Tobu Skytree Line",
-                    "東武動物公園・南栗橋方面", "for Tobu-Dobutsu-Koen & Minami-Kurihashi"),
+                    "東武動物公園・南栗橋方面", "for Tobu-Dobutsu-Koen & Minami-Kurihashi",
+                    to: "odpt.Railway:Tobu.TobuSkytree"),
         ]
     )
 
@@ -261,13 +264,15 @@ enum TokyoMetroLineData {
         throughServices: [
             through("Tozai", "Nakano", .descending,
                     "JR中央・総武線各駅停車", "JR Chuo-Sobu Local Line",
-                    "三鷹方面", "for Mitaka"),
+                    "三鷹方面", "for Mitaka",
+                    to: "odpt.Railway:JR-East.ChuoSobuLocal"),
             through("Tozai", "NishiFunabashi", .ascending,
                     "東葉高速線", "Toyo Rapid Line",
                     "東葉勝田台方面", "for Toyo-Katsutadai"),
             through("Tozai", "NishiFunabashi", .ascending,
                     "JR総武線各駅停車", "JR Sobu Local Line",
-                    "津田沼方面", "for Tsudanuma"),
+                    "津田沼方面", "for Tsudanuma",
+                    to: "odpt.Railway:JR-East.ChuoSobuLocal"),
         ]
     )
 
@@ -314,10 +319,12 @@ enum TokyoMetroLineData {
         throughServices: [
             through("Chiyoda", "Ayase", .ascending,
                     "JR常磐線各駅停車", "JR Joban Local Line",
-                    "取手方面", "for Toride"),
+                    "取手方面", "for Toride",
+                    to: "odpt.Railway:JR-East.JobanLocal"),
             through("Chiyoda", "YoyogiUehara", .descending,
-                    "小田急線", "Odakyu Line",
-                    "本厚木・伊勢原方面", "for Hon-Atsugi & Isehara"),
+                    "小田急小田原線", "Odakyu Odawara Line",
+                    "本厚木・伊勢原方面", "for Hon-Atsugi & Isehara",
+                    to: "odpt.Railway:Odakyu.Odawara"),
         ]
     )
 
@@ -368,7 +375,8 @@ enum TokyoMetroLineData {
         throughServices: [
             through("Yurakucho", "Wakoshi", .descending,
                     "東武東上線", "Tobu Tojo Line",
-                    "川越市・森林公園方面", "for Kawagoeshi & Shinrin-Koen"),
+                    "川越市・森林公園方面", "for Kawagoeshi & Shinrin-Koen",
+                    to: "odpt.Railway:Tobu.Tojo"),
             through("Yurakucho", "KotakeMukaihara", .descending,
                     "西武有楽町線・池袋線", "Seibu Yurakucho & Ikebukuro Lines",
                     "所沢・飯能方面", "for Tokorozawa & Hanno"),
@@ -415,7 +423,8 @@ enum TokyoMetroLineData {
                     "中央林間方面", "for Chuo-Rinkan"),
             through("Hanzomon", "Oshiage", .ascending,
                     "東武スカイツリーライン", "Tobu Skytree Line",
-                    "久喜・南栗橋方面", "for Kuki & Minami-Kurihashi"),
+                    "久喜・南栗橋方面", "for Kuki & Minami-Kurihashi",
+                    to: "odpt.Railway:Tobu.TobuSkytree"),
         ]
     )
 
@@ -510,7 +519,8 @@ enum TokyoMetroLineData {
                     "横浜・元町・中華街方面", "for Yokohama & Motomachi-Chukagai"),
             through("Fukutoshin", "Wakoshi", .descending,
                     "東武東上線", "Tobu Tojo Line",
-                    "川越市・森林公園方面", "for Kawagoeshi & Shinrin-Koen"),
+                    "川越市・森林公園方面", "for Kawagoeshi & Shinrin-Koen",
+                    to: "odpt.Railway:Tobu.Tojo"),
             through("Fukutoshin", "KotakeMukaihara", .descending,
                     "西武有楽町線・池袋線", "Seibu Yurakucho & Ikebukuro Lines",
                     "所沢・飯能方面", "for Tokorozawa & Hanno"),

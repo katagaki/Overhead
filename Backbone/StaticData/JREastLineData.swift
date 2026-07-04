@@ -13,12 +13,14 @@ private func st(_ line: String, _ suffix: String, _ ja: String, _ en: String,
 
 private func through(_ line: String, _ junctionSuffix: String, _ end: ThroughService.LineEnd,
                      _ lineJa: String, _ lineEn: String,
-                     _ towardJa: String, _ towardEn: String) -> ThroughService {
+                     _ towardJa: String, _ towardEn: String,
+                     to connectingLineId: String? = nil) -> ThroughService {
     ThroughService(
         junctionStationId: "odpt.Station:JR-East.\(line).\(junctionSuffix)",
         end: end,
         lineNameJa: lineJa, lineNameEn: lineEn,
-        towardJa: towardJa, towardEn: towardEn
+        towardJa: towardJa, towardEn: towardEn,
+        connectingLineId: connectingLineId
     )
 }
 
@@ -248,7 +250,8 @@ enum JREastLineData {
         delayInfo: delayInfo,
         throughServices: [
             through("ChuoRapid", "Tachikawa", .ascending,
-                    "青梅線", "JR Ome Line", "青梅方面", "for Ome"),
+                    "青梅線", "JR Ome Line", "青梅方面", "for Ome",
+                    to: "odpt.Railway:JR-East.Ome"),
             through("ChuoRapid", "Takao", .ascending,
                     "中央本線", "JR Chuo Main Line", "大月方面", "for Otsuki"),
         ]
@@ -363,7 +366,17 @@ enum JREastLineData {
                 )
             ),
         ],
-        delayInfo: delayInfo
+        delayInfo: delayInfo,
+        throughServices: [
+            through("ChuoSobuLocal", "Nakano", .ascending,
+                    "東京メトロ東西線", "Tokyo Metro Tozai Line",
+                    "西船橋方面", "for Nishi-funabashi",
+                    to: "odpt.Railway:TokyoMetro.Tozai"),
+            through("ChuoSobuLocal", "NishiFunabashi", .descending,
+                    "東京メトロ東西線", "Tokyo Metro Tozai Line",
+                    "中野方面", "for Nakano",
+                    to: "odpt.Railway:TokyoMetro.Tozai"),
+        ]
     )
 
     // MARK: - Keihin-Tohoku Line (JK, incl. Negishi Line)
@@ -483,7 +496,13 @@ enum JREastLineData {
                 )
             ),
         ],
-        delayInfo: delayInfo
+        delayInfo: delayInfo,
+        throughServices: [
+            through("KeihinTohoku", "HigashiKanagawa", .ascending,
+                    "横浜線", "JR Yokohama Line",
+                    "町田・八王子方面", "for Machida & Hachioji",
+                    to: "odpt.Railway:JR-East.Yokohama"),
+        ]
     )
 
     // MARK: - Saikyo Line (JA)

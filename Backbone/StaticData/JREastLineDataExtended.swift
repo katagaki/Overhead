@@ -33,12 +33,14 @@ private func direction(_ line: String, _ suffix: String, _ ja: String, _ en: Str
 
 private func through(_ line: String, _ junctionSuffix: String, _ end: ThroughService.LineEnd,
                      _ lineJa: String, _ lineEn: String,
-                     _ towardJa: String, _ towardEn: String) -> ThroughService {
+                     _ towardJa: String, _ towardEn: String,
+                     to connectingLineId: String? = nil) -> ThroughService {
     ThroughService(
         junctionStationId: "odpt.Station:JR-East.\(line).\(junctionSuffix)",
         end: end,
         lineNameJa: lineJa, lineNameEn: lineEn,
-        towardJa: towardJa, towardEn: towardEn
+        towardJa: towardJa, towardEn: towardEn,
+        connectingLineId: connectingLineId
     )
 }
 
@@ -91,7 +93,8 @@ extension JREastLineData {
         delayInfo: delayInfo,
         throughServices: [
             through("JobanRapid", "Ueno", .descending,
-                    "上野東京ライン", "Ueno-Tokyo Line", "品川方面", "for Shinagawa"),
+                    "上野東京ライン", "Ueno-Tokyo Line", "品川方面", "for Shinagawa",
+                    to: "odpt.Railway:JR-East.Tokaido"),
             through("JobanRapid", "Toride", .ascending,
                     "常磐線", "JR Joban Line", "土浦・水戸方面", "for Tsuchiura & Mito"),
         ]
@@ -142,7 +145,8 @@ extension JREastLineData {
         throughServices: [
             through("JobanLocal", "Ayase", .descending,
                     "東京メトロ千代田線", "Tokyo Metro Chiyoda Line",
-                    "代々木上原・小田急線方面", "for Yoyogi-Uehara & the Odakyu Line"),
+                    "代々木上原・小田急線方面", "for Yoyogi-Uehara & the Odakyu Line",
+                    to: "odpt.Railway:TokyoMetro.Chiyoda"),
         ]
     )
 
@@ -265,8 +269,21 @@ extension JREastLineData {
         delayInfo: delayInfo,
         throughServices: [
             through("Tokaido", "Tokyo", .descending,
-                    "上野東京ライン", "Ueno-Tokyo Line",
-                    "宇都宮線・高崎線・常磐線方面", "for the Utsunomiya, Takasaki & Joban Lines"),
+                    "宇都宮線（上野東京ライン）", "JR Utsunomiya Line (via Ueno-Tokyo Line)",
+                    "宇都宮方面", "for Utsunomiya",
+                    to: "odpt.Railway:JR-East.Utsunomiya"),
+            through("Tokaido", "Tokyo", .descending,
+                    "高崎線（上野東京ライン）", "JR Takasaki Line (via Ueno-Tokyo Line)",
+                    "高崎方面", "for Takasaki",
+                    to: "odpt.Railway:JR-East.Takasaki"),
+            through("Tokaido", "Tokyo", .descending,
+                    "常磐線（上野東京ライン）", "JR Joban Line (via Ueno-Tokyo Line)",
+                    "取手・土浦方面", "for Toride & Tsuchiura",
+                    to: "odpt.Railway:JR-East.JobanRapid"),
+            through("Tokaido", "Ofuna", .descending,
+                    "湘南新宿ライン", "Shonan-Shinjuku Line",
+                    "渋谷・新宿方面", "for Shibuya & Shinjuku",
+                    to: "odpt.Railway:JR-East.ShonanShinjuku"),
             through("Tokaido", "Atami", .ascending,
                     "伊東線", "JR Ito Line", "伊東方面", "for Ito"),
         ]
@@ -323,11 +340,17 @@ extension JREastLineData {
         delayInfo: delayInfo,
         throughServices: [
             through("ShonanShinjuku", "Omiya", .ascending,
-                    "宇都宮線・高崎線", "JR Utsunomiya & Takasaki Lines",
-                    "宇都宮・高崎方面", "for Utsunomiya & Takasaki"),
+                    "宇都宮線", "JR Utsunomiya Line",
+                    "宇都宮方面", "for Utsunomiya",
+                    to: "odpt.Railway:JR-East.Utsunomiya"),
+            through("ShonanShinjuku", "Omiya", .ascending,
+                    "高崎線", "JR Takasaki Line",
+                    "高崎方面", "for Takasaki",
+                    to: "odpt.Railway:JR-East.Takasaki"),
             through("ShonanShinjuku", "Ofuna", .descending,
                     "東海道線", "JR Tokaido Line",
-                    "藤沢・小田原方面", "for Fujisawa & Odawara"),
+                    "藤沢・小田原方面", "for Fujisawa & Odawara",
+                    to: "odpt.Railway:JR-East.Tokaido"),
         ]
     )
 
@@ -388,7 +411,12 @@ extension JREastLineData {
         throughServices: [
             through("Utsunomiya", "Tokyo", .descending,
                     "東海道線（上野東京ライン）", "JR Tokaido Line (via Ueno-Tokyo Line)",
-                    "横浜・熱海方面", "for Yokohama & Atami"),
+                    "横浜・熱海方面", "for Yokohama & Atami",
+                    to: "odpt.Railway:JR-East.Tokaido"),
+            through("Utsunomiya", "Omiya", .descending,
+                    "湘南新宿ライン", "Shonan-Shinjuku Line",
+                    "新宿・横浜方面", "for Shinjuku & Yokohama",
+                    to: "odpt.Railway:JR-East.ShonanShinjuku"),
         ]
     )
 
@@ -450,7 +478,12 @@ extension JREastLineData {
         throughServices: [
             through("Takasaki", "Tokyo", .descending,
                     "東海道線（上野東京ライン）", "JR Tokaido Line (via Ueno-Tokyo Line)",
-                    "横浜・熱海方面", "for Yokohama & Atami"),
+                    "横浜・熱海方面", "for Yokohama & Atami",
+                    to: "odpt.Railway:JR-East.Tokaido"),
+            through("Takasaki", "Omiya", .descending,
+                    "湘南新宿ライン", "Shonan-Shinjuku Line",
+                    "新宿・横浜方面", "for Shinjuku & Yokohama",
+                    to: "odpt.Railway:JR-East.ShonanShinjuku"),
             through("Takasaki", "Takasaki", .ascending,
                     "両毛線", "JR Ryomo Line", "前橋方面", "for Maebashi"),
         ]
@@ -509,7 +542,8 @@ extension JREastLineData {
         throughServices: [
             through("Yokohama", "HigashiKanagawa", .descending,
                     "根岸線", "JR Negishi Line",
-                    "桜木町・大船方面", "for Sakuragicho & Ofuna"),
+                    "桜木町・大船方面", "for Sakuragicho & Ofuna",
+                    to: "odpt.Railway:JR-East.KeihinTohoku"),
         ]
     )
 
@@ -630,7 +664,8 @@ extension JREastLineData {
         throughServices: [
             through("Musashino", "NishiFunabashi", .descending,
                     "京葉線", "JR Keiyo Line",
-                    "東京・海浜幕張方面", "for Tokyo & Kaihim-Makuhari"),
+                    "東京・海浜幕張方面", "for Tokyo & Kaihim-Makuhari",
+                    to: "odpt.Railway:JR-East.Keiyo"),
         ]
     )
 
@@ -677,7 +712,12 @@ extension JREastLineData {
         delayInfo: delayInfo,
         throughServices: [
             through("Ome", "Tachikawa", .descending,
-                    "中央線快速", "JR Chuo Rapid Line", "東京方面", "for Tokyo"),
+                    "中央線快速", "JR Chuo Rapid Line", "東京方面", "for Tokyo",
+                    to: "odpt.Railway:JR-East.ChuoRapid"),
+            through("Ome", "Haijima", .ascending,
+                    "五日市線", "JR Itsukaichi Line",
+                    "武蔵五日市方面", "for Musashi-Itsukaichi",
+                    to: "odpt.Railway:JR-East.Itsukaichi"),
             through("Ome", "Ome", .ascending,
                     "青梅線（東京アドベンチャーライン）", "JR Ome Line (Tokyo Adventure Line)",
                     "奥多摩方面", "for Okutama"),
@@ -721,7 +761,8 @@ extension JREastLineData {
         delayInfo: delayInfo,
         throughServices: [
             through("Itsukaichi", "Haijima", .descending,
-                    "青梅線・中央線", "JR Ome & Chuo Lines", "立川方面", "for Tachikawa"),
+                    "青梅線・中央線", "JR Ome & Chuo Lines", "立川方面", "for Tachikawa",
+                    to: "odpt.Railway:JR-East.Ome"),
         ]
     )
 }
