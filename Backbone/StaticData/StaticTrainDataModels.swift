@@ -77,8 +77,7 @@ public struct StaticLineDirection: Codable, Hashable {
 
 // MARK: - Through Service
 
-/// A through-running connection (直通運転): trains that continue past a
-/// junction station onto another line's or operator's tracks.
+/// A through-running connection (直通運転) past a junction station.
 public struct ThroughService: Codable, Hashable {
 
     public enum LineEnd: String, Codable {
@@ -92,6 +91,8 @@ public struct ThroughService: Codable, Hashable {
     public let lineNameEn: String   // e.g. "Tokyu Toyoko Line"
     public let towardJa: String     // e.g. "元町・中華街方面"
     public let towardEn: String     // e.g. "for Motomachi-Chukagai"
+    // Set when the connecting line is bundled in the app; nil for external operators
+    public var connectingLineId: String? = nil
 
     public var localizedLineName: String {
         let lang = Locale.current.language.languageCode?.identifier ?? "ja"
@@ -140,6 +141,7 @@ public enum StaticTrainData {
         + ToeiLineData.lines
         + KeiseiLineData.lines
         + TobuLineData.lines
+        + OdakyuLineData.lines
 
     private static let linesById: [String: StaticTrainLine] = Dictionary(
         allLines.map { ($0.id, $0) },
@@ -187,6 +189,162 @@ public enum StaticTrainData {
             }
         }
         return map
+    }
+
+    // MARK: Through Services (直通運転)
+
+    /// Stations reachable beyond a junction via a through service onto a bundled line.
+    public struct ThroughDestinationGroup {
+        public let service: ThroughService
+        public let connectingLine: StaticTrainLine
+        /// Stations past the junction on the connecting line, in travel order.
+        public let stations: [Station]
+    }
+
+    /// Through-service destination groups for a line, limited to services that
+    /// continue onto lines bundled in the app. When `boardingStationId` is given,
+    /// only junctions reachable from that station (without reversing) are returned.
+    public static func throughDestinations(
+        fromLineId lineId: String,
+        boardingStationId: String? = nil
+    ) -> [ThroughDestinationGroup] {
+        guard let line = linesById[lineId] else { return [] }
+        return line.throughServices.compactMap { service in
+            if let boardingStationId {
+                guard let fromIdx = line.stations.firstIndex(where: { $0.id == boardingStationId }),
+                      let jIdx = line.stations.firstIndex(where: { $0.id == service.junctionStationId })
+                else { return nil }
+                switch service.end {
+                case .ascending: guard fromIdx <= jIdx else { return nil }
+                case .descending: guard fromIdx >= jIdx else { return nil }
+                }
+            }
+            return destinationGroup(for: service, on: line)
+        }
+    }
+
+    private static func destinationGroup(
+        for service: ThroughService,
+        on line: StaticTrainLine
+    ) -> ThroughDestinationGroup? {
+        guard let targetId = service.connectingLineId,
+              let target = linesById[targetId],
+              let junction = line.stations.first(where: { $0.id == service.junctionStationId }),
+              let jIdx = target.stations.firstIndex(where: { $0.name == junction.name })
+        else { return nil }
+
+        // Travel direction on the connecting line: prefer the reciprocal through
+        // service at the same junction (incoming trains run opposite to it);
+        // otherwise a junction at either end of the line fixes the direction.
+        let ascending: Bool
+        if let reciprocal = target.throughServices.first(where: { ts in
+            target.stations.first(where: { $0.id == ts.junctionStationId })?.name == junction.name
+        }) {
+            ascending = reciprocal.end == .descending
+        } else if jIdx == 0 {
+            ascending = true
+        } else if jIdx == target.stations.count - 1 {
+            ascending = false
+        } else {
+            return nil
+        }
+
+        let beyond = ascending
+            ? Array(target.stations[(jIdx + 1)...])
+            : Array(target.stations[..<jIdx].reversed())
+        guard !beyond.isEmpty else { return nil }
+        return ThroughDestinationGroup(service: service, connectingLine: target, stations: beyond)
+    }
+
+    /// A journey line resolved from a boarding and alighting station, spanning
+    /// a through-service junction onto a second line when necessary.
+    public struct ResolvedJourneyLine {
+        public let staticLine: StaticTrainLine
+        public let isThrough: Bool
+        public let throughService: ThroughService?
+    }
+
+    /// Resolves the line to ride from `fromStationId` (on the line `lineId`)
+    /// to `toStationId`, which may sit past a 直通 junction on a connecting line.
+    public static func resolveJourneyLine(
+        lineId: String,
+        fromStationId: String,
+        toStationId: String
+    ) -> ResolvedJourneyLine? {
+        guard let line = linesById[lineId],
+              line.stations.contains(where: { $0.id == fromStationId })
+        else { return nil }
+
+        if line.stations.contains(where: { $0.id == toStationId }) {
+            return ResolvedJourneyLine(staticLine: line, isThrough: false, throughService: nil)
+        }
+
+        for group in throughDestinations(fromLineId: lineId, boardingStationId: fromStationId)
+        where group.stations.contains(where: { $0.id == toStationId }) {
+            guard let composite = compositeLine(origin: line, group: group) else { continue }
+            return ResolvedJourneyLine(staticLine: composite, isThrough: true, throughService: group.service)
+        }
+        return nil
+    }
+
+    /// Builds a single linear line covering the origin line up to the junction
+    /// plus the connecting line beyond it, in through-travel order.
+    private static func compositeLine(
+        origin: StaticTrainLine,
+        group: ThroughDestinationGroup
+    ) -> StaticTrainLine? {
+        let service = group.service
+        guard let jIdx = origin.stations.firstIndex(where: { $0.id == service.junctionStationId })
+        else { return nil }
+        let originAscending = service.end == .ascending
+
+        let originStations: [Station]
+        let originHops: [Double]
+        if originAscending {
+            originStations = Array(origin.stations[...jIdx])
+            originHops = Array(origin.hopTimesMinutes[..<jIdx])
+        } else {
+            originStations = Array(origin.stations[jIdx...].reversed())
+            originHops = Array(origin.hopTimesMinutes[jIdx...].reversed())
+        }
+
+        let target = group.connectingLine
+        guard let junctionName = originStations.last?.name,
+              let tIdx = target.stations.firstIndex(where: { $0.name == junctionName }),
+              let firstBeyond = group.stations.first,
+              let bIdx = target.stations.firstIndex(where: { $0.id == firstBeyond.id })
+        else { return nil }
+
+        let targetHops: [Double] = bIdx > tIdx
+            ? Array(target.hopTimesMinutes[tIdx...])
+            : Array(target.hopTimesMinutes[..<tIdx].reversed())
+
+        let stations = originStations + group.stations
+        let hops = originHops + targetHops
+        guard hops.count == stations.count - 1 else { return nil }
+
+        let basis = origin.directions.first(where: { $0.isAscending == originAscending })
+            ?? origin.directions[0]
+        let direction = StaticLineDirection(
+            id: "static.RailDirection:Composite.\(origin.id).\(target.id)",
+            nameJa: service.towardJa,
+            nameEn: service.towardEn,
+            isAscending: true,
+            weekday: basis.weekday,
+            saturdayHoliday: basis.saturdayHoliday
+        )
+
+        return StaticTrainLine(
+            id: "\(origin.id)+\(target.id)",
+            nameJa: "\(origin.nameJa)〜\(target.nameJa)",
+            nameEn: "\(origin.nameEn) – \(target.nameEn)",
+            operatorId: origin.operatorId,
+            colorHex: origin.colorHex,
+            stations: stations,
+            hopTimesMinutes: hops,
+            directions: [direction],
+            delayInfo: origin.delayInfo
+        )
     }
 }
 
