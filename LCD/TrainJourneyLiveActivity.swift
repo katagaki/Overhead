@@ -7,13 +7,11 @@ import ActivityKit
 struct TrainJourneyLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: TrainJourneyAttributes.self) { context in
-            // Lock Screen / Banner presentation
             LockScreenLiveActivityView(context: context)
                 .containerBackground(.clear, for: .widget)
 
         } dynamicIsland: { context in
             DynamicIsland {
-                // Expanded Dynamic Island
                 DynamicIslandExpandedRegion(.leading) {
                     EmptyView()
                 }
@@ -29,9 +27,7 @@ struct TrainJourneyLiveActivity: Widget {
 
                 DynamicIslandExpandedRegion(.bottom) {
                     VStack(spacing: 8) {
-                        // Two-column info row
                         HStack {
-                            // Left column: line info
                             HStack(spacing: 6) {
                                 if !context.attributes.lineSymbol.isEmpty {
                                     LCDLineSymbolBadge(
@@ -62,7 +58,6 @@ struct TrainJourneyLiveActivity: Widget {
 
                             Spacer()
 
-                            // Right column: status + ETA
                             VStack(alignment: .trailing, spacing: 1) {
                                 if context.state.isDelayed {
                                     Text("LiveActivity.Delay.Minutes \(context.state.delayMinutes)")
@@ -79,7 +74,6 @@ struct TrainJourneyLiveActivity: Widget {
                             }
                         }
 
-                        // Next station + refresh row
                         HStack {
                             HStack(spacing: 4) {
                                 Image(systemName: "arrow.right")
@@ -167,7 +161,6 @@ struct LockScreenLiveActivityView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header: line name + tracking mode + delay
             HStack {
                 HStack(spacing: 8) {
                     if !context.attributes.lineSymbol.isEmpty {
@@ -213,7 +206,6 @@ struct LockScreenLiveActivityView: View {
             .padding(.top, 12)
             .padding(.bottom, 8)
 
-            // LCD line diagram
             LCDLineView(
                 stationNames: context.attributes.stationNames,
                 stationCount: context.attributes.stationCount,
@@ -224,7 +216,6 @@ struct LockScreenLiveActivityView: View {
             )
             .padding(.horizontal, 16)
 
-            // Footer: next station + ETA + refresh button
             HStack {
                 VStack(alignment: .leading, spacing: 1) {
                     Text("Label.NextStation")

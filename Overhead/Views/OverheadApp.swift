@@ -17,7 +17,6 @@ struct OverheadApp: App {
         }
     }
 
-    /// Handle deep links from Live Activity buttons
     private func handleDeepLink(_ url: URL) {
         guard url.scheme == "overhead" else { return }
 
@@ -45,7 +44,6 @@ struct RootView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            // Journey tab
             Group {
                 if viewModel.activeJourney != nil {
                     JourneyView(viewModel: viewModel)
@@ -61,7 +59,6 @@ struct RootView: View {
             }
             .tag(Tab.journey)
 
-            // Routes tab
             RoutesView(viewModel: viewModel)
                 .tabItem {
                     Image(systemName: "bookmark.fill")
@@ -69,7 +66,6 @@ struct RootView: View {
                 }
                 .tag(Tab.routes)
 
-            // Lines tab
             LinePickerView(viewModel: viewModel)
                 .tabItem {
                     Image(systemName: "map")
@@ -77,7 +73,6 @@ struct RootView: View {
                 }
                 .tag(Tab.lines)
 
-            // More
             MoreView(viewModel: viewModel)
                 .tabItem {
                     Image(systemName: "ellipsis")

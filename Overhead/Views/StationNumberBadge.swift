@@ -18,14 +18,13 @@ struct StationNumberBadge: View {
         case regular  // For journey view station labels
     }
 
-    /// Parse "JC05" → ("JC", "05"), "G01" → ("G", "01"), "M08" → ("M", "08")
     private var parsed: (prefix: String, number: String) {
         let letters = code.prefix(while: \.isLetter)
         let digits = code.drop(while: \.isLetter)
         return (String(letters), String(digits))
     }
 
-    /// JR station codes start with "J" (JC, JY, JK, JB, JA, JE, JH, etc.)
+    // JR station codes start with "J" (JC, JY, JK, JB, etc.)
     private var isJR: Bool {
         parsed.prefix.hasPrefix("J")
     }

@@ -6,7 +6,6 @@ import Backbone
 // MARK: - Live Activity Attributes
 
 struct TrainJourneyAttributes: ActivityAttributes {
-    /// Dynamic state updated during the journey
     public struct ContentState: Codable, Hashable {
         var progress: Double
         var currentStationIndex: Int?
@@ -35,7 +34,6 @@ struct TrainJourneyAttributes: ActivityAttributes {
         }
     }
 
-    // Static journey info (doesn't change during the activity)
     let lineName: String
     let lineNameEn: String
     let lineColorHex: String
@@ -48,9 +46,8 @@ struct TrainJourneyAttributes: ActivityAttributes {
     let stationNames: [String]
     let stationNamesEn: [String]
     let stationCount: Int
-    /// Whether the train stops at each station (false = express skip)
+    // Whether the train stops at each station (false = express skip)
     let stationStops: [Bool]
-    /// URL scheme for the refresh deep link
     let refreshURLString: String
 }
 
@@ -61,7 +58,7 @@ final class LiveActivityManager {
     static let shared = LiveActivityManager()
     private init() {}
 
-    /// The URL scheme that the Live Activity refresh button opens
+    // Opened by the Live Activity refresh button
     static let refreshURLScheme = "overhead://refresh-delay"
 
     private(set) var currentActivity: Activity<TrainJourneyAttributes>?
@@ -122,7 +119,6 @@ final class LiveActivityManager {
         }
     }
 
-    /// Called after a successful delay data refresh
     func markDelayRefreshed() {
         lastDelayFetchTime = Date()
     }

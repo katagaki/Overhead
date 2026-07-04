@@ -2,7 +2,6 @@ import SwiftUI
 import Backbone
 
 // MARK: - Station Timetable View
-/// Shows upcoming departures from a station, grouped by direction.
 
 struct StationTimetableView: View {
     let station: Station
@@ -31,7 +30,6 @@ struct StationTimetableView: View {
         List {
             ForEach(viewModel.stationTimetable, id: \.railDirection) { timetable in
                 Section {
-                    // Show upcoming departures (from now onwards, limited)
                     let upcoming = upcomingDepartures(from: timetable.departures)
                     if upcoming.isEmpty {
                         Text("StationTimetable.NoMoreTrains")
@@ -42,6 +40,7 @@ struct StationTimetableView: View {
                             departureRow(departure: departure)
                         }
                     }
+                    connectingThroughServiceRows(for: timetable)
                 } header: {
                     HStack(spacing: 6) {
                         Image(systemName: "arrow.right.circle.fill")
@@ -62,9 +61,31 @@ struct StationTimetableView: View {
 
     // MARK: - Through Services
 
+    // Through services onto a line bundled in the app are navigable rows;
+    // ones onto external operators are informational footer text.
+    @ViewBuilder
+    private func connectingThroughServiceRows(for timetable: StationTimetableData) -> some View {
+        ForEach(throughServices(for: timetable), id: \.self) { through in
+            if let connecting = connectingLine(for: through) {
+                NavigationLink {
+                    StationPickerView(line: connecting, viewModel: viewModel)
+                } label: {
+                    HStack(alignment: .top, spacing: 8) {
+                        Image(systemName: "arrow.triangle.branch")
+                            .font(.system(size: 12))
+                            .foregroundColor(connecting.color)
+                        Text("StationTimetable.ThroughService \(junctionName(for: through)) \(through.localizedLineName) \(through.localizedToward)")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+        }
+    }
+
     @ViewBuilder
     private func throughServiceFooter(for timetable: StationTimetableData) -> some View {
-        let throughs = throughServices(for: timetable)
+        let throughs = throughServices(for: timetable).filter { connectingLine(for: $0) == nil }
         if !throughs.isEmpty {
             VStack(alignment: .leading, spacing: 4) {
                 ForEach(throughs, id: \.self) { through in
@@ -78,6 +99,11 @@ struct StationTimetableView: View {
                 }
             }
         }
+    }
+
+    private func connectingLine(for through: ThroughService) -> TrainLine? {
+        guard let id = through.connectingLineId else { return nil }
+        return StaticTrainData.line(withId: id)?.trainLine
     }
 
     private func throughServices(for timetable: StationTimetableData) -> [ThroughService] {
@@ -139,12 +165,10 @@ struct StationTimetableView: View {
     @ViewBuilder
     private func departureRow(departure: StationDeparture) -> some View {
         HStack(spacing: 12) {
-            // Time
             Text(departure.departureTime)
                 .font(.system(size: 17, weight: .semibold, design: .rounded))
                 .foregroundColor(departure.isLast ? .red : .primary)
 
-            // Train type pill
             Text(departure.trainType.displayNameJa)
                 .font(.system(size: 11, weight: .bold))
                 .foregroundColor(.white)
@@ -155,14 +179,12 @@ struct StationTimetableView: View {
 
             Spacer()
 
-            // Destination
             if !departure.localizedDestination.isEmpty {
                 Text(departure.localizedDestination)
                     .font(.system(size: 14))
                     .foregroundColor(.secondary)
             }
 
-            // Last train badge
             if departure.isLast {
                 Text("StationTimetable.LastTrain")
                     .font(.system(size: 10, weight: .bold))

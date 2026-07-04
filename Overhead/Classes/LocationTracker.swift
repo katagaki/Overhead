@@ -33,28 +33,26 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
     private var delay: DelayInfo?
     private var stationCoordinates: [(station: Station, coordinate: CLLocationCoordinate2D)] = []
 
-    /// Meters moved before recalculating
+    // Meters moved before recalculating
     private let distanceFilter: CLLocationDistance = 20
 
-    /// GPS accuracy thresholds (meters)
+    // GPS accuracy thresholds (meters)
     private let excellentAccuracy: Double = 30      // Full GPS trust
     private let acceptableAccuracy: Double = 100    // Blend GPS + timetable
     private let poorAccuracy: Double = 250          // Timetable wins
 
-    /// Snap distance thresholds (meters from rail line)
+    // Snap distance thresholds (meters from rail line)
     private let closeSnapDistance: Double = 150      // Clearly on the line
     private let farSnapDistance: Double = 500         // Probably underground or drifting
 
-    /// How long since last good GPS fix before falling back (seconds)
+    // How long since last good GPS fix before falling back (seconds)
     private let gpsStalenessThreshold: TimeInterval = 45
 
-    /// Timetable tick timer — drives updates even when GPS is silent
+    // Timetable tick timer — drives updates even when GPS is silent
     private var timetableTimer: Timer?
 
-    /// Track the last time we got a usable GPS fix
     private var lastGoodGPSTime: Date?
 
-    /// Track GPS confidence over a rolling window
     private var recentAccuracies: [Double] = []
     private let accuracyWindowSize = 5
 
@@ -82,7 +80,6 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         // Always start the timetable tick — it's the baseline
         startTimetableTick()
 
-        // Attempt GPS on top of timetable baseline
         let status = locationManager.authorizationStatus
         if status == .notDetermined {
             locationManager.requestWhenInUseAuthorization()
@@ -116,15 +113,14 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         recalculate()
     }
 
-    /// Force a timetable+delay recalculation. Called from Live Activity refresh button.
+    // Called from the Live Activity refresh button
     func forceRefresh() {
         tickTimetable()
     }
 
     // MARK: - Timetable Tick
 
-    /// Runs every 10 seconds to keep timetable-based position current,
-    /// regardless of GPS state. This is the heartbeat.
+    // Runs every 10 seconds regardless of GPS state — this is the heartbeat
     private func startTimetableTick() {
         timetableTimer?.invalidate()
         timetableTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in
@@ -144,7 +140,6 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
 
         if !gpsFresh || trackingMode == .timetable {
             if gpsFresh == false && trackingMode == .gps {
-                // GPS went stale — transition to timetable
                 trackingMode = .timetable
             }
             positionState = timetableState
@@ -170,7 +165,6 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last, journey != nil else { return }
 
-        // Reject stale readings
         let age = -location.timestamp.timeIntervalSinceNow
         guard age < 20 else { return }
 
@@ -197,12 +191,10 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
             return
         }
 
-        // Always compute the timetable baseline
         let timetableState = TrainPositionEngine.computePosition(
             journey: journey, delay: delay
         )
 
-        // If no station coordinates available, timetable only
         guard stationCoordinates.count >= 2 else {
             trackingMode = .timetable
             positionState = timetableState
@@ -210,19 +202,15 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
             return
         }
 
-        // Snap GPS to line
         let snapResult = snapToLine(location: location.coordinate)
 
-        // Compute GPS confidence (0.0 = useless, 1.0 = perfect)
         let gpsConfidence = computeGPSConfidence(
             accuracy: location.horizontalAccuracy,
             snapDistance: snapResult.distance,
             age: -location.timestamp.timeIntervalSinceNow
         )
 
-        // Decide mode based on confidence
         if gpsConfidence >= 0.7 {
-            // GPS is strong — use it
             trackingMode = .gps
             lastGoodGPSTime = Date()
 
@@ -236,7 +224,6 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
             updateLiveActivity()
 
         } else if gpsConfidence >= 0.3 {
-            // Mixed confidence — blend the two
             trackingMode = .blended
 
             let gpsState = buildGPSState(
@@ -246,7 +233,6 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
                 stations: stations
             )
 
-            // Weighted average of progress values
             let blendedProgress = gpsState.progress * gpsConfidence
                                 + timetableState.progress * (1.0 - gpsConfidence)
 
@@ -272,7 +258,6 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
             updateLiveActivity()
 
         } else {
-            // GPS too poor — timetable takes over
             trackingMode = .timetable
             positionState = timetableState
             updateLiveActivity()
@@ -281,13 +266,12 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
 
     // MARK: - GPS Confidence Scoring
 
-    /// Compute a 0...1 confidence score for how much to trust the GPS
+    // 0.0 = useless, 1.0 = perfect
     private func computeGPSConfidence(
         accuracy: Double,
         snapDistance: Double,
         age: TimeInterval
     ) -> Double {
-        // Factor 1: Horizontal accuracy
         let accuracyScore: Double
         if accuracy <= excellentAccuracy {
             accuracyScore = 1.0
@@ -299,7 +283,6 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
             accuracyScore = 0.1
         }
 
-        // Factor 2: Distance from rail line
         let snapScore: Double
         if snapDistance <= closeSnapDistance {
             snapScore = 1.0
@@ -309,14 +292,12 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
             snapScore = 0.1
         }
 
-        // Factor 3: Freshness
         let freshScore: Double
         if age < 5 { freshScore = 1.0 }
         else if age < 15 { freshScore = 0.8 }
         else if age < 30 { freshScore = 0.5 }
         else { freshScore = 0.2 }
 
-        // Factor 4: Rolling accuracy trend
         let trendScore: Double
         if recentAccuracies.count >= 3 {
             let avg = recentAccuracies.reduce(0, +) / Double(recentAccuracies.count)
@@ -325,7 +306,6 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
             trendScore = 0.5  // Not enough data yet
         }
 
-        // Weighted combination
         let confidence = accuracyScore * 0.3
                        + snapScore * 0.35
                        + freshScore * 0.15

@@ -14,7 +14,6 @@ public struct Station: Identifiable, Codable, Hashable {
     public let latitude: Double?
     public let longitude: Double?
 
-    /// Convenience initializer for cases that don't have multilingual data
     public init(id: String, name: String, nameEn: String, nameKo: String = "", nameZhHans: String = "", nameZhHant: String = "", stationCode: String, latitude: Double?, longitude: Double?) {
         self.id = id
         self.name = name
@@ -31,7 +30,6 @@ public struct Station: Identifiable, Codable, Hashable {
         stationCode.isEmpty ? "" : stationCode
     }
 
-    /// Returns the station name for the user's current language
     public var localizedName: String {
         let lang = Locale.current.language.languageCode?.identifier ?? "ja"
         switch lang {
@@ -61,7 +59,6 @@ public struct TrainLine: Identifiable, Codable, Hashable {
     public let stations: [Station]
     public let colorHex: String     // Primary accent color
 
-    /// Convenience initializer for cases that don't have multilingual data
     public init(id: String, name: String, nameEn: String, nameKo: String = "", nameZhHans: String = "", nameZhHant: String = "", operatorId: String, stations: [Station], colorHex: String) {
         self.id = id
         self.name = name
@@ -78,14 +75,11 @@ public struct TrainLine: Identifiable, Codable, Hashable {
         Color(hex: colorHex)
     }
 
-    /// Line symbol prefix derived from station codes (e.g. "JC", "G", "C")
     public var lineSymbol: String {
-        // Try to extract from first station with a code
         if let station = stations.first(where: { !$0.stationCode.isEmpty }) {
             let letters = station.stationCode.prefix(while: \.isLetter)
             if !letters.isEmpty { return String(letters) }
         }
-        // Fallback mapping from railway ID
         return Self.symbolForRailwayId[id] ?? ""
     }
 
@@ -94,7 +88,6 @@ public struct TrainLine: Identifiable, Codable, Hashable {
         lineSymbol.hasPrefix("J")
     }
 
-    /// Comprehensive fallback mapping from railway ID to line symbol
     private static let symbolForRailwayId: [String: String] = [
         // JR East
         "odpt.Railway:JR-East.Yamanote": "JY",
@@ -140,7 +133,6 @@ public struct TrainLine: Identifiable, Codable, Hashable {
         "odpt.Railway:Toei.Toden": "SA",
     ]
 
-    /// Returns the line name for the user's current language
     public var localizedName: String {
         let lang = Locale.current.language.languageCode?.identifier ?? "ja"
         switch lang {
@@ -172,7 +164,6 @@ public struct TimetableEntry: Identifiable, Codable {
         self.departureTime = departureTime
     }
 
-    /// Parse a Japanese rail time string (supports 25:30 etc.)
     public func arrivalSeconds() -> Int? {
         guard let t = arrivalTime else { return nil }
         return Self.parseRailTime(t)
@@ -333,7 +324,6 @@ public struct Journey: Identifiable, Codable {
         self.startedAt = startedAt
     }
 
-    /// Subset of stations the user travels through
     public var journeyStations: [Station] {
         guard let startIdx = line.stations.firstIndex(where: { $0.id == boardingStationId }),
               let endIdx = line.stations.firstIndex(where: { $0.id == alightingStationId }) else {
@@ -346,7 +336,6 @@ public struct Journey: Identifiable, Codable {
         }
     }
 
-    /// Subset of timetable entries for this journey
     public var journeyTimetable: [TimetableEntry] {
         let stationIds = Set(journeyStations.map(\.id))
         return service.timetable.filter { stationIds.contains($0.stationId) }

@@ -20,14 +20,12 @@ enum TrainPositionEngine {
             return defaultState(stations: stations, delayMinutes: delayMinutes)
         }
 
-        // Current time in JST seconds since midnight
         let tz = TimeZone(identifier: "Asia/Tokyo")!
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = tz
         let comps = cal.dateComponents([.hour, .minute, .second], from: Date())
         let nowSec = (comps.hour ?? 0) * 3600 + (comps.minute ?? 0) * 60 + (comps.second ?? 0)
 
-        // Build timeline: each station's adjusted time
         var stationTimes: [(index: Int, seconds: Int)] = []
         for (i, station) in stations.enumerated() {
             if let entry = timetable.first(where: { $0.stationId == station.id }) {
@@ -43,7 +41,6 @@ enum TrainPositionEngine {
         let firstTime = stationTimes.first!.seconds
         let lastTime = stationTimes.last!.seconds
 
-        // Before first station
         if nowSec < firstTime {
             let nextStation = stations[0]
             let eta = dateFromRailSeconds(lastTime)
@@ -61,7 +58,6 @@ enum TrainPositionEngine {
             )
         }
 
-        // After last station
         if nowSec >= lastTime {
             let lastStation = stations[stations.count - 1]
             return TrainPositionState(
@@ -78,7 +74,6 @@ enum TrainPositionEngine {
             )
         }
 
-        // Find which segment we're in
         for j in 0..<(stationTimes.count - 1) {
             let fromTime = stationTimes[j].seconds
             let toTime = stationTimes[j + 1].seconds

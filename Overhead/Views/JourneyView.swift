@@ -2,8 +2,6 @@ import SwiftUI
 import Backbone
 
 // MARK: - Journey View (In-App, Vertical/Portrait)
-/// Full-screen vertical route display mimicking the in-train LCD panels
-/// but rotated for portrait orientation.
 
 struct JourneyView: View {
     @ObservedObject var viewModel: JourneyViewModel
@@ -14,7 +12,6 @@ struct JourneyView: View {
 
     var body: some View {
         ZStack {
-            // Background
             Color(.systemBackground)
                 .ignoresSafeArea()
 
@@ -24,11 +21,9 @@ struct JourneyView: View {
                 ScrollViewReader { proxy in
                     ScrollView(.vertical, showsIndicators: false) {
                         VStack(spacing: 0) {
-                            // Header
                             journeyHeader(journey: journey, state: state)
                                 .padding(.bottom, 16)
 
-                            // Vertical LCD line
                             VerticalLCDLine(
                                 journey: journey,
                                 state: state,
@@ -43,7 +38,6 @@ struct JourneyView: View {
                         nextStationBar(state: state, journey: journey)
                     }
                     .onAppear {
-                        // Scroll to approximate current position
                         if let idx = state.currentStationIndex {
                             withAnimation {
                                 proxy.scrollTo("station_\(idx)", anchor: .center)
@@ -62,7 +56,6 @@ struct JourneyView: View {
     @ViewBuilder
     private func journeyHeader(journey: Journey, state: TrainPositionState) -> some View {
         VStack(spacing: 8) {
-            // Line badge
             HStack(spacing: 8) {
                 RoundedRectangle(cornerRadius: 4)
                     .fill(lineColor)
@@ -78,7 +71,6 @@ struct JourneyView: View {
 
                 Spacer()
 
-                // Train type pill
                 Text(journey.service.trainType.displayNameJa)
                     .font(.system(size: 13, weight: .bold))
                     .foregroundColor(.white)
@@ -89,10 +81,8 @@ struct JourneyView: View {
             }
             .padding(.horizontal, 24)
 
-            // Location status
             trackingModeBanner(state: state)
 
-            // Delay banner
             if state.delayMinutes > 0 {
                 HStack(spacing: 6) {
                     Image(systemName: "exclamationmark.triangle.fill")
@@ -121,7 +111,6 @@ struct JourneyView: View {
         let mode = viewModel.trackingMode
 
         HStack(spacing: 8) {
-            // Mode icon + label
             HStack(spacing: 4) {
                 Image(systemName: modeIcon(mode))
                     .font(.system(size: 11))
@@ -139,7 +128,6 @@ struct JourneyView: View {
 
             Spacer()
 
-            // Refresh button
             Button {
                 viewModel.forceRefresh()
             } label: {
@@ -192,7 +180,6 @@ struct JourneyView: View {
     @ViewBuilder
     private func nextStationBar(state: TrainPositionState, journey: Journey) -> some View {
         HStack {
-            // Next station
             VStack(alignment: .leading, spacing: 2) {
                 Text("Label.NextStation")
                     .font(.system(size: 10))
@@ -206,7 +193,6 @@ struct JourneyView: View {
 
             Spacer()
 
-            // ETA
             VStack(alignment: .trailing, spacing: 2) {
                 Text("Label.EstimatedArrival")
                     .font(.system(size: 10))
@@ -259,9 +245,6 @@ struct JourneyView: View {
 }
 
 // MARK: - Vertical LCD Line
-/// Portrait-optimized vertical station line inspired by the JR East app.
-/// Thin track centered through station dots, hollow future stations,
-/// prominent current/next station indicators.
 
 struct VerticalLCDLine: View {
     let journey: Journey
@@ -290,13 +273,10 @@ struct VerticalLCDLine: View {
                              (state.currentStationIndex != nil && index == (state.currentStationIndex! + 1))
 
                 HStack(alignment: .top, spacing: 0) {
-                    // Left side: time
                     timeColumn(for: station, timetable: timetable, isPast: isPast, isCurrent: isCurrent)
                         .frame(width: 56)
 
-                    // Track + circle
                     ZStack(alignment: .top) {
-                        // Track segment below this station (not for last)
                         if !isLast {
                             let segFrac = segmentFillFraction(stationIndex: index, totalStations: stations.count)
                             trackSegment(filled: isPast, fillFraction: segFrac)
@@ -304,7 +284,6 @@ struct VerticalLCDLine: View {
                                 .offset(y: stationDotRadius(isTerminal: isTerminal, isCurrent: isCurrent))
                         }
 
-                        // Station circle
                         stationCircle(
                             isPast: isPast,
                             isCurrent: isCurrent,
@@ -314,7 +293,6 @@ struct VerticalLCDLine: View {
                     }
                     .frame(width: 40)
 
-                    // Right side: station name
                     stationLabel(
                         station: station,
                         isPast: isPast,
@@ -366,11 +344,9 @@ struct VerticalLCDLine: View {
     @ViewBuilder
     private func trackSegment(filled: Bool, fillFraction: Double) -> some View {
         ZStack(alignment: .top) {
-            // Background track — thin and subtle
             RoundedRectangle(cornerRadius: trackWidth / 2)
                 .fill(Color(.quaternarySystemFill))
 
-            // Filled portion
             GeometryReader { geo in
                 RoundedRectangle(cornerRadius: trackWidth / 2)
                     .fill(lineColor)
@@ -387,7 +363,6 @@ struct VerticalLCDLine: View {
 
         ZStack {
             if isCurrent {
-                // Current station: filled colored circle with white inner dot
                 Circle()
                     .fill(lineColor)
                     .frame(width: r * 2, height: r * 2)
@@ -395,12 +370,10 @@ struct VerticalLCDLine: View {
                     .fill(Color.white)
                     .frame(width: r * 0.7, height: r * 0.7)
                     .shadow(color: lineColor, radius: 3)
-                // Pulse ring
                 Circle()
                     .strokeBorder(lineColor, lineWidth: 2)
                     .frame(width: r * 2 + 10, height: r * 2 + 10)
             } else if isTerminal {
-                // Terminal: double circle (outline with colored/gray border)
                 Circle()
                     .fill(Color(.systemBackground))
                     .frame(width: r * 2, height: r * 2)
@@ -411,12 +384,10 @@ struct VerticalLCDLine: View {
                     .fill(isPast ? lineColor : Color(.systemGray5))
                     .frame(width: r * 2 - 10, height: r * 2 - 10)
             } else if isPast {
-                // Past station: small filled dot
                 Circle()
                     .fill(lineColor)
                     .frame(width: r * 2, height: r * 2)
             } else {
-                // Future station: hollow circle (white fill, gray outline)
                 Circle()
                     .fill(Color(.systemBackground))
                     .frame(width: r * 2, height: r * 2)
@@ -425,7 +396,6 @@ struct VerticalLCDLine: View {
                     .frame(width: r * 2, height: r * 2)
             }
 
-            // Next station: colored ring highlight
             if isNext && !isCurrent {
                 Circle()
                     .strokeBorder(lineColor, lineWidth: 2)
@@ -486,7 +456,6 @@ struct VerticalLCDLine: View {
 
     // MARK: - Helpers
 
-    /// How much of the segment below this station is filled
     private func segmentFillFraction(stationIndex: Int, totalStations: Int) -> Double {
         let stationFrac = totalStations > 1 ? Double(stationIndex) / Double(totalStations - 1) : 0
         let nextFrac = totalStations > 1 ? Double(stationIndex + 1) / Double(totalStations - 1) : 0

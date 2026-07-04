@@ -3,9 +3,6 @@ import Combine
 import Backbone
 
 // MARK: - Demo Data Provider
-/// Provides simulated journey data for demo mode.
-/// Drives a realistic train journey progression with station dwelling,
-/// delay simulation, and tracking mode transitions.
 
 @MainActor
 final class DemoDataProvider: ObservableObject {
@@ -21,11 +18,10 @@ final class DemoDataProvider: ObservableObject {
     private var dwellCountdown: Int = 0
     private var currentStationDwellIndex: Int?
 
-    /// Total simulated journey duration in seconds
+    // Total simulated journey duration in seconds
     private let journeyDuration: Double = 120.0
-    /// Tick interval
     private let tickInterval: TimeInterval = 1.0
-    /// Seconds to dwell at each intermediate station
+    // Seconds to dwell at each intermediate station
     private let dwellDuration: Int = 5
 
     // MARK: - Demo Lines & Data
@@ -210,7 +206,6 @@ final class DemoDataProvider: ObservableObject {
         self.dwellCountdown = 0
         self.currentStationDwellIndex = nil
 
-        // Start with a small delay
         currentDelay = DelayInfo(
             lineId: journey.line.id,
             delayMinutes: 2,
@@ -247,7 +242,6 @@ final class DemoDataProvider: ObservableObject {
         let stations = journey.journeyStations
         guard stations.count >= 2 else { return }
 
-        // Handle dwelling at a station
         if dwellCountdown > 0 {
             dwellCountdown -= 1
             if dwellCountdown == 0 {
@@ -257,18 +251,15 @@ final class DemoDataProvider: ObservableObject {
             return
         }
 
-        // Advance progress
         let increment = tickInterval / journeyDuration
         progress = min(1.0, progress + increment)
         elapsedSeconds += tickInterval
 
-        // Check if we've reached a station
         let stationCount = stations.count
         for i in 1..<(stationCount - 1) {
             let stationFrac = Double(i) / Double(stationCount - 1)
             let prevProgress = progress - increment
             if prevProgress < stationFrac && progress >= stationFrac {
-                // Arrived at intermediate station — dwell
                 currentStationDwellIndex = i
                 dwellCountdown = dwellDuration
                 progress = stationFrac
@@ -276,7 +267,6 @@ final class DemoDataProvider: ObservableObject {
             }
         }
 
-        // Simulate tracking mode transitions
         let phase = elapsedSeconds.truncatingRemainder(dividingBy: 40)
         if phase < 15 {
             trackingMode = .gps
@@ -286,7 +276,6 @@ final class DemoDataProvider: ObservableObject {
             trackingMode = .timetable
         }
 
-        // Simulate delay changes
         if Int(elapsedSeconds) % 30 == 0 && elapsedSeconds > 0 {
             let delayMins = [0, 1, 2, 3, 5].randomElement() ?? 0
             currentDelay = DelayInfo(
@@ -297,7 +286,6 @@ final class DemoDataProvider: ObservableObject {
             )
         }
 
-        // Check arrival
         if progress >= 1.0 {
             progress = 1.0
             currentStationDwellIndex = stationCount - 1
@@ -316,13 +304,11 @@ final class DemoDataProvider: ObservableObject {
         let stationCount = stations.count
         let totalSegments = stationCount - 1
 
-        // Determine segment
         let rawSegment = progress * Double(totalSegments)
         let segmentFrom = min(Int(rawSegment), totalSegments - 1)
         let segmentTo = min(segmentFrom + 1, totalSegments)
         let segmentProgress = rawSegment - Double(segmentFrom)
 
-        // Determine next station
         let nextIdx: Int
         if let dwellIdx = currentStationDwellIndex {
             nextIdx = min(dwellIdx + 1, stationCount - 1)
