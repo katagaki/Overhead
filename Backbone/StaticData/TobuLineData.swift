@@ -29,12 +29,12 @@ private func direction(_ path: String, _ suffix: String, _ ja: String, _ en: Str
     )
 }
 
-private func through(_ path: String, _ junctionSuffix: String, _ end: ThroughService.LineEnd,
+private func through(_ junction: String, _ end: ThroughService.LineEnd,
                      _ lineJa: String, _ lineEn: String,
                      _ towardJa: String, _ towardEn: String,
                      to connectingLineId: String? = nil) -> ThroughService {
     ThroughService(
-        junctionStationId: "odpt.Station:\(path).\(junctionSuffix)",
+        junctionStationId: "odpt.Station:\(junction)",
         end: end,
         lineNameJa: lineJa, lineNameEn: lineEn,
         towardJa: towardJa, towardEn: towardEn,
@@ -118,17 +118,17 @@ enum TobuLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Tobu.TobuSkytree", "Oshiage", .descending,
+            through("Tobu.TobuSkytree.Oshiage", .descending,
                     "東京メトロ半蔵門線・東急田園都市線", "Tokyo Metro Hanzomon & Tokyu Den-en-toshi Lines",
                     "渋谷・中央林間方面", "for Shibuya & Chuo-Rinkan",
                     to: "odpt.Railway:TokyoMetro.Hanzomon"),
-            through("Tobu.TobuSkytree", "KitaSenju", .descending,
+            through("Tobu.TobuSkytree.KitaSenju", .descending,
                     "東京メトロ日比谷線", "Tokyo Metro Hibiya Line",
                     "中目黒方面", "for Naka-meguro",
                     to: "odpt.Railway:TokyoMetro.Hibiya"),
-            through("Tobu.TobuSkytree", "TobuDobutsuKoen", .ascending,
+            through("Tobu.TobuSkytree.TobuDobutsuKoen", .ascending,
                     "東武伊勢崎線", "Tobu Isesaki Line", "久喜方面", "for Kuki"),
-            through("Tobu.TobuSkytree", "TobuDobutsuKoen", .ascending,
+            through("Tobu.TobuSkytree.TobuDobutsuKoen", .ascending,
                     "東武日光線", "Tobu Nikko Line", "南栗橋方面", "for Minami-Kurihashi",
                     to: "odpt.Railway:Tobu.Nikko"),
         ]
@@ -196,15 +196,15 @@ enum TobuLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Tobu.Tojo", "Wakoshi", .descending,
+            through("Tobu.Tojo.Wakoshi", .descending,
                     "東京メトロ有楽町線", "Tokyo Metro Yurakucho Line",
                     "新木場方面", "for Shin-kiba",
                     to: "odpt.Railway:TokyoMetro.Yurakucho"),
-            through("Tobu.Tojo", "Wakoshi", .descending,
+            through("Tobu.Tojo.Wakoshi", .descending,
                     "東京メトロ副都心線", "Tokyo Metro Fukutoshin Line",
                     "渋谷・横浜方面", "for Shibuya & Yokohama",
                     to: "odpt.Railway:TokyoMetro.Fukutoshin"),
-            through("Tobu.Tojo", "ShinrinKoen", .ascending,
+            through("Tobu.Tojo.ShinrinKoen", .ascending,
                     "東武東上線", "Tobu Tojo Line", "小川町方面", "for Ogawamachi"),
         ]
     )
@@ -387,11 +387,11 @@ enum TobuLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Tobu.Nikko", "TobuDobutsuKoen", .descending,
+            through("Tobu.Nikko.TobuDobutsuKoen", .descending,
                     "東武スカイツリーライン", "Tobu Skytree Line",
                     "北千住・浅草方面", "for Kita-Senju & Asakusa",
                     to: "odpt.Railway:Tobu.TobuSkytree"),
-            through("Tobu.Nikko", "ShimoImaichi", .ascending,
+            through("Tobu.Nikko.ShimoImaichi", .ascending,
                     "東武鬼怒川線", "Tobu Kinugawa Line",
                     "鬼怒川温泉方面", "for Kinugawa-Onsen"),
         ]

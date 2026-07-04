@@ -42,7 +42,8 @@ enum StationSearch {
         }
 
         return hits.sorted {
-            let l = rank($0), r = rank($1)
+            let l = rank($0)
+            let r = rank($1)
             if l != r { return l < r }
             if $0.station.name != $1.station.name { return $0.station.name < $1.station.name }
             return $0.line.nameEn < $1.line.nameEn

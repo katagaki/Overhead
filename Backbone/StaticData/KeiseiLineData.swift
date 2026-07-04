@@ -29,12 +29,12 @@ private func direction(_ path: String, _ suffix: String, _ ja: String, _ en: Str
     )
 }
 
-private func through(_ path: String, _ junctionSuffix: String, _ end: ThroughService.LineEnd,
+private func through(_ junction: String, _ end: ThroughService.LineEnd,
                      _ lineJa: String, _ lineEn: String,
                      _ towardJa: String, _ towardEn: String,
                      to connectingLineId: String? = nil) -> ThroughService {
     ThroughService(
-        junctionStationId: "odpt.Station:\(path).\(junctionSuffix)",
+        junctionStationId: "odpt.Station:\(junction)",
         end: end,
         lineNameJa: lineJa, lineNameEn: lineEn,
         towardJa: towardJa, towardEn: towardEn,
@@ -127,15 +127,15 @@ enum KeiseiLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Keisei.Main", "Aoto", .descending,
+            through("Keisei.Main.Aoto", .descending,
                     "京成押上線・都営浅草線", "Keisei Oshiage & Toei Asakusa Lines",
                     "押上・西馬込方面", "for Oshiage & Nishi-magome",
                     to: "odpt.Railway:Keisei.Oshiage"),
-            through("Keisei.Main", "KeiseiTakasago", .ascending,
+            through("Keisei.Main.KeiseiTakasago", .ascending,
                     "成田スカイアクセス線", "Narita Sky Access Line",
                     "成田空港方面", "for Narita Airport",
                     to: "odpt.Railway:Keisei.NaritaSkyAccess"),
-            through("Keisei.Main", "KeiseiTsudanuma", .ascending,
+            through("Keisei.Main.KeiseiTsudanuma", .ascending,
                     "京成千葉線", "Keisei Chiba Line",
                     "千葉中央方面", "for Chiba-Chuo",
                     to: "odpt.Railway:Keisei.Chiba"),
@@ -177,11 +177,11 @@ enum KeiseiLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Keisei.Oshiage", "Aoto", .ascending,
+            through("Keisei.Oshiage.Aoto", .ascending,
                     "京成本線", "Keisei Main Line",
                     "京成船橋・成田空港方面", "for Keisei-Funabashi & Narita Airport",
                     to: "odpt.Railway:Keisei.Main"),
-            through("Keisei.Oshiage", "Oshiage", .descending,
+            through("Keisei.Oshiage.Oshiage", .descending,
                     "都営浅草線・京急線", "Toei Asakusa & Keikyu Lines",
                     "羽田空港・西馬込方面", "for Haneda Airport & Nishi-magome",
                     to: "odpt.Railway:Toei.Asakusa"),
@@ -257,15 +257,15 @@ enum KeiseiLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Keisei.Chiba", "Chibachuo", .ascending,
+            through("Keisei.Chiba.Chibachuo", .ascending,
                     "京成千原線", "Keisei Chihara Line",
                     "ちはら台方面", "for Chiharadai",
                     to: "odpt.Railway:Keisei.Chihara"),
-            through("Keisei.Chiba", "KeiseiTsudanuma", .descending,
+            through("Keisei.Chiba.KeiseiTsudanuma", .descending,
                     "京成本線", "Keisei Main Line",
                     "京成上野方面", "for Keisei-Ueno",
                     to: "odpt.Railway:Keisei.Main"),
-            through("Keisei.Chiba", "KeiseiTsudanuma", .descending,
+            through("Keisei.Chiba.KeiseiTsudanuma", .descending,
                     "京成松戸線", "Keisei Matsudo Line",
                     "松戸方面", "for Matsudo"),
         ]
@@ -303,7 +303,7 @@ enum KeiseiLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Keisei.Chihara", "Chibachuo", .descending,
+            through("Keisei.Chihara.Chibachuo", .descending,
                     "京成千葉線", "Keisei Chiba Line",
                     "京成津田沼方面", "for Keisei-Tsudanuma",
                     to: "odpt.Railway:Keisei.Chiba"),
@@ -335,7 +335,7 @@ enum KeiseiLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Keisei.HigashiNarita", "HigashiNarita", .ascending,
+            through("Keisei.HigashiNarita.HigashiNarita", .ascending,
                     "芝山鉄道線", "Shibayama Railway Line",
                     "芝山千代田方面", "for Shibayama-Chiyoda"),
         ]
@@ -375,11 +375,11 @@ enum KeiseiLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Keisei.NaritaSkyAccess", "KeiseiTakasago", .descending,
+            through("Keisei.NaritaSkyAccess.KeiseiTakasago", .descending,
                     "京成本線", "Keisei Main Line",
                     "京成上野方面", "for Keisei-Ueno",
                     to: "odpt.Railway:Keisei.Main"),
-            through("Keisei.NaritaSkyAccess", "KeiseiTakasago", .descending,
+            through("Keisei.NaritaSkyAccess.KeiseiTakasago", .descending,
                     "京成押上線・都営浅草線・京急線", "Keisei Oshiage, Toei Asakusa & Keikyu Lines",
                     "羽田空港方面", "for Haneda Airport",
                     to: "odpt.Railway:Keisei.Oshiage"),

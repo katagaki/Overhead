@@ -29,12 +29,12 @@ private func direction(_ line: String, _ suffix: String, _ ja: String, _ en: Str
     )
 }
 
-private func through(_ line: String, _ junctionSuffix: String, _ end: ThroughService.LineEnd,
+private func through(_ junction: String, _ end: ThroughService.LineEnd,
                      _ lineJa: String, _ lineEn: String,
                      _ towardJa: String, _ towardEn: String,
                      to connectingLineId: String? = nil) -> ThroughService {
     ThroughService(
-        junctionStationId: "odpt.Station:TokyoMetro.\(line).\(junctionSuffix)",
+        junctionStationId: "odpt.Station:TokyoMetro.\(junction)",
         end: end,
         lineNameJa: lineJa, lineNameEn: lineEn,
         towardJa: towardJa, towardEn: towardEn,
@@ -205,7 +205,7 @@ enum TokyoMetroLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Hibiya", "KitaSenju", .ascending,
+            through("Hibiya.KitaSenju", .ascending,
                     "東武スカイツリーライン", "Tobu Skytree Line",
                     "東武動物公園・南栗橋方面", "for Tobu-Dobutsu-Koen & Minami-Kurihashi",
                     to: "odpt.Railway:Tobu.TobuSkytree"),
@@ -262,14 +262,14 @@ enum TokyoMetroLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Tozai", "Nakano", .descending,
+            through("Tozai.Nakano", .descending,
                     "JR中央・総武線各駅停車", "JR Chuo-Sobu Local Line",
                     "三鷹方面", "for Mitaka",
                     to: "odpt.Railway:JR-East.ChuoSobuLocal"),
-            through("Tozai", "NishiFunabashi", .ascending,
+            through("Tozai.NishiFunabashi", .ascending,
                     "東葉高速線", "Toyo Rapid Line",
                     "東葉勝田台方面", "for Toyo-Katsutadai"),
-            through("Tozai", "NishiFunabashi", .ascending,
+            through("Tozai.NishiFunabashi", .ascending,
                     "JR総武線各駅停車", "JR Sobu Local Line",
                     "津田沼方面", "for Tsudanuma",
                     to: "odpt.Railway:JR-East.ChuoSobuLocal"),
@@ -317,11 +317,11 @@ enum TokyoMetroLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Chiyoda", "Ayase", .ascending,
+            through("Chiyoda.Ayase", .ascending,
                     "JR常磐線各駅停車", "JR Joban Local Line",
                     "取手方面", "for Toride",
                     to: "odpt.Railway:JR-East.JobanLocal"),
-            through("Chiyoda", "YoyogiUehara", .descending,
+            through("Chiyoda.YoyogiUehara", .descending,
                     "小田急小田原線", "Odakyu Odawara Line",
                     "本厚木・伊勢原方面", "for Hon-Atsugi & Isehara",
                     to: "odpt.Railway:Odakyu.Odawara"),
@@ -373,11 +373,11 @@ enum TokyoMetroLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Yurakucho", "Wakoshi", .descending,
+            through("Yurakucho.Wakoshi", .descending,
                     "東武東上線", "Tobu Tojo Line",
                     "川越市・森林公園方面", "for Kawagoeshi & Shinrin-Koen",
                     to: "odpt.Railway:Tobu.Tojo"),
-            through("Yurakucho", "KotakeMukaihara", .descending,
+            through("Yurakucho.KotakeMukaihara", .descending,
                     "西武有楽町線・池袋線", "Seibu Yurakucho & Ikebukuro Lines",
                     "所沢・飯能方面", "for Tokorozawa & Hanno"),
         ]
@@ -418,10 +418,10 @@ enum TokyoMetroLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Hanzomon", "Shibuya", .descending,
+            through("Hanzomon.Shibuya", .descending,
                     "東急田園都市線", "Tokyu Den-en-toshi Line",
                     "中央林間方面", "for Chuo-Rinkan"),
-            through("Hanzomon", "Oshiage", .ascending,
+            through("Hanzomon.Oshiage", .ascending,
                     "東武スカイツリーライン", "Tobu Skytree Line",
                     "久喜・南栗橋方面", "for Kuki & Minami-Kurihashi",
                     to: "odpt.Railway:Tobu.TobuSkytree"),
@@ -468,10 +468,10 @@ enum TokyoMetroLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Namboku", "AkabaneIwabuchi", .ascending,
+            through("Namboku.AkabaneIwabuchi", .ascending,
                     "埼玉高速鉄道線", "Saitama Rapid Railway Line",
                     "浦和美園方面", "for Urawa-Misono"),
-            through("Namboku", "Meguro", .descending,
+            through("Namboku.Meguro", .descending,
                     "東急目黒線・新横浜線", "Tokyu Meguro & Shin-Yokohama Lines",
                     "日吉・新横浜方面", "for Hiyoshi & Shin-Yokohama"),
         ]
@@ -514,14 +514,14 @@ enum TokyoMetroLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Fukutoshin", "Shibuya", .ascending,
+            through("Fukutoshin.Shibuya", .ascending,
                     "東急東横線・みなとみらい線", "Tokyu Toyoko & Minatomirai Lines",
                     "横浜・元町・中華街方面", "for Yokohama & Motomachi-Chukagai"),
-            through("Fukutoshin", "Wakoshi", .descending,
+            through("Fukutoshin.Wakoshi", .descending,
                     "東武東上線", "Tobu Tojo Line",
                     "川越市・森林公園方面", "for Kawagoeshi & Shinrin-Koen",
                     to: "odpt.Railway:Tobu.Tojo"),
-            through("Fukutoshin", "KotakeMukaihara", .descending,
+            through("Fukutoshin.KotakeMukaihara", .descending,
                     "西武有楽町線・池袋線", "Seibu Yurakucho & Ikebukuro Lines",
                     "所沢・飯能方面", "for Tokorozawa & Hanno"),
         ]

@@ -29,12 +29,12 @@ private func direction(_ line: String, _ suffix: String, _ ja: String, _ en: Str
     )
 }
 
-private func through(_ line: String, _ junctionSuffix: String, _ end: ThroughService.LineEnd,
+private func through(_ junction: String, _ end: ThroughService.LineEnd,
                      _ lineJa: String, _ lineEn: String,
                      _ towardJa: String, _ towardEn: String,
                      to connectingLineId: String? = nil) -> ThroughService {
     ThroughService(
-        junctionStationId: "odpt.Station:Toei.\(line).\(junctionSuffix)",
+        junctionStationId: "odpt.Station:Toei.\(junction)",
         end: end,
         lineNameJa: lineJa, lineNameEn: lineEn,
         towardJa: towardJa, towardEn: towardEn,
@@ -106,11 +106,11 @@ enum ToeiLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Asakusa", "Oshiage", .ascending,
+            through("Asakusa.Oshiage", .ascending,
                     "京成押上線・京成本線", "Keisei Oshiage & Main Lines",
                     "青砥・成田空港方面", "for Aoto & Narita Airport",
                     to: "odpt.Railway:Keisei.Oshiage"),
-            through("Asakusa", "Sengakuji", .descending,
+            through("Asakusa.Sengakuji", .descending,
                     "京急線", "Keikyu Line",
                     "羽田空港・横浜方面", "for Haneda Airport & Yokohama"),
         ]
@@ -164,7 +164,7 @@ enum ToeiLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Mita", "Meguro", .descending,
+            through("Mita.Meguro", .descending,
                     "東急目黒線・新横浜線", "Tokyu Meguro & Shin-Yokohama Lines",
                     "日吉・新横浜方面", "for Hiyoshi & Shin-Yokohama"),
         ]
@@ -212,7 +212,7 @@ enum ToeiLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Shinjuku", "Shinjuku", .descending,
+            through("Shinjuku.Shinjuku", .descending,
                     "京王新線・京王線", "Keio New Line & Keio Line",
                     "笹塚・橋本方面", "for Sasazuka & Hashimoto"),
         ]

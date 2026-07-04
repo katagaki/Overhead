@@ -29,12 +29,12 @@ private func direction(_ path: String, _ suffix: String, _ ja: String, _ en: Str
     )
 }
 
-private func through(_ path: String, _ junctionSuffix: String, _ end: ThroughService.LineEnd,
+private func through(_ junction: String, _ end: ThroughService.LineEnd,
                      _ lineJa: String, _ lineEn: String,
                      _ towardJa: String, _ towardEn: String,
                      to connectingLineId: String? = nil) -> ThroughService {
     ThroughService(
-        junctionStationId: "odpt.Station:\(path).\(junctionSuffix)",
+        junctionStationId: "odpt.Station:\(junction)",
         end: end,
         lineNameJa: lineJa, lineNameEn: lineEn,
         towardJa: towardJa, towardEn: towardEn,
@@ -132,19 +132,19 @@ enum OdakyuLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Odakyu.Odawara", "YoyogiUehara", .descending,
+            through("Odakyu.Odawara.YoyogiUehara", .descending,
                     "東京メトロ千代田線", "Tokyo Metro Chiyoda Line",
                     "大手町・綾瀬方面", "for Otemachi & Ayase",
                     to: "odpt.Railway:TokyoMetro.Chiyoda"),
-            through("Odakyu.Odawara", "ShinYurigaoka", .ascending,
+            through("Odakyu.Odawara.ShinYurigaoka", .ascending,
                     "小田急多摩線", "Odakyu Tama Line",
                     "唐木田方面", "for Karakida",
                     to: "odpt.Railway:Odakyu.Tama"),
-            through("Odakyu.Odawara", "SagamiOno", .ascending,
+            through("Odakyu.Odawara.SagamiOno", .ascending,
                     "小田急江ノ島線", "Odakyu Enoshima Line",
                     "藤沢・片瀬江ノ島方面", "for Fujisawa & Katase-Enoshima",
                     to: "odpt.Railway:Odakyu.Enoshima"),
-            through("Odakyu.Odawara", "Odawara", .ascending,
+            through("Odakyu.Odawara.Odawara", .ascending,
                     "箱根登山線", "Hakone Tozan Line",
                     "箱根湯本方面", "for Hakone-Yumoto"),
         ]
@@ -193,7 +193,7 @@ enum OdakyuLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Odakyu.Enoshima", "SagamiOno", .descending,
+            through("Odakyu.Enoshima.SagamiOno", .descending,
                     "小田急小田原線", "Odakyu Odawara Line",
                     "町田・新宿方面", "for Machida & Shinjuku",
                     to: "odpt.Railway:Odakyu.Odawara"),
@@ -234,7 +234,7 @@ enum OdakyuLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Odakyu.Tama", "ShinYurigaoka", .descending,
+            through("Odakyu.Tama.ShinYurigaoka", .descending,
                     "小田急小田原線", "Odakyu Odawara Line",
                     "新宿・千代田線方面", "for Shinjuku & the Chiyoda Line",
                     to: "odpt.Railway:Odakyu.Odawara"),
