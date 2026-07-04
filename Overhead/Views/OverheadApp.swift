@@ -48,9 +48,7 @@ struct RootView: View {
                 if viewModel.activeJourney != nil {
                     JourneyView(viewModel: viewModel)
                 } else {
-                    NoJourneyView {
-                        selectedTab = .lines
-                    }
+                    JourneySetupView(viewModel: viewModel)
                 }
             }
             .tabItem {
@@ -85,53 +83,6 @@ struct RootView: View {
             if hasJourney {
                 selectedTab = .journey
             }
-        }
-    }
-}
-
-// MARK: - No Journey View
-
-struct NoJourneyView: View {
-    let onSelectLine: () -> Void
-
-    var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
-
-            ZStack {
-                Circle()
-                    .fill(Color.primary.opacity(0.1))
-                    .frame(width: 100, height: 100)
-
-                Image(systemName: "tram.fill")
-                    .font(.system(size: 40))
-                    .foregroundColor(.primary)
-            }
-
-            Text("Onboarding.Description")
-                .font(.system(size: 14))
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .lineSpacing(4)
-
-            Button {
-                onSelectLine()
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "plus.circle.fill")
-                    Text("Button.StartJourney")
-                }
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(Color.accentColor)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-            .padding(.horizontal, 48)
-
-            Spacer()
-            Spacer()
         }
     }
 }
