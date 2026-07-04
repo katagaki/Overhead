@@ -2,7 +2,6 @@ import SwiftUI
 import Backbone
 
 // MARK: - Routes View
-/// Lets users configure and launch predefined quick routes (Home, Work, School).
 
 struct RoutesView: View {
     @ObservedObject var viewModel: JourneyViewModel
@@ -28,10 +27,7 @@ struct RoutesView: View {
 
     @ViewBuilder
     private func routeRow(label: QuickRoute.RouteLabel, route: QuickRoute?) -> some View {
-        if let route, let line = findLine(id: route.lineId),
-           let from = line.stations.first(where: { $0.id == route.fromStationId }),
-           let to = line.stations.first(where: { $0.id == route.toStationId }) {
-            // Configured route — show details + start button
+        if let route, let resolved = resolveRoute(route) {
             Section {
                 Button {
                     startRoute(route)
@@ -39,26 +35,26 @@ struct RoutesView: View {
                     HStack(spacing: 14) {
                         Image(systemName: label.iconName)
                             .font(.system(size: 22))
-                            .foregroundColor(line.color)
+                            .foregroundColor(resolved.line.color)
                             .frame(width: 36)
 
                         VStack(alignment: .leading, spacing: 4) {
                             Text(LocalizedStringKey(label.localizationKey))
                                 .font(.system(size: 17, weight: .semibold))
 
-                            Text(line.localizedName)
+                            Text(resolved.line.localizedName)
                                 .font(.system(size: 13))
-                                .foregroundColor(line.color)
+                                .foregroundColor(resolved.line.color)
 
                             HStack(spacing: 4) {
-                                StationNumberBadge(code: from.stationCode, color: line.color, size: .regular)
-                                Text(from.localizedName)
+                                StationNumberBadge(code: resolved.from.stationCode, color: resolved.line.color, size: .regular)
+                                Text(resolved.from.localizedName)
                                     .font(.system(size: 13))
-                                Image(systemName: "arrow.right")
+                                Image(systemName: resolved.isThrough ? "arrow.triangle.branch" : "arrow.right")
                                     .font(.system(size: 10))
                                     .foregroundColor(.secondary)
-                                StationNumberBadge(code: to.stationCode, color: line.color, size: .regular)
-                                Text(to.localizedName)
+                                StationNumberBadge(code: resolved.to.stationCode, color: resolved.line.color, size: .regular)
+                                Text(resolved.to.localizedName)
                                     .font(.system(size: 13))
                             }
                         }
@@ -67,7 +63,7 @@ struct RoutesView: View {
 
                         Image(systemName: "play.circle.fill")
                             .font(.system(size: 28))
-                            .foregroundColor(line.color)
+                            .foregroundColor(resolved.line.color)
                     }
                     .padding(.vertical, 4)
                 }
@@ -78,6 +74,7 @@ struct RoutesView: View {
                         label: label,
                         existingRoute: route,
                         availableLines: availableLines,
+                        includeThroughDestinations: !viewModel.isDemoMode,
                         onSave: { updated in
                             saveRoute(updated)
                         }
@@ -96,13 +93,13 @@ struct RoutesView: View {
                 }
             }
         } else {
-            // Unconfigured — show setup link
             Section {
                 NavigationLink {
                     RouteEditorView(
                         label: label,
                         existingRoute: nil,
                         availableLines: availableLines,
+                        includeThroughDestinations: !viewModel.isDemoMode,
                         onSave: { newRoute in
                             saveRoute(newRoute)
                         }
@@ -147,18 +144,36 @@ struct RoutesView: View {
         availableLines.first(where: { $0.id == id })
     }
 
+    /// Resolves a saved route's stations. The alighting station may live on a
+    /// connecting line reached via a through service (直通) past a junction.
+    private func resolveRoute(_ route: QuickRoute) -> (line: TrainLine, from: Station, to: Station, isThrough: Bool)? {
+        guard let line = findLine(id: route.lineId),
+              let from = line.stations.first(where: { $0.id == route.fromStationId })
+        else { return nil }
+
+        if let to = line.stations.first(where: { $0.id == route.toStationId }) {
+            return (line, from, to, false)
+        }
+
+        guard !viewModel.isDemoMode else { return nil }
+        for group in StaticTrainData.throughDestinations(fromLineId: line.id, boardingStationId: from.id) {
+            if let to = group.stations.first(where: { $0.id == route.toStationId }) {
+                return (line, from, to, true)
+            }
+        }
+        return nil
+    }
+
     // MARK: - Actions
 
     private func startRoute(_ route: QuickRoute) {
-        guard let line = findLine(id: route.lineId),
-              let from = line.stations.first(where: { $0.id == route.fromStationId }),
-              let to = line.stations.first(where: { $0.id == route.toStationId }) else { return }
+        guard let resolved = resolveRoute(route) else { return }
 
         if viewModel.isDemoMode {
-            viewModel.startDemoJourney(line: line, from: from, to: to)
+            viewModel.startDemoJourney(line: resolved.line, from: resolved.from, to: resolved.to)
         } else {
             Task {
-                await viewModel.startJourney(line: line, from: from, to: to)
+                await viewModel.startJourney(line: resolved.line, from: resolved.from, to: resolved.to)
             }
         }
     }
@@ -197,87 +212,70 @@ struct RouteEditorView: View {
     let label: QuickRoute.RouteLabel
     let existingRoute: QuickRoute?
     let availableLines: [TrainLine]
+    var includeThroughDestinations: Bool = true
     let onSave: (QuickRoute) -> Void
 
-    @State private var selectedLine: TrainLine?
+    @State private var line: TrainLine?
     @State private var fromStation: Station?
     @State private var toStation: Station?
     @Environment(\.dismiss) private var dismiss
 
-    /// The effective line: explicitly selected, or auto-detected from the From station
-    private var effectiveLine: TrainLine? {
-        if let selectedLine { return selectedLine }
-        guard let from = fromStation else { return nil }
-        return availableLines.first(where: { $0.stations.contains(where: { $0.id == from.id }) })
+    // Through-service (直通) destinations reachable from the boarding station.
+    private var throughGroups: [StaticTrainData.ThroughDestinationGroup] {
+        guard includeThroughDestinations, let line else { return [] }
+        return StaticTrainData.throughDestinations(
+            fromLineId: line.id,
+            boardingStationId: fromStation?.id
+        )
     }
 
     var body: some View {
         Form {
-            // Line selection (optional — auto-detected from station)
-            Section("Route.Section.Line") {
-                Picker(selection: $selectedLine) {
-                    Text("Picker.AllLines").tag(nil as TrainLine?)
-                    ForEach(availableLines) { line in
-                        Text(line.localizedName).tag(line as TrainLine?)
-                    }
-                } label: {
-                    HStack(spacing: 8) {
-                        if let line = effectiveLine {
-                            RoundedRectangle(cornerRadius: 3)
-                                .fill(line.color)
-                                .frame(width: 4, height: 20)
-                        }
-                        Text("Route.Section.Line")
-                    }
-                }
-                .onChange(of: selectedLine) { _, newLine in
-                    // Reset stations when line changes if they don't belong to the new line
-                    if let newLine {
-                        if let from = fromStation, !newLine.stations.contains(where: { $0.id == from.id }) {
-                            fromStation = nil
-                        }
-                        if let to = toStation, !newLine.stations.contains(where: { $0.id == to.id }) {
+            Section("Section.BoardingStation") {
+                NavigationLink {
+                    StationSearchSelectionView(lines: availableLines) { hit in
+                        if hit.line.id != line?.id {
                             toStation = nil
                         }
-                    }
-                }
-            }
-
-            // From station
-            Section("Section.BoardingStation") {
-                Picker(selection: $fromStation) {
-                    Text("Picker.SelectStation").tag(nil as Station?)
-                    if let line = selectedLine {
-                        // Show only the selected line's stations
-                        ForEach(line.stations) { station in
-                            stationPickerLabel(station: station, line: line).tag(station as Station?)
-                        }
-                    } else {
-                        // Show all stations grouped by line
-                        ForEach(availableLines) { line in
-                            Section(line.localizedName) {
-                                ForEach(line.stations) { station in
-                                    stationPickerLabel(station: station, line: line).tag(station as Station?)
-                                }
-                            }
-                        }
+                        line = hit.line
+                        fromStation = hit.station
                     }
                 } label: {
-                    HStack {
+                    HStack(spacing: 10) {
                         Image(systemName: "arrow.up.circle.fill")
-                            .foregroundColor(effectiveLine?.color ?? .secondary)
-                        Text("Section.BoardingStation")
+                            .foregroundColor(line?.color ?? .secondary)
+                        if let from = fromStation, let line {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(from.localizedName)
+                                Text(line.localizedName)
+                                    .font(.system(size: 12))
+                                    .foregroundColor(line.color)
+                            }
+                        } else {
+                            Text("StationSearch.Prompt")
+                                .foregroundColor(.secondary)
+                        }
                     }
                 }
             }
 
-            // To station (shown once we know which line)
-            if let line = effectiveLine {
+            if let line, fromStation != nil {
                 Section("Section.AlightingStation") {
                     Picker(selection: $toStation) {
                         Text("Picker.SelectStation").tag(nil as Station?)
-                        ForEach(line.stations) { station in
-                            stationPickerLabel(station: station, line: line).tag(station as Station?)
+                        Section(line.localizedName) {
+                            ForEach(line.stations) { station in
+                                stationPickerLabel(station: station).tag(station as Station?)
+                            }
+                        }
+                        ForEach(throughGroups, id: \.service) { group in
+                            Section {
+                                ForEach(group.stations) { station in
+                                    stationPickerLabel(station: station).tag(station as Station?)
+                                }
+                            } header: {
+                                Text("Picker.ThroughSection \(group.service.localizedLineName)")
+                            }
                         }
                     } label: {
                         HStack {
@@ -289,8 +287,7 @@ struct RouteEditorView: View {
                 }
             }
 
-            // Save button
-            if let line = effectiveLine,
+            if let line,
                let from = fromStation,
                let to = toStation,
                from.id != to.id {
@@ -320,20 +317,85 @@ struct RouteEditorView: View {
         }
         .navigationTitle(LocalizedStringKey(label.localizationKey))
         .onAppear {
-            if let existing = existingRoute {
-                selectedLine = availableLines.first(where: { $0.id == existing.lineId })
-                fromStation = selectedLine?.stations.first(where: { $0.id == existing.fromStationId })
-                toStation = selectedLine?.stations.first(where: { $0.id == existing.toStationId })
-            }
+            guard line == nil, let existing = existingRoute else { return }
+            let savedLine = availableLines.first(where: { $0.id == existing.lineId })
+            line = savedLine
+            fromStation = savedLine?.stations.first(where: { $0.id == existing.fromStationId })
+            toStation = savedLine?.stations.first(where: { $0.id == existing.toStationId })
+                ?? throughStation(withId: existing.toStationId)
         }
     }
 
+    private func throughStation(withId id: String) -> Station? {
+        for group in throughGroups {
+            if let station = group.stations.first(where: { $0.id == id }) {
+                return station
+            }
+        }
+        return nil
+    }
+
     @ViewBuilder
-    private func stationPickerLabel(station: Station, line: TrainLine) -> some View {
+    private func stationPickerLabel(station: Station) -> some View {
         if station.stationCode.isEmpty {
             Text(station.localizedName)
         } else {
             Text("\(station.stationCode) \(station.localizedName)")
         }
+    }
+}
+
+// MARK: - Station Search Selection
+
+/// Searchable list of every bundled station; calls `onSelect` and dismisses.
+struct StationSearchSelectionView: View {
+    let lines: [TrainLine]
+    let onSelect: (StationSearchHit) -> Void
+
+    @State private var searchText = ""
+    @Environment(\.dismiss) private var dismiss
+
+    private var trimmedQuery: String {
+        searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    var body: some View {
+        List {
+            if trimmedQuery.isEmpty {
+                ForEach(lines) { line in
+                    Section(line.localizedName) {
+                        ForEach(line.stations) { station in
+                            selectionRow(hit: StationSearchHit(line: line, station: station))
+                        }
+                    }
+                }
+            } else {
+                let results = StationSearch.search(lines: lines, query: trimmedQuery)
+                if results.isEmpty {
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                        Text("StationSearch.NoResults")
+                    }
+                    .foregroundColor(.secondary)
+                } else {
+                    ForEach(results) { hit in
+                        selectionRow(hit: hit)
+                    }
+                }
+            }
+        }
+        .listStyle(.grouped)
+        .searchable(text: $searchText, prompt: Text("StationSearch.Prompt"))
+        .navigationTitle("ViewTitle.Stations")
+    }
+
+    private func selectionRow(hit: StationSearchHit) -> some View {
+        Button {
+            onSelect(hit)
+            dismiss()
+        } label: {
+            StationSearchRow(hit: hit)
+        }
+        .foregroundColor(.primary)
     }
 }

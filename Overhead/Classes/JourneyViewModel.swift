@@ -176,14 +176,28 @@ final class JourneyViewModel: ObservableObject {
     ) async {
         isStartingJourney = true
 
-        if timetableCache[line.id] == nil,
-           let staticLine = StaticTrainData.line(withId: line.id) {
-            timetableCache[line.id] = StaticTimetableGenerator.services(
-                for: staticLine, calendar: .current()
+        // Resolve the line to ride — this may span a through-service (直通)
+        // junction onto a connecting line when the alighting station is past it.
+        guard let resolved = StaticTrainData.resolveJourneyLine(
+            lineId: line.id,
+            fromStationId: boardingStation.id,
+            toStationId: alightingStation.id
+        ) else {
+            errorMessage = "No timetable data available"
+            isStartingJourney = false
+            return
+        }
+
+        let journeyStaticLine = resolved.staticLine
+        let journeyLine = journeyStaticLine.trainLine
+
+        if timetableCache[journeyStaticLine.id] == nil {
+            timetableCache[journeyStaticLine.id] = StaticTimetableGenerator.services(
+                for: journeyStaticLine, calendar: .current()
             )
         }
 
-        guard let services = timetableCache[line.id] else {
+        guard let services = timetableCache[journeyStaticLine.id] else {
             errorMessage = "No timetable data available"
             isStartingJourney = false
             return
@@ -206,14 +220,14 @@ final class JourneyViewModel: ObservableObject {
         let journey = Journey(
             id: UUID(),
             service: service,
-            line: line,
+            line: journeyLine,
             boardingStationId: boardingStation.id,
             alightingStationId: alightingStation.id,
             startedAt: Date()
         )
 
         activeJourney = journey
-        selectedLine = line
+        selectedLine = journeyLine
 
         // Start location-based tracking — this drives everything
         locationTracker.startTracking(journey: journey, delay: nil)
@@ -288,8 +302,13 @@ final class JourneyViewModel: ObservableObject {
     // MARK: - Delay Check Sources
 
     /// Where and how to check for delays on a line (from bundled data).
+    /// Composite through-journey line IDs ("A+B") fall back to the origin line.
     func delayCheckInfo(for lineId: String) -> DelayCheckInfo? {
-        StaticTrainData.delayCheckInfo(forLineId: lineId)
+        if let info = StaticTrainData.delayCheckInfo(forLineId: lineId) {
+            return info
+        }
+        guard let originId = lineId.split(separator: "+").first else { return nil }
+        return StaticTrainData.delayCheckInfo(forLineId: String(originId))
     }
 
     /// Returns a localized direction name for a rail direction ID
