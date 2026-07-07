@@ -127,7 +127,7 @@ struct JourneySetupView: View {
         }
         .padding(14)
         .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
     }
 
     @ViewBuilder
@@ -220,7 +220,7 @@ struct JourneySetupView: View {
             }
             .padding(14)
             .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
         }
     }
 
@@ -286,7 +286,7 @@ struct JourneySetupView: View {
                     }
                 }
                 .background(Color(.secondarySystemGroupedBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
             }
         }
     }
@@ -488,7 +488,7 @@ struct JourneySetupView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
         .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
     }
 
     // MARK: - Actions
