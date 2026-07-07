@@ -352,12 +352,6 @@ struct StationPickerView: View {
                     .font(.system(size: 11))
                     .foregroundColor(.secondary)
             }
-
-            Spacer()
-
-            Image(systemName: "clock")
-                .font(.system(size: 12))
-                .foregroundColor(.secondary)
         }
     }
 }
