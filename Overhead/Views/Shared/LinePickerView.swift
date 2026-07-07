@@ -63,10 +63,17 @@ struct StationSearchRow: View {
                     size: .compact,
                     stationName: hit.station.name
                 )
+            } else if !hit.line.lineSymbol.isEmpty {
+                // Stations without a number (beyond the numbered section)
+                // still get the line's symbol so rows stay aligned
+                LineSymbolBadge(
+                    symbol: hit.line.lineSymbol,
+                    color: hit.line.color
+                )
             } else {
                 RoundedRectangle(cornerRadius: 3)
                     .fill(hit.line.color)
-                    .frame(width: 4, height: 28)
+                    .frame(width: 4, height: 32)
             }
 
             VStack(alignment: .leading, spacing: 2) {
@@ -301,6 +308,11 @@ struct StationPickerView: View {
                     color: line.color,
                     size: .compact,
                     stationName: station.name
+                )
+            } else if !line.lineSymbol.isEmpty {
+                LineSymbolBadge(
+                    symbol: line.lineSymbol,
+                    color: line.color
                 )
             }
             VStack(alignment: .leading) {

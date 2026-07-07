@@ -64,33 +64,16 @@ struct JourneyView: View {
 
     @ViewBuilder
     private func journeyHeader(journey: Journey, state: TrainPositionState) -> some View {
-        let stations = journey.journeyStations
-
         VStack(spacing: 10) {
             HStack(spacing: 10) {
                 RoundedRectangle(cornerRadius: 4)
                     .fill(lineColor)
                     .frame(width: 6, height: 32)
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(journey.line.localizedName)
-                        .font(.system(size: 20, weight: .bold))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-
-                    if let origin = stations.first, let destination = stations.last {
-                        HStack(spacing: 4) {
-                            Text(origin.localizedName)
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 9, weight: .semibold))
-                            Text(destination.localizedName)
-                        }
-                        .font(.system(size: 13))
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-                    }
-                }
+                Text(lineDisplayName(for: journey))
+                    .font(.system(size: 20, weight: .bold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
 
                 Spacer()
 
@@ -287,6 +270,27 @@ struct JourneyView: View {
         return f.string(from: date)
     }
 
+    /// Line name without train-type qualifiers — the type is shown in its own
+    /// pill, so 中央線快速 renders as 中央線 + [快速]. Composite itineraries
+    /// (legs joined with 〜) are cleaned per segment, so
+    /// 常磐線快速〜千代田線 renders as 常磐線〜千代田線.
+    private func lineDisplayName(for journey: Journey) -> String {
+        // Longest first so 特別快速 strips before 快速
+        let suffixes = ["通勤快速", "特別快速", "各駅停車", "快速", "急行", "特急"]
+
+        func stripped(_ component: String) -> String {
+            for suffix in suffixes where component.hasSuffix(suffix) && component.count > suffix.count {
+                return String(component.dropLast(suffix.count))
+            }
+            return component
+        }
+
+        return journey.line.localizedName
+            .components(separatedBy: "〜")
+            .map(stripped)
+            .joined(separator: "〜")
+    }
+
     private var isDelayed: Bool {
         viewModel.positionState?.delayMinutes ?? 0 > 0
     }
@@ -325,21 +329,12 @@ struct VerticalLCDLine: View {
                     timeColumn(for: station, timetable: timetable, isPast: isPast, isCurrent: isCurrent)
                         .frame(width: 56)
 
-                    ZStack(alignment: .top) {
-                        if !isLast {
-                            let segFrac = segmentFillFraction(stationIndex: index, totalStations: stations.count)
-                            trackSegment(filled: isPast, fillFraction: segFrac)
-                                .frame(width: trackWidth, height: stationSpacing)
-                                .offset(y: stationDotRadius(isTerminal: isTerminal, isCurrent: isCurrent))
-                        }
-
-                        stationCircle(
-                            isPast: isPast,
-                            isCurrent: isCurrent,
-                            isTerminal: isTerminal,
-                            isNext: isNext
-                        )
-                    }
+                    stationCircle(
+                        isPast: isPast,
+                        isCurrent: isCurrent,
+                        isTerminal: isTerminal,
+                        isNext: isNext
+                    )
                     .frame(width: 40)
 
                     stationLabel(
@@ -350,10 +345,24 @@ struct VerticalLCDLine: View {
                         isTerminal: isTerminal,
                         isTransfer: transferIds.contains(station.id)
                     )
+                    .padding(.bottom, isLast ? 0 : 14)
 
                     Spacer()
                 }
-                .frame(height: isLast ? nil : stationSpacing)
+                // Rows grow when the label stack is tall (transfer/next badges)
+                // instead of overflowing into the next station.
+                .frame(minHeight: isLast ? 0 : stationSpacing, alignment: .top)
+                // The connecting track lives in the background so it always
+                // spans the actual row height, whatever the label needed.
+                .background(alignment: .topLeading) {
+                    if !isLast {
+                        let segFrac = segmentFillFraction(stationIndex: index, totalStations: stations.count)
+                        trackSegment(filled: isPast, fillFraction: segFrac)
+                            .frame(width: trackWidth)
+                            .padding(.top, stationDotRadius(isTerminal: isTerminal, isCurrent: isCurrent))
+                            .padding(.leading, 56 + 20 - trackWidth / 2)
+                    }
+                }
                 .id("station_\(index)")
             }
         }

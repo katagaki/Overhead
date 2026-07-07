@@ -70,34 +70,36 @@ struct PlacesView: View {
                 onSave: { upsert($0) }
             )
         } label: {
-            HStack(spacing: 14) {
+            HStack(spacing: 12) {
                 Image(systemName: place.kind.iconName)
-                    .font(.system(size: 20))
-                    .foregroundColor(resolved.line.color)
-                    .frame(width: 32)
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(width: 36, height: 36)
+                    .background(resolved.line.color)
+                    .clipShape(RoundedRectangle(cornerRadius: 9))
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 3) {
                     Text(displayName(of: place))
                         .font(.system(size: 16, weight: .semibold))
 
-                    HStack(spacing: 4) {
-                        StationNumberBadge(code: resolved.from.stationCode, color: resolved.line.color, size: .regular, stationName: resolved.from.name)
+                    HStack(spacing: 5) {
                         Text(resolved.from.localizedName)
-                            .font(.system(size: 13))
                         Image(systemName: resolved.isThrough ? "arrow.triangle.branch" : "arrow.right")
-                            .font(.system(size: 10))
-                            .foregroundColor(.secondary)
-                        StationNumberBadge(code: resolved.to.stationCode, color: resolved.line.color, size: .regular, stationName: resolved.to.name)
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(.tertiary)
                         Text(resolved.to.localizedName)
-                            .font(.system(size: 13))
                     }
+                    .font(.system(size: 13))
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
 
                     Text(resolved.line.localizedName)
                         .font(.system(size: 12))
                         .foregroundColor(resolved.line.color)
+                        .lineLimit(1)
                 }
 
-                Spacer()
+                Spacer(minLength: 8)
 
                 Button {
                     Task {
@@ -417,7 +419,7 @@ struct StationSearchSelectionView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if showsCloseButton {
-                ToolbarItem(placement: .cancellationAction) {
+                ToolbarItem(placement: .topBarTrailing) {
                     if #available(iOS 26.0, *) {
                         // System close role: standard neutral glyph, ignores tint
                         Button(role: .close) {

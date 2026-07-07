@@ -39,19 +39,20 @@ struct JourneyBottomAccessory: View {
 
                     Spacer(minLength: 8)
 
-                    Text(Self.timeString(state.estimatedArrival))
-                        .font(.system(size: 15, weight: .semibold, design: .rounded))
-                        .foregroundColor(state.delayMinutes > 0 ? .red : .primary)
+                    VStack(alignment: .trailing, spacing: 0) {
+                        Text("Label.EstimatedArrival")
+                            .font(.system(size: 9))
+                            .foregroundColor(.secondary)
+                        Text(Self.timeString(state.estimatedArrival))
+                            .font(.system(size: 15, weight: .semibold, design: .rounded))
+                            .foregroundColor(state.delayMinutes > 0 ? .red : .primary)
+                    }
                 } else if let journey = viewModel.activeJourney {
                     Text(journey.line.localizedName)
                         .font(.system(size: 14, weight: .semibold))
                         .lineLimit(1)
                     Spacer(minLength: 8)
                 }
-
-                Image(systemName: "chevron.up")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(.secondary)
             }
             .padding(.horizontal, 14)
             .contentShape(Rectangle())
