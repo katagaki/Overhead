@@ -314,14 +314,18 @@ public struct Journey: Identifiable, Codable {
     public let boardingStationId: String
     public let alightingStationId: String
     public let startedAt: Date
+    /// Stations where the passenger changes trains (乗り換え) on a multi-leg
+    /// itinerary. Empty for single-ride and through (直通) journeys.
+    public let transferStationIds: [String]
 
-    public init(id: UUID, service: TrainService, line: TrainLine, boardingStationId: String, alightingStationId: String, startedAt: Date) {
+    public init(id: UUID, service: TrainService, line: TrainLine, boardingStationId: String, alightingStationId: String, startedAt: Date, transferStationIds: [String] = []) {
         self.id = id
         self.service = service
         self.line = line
         self.boardingStationId = boardingStationId
         self.alightingStationId = alightingStationId
         self.startedAt = startedAt
+        self.transferStationIds = transferStationIds
     }
 
     public var journeyStations: [Station] {

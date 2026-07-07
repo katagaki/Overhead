@@ -5,6 +5,10 @@ import Backbone
 
 struct JourneyView: View {
     @ObservedObject var viewModel: JourneyViewModel
+    /// Whether to show the in-bar end-journey button. Off when presented in
+    /// the journey sheet, whose toolbar provides the actions instead.
+    var showsEndButton: Bool = true
+    @State private var showingEndConfirmation = false
 
     private var lineColor: Color {
         viewModel.selectedLine?.color ?? .gray
@@ -22,7 +26,8 @@ struct JourneyView: View {
                     ScrollView(.vertical, showsIndicators: false) {
                         VStack(spacing: 0) {
                             journeyHeader(journey: journey, state: state)
-                                .padding(.bottom, 16)
+                                .padding(.top, 12)
+                                .padding(.bottom, 20)
 
                             VerticalLCDLine(
                                 journey: journey,
@@ -36,6 +41,10 @@ struct JourneyView: View {
                     }
                     .safeAreaInset(edge: .top) {
                         nextStationBar(state: state, journey: journey)
+                    }
+                    .safeAreaInset(edge: .bottom) {
+                        trackingModeCapsule
+                            .padding(.vertical, 8)
                     }
                     .onAppear {
                         if let idx = state.currentStationIndex {
@@ -55,18 +64,32 @@ struct JourneyView: View {
 
     @ViewBuilder
     private func journeyHeader(journey: Journey, state: TrainPositionState) -> some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 8) {
+        let stations = journey.journeyStations
+
+        VStack(spacing: 10) {
+            HStack(spacing: 10) {
                 RoundedRectangle(cornerRadius: 4)
                     .fill(lineColor)
-                    .frame(width: 6, height: 28)
+                    .frame(width: 6, height: 32)
 
-                VStack(alignment: .leading, spacing: 1) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text(journey.line.localizedName)
                         .font(.system(size: 20, weight: .bold))
-                    Text(journey.line.nameEn)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+
+                    if let origin = stations.first, let destination = stations.last {
+                        HStack(spacing: 4) {
+                            Text(origin.localizedName)
+                            Image(systemName: "arrow.right")
+                                .font(.system(size: 9, weight: .semibold))
+                            Text(destination.localizedName)
+                        }
                         .font(.system(size: 13))
                         .foregroundColor(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                    }
                 }
 
                 Spacer()
@@ -80,8 +103,6 @@ struct JourneyView: View {
                     .clipShape(Capsule())
             }
             .padding(.horizontal, 24)
-
-            trackingModeBanner(state: state)
 
             if state.delayMinutes > 0 {
                 HStack(spacing: 6) {
@@ -104,51 +125,53 @@ struct JourneyView: View {
         }
     }
 
-    // MARK: - Tracking Mode Banner
+    // MARK: - Tracking Mode Capsule (bottom safe area)
 
+    /// Floating glass capsule summarizing the tracking mode; tapping it
+    /// refreshes the position.
     @ViewBuilder
-    private func trackingModeBanner(state: TrainPositionState) -> some View {
+    private var trackingModeCapsule: some View {
         let mode = viewModel.trackingMode
 
-        HStack(spacing: 8) {
-            HStack(spacing: 4) {
-                Image(systemName: modeIcon(mode))
-                    .font(.system(size: 11))
-                Text(modeLabel(mode))
-                    .font(.system(size: 12, weight: .medium))
-            }
-            .foregroundColor(modeColor(mode))
+        let content = HStack(spacing: 8) {
+            Image(systemName: modeIcon(mode))
+                .font(.system(size: 12, weight: .semibold))
+            Text(modeLabel(mode))
+                .font(.system(size: 13, weight: .bold))
 
             if mode == .timetable {
                 Text("Status.WeakGPSSignal")
-                    .font(.system(size: 10))
-                    .foregroundColor(.secondary)
+                    .font(.system(size: 11))
+                    .opacity(0.7)
                     .lineLimit(1)
             }
 
-            Spacer()
+            Image(systemName: "arrow.clockwise")
+                .font(.system(size: 11, weight: .semibold))
+                .opacity(0.8)
+        }
+        .foregroundColor(modeColor(mode))
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
 
-            Button {
-                viewModel.forceRefresh()
-            } label: {
-                HStack(spacing: 3) {
-                    Image(systemName: "arrow.clockwise")
-                        .font(.system(size: 10, weight: .semibold))
-                    Text("Button.Refresh")
-                        .font(.system(size: 10, weight: .medium))
-                }
-                .foregroundColor(lineColor)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(lineColor.opacity(0.1))
-                .clipShape(Capsule())
+        Button {
+            viewModel.forceRefresh()
+        } label: {
+            if #available(iOS 26.0, *) {
+                content
+                    .glassEffect(.regular.tint(modeColor(mode).opacity(0.2)).interactive())
+            } else {
+                content
+                    .background {
+                        ZStack {
+                            Capsule().fill(.ultraThinMaterial)
+                            Capsule().fill(modeColor(mode).opacity(0.12))
+                        }
+                    }
             }
         }
-        .padding(.horizontal, 24)
-        .padding(.vertical, 6)
-        .background(modeColor(mode).opacity(0.06))
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-        .padding(.horizontal, 24)
+        .buttonStyle(.plain)
+        .accessibilityLabel("Button.Refresh")
     }
 
     private func modeIcon(_ mode: TrackingMode) -> String {
@@ -179,36 +202,61 @@ struct JourneyView: View {
 
     @ViewBuilder
     private func nextStationBar(state: TrainPositionState, journey: Journey) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Label.NextStation")
-                    .font(.system(size: 10))
-                    .foregroundColor(.secondary)
-                Text(state.nextStationName)
-                    .font(.system(size: 22, weight: .bold))
-                Text(state.nextStationNameEn)
-                    .font(.system(size: 13))
-                    .foregroundColor(.secondary)
-            }
+        VStack(spacing: 0) {
+            HStack(alignment: .top, spacing: 12) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Label.NextStation")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.secondary)
+                    Text(state.nextStationName)
+                        .font(.system(size: 26, weight: .bold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                    Text(state.nextStationNameEn)
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
+                }
 
-            Spacer()
+                Spacer()
 
-            VStack(alignment: .trailing, spacing: 2) {
-                Text("Label.EstimatedArrival")
-                    .font(.system(size: 10))
-                    .foregroundColor(.secondary)
-                Text(formatTime(state.estimatedArrival))
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundColor(state.isDelayed ? .red : lineColor)
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("Label.EstimatedArrival")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.secondary)
+                    Text(formatTime(state.estimatedArrival))
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .foregroundColor(state.isDelayed ? .red : lineColor)
 
-                if state.isDelayed {
-                    Text("Journey.Delay.Minutes \(state.delayMinutes)")
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
-                        .foregroundColor(.red)
+                    if state.isDelayed {
+                        Text("Journey.Delay.Minutes \(state.delayMinutes)")
+                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                            .foregroundColor(.red)
+                    }
+                }
+
+                if showsEndButton {
+                    Button {
+                        showingEndConfirmation = true
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 26))
+                            .foregroundStyle(.secondary, Color(.tertiarySystemFill))
+                    }
+                    .accessibilityLabel("Button.EndJourney")
+                    .confirmationDialog(
+                        "Journey.End.ConfirmTitle",
+                        isPresented: $showingEndConfirmation,
+                        titleVisibility: .visible
+                    ) {
+                        Button("Button.EndJourney", role: .destructive) {
+                            viewModel.stopJourney()
+                        }
+                        Button("Button.KeepJourney", role: .cancel) {}
+                    }
                 }
             }
         }
-        .padding(.horizontal, 24)
+        .padding(.horizontal, 20)
         .padding(.vertical, 12)
         .background(.ultraThinMaterial)
         .overlay(alignment: .bottom) {
@@ -260,6 +308,7 @@ struct VerticalLCDLine: View {
     var body: some View {
         let stations = journey.journeyStations
         let timetable = journey.journeyTimetable
+        let transferIds = Set(journey.transferStationIds)
 
         VStack(spacing: 0) {
             ForEach(Array(stations.enumerated()), id: \.element.id) { index, station in
@@ -298,7 +347,8 @@ struct VerticalLCDLine: View {
                         isPast: isPast,
                         isCurrent: isCurrent,
                         isNext: isNext,
-                        isTerminal: isTerminal
+                        isTerminal: isTerminal,
+                        isTransfer: transferIds.contains(station.id)
                     )
 
                     Spacer()
@@ -407,7 +457,7 @@ struct VerticalLCDLine: View {
     // MARK: - Station Label
 
     @ViewBuilder
-    private func stationLabel(station: Station, isPast: Bool, isCurrent: Bool, isNext: Bool, isTerminal: Bool) -> some View {
+    private func stationLabel(station: Station, isPast: Bool, isCurrent: Bool, isNext: Bool, isTerminal: Bool, isTransfer: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 6) {
                 if !station.stationCode.isEmpty {
@@ -415,19 +465,36 @@ struct VerticalLCDLine: View {
                         code: station.stationCode,
                         color: lineColor,
                         opacity: isPast && !isCurrent ? 0.4 : 1.0,
-                        size: .regular
+                        size: .regular,
+                        stationName: station.name
                     )
                 }
 
                 Text(station.localizedName)
-                    .font(.system(size: isCurrent || isTerminal ? 18 : 15,
-                                  weight: isCurrent || isTerminal ? .bold : .medium))
+                    .font(.system(size: isCurrent || isTerminal || isTransfer ? 18 : 15,
+                                  weight: isCurrent || isTerminal || isTransfer ? .bold : .medium))
                     .foregroundColor(isPast && !isCurrent ? .secondary : .primary)
             }
 
             Text(station.nameEn)
                 .font(.system(size: 11))
                 .foregroundColor(isPast && !isCurrent ? .secondary.opacity(0.5) : .secondary)
+
+            if isTransfer {
+                HStack(spacing: 3) {
+                    Image(systemName: "arrow.triangle.2.circlepath")
+                        .font(.system(size: 9, weight: .bold))
+                    Text("Label.Transfer")
+                        .font(.system(size: 10, weight: .bold))
+                }
+                .foregroundColor(.orange)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(Color.orange.opacity(isPast && !isCurrent ? 0.08 : 0.15))
+                .clipShape(Capsule())
+                .padding(.top, 2)
+                .opacity(isPast && !isCurrent ? 0.5 : 1.0)
+            }
 
             if isCurrent {
                 Text("Label.CurrentLocation")

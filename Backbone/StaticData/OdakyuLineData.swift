@@ -56,11 +56,17 @@ enum OdakyuLineData {
         odawara, enoshima, tama,
     ]
 
-    private static let odawaraWeekday = pattern("05:00", "24:00", [
-        ("05:00", 8), ("06:30", 4), ("09:30", 7), ("16:30", 5), ("20:00", 7), ("22:00", 9),
+    private static let odawaraDownWeekday = pattern("05:00", "24:43", [
+        ("05:00", 7), ("06:30", 3.5), ("09:30", 5), ("16:30", 4), ("20:00", 5), ("22:00", 6),
     ])
-    private static let odawaraHoliday = pattern("05:00", "24:00", [
-        ("05:00", 8), ("07:00", 6), ("10:00", 7), ("20:00", 8),
+    private static let odawaraDownHoliday = pattern("05:00", "24:43", [
+        ("05:00", 7), ("07:00", 5), ("10:00", 5), ("20:00", 6),
+    ])
+    private static let odawaraUpWeekday = pattern("04:54", "23:49", [
+        ("04:54", 8), ("06:30", 4), ("09:30", 7), ("16:30", 5), ("20:00", 7), ("22:00", 9),
+    ])
+    private static let odawaraUpHoliday = pattern("04:54", "23:49", [
+        ("04:54", 8), ("07:00", 6), ("10:00", 7), ("20:00", 8),
     ])
 
     // MARK: Odakyu Odawara Line (OH)
@@ -70,7 +76,7 @@ enum OdakyuLineData {
         nameJa: "小田急小田原線",
         nameEn: "Odakyu Odawara Line",
         operatorId: "odpt.Operator:Odakyu",
-        colorHex: "#005BAC",
+        colorHex: "#0085CE",
         stations: [
             st("Odakyu.Odawara", "Shinjuku", "新宿", "Shinjuku", "OH01", 35.6905, 139.6994),
             st("Odakyu.Odawara", "MinamiShinjuku", "南新宿", "Minami-Shinjuku", "OH02", 35.6842, 139.6980),
@@ -122,13 +128,13 @@ enum OdakyuLineData {
         ],
         hopTimesMinutes: [
             2, 1, 2, 1, 1, 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 3, 2, 2, 2, 2,
-            2, 3, 3, 3, 3, 2, 2, 4, 2, 2, 3, 4, 4, 2, 4, 4, 5, 2, 2, 2, 2, 2, 3,
+            2, 3, 3, 3, 3, 2, 2, 4, 2, 2, 4.5, 6, 6, 3, 6, 6, 8, 3, 3, 3, 3, 3, 4.5,
         ],
         directions: [
             direction("Odakyu.Odawara", "Odawara", "小田原方面", "For Odawara", ascending: true,
-                      weekday: odawaraWeekday, holiday: odawaraHoliday),
+                      weekday: odawaraDownWeekday, holiday: odawaraDownHoliday),
             direction("Odakyu.Odawara", "Shinjuku", "新宿方面", "For Shinjuku", ascending: false,
-                      weekday: odawaraWeekday, holiday: odawaraHoliday),
+                      weekday: odawaraUpWeekday, holiday: odawaraUpHoliday),
         ],
         delayInfo: delayInfo,
         throughServices: [
@@ -152,11 +158,17 @@ enum OdakyuLineData {
 
     // MARK: Odakyu Enoshima Line (OE)
 
-    private static let enoshimaWeekday = pattern("05:00", "24:00", [
+    private static let enoshimaDownWeekday = pattern("05:00", "24:30", [
         ("05:00", 8), ("06:30", 5), ("09:30", 8), ("16:30", 6), ("20:00", 8), ("22:00", 10),
     ])
-    private static let enoshimaHoliday = pattern("05:00", "24:00", [
+    private static let enoshimaDownHoliday = pattern("05:00", "24:30", [
         ("05:00", 8), ("07:00", 7), ("10:00", 8), ("20:00", 9),
+    ])
+    private static let enoshimaUpWeekday = pattern("05:00", "24:18", [
+        ("05:00", 10), ("09:30", 11), ("22:00", 12),
+    ])
+    private static let enoshimaUpHoliday = pattern("05:00", "24:18", [
+        ("05:00", 10), ("10:00", 11), ("20:00", 12),
     ])
 
     static let enoshima = StaticTrainLine(
@@ -164,7 +176,7 @@ enum OdakyuLineData {
         nameJa: "小田急江ノ島線",
         nameEn: "Odakyu Enoshima Line",
         operatorId: "odpt.Operator:Odakyu",
-        colorHex: "#009250",
+        colorHex: "#0085CE",
         stations: [
             st("Odakyu.Enoshima", "SagamiOno", "相模大野", "Sagami-Ono", "OH28", 35.5318, 139.4383),
             st("Odakyu.Enoshima", "HigashiRinkan", "東林間", "Higashi-Rinkan", "OE01", 35.5203, 139.4365),
@@ -184,12 +196,12 @@ enum OdakyuLineData {
             st("Odakyu.Enoshima", "KugenumaKaigan", "鵠沼海岸", "Kugenuma-Kaigan", "OE15", 35.3162, 139.4788),
             st("Odakyu.Enoshima", "KataseEnoshima", "片瀬江ノ島", "Katase-Enoshima", "OE16", 35.3096, 139.4791),
         ],
-        hopTimesMinutes: [3, 2, 2, 1, 3, 2, 3, 2, 3, 2, 2, 2, 3, 2, 2, 2],
+        hopTimesMinutes: [3.5, 2.5, 2.5, 1.5, 3.5, 2.5, 3.5, 2.5, 3.5, 2.5, 2.5, 2.5, 3.5, 2.5, 2.5, 2.5],
         directions: [
             direction("Odakyu.Enoshima", "KataseEnoshima", "藤沢・片瀬江ノ島方面", "For Fujisawa & Katase-Enoshima", ascending: true,
-                      weekday: enoshimaWeekday, holiday: enoshimaHoliday),
+                      weekday: enoshimaDownWeekday, holiday: enoshimaDownHoliday),
             direction("Odakyu.Enoshima", "SagamiOno", "相模大野方面", "For Sagami-Ono", ascending: false,
-                      weekday: enoshimaWeekday, holiday: enoshimaHoliday),
+                      weekday: enoshimaUpWeekday, holiday: enoshimaUpHoliday),
         ],
         delayInfo: delayInfo,
         throughServices: [
@@ -202,11 +214,17 @@ enum OdakyuLineData {
 
     // MARK: Odakyu Tama Line (OT)
 
-    private static let tamaWeekday = pattern("05:00", "24:00", [
-        ("05:00", 10), ("06:30", 6), ("09:30", 10), ("16:30", 8), ("20:00", 10), ("22:00", 12),
+    private static let tamaDownWeekday = pattern("05:42", "24:45", [
+        ("05:42", 10), ("06:30", 7.5), ("09:30", 10), ("16:30", 8), ("20:00", 10), ("22:00", 12),
     ])
-    private static let tamaHoliday = pattern("05:00", "24:00", [
-        ("05:00", 10), ("07:00", 8), ("10:00", 10), ("20:00", 11),
+    private static let tamaDownHoliday = pattern("05:42", "24:45", [
+        ("05:42", 10), ("07:00", 8), ("10:00", 10), ("20:00", 11),
+    ])
+    private static let tamaUpWeekday = pattern("04:55", "24:07", [
+        ("04:55", 10), ("06:30", 7.5), ("09:30", 10), ("16:30", 8), ("20:00", 10), ("22:00", 12),
+    ])
+    private static let tamaUpHoliday = pattern("04:55", "24:07", [
+        ("04:55", 10), ("07:00", 8), ("10:00", 10), ("20:00", 11),
     ])
 
     static let tama = StaticTrainLine(
@@ -214,7 +232,7 @@ enum OdakyuLineData {
         nameJa: "小田急多摩線",
         nameEn: "Odakyu Tama Line",
         operatorId: "odpt.Operator:Odakyu",
-        colorHex: "#00A5E3",
+        colorHex: "#0085CE",
         stations: [
             st("Odakyu.Tama", "ShinYurigaoka", "新百合ヶ丘", "Shin-Yurigaoka", "OH23", 35.6039, 139.5083),
             st("Odakyu.Tama", "Satsukidai", "五月台", "Satsukidai", "OT01", 35.6008, 139.4979),
@@ -225,12 +243,12 @@ enum OdakyuLineData {
             st("Odakyu.Tama", "OdakyuTamaCenter", "小田急多摩センター", "Odakyu-Tama-Center", "OT06", 35.6244, 139.4243),
             st("Odakyu.Tama", "Karakida", "唐木田", "Karakida", "OT07", 35.6146, 139.4110),
         ],
-        hopTimesMinutes: [3, 2, 2, 2, 3, 3, 3],
+        hopTimesMinutes: [2.5, 1.5, 1.5, 1.5, 2.5, 2.5, 2.5],
         directions: [
             direction("Odakyu.Tama", "Karakida", "唐木田方面", "For Karakida", ascending: true,
-                      weekday: tamaWeekday, holiday: tamaHoliday),
+                      weekday: tamaDownWeekday, holiday: tamaDownHoliday),
             direction("Odakyu.Tama", "ShinYurigaoka", "新百合ヶ丘方面", "For Shin-Yurigaoka", ascending: false,
-                      weekday: tamaWeekday, holiday: tamaHoliday),
+                      weekday: tamaUpWeekday, holiday: tamaUpHoliday),
         ],
         delayInfo: delayInfo,
         throughServices: [

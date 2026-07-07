@@ -61,6 +61,8 @@
 		7B5E01DC2F76257200861ADF /* LCDExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LCDExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		7B5E01DE2F76257200861ADF /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		7B5E01E02F76257300861ADF /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		E49DCE832FFCFB2B005BA3DF /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
+		E49DCEF12FFD1371005BA3DF /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
 		E4D93A0B2FF7F7C6004D37D7 /* Backbone.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Backbone.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -75,9 +77,21 @@
 		7B5E02002F76300000861ADF /* Exceptions for "Overhead" folder in "Overhead" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Fonts/OFL.txt,
 				Info.plist,
 			);
 			target = 7B5E01C92F7624FC00861ADF /* Overhead */;
+		};
+		AA10FEED2F76FFEE00861ADF /* Exceptions for "Overhead" folder in "LCDExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Fonts/Hind-Bold.ttf",
+				"Fonts/Hind-Light.ttf",
+				"Fonts/Hind-Medium.ttf",
+				"Fonts/Hind-Regular.ttf",
+				"Fonts/Hind-SemiBold.ttf",
+			);
+			target = 7B5E01DB2F76257200861ADF /* LCDExtension */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -86,6 +100,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				7B5E02002F76300000861ADF /* Exceptions for "Overhead" folder in "Overhead" target */,
+				AA10FEED2F76FFEE00861ADF /* Exceptions for "Overhead" folder in "LCDExtension" target */,
 			);
 			path = Overhead;
 			sourceTree = "<group>";
@@ -141,6 +156,7 @@
 				E4D93A0C2FF7F7C6004D37D7 /* Backbone */,
 				7B5E01DD2F76257200861ADF /* Frameworks */,
 				7B5E01CB2F7624FC00861ADF /* Products */,
+				E49DCED12FFD1371005BA3DF /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -161,6 +177,24 @@
 				7B5E01E02F76257300861ADF /* SwiftUI.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E49DCE842FFCFB2B005BA3DF /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E49DCED12FFD1371005BA3DF /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				E49DCE832FFCFB2B005BA3DF /* Overhead.xcodeproj */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
+		E49DCEF22FFD1371005BA3DF /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -281,6 +315,16 @@
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7B5E01CB2F7624FC00861ADF /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = E49DCEF22FFD1371005BA3DF /* Products */;
+					ProjectRef = E49DCEF12FFD1371005BA3DF /* Overhead.xcodeproj */;
+				},
+				{
+					ProductGroup = E49DCE842FFCFB2B005BA3DF /* Products */;
+					ProjectRef = E49DCE832FFCFB2B005BA3DF /* Overhead.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				7B5E01C92F7624FC00861ADF /* Overhead */,
@@ -492,7 +536,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -531,7 +575,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -565,7 +609,7 @@
 				INFOPLIST_FILE = LCD/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = LCD;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -600,7 +644,7 @@
 				INFOPLIST_FILE = LCD/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = LCD;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -638,7 +682,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
@@ -647,7 +691,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
@@ -666,7 +710,7 @@
 				TARGETED_DEVICE_FAMILY = "1,2,7";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
-				XROS_DEPLOYMENT_TARGET = 27.0;
+				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Debug;
 		};
@@ -685,7 +729,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
@@ -694,7 +738,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
@@ -713,7 +757,7 @@
 				TARGETED_DEVICE_FAMILY = "1,2,7";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
-				XROS_DEPLOYMENT_TARGET = 27.0;
+				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Release;
 		};

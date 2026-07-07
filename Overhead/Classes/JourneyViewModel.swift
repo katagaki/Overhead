@@ -19,21 +19,18 @@ final class JourneyViewModel: ObservableObject {
     @Published var isStartingJourney = false
     @Published var errorMessage: String?
     @Published var locationError: String?
-    @Published var isDemoMode = false
     @Published var stationTimetable: [StationTimetableData] = []
     @Published var isLoadingTimetable = false
     @Published var railDirections: [String: (ja: String, en: String)] = [:]
 
     // Services
     private let locationTracker = LocationTracker()
-    private let demoProvider = DemoDataProvider()
     private var cancellables = Set<AnyCancellable>()
     private var timetableCache: [String: [TrainService]] = [:]
     private var linesLoaded = false
 
     init(previewMode: Bool = false) {
         bindLocationTracker()
-        bindDemoProvider()
         if previewMode {
             loadPreviewData()
         }
@@ -44,7 +41,7 @@ final class JourneyViewModel: ObservableObject {
         locationTracker.$positionState
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
-                guard let self, let state, !self.isDemoMode else { return }
+                guard let self, let state else { return }
                 self.positionState = state
             }
             .store(in: &cancellables)
@@ -52,7 +49,7 @@ final class JourneyViewModel: ObservableObject {
         locationTracker.$trackingMode
             .receive(on: DispatchQueue.main)
             .sink { [weak self] mode in
-                guard let self, !self.isDemoMode else { return }
+                guard let self else { return }
                 self.trackingMode = mode
             }
             .store(in: &cancellables)
@@ -62,97 +59,9 @@ final class JourneyViewModel: ObservableObject {
             .assign(to: &$locationError)
     }
 
-    /// Subscribe to DemoDataProvider's published state
-    private func bindDemoProvider() {
-        demoProvider.$positionState
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] state in
-                guard let self, self.isDemoMode, let state else { return }
-                self.positionState = state
-
-                // Drive Live Activity from demo state
-                if let journey = self.activeJourney {
-                    if LiveActivityManager.shared.hasActiveActivity {
-                        LiveActivityManager.shared.updateActivity(positionState: state)
-                    } else {
-                        LiveActivityManager.shared.startActivity(
-                            journey: journey,
-                            positionState: state,
-                            lineColorHex: journey.line.colorHex
-                        )
-                    }
-                }
-            }
-            .store(in: &cancellables)
-
-        demoProvider.$trackingMode
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] mode in
-                guard let self, self.isDemoMode else { return }
-                self.trackingMode = mode
-            }
-            .store(in: &cancellables)
-
-        demoProvider.$currentDelay
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] delay in
-                guard let self, self.isDemoMode else { return }
-                self.currentDelay = delay
-            }
-            .store(in: &cancellables)
-    }
-
-    // MARK: - Demo Mode
-
-    func startDemoMode() {
-        isDemoMode = true
-        let demoLines = DemoDataProvider.demoLines
-        availableLines = demoLines
-        let line = demoLines[0]
-        let stations = line.stations
-        guard let from = stations.first, let to = stations.last else { return }
-
-        selectedLine = line
-        let journey = demoProvider.buildJourney(line: line, from: from, to: to)
-        activeJourney = journey
-        demoProvider.startSimulation(journey: journey)
-    }
-
-    func stopDemoMode() {
-        demoProvider.stopSimulation()
-        LiveActivityManager.shared.endActivity()
-        isDemoMode = false
-        activeJourney = nil
-        positionState = nil
-        currentDelay = nil
-        selectedLine = nil
-        availableLines = []
-        linesLoaded = false
-    }
-
-    func startDemoJourney(
-        line: TrainLine,
-        from boardingStation: Station,
-        to alightingStation: Station
-    ) {
-        // End any existing Live Activity before starting a new one
-        LiveActivityManager.shared.endActivity()
-
-        selectedLine = line
-        let journey = demoProvider.buildJourney(line: line, from: boardingStation, to: alightingStation)
-        activeJourney = journey
-        demoProvider.startSimulation(journey: journey)
-    }
-
     // MARK: - Load Lines
 
     func loadLines() async {
-        if isDemoMode {
-            availableLines = DemoDataProvider.demoLines
-            linesLoaded = true
-            return
-        }
-
         guard !linesLoaded else { return }
 
         availableLines = StaticTrainData.trainLines()
@@ -162,7 +71,6 @@ final class JourneyViewModel: ObservableObject {
     }
 
     func forceRefreshLines() async {
-        guard !isDemoMode else { return }
         linesLoaded = false
         await loadLines()
     }
@@ -249,15 +157,303 @@ final class JourneyViewModel: ObservableObject {
         isStartingJourney = false
     }
 
+    // MARK: - Departure Search (乗換案内-style)
+
+    /// All boardable itineraries between two stations (matched by Japanese
+    /// name across lines), departing at or after `departure`, sorted by
+    /// departure time. Falls back to routes with transfers (乗り換え) when no
+    /// single-train route exists.
+    func searchTrainCandidates(
+        fromName: String,
+        toName: String,
+        departure: Date,
+        limit: Int = 12
+    ) -> [TrainCandidate] {
+        let calendar = ScheduleCalendar.current(at: departure)
+        var jstCal = Calendar(identifier: .gregorian)
+        jstCal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
+        let comps = jstCal.dateComponents([.hour, .minute], from: departure)
+        let target = (comps.hour ?? 0) * 3600 + (comps.minute ?? 0) * 60
+        // Just after midnight, trains published as 24:00+ on the previous
+        // service day are the ones to show.
+        let targetSec = target < 4 * 3600 ? target + 24 * 3600 : target
+
+        let direct = directCandidates(
+            fromName: fromName, toName: toName,
+            targetSec: targetSec, calendar: calendar, limit: limit
+        )
+        if !direct.isEmpty { return direct }
+
+        return transferCandidates(
+            fromName: fromName, toName: toName,
+            targetSec: targetSec, calendar: calendar, limit: 8
+        )
+    }
+
+    /// Whether any route (direct or with transfers) exists between two stations.
+    func routeExists(fromName: String, toName: String) -> Bool {
+        !StaticTrainData.directRoutes(fromStationName: fromName, toStationName: toName).isEmpty
+            || StaticTrainData.planTransferRoute(fromStationName: fromName, toStationName: toName) != nil
+    }
+
+    private func directCandidates(
+        fromName: String,
+        toName: String,
+        targetSec: Int,
+        calendar: ScheduleCalendar,
+        limit: Int
+    ) -> [TrainCandidate] {
+        let routes = StaticTrainData.directRoutes(
+            fromStationName: fromName,
+            toStationName: toName
+        )
+
+        var candidates: [TrainCandidate] = []
+        for route in routes {
+            for ride in rides(on: route.staticLine,
+                              fromId: route.fromStation.id, toId: route.toStation.id,
+                              departingAtOrAfter: targetSec, calendar: calendar,
+                              limit: limit) {
+                let line = route.staticLine.trainLine
+                let leg = CandidateLeg(
+                    service: ride.service,
+                    line: route.boardingLine.trainLine,
+                    fromStation: route.fromStation,
+                    toStation: route.toStation,
+                    departureSeconds: ride.departure,
+                    arrivalSeconds: ride.arrival
+                )
+                candidates.append(TrainCandidate(
+                    id: "\(ride.service.id)|\(route.id)",
+                    legs: [leg],
+                    isThrough: route.isThrough,
+                    journeyLine: line,
+                    journeyService: ride.service,
+                    fromStation: route.fromStation,
+                    toStation: route.toStation
+                ))
+            }
+        }
+
+        return Array(candidates.sorted { $0.departureSeconds < $1.departureSeconds }.prefix(limit))
+    }
+
+    /// Builds connecting itineraries along a planned multi-leg route.
+    private func transferCandidates(
+        fromName: String,
+        toName: String,
+        targetSec: Int,
+        calendar: ScheduleCalendar,
+        limit: Int
+    ) -> [TrainCandidate] {
+        guard let plan = StaticTrainData.planTransferRoute(
+            fromStationName: fromName,
+            toStationName: toName
+        ), plan.count >= 2 else { return [] }
+
+        let bufferSec = Int(StaticTrainData.transferBufferMinutes * 60)
+        let firstLeg = plan[0]
+        let firstRides = rides(on: firstLeg.staticLine,
+                               fromId: firstLeg.fromStation.id, toId: firstLeg.toStation.id,
+                               departingAtOrAfter: targetSec, calendar: calendar,
+                               limit: limit)
+
+        var candidates: [TrainCandidate] = []
+        for firstRide in firstRides {
+            var legs: [CandidateLeg] = [CandidateLeg(
+                service: firstRide.service,
+                line: firstLeg.staticLine.trainLine,
+                fromStation: firstLeg.fromStation,
+                toStation: firstLeg.toStation,
+                departureSeconds: firstRide.departure,
+                arrivalSeconds: firstRide.arrival
+            )]
+
+            var cursor = firstRide.arrival + bufferSec
+            var complete = true
+            for planLeg in plan.dropFirst() {
+                guard let ride = rides(on: planLeg.staticLine,
+                                       fromId: planLeg.fromStation.id, toId: planLeg.toStation.id,
+                                       departingAtOrAfter: cursor, calendar: calendar,
+                                       limit: 1).first
+                else { complete = false; break }
+                legs.append(CandidateLeg(
+                    service: ride.service,
+                    line: planLeg.staticLine.trainLine,
+                    fromStation: planLeg.fromStation,
+                    toStation: planLeg.toStation,
+                    departureSeconds: ride.departure,
+                    arrivalSeconds: ride.arrival
+                ))
+                cursor = ride.arrival + bufferSec
+            }
+            guard complete, let candidate = compositeCandidate(legs: legs) else { continue }
+            candidates.append(candidate)
+        }
+
+        // Connections can converge on the same onward train — keep the
+        // latest-departing first leg for each distinct arrival.
+        var seen = Set<String>()
+        var unique: [TrainCandidate] = []
+        for candidate in candidates.sorted(by: { $0.departureSeconds > $1.departureSeconds }) {
+            let key = candidate.legs.dropFirst().map { $0.service.id }.joined(separator: "|")
+            if seen.insert(key).inserted {
+                unique.append(candidate)
+            }
+        }
+        return unique.sorted { $0.departureSeconds < $1.departureSeconds }
+    }
+
+    /// Concrete services on a line between two of its stations.
+    private func rides(
+        on staticLine: StaticTrainLine,
+        fromId: String,
+        toId: String,
+        departingAtOrAfter targetSec: Int,
+        calendar: ScheduleCalendar,
+        limit: Int
+    ) -> [(service: TrainService, departure: Int, arrival: Int)] {
+        let cacheKey = "\(staticLine.id)|\(calendar.rawValue)"
+        if timetableCache[cacheKey] == nil {
+            timetableCache[cacheKey] = StaticTimetableGenerator.services(
+                for: staticLine, calendar: calendar
+            )
+        }
+        guard let services = timetableCache[cacheKey] else { return [] }
+
+        var result: [(TrainService, Int, Int)] = []
+        for service in services {
+            let stationIds = service.timetable.map(\.stationId)
+            guard let fromIdx = stationIds.firstIndex(of: fromId),
+                  let toIdx = stationIds.firstIndex(of: toId),
+                  fromIdx < toIdx,
+                  let depSec = service.timetable[fromIdx].departureSeconds()
+                      ?? service.timetable[fromIdx].arrivalSeconds(),
+                  let arrSec = service.timetable[toIdx].arrivalSeconds()
+                      ?? service.timetable[toIdx].departureSeconds(),
+                  depSec >= targetSec
+            else { continue }
+            result.append((service, depSec, arrSec))
+        }
+        return Array(result.sorted { $0.1 < $1.1 }.prefix(limit))
+    }
+
+    /// Merges connecting legs into one linear line + service so that position
+    /// tracking and the Live Activity treat the itinerary as a single journey.
+    private func compositeCandidate(legs: [CandidateLeg]) -> TrainCandidate? {
+        guard let first = legs.first, let last = legs.last else { return nil }
+
+        var stations: [Station] = []
+        var entries: [TimetableEntry] = []
+        let compositeId = legs.map(\.line.id).joined(separator: "+")
+
+        for (legIndex, leg) in legs.enumerated() {
+            guard let fromIdx = leg.line.stations.firstIndex(where: { $0.id == leg.fromStation.id }),
+                  let toIdx = leg.line.stations.firstIndex(where: { $0.id == leg.toStation.id })
+            else { return nil }
+            let slice: [Station] = fromIdx <= toIdx
+                ? Array(leg.line.stations[fromIdx...toIdx])
+                : Array(leg.line.stations[toIdx...fromIdx].reversed())
+
+            let entryByStationId = Dictionary(
+                leg.service.timetable.map { ($0.stationId, $0) },
+                uniquingKeysWith: { first, _ in first }
+            )
+
+            for (i, station) in slice.enumerated() {
+                let isTransferIn = legIndex > 0 && i == 0
+                if isTransferIn {
+                    // The transfer station is already in `stations` under the
+                    // previous leg's ID — merge this leg's departure into it.
+                    guard let prev = entries.popLast() else { return nil }
+                    let depTime = entryByStationId[station.id]?.departureTime
+                        ?? entryByStationId[station.id]?.arrivalTime
+                    entries.append(TimetableEntry(
+                        id: prev.id,
+                        stationId: prev.stationId,
+                        arrivalTime: prev.arrivalTime ?? prev.departureTime,
+                        departureTime: depTime
+                    ))
+                    continue
+                }
+                guard let entry = entryByStationId[station.id] else { return nil }
+                stations.append(station)
+                entries.append(TimetableEntry(
+                    id: "composite_\(compositeId)_\(entries.count)",
+                    stationId: station.id,
+                    arrivalTime: entry.arrivalTime,
+                    departureTime: entry.departureTime
+                ))
+            }
+        }
+
+        guard stations.count >= 2, let destination = stations.last else { return nil }
+
+        let nameJa = legs.map(\.line.name).joined(separator: "〜")
+        let nameEn = legs.map(\.line.nameEn).joined(separator: " – ")
+        let journeyLine = TrainLine(
+            id: compositeId,
+            name: nameJa,
+            nameEn: nameEn,
+            operatorId: first.line.operatorId,
+            stations: stations,
+            colorHex: first.line.colorHex
+        )
+        let journeyService = TrainService(
+            id: "composite.\(compositeId).\(first.departureTime)",
+            lineId: compositeId,
+            trainType: first.service.trainType,
+            direction: .outbound,
+            timetable: entries,
+            destinationStationId: destination.id
+        )
+
+        return TrainCandidate(
+            id: journeyService.id + "|" + legs.map { $0.service.id }.joined(separator: "|"),
+            legs: legs,
+            isThrough: false,
+            journeyLine: journeyLine,
+            journeyService: journeyService,
+            fromStation: first.fromStation,
+            toStation: last.toStation
+        )
+    }
+
+    /// Starts a journey on a specific itinerary chosen from the departure search.
+    func startJourney(candidate: TrainCandidate) {
+        LiveActivityManager.shared.endActivity()
+
+        let journey = Journey(
+            id: UUID(),
+            service: candidate.journeyService,
+            line: candidate.journeyLine,
+            boardingStationId: candidate.fromStation.id,
+            alightingStationId: candidate.toStation.id,
+            startedAt: Date(),
+            transferStationIds: candidate.transferStationIds
+        )
+
+        activeJourney = journey
+        selectedLine = candidate.journeyLine
+        errorMessage = nil
+
+        locationTracker.startTracking(journey: journey, delay: nil)
+        positionState = TrainPositionEngine.computePosition(journey: journey, delay: nil)
+
+        if let state = positionState {
+            LiveActivityManager.shared.startActivity(
+                journey: journey,
+                positionState: state,
+                lineColorHex: candidate.journeyLine.colorHex
+            )
+        }
+    }
+
     // MARK: - Stop Journey
 
     func stopJourney() {
-        if isDemoMode {
-            demoProvider.stopSimulation()
-        } else {
-            locationTracker.stopTracking()
-            LiveActivityManager.shared.endActivity()
-        }
+        locationTracker.stopTracking()
+        LiveActivityManager.shared.endActivity()
         activeJourney = nil
         positionState = nil
         currentDelay = nil
@@ -276,7 +472,6 @@ final class JourneyViewModel: ObservableObject {
     // MARK: - Station Timetable
 
     func loadStationTimetable(stationId: String) {
-        guard !isDemoMode else { return }
         isLoadingTimetable = true
         stationTimetable = []
 

@@ -56,23 +56,37 @@ enum TokyoMetroLineData {
     )
 
     static let lines: [StaticTrainLine] = [
-        ginza, marunouchi, hibiya, tozai, chiyoda,
+        ginza, marunouchi, marunouchiBranch, hibiya, tozai, chiyoda,
         yurakucho, hanzomon, namboku, fukutoshin,
     ]
 
-    // Typical Tokyo Metro service patterns
-    private static let metroWeekday = pattern("05:00", "24:00", [
+    // Typical Tokyo Metro headway bands. First/last departures are set per
+    // direction below (verified against published timetables, 2026).
+    private static let metroWeekdayBands: [(String, Double)] = [
         ("05:00", 6), ("07:00", 3), ("09:30", 5), ("17:00", 3.5), ("20:00", 5), ("22:00", 6.5),
-    ])
-    private static let metroHoliday = pattern("05:00", "24:00", [
+    ]
+    private static let metroHolidayBands: [(String, Double)] = [
         ("05:00", 6), ("07:00", 5), ("10:00", 5), ("20:00", 5.5), ("22:00", 7),
-    ])
-    private static let quietWeekday = pattern("05:00", "24:00", [
+    ]
+    private static let quietWeekdayBands: [(String, Double)] = [
         ("05:00", 7), ("07:00", 3.5), ("09:30", 6), ("17:00", 4), ("20:00", 6), ("22:00", 7),
-    ])
-    private static let quietHoliday = pattern("05:00", "24:00", [
+    ]
+    private static let quietHolidayBands: [(String, Double)] = [
         ("05:00", 7), ("07:00", 6), ("10:00", 6), ("20:00", 6.5), ("22:00", 7.5),
-    ])
+    ]
+
+    private static func metroWeekday(_ first: String, _ last: String) -> ServicePattern {
+        pattern(first, last, metroWeekdayBands)
+    }
+    private static func metroHoliday(_ first: String, _ last: String) -> ServicePattern {
+        pattern(first, last, metroHolidayBands)
+    }
+    private static func quietWeekday(_ first: String, _ last: String) -> ServicePattern {
+        pattern(first, last, quietWeekdayBands)
+    }
+    private static func quietHoliday(_ first: String, _ last: String) -> ServicePattern {
+        pattern(first, last, quietHolidayBands)
+    }
 
     // MARK: - Ginza Line (G)
 
@@ -108,9 +122,9 @@ enum TokyoMetroLineData {
         ],
         directions: [
             direction("Ginza", "Asakusa", "浅草方面", "For Asakusa", ascending: true,
-                      weekday: metroWeekday, holiday: metroHoliday),
+                      weekday: metroWeekday("05:01", "24:02"), holiday: metroHoliday("05:01", "24:02")),
             direction("Ginza", "Shibuya", "渋谷方面", "For Shibuya", ascending: false,
-                      weekday: metroWeekday, holiday: metroHoliday),
+                      weekday: metroWeekday("05:01", "24:10"), holiday: metroHoliday("05:01", "24:14")),
         ],
         delayInfo: delayInfo
     )
@@ -155,9 +169,45 @@ enum TokyoMetroLineData {
         ],
         directions: [
             direction("Marunouchi", "Ikebukuro", "池袋方面", "For Ikebukuro", ascending: true,
-                      weekday: metroWeekday, holiday: metroHoliday),
+                      weekday: metroWeekday("05:01", "24:11"), holiday: metroHoliday("05:01", "24:11")),
             direction("Marunouchi", "Ogikubo", "荻窪方面", "For Ogikubo", ascending: false,
-                      weekday: metroWeekday, holiday: metroHoliday),
+                      weekday: metroWeekday("05:00", "24:20"), holiday: metroHoliday("05:00", "24:20")),
+        ],
+        delayInfo: delayInfo
+    )
+
+    // MARK: - Marunouchi Line Honancho Branch (Mb)
+
+    static let marunouchiBranch = StaticTrainLine(
+        id: "odpt.Railway:TokyoMetro.MarunouchiBranch",
+        nameJa: "丸ノ内線(方南町支線)",
+        nameEn: "Marunouchi Line Honancho Branch",
+        operatorId: "odpt.Operator:TokyoMetro",
+        colorHex: "#E60012",
+        stations: [
+            st("MarunouchiBranch", "Honancho", "方南町", "Honancho", "Mb03", 35.6836, 139.6588),
+            st("MarunouchiBranch", "NakanoFujimicho", "中野富士見町", "Nakano-fujimicho", "Mb04", 35.6866, 139.6693),
+            st("MarunouchiBranch", "NakanoShimbashi", "中野新橋", "Nakano-shimbashi", "Mb05", 35.6907, 139.6764),
+            st("MarunouchiBranch", "NakanoSakaue", "中野坂上", "Nakano-sakaue", "M06", 35.6975, 139.6827),
+        ],
+        hopTimesMinutes: [
+            2, 2, 2,
+        ],
+        directions: [
+            direction("MarunouchiBranch", "NakanoSakaue", "中野坂上方面", "For Nakano-sakaue", ascending: true,
+                      weekday: pattern("05:00", "24:09", [
+                          ("05:00", 9), ("07:00", 8), ("09:30", 9), ("20:00", 8), ("22:00", 10),
+                      ]),
+                      holiday: pattern("05:00", "24:09", [
+                          ("05:00", 10), ("10:00", 10), ("22:00", 12),
+                      ])),
+            direction("MarunouchiBranch", "Honancho", "方南町方面", "For Honancho", ascending: false,
+                      weekday: pattern("05:09", "24:26", [
+                          ("05:09", 9), ("07:00", 8.5), ("09:30", 10), ("20:00", 10), ("22:00", 12),
+                      ]),
+                      holiday: pattern("05:09", "24:26", [
+                          ("05:09", 10), ("10:00", 10), ("22:00", 12),
+                      ])),
         ],
         delayInfo: delayInfo
     )
@@ -199,9 +249,9 @@ enum TokyoMetroLineData {
         ],
         directions: [
             direction("Hibiya", "KitaSenju", "北千住方面", "For Kita-senju", ascending: true,
-                      weekday: metroWeekday, holiday: metroHoliday),
+                      weekday: metroWeekday("05:00", "24:28"), holiday: metroHoliday("05:00", "24:28")),
             direction("Hibiya", "NakaMeguro", "中目黒方面", "For Naka-meguro", ascending: false,
-                      weekday: metroWeekday, holiday: metroHoliday),
+                      weekday: metroWeekday("05:00", "24:28"), holiday: metroHoliday("05:00", "24:27")),
         ],
         delayInfo: delayInfo,
         throughServices: [
@@ -250,15 +300,15 @@ enum TokyoMetroLineData {
         ],
         directions: [
             direction("Tozai", "NishiFunabashi", "西船橋方面", "For Nishi-funabashi", ascending: true,
-                      weekday: pattern("05:00", "24:00", [
+                      weekday: pattern("05:00", "23:52", [
                           ("05:00", 6), ("07:00", 2.5), ("09:30", 5), ("17:00", 3), ("20:00", 5), ("22:00", 6.5),
                       ]),
-                      holiday: metroHoliday),
+                      holiday: metroHoliday("05:00", "23:52")),
             direction("Tozai", "Nakano", "中野方面", "For Nakano", ascending: false,
-                      weekday: pattern("05:00", "24:00", [
+                      weekday: pattern("05:00", "24:09", [
                           ("05:00", 6), ("07:00", 2.5), ("09:30", 5), ("17:00", 3), ("20:00", 5), ("22:00", 6.5),
                       ]),
-                      holiday: metroHoliday),
+                      holiday: metroHoliday("05:00", "24:09")),
         ],
         delayInfo: delayInfo,
         throughServices: [
@@ -311,9 +361,9 @@ enum TokyoMetroLineData {
         ],
         directions: [
             direction("Chiyoda", "KitaAyase", "北綾瀬方面", "For Kita-ayase", ascending: true,
-                      weekday: metroWeekday, holiday: metroHoliday),
+                      weekday: metroWeekday("05:00", "24:00"), holiday: metroHoliday("05:00", "23:55")),
             direction("Chiyoda", "YoyogiUehara", "代々木上原方面", "For Yoyogi-uehara", ascending: false,
-                      weekday: metroWeekday, holiday: metroHoliday),
+                      weekday: metroWeekday("05:00", "24:15"), holiday: metroHoliday("05:00", "24:13")),
         ],
         delayInfo: delayInfo,
         throughServices: [
@@ -367,9 +417,9 @@ enum TokyoMetroLineData {
         ],
         directions: [
             direction("Yurakucho", "ShinKiba", "新木場方面", "For Shin-kiba", ascending: true,
-                      weekday: quietWeekday, holiday: quietHoliday),
+                      weekday: quietWeekday("05:00", "23:40"), holiday: quietHoliday("05:00", "23:23")),
             direction("Yurakucho", "Wakoshi", "和光市方面", "For Wakoshi", ascending: false,
-                      weekday: quietWeekday, holiday: quietHoliday),
+                      weekday: quietWeekday("05:00", "24:01"), holiday: quietHoliday("05:00", "24:01")),
         ],
         delayInfo: delayInfo,
         throughServices: [
@@ -412,9 +462,9 @@ enum TokyoMetroLineData {
         ],
         directions: [
             direction("Hanzomon", "Oshiage", "押上方面", "For Oshiage", ascending: true,
-                      weekday: quietWeekday, holiday: quietHoliday),
+                      weekday: quietWeekday("05:15", "24:12"), holiday: quietHoliday("05:15", "24:15")),
             direction("Hanzomon", "Shibuya", "渋谷方面", "For Shibuya", ascending: false,
-                      weekday: quietWeekday, holiday: quietHoliday),
+                      weekday: quietWeekday("05:06", "24:18"), holiday: quietHoliday("05:06", "23:53")),
         ],
         delayInfo: delayInfo,
         throughServices: [
@@ -462,9 +512,9 @@ enum TokyoMetroLineData {
         ],
         directions: [
             direction("Namboku", "AkabaneIwabuchi", "赤羽岩淵方面", "For Akabane-iwabuchi", ascending: true,
-                      weekday: quietWeekday, holiday: quietHoliday),
+                      weekday: quietWeekday("05:16", "24:00"), holiday: quietHoliday("05:16", "24:00")),
             direction("Namboku", "Meguro", "目黒方面", "For Meguro", ascending: false,
-                      weekday: quietWeekday, holiday: quietHoliday),
+                      weekday: quietWeekday("05:01", "24:26"), holiday: quietHoliday("05:01", "24:16")),
         ],
         delayInfo: delayInfo,
         throughServices: [
@@ -508,9 +558,9 @@ enum TokyoMetroLineData {
         ],
         directions: [
             direction("Fukutoshin", "Shibuya", "渋谷方面", "For Shibuya", ascending: true,
-                      weekday: quietWeekday, holiday: quietHoliday),
+                      weekday: quietWeekday("05:05", "23:55"), holiday: quietHoliday("05:05", "23:55")),
             direction("Fukutoshin", "Wakoshi", "和光市方面", "For Wakoshi", ascending: false,
-                      weekday: quietWeekday, holiday: quietHoliday),
+                      weekday: quietWeekday("05:05", "24:20"), holiday: quietHoliday("05:05", "24:20")),
         ],
         delayInfo: delayInfo,
         throughServices: [

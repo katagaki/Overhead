@@ -2,18 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
-	<key>NSSupportsLiveActivities</key>
-	<true/>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Overhead uses your location to track your position along the train line and show it on the Live Activity.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Overhead uses your location in the background to keep the Live Activity updated with your current position even when the app is not open.</string>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>location</string>
-	</array>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -24,6 +12,26 @@
 				<string>overhead</string>
 			</array>
 		</dict>
+	</array>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Overhead uses your location in the background to keep the Live Activity updated with your current position even when the app is not open.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Overhead uses your location to track your position along the train line and show it on the Live Activity.</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Hind-Light.ttf</string>
+		<string>Hind-Regular.ttf</string>
+		<string>Hind-Medium.ttf</string>
+		<string>Hind-SemiBold.ttf</string>
+		<string>Hind-Bold.ttf</string>
+	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
 	</array>
 </dict>
 </plist>

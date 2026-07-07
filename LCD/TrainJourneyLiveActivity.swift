@@ -68,9 +68,18 @@ struct TrainJourneyLiveActivity: Widget {
                                         .font(.system(size: 13, weight: .medium))
                                         .foregroundColor(.green)
                                 }
-                                Text(formatTime(context.state.estimatedArrival))
-                                    .font(.system(size: 10, design: .rounded))
-                                    .foregroundColor(.secondary)
+                                HStack(spacing: 3) {
+                                    Text(formatTime(context.state.estimatedArrival))
+                                        .font(.system(size: 10, design: .rounded))
+                                        .foregroundColor(.secondary)
+                                    if context.state.status != .arrived && context.state.status != .notStarted {
+                                        Text(timerInterval: context.state.journeyInterval, countsDown: true)
+                                            .font(.system(size: 10, weight: .semibold, design: .rounded))
+                                            .monospacedDigit()
+                                            .multilineTextAlignment(.trailing)
+                                            .frame(maxWidth: 48)
+                                    }
+                                }
                             }
                         }
 
@@ -124,14 +133,15 @@ struct TrainJourneyLiveActivity: Widget {
                 }
 
             } minimal: {
-                ZStack {
+                // Timer-driven ring keeps filling while the app is suspended.
+                ProgressView(timerInterval: context.state.journeyInterval, countsDown: false) {
+                } currentValueLabel: {
                     Circle()
-                        .strokeBorder(Color(hex: context.attributes.lineColorHex), lineWidth: 2)
-                    Circle()
-                        .trim(from: 0, to: context.state.progress)
-                        .stroke(Color(hex: context.attributes.lineColorHex), lineWidth: 2)
-                        .rotationEffect(.degrees(-90))
+                        .fill(Color(hex: context.attributes.lineColorHex))
+                        .frame(width: 6, height: 6)
                 }
+                .progressViewStyle(.circular)
+                .tint(Color(hex: context.attributes.lineColorHex))
             }
         }
     }
@@ -212,7 +222,8 @@ struct LockScreenLiveActivityView: View {
                 progress: context.state.progress,
                 currentStationIndex: context.state.currentStationIndex,
                 lineColor: lineColor,
-                stationStops: context.attributes.stationStops
+                stationStops: context.attributes.stationStops,
+                journeyInterval: context.state.journeyInterval
             )
             .padding(.horizontal, 16)
 
@@ -238,6 +249,24 @@ struct LockScreenLiveActivityView: View {
                         Text(formatTime(context.state.estimatedArrival))
                             .font(.system(size: 20, weight: .bold, design: .rounded))
                             .foregroundColor(context.state.isDelayed ? .red : .primary)
+
+                        // Self-updating even while the app is suspended
+                        if context.state.status == .notStarted {
+                            Text("LiveActivity.DepartsAt \(formatTime(context.state.departure))")
+                                .font(.system(size: 10, weight: .semibold, design: .rounded))
+                                .foregroundColor(.orange)
+                        } else if context.state.status != .arrived {
+                            HStack(spacing: 3) {
+                                Text("Label.TimeRemaining")
+                                    .font(.system(size: 9))
+                                    .foregroundColor(.secondary)
+                                Text(timerInterval: context.state.journeyInterval, countsDown: true)
+                                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                                    .monospacedDigit()
+                                    .multilineTextAlignment(.trailing)
+                                    .frame(maxWidth: 56)
+                            }
+                        }
                     }
 
                     Link(destination: URL(string: context.attributes.refreshURLString)!) {
@@ -334,6 +363,9 @@ struct LCDLineView: View {
     let currentStationIndex: Int?
     let lineColor: Color
     var stationStops: [Bool] = []
+    // When set, the progress fill is timer-driven so it keeps advancing while
+    // the app is suspended (no GPS or background updates required).
+    var journeyInterval: ClosedRange<Date>? = nil
 
     /// Next station index derived from current
     private var nextStationIndex: Int? {
@@ -365,11 +397,22 @@ struct LCDLineView: View {
                     .frame(width: lineWidth, height: trackHeight)
                     .offset(x: padding, y: centerY - trackHeight / 2)
 
-                // Filled progress track
-                RoundedRectangle(cornerRadius: 1)
-                    .fill(lineColor)
-                    .frame(width: max(0, lineWidth * progress), height: trackHeight)
-                    .offset(x: padding, y: centerY - trackHeight / 2)
+                // Filled progress track — timer-driven when an interval is
+                // available so it advances even without app updates.
+                if let interval = journeyInterval {
+                    ProgressView(timerInterval: interval, countsDown: false) {
+                    } currentValueLabel: {
+                    }
+                    .progressViewStyle(.linear)
+                    .tint(lineColor)
+                    .frame(width: lineWidth)
+                    .offset(x: padding, y: centerY - 2)
+                } else {
+                    RoundedRectangle(cornerRadius: 1)
+                        .fill(lineColor)
+                        .frame(width: max(0, lineWidth * progress), height: trackHeight)
+                        .offset(x: padding, y: centerY - trackHeight / 2)
+                }
 
                 // Station circles + labels (positioned independently so circles stay centered on track)
                 ForEach(0..<stationCount, id: \.self) { i in
@@ -497,11 +540,14 @@ struct ExpandedIslandLineView: View {
                     .frame(width: w - pad * 2, height: trackHeight)
                     .offset(x: pad)
 
-                // Filled track
-                Capsule()
-                    .fill(lineColor)
-                    .frame(width: max(0, (w - pad * 2) * context.state.progress), height: trackHeight)
-                    .offset(x: pad)
+                // Filled track — timer-driven so it advances while the app is suspended
+                ProgressView(timerInterval: context.state.journeyInterval, countsDown: false) {
+                } currentValueLabel: {
+                }
+                .progressViewStyle(.linear)
+                .tint(lineColor)
+                .frame(width: w - pad * 2)
+                .offset(x: pad)
 
                 // Station dots
                 ForEach(0..<count, id: \.self) { i in
@@ -566,18 +612,19 @@ struct LCDLineSymbolBadge: View {
     var body: some View {
         switch symbol {
         case "KS":
-            circleBadge(ringWidth: 2.4, textColor: color)
+            circleBadge(ringWidth: 2.4, textColor: color, hind: true)
         case _ where Self.tobuSymbols.contains(symbol):
             squareBadge(cornerRadius: 5.5, borderWidth: 2.6)
         case _ where symbol.hasPrefix("J"):
             squareBadge(cornerRadius: 3, borderWidth: 2.6)
         default:
-            circleBadge(ringWidth: 5, textColor: .black)
+            // Metro/Toei symbols use Futura like the real signage
+            circleBadge(ringWidth: 3.8, textColor: .black, hind: false)
         }
     }
 
-    private func circleBadge(ringWidth: CGFloat, textColor: Color) -> some View {
-        symbolText(color: textColor, inset: ringWidth + 1)
+    private func circleBadge(ringWidth: CGFloat, textColor: Color, hind: Bool) -> some View {
+        symbolText(color: textColor, inset: ringWidth + 1, hind: hind)
             .frame(width: 24, height: 24)
             .background(Color.white, in: Circle())
             .overlay(
@@ -587,7 +634,7 @@ struct LCDLineSymbolBadge: View {
     }
 
     private func squareBadge(cornerRadius: CGFloat, borderWidth: CGFloat) -> some View {
-        symbolText(color: .black, inset: borderWidth + 1)
+        symbolText(color: .black, inset: borderWidth + 1, hind: true)
             .frame(width: 24, height: 24)
             .background(Color.white, in: RoundedRectangle(cornerRadius: cornerRadius))
             .overlay(
@@ -596,13 +643,18 @@ struct LCDLineSymbolBadge: View {
             )
     }
 
-    private func symbolText(color: Color, inset: CGFloat) -> some View {
-        Text(symbol)
-            .font(.custom("HelveticaNeue-Bold", fixedSize: symbol.count > 1 ? 10 : 12))
+    private func symbolText(color: Color, inset: CGFloat, hind: Bool) -> some View {
+        let size: CGFloat = symbol.count > 1 ? 11.5 : 14
+        return Text(symbol)
+            .font(hind
+                  ? .custom("Hind-Bold", fixedSize: size)
+                  : .custom("Futura-Bold", fixedSize: symbol.count > 1 ? 9 : 11.5))
             .kerning(symbol.count > 1 ? -0.4 : 0)
             .lineLimit(1)
             .minimumScaleFactor(0.5)
             .foregroundColor(color)
+            // Hind's tall metrics leave caps 0.085em above the box center
+            .offset(y: hind ? size * 0.085 : 0)
             .padding(.horizontal, inset)
     }
 }

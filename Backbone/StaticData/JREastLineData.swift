@@ -97,7 +97,7 @@ enum JREastLineData {
                 nameEn: "Inner Loop (for Ueno & Ikebukuro)",
                 isAscending: true,
                 weekday: ServicePattern(
-                    first: "04:40", last: "24:30",
+                    first: "04:46", last: "24:30",
                     bands: [
                         HeadwayBand(from: "04:40", headwayMinutes: 6),
                         HeadwayBand(from: "06:30", headwayMinutes: 3.5),
@@ -108,7 +108,7 @@ enum JREastLineData {
                     ]
                 ),
                 saturdayHoliday: ServicePattern(
-                    first: "04:40", last: "24:20",
+                    first: "04:46", last: "24:20",
                     bands: [
                         HeadwayBand(from: "04:40", headwayMinutes: 6),
                         HeadwayBand(from: "07:00", headwayMinutes: 4.5),
@@ -124,7 +124,7 @@ enum JREastLineData {
                 nameEn: "Outer Loop (for Shinagawa & Shibuya)",
                 isAscending: false,
                 weekday: ServicePattern(
-                    first: "04:40", last: "24:30",
+                    first: "04:49", last: "24:46",
                     bands: [
                         HeadwayBand(from: "04:40", headwayMinutes: 6),
                         HeadwayBand(from: "06:30", headwayMinutes: 3.5),
@@ -135,7 +135,7 @@ enum JREastLineData {
                     ]
                 ),
                 saturdayHoliday: ServicePattern(
-                    first: "04:40", last: "24:20",
+                    first: "04:49", last: "24:46",
                     bands: [
                         HeadwayBand(from: "04:40", headwayMinutes: 6),
                         HeadwayBand(from: "07:00", headwayMinutes: 4.5),
@@ -194,7 +194,7 @@ enum JREastLineData {
                 nameEn: "For Takao",
                 isAscending: true,
                 weekday: ServicePattern(
-                    first: "05:00", last: "24:00",
+                    first: "04:38", last: "24:06",
                     bands: [
                         HeadwayBand(from: "05:00", headwayMinutes: 7),
                         HeadwayBand(from: "06:30", headwayMinutes: 4),
@@ -206,7 +206,7 @@ enum JREastLineData {
                     trainType: .rapid
                 ),
                 saturdayHoliday: ServicePattern(
-                    first: "05:00", last: "24:00",
+                    first: "04:38", last: "24:06",
                     bands: [
                         HeadwayBand(from: "05:00", headwayMinutes: 7),
                         HeadwayBand(from: "07:00", headwayMinutes: 5),
@@ -223,7 +223,7 @@ enum JREastLineData {
                 nameEn: "For Tokyo",
                 isAscending: false,
                 weekday: ServicePattern(
-                    first: "04:45", last: "23:40",
+                    first: "04:27", last: "24:13",
                     bands: [
                         HeadwayBand(from: "04:45", headwayMinutes: 7),
                         HeadwayBand(from: "06:00", headwayMinutes: 4),
@@ -235,7 +235,7 @@ enum JREastLineData {
                     trainType: .rapid
                 ),
                 saturdayHoliday: ServicePattern(
-                    first: "04:45", last: "23:40",
+                    first: "04:27", last: "24:13",
                     bands: [
                         HeadwayBand(from: "04:45", headwayMinutes: 7),
                         HeadwayBand(from: "07:00", headwayMinutes: 5),
@@ -317,7 +317,7 @@ enum JREastLineData {
                 nameEn: "For Chiba",
                 isAscending: true,
                 weekday: ServicePattern(
-                    first: "04:35", last: "23:50",
+                    first: "04:35", last: "24:34",
                     bands: [
                         HeadwayBand(from: "04:35", headwayMinutes: 8),
                         HeadwayBand(from: "06:30", headwayMinutes: 3.5),
@@ -328,7 +328,7 @@ enum JREastLineData {
                     ]
                 ),
                 saturdayHoliday: ServicePattern(
-                    first: "04:35", last: "23:50",
+                    first: "04:35", last: "24:34",
                     bands: [
                         HeadwayBand(from: "04:35", headwayMinutes: 8),
                         HeadwayBand(from: "07:00", headwayMinutes: 6),
@@ -344,7 +344,7 @@ enum JREastLineData {
                 nameEn: "For Mitaka",
                 isAscending: false,
                 weekday: ServicePattern(
-                    first: "04:35", last: "23:50",
+                    first: "04:28", last: "24:30",
                     bands: [
                         HeadwayBand(from: "04:35", headwayMinutes: 8),
                         HeadwayBand(from: "06:30", headwayMinutes: 3.5),
@@ -355,7 +355,7 @@ enum JREastLineData {
                     ]
                 ),
                 saturdayHoliday: ServicePattern(
-                    first: "04:35", last: "23:50",
+                    first: "04:28", last: "24:30",
                     bands: [
                         HeadwayBand(from: "04:35", headwayMinutes: 8),
                         HeadwayBand(from: "07:00", headwayMinutes: 6),
@@ -447,7 +447,7 @@ enum JREastLineData {
                 nameEn: "For Omiya",
                 isAscending: true,
                 weekday: ServicePattern(
-                    first: "04:30", last: "23:30",
+                    first: "04:43", last: "24:09",
                     bands: [
                         HeadwayBand(from: "04:30", headwayMinutes: 8),
                         HeadwayBand(from: "06:30", headwayMinutes: 4),
@@ -458,7 +458,7 @@ enum JREastLineData {
                     ]
                 ),
                 saturdayHoliday: ServicePattern(
-                    first: "04:30", last: "23:30",
+                    first: "04:43", last: "24:09",
                     bands: [
                         HeadwayBand(from: "04:30", headwayMinutes: 8),
                         HeadwayBand(from: "07:00", headwayMinutes: 5),
@@ -474,7 +474,7 @@ enum JREastLineData {
                 nameEn: "For Ofuna",
                 isAscending: false,
                 weekday: ServicePattern(
-                    first: "04:30", last: "23:30",
+                    first: "04:28", last: "24:15",
                     bands: [
                         HeadwayBand(from: "04:30", headwayMinutes: 8),
                         HeadwayBand(from: "06:30", headwayMinutes: 4),
@@ -485,7 +485,7 @@ enum JREastLineData {
                     ]
                 ),
                 saturdayHoliday: ServicePattern(
-                    first: "04:30", last: "23:30",
+                    first: "04:28", last: "24:15",
                     bands: [
                         HeadwayBand(from: "04:30", headwayMinutes: 8),
                         HeadwayBand(from: "07:00", headwayMinutes: 5),
@@ -544,7 +544,7 @@ enum JREastLineData {
                 nameEn: "For Omiya",
                 isAscending: true,
                 weekday: ServicePattern(
-                    first: "05:00", last: "23:55",
+                    first: "06:13", last: "23:35",
                     bands: [
                         HeadwayBand(from: "05:00", headwayMinutes: 9),
                         HeadwayBand(from: "06:30", headwayMinutes: 5),
@@ -555,7 +555,7 @@ enum JREastLineData {
                     ]
                 ),
                 saturdayHoliday: ServicePattern(
-                    first: "05:00", last: "23:55",
+                    first: "06:13", last: "23:35",
                     bands: [
                         HeadwayBand(from: "05:00", headwayMinutes: 9),
                         HeadwayBand(from: "07:00", headwayMinutes: 7),
@@ -570,7 +570,7 @@ enum JREastLineData {
                 nameEn: "For Osaki",
                 isAscending: false,
                 weekday: ServicePattern(
-                    first: "05:00", last: "23:55",
+                    first: "04:51", last: "24:00",
                     bands: [
                         HeadwayBand(from: "05:00", headwayMinutes: 9),
                         HeadwayBand(from: "06:30", headwayMinutes: 5),
@@ -581,7 +581,7 @@ enum JREastLineData {
                     ]
                 ),
                 saturdayHoliday: ServicePattern(
-                    first: "05:00", last: "23:55",
+                    first: "04:51", last: "23:46",
                     bands: [
                         HeadwayBand(from: "05:00", headwayMinutes: 9),
                         HeadwayBand(from: "07:00", headwayMinutes: 7),
@@ -624,7 +624,7 @@ enum JREastLineData {
             st("Keiyo", "MinamiFunabashi", "南船橋", "Minami-Funabashi", "JE11", 35.6842, 139.9903),
             st("Keiyo", "ShinNarashino", "新習志野", "Shin-Narashino", "JE12", 35.6716, 140.0257),
             st("Keiyo", "MakuhariToyosuna", "幕張豊砂", "Makuhari-Toyosuna", "JE13", 35.6555, 140.0339),
-            st("Keiyo", "KaihimMakuhari", "海浜幕張", "Kaihim-Makuhari", "JE14", 35.6482, 140.0416),
+            st("Keiyo", "KaihimMakuhari", "海浜幕張", "Kaihimmakuhari", "JE14", 35.6482, 140.0416),
             st("Keiyo", "Kemigawahama", "検見川浜", "Kemigawahama", "JE15", 35.6391, 140.0687),
             st("Keiyo", "InageKaigan", "稲毛海岸", "Inage-Kaigan", "JE16", 35.6300, 140.0868),
             st("Keiyo", "Chibaminato", "千葉みなと", "Chibaminato", "JE17", 35.6072, 140.1052),
@@ -640,7 +640,7 @@ enum JREastLineData {
                 nameEn: "For Soga",
                 isAscending: true,
                 weekday: ServicePattern(
-                    first: "05:10", last: "23:45",
+                    first: "04:55", last: "24:24",
                     bands: [
                         HeadwayBand(from: "05:10", headwayMinutes: 9),
                         HeadwayBand(from: "06:30", headwayMinutes: 6),
@@ -651,7 +651,7 @@ enum JREastLineData {
                     ]
                 ),
                 saturdayHoliday: ServicePattern(
-                    first: "05:10", last: "23:45",
+                    first: "04:55", last: "24:24",
                     bands: [
                         HeadwayBand(from: "05:10", headwayMinutes: 9),
                         HeadwayBand(from: "07:00", headwayMinutes: 7),
@@ -666,7 +666,7 @@ enum JREastLineData {
                 nameEn: "For Tokyo",
                 isAscending: false,
                 weekday: ServicePattern(
-                    first: "05:00", last: "23:30",
+                    first: "04:50", last: "24:20",
                     bands: [
                         HeadwayBand(from: "05:00", headwayMinutes: 9),
                         HeadwayBand(from: "06:00", headwayMinutes: 6),
@@ -677,7 +677,7 @@ enum JREastLineData {
                     ]
                 ),
                 saturdayHoliday: ServicePattern(
-                    first: "05:00", last: "23:30",
+                    first: "04:50", last: "24:20",
                     bands: [
                         HeadwayBand(from: "05:00", headwayMinutes: 9),
                         HeadwayBand(from: "07:00", headwayMinutes: 7),

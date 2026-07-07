@@ -58,12 +58,16 @@ enum ToeiLineData {
         asakusa, mita, shinjuku, oedo, nipporiToneri, arakawa,
     ]
 
-    private static let toeiWeekday = pattern("05:00", "24:00", [
-        ("05:00", 7), ("07:00", 4), ("09:30", 6), ("17:00", 4.5), ("20:00", 6), ("22:00", 8),
-    ])
-    private static let toeiHoliday = pattern("05:00", "24:00", [
-        ("05:00", 7), ("07:00", 6), ("10:00", 6), ("20:00", 6.5), ("22:00", 8),
-    ])
+    private static func toeiWeekday(_ first: String, _ last: String) -> ServicePattern {
+        pattern(first, last, [
+            (first, 7), ("07:00", 4), ("09:30", 6), ("17:00", 4.5), ("20:00", 6), ("22:00", 8),
+        ])
+    }
+    private static func toeiHoliday(_ first: String, _ last: String) -> ServicePattern {
+        pattern(first, last, [
+            (first, 7), ("07:00", 6), ("10:00", 6), ("20:00", 6.5), ("22:00", 8),
+        ])
+    }
 
     // MARK: - Asakusa Line (A)
 
@@ -100,9 +104,9 @@ enum ToeiLineData {
         ],
         directions: [
             direction("Asakusa", "Oshiage", "押上方面", "For Oshiage", ascending: true,
-                      weekday: toeiWeekday, holiday: toeiHoliday),
+                      weekday: toeiWeekday("05:00", "24:01"), holiday: toeiHoliday("05:00", "24:01")),
             direction("Asakusa", "NishiMagome", "西馬込方面", "For Nishi-magome", ascending: false,
-                      weekday: toeiWeekday, holiday: toeiHoliday),
+                      weekday: toeiWeekday("05:00", "24:22"), holiday: toeiHoliday("05:00", "24:22")),
         ],
         delayInfo: delayInfo,
         throughServices: [
@@ -158,9 +162,9 @@ enum ToeiLineData {
         ],
         directions: [
             direction("Mita", "NishiTakashimadaira", "西高島平方面", "For Nishi-takashimadaira", ascending: true,
-                      weekday: toeiWeekday, holiday: toeiHoliday),
+                      weekday: toeiWeekday("05:12", "24:00"), holiday: toeiHoliday("05:12", "24:00")),
             direction("Mita", "Meguro", "目黒方面", "For Meguro", ascending: false,
-                      weekday: toeiWeekday, holiday: toeiHoliday),
+                      weekday: toeiWeekday("05:00", "23:45"), holiday: toeiHoliday("05:00", "23:45")),
         ],
         delayInfo: delayInfo,
         throughServices: [
@@ -206,9 +210,9 @@ enum ToeiLineData {
         ],
         directions: [
             direction("Shinjuku", "Motoyawata", "本八幡方面", "For Motoyawata", ascending: true,
-                      weekday: toeiWeekday, holiday: toeiHoliday),
+                      weekday: toeiWeekday("05:00", "24:10"), holiday: toeiHoliday("05:00", "24:10")),
             direction("Shinjuku", "Shinjuku", "新宿方面", "For Shinjuku", ascending: false,
-                      weekday: toeiWeekday, holiday: toeiHoliday),
+                      weekday: toeiWeekday("05:00", "24:09"), holiday: toeiHoliday("05:00", "24:09")),
         ],
         delayInfo: delayInfo,
         throughServices: [
@@ -269,14 +273,14 @@ enum ToeiLineData {
             st("Oedo", "ShinjukuNishiguchi", "新宿西口", "Shinjuku-nishiguchi", "E01", 35.6935, 139.6992),
         ],
         hopTimesMinutes: [
-            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+            2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25,
+            2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25, 2.25,
         ],
         directions: [
             direction("Oedo", "Ryogoku", "六本木・両国方面", "For Roppongi & Ryogoku", ascending: true,
-                      weekday: toeiWeekday, holiday: toeiHoliday),
+                      weekday: toeiWeekday("05:00", "24:17"), holiday: toeiHoliday("05:00", "24:17")),
             direction("Oedo", "Hikarigaoka", "都庁前・光が丘方面", "For Tochomae & Hikarigaoka", ascending: false,
-                      weekday: toeiWeekday, holiday: toeiHoliday),
+                      weekday: toeiWeekday("05:09", "24:27"), holiday: toeiHoliday("05:09", "24:27")),
         ],
         delayInfo: delayInfo
     )
@@ -307,18 +311,18 @@ enum ToeiLineData {
         hopTimesMinutes: [2, 2, 2, 2, 1, 1, 2, 2, 1, 2, 1, 2],
         directions: [
             direction("NipporiToneri", "MinumadaiShinsuikoen", "見沼代親水公園方面", "For Minumadai-shinsuikoen", ascending: true,
-                      weekday: pattern("05:00", "24:00", [
-                          ("05:00", 8), ("07:00", 5), ("09:30", 7), ("17:00", 6), ("20:00", 8), ("22:00", 10),
+                      weekday: pattern("05:33", "24:30", [
+                          ("05:33", 8), ("07:00", 3), ("09:30", 7), ("17:00", 6), ("20:00", 8), ("22:00", 10),
                       ]),
-                      holiday: pattern("05:00", "24:00", [
-                          ("05:00", 8), ("07:00", 7), ("10:00", 7.5), ("20:00", 8), ("22:00", 10),
+                      holiday: pattern("05:33", "24:03", [
+                          ("05:33", 8), ("07:00", 7), ("10:00", 7.5), ("20:00", 8), ("22:00", 10),
                       ])),
             direction("NipporiToneri", "Nippori", "日暮里方面", "For Nippori", ascending: false,
-                      weekday: pattern("05:00", "24:00", [
-                          ("05:00", 8), ("07:00", 5), ("09:30", 7), ("17:00", 6), ("20:00", 8), ("22:00", 10),
+                      weekday: pattern("05:08", "23:58", [
+                          ("05:08", 8), ("07:00", 3), ("09:30", 7), ("17:00", 6), ("20:00", 8), ("22:00", 10),
                       ]),
-                      holiday: pattern("05:00", "24:00", [
-                          ("05:00", 8), ("07:00", 7), ("10:00", 7.5), ("20:00", 8), ("22:00", 10),
+                      holiday: pattern("05:08", "23:58", [
+                          ("05:08", 8), ("07:00", 7), ("10:00", 7.5), ("20:00", 8), ("22:00", 10),
                       ])),
         ],
         delayInfo: delayInfo
@@ -373,15 +377,15 @@ enum ToeiLineData {
                       weekday: pattern("05:48", "22:11", [
                           ("05:48", 6), ("07:00", 4), ("10:00", 6.5), ("16:00", 5), ("19:00", 7),
                       ]),
-                      holiday: pattern("06:00", "22:11", [
-                          ("06:00", 7), ("10:00", 6.5), ("19:00", 8),
+                      holiday: pattern("05:48", "20:55", [
+                          ("05:48", 7), ("10:00", 6.5), ("19:00", 8),
                       ])),
             direction("Arakawa", "Minowabashi", "三ノ輪橋方面", "For Minowabashi", ascending: false,
-                      weekday: pattern("06:00", "22:19", [
-                          ("06:00", 6), ("07:00", 4), ("10:00", 6.5), ("16:00", 5), ("19:00", 7),
+                      weekday: pattern("05:00", "22:00", [
+                          ("05:00", 6), ("07:00", 4), ("10:00", 6.5), ("16:00", 5), ("19:00", 7),
                       ]),
-                      holiday: pattern("06:14", "22:19", [
-                          ("06:14", 7), ("10:00", 6.5), ("19:00", 8),
+                      holiday: pattern("05:00", "22:00", [
+                          ("05:00", 7), ("10:00", 6.5), ("19:00", 8),
                       ])),
         ],
         delayInfo: delayInfo

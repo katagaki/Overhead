@@ -56,12 +56,16 @@ enum KeiseiLineData {
         main, oshiage, kanamachi, chiba, chihara, higashiNarita, skyAccess,
     ]
 
-    private static let keiseiWeekday = pattern("05:00", "23:40", [
-        ("05:00", 10), ("06:30", 6), ("09:30", 10), ("16:30", 8), ("20:00", 10), ("22:00", 12),
-    ])
-    private static let keiseiHoliday = pattern("05:00", "23:40", [
-        ("05:00", 10), ("07:00", 8), ("10:00", 10), ("20:00", 11),
-    ])
+    private static func keiseiWeekday(_ first: String, _ last: String) -> ServicePattern {
+        pattern(first, last, [
+            (first, 10), ("06:30", 6), ("09:30", 10), ("16:30", 8), ("20:00", 10), ("22:00", 12),
+        ])
+    }
+    private static func keiseiHoliday(_ first: String, _ last: String) -> ServicePattern {
+        pattern(first, last, [
+            (first, 10), ("07:00", 8), ("10:00", 10), ("20:00", 11),
+        ])
+    }
 
     // MARK: Keisei Main Line (KS)
 
@@ -121,9 +125,9 @@ enum KeiseiLineData {
         ],
         directions: [
             direction("Keisei.Main", "NaritaAirport", "成田空港方面", "For Narita Airport", ascending: true,
-                      weekday: keiseiWeekday, holiday: keiseiHoliday),
+                      weekday: keiseiWeekday("05:03", "24:21"), holiday: keiseiHoliday("05:03", "24:21")),
             direction("Keisei.Main", "KeiseiUeno", "京成上野方面", "For Keisei-Ueno", ascending: false,
-                      weekday: keiseiWeekday, holiday: keiseiHoliday),
+                      weekday: keiseiWeekday("05:17", "24:09"), holiday: keiseiHoliday("05:17", "24:09")),
         ],
         delayInfo: delayInfo,
         throughServices: [
@@ -161,18 +165,18 @@ enum KeiseiLineData {
         hopTimesMinutes: [2, 2, 2, 2, 3],
         directions: [
             direction("Keisei.Oshiage", "Aoto", "青砥方面", "For Aoto", ascending: true,
-                      weekday: pattern("05:00", "23:50", [
+                      weekday: pattern("05:00", "24:27", [
                           ("05:00", 8), ("06:30", 5), ("09:30", 8), ("16:30", 6), ("20:00", 8), ("22:00", 10),
                       ]),
-                      holiday: pattern("05:00", "23:50", [
+                      holiday: pattern("05:00", "24:27", [
                           ("05:00", 8), ("07:00", 7), ("10:00", 8), ("20:00", 9),
                       ])),
             direction("Keisei.Oshiage", "Oshiage", "押上方面", "For Oshiage", ascending: false,
-                      weekday: pattern("05:00", "23:50", [
-                          ("05:00", 8), ("06:30", 5), ("09:30", 8), ("16:30", 6), ("20:00", 8), ("22:00", 10),
+                      weekday: pattern("04:50", "23:56", [
+                          ("04:50", 8), ("06:30", 5), ("09:30", 8), ("16:30", 6), ("20:00", 8), ("22:00", 10),
                       ]),
-                      holiday: pattern("05:00", "23:50", [
-                          ("05:00", 8), ("07:00", 7), ("10:00", 8), ("20:00", 9),
+                      holiday: pattern("04:50", "23:56", [
+                          ("04:50", 8), ("07:00", 7), ("10:00", 8), ("20:00", 9),
                       ])),
         ],
         delayInfo: delayInfo,
@@ -201,21 +205,21 @@ enum KeiseiLineData {
             st("Keisei.Kanamachi", "Shibamata", "柴又", "Shibamata", "KS50", 35.7565, 139.8753),
             st("Keisei.Kanamachi", "KeiseiKanamachi", "京成金町", "Keisei-Kanamachi", "KS51", 35.7685, 139.8705),
         ],
-        hopTimesMinutes: [2, 2],
+        hopTimesMinutes: [2.5, 2.5],
         directions: [
             direction("Keisei.Kanamachi", "KeiseiKanamachi", "京成金町方面", "For Keisei-Kanamachi", ascending: true,
-                      weekday: pattern("05:10", "23:55", [
-                          ("05:10", 10), ("07:00", 8), ("09:30", 10), ("22:00", 12),
+                      weekday: pattern("05:01", "24:04", [
+                          ("05:01", 12), ("07:00", 8), ("09:30", 15), ("22:00", 15),
                       ]),
-                      holiday: pattern("05:10", "23:55", [
-                          ("05:10", 10), ("22:00", 12),
+                      holiday: pattern("05:01", "24:04", [
+                          ("05:01", 15), ("22:00", 15),
                       ])),
             direction("Keisei.Kanamachi", "KeiseiTakasago", "京成高砂方面", "For Keisei-Takasago", ascending: false,
-                      weekday: pattern("05:10", "23:55", [
-                          ("05:10", 10), ("07:00", 8), ("09:30", 10), ("22:00", 12),
+                      weekday: pattern("05:10", "24:12", [
+                          ("05:10", 12), ("07:00", 8), ("09:30", 15), ("22:00", 15),
                       ]),
-                      holiday: pattern("05:10", "23:55", [
-                          ("05:10", 10), ("22:00", 12),
+                      holiday: pattern("05:10", "24:12", [
+                          ("05:10", 15), ("22:00", 15),
                       ])),
         ],
         delayInfo: delayInfo
@@ -273,12 +277,16 @@ enum KeiseiLineData {
 
     // MARK: Keisei Chihara Line (KS)
 
-    private static let chiharaWeekday = pattern("05:10", "23:30", [
-        ("05:10", 15), ("07:00", 10), ("09:30", 20), ("17:00", 15), ("20:00", 20),
-    ])
-    private static let chiharaHoliday = pattern("05:10", "23:30", [
-        ("05:10", 20),
-    ])
+    private static func chiharaWeekday(_ first: String, _ last: String) -> ServicePattern {
+        pattern(first, last, [
+            (first, 15), ("07:00", 10), ("09:30", 20), ("17:00", 15), ("20:00", 20),
+        ])
+    }
+    private static func chiharaHoliday(_ first: String, _ last: String) -> ServicePattern {
+        pattern(first, last, [
+            (first, 20),
+        ])
+    }
 
     static let chihara = StaticTrainLine(
         id: "odpt.Railway:Keisei.Chihara",
@@ -297,9 +305,9 @@ enum KeiseiLineData {
         hopTimesMinutes: [3, 2, 4, 2, 3],
         directions: [
             direction("Keisei.Chihara", "Chiharadai", "ちはら台方面", "For Chiharadai", ascending: true,
-                      weekday: chiharaWeekday, holiday: chiharaHoliday),
+                      weekday: chiharaWeekday("05:49", "23:49"), holiday: chiharaHoliday("05:49", "23:49")),
             direction("Keisei.Chihara", "Chibachuo", "千葉中央方面", "For Chiba-Chuo", ascending: false,
-                      weekday: chiharaWeekday, holiday: chiharaHoliday),
+                      weekday: chiharaWeekday("05:34", "23:21"), holiday: chiharaHoliday("05:34", "23:21")),
         ],
         delayInfo: delayInfo,
         throughServices: [
@@ -312,9 +320,11 @@ enum KeiseiLineData {
 
     // MARK: Keisei Higashi-Narita Line (KS)
 
-    private static let higashiNaritaPattern = pattern("05:15", "22:50", [
-        ("05:15", 40),
-    ])
+    private static func higashiNaritaPattern(_ first: String, _ last: String) -> ServicePattern {
+        pattern(first, last, [
+            (first, 40),
+        ])
+    }
 
     static let higashiNarita = StaticTrainLine(
         id: "odpt.Railway:Keisei.HigashiNarita",
@@ -329,9 +339,9 @@ enum KeiseiLineData {
         hopTimesMinutes: [8],
         directions: [
             direction("Keisei.HigashiNarita", "HigashiNarita", "東成田方面", "For Higashi-Narita", ascending: true,
-                      weekday: higashiNaritaPattern, holiday: higashiNaritaPattern),
+                      weekday: higashiNaritaPattern("05:51", "23:08"), holiday: higashiNaritaPattern("05:51", "23:08")),
             direction("Keisei.HigashiNarita", "KeiseiNarita", "京成成田方面", "For Keisei-Narita", ascending: false,
-                      weekday: higashiNaritaPattern, holiday: higashiNaritaPattern),
+                      weekday: higashiNaritaPattern("06:11", "23:27"), holiday: higashiNaritaPattern("06:11", "23:27")),
         ],
         delayInfo: delayInfo,
         throughServices: [
@@ -343,12 +353,16 @@ enum KeiseiLineData {
 
     // MARK: Narita Sky Access Line (KS)
 
-    private static let skyAccessWeekday = pattern("05:00", "23:00", [
-        ("05:00", 40), ("06:30", 30), ("09:00", 40), ("17:00", 30), ("20:00", 40),
-    ])
-    private static let skyAccessHoliday = pattern("05:00", "23:00", [
-        ("05:00", 40),
-    ])
+    private static func skyAccessWeekday(_ first: String, _ last: String) -> ServicePattern {
+        pattern(first, last, [
+            (first, 40), ("06:30", 30), ("09:00", 40), ("17:00", 30), ("20:00", 40),
+        ])
+    }
+    private static func skyAccessHoliday(_ first: String, _ last: String) -> ServicePattern {
+        pattern(first, last, [
+            (first, 40),
+        ])
+    }
 
     static let skyAccess = StaticTrainLine(
         id: "odpt.Railway:Keisei.NaritaSkyAccess",
@@ -369,9 +383,9 @@ enum KeiseiLineData {
         hopTimesMinutes: [8, 5, 9, 7, 7, 8, 2],
         directions: [
             direction("Keisei.NaritaSkyAccess", "NaritaAirport", "成田空港方面", "For Narita Airport", ascending: true,
-                      weekday: skyAccessWeekday, holiday: skyAccessHoliday),
+                      weekday: skyAccessWeekday("05:34", "23:00"), holiday: skyAccessHoliday("05:34", "23:00")),
             direction("Keisei.NaritaSkyAccess", "KeiseiTakasago", "京成高砂方面", "For Keisei-Takasago", ascending: false,
-                      weekday: skyAccessWeekday, holiday: skyAccessHoliday),
+                      weekday: skyAccessWeekday("05:41", "23:08"), holiday: skyAccessHoliday("05:41", "23:08")),
         ],
         delayInfo: delayInfo,
         throughServices: [

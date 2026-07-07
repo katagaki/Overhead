@@ -102,18 +102,18 @@ enum TobuLineData {
         ],
         directions: [
             direction("Tobu.TobuSkytree", "TobuDobutsuKoen", "東武動物公園方面", "For Tobu-Dobutsu-Koen", ascending: true,
-                      weekday: pattern("05:00", "23:40", [
-                          ("05:00", 10), ("06:30", 5), ("09:30", 10), ("16:30", 7), ("20:00", 10), ("22:00", 12),
+                      weekday: pattern("04:58", "24:09", [
+                          ("04:58", 10), ("06:30", 5), ("09:30", 10), ("16:30", 7), ("20:00", 10), ("22:00", 12),
                       ]),
-                      holiday: pattern("05:00", "23:40", [
-                          ("05:00", 10), ("07:00", 8), ("10:00", 10), ("20:00", 11),
+                      holiday: pattern("04:58", "24:09", [
+                          ("04:58", 10), ("07:00", 8), ("10:00", 10), ("20:00", 11),
                       ])),
             direction("Tobu.TobuSkytree", "Asakusa", "浅草方面", "For Asakusa", ascending: false,
-                      weekday: pattern("05:00", "23:40", [
-                          ("05:00", 10), ("06:30", 5), ("09:30", 10), ("16:30", 7), ("20:00", 10), ("22:00", 12),
+                      weekday: pattern("05:09", "23:12", [
+                          ("05:09", 10), ("06:30", 5), ("09:30", 10), ("16:30", 7), ("20:00", 10), ("22:00", 12),
                       ]),
-                      holiday: pattern("05:00", "23:40", [
-                          ("05:00", 10), ("07:00", 8), ("10:00", 10), ("20:00", 11),
+                      holiday: pattern("05:09", "23:12", [
+                          ("05:09", 10), ("07:00", 8), ("10:00", 10), ("20:00", 11),
                       ])),
         ],
         delayInfo: delayInfo,
@@ -175,22 +175,22 @@ enum TobuLineData {
             st("Tobu.Tojo", "ShinrinKoen", "森林公園", "Shinrin-Koen", "TJ30", 36.0458, 139.3802),
         ],
         hopTimesMinutes: [
-            2, 1, 2, 2, 1, 2, 2, 2, 2, 3, 2, 3, 2, 2,
-            2, 2, 2, 2, 3, 3, 2, 4, 2, 2, 2, 2, 3, 4, 3,
+            2.5, 1.5, 2.5, 2.5, 1.5, 2.5, 2.5, 2.5, 2.5, 3.5, 2.5, 3.5, 2.5, 2.5,
+            2.5, 2.5, 2.5, 2.5, 3.5, 3.5, 2.5, 4.5, 2.5, 2.5, 2.5, 2.5, 3.5, 4.5, 3.5,
         ],
         directions: [
             direction("Tobu.Tojo", "ShinrinKoen", "川越・森林公園方面", "For Kawagoe & Shinrin-Koen", ascending: true,
-                      weekday: pattern("05:00", "23:45", [
+                      weekday: pattern("05:00", "24:35", [
                           ("05:00", 10), ("06:30", 4.5), ("09:30", 8), ("16:30", 6), ("20:00", 8), ("22:00", 10),
                       ]),
-                      holiday: pattern("05:00", "23:45", [
+                      holiday: pattern("05:00", "24:35", [
                           ("05:00", 10), ("07:00", 7), ("10:00", 8), ("20:00", 9),
                       ])),
             direction("Tobu.Tojo", "Ikebukuro", "池袋方面", "For Ikebukuro", ascending: false,
-                      weekday: pattern("05:00", "23:45", [
+                      weekday: pattern("05:00", "23:17", [
                           ("05:00", 10), ("06:30", 4.5), ("09:30", 8), ("16:30", 6), ("20:00", 8), ("22:00", 10),
                       ]),
-                      holiday: pattern("05:00", "23:45", [
+                      holiday: pattern("05:00", "23:17", [
                           ("05:00", 10), ("07:00", 7), ("10:00", 8), ("20:00", 9),
                       ])),
         ],
@@ -211,19 +211,23 @@ enum TobuLineData {
 
     // MARK: Tobu Kameido Line (TS)
 
-    private static let kameidoWeekday = pattern("05:05", "23:45", [
-        ("05:05", 10), ("07:00", 8), ("09:30", 10), ("22:00", 12),
-    ])
-    private static let kameidoHoliday = pattern("05:05", "23:45", [
-        ("05:05", 10), ("22:00", 12),
-    ])
+    private static func kameidoWeekday(_ first: String, _ last: String) -> ServicePattern {
+        pattern(first, last, [
+            (first, 10), ("07:00", 8), ("09:30", 10), ("22:00", 12),
+        ])
+    }
+    private static func kameidoHoliday(_ first: String, _ last: String) -> ServicePattern {
+        pattern(first, last, [
+            (first, 10), ("22:00", 12),
+        ])
+    }
 
     static let kameido = StaticTrainLine(
         id: "odpt.Railway:Tobu.Kameido",
         nameJa: "東武亀戸線",
         nameEn: "Tobu Kameido Line",
         operatorId: "odpt.Operator:Tobu",
-        colorHex: "#C7A367",
+        colorHex: "#0067C0",
         stations: [
             st("Tobu.Kameido", "Hikifune", "曳舟", "Hikifune", "TS04", 35.7168, 139.8172),
             st("Tobu.Kameido", "Omurai", "小村井", "Omurai", "TS41", 35.7101, 139.8280),
@@ -234,25 +238,27 @@ enum TobuLineData {
         hopTimesMinutes: [3, 1, 2, 2],
         directions: [
             direction("Tobu.Kameido", "Kameido", "亀戸方面", "For Kameido", ascending: true,
-                      weekday: kameidoWeekday, holiday: kameidoHoliday),
+                      weekday: kameidoWeekday("05:34", "24:18"), holiday: kameidoHoliday("05:34", "24:18")),
             direction("Tobu.Kameido", "Hikifune", "曳舟方面", "For Hikifune", ascending: false,
-                      weekday: kameidoWeekday, holiday: kameidoHoliday),
+                      weekday: kameidoWeekday("05:43", "24:29"), holiday: kameidoHoliday("05:43", "24:29")),
         ],
         delayInfo: delayInfo
     )
 
     // MARK: Tobu Daishi Line (TS)
 
-    private static let daishiPattern = pattern("05:10", "23:40", [
-        ("05:10", 10),
-    ])
+    private static func daishiPattern(_ first: String, _ last: String) -> ServicePattern {
+        pattern(first, last, [
+            (first, 10),
+        ])
+    }
 
     static let daishi = StaticTrainLine(
         id: "odpt.Railway:Tobu.Daishi",
         nameJa: "東武大師線",
         nameEn: "Tobu Daishi Line",
         operatorId: "odpt.Operator:Tobu",
-        colorHex: "#777195",
+        colorHex: "#0067C0",
         stations: [
             st("Tobu.Daishi", "Nishiarai", "西新井", "Nishiarai", "TS13", 35.7775, 139.7925),
             st("Tobu.Daishi", "Daishimae", "大師前", "Daishimae", "TS51", 35.7789, 139.7815),
@@ -260,21 +266,25 @@ enum TobuLineData {
         hopTimesMinutes: [2],
         directions: [
             direction("Tobu.Daishi", "Daishimae", "大師前方面", "For Daishimae", ascending: true,
-                      weekday: daishiPattern, holiday: daishiPattern),
+                      weekday: daishiPattern("05:28", "24:14"), holiday: daishiPattern("05:28", "24:14")),
             direction("Tobu.Daishi", "Nishiarai", "西新井方面", "For Nishiarai", ascending: false,
-                      weekday: daishiPattern, holiday: daishiPattern),
+                      weekday: daishiPattern("05:32", "24:08"), holiday: daishiPattern("05:32", "24:08")),
         ],
         delayInfo: delayInfo
     )
 
     // MARK: Tobu Urban Park Line (TD)
 
-    private static let urbanParkWeekday = pattern("05:00", "23:30", [
-        ("05:00", 10), ("06:30", 6), ("09:30", 10), ("16:30", 8), ("20:00", 10), ("22:00", 12),
-    ])
-    private static let urbanParkHoliday = pattern("05:00", "23:30", [
-        ("05:00", 10), ("20:00", 11),
-    ])
+    private static func urbanParkWeekday(_ first: String, _ last: String) -> ServicePattern {
+        pattern(first, last, [
+            (first, 10), ("06:30", 8), ("09:30", 10), ("16:30", 8), ("20:00", 10), ("22:00", 12),
+        ])
+    }
+    private static func urbanParkHoliday(_ first: String, _ last: String) -> ServicePattern {
+        pattern(first, last, [
+            (first, 10), ("20:00", 11),
+        ])
+    }
 
     static let urbanPark = StaticTrainLine(
         id: "odpt.Railway:Tobu.TobuUrbanPark",
@@ -325,21 +335,25 @@ enum TobuLineData {
         ],
         directions: [
             direction("Tobu.TobuUrbanPark", "Funabashi", "柏・船橋方面", "For Kashiwa & Funabashi", ascending: true,
-                      weekday: urbanParkWeekday, holiday: urbanParkHoliday),
+                      weekday: urbanParkWeekday("05:25", "23:55"), holiday: urbanParkHoliday("05:25", "23:55")),
             direction("Tobu.TobuUrbanPark", "Omiya", "大宮方面", "For Omiya", ascending: false,
-                      weekday: urbanParkWeekday, holiday: urbanParkHoliday),
+                      weekday: urbanParkWeekday("04:54", "23:59"), holiday: urbanParkHoliday("04:54", "23:59")),
         ],
         delayInfo: delayInfo
     )
 
     // MARK: Tobu Nikko Line (TN)
 
-    private static let nikkoWeekday = pattern("05:00", "22:40", [
-        ("05:00", 30), ("06:30", 20), ("09:30", 30), ("17:00", 20), ("20:00", 30),
-    ])
-    private static let nikkoHoliday = pattern("05:00", "22:40", [
-        ("05:00", 30),
-    ])
+    private static func nikkoWeekday(_ first: String, _ last: String) -> ServicePattern {
+        pattern(first, last, [
+            (first, 30), ("06:30", 20), ("09:30", 40), ("17:00", 30), ("20:00", 40),
+        ])
+    }
+    private static func nikkoHoliday(_ first: String, _ last: String) -> ServicePattern {
+        pattern(first, last, [
+            (first, 40),
+        ])
+    }
 
     static let nikko = StaticTrainLine(
         id: "odpt.Railway:Tobu.Nikko",
@@ -381,9 +395,9 @@ enum TobuLineData {
         ],
         directions: [
             direction("Tobu.Nikko", "TobuNikko", "東武日光方面", "For Tobu-Nikko", ascending: true,
-                      weekday: nikkoWeekday, holiday: nikkoHoliday),
+                      weekday: nikkoWeekday("05:48", "22:40"), holiday: nikkoHoliday("05:48", "22:40")),
             direction("Tobu.Nikko", "TobuDobutsuKoen", "東武動物公園方面", "For Tobu-Dobutsu-Koen", ascending: false,
-                      weekday: nikkoWeekday, holiday: nikkoHoliday),
+                      weekday: nikkoWeekday("05:00", "22:30"), holiday: nikkoHoliday("05:00", "22:30")),
         ],
         delayInfo: delayInfo,
         throughServices: [

@@ -18,6 +18,10 @@ struct TrainJourneyAttributes: ActivityAttributes {
         var statusRaw: String
         var trackingModeRaw: String
         var lastRefreshTimestamp: Double
+        // Scheduled departure from the boarding station (delay-adjusted).
+        // Together with the arrival timestamp this drives timer-based views
+        // that keep advancing while the app is suspended (no GPS needed).
+        var departureTimestamp: Double
 
         var status: TrainPositionStatus {
             TrainPositionStatus(rawValue: statusRaw) ?? .onTime
@@ -28,6 +32,17 @@ struct TrainJourneyAttributes: ActivityAttributes {
 
         var estimatedArrival: Date {
             Date(timeIntervalSince1970: estimatedArrivalTimestamp)
+        }
+
+        var departure: Date {
+            Date(timeIntervalSince1970: departureTimestamp)
+        }
+
+        /// Timer interval covering the scheduled ride, clamped to stay valid.
+        var journeyInterval: ClosedRange<Date> {
+            let start = departure
+            let end = max(estimatedArrival, start.addingTimeInterval(60))
+            return start...end
         }
 
         var lastRefresh: Date {

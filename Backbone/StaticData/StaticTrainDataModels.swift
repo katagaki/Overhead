@@ -256,6 +256,203 @@ public enum StaticTrainData {
         return ThroughDestinationGroup(service: service, connectingLine: target, stations: beyond)
     }
 
+    // MARK: Direct Route Search
+
+    /// A rideable single-train route between two physical stations, possibly
+    /// continuing past a through-service (直通) junction onto a connecting line.
+    public struct DirectRouteOption: Identifiable {
+        /// Line to generate services from (composite when the route runs through a junction).
+        public let staticLine: StaticTrainLine
+        /// The line the passenger boards on (used for color, symbol, and display).
+        public let boardingLine: StaticTrainLine
+        public let fromStation: Station
+        public let toStation: Station
+        public let isThrough: Bool
+
+        public var id: String { "\(staticLine.id)|\(fromStation.id)|\(toStation.id)" }
+    }
+
+    /// All single-train routes between two stations identified by their
+    /// Japanese names (station IDs differ between lines at the same physical
+    /// station, so names are the cross-line join key).
+    public static func directRoutes(
+        fromStationName: String,
+        toStationName: String
+    ) -> [DirectRouteOption] {
+        guard fromStationName != toStationName else { return [] }
+        var options: [DirectRouteOption] = []
+        for line in allLines {
+            guard let from = line.stations.first(where: { $0.name == fromStationName }) else { continue }
+
+            if let to = line.stations.first(where: { $0.name == toStationName }) {
+                if let resolved = resolveJourneyLine(
+                    lineId: line.id, fromStationId: from.id, toStationId: to.id
+                ) {
+                    options.append(DirectRouteOption(
+                        staticLine: resolved.staticLine,
+                        boardingLine: line,
+                        fromStation: from,
+                        toStation: to,
+                        isThrough: false
+                    ))
+                }
+                continue
+            }
+
+            for group in throughDestinations(fromLineId: line.id, boardingStationId: from.id) {
+                guard let to = group.stations.first(where: { $0.name == toStationName }),
+                      let resolved = resolveJourneyLine(
+                          lineId: line.id, fromStationId: from.id, toStationId: to.id
+                      )
+                else { continue }
+                options.append(DirectRouteOption(
+                    staticLine: resolved.staticLine,
+                    boardingLine: line,
+                    fromStation: from,
+                    toStation: to,
+                    isThrough: true
+                ))
+            }
+        }
+        return options
+    }
+
+    // MARK: Transfer Route Planning (乗り換え)
+
+    /// One ride of a multi-leg route: board `staticLine` at `fromStation` and
+    /// alight at `toStation`, then change trains for the next leg.
+    public struct TransferLeg {
+        public let staticLine: StaticTrainLine
+        public let fromStation: Station
+        public let toStation: Station
+    }
+
+    /// Time assumed for walking between platforms when changing trains.
+    public static let transferBufferMinutes: Double = 5
+
+    /// Plans a route between two physical stations (identified by Japanese
+    /// name), changing trains at same-name stations when no single ride
+    /// exists. Returns ordered legs, or nil when unreachable within
+    /// `maxTransfers` changes. Shortest ride-time route via Dijkstra, with a
+    /// fixed penalty per transfer so direct rides win when comparable.
+    public static func planTransferRoute(
+        fromStationName: String,
+        toStationName: String,
+        maxTransfers: Int = 2
+    ) -> [TransferLeg]? {
+        guard fromStationName != toStationName else { return nil }
+        let lines = allLines
+        let transferPenalty = transferBufferMinutes + 3  // walk + expected wait
+
+        // Node = (line index, station index on that line)
+        struct Node: Hashable {
+            let line: Int
+            let idx: Int
+        }
+        struct Entry {
+            var cost: Double
+            var transfers: Int
+            var parent: Node?
+        }
+
+        // Stations grouped by name for transfer edges and start/goal lookup
+        var nodesByName: [String: [Node]] = [:]
+        for (li, line) in lines.enumerated() {
+            for (si, station) in line.stations.enumerated() {
+                nodesByName[station.name, default: []].append(Node(line: li, idx: si))
+            }
+        }
+        guard let startNodes = nodesByName[fromStationName],
+              nodesByName[toStationName] != nil
+        else { return nil }
+
+        var best: [Node: Entry] = [:]
+        // Simple priority queue: linear extract-min is fine at this scale
+        var frontier: [(cost: Double, node: Node)] = []
+        for node in startNodes {
+            best[node] = Entry(cost: 0, transfers: 0, parent: nil)
+            frontier.append((0, node))
+        }
+
+        var goal: Node?
+        while !frontier.isEmpty {
+            var minIdx = 0
+            for i in 1..<frontier.count where frontier[i].cost < frontier[minIdx].cost {
+                minIdx = i
+            }
+            let (cost, node) = frontier.remove(at: minIdx)
+            guard let entry = best[node], entry.cost == cost else { continue }
+
+            let line = lines[node.line]
+            let station = line.stations[node.idx]
+            if station.name == toStationName {
+                goal = node
+                break
+            }
+
+            func relax(_ next: Node, cost nextCost: Double, transfers: Int) {
+                if let existing = best[next], existing.cost <= nextCost { return }
+                best[next] = Entry(cost: nextCost, transfers: transfers, parent: node)
+                frontier.append((nextCost, next))
+            }
+
+            // Ride to adjacent stations on the same line
+            if node.idx > 0 {
+                relax(Node(line: node.line, idx: node.idx - 1),
+                      cost: cost + line.hopTimesMinutes[node.idx - 1],
+                      transfers: entry.transfers)
+            }
+            if node.idx < line.stations.count - 1 {
+                relax(Node(line: node.line, idx: node.idx + 1),
+                      cost: cost + line.hopTimesMinutes[node.idx],
+                      transfers: entry.transfers)
+            }
+
+            // Change to other lines at this station
+            if entry.transfers < maxTransfers, let siblings = nodesByName[station.name] {
+                for sibling in siblings where sibling.line != node.line {
+                    relax(sibling, cost: cost + transferPenalty, transfers: entry.transfers + 1)
+                }
+            }
+        }
+
+        guard var cursor = goal else { return nil }
+
+        // Walk parents back to the start, then compress into per-line legs
+        var path: [Node] = [cursor]
+        while let parent = best[cursor]?.parent {
+            path.append(parent)
+            cursor = parent
+        }
+        path.reverse()
+
+        var legs: [TransferLeg] = []
+        var legStart = path[0]
+        for i in 1..<path.count {
+            let prev = path[i - 1]
+            let node = path[i]
+            if node.line != prev.line {
+                if legStart.idx != prev.idx {
+                    legs.append(TransferLeg(
+                        staticLine: lines[legStart.line],
+                        fromStation: lines[legStart.line].stations[legStart.idx],
+                        toStation: lines[prev.line].stations[prev.idx]
+                    ))
+                }
+                legStart = node
+            }
+        }
+        let last = path[path.count - 1]
+        if legStart.idx != last.idx {
+            legs.append(TransferLeg(
+                staticLine: lines[legStart.line],
+                fromStation: lines[legStart.line].stations[legStart.idx],
+                toStation: lines[last.line].stations[last.idx]
+            ))
+        }
+        return legs.isEmpty ? nil : legs
+    }
+
     /// A journey line resolved from a boarding and alighting station, spanning
     /// a through-service junction onto a second line when necessary.
     public struct ResolvedJourneyLine {
