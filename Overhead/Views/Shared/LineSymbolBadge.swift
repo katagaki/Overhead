@@ -11,6 +11,14 @@ import Backbone
 /// - Tobu (TS/TI/TN/TD/TJ): rounded square, rounder corners than JR,
 ///   color stroke with rounded white core
 /// - Nippori-Toneri Liner (NT): rounded square with pink outer + green inner border
+/// - Tokyu / Minatomirai (TY/DT/MG/…/MM): FILLED rounded square in the line
+///   color with white letters
+/// - Keikyu (KK): white circle with a thin light-blue ring and BLUE letters
+///   (signage is blue regardless of the red line color)
+/// - Keio (KO/IN): filled circle in the line color with white letters
+/// - Seibu (SI/SS/…): Tobu-like bordered rounded square, dark navy letters
+/// - Sotetsu (SO): filled navy rounded square, white letters over an orange rule
+/// (Shapes verified against station signage photos, 2026-07)
 
 struct LineSymbolBadge: View {
     let symbol: String
@@ -19,8 +27,15 @@ struct LineSymbolBadge: View {
     var dimension: CGFloat = 32
 
     private static let tobuSymbols: Set<String> = ["TS", "TI", "TN", "TD", "TJ"]
+    private static let tokyuStyleSymbols: Set<String> = ["TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD", "MM"]
+    private static let seibuSymbols: Set<String> = ["SI", "SS", "SK", "ST", "SW", "SY"]
+    private static let keioSymbols: Set<String> = ["KO", "IN"]
     private static let metroLetterColor = Color(hex: "#232021")
     private static let nipporiToneriGreen = Color(hex: "#69B444")
+    private static let keikyuRingBlue = Color(hex: "#00A7E1")
+    private static let keikyuLetterBlue = Color(hex: "#1E50A2")
+    private static let seibuLetterColor = Color(hex: "#414D66")
+    private static let sotetsuOrange = Color(hex: "#EE7B01")
 
     /// Scale factor relative to the 32pt reference design.
     private var f: CGFloat { dimension / 32 }
@@ -31,6 +46,16 @@ struct LineSymbolBadge: View {
             nipporiToneriBadge
         case "KS":
             keiseiBadge
+        case "KK":
+            keikyuBadge
+        case "SO":
+            sotetsuBadge
+        case _ where Self.keioSymbols.contains(symbol):
+            keioBadge
+        case _ where Self.tokyuStyleSymbols.contains(symbol):
+            tokyuBadge
+        case _ where Self.seibuSymbols.contains(symbol):
+            seibuBadge
         case _ where Self.tobuSymbols.contains(symbol):
             tobuBadge
         case _ where symbol.hasPrefix("J"):
@@ -100,6 +125,64 @@ struct LineSymbolBadge: View {
                     .strokeBorder(Self.nipporiToneriGreen, lineWidth: 1.4 * f)
                     .padding(3.8 * f)
             )
+    }
+
+    // MARK: - Tokyu / Minatomirai: filled rounded square, white letters
+
+    private var tokyuBadge: some View {
+        symbolText(.custom("Hind-Bold", fixedSize: 15 * f), color: .white, inset: 4.5 * f,
+                   nudge: 15 * f * 0.085)
+            .frame(width: dimension, height: dimension)
+            .background(color, in: RoundedRectangle(cornerRadius: 8 * f))
+    }
+
+    // MARK: - Keikyu: white circle, thin light-blue ring, blue letters
+
+    private var keikyuBadge: some View {
+        symbolText(.custom("Hind-Bold", fixedSize: 14 * f), color: Self.keikyuLetterBlue, inset: 4.5 * f,
+                   nudge: 14 * f * 0.085)
+            .frame(width: dimension, height: dimension)
+            .background(Color.white, in: Circle())
+            .overlay(
+                Circle()
+                    .strokeBorder(Self.keikyuRingBlue, lineWidth: 2.6 * f)
+            )
+    }
+
+    // MARK: - Keio: filled circle, white letters
+
+    private var keioBadge: some View {
+        symbolText(.custom("Hind-Bold", fixedSize: 14 * f), color: .white, inset: 5 * f,
+                   nudge: 14 * f * 0.085)
+            .frame(width: dimension, height: dimension)
+            .background(color, in: Circle())
+    }
+
+    // MARK: - Seibu: bordered rounded square, dark navy letters
+
+    private var seibuBadge: some View {
+        symbolText(.custom("Hind-Bold", fixedSize: 15 * f), color: Self.seibuLetterColor, inset: 4.5 * f,
+                   nudge: 15 * f * 0.085)
+            .frame(width: dimension, height: dimension)
+            .background(Color.white, in: RoundedRectangle(cornerRadius: 7 * f))
+            .overlay(
+                RoundedRectangle(cornerRadius: 7 * f)
+                    .strokeBorder(color, lineWidth: 3.5 * f)
+            )
+    }
+
+    // MARK: - Sotetsu: filled navy square, white letters over orange rule
+
+    private var sotetsuBadge: some View {
+        VStack(spacing: 2 * f) {
+            symbolText(.custom("Hind-Bold", fixedSize: 13 * f), color: .white, inset: 4 * f,
+                       nudge: 13 * f * 0.085)
+            Rectangle()
+                .fill(Self.sotetsuOrange)
+                .frame(width: 18 * f, height: max(1, 1.6 * f))
+        }
+        .frame(width: dimension, height: dimension)
+        .background(color, in: RoundedRectangle(cornerRadius: 6.5 * f))
     }
 
     // MARK: - Tokyo Metro / Toei: thick color ring

@@ -608,11 +608,28 @@ struct LCDLineSymbolBadge: View {
     let color: Color
 
     private static let tobuSymbols: Set<String> = ["TS", "TI", "TN", "TD", "TJ"]
+    private static let tokyuStyleSymbols: Set<String> = ["TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD", "MM"]
+    private static let seibuSymbols: Set<String> = ["SI", "SS", "SK", "ST", "SW", "SY"]
+    private static let keioSymbols: Set<String> = ["KO", "IN"]
+    private static let keikyuRingBlue = Color(hex: "#00A7E1")
+    private static let keikyuLetterBlue = Color(hex: "#1E50A2")
+    private static let seibuLetterColor = Color(hex: "#414D66")
 
     var body: some View {
         switch symbol {
         case "KS":
             circleBadge(ringWidth: 2.4, textColor: color, hind: true)
+        case "KK":
+            circleBadge(ringWidth: 2.0, textColor: Self.keikyuLetterBlue, hind: true,
+                        ringColor: Self.keikyuRingBlue)
+        case "SO":
+            filledBadge(in: AnyShape(RoundedRectangle(cornerRadius: 5)))
+        case _ where Self.keioSymbols.contains(symbol):
+            filledBadge(in: AnyShape(Circle()))
+        case _ where Self.tokyuStyleSymbols.contains(symbol):
+            filledBadge(in: AnyShape(RoundedRectangle(cornerRadius: 6)))
+        case _ where Self.seibuSymbols.contains(symbol):
+            squareBadge(cornerRadius: 5.5, borderWidth: 2.6, textColor: Self.seibuLetterColor)
         case _ where Self.tobuSymbols.contains(symbol):
             squareBadge(cornerRadius: 5.5, borderWidth: 2.6)
         case _ where symbol.hasPrefix("J"):
@@ -623,24 +640,33 @@ struct LCDLineSymbolBadge: View {
         }
     }
 
-    private func circleBadge(ringWidth: CGFloat, textColor: Color, hind: Bool) -> some View {
+    private func circleBadge(ringWidth: CGFloat, textColor: Color, hind: Bool,
+                             ringColor: Color? = nil) -> some View {
         symbolText(color: textColor, inset: ringWidth + 1, hind: hind)
             .frame(width: 24, height: 24)
             .background(Color.white, in: Circle())
             .overlay(
                 Circle()
-                    .strokeBorder(color, lineWidth: ringWidth)
+                    .strokeBorder(ringColor ?? color, lineWidth: ringWidth)
             )
     }
 
-    private func squareBadge(cornerRadius: CGFloat, borderWidth: CGFloat) -> some View {
-        symbolText(color: .black, inset: borderWidth + 1, hind: true)
+    private func squareBadge(cornerRadius: CGFloat, borderWidth: CGFloat,
+                             textColor: Color = .black) -> some View {
+        symbolText(color: textColor, inset: borderWidth + 1, hind: true)
             .frame(width: 24, height: 24)
             .background(Color.white, in: RoundedRectangle(cornerRadius: cornerRadius))
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius)
                     .strokeBorder(color, lineWidth: borderWidth)
             )
+    }
+
+    /// Tokyu / Minatomirai / Keio / Sotetsu: line-color fill, white letters
+    private func filledBadge(in shape: AnyShape) -> some View {
+        symbolText(color: .white, inset: 3, hind: true)
+            .frame(width: 24, height: 24)
+            .background(color, in: shape)
     }
 
     private func symbolText(color: Color, inset: CGFloat, hind: Bool) -> some View {

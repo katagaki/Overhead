@@ -9,6 +9,14 @@ import Backbone
 ///   prefix stacked over number in black (e.g. G01, A01, KS01)
 /// - Odakyu: split rounded square — line-color top band with white prefix,
 ///   white bottom with black number (e.g. OH01)
+/// - Tokyu / Minatomirai: FILLED rounded square in the line color with white
+///   stacked code (e.g. TY01, MM03)
+/// - Keikyu: white circle, thin light-blue ring, BLUE stacked code (KK01)
+/// - Keio: split circle — line-color top with white prefix, white bottom with
+///   black number, line-color ring (KO01)
+/// - Seibu: bordered rounded square like Tobu but dark navy code (SI01)
+/// - Sotetsu: filled navy rounded square, white code split by an orange rule
+/// (Shapes verified against station signage photos, 2026-07)
 
 struct StationNumberBadge: View {
     let code: String
@@ -31,6 +39,21 @@ struct StationNumberBadge: View {
         // Odakyu
         "OH", "OE", "OT",
     ]
+    private static let filledSquarePrefixes: Set<String> = [
+        // Tokyu
+        "TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD",
+        // Minatomirai
+        "MM",
+    ]
+    private static let seibuPrefixes: Set<String> = [
+        "SI", "SS", "SK", "ST", "SW", "SY",
+    ]
+    private static let keioPrefixes: Set<String> = ["KO", "IN"]
+
+    private static let keikyuRingBlue = Color(hex: "#00A7E1")
+    private static let keikyuLetterBlue = Color(hex: "#1E50A2")
+    private static let seibuLetterColor = Color(hex: "#414D66")
+    private static let sotetsuOrange = Color(hex: "#EE7B01")
 
     private var parsed: (prefix: String, number: String) {
         let letters = code.prefix(while: \.isLetter)
@@ -65,6 +88,16 @@ struct StationNumberBadge: View {
         // JR station codes start with "J" (JC, JY, JK, JB, etc.)
         if prefix.hasPrefix("J") || Self.squarePrefixes.contains(prefix) {
             squareBadge(prefix: prefix, number: number)
+        } else if Self.seibuPrefixes.contains(prefix) {
+            squareBadge(prefix: prefix, number: number, textColor: Self.seibuLetterColor)
+        } else if Self.filledSquarePrefixes.contains(prefix) {
+            filledSquareBadge(prefix: prefix, number: number)
+        } else if prefix == "KK" {
+            keikyuBadge(prefix: prefix, number: number)
+        } else if Self.keioPrefixes.contains(prefix) {
+            keioBadge(prefix: prefix, number: number)
+        } else if prefix == "SO" {
+            sotetsuBadge(prefix: prefix, number: number)
         } else if Self.splitPrefixes.contains(prefix) {
             splitBadge(prefix: prefix, number: number)
         } else {
@@ -75,7 +108,7 @@ struct StationNumberBadge: View {
     // MARK: - JR East / Tobu: Rounded Square Frame
 
     @ViewBuilder
-    private func squareBadge(prefix: String, number: String) -> some View {
+    private func squareBadge(prefix: String, number: String, textColor: Color = .black) -> some View {
         let d = badgeDimension
         // Sized so the letters and digits fill the white core like the real
         // JR East signage (Hind's cap height is only 0.678em, hence the
@@ -101,7 +134,7 @@ struct StationNumberBadge: View {
         }
         .lineLimit(1)
         .minimumScaleFactor(0.6)
-        .foregroundColor(Color.black.opacity(opacity))
+        .foregroundColor(textColor.opacity(opacity))
         .frame(width: d, height: d)
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 6))
@@ -109,6 +142,123 @@ struct StationNumberBadge: View {
             RoundedRectangle(cornerRadius: 6)
                 .strokeBorder(color.opacity(opacity), lineWidth: 3)
         )
+    }
+
+    // MARK: - Tokyu / Minatomirai: Filled Rounded Square
+
+    @ViewBuilder
+    private func filledSquareBadge(prefix: String, number: String) -> some View {
+        let d = badgeDimension
+        let prefixSize = d * 0.44
+        let numberSize = d * 0.56
+
+        VStack(spacing: 1) {
+            Text(prefix)
+                .font(.custom("Hind-Bold", size: prefixSize))
+                .offset(y: prefixSize * 0.24)
+                .frame(maxWidth: .infinity)
+                .frame(height: prefixSize * 0.75)
+
+            Text(number)
+                .font(.custom("Hind-Bold", size: numberSize))
+                .offset(y: numberSize * -0.02)
+                .frame(maxWidth: .infinity)
+                .frame(height: numberSize * 0.75)
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.6)
+        .foregroundColor(Color.white.opacity(opacity))
+        .frame(width: d, height: d)
+        .background(color.opacity(opacity), in: RoundedRectangle(cornerRadius: d * 0.25))
+    }
+
+    // MARK: - Keikyu: White Circle, Light-Blue Ring, Blue Code
+
+    @ViewBuilder
+    private func keikyuBadge(prefix: String, number: String) -> some View {
+        let d = badgeDimension
+
+        VStack(spacing: 0) {
+            Text(prefix)
+                .font(.custom("Hind-Bold", size: d * 0.30))
+                .offset(y: d * 0.30 * 0.24)
+                .frame(height: d * 0.34)
+
+            Text(number)
+                .font(.custom("Hind-Bold", size: d * 0.42))
+                .offset(y: d * 0.42 * 0.02)
+                .frame(height: d * 0.40)
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.6)
+        .foregroundColor(Self.keikyuLetterBlue.opacity(opacity))
+        .frame(width: d, height: d)
+        .background(Color.white)
+        .clipShape(Circle())
+        .overlay(
+            Circle()
+                .strokeBorder(Self.keikyuRingBlue.opacity(opacity), lineWidth: d * 0.08)
+        )
+    }
+
+    // MARK: - Keio: Split Circle
+
+    @ViewBuilder
+    private func keioBadge(prefix: String, number: String) -> some View {
+        let d = badgeDimension
+
+        VStack(spacing: 0) {
+            Text(prefix)
+                .font(.custom("Hind-Bold", size: d * 0.32))
+                .offset(y: d * 0.32 * 0.13)
+                .foregroundColor(Color.white.opacity(opacity))
+                .frame(maxWidth: .infinity)
+                .frame(height: d * 0.44)
+                .background(color.opacity(opacity))
+
+            Text(number)
+                .font(.custom("Hind-Bold", size: d * 0.44))
+                .offset(y: d * 0.44 * -0.02)
+                .foregroundColor(Color.black.opacity(opacity))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.white)
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.6)
+        .frame(width: d, height: d)
+        .clipShape(Circle())
+        .overlay(
+            Circle()
+                .strokeBorder(color.opacity(opacity), lineWidth: d * 0.06)
+        )
+    }
+
+    // MARK: - Sotetsu: Filled Navy Square, Orange Rule
+
+    @ViewBuilder
+    private func sotetsuBadge(prefix: String, number: String) -> some View {
+        let d = badgeDimension
+
+        VStack(spacing: d * 0.045) {
+            Text(prefix)
+                .font(.custom("Hind-Bold", size: d * 0.36))
+                .offset(y: d * 0.36 * 0.14)
+                .frame(height: d * 0.30)
+
+            Rectangle()
+                .fill(Self.sotetsuOrange.opacity(opacity))
+                .frame(width: d * 0.62, height: max(1, d * 0.05))
+
+            Text(number)
+                .font(.custom("Hind-Bold", size: d * 0.42))
+                .offset(y: d * 0.42 * -0.02)
+                .frame(height: d * 0.34)
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.6)
+        .foregroundColor(Color.white.opacity(opacity))
+        .frame(width: d, height: d)
+        .background(color.opacity(opacity), in: RoundedRectangle(cornerRadius: d * 0.2))
     }
 
     // MARK: - Metro / Toei / Keisei: Circle Ring

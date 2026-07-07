@@ -298,7 +298,7 @@ struct LinePickerView: View {
         .padding(.horizontal, 6)
         .frame(maxWidth: .infinity)
         .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
         .contentShape(Rectangle())
     }
 }
