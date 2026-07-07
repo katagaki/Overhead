@@ -1,3 +1,3 @@
 # Overhead
 
-A real-time Tokyo train journey tracker for iOS with Live Activities and Dynamic Island support.
+A real-time Kanto train journey tracker for iOS with Live Activities and Dynamic Island support.

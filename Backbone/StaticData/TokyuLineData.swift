@@ -119,7 +119,8 @@ enum TokyuLineData {
                     to: "odpt.Railway:TokyoMetro.Fukutoshin"),
             through("Tokyu.Toyoko.Yokohama", .ascending,
                     "みなとみらい線", "Minatomirai Line",
-                    "元町・中華街方面", "for Motomachi-Chukagai"),
+                    "元町・中華街方面", "for Motomachi-Chukagai",
+                    to: "odpt.Railway:Minatomirai.Minatomirai"),
         ]
     )
 

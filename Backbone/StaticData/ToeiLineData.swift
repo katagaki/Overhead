@@ -116,7 +116,8 @@ enum ToeiLineData {
                     to: "odpt.Railway:Keisei.Oshiage"),
             through("Asakusa.Sengakuji", .descending,
                     "京急線", "Keikyu Line",
-                    "羽田空港・横浜方面", "for Haneda Airport & Yokohama"),
+                    "羽田空港・横浜方面", "for Haneda Airport & Yokohama",
+                    to: "odpt.Railway:Keikyu.Main"),
         ]
     )
 
@@ -219,7 +220,8 @@ enum ToeiLineData {
         throughServices: [
             through("Shinjuku.Shinjuku", .descending,
                     "京王新線・京王線", "Keio New Line & Keio Line",
-                    "笹塚・橋本方面", "for Sasazuka & Hashimoto"),
+                    "笹塚・橋本方面", "for Sasazuka & Hashimoto",
+                    to: "odpt.Railway:Keio.Keio"),
         ]
     )
 

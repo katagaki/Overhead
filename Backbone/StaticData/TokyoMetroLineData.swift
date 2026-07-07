@@ -429,7 +429,8 @@ enum TokyoMetroLineData {
                     to: "odpt.Railway:Tobu.Tojo"),
             through("Yurakucho.KotakeMukaihara", .descending,
                     "西武有楽町線・池袋線", "Seibu Yurakucho & Ikebukuro Lines",
-                    "所沢・飯能方面", "for Tokorozawa & Hanno"),
+                    "所沢・飯能方面", "for Tokorozawa & Hanno",
+                    to: "odpt.Railway:Seibu.SeibuYurakucho"),
         ]
     )
 
@@ -521,7 +522,8 @@ enum TokyoMetroLineData {
         throughServices: [
             through("Namboku.AkabaneIwabuchi", .ascending,
                     "埼玉高速鉄道線", "Saitama Rapid Railway Line",
-                    "浦和美園方面", "for Urawa-Misono"),
+                    "浦和美園方面", "for Urawa-Misono",
+                    to: "odpt.Railway:SaitamaRailway.SaitamaRailway"),
             through("Namboku.Meguro", .descending,
                     "東急目黒線・新横浜線", "Tokyu Meguro & Shin-Yokohama Lines",
                     "日吉・新横浜方面", "for Hiyoshi & Shin-Yokohama",
@@ -576,7 +578,8 @@ enum TokyoMetroLineData {
                     to: "odpt.Railway:Tobu.Tojo"),
             through("Fukutoshin.KotakeMukaihara", .descending,
                     "西武有楽町線・池袋線", "Seibu Yurakucho & Ikebukuro Lines",
-                    "所沢・飯能方面", "for Tokorozawa & Hanno"),
+                    "所沢・飯能方面", "for Tokorozawa & Hanno",
+                    to: "odpt.Railway:Seibu.SeibuYurakucho"),
         ]
     )
 }
