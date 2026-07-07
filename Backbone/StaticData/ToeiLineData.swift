@@ -170,7 +170,8 @@ enum ToeiLineData {
         throughServices: [
             through("Mita.Meguro", .descending,
                     "東急目黒線・新横浜線", "Tokyu Meguro & Shin-Yokohama Lines",
-                    "日吉・新横浜方面", "for Hiyoshi & Shin-Yokohama"),
+                    "日吉・新横浜方面", "for Hiyoshi & Shin-Yokohama",
+                    to: "odpt.Railway:Tokyu.Meguro"),
         ]
     )
 

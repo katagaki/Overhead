@@ -470,7 +470,8 @@ enum TokyoMetroLineData {
         throughServices: [
             through("Hanzomon.Shibuya", .descending,
                     "東急田園都市線", "Tokyu Den-en-toshi Line",
-                    "中央林間方面", "for Chuo-Rinkan"),
+                    "中央林間方面", "for Chuo-Rinkan",
+                    to: "odpt.Railway:Tokyu.DenEnToshi"),
             through("Hanzomon.Oshiage", .ascending,
                     "東武スカイツリーライン", "Tobu Skytree Line",
                     "久喜・南栗橋方面", "for Kuki & Minami-Kurihashi",
@@ -523,7 +524,8 @@ enum TokyoMetroLineData {
                     "浦和美園方面", "for Urawa-Misono"),
             through("Namboku.Meguro", .descending,
                     "東急目黒線・新横浜線", "Tokyu Meguro & Shin-Yokohama Lines",
-                    "日吉・新横浜方面", "for Hiyoshi & Shin-Yokohama"),
+                    "日吉・新横浜方面", "for Hiyoshi & Shin-Yokohama",
+                    to: "odpt.Railway:Tokyu.Meguro"),
         ]
     )
 
@@ -566,7 +568,8 @@ enum TokyoMetroLineData {
         throughServices: [
             through("Fukutoshin.Shibuya", .ascending,
                     "東急東横線・みなとみらい線", "Tokyu Toyoko & Minatomirai Lines",
-                    "横浜・元町・中華街方面", "for Yokohama & Motomachi-Chukagai"),
+                    "横浜・元町・中華街方面", "for Yokohama & Motomachi-Chukagai",
+                    to: "odpt.Railway:Tokyu.Toyoko"),
             through("Fukutoshin.Wakoshi", .descending,
                     "東武東上線", "Tobu Tojo Line",
                     "川越市・森林公園方面", "for Kawagoeshi & Shinrin-Koen",

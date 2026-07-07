@@ -142,6 +142,7 @@ public enum StaticTrainData {
         + KeiseiLineData.lines
         + TobuLineData.lines
         + OdakyuLineData.lines
+        + TokyuLineData.lines
 
     private static let linesById: [String: StaticTrainLine] = Dictionary(
         allLines.map { ($0.id, $0) },
