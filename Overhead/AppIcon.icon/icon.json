@@ -1,19 +1,84 @@
 {
+  "features" : [
+    "refractivity"
+  ],
   "fill" : {
-    "automatic-gradient" : "display-p3:0.00000,0.73333,0.52157,1.00000"
+    "linear-gradient" : [
+      "display-p3:0.31794,0.75545,0.77662,1.00000",
+      "display-p3:0.58711,0.49859,0.88023,1.00000"
+    ]
   },
   "groups" : [
     {
+      "blur-material" : 0.4,
       "layers" : [
-
+        {
+          "image-name" : "Overhead.003.png",
+          "name" : "Overhead.003"
+        }
       ],
+      "lighting" : "combined",
+      "name" : "Tracks",
+      "position-specializations" : [
+        {
+          "idiom" : "square",
+          "value" : {
+            "scale" : 0.86,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "refractivity" : {
+        "depth" : 0.35,
+        "enabled" : true,
+        "strength" : -0.3
+      },
       "shadow" : {
         "kind" : "neutral",
-        "opacity" : 0.5
+        "opacity" : 0.6
       },
       "translucency" : {
         "enabled" : true,
-        "value" : 0.5
+        "value" : 1
+      }
+    },
+    {
+      "blur-material" : 0.5,
+      "layers" : [
+        {
+          "image-name" : "Overhead.002.png",
+          "name" : "Overhead.002"
+        }
+      ],
+      "lighting" : "combined",
+      "name" : "Rails",
+      "position-specializations" : [
+        {
+          "idiom" : "square",
+          "value" : {
+            "scale" : 0.86,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "refractivity" : {
+        "depth" : 0.5,
+        "enabled" : true,
+        "strength" : 0
+      },
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 1.4
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.75
       }
     }
   ],

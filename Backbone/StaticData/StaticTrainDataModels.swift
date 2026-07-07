@@ -199,28 +199,67 @@ public enum StaticTrainData {
         public let connectingLine: StaticTrainLine
         /// Stations past the junction on the connecting line, in travel order.
         public let stations: [Station]
+        /// Whether through trains traverse `connectingLine` in array order.
+        public let connectingAscending: Bool
     }
 
     /// Through-service destination groups for a line, limited to services that
-    /// continue onto lines bundled in the app. When `boardingStationId` is given,
-    /// only junctions reachable from that station (without reversing) are returned.
+    /// continue onto lines bundled in the app. Includes two-junction chains
+    /// (e.g. 常磐線各停 → 千代田線 → 小田急線). When `boardingStationId` is
+    /// given, only junctions reachable from that station (without reversing)
+    /// are returned.
     public static func throughDestinations(
         fromLineId lineId: String,
         boardingStationId: String? = nil
     ) -> [ThroughDestinationGroup] {
         guard let line = linesById[lineId] else { return [] }
-        return line.throughServices.compactMap { service in
+        var groups: [ThroughDestinationGroup] = []
+        for service in line.throughServices {
             if let boardingStationId {
                 guard let fromIdx = line.stations.firstIndex(where: { $0.id == boardingStationId }),
                       let jIdx = line.stations.firstIndex(where: { $0.id == service.junctionStationId })
-                else { return nil }
+                else { continue }
                 switch service.end {
-                case .ascending: guard fromIdx <= jIdx else { return nil }
-                case .descending: guard fromIdx >= jIdx else { return nil }
+                case .ascending: guard fromIdx <= jIdx else { continue }
+                case .descending: guard fromIdx >= jIdx else { continue }
                 }
             }
-            return destinationGroup(for: service, on: line)
+            guard let group = destinationGroup(for: service, on: line) else { continue }
+            groups.append(group)
+            groups.append(contentsOf: chainedGroups(after: group))
         }
+        return groups
+    }
+
+    /// Second-hop groups for through trains continuing past another junction
+    /// onto a third line, presented as a single combined through service.
+    private static func chainedGroups(after group: ThroughDestinationGroup) -> [ThroughDestinationGroup] {
+        let line2 = group.connectingLine
+        var result: [ThroughDestinationGroup] = []
+        for onward in line2.throughServices {
+            // Must continue in the direction the through train already travels,
+            // via a junction the train actually passes
+            guard (onward.end == .ascending) == group.connectingAscending,
+                  group.stations.contains(where: { $0.id == onward.junctionStationId }),
+                  let g2 = destinationGroup(for: onward, on: line2)
+            else { continue }
+            let combined = ThroughService(
+                junctionStationId: group.service.junctionStationId,
+                end: group.service.end,
+                lineNameJa: "\(group.service.lineNameJa)・\(onward.lineNameJa)",
+                lineNameEn: "\(group.service.lineNameEn) & \(onward.lineNameEn)",
+                towardJa: onward.towardJa,
+                towardEn: onward.towardEn,
+                connectingLineId: onward.connectingLineId
+            )
+            result.append(ThroughDestinationGroup(
+                service: combined,
+                connectingLine: g2.connectingLine,
+                stations: g2.stations,
+                connectingAscending: g2.connectingAscending
+            ))
+        }
+        return result
     }
 
     private static func destinationGroup(
@@ -253,7 +292,10 @@ public enum StaticTrainData {
             ? Array(target.stations[(jIdx + 1)...])
             : Array(target.stations[..<jIdx].reversed())
         guard !beyond.isEmpty else { return nil }
-        return ThroughDestinationGroup(service: service, connectingLine: target, stations: beyond)
+        return ThroughDestinationGroup(
+            service: service, connectingLine: target,
+            stations: beyond, connectingAscending: ascending
+        )
     }
 
     // MARK: Direct Route Search
@@ -462,24 +504,67 @@ public enum StaticTrainData {
     }
 
     /// Resolves the line to ride from `fromStationId` (on the line `lineId`)
-    /// to `toStationId`, which may sit past a 直通 junction on a connecting line.
+    /// to `toStationId`, which may sit past one or two 直通 junctions on
+    /// connecting lines (e.g. 常磐線各停 → 千代田線 → 小田急線).
     public static func resolveJourneyLine(
         lineId: String,
         fromStationId: String,
         toStationId: String
     ) -> ResolvedJourneyLine? {
         guard let line = linesById[lineId],
-              line.stations.contains(where: { $0.id == fromStationId })
+              let fromIdx = line.stations.firstIndex(where: { $0.id == fromStationId })
         else { return nil }
 
         if line.stations.contains(where: { $0.id == toStationId }) {
             return ResolvedJourneyLine(staticLine: line, isThrough: false, throughService: nil)
         }
 
-        for group in throughDestinations(fromLineId: lineId, boardingStationId: fromStationId)
-        where group.stations.contains(where: { $0.id == toStationId }) {
-            guard let composite = compositeLine(origin: line, group: group) else { continue }
-            return ResolvedJourneyLine(staticLine: composite, isThrough: true, throughService: group.service)
+        for service in line.throughServices {
+            // The junction must be reachable from the boarding station
+            // without reversing
+            guard let jIdx = line.stations.firstIndex(where: { $0.id == service.junctionStationId })
+            else { continue }
+            switch service.end {
+            case .ascending: guard fromIdx <= jIdx else { continue }
+            case .descending: guard fromIdx >= jIdx else { continue }
+            }
+            guard let group = destinationGroup(for: service, on: line) else { continue }
+
+            if group.stations.contains(where: { $0.id == toStationId }) {
+                guard let composite = compositeLine(origin: line, group: group) else { continue }
+                return ResolvedJourneyLine(staticLine: composite, isThrough: true, throughService: service)
+            }
+
+            // Two-junction chain onto a third line
+            let line2 = group.connectingLine
+            for onward in line2.throughServices {
+                guard (onward.end == .ascending) == group.connectingAscending,
+                      group.stations.contains(where: { $0.id == onward.junctionStationId }),
+                      let g2 = destinationGroup(for: onward, on: line2),
+                      g2.stations.contains(where: { $0.id == toStationId }),
+                      let first = compositeLine(origin: line, group: group)
+                else { continue }
+
+                // The first composite runs in travel order, so the second
+                // junction is always exited "ascending" relative to it.
+                let onwardForComposite = ThroughService(
+                    junctionStationId: onward.junctionStationId,
+                    end: .ascending,
+                    lineNameJa: onward.lineNameJa,
+                    lineNameEn: onward.lineNameEn,
+                    towardJa: onward.towardJa,
+                    towardEn: onward.towardEn,
+                    connectingLineId: onward.connectingLineId
+                )
+                let secondGroup = ThroughDestinationGroup(
+                    service: onwardForComposite,
+                    connectingLine: g2.connectingLine,
+                    stations: g2.stations,
+                    connectingAscending: g2.connectingAscending
+                )
+                guard let composite = compositeLine(origin: first, group: secondGroup) else { continue }
+                return ResolvedJourneyLine(staticLine: composite, isThrough: true, throughService: service)
+            }
         }
         return nil
     }
