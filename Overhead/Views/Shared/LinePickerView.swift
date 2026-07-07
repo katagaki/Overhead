@@ -211,6 +211,19 @@ struct LinePickerView: View {
         return LazyVStack(alignment: .leading, spacing: 20) {
             ForEach(sectionOrder, id: \.self) { operatorId in
                 if let lines = grouped[operatorId] {
+                    // Symbol order (JA, JB, JC… / A, C, E…); symbol-less lines last
+                    let sorted = lines.sorted {
+                        switch ($0.lineSymbol.isEmpty, $1.lineSymbol.isEmpty) {
+                        case (false, false):
+                            return $0.lineSymbol == $1.lineSymbol
+                                ? $0.localizedName < $1.localizedName
+                                : $0.lineSymbol < $1.lineSymbol
+                        case (false, true): return true
+                        case (true, false): return false
+                        case (true, true): return $0.localizedName < $1.localizedName
+                        }
+                    }
+
                     VStack(alignment: .leading, spacing: 8) {
                         Text(sectionTitles[operatorId] ?? operatorId)
                             .font(.body)
@@ -218,7 +231,7 @@ struct LinePickerView: View {
                             .padding(.leading, 4)
 
                         LazyVGrid(columns: columns, spacing: 10) {
-                            ForEach(lines) { line in
+                            ForEach(sorted) { line in
                                 NavigationLink {
                                     StationPickerView(
                                         line: line,

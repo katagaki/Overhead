@@ -296,6 +296,18 @@ struct JourneyView: View {
     }
 }
 
+// MARK: - Vertical Dash Line
+
+/// A vertical line through the center of its rect, for dashed stroking.
+private struct VerticalDashLine: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.midX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.midX, y: rect.maxY))
+        return path
+    }
+}
+
 // MARK: - Vertical LCD Line
 
 struct VerticalLCDLine: View {
@@ -324,9 +336,15 @@ struct VerticalLCDLine: View {
                 let isCurrent = state.currentStationIndex == index
                 let isNext = (!isLast && index == state.segmentTo) ||
                              (state.currentStationIndex != nil && index == (state.currentStationIndex! + 1))
+                let isTransfer = transferIds.contains(station.id)
+                let target = isTransfer && index < stations.count - 1
+                    ? transferTarget(at: station, nextStation: stations[index + 1])
+                    : nil
+                let segFrac = segmentFillFraction(stationIndex: index, totalStations: stations.count)
 
                 HStack(alignment: .top, spacing: 0) {
-                    timeColumn(for: station, timetable: timetable, isPast: isPast, isCurrent: isCurrent)
+                    timeColumn(for: station, timetable: timetable, isPast: isPast, isCurrent: isCurrent,
+                               preferArrival: isTransfer)
                         .frame(width: 56)
 
                     stationCircle(
@@ -341,9 +359,9 @@ struct VerticalLCDLine: View {
                         station: station,
                         isPast: isPast,
                         isCurrent: isCurrent,
-                        isNext: isNext,
+                        isNext: isNext && !isTransfer,
                         isTerminal: isTerminal,
-                        isTransfer: transferIds.contains(station.id)
+                        isTransfer: isTransfer
                     )
                     .padding(.bottom, isLast ? 0 : 14)
 
@@ -354,16 +372,28 @@ struct VerticalLCDLine: View {
                 .frame(minHeight: isLast ? 0 : stationSpacing, alignment: .top)
                 // The connecting track lives in the background so it always
                 // spans the actual row height, whatever the label needed.
+                // Walking to the connecting platform is drawn dashed.
                 .background(alignment: .topLeading) {
                     if !isLast {
-                        let segFrac = segmentFillFraction(stationIndex: index, totalStations: stations.count)
-                        trackSegment(filled: isPast, fillFraction: segFrac)
+                        trackSegment(filled: isPast, fillFraction: target == nil ? segFrac : min(1, segFrac * 2),
+                                     dashed: isTransfer)
                             .frame(width: trackWidth)
                             .padding(.top, stationDotRadius(isTerminal: isTerminal, isCurrent: isCurrent))
                             .padding(.leading, 56 + 20 - trackWidth / 2)
                     }
                 }
                 .id("station_\(index)")
+
+                // Boarding point after the transfer: own dot and departure time
+                if let target {
+                    transferBoardingRow(
+                        station: station,
+                        target: target,
+                        timetable: timetable,
+                        isPast: isPast,
+                        fillFraction: max(0, segFrac * 2 - 1)
+                    )
+                }
             }
         }
     }
@@ -377,9 +407,12 @@ struct VerticalLCDLine: View {
     // MARK: - Time Column
 
     @ViewBuilder
-    private func timeColumn(for station: Station, timetable: [TimetableEntry], isPast: Bool, isCurrent: Bool) -> some View {
+    private func timeColumn(for station: Station, timetable: [TimetableEntry], isPast: Bool, isCurrent: Bool, preferArrival: Bool = false) -> some View {
         if let entry = timetable.first(where: { $0.stationId == station.id }),
-           let timeStr = entry.departureTime ?? entry.arrivalTime, !timeStr.isEmpty {
+           let timeStr = preferArrival
+                ? (entry.arrivalTime ?? entry.departureTime)
+                : (entry.departureTime ?? entry.arrivalTime),
+           !timeStr.isEmpty {
             let delayMins = state.delayMinutes
 
             VStack(spacing: 1) {
@@ -401,16 +434,107 @@ struct VerticalLCDLine: View {
     // MARK: - Track Segment
 
     @ViewBuilder
-    private func trackSegment(filled: Bool, fillFraction: Double) -> some View {
-        ZStack(alignment: .top) {
-            RoundedRectangle(cornerRadius: trackWidth / 2)
-                .fill(Color(.quaternarySystemFill))
+    private func trackSegment(filled: Bool, fillFraction: Double, dashed: Bool = false) -> some View {
+        if dashed {
+            ZStack(alignment: .top) {
+                VerticalDashLine()
+                    .stroke(Color(.quaternarySystemFill),
+                            style: StrokeStyle(lineWidth: trackWidth, lineCap: .round, dash: [1, 8]))
 
-            GeometryReader { geo in
-                RoundedRectangle(cornerRadius: trackWidth / 2)
-                    .fill(lineColor)
-                    .frame(height: max(0, geo.size.height * fillFraction))
+                GeometryReader { geo in
+                    VerticalDashLine()
+                        .stroke(lineColor,
+                                style: StrokeStyle(lineWidth: trackWidth, lineCap: .round, dash: [1, 8]))
+                        .frame(height: max(0, geo.size.height * fillFraction))
+                        .clipped()
+                }
             }
+        } else {
+            ZStack(alignment: .top) {
+                RoundedRectangle(cornerRadius: trackWidth / 2)
+                    .fill(Color(.quaternarySystemFill))
+
+                GeometryReader { geo in
+                    RoundedRectangle(cornerRadius: trackWidth / 2)
+                        .fill(lineColor)
+                        .frame(height: max(0, geo.size.height * fillFraction))
+                }
+            }
+        }
+    }
+
+    // MARK: - Transfer Target
+
+    /// The same physical station on the line ridden after the transfer,
+    /// resolved via the following station's line (e.g. 北千住 JJ05 → C18).
+    private func transferTarget(at station: Station, nextStation: Station) -> (station: Station, line: TrainLine)? {
+        guard let nextLine = StaticTrainData.line(containingStationId: nextStation.id),
+              let target = nextLine.stations.first(where: { $0.name == station.name })
+        else { return nil }
+        return (target, nextLine.trainLine)
+    }
+
+    // MARK: - Transfer Boarding Row
+
+    /// The boarding point on the connecting line, rendered as its own stop:
+    /// departure time in the time column, dot on the track, and the next
+    /// line's station badge and name.
+    @ViewBuilder
+    private func transferBoardingRow(
+        station: Station,
+        target: (station: Station, line: TrainLine),
+        timetable: [TimetableEntry],
+        isPast: Bool,
+        fillFraction: Double
+    ) -> some View {
+        HStack(alignment: .top, spacing: 0) {
+            Group {
+                if let entry = timetable.first(where: { $0.stationId == station.id }),
+                   let dep = entry.departureTime, !dep.isEmpty {
+                    Text(dep)
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundColor(isPast ? .secondary : .primary)
+                } else {
+                    Color.clear
+                }
+            }
+            .frame(width: 56)
+
+            ZStack {
+                Circle()
+                    .fill(Color(.systemBackground))
+                    .frame(width: circleRadius * 2, height: circleRadius * 2)
+                Circle()
+                    .strokeBorder(target.line.color.opacity(isPast ? 1.0 : 0.5), lineWidth: 3)
+                    .frame(width: circleRadius * 2, height: circleRadius * 2)
+            }
+            .frame(width: 40)
+
+            HStack(spacing: 6) {
+                if !target.station.stationCode.isEmpty {
+                    StationNumberBadge(
+                        code: target.station.stationCode,
+                        color: target.line.color,
+                        opacity: isPast ? 0.6 : 1.0,
+                        size: .regular,
+                        stationName: target.station.name
+                    )
+                }
+                Text(target.line.localizedName)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(target.line.color)
+                    .lineLimit(1)
+            }
+            .padding(.bottom, 14)
+
+            Spacer()
+        }
+        .frame(minHeight: stationSpacing * 0.8, alignment: .top)
+        .background(alignment: .topLeading) {
+            trackSegment(filled: isPast, fillFraction: fillFraction)
+                .frame(width: trackWidth)
+                .padding(.top, circleRadius)
+                .padding(.leading, 56 + 20 - trackWidth / 2)
         }
     }
 
