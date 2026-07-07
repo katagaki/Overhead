@@ -67,7 +67,9 @@ enum KeikyuLineData {
         operatorId: "odpt.Operator:Keikyu",
         colorHex: "#E60012",
         stations: [
-            st("Keikyu.Main", "Sengakuji", "泉岳寺", "Sengakuji", "A07", 35.6385, 139.7401),
+            // Sengakuji is Toei-managed (A07); leave the code empty so the
+            // line symbol derives from Shinagawa's KK01
+            st("Keikyu.Main", "Sengakuji", "泉岳寺", "Sengakuji", "", 35.6385, 139.7401),
             st("Keikyu.Main", "Shinagawa", "品川", "Shinagawa", "KK01", 35.6285, 139.7388),
             st("Keikyu.Main", "Kitashinagawa", "北品川", "Kita-shinagawa", "KK02", 35.6222, 139.7392),
             st("Keikyu.Main", "Shimbamba", "新馬場", "Shimbamba", "KK03", 35.6172, 139.7407),
