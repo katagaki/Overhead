@@ -191,38 +191,38 @@ struct LinePickerView: View {
     private var browseByLineGrid: some View {
         let grouped = Dictionary(grouping: viewModel.availableLines) { $0.operatorId }
         let knownOrder = [
-            "odpt.Operator:JR-East",
-            "odpt.Operator:TokyoMetro",
-            "odpt.Operator:Toei",
-            "odpt.Operator:Keisei",
-            "odpt.Operator:Tobu",
-            "odpt.Operator:Odakyu",
-            "odpt.Operator:Tokyu",
-            "odpt.Operator:Keikyu",
-            "odpt.Operator:Keio",
-            "odpt.Operator:Seibu",
-            "odpt.Operator:Sotetsu",
-            "odpt.Operator:Minatomirai",
-            "odpt.Operator:SaitamaRailway"
+            "Operator:JR-East",
+            "Operator:TokyoMetro",
+            "Operator:Toei",
+            "Operator:Keisei",
+            "Operator:Tobu",
+            "Operator:Odakyu",
+            "Operator:Tokyu",
+            "Operator:Keikyu",
+            "Operator:Keio",
+            "Operator:Seibu",
+            "Operator:Sotetsu",
+            "Operator:Minatomirai",
+            "Operator:SaitamaRailway"
         ]
         // Operators missing from knownOrder still get a section at the end
         // instead of silently disappearing from the browser
         let sectionOrder = knownOrder.filter { grouped[$0] != nil }
             + grouped.keys.filter { !knownOrder.contains($0) }.sorted()
         let sectionTitles: [String: String] = [
-            "odpt.Operator:JR-East": "JR",
-            "odpt.Operator:TokyoMetro": "東京メトロ",
-            "odpt.Operator:Toei": "都営",
-            "odpt.Operator:Keisei": "京成",
-            "odpt.Operator:Tobu": "東武",
-            "odpt.Operator:Odakyu": "小田急",
-            "odpt.Operator:Tokyu": "東急",
-            "odpt.Operator:Keikyu": "京急",
-            "odpt.Operator:Keio": "京王",
-            "odpt.Operator:Seibu": "西武",
-            "odpt.Operator:Sotetsu": "相鉄",
-            "odpt.Operator:Minatomirai": "みなとみらい線",
-            "odpt.Operator:SaitamaRailway": "埼玉高速鉄道"
+            "Operator:JR-East": "JR",
+            "Operator:TokyoMetro": "東京メトロ",
+            "Operator:Toei": "都営",
+            "Operator:Keisei": "京成",
+            "Operator:Tobu": "東武",
+            "Operator:Odakyu": "小田急",
+            "Operator:Tokyu": "東急",
+            "Operator:Keikyu": "京急",
+            "Operator:Keio": "京王",
+            "Operator:Seibu": "西武",
+            "Operator:Sotetsu": "相鉄",
+            "Operator:Minatomirai": "みなとみらい線",
+            "Operator:SaitamaRailway": "埼玉高速鉄道"
         ]
         let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 3)
 

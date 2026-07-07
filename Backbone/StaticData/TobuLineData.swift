@@ -5,7 +5,7 @@ import Foundation
 private func st(_ path: String, _ suffix: String, _ ja: String, _ en: String,
                 _ code: String, _ lat: Double, _ lon: Double) -> Station {
     Station(
-        id: "odpt.Station:\(path).\(suffix)",
+        id: "Station:\(path).\(suffix)",
         name: ja, nameEn: en, stationCode: code,
         latitude: lat, longitude: lon
     )
@@ -34,7 +34,7 @@ private func through(_ junction: String, _ end: ThroughService.LineEnd,
                      _ towardJa: String, _ towardEn: String,
                      to connectingLineId: String? = nil) -> ThroughService {
     ThroughService(
-        junctionStationId: "odpt.Station:\(junction)",
+        junctionStationId: "Station:\(junction)",
         end: end,
         lineNameJa: lineJa, lineNameEn: lineEn,
         towardJa: towardJa, towardEn: towardEn,
@@ -59,10 +59,10 @@ enum TobuLineData {
     // MARK: Tobu Skytree Line (TS)
 
     static let skytree = StaticTrainLine(
-        id: "odpt.Railway:Tobu.TobuSkytree",
+        id: "Railway:Tobu.TobuSkytree",
         nameJa: "東武スカイツリーライン",
         nameEn: "Tobu Skytree Line",
-        operatorId: "odpt.Operator:Tobu",
+        operatorId: "Operator:Tobu",
         colorHex: "#0067C0",
         stations: [
             st("Tobu.TobuSkytree", "Asakusa", "浅草", "Asakusa", "TS01", 35.7106, 139.7973),
@@ -121,26 +121,26 @@ enum TobuLineData {
             through("Tobu.TobuSkytree.Oshiage", .descending,
                     "東京メトロ半蔵門線・東急田園都市線", "Tokyo Metro Hanzomon & Tokyu Den-en-toshi Lines",
                     "渋谷・中央林間方面", "for Shibuya & Chuo-Rinkan",
-                    to: "odpt.Railway:TokyoMetro.Hanzomon"),
+                    to: "Railway:TokyoMetro.Hanzomon"),
             through("Tobu.TobuSkytree.KitaSenju", .descending,
                     "東京メトロ日比谷線", "Tokyo Metro Hibiya Line",
                     "中目黒方面", "for Naka-meguro",
-                    to: "odpt.Railway:TokyoMetro.Hibiya"),
+                    to: "Railway:TokyoMetro.Hibiya"),
             through("Tobu.TobuSkytree.TobuDobutsuKoen", .ascending,
                     "東武伊勢崎線", "Tobu Isesaki Line", "久喜方面", "for Kuki"),
             through("Tobu.TobuSkytree.TobuDobutsuKoen", .ascending,
                     "東武日光線", "Tobu Nikko Line", "南栗橋方面", "for Minami-Kurihashi",
-                    to: "odpt.Railway:Tobu.Nikko"),
+                    to: "Railway:Tobu.Nikko"),
         ]
     )
 
     // MARK: Tobu Tojo Line (TJ)
 
     static let tojo = StaticTrainLine(
-        id: "odpt.Railway:Tobu.Tojo",
+        id: "Railway:Tobu.Tojo",
         nameJa: "東武東上線",
         nameEn: "Tobu Tojo Line",
-        operatorId: "odpt.Operator:Tobu",
+        operatorId: "Operator:Tobu",
         colorHex: "#00479D",
         stations: [
             st("Tobu.Tojo", "Ikebukuro", "池袋", "Ikebukuro", "TJ01", 35.7298, 139.7100),
@@ -199,11 +199,11 @@ enum TobuLineData {
             through("Tobu.Tojo.Wakoshi", .descending,
                     "東京メトロ有楽町線", "Tokyo Metro Yurakucho Line",
                     "新木場方面", "for Shin-kiba",
-                    to: "odpt.Railway:TokyoMetro.Yurakucho"),
+                    to: "Railway:TokyoMetro.Yurakucho"),
             through("Tobu.Tojo.Wakoshi", .descending,
                     "東京メトロ副都心線", "Tokyo Metro Fukutoshin Line",
                     "渋谷・横浜方面", "for Shibuya & Yokohama",
-                    to: "odpt.Railway:TokyoMetro.Fukutoshin"),
+                    to: "Railway:TokyoMetro.Fukutoshin"),
             through("Tobu.Tojo.ShinrinKoen", .ascending,
                     "東武東上線", "Tobu Tojo Line", "小川町方面", "for Ogawamachi"),
         ]
@@ -223,10 +223,10 @@ enum TobuLineData {
     }
 
     static let kameido = StaticTrainLine(
-        id: "odpt.Railway:Tobu.Kameido",
+        id: "Railway:Tobu.Kameido",
         nameJa: "東武亀戸線",
         nameEn: "Tobu Kameido Line",
-        operatorId: "odpt.Operator:Tobu",
+        operatorId: "Operator:Tobu",
         colorHex: "#0067C0",
         stations: [
             st("Tobu.Kameido", "Hikifune", "曳舟", "Hikifune", "TS04", 35.7168, 139.8172),
@@ -254,10 +254,10 @@ enum TobuLineData {
     }
 
     static let daishi = StaticTrainLine(
-        id: "odpt.Railway:Tobu.Daishi",
+        id: "Railway:Tobu.Daishi",
         nameJa: "東武大師線",
         nameEn: "Tobu Daishi Line",
-        operatorId: "odpt.Operator:Tobu",
+        operatorId: "Operator:Tobu",
         colorHex: "#0067C0",
         stations: [
             st("Tobu.Daishi", "Nishiarai", "西新井", "Nishiarai", "TS13", 35.7775, 139.7925),
@@ -287,10 +287,10 @@ enum TobuLineData {
     }
 
     static let urbanPark = StaticTrainLine(
-        id: "odpt.Railway:Tobu.TobuUrbanPark",
+        id: "Railway:Tobu.TobuUrbanPark",
         nameJa: "東武アーバンパークライン",
         nameEn: "Tobu Urban Park Line",
-        operatorId: "odpt.Operator:Tobu",
+        operatorId: "Operator:Tobu",
         colorHex: "#40B3E5",
         stations: [
             st("Tobu.TobuUrbanPark", "Omiya", "大宮", "Omiya", "TD01", 35.9076, 139.6244),
@@ -356,10 +356,10 @@ enum TobuLineData {
     }
 
     static let nikko = StaticTrainLine(
-        id: "odpt.Railway:Tobu.Nikko",
+        id: "Railway:Tobu.Nikko",
         nameJa: "東武日光線",
         nameEn: "Tobu Nikko Line",
-        operatorId: "odpt.Operator:Tobu",
+        operatorId: "Operator:Tobu",
         colorHex: "#FFA600",
         stations: [
             st("Tobu.Nikko", "TobuDobutsuKoen", "東武動物公園", "Tobu-Dobutsu-Koen", "TS30", 36.0208, 139.7292),
@@ -404,7 +404,7 @@ enum TobuLineData {
             through("Tobu.Nikko.TobuDobutsuKoen", .descending,
                     "東武スカイツリーライン", "Tobu Skytree Line",
                     "北千住・浅草方面", "for Kita-Senju & Asakusa",
-                    to: "odpt.Railway:Tobu.TobuSkytree"),
+                    to: "Railway:Tobu.TobuSkytree"),
             through("Tobu.Nikko.ShimoImaichi", .ascending,
                     "東武鬼怒川線", "Tobu Kinugawa Line",
                     "鬼怒川温泉方面", "for Kinugawa-Onsen"),

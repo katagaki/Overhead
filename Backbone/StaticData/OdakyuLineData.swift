@@ -5,7 +5,7 @@ import Foundation
 private func st(_ path: String, _ suffix: String, _ ja: String, _ en: String,
                 _ code: String, _ lat: Double, _ lon: Double) -> Station {
     Station(
-        id: "odpt.Station:\(path).\(suffix)",
+        id: "Station:\(path).\(suffix)",
         name: ja, nameEn: en, stationCode: code,
         latitude: lat, longitude: lon
     )
@@ -34,7 +34,7 @@ private func through(_ junction: String, _ end: ThroughService.LineEnd,
                      _ towardJa: String, _ towardEn: String,
                      to connectingLineId: String? = nil) -> ThroughService {
     ThroughService(
-        junctionStationId: "odpt.Station:\(junction)",
+        junctionStationId: "Station:\(junction)",
         end: end,
         lineNameJa: lineJa, lineNameEn: lineEn,
         towardJa: towardJa, towardEn: towardEn,
@@ -72,10 +72,10 @@ enum OdakyuLineData {
     // MARK: Odakyu Odawara Line (OH)
 
     static let odawara = StaticTrainLine(
-        id: "odpt.Railway:Odakyu.Odawara",
+        id: "Railway:Odakyu.Odawara",
         nameJa: "小田急小田原線",
         nameEn: "Odakyu Odawara Line",
-        operatorId: "odpt.Operator:Odakyu",
+        operatorId: "Operator:Odakyu",
         colorHex: "#0085CE",
         stations: [
             st("Odakyu.Odawara", "Shinjuku", "新宿", "Shinjuku", "OH01", 35.6905, 139.6994),
@@ -141,15 +141,15 @@ enum OdakyuLineData {
             through("Odakyu.Odawara.YoyogiUehara", .descending,
                     "東京メトロ千代田線", "Tokyo Metro Chiyoda Line",
                     "大手町・綾瀬方面", "for Otemachi & Ayase",
-                    to: "odpt.Railway:TokyoMetro.Chiyoda"),
+                    to: "Railway:TokyoMetro.Chiyoda"),
             through("Odakyu.Odawara.ShinYurigaoka", .ascending,
                     "小田急多摩線", "Odakyu Tama Line",
                     "唐木田方面", "for Karakida",
-                    to: "odpt.Railway:Odakyu.Tama"),
+                    to: "Railway:Odakyu.Tama"),
             through("Odakyu.Odawara.SagamiOno", .ascending,
                     "小田急江ノ島線", "Odakyu Enoshima Line",
                     "藤沢・片瀬江ノ島方面", "for Fujisawa & Katase-Enoshima",
-                    to: "odpt.Railway:Odakyu.Enoshima"),
+                    to: "Railway:Odakyu.Enoshima"),
             through("Odakyu.Odawara.Odawara", .ascending,
                     "箱根登山線", "Hakone Tozan Line",
                     "箱根湯本方面", "for Hakone-Yumoto"),
@@ -172,10 +172,10 @@ enum OdakyuLineData {
     ])
 
     static let enoshima = StaticTrainLine(
-        id: "odpt.Railway:Odakyu.Enoshima",
+        id: "Railway:Odakyu.Enoshima",
         nameJa: "小田急江ノ島線",
         nameEn: "Odakyu Enoshima Line",
-        operatorId: "odpt.Operator:Odakyu",
+        operatorId: "Operator:Odakyu",
         colorHex: "#0085CE",
         stations: [
             st("Odakyu.Enoshima", "SagamiOno", "相模大野", "Sagami-Ono", "OH28", 35.5318, 139.4383),
@@ -208,7 +208,7 @@ enum OdakyuLineData {
             through("Odakyu.Enoshima.SagamiOno", .descending,
                     "小田急小田原線", "Odakyu Odawara Line",
                     "町田・新宿方面", "for Machida & Shinjuku",
-                    to: "odpt.Railway:Odakyu.Odawara"),
+                    to: "Railway:Odakyu.Odawara"),
         ]
     )
 
@@ -228,10 +228,10 @@ enum OdakyuLineData {
     ])
 
     static let tama = StaticTrainLine(
-        id: "odpt.Railway:Odakyu.Tama",
+        id: "Railway:Odakyu.Tama",
         nameJa: "小田急多摩線",
         nameEn: "Odakyu Tama Line",
-        operatorId: "odpt.Operator:Odakyu",
+        operatorId: "Operator:Odakyu",
         colorHex: "#0085CE",
         stations: [
             st("Odakyu.Tama", "ShinYurigaoka", "新百合ヶ丘", "Shin-Yurigaoka", "OH23", 35.6039, 139.5083),
@@ -255,7 +255,7 @@ enum OdakyuLineData {
             through("Odakyu.Tama.ShinYurigaoka", .descending,
                     "小田急小田原線", "Odakyu Odawara Line",
                     "新宿・千代田線方面", "for Shinjuku & the Chiyoda Line",
-                    to: "odpt.Railway:Odakyu.Odawara"),
+                    to: "Railway:Odakyu.Odawara"),
         ]
     )
 }

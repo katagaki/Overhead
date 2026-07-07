@@ -5,7 +5,7 @@ import Foundation
 private func st(_ path: String, _ suffix: String, _ ja: String, _ en: String,
                 _ code: String, _ lat: Double, _ lon: Double) -> Station {
     Station(
-        id: "odpt.Station:\(path).\(suffix)",
+        id: "Station:\(path).\(suffix)",
         name: ja, nameEn: en, stationCode: code,
         latitude: lat, longitude: lon
     )
@@ -34,7 +34,7 @@ private func through(_ junction: String, _ end: ThroughService.LineEnd,
                      _ towardJa: String, _ towardEn: String,
                      to connectingLineId: String? = nil) -> ThroughService {
     ThroughService(
-        junctionStationId: "odpt.Station:\(junction)",
+        junctionStationId: "Station:\(junction)",
         end: end,
         lineNameJa: lineJa, lineNameEn: lineEn,
         towardJa: towardJa, towardEn: towardEn,
@@ -62,10 +62,10 @@ enum TokyuLineData {
     // MARK: - Tokyu Toyoko Line (TY)
 
     static let toyoko = StaticTrainLine(
-        id: "odpt.Railway:Tokyu.Toyoko",
+        id: "Railway:Tokyu.Toyoko",
         nameJa: "東急東横線",
         nameEn: "Tokyu Toyoko Line",
-        operatorId: "odpt.Operator:Tokyu",
+        operatorId: "Operator:Tokyu",
         colorHex: "#DA0442",
         stations: [
             st("Tokyu.Toyoko", "Shibuya", "渋谷", "Shibuya", "TY01", 35.6580, 139.7016),
@@ -116,21 +116,21 @@ enum TokyuLineData {
             through("Tokyu.Toyoko.Shibuya", .descending,
                     "東京メトロ副都心線", "Tokyo Metro Fukutoshin Line",
                     "池袋・和光市方面", "for Ikebukuro & Wakoshi",
-                    to: "odpt.Railway:TokyoMetro.Fukutoshin"),
+                    to: "Railway:TokyoMetro.Fukutoshin"),
             through("Tokyu.Toyoko.Yokohama", .ascending,
                     "みなとみらい線", "Minatomirai Line",
                     "元町・中華街方面", "for Motomachi-Chukagai",
-                    to: "odpt.Railway:Minatomirai.Minatomirai"),
+                    to: "Railway:Minatomirai.Minatomirai"),
         ]
     )
 
     // MARK: - Tokyu Den-en-toshi Line (DT)
 
     static let denentoshi = StaticTrainLine(
-        id: "odpt.Railway:Tokyu.DenEnToshi",
+        id: "Railway:Tokyu.DenEnToshi",
         nameJa: "東急田園都市線",
         nameEn: "Tokyu Den-en-toshi Line",
-        operatorId: "odpt.Operator:Tokyu",
+        operatorId: "Operator:Tokyu",
         colorHex: "#20A288",
         stations: [
             st("Tokyu.DenEnToshi", "Shibuya", "渋谷", "Shibuya", "DT01", 35.6580, 139.7016),
@@ -187,17 +187,17 @@ enum TokyuLineData {
             through("Tokyu.DenEnToshi.Shibuya", .descending,
                     "東京メトロ半蔵門線", "Tokyo Metro Hanzomon Line",
                     "大手町・押上方面", "for Otemachi & Oshiage",
-                    to: "odpt.Railway:TokyoMetro.Hanzomon"),
+                    to: "Railway:TokyoMetro.Hanzomon"),
         ]
     )
 
     // MARK: - Tokyu Meguro Line (MG)
 
     static let meguro = StaticTrainLine(
-        id: "odpt.Railway:Tokyu.Meguro",
+        id: "Railway:Tokyu.Meguro",
         nameJa: "東急目黒線",
         nameEn: "Tokyu Meguro Line",
-        operatorId: "odpt.Operator:Tokyu",
+        operatorId: "Operator:Tokyu",
         colorHex: "#009CD2",
         stations: [
             st("Tokyu.Meguro", "Meguro", "目黒", "Meguro", "MG01", 35.6340, 139.7157),
@@ -240,11 +240,11 @@ enum TokyuLineData {
             through("Tokyu.Meguro.Meguro", .descending,
                     "東京メトロ南北線", "Tokyo Metro Namboku Line",
                     "四ツ谷・赤羽岩淵方面", "for Yotsuya & Akabane-Iwabuchi",
-                    to: "odpt.Railway:TokyoMetro.Namboku"),
+                    to: "Railway:TokyoMetro.Namboku"),
             through("Tokyu.Meguro.Meguro", .descending,
                     "都営三田線", "Toei Mita Line",
                     "大手町・西高島平方面", "for Otemachi & Nishi-Takashimadaira",
-                    to: "odpt.Railway:Toei.Mita"),
+                    to: "Railway:Toei.Mita"),
             through("Tokyu.Meguro.Hiyoshi", .ascending,
                     "東急新横浜線", "Tokyu Shin-Yokohama Line",
                     "新横浜・相鉄線方面", "for Shin-Yokohama & the Sotetsu Line"),

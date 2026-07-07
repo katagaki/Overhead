@@ -5,7 +5,7 @@ import Foundation
 private func st(_ path: String, _ suffix: String, _ ja: String, _ en: String,
                 _ code: String, _ lat: Double, _ lon: Double) -> Station {
     Station(
-        id: "odpt.Station:\(path).\(suffix)",
+        id: "Station:\(path).\(suffix)",
         name: ja, nameEn: en, stationCode: code,
         latitude: lat, longitude: lon
     )
@@ -34,7 +34,7 @@ private func through(_ junction: String, _ end: ThroughService.LineEnd,
                      _ towardJa: String, _ towardEn: String,
                      to connectingLineId: String? = nil) -> ThroughService {
     ThroughService(
-        junctionStationId: "odpt.Station:\(junction)",
+        junctionStationId: "Station:\(junction)",
         end: end,
         lineNameJa: lineJa, lineNameEn: lineEn,
         towardJa: towardJa, towardEn: towardEn,
@@ -61,10 +61,10 @@ enum SaitamaRapidLineData {
     // MARK: - Saitama Rapid Railway Line (SR, 埼玉スタジアム線)
 
     static let saitamaRailway = StaticTrainLine(
-        id: "odpt.Railway:SaitamaRailway.SaitamaRailway",
+        id: "Railway:SaitamaRailway.SaitamaRailway",
         nameJa: "埼玉高速鉄道線",
         nameEn: "Saitama Rapid Railway Line",
-        operatorId: "odpt.Operator:SaitamaRailway",
+        operatorId: "Operator:SaitamaRailway",
         colorHex: "#0067C0",
         stations: [
             st("SaitamaRailway.SaitamaRailway", "AkabaneIwabuchi", "赤羽岩淵", "Akabane-iwabuchi", "SR19", 35.7837, 139.7217),
@@ -101,7 +101,7 @@ enum SaitamaRapidLineData {
             through("SaitamaRailway.SaitamaRailway.AkabaneIwabuchi", .descending,
                     "東京メトロ南北線", "Tokyo Metro Namboku Line",
                     "目黒・東急線方面", "for Meguro & the Tokyu Line",
-                    to: "odpt.Railway:TokyoMetro.Namboku"),
+                    to: "Railway:TokyoMetro.Namboku"),
         ]
     )
 }

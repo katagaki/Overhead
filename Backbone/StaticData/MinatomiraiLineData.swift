@@ -5,7 +5,7 @@ import Foundation
 private func st(_ path: String, _ suffix: String, _ ja: String, _ en: String,
                 _ code: String, _ lat: Double, _ lon: Double) -> Station {
     Station(
-        id: "odpt.Station:\(path).\(suffix)",
+        id: "Station:\(path).\(suffix)",
         name: ja, nameEn: en, stationCode: code,
         latitude: lat, longitude: lon
     )
@@ -34,7 +34,7 @@ private func through(_ junction: String, _ end: ThroughService.LineEnd,
                      _ towardJa: String, _ towardEn: String,
                      to connectingLineId: String? = nil) -> ThroughService {
     ThroughService(
-        junctionStationId: "odpt.Station:\(junction)",
+        junctionStationId: "Station:\(junction)",
         end: end,
         lineNameJa: lineJa, lineNameEn: lineEn,
         towardJa: towardJa, towardEn: towardEn,
@@ -61,10 +61,10 @@ enum MinatomiraiLineData {
     // MARK: - Minatomirai Line (MM)
 
     static let minatomirai = StaticTrainLine(
-        id: "odpt.Railway:Minatomirai.Minatomirai",
+        id: "Railway:Minatomirai.Minatomirai",
         nameJa: "みなとみらい線",
         nameEn: "Minatomirai Line",
-        operatorId: "odpt.Operator:Minatomirai",
+        operatorId: "Operator:Minatomirai",
         colorHex: "#004098",
         stations: [
             st("Minatomirai.Minatomirai", "Yokohama", "横浜", "Yokohama", "MM01", 35.4657, 139.6224),
@@ -98,7 +98,7 @@ enum MinatomiraiLineData {
             through("Minatomirai.Minatomirai.Yokohama", .descending,
                     "東急東横線", "Tokyu Toyoko Line",
                     "渋谷・副都心線方面", "for Shibuya & the Fukutoshin Line",
-                    to: "odpt.Railway:Tokyu.Toyoko"),
+                    to: "Railway:Tokyu.Toyoko"),
         ]
     )
 }

@@ -1,8 +1,8 @@
 {
   "fill" : {
     "linear-gradient" : [
-      "display-p3:0.31794,0.75545,0.77662,1.00000",
-      "display-p3:0.58711,0.49859,0.88023,1.00000"
+      "display-p3:0.31765,0.75686,0.77647,1.00000",
+      "display-p3:0.58824,0.49804,0.87843,1.00000"
     ]
   },
   "groups" : [
@@ -10,6 +10,17 @@
       "blur-material" : 0.4,
       "layers" : [
         {
+          "fill-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : {
+                "linear-gradient" : [
+                  "display-p3:0.58824,0.49804,0.87843,1.00000",
+                  "srgb:0.31765,0.75686,0.77647,1.00000"
+                ]
+              }
+            }
+          ],
           "image-name" : "Overhead.003.png",
           "name" : "Overhead.003"
         }
@@ -41,6 +52,17 @@
       "blur-material" : 0.5,
       "layers" : [
         {
+          "fill-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : {
+                "linear-gradient" : [
+                  "display-p3:0.31765,0.75686,0.77647,1.00000",
+                  "srgb:0.58824,0.49804,0.87843,1.00000"
+                ]
+              }
+            }
+          ],
           "image-name" : "Overhead.002.png",
           "name" : "Overhead.002"
         }

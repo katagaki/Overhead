@@ -5,7 +5,7 @@ import Foundation
 private func st(_ line: String, _ suffix: String, _ ja: String, _ en: String,
                 _ code: String, _ lat: Double, _ lon: Double) -> Station {
     Station(
-        id: "odpt.Station:TokyoMetro.\(line).\(suffix)",
+        id: "Station:TokyoMetro.\(line).\(suffix)",
         name: ja, nameEn: en, stationCode: code,
         latitude: lat, longitude: lon
     )
@@ -34,7 +34,7 @@ private func through(_ junction: String, _ end: ThroughService.LineEnd,
                      _ towardJa: String, _ towardEn: String,
                      to connectingLineId: String? = nil) -> ThroughService {
     ThroughService(
-        junctionStationId: "odpt.Station:TokyoMetro.\(junction)",
+        junctionStationId: "Station:TokyoMetro.\(junction)",
         end: end,
         lineNameJa: lineJa, lineNameEn: lineEn,
         towardJa: towardJa, towardEn: towardEn,
@@ -91,10 +91,10 @@ enum TokyoMetroLineData {
     // MARK: - Ginza Line (G)
 
     static let ginza = StaticTrainLine(
-        id: "odpt.Railway:TokyoMetro.Ginza",
+        id: "Railway:TokyoMetro.Ginza",
         nameJa: "銀座線",
         nameEn: "Ginza Line",
-        operatorId: "odpt.Operator:TokyoMetro",
+        operatorId: "Operator:TokyoMetro",
         colorHex: "#F7931D",
         stations: [
             st("Ginza", "Shibuya", "渋谷", "Shibuya", "G01", 35.6580, 139.7016),
@@ -132,10 +132,10 @@ enum TokyoMetroLineData {
     // MARK: - Marunouchi Line (M)
 
     static let marunouchi = StaticTrainLine(
-        id: "odpt.Railway:TokyoMetro.Marunouchi",
+        id: "Railway:TokyoMetro.Marunouchi",
         nameJa: "丸ノ内線",
         nameEn: "Marunouchi Line",
-        operatorId: "odpt.Operator:TokyoMetro",
+        operatorId: "Operator:TokyoMetro",
         colorHex: "#E60012",
         stations: [
             st("Marunouchi", "Ogikubo", "荻窪", "Ogikubo", "M01", 35.7047, 139.6202),
@@ -179,10 +179,10 @@ enum TokyoMetroLineData {
     // MARK: - Marunouchi Line Honancho Branch (Mb)
 
     static let marunouchiBranch = StaticTrainLine(
-        id: "odpt.Railway:TokyoMetro.MarunouchiBranch",
+        id: "Railway:TokyoMetro.MarunouchiBranch",
         nameJa: "丸ノ内線(方南町支線)",
         nameEn: "Marunouchi Line Honancho Branch",
-        operatorId: "odpt.Operator:TokyoMetro",
+        operatorId: "Operator:TokyoMetro",
         colorHex: "#E60012",
         stations: [
             st("MarunouchiBranch", "Honancho", "方南町", "Honancho", "Mb03", 35.6836, 139.6588),
@@ -215,10 +215,10 @@ enum TokyoMetroLineData {
     // MARK: - Hibiya Line (H)
 
     static let hibiya = StaticTrainLine(
-        id: "odpt.Railway:TokyoMetro.Hibiya",
+        id: "Railway:TokyoMetro.Hibiya",
         nameJa: "日比谷線",
         nameEn: "Hibiya Line",
-        operatorId: "odpt.Operator:TokyoMetro",
+        operatorId: "Operator:TokyoMetro",
         colorHex: "#B5B5AC",
         stations: [
             st("Hibiya", "NakaMeguro", "中目黒", "Naka-meguro", "H01", 35.6442, 139.6990),
@@ -258,17 +258,17 @@ enum TokyoMetroLineData {
             through("Hibiya.KitaSenju", .ascending,
                     "東武スカイツリーライン", "Tobu Skytree Line",
                     "東武動物公園・南栗橋方面", "for Tobu-Dobutsu-Koen & Minami-Kurihashi",
-                    to: "odpt.Railway:Tobu.TobuSkytree"),
+                    to: "Railway:Tobu.TobuSkytree"),
         ]
     )
 
     // MARK: - Tozai Line (T)
 
     static let tozai = StaticTrainLine(
-        id: "odpt.Railway:TokyoMetro.Tozai",
+        id: "Railway:TokyoMetro.Tozai",
         nameJa: "東西線",
         nameEn: "Tozai Line",
-        operatorId: "odpt.Operator:TokyoMetro",
+        operatorId: "Operator:TokyoMetro",
         colorHex: "#00A7DB",
         stations: [
             st("Tozai", "Nakano", "中野", "Nakano", "T01", 35.7056, 139.6659),
@@ -315,24 +315,24 @@ enum TokyoMetroLineData {
             through("Tozai.Nakano", .descending,
                     "JR中央・総武線各駅停車", "JR Chuo-Sobu Local Line",
                     "三鷹方面", "for Mitaka",
-                    to: "odpt.Railway:JR-East.ChuoSobuLocal"),
+                    to: "Railway:JR-East.ChuoSobuLocal"),
             through("Tozai.NishiFunabashi", .ascending,
                     "東葉高速線", "Toyo Rapid Line",
                     "東葉勝田台方面", "for Toyo-Katsutadai"),
             through("Tozai.NishiFunabashi", .ascending,
                     "JR総武線各駅停車", "JR Sobu Local Line",
                     "津田沼方面", "for Tsudanuma",
-                    to: "odpt.Railway:JR-East.ChuoSobuLocal"),
+                    to: "Railway:JR-East.ChuoSobuLocal"),
         ]
     )
 
     // MARK: - Chiyoda Line (C)
 
     static let chiyoda = StaticTrainLine(
-        id: "odpt.Railway:TokyoMetro.Chiyoda",
+        id: "Railway:TokyoMetro.Chiyoda",
         nameJa: "千代田線",
         nameEn: "Chiyoda Line",
-        operatorId: "odpt.Operator:TokyoMetro",
+        operatorId: "Operator:TokyoMetro",
         colorHex: "#00A854",
         stations: [
             st("Chiyoda", "YoyogiUehara", "代々木上原", "Yoyogi-uehara", "C01", 35.6690, 139.6799),
@@ -370,21 +370,21 @@ enum TokyoMetroLineData {
             through("Chiyoda.Ayase", .ascending,
                     "JR常磐線各駅停車", "JR Joban Local Line",
                     "取手方面", "for Toride",
-                    to: "odpt.Railway:JR-East.JobanLocal"),
+                    to: "Railway:JR-East.JobanLocal"),
             through("Chiyoda.YoyogiUehara", .descending,
                     "小田急小田原線", "Odakyu Odawara Line",
                     "本厚木・伊勢原方面", "for Hon-Atsugi & Isehara",
-                    to: "odpt.Railway:Odakyu.Odawara"),
+                    to: "Railway:Odakyu.Odawara"),
         ]
     )
 
     // MARK: - Yurakucho Line (Y)
 
     static let yurakucho = StaticTrainLine(
-        id: "odpt.Railway:TokyoMetro.Yurakucho",
+        id: "Railway:TokyoMetro.Yurakucho",
         nameJa: "有楽町線",
         nameEn: "Yurakucho Line",
-        operatorId: "odpt.Operator:TokyoMetro",
+        operatorId: "Operator:TokyoMetro",
         colorHex: "#C1A470",
         stations: [
             st("Yurakucho", "Wakoshi", "和光市", "Wakoshi", "Y01", 35.7887, 139.6122),
@@ -426,21 +426,21 @@ enum TokyoMetroLineData {
             through("Yurakucho.Wakoshi", .descending,
                     "東武東上線", "Tobu Tojo Line",
                     "川越市・森林公園方面", "for Kawagoeshi & Shinrin-Koen",
-                    to: "odpt.Railway:Tobu.Tojo"),
+                    to: "Railway:Tobu.Tojo"),
             through("Yurakucho.KotakeMukaihara", .descending,
                     "西武有楽町線・池袋線", "Seibu Yurakucho & Ikebukuro Lines",
                     "所沢・飯能方面", "for Tokorozawa & Hanno",
-                    to: "odpt.Railway:Seibu.SeibuYurakucho"),
+                    to: "Railway:Seibu.SeibuYurakucho"),
         ]
     )
 
     // MARK: - Hanzomon Line (Z)
 
     static let hanzomon = StaticTrainLine(
-        id: "odpt.Railway:TokyoMetro.Hanzomon",
+        id: "Railway:TokyoMetro.Hanzomon",
         nameJa: "半蔵門線",
         nameEn: "Hanzomon Line",
-        operatorId: "odpt.Operator:TokyoMetro",
+        operatorId: "Operator:TokyoMetro",
         colorHex: "#8B76D0",
         stations: [
             st("Hanzomon", "Shibuya", "渋谷", "Shibuya", "Z01", 35.6580, 139.7016),
@@ -472,21 +472,21 @@ enum TokyoMetroLineData {
             through("Hanzomon.Shibuya", .descending,
                     "東急田園都市線", "Tokyu Den-en-toshi Line",
                     "中央林間方面", "for Chuo-Rinkan",
-                    to: "odpt.Railway:Tokyu.DenEnToshi"),
+                    to: "Railway:Tokyu.DenEnToshi"),
             through("Hanzomon.Oshiage", .ascending,
                     "東武スカイツリーライン", "Tobu Skytree Line",
                     "久喜・南栗橋方面", "for Kuki & Minami-Kurihashi",
-                    to: "odpt.Railway:Tobu.TobuSkytree"),
+                    to: "Railway:Tobu.TobuSkytree"),
         ]
     )
 
     // MARK: - Namboku Line (N)
 
     static let namboku = StaticTrainLine(
-        id: "odpt.Railway:TokyoMetro.Namboku",
+        id: "Railway:TokyoMetro.Namboku",
         nameJa: "南北線",
         nameEn: "Namboku Line",
-        operatorId: "odpt.Operator:TokyoMetro",
+        operatorId: "Operator:TokyoMetro",
         colorHex: "#00ADA9",
         stations: [
             st("Namboku", "Meguro", "目黒", "Meguro", "N01", 35.6340, 139.7157),
@@ -523,21 +523,21 @@ enum TokyoMetroLineData {
             through("Namboku.AkabaneIwabuchi", .ascending,
                     "埼玉高速鉄道線", "Saitama Rapid Railway Line",
                     "浦和美園方面", "for Urawa-Misono",
-                    to: "odpt.Railway:SaitamaRailway.SaitamaRailway"),
+                    to: "Railway:SaitamaRailway.SaitamaRailway"),
             through("Namboku.Meguro", .descending,
                     "東急目黒線・新横浜線", "Tokyu Meguro & Shin-Yokohama Lines",
                     "日吉・新横浜方面", "for Hiyoshi & Shin-Yokohama",
-                    to: "odpt.Railway:Tokyu.Meguro"),
+                    to: "Railway:Tokyu.Meguro"),
         ]
     )
 
     // MARK: - Fukutoshin Line (F)
 
     static let fukutoshin = StaticTrainLine(
-        id: "odpt.Railway:TokyoMetro.Fukutoshin",
+        id: "Railway:TokyoMetro.Fukutoshin",
         nameJa: "副都心線",
         nameEn: "Fukutoshin Line",
-        operatorId: "odpt.Operator:TokyoMetro",
+        operatorId: "Operator:TokyoMetro",
         colorHex: "#9C5E31",
         stations: [
             st("Fukutoshin", "Wakoshi", "和光市", "Wakoshi", "F01", 35.7887, 139.6122),
@@ -571,15 +571,15 @@ enum TokyoMetroLineData {
             through("Fukutoshin.Shibuya", .ascending,
                     "東急東横線・みなとみらい線", "Tokyu Toyoko & Minatomirai Lines",
                     "横浜・元町・中華街方面", "for Yokohama & Motomachi-Chukagai",
-                    to: "odpt.Railway:Tokyu.Toyoko"),
+                    to: "Railway:Tokyu.Toyoko"),
             through("Fukutoshin.Wakoshi", .descending,
                     "東武東上線", "Tobu Tojo Line",
                     "川越市・森林公園方面", "for Kawagoeshi & Shinrin-Koen",
-                    to: "odpt.Railway:Tobu.Tojo"),
+                    to: "Railway:Tobu.Tojo"),
             through("Fukutoshin.KotakeMukaihara", .descending,
                     "西武有楽町線・池袋線", "Seibu Yurakucho & Ikebukuro Lines",
                     "所沢・飯能方面", "for Tokorozawa & Hanno",
-                    to: "odpt.Railway:Seibu.SeibuYurakucho"),
+                    to: "Railway:Seibu.SeibuYurakucho"),
         ]
     )
 }

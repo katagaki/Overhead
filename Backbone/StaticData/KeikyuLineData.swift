@@ -5,7 +5,7 @@ import Foundation
 private func st(_ path: String, _ suffix: String, _ ja: String, _ en: String,
                 _ code: String, _ lat: Double, _ lon: Double) -> Station {
     Station(
-        id: "odpt.Station:\(path).\(suffix)",
+        id: "Station:\(path).\(suffix)",
         name: ja, nameEn: en, stationCode: code,
         latitude: lat, longitude: lon
     )
@@ -34,7 +34,7 @@ private func through(_ junction: String, _ end: ThroughService.LineEnd,
                      _ towardJa: String, _ towardEn: String,
                      to connectingLineId: String? = nil) -> ThroughService {
     ThroughService(
-        junctionStationId: "odpt.Station:\(junction)",
+        junctionStationId: "Station:\(junction)",
         end: end,
         lineNameJa: lineJa, lineNameEn: lineEn,
         towardJa: towardJa, towardEn: towardEn,
@@ -61,10 +61,10 @@ enum KeikyuLineData {
     // MARK: - Keikyu Main Line (KK)
 
     static let main = StaticTrainLine(
-        id: "odpt.Railway:Keikyu.Main",
+        id: "Railway:Keikyu.Main",
         nameJa: "京急本線",
         nameEn: "Keikyu Main Line",
-        operatorId: "odpt.Operator:Keikyu",
+        operatorId: "Operator:Keikyu",
         colorHex: "#E60012",
         stations: [
             // Sengakuji is Toei-managed (A07); leave the code empty so the
@@ -152,11 +152,11 @@ enum KeikyuLineData {
             through("Keikyu.Main.Sengakuji", .descending,
                     "都営浅草線", "Toei Asakusa Line",
                     "押上・成田空港方面", "for Oshiage & Narita Airport",
-                    to: "odpt.Railway:Toei.Asakusa"),
+                    to: "Railway:Toei.Asakusa"),
             through("Keikyu.Main.KeikyuKamata", .ascending,
                     "京急空港線", "Keikyu Airport Line",
                     "羽田空港方面", "for Haneda Airport",
-                    to: "odpt.Railway:Keikyu.Airport"),
+                    to: "Railway:Keikyu.Airport"),
             through("Keikyu.Main.Horinouchi", .ascending,
                     "京急久里浜線", "Keikyu Kurihama Line",
                     "三崎口方面", "for Misakiguchi"),
@@ -166,10 +166,10 @@ enum KeikyuLineData {
     // MARK: - Keikyu Airport Line (KK)
 
     static let airport = StaticTrainLine(
-        id: "odpt.Railway:Keikyu.Airport",
+        id: "Railway:Keikyu.Airport",
         nameJa: "京急空港線",
         nameEn: "Keikyu Airport Line",
-        operatorId: "odpt.Operator:Keikyu",
+        operatorId: "Operator:Keikyu",
         colorHex: "#E60012",
         stations: [
             st("Keikyu.Airport", "KeikyuKamata", "京急蒲田", "Keikyu Kamata", "KK11", 35.5607, 139.7237),
@@ -205,7 +205,7 @@ enum KeikyuLineData {
             through("Keikyu.Airport.KeikyuKamata", .descending,
                     "京急本線", "Keikyu Main Line",
                     "品川・泉岳寺・都営浅草線方面", "for Shinagawa, Sengakuji & the Toei Asakusa Line",
-                    to: "odpt.Railway:Keikyu.Main"),
+                    to: "Railway:Keikyu.Main"),
         ]
     )
 }

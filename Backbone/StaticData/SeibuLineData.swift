@@ -5,7 +5,7 @@ import Foundation
 private func st(_ path: String, _ suffix: String, _ ja: String, _ en: String,
                 _ code: String, _ lat: Double, _ lon: Double) -> Station {
     Station(
-        id: "odpt.Station:\(path).\(suffix)",
+        id: "Station:\(path).\(suffix)",
         name: ja, nameEn: en, stationCode: code,
         latitude: lat, longitude: lon
     )
@@ -34,7 +34,7 @@ private func through(_ junction: String, _ end: ThroughService.LineEnd,
                      _ towardJa: String, _ towardEn: String,
                      to connectingLineId: String? = nil) -> ThroughService {
     ThroughService(
-        junctionStationId: "odpt.Station:\(junction)",
+        junctionStationId: "Station:\(junction)",
         end: end,
         lineNameJa: lineJa, lineNameEn: lineEn,
         towardJa: towardJa, towardEn: towardEn,
@@ -61,10 +61,10 @@ enum SeibuLineData {
     // MARK: - Seibu Ikebukuro Line (SI)
 
     static let ikebukuro = StaticTrainLine(
-        id: "odpt.Railway:Seibu.Ikebukuro",
+        id: "Railway:Seibu.Ikebukuro",
         nameJa: "西武池袋線",
         nameEn: "Seibu Ikebukuro Line",
-        operatorId: "odpt.Operator:Seibu",
+        operatorId: "Operator:Seibu",
         colorHex: "#F08300",
         stations: [
             st("Seibu.Ikebukuro", "Ikebukuro", "池袋", "Ikebukuro", "SI01", 35.7295, 139.7109),
@@ -121,7 +121,7 @@ enum SeibuLineData {
             through("Seibu.Ikebukuro.Nerima", .descending,
                     "西武有楽町線", "Seibu Yurakucho Line",
                     "小竹向原・有楽町線・副都心線方面", "for Kotake-Mukaihara & the Yurakucho and Fukutoshin Lines",
-                    to: "odpt.Railway:Seibu.SeibuYurakucho"),
+                    to: "Railway:Seibu.SeibuYurakucho"),
             through("Seibu.Ikebukuro.Hanno", .ascending,
                     "西武池袋線・秩父線", "Seibu Ikebukuro & Chichibu Lines",
                     "西武秩父方面", "for Seibu-Chichibu"),
@@ -131,10 +131,10 @@ enum SeibuLineData {
     // MARK: - Seibu Yurakucho Line (SI)
 
     static let seibuYurakucho = StaticTrainLine(
-        id: "odpt.Railway:Seibu.SeibuYurakucho",
+        id: "Railway:Seibu.SeibuYurakucho",
         nameJa: "西武有楽町線",
         nameEn: "Seibu Yurakucho Line",
-        operatorId: "odpt.Operator:Seibu",
+        operatorId: "Operator:Seibu",
         colorHex: "#F08300",
         stations: [
             st("Seibu.SeibuYurakucho", "KotakeMukaihara", "小竹向原", "Kotake-Mukaihara", "SI37", 35.7437, 139.6787),
@@ -167,15 +167,15 @@ enum SeibuLineData {
             through("Seibu.SeibuYurakucho.KotakeMukaihara", .descending,
                     "東京メトロ有楽町線", "Tokyo Metro Yurakucho Line",
                     "有楽町・新木場方面", "for Yurakucho & Shin-Kiba",
-                    to: "odpt.Railway:TokyoMetro.Yurakucho"),
+                    to: "Railway:TokyoMetro.Yurakucho"),
             through("Seibu.SeibuYurakucho.KotakeMukaihara", .descending,
                     "東京メトロ副都心線", "Tokyo Metro Fukutoshin Line",
                     "渋谷・横浜方面", "for Shibuya & Yokohama",
-                    to: "odpt.Railway:TokyoMetro.Fukutoshin"),
+                    to: "Railway:TokyoMetro.Fukutoshin"),
             through("Seibu.SeibuYurakucho.Nerima", .ascending,
                     "西武池袋線", "Seibu Ikebukuro Line",
                     "所沢・飯能方面", "for Tokorozawa & Hanno",
-                    to: "odpt.Railway:Seibu.Ikebukuro"),
+                    to: "Railway:Seibu.Ikebukuro"),
         ]
     )
 }

@@ -5,7 +5,7 @@ import Foundation
 private func st(_ path: String, _ suffix: String, _ ja: String, _ en: String,
                 _ code: String, _ lat: Double, _ lon: Double) -> Station {
     Station(
-        id: "odpt.Station:\(path).\(suffix)",
+        id: "Station:\(path).\(suffix)",
         name: ja, nameEn: en, stationCode: code,
         latitude: lat, longitude: lon
     )
@@ -34,7 +34,7 @@ private func through(_ junction: String, _ end: ThroughService.LineEnd,
                      _ towardJa: String, _ towardEn: String,
                      to connectingLineId: String? = nil) -> ThroughService {
     ThroughService(
-        junctionStationId: "odpt.Station:\(junction)",
+        junctionStationId: "Station:\(junction)",
         end: end,
         lineNameJa: lineJa, lineNameEn: lineEn,
         towardJa: towardJa, towardEn: towardEn,
@@ -70,10 +70,10 @@ enum KeiseiLineData {
     // MARK: Keisei Main Line (KS)
 
     static let main = StaticTrainLine(
-        id: "odpt.Railway:Keisei.Main",
+        id: "Railway:Keisei.Main",
         nameJa: "京成本線",
         nameEn: "Keisei Main Line",
-        operatorId: "odpt.Operator:Keisei",
+        operatorId: "Operator:Keisei",
         colorHex: "#005AAA",
         stations: [
             st("Keisei.Main", "KeiseiUeno", "京成上野", "Keisei-Ueno", "KS01", 35.7113, 139.7742),
@@ -134,25 +134,25 @@ enum KeiseiLineData {
             through("Keisei.Main.Aoto", .descending,
                     "京成押上線・都営浅草線", "Keisei Oshiage & Toei Asakusa Lines",
                     "押上・西馬込方面", "for Oshiage & Nishi-magome",
-                    to: "odpt.Railway:Keisei.Oshiage"),
+                    to: "Railway:Keisei.Oshiage"),
             through("Keisei.Main.KeiseiTakasago", .ascending,
                     "成田スカイアクセス線", "Narita Sky Access Line",
                     "成田空港方面", "for Narita Airport",
-                    to: "odpt.Railway:Keisei.NaritaSkyAccess"),
+                    to: "Railway:Keisei.NaritaSkyAccess"),
             through("Keisei.Main.KeiseiTsudanuma", .ascending,
                     "京成千葉線", "Keisei Chiba Line",
                     "千葉中央方面", "for Chiba-Chuo",
-                    to: "odpt.Railway:Keisei.Chiba"),
+                    to: "Railway:Keisei.Chiba"),
         ]
     )
 
     // MARK: Keisei Oshiage Line (KS)
 
     static let oshiage = StaticTrainLine(
-        id: "odpt.Railway:Keisei.Oshiage",
+        id: "Railway:Keisei.Oshiage",
         nameJa: "京成押上線",
         nameEn: "Keisei Oshiage Line",
-        operatorId: "odpt.Operator:Keisei",
+        operatorId: "Operator:Keisei",
         colorHex: "#005AAA",
         stations: [
             st("Keisei.Oshiage", "Oshiage", "押上", "Oshiage 'SKYTREE'", "KS45", 35.7103, 139.8129),
@@ -184,21 +184,21 @@ enum KeiseiLineData {
             through("Keisei.Oshiage.Aoto", .ascending,
                     "京成本線", "Keisei Main Line",
                     "京成船橋・成田空港方面", "for Keisei-Funabashi & Narita Airport",
-                    to: "odpt.Railway:Keisei.Main"),
+                    to: "Railway:Keisei.Main"),
             through("Keisei.Oshiage.Oshiage", .descending,
                     "都営浅草線・京急線", "Toei Asakusa & Keikyu Lines",
                     "羽田空港・西馬込方面", "for Haneda Airport & Nishi-magome",
-                    to: "odpt.Railway:Toei.Asakusa"),
+                    to: "Railway:Toei.Asakusa"),
         ]
     )
 
     // MARK: Keisei Kanamachi Line (KS)
 
     static let kanamachi = StaticTrainLine(
-        id: "odpt.Railway:Keisei.Kanamachi",
+        id: "Railway:Keisei.Kanamachi",
         nameJa: "京成金町線",
         nameEn: "Keisei Kanamachi Line",
-        operatorId: "odpt.Operator:Keisei",
+        operatorId: "Operator:Keisei",
         colorHex: "#005AAA",
         stations: [
             st("Keisei.Kanamachi", "KeiseiTakasago", "京成高砂", "Keisei-Takasago", "KS10", 35.7498, 139.8658),
@@ -235,10 +235,10 @@ enum KeiseiLineData {
     ])
 
     static let chiba = StaticTrainLine(
-        id: "odpt.Railway:Keisei.Chiba",
+        id: "Railway:Keisei.Chiba",
         nameJa: "京成千葉線",
         nameEn: "Keisei Chiba Line",
-        operatorId: "odpt.Operator:Keisei",
+        operatorId: "Operator:Keisei",
         colorHex: "#005AAA",
         stations: [
             st("Keisei.Chiba", "KeiseiTsudanuma", "京成津田沼", "Keisei-Tsudanuma", "KS26", 35.6828, 140.0248),
@@ -264,11 +264,11 @@ enum KeiseiLineData {
             through("Keisei.Chiba.Chibachuo", .ascending,
                     "京成千原線", "Keisei Chihara Line",
                     "ちはら台方面", "for Chiharadai",
-                    to: "odpt.Railway:Keisei.Chihara"),
+                    to: "Railway:Keisei.Chihara"),
             through("Keisei.Chiba.KeiseiTsudanuma", .descending,
                     "京成本線", "Keisei Main Line",
                     "京成上野方面", "for Keisei-Ueno",
-                    to: "odpt.Railway:Keisei.Main"),
+                    to: "Railway:Keisei.Main"),
             through("Keisei.Chiba.KeiseiTsudanuma", .descending,
                     "京成松戸線", "Keisei Matsudo Line",
                     "松戸方面", "for Matsudo"),
@@ -289,10 +289,10 @@ enum KeiseiLineData {
     }
 
     static let chihara = StaticTrainLine(
-        id: "odpt.Railway:Keisei.Chihara",
+        id: "Railway:Keisei.Chihara",
         nameJa: "京成千原線",
         nameEn: "Keisei Chihara Line",
-        operatorId: "odpt.Operator:Keisei",
+        operatorId: "Operator:Keisei",
         colorHex: "#005AAA",
         stations: [
             st("Keisei.Chihara", "Chibachuo", "千葉中央", "Chiba-Chuo", "KS60", 35.6073, 140.1178),
@@ -314,7 +314,7 @@ enum KeiseiLineData {
             through("Keisei.Chihara.Chibachuo", .descending,
                     "京成千葉線", "Keisei Chiba Line",
                     "京成津田沼方面", "for Keisei-Tsudanuma",
-                    to: "odpt.Railway:Keisei.Chiba"),
+                    to: "Railway:Keisei.Chiba"),
         ]
     )
 
@@ -327,10 +327,10 @@ enum KeiseiLineData {
     }
 
     static let higashiNarita = StaticTrainLine(
-        id: "odpt.Railway:Keisei.HigashiNarita",
+        id: "Railway:Keisei.HigashiNarita",
         nameJa: "京成東成田線",
         nameEn: "Keisei Higashi-Narita Line",
-        operatorId: "odpt.Operator:Keisei",
+        operatorId: "Operator:Keisei",
         colorHex: "#005AAA",
         stations: [
             st("Keisei.HigashiNarita", "KeiseiNarita", "京成成田", "Keisei-Narita", "KS40", 35.7718, 140.3178),
@@ -365,10 +365,10 @@ enum KeiseiLineData {
     }
 
     static let skyAccess = StaticTrainLine(
-        id: "odpt.Railway:Keisei.NaritaSkyAccess",
+        id: "Railway:Keisei.NaritaSkyAccess",
         nameJa: "成田スカイアクセス線",
         nameEn: "Narita Sky Access Line",
-        operatorId: "odpt.Operator:Keisei",
+        operatorId: "Operator:Keisei",
         colorHex: "#EC7B02",
         stations: [
             st("Keisei.NaritaSkyAccess", "KeiseiTakasago", "京成高砂", "Keisei-Takasago", "KS10", 35.7498, 139.8658),
@@ -392,11 +392,11 @@ enum KeiseiLineData {
             through("Keisei.NaritaSkyAccess.KeiseiTakasago", .descending,
                     "京成本線", "Keisei Main Line",
                     "京成上野方面", "for Keisei-Ueno",
-                    to: "odpt.Railway:Keisei.Main"),
+                    to: "Railway:Keisei.Main"),
             through("Keisei.NaritaSkyAccess.KeiseiTakasago", .descending,
                     "京成押上線・都営浅草線・京急線", "Keisei Oshiage, Toei Asakusa & Keikyu Lines",
                     "羽田空港方面", "for Haneda Airport",
-                    to: "odpt.Railway:Keisei.Oshiage"),
+                    to: "Railway:Keisei.Oshiage"),
         ]
     )
 }

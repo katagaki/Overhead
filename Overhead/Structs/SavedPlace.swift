@@ -56,17 +56,33 @@ enum SavedPlaceStore {
         let toStationId: String
     }
 
+    /// Line/station ids saved before the "odpt." prefix was dropped are
+    /// rewritten to the current scheme (e.g. "odpt.Railway:X" → "Railway:X").
+    private static func migratingIds(_ places: [SavedPlace]) -> [SavedPlace] {
+        places.map { place in
+            var place = place
+            place.lineId = place.lineId.replacingOccurrences(of: "odpt.", with: "")
+            place.fromStationId = place.fromStationId.replacingOccurrences(of: "odpt.", with: "")
+            place.toStationId = place.toStationId.replacingOccurrences(of: "odpt.", with: "")
+            return place
+        }
+    }
+
     static func load() -> [SavedPlace] {
         let defaults = UserDefaults.standard
         if let data = defaults.data(forKey: storageKey),
            let decoded = try? JSONDecoder().decode([SavedPlace].self, from: data) {
-            return decoded
+            let migrated = migratingIds(decoded)
+            if migrated != decoded {
+                save(migrated)
+            }
+            return migrated
         }
 
         // One-time migration from the old fixed-slot quick routes
         if let data = defaults.data(forKey: legacyStorageKey),
            let legacy = try? JSONDecoder().decode([LegacyQuickRoute].self, from: data) {
-            let migrated = legacy.map { route in
+            let migrated = migratingIds(legacy.map { route in
                 SavedPlace(
                     id: route.id,
                     kind: SavedPlace.Kind(rawValue: route.label) ?? .custom,
@@ -74,7 +90,7 @@ enum SavedPlaceStore {
                     fromStationId: route.fromStationId,
                     toStationId: route.toStationId
                 )
-            }
+            })
             save(migrated)
             defaults.removeObject(forKey: legacyStorageKey)
             return migrated

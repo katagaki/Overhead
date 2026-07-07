@@ -5,7 +5,7 @@ import Foundation
 private func st(_ path: String, _ suffix: String, _ ja: String, _ en: String,
                 _ code: String, _ lat: Double, _ lon: Double) -> Station {
     Station(
-        id: "odpt.Station:\(path).\(suffix)",
+        id: "Station:\(path).\(suffix)",
         name: ja, nameEn: en, stationCode: code,
         latitude: lat, longitude: lon
     )
@@ -34,7 +34,7 @@ private func through(_ junction: String, _ end: ThroughService.LineEnd,
                      _ towardJa: String, _ towardEn: String,
                      to connectingLineId: String? = nil) -> ThroughService {
     ThroughService(
-        junctionStationId: "odpt.Station:\(junction)",
+        junctionStationId: "Station:\(junction)",
         end: end,
         lineNameJa: lineJa, lineNameEn: lineEn,
         towardJa: towardJa, towardEn: towardEn,
@@ -63,10 +63,10 @@ enum KeioLineData {
     // 初台・幡ヶ谷 are Keio New Line platforms and are not stops on Keio Line
     // locals from Shinjuku, so they are omitted.
     static let keio = StaticTrainLine(
-        id: "odpt.Railway:Keio.Keio",
+        id: "Railway:Keio.Keio",
         nameJa: "京王線",
         nameEn: "Keio Line",
-        operatorId: "odpt.Operator:Keio",
+        operatorId: "Operator:Keio",
         colorHex: "#DD0077",
         stations: [
             st("Keio.Keio", "Shinjuku", "新宿", "Shinjuku", "KO01", 35.6896, 139.7006),
@@ -129,11 +129,11 @@ enum KeioLineData {
             through("Keio.Keio.Shinjuku", .descending,
                     "京王新線・都営新宿線", "Keio New Line & Toei Shinjuku Line",
                     "本八幡方面", "for Motoyawata",
-                    to: "odpt.Railway:Toei.Shinjuku"),
+                    to: "Railway:Toei.Shinjuku"),
             through("Keio.Keio.Chofu", .ascending,
                     "京王相模原線", "Keio Sagamihara Line",
                     "橋本方面", "for Hashimoto",
-                    to: "odpt.Railway:Keio.Sagamihara"),
+                    to: "Railway:Keio.Sagamihara"),
             through("Keio.Keio.Kitano", .ascending,
                     "京王高尾線", "Keio Takao Line",
                     "高尾山口方面", "for Takaosanguchi"),
@@ -143,10 +143,10 @@ enum KeioLineData {
     // MARK: - Keio Sagamihara Line (KO)
 
     static let sagamihara = StaticTrainLine(
-        id: "odpt.Railway:Keio.Sagamihara",
+        id: "Railway:Keio.Sagamihara",
         nameJa: "京王相模原線",
         nameEn: "Keio Sagamihara Line",
-        operatorId: "odpt.Operator:Keio",
+        operatorId: "Operator:Keio",
         colorHex: "#DD0077",
         stations: [
             st("Keio.Sagamihara", "Chofu", "調布", "Chofu", "KO18", 35.6517, 139.5407),
@@ -187,7 +187,7 @@ enum KeioLineData {
             through("Keio.Sagamihara.Chofu", .descending,
                     "京王線", "Keio Line",
                     "明大前・新宿方面", "for Meidaimae & Shinjuku",
-                    to: "odpt.Railway:Keio.Keio"),
+                    to: "Railway:Keio.Keio"),
         ]
     )
 }

@@ -5,7 +5,7 @@ import Foundation
 private func st(_ line: String, _ suffix: String, _ ja: String, _ en: String,
                 _ code: String, _ lat: Double, _ lon: Double) -> Station {
     Station(
-        id: "odpt.Station:Toei.\(line).\(suffix)",
+        id: "Station:Toei.\(line).\(suffix)",
         name: ja, nameEn: en, stationCode: code,
         latitude: lat, longitude: lon
     )
@@ -34,7 +34,7 @@ private func through(_ junction: String, _ end: ThroughService.LineEnd,
                      _ towardJa: String, _ towardEn: String,
                      to connectingLineId: String? = nil) -> ThroughService {
     ThroughService(
-        junctionStationId: "odpt.Station:Toei.\(junction)",
+        junctionStationId: "Station:Toei.\(junction)",
         end: end,
         lineNameJa: lineJa, lineNameEn: lineEn,
         towardJa: towardJa, towardEn: towardEn,
@@ -72,10 +72,10 @@ enum ToeiLineData {
     // MARK: - Asakusa Line (A)
 
     static let asakusa = StaticTrainLine(
-        id: "odpt.Railway:Toei.Asakusa",
+        id: "Railway:Toei.Asakusa",
         nameJa: "都営浅草線",
         nameEn: "Toei Asakusa Line",
-        operatorId: "odpt.Operator:Toei",
+        operatorId: "Operator:Toei",
         colorHex: "#E85298",
         stations: [
             st("Asakusa", "NishiMagome", "西馬込", "Nishi-magome", "A01", 35.5866, 139.7053),
@@ -113,21 +113,21 @@ enum ToeiLineData {
             through("Asakusa.Oshiage", .ascending,
                     "京成押上線・京成本線", "Keisei Oshiage & Main Lines",
                     "青砥・成田空港方面", "for Aoto & Narita Airport",
-                    to: "odpt.Railway:Keisei.Oshiage"),
+                    to: "Railway:Keisei.Oshiage"),
             through("Asakusa.Sengakuji", .descending,
                     "京急線", "Keikyu Line",
                     "羽田空港・横浜方面", "for Haneda Airport & Yokohama",
-                    to: "odpt.Railway:Keikyu.Main"),
+                    to: "Railway:Keikyu.Main"),
         ]
     )
 
     // MARK: - Mita Line (I)
 
     static let mita = StaticTrainLine(
-        id: "odpt.Railway:Toei.Mita",
+        id: "Railway:Toei.Mita",
         nameJa: "都営三田線",
         nameEn: "Toei Mita Line",
-        operatorId: "odpt.Operator:Toei",
+        operatorId: "Operator:Toei",
         colorHex: "#0079C2",
         stations: [
             st("Mita", "Meguro", "目黒", "Meguro", "I01", 35.6340, 139.7157),
@@ -172,17 +172,17 @@ enum ToeiLineData {
             through("Mita.Meguro", .descending,
                     "東急目黒線・新横浜線", "Tokyu Meguro & Shin-Yokohama Lines",
                     "日吉・新横浜方面", "for Hiyoshi & Shin-Yokohama",
-                    to: "odpt.Railway:Tokyu.Meguro"),
+                    to: "Railway:Tokyu.Meguro"),
         ]
     )
 
     // MARK: - Shinjuku Line (S)
 
     static let shinjuku = StaticTrainLine(
-        id: "odpt.Railway:Toei.Shinjuku",
+        id: "Railway:Toei.Shinjuku",
         nameJa: "都営新宿線",
         nameEn: "Toei Shinjuku Line",
-        operatorId: "odpt.Operator:Toei",
+        operatorId: "Operator:Toei",
         colorHex: "#6CBB5A",
         stations: [
             st("Shinjuku", "Shinjuku", "新宿", "Shinjuku", "S01", 35.6895, 139.6988),
@@ -221,7 +221,7 @@ enum ToeiLineData {
             through("Shinjuku.Shinjuku", .descending,
                     "京王新線・京王線", "Keio New Line & Keio Line",
                     "笹塚・橋本方面", "for Sasazuka & Hashimoto",
-                    to: "odpt.Railway:Keio.Keio"),
+                    to: "Railway:Keio.Keio"),
         ]
     )
 
@@ -230,10 +230,10 @@ enum ToeiLineData {
     // actual running order (Hikarigaoka -> loop via Roppongi/Daimon/Ryogoku -> Shinjuku-nishiguchi).
 
     static let oedo = StaticTrainLine(
-        id: "odpt.Railway:Toei.Oedo",
+        id: "Railway:Toei.Oedo",
         nameJa: "都営大江戸線",
         nameEn: "Toei Oedo Line",
-        operatorId: "odpt.Operator:Toei",
+        operatorId: "Operator:Toei",
         colorHex: "#B6007A",
         stations: [
             st("Oedo", "Hikarigaoka", "光が丘", "Hikarigaoka", "E38", 35.7583, 139.6289),
@@ -291,10 +291,10 @@ enum ToeiLineData {
     // MARK: - Nippori-Toneri Liner (NT)
 
     static let nipporiToneri = StaticTrainLine(
-        id: "odpt.Railway:Toei.NipporiToneri",
+        id: "Railway:Toei.NipporiToneri",
         nameJa: "日暮里・舎人ライナー",
         nameEn: "Nippori-Toneri Liner",
-        operatorId: "odpt.Operator:Toei",
+        operatorId: "Operator:Toei",
         colorHex: "#EF5BA1",
         stations: [
             st("NipporiToneri", "Nippori", "日暮里", "Nippori", "NT01", 35.7278, 139.7708),
@@ -334,10 +334,10 @@ enum ToeiLineData {
     // MARK: - Arakawa Line / Tokyo Sakura Tram (SA)
 
     static let arakawa = StaticTrainLine(
-        id: "odpt.Railway:Toei.Arakawa",
+        id: "Railway:Toei.Arakawa",
         nameJa: "都電荒川線",
         nameEn: "Toden Arakawa Line",
-        operatorId: "odpt.Operator:Toei",
+        operatorId: "Operator:Toei",
         colorHex: "#EE86A7",
         stations: [
             st("Arakawa", "Minowabashi", "三ノ輪橋", "Minowabashi", "SA01", 35.7321, 139.7915),

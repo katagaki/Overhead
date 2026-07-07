@@ -569,9 +569,9 @@ final class JourneyViewModel: ObservableObject {
         ]
 
         let line = TrainLine(
-            id: "odpt.Railway:JR-East.ChuoRapid",
+            id: "Railway:JR-East.ChuoRapid",
             name: "中央線快速", nameEn: "Chuo Rapid Line",
-            operatorId: "odpt.Operator:JR-East",
+            operatorId: "Operator:JR-East",
             stations: stations,
             colorHex: LineColors.chuoRapid
         )

@@ -5,7 +5,7 @@ import Foundation
 private func st(_ path: String, _ suffix: String, _ ja: String, _ en: String,
                 _ code: String, _ lat: Double, _ lon: Double) -> Station {
     Station(
-        id: "odpt.Station:\(path).\(suffix)",
+        id: "Station:\(path).\(suffix)",
         name: ja, nameEn: en, stationCode: code,
         latitude: lat, longitude: lon
     )
@@ -34,7 +34,7 @@ private func through(_ junction: String, _ end: ThroughService.LineEnd,
                      _ towardJa: String, _ towardEn: String,
                      to connectingLineId: String? = nil) -> ThroughService {
     ThroughService(
-        junctionStationId: "odpt.Station:\(junction)",
+        junctionStationId: "Station:\(junction)",
         end: end,
         lineNameJa: lineJa, lineNameEn: lineEn,
         towardJa: towardJa, towardEn: towardEn,
@@ -61,10 +61,10 @@ enum SotetsuLineData {
     // MARK: - Sotetsu Main Line (SO)
 
     static let main = StaticTrainLine(
-        id: "odpt.Railway:Sotetsu.Main",
+        id: "Railway:Sotetsu.Main",
         nameJa: "相鉄本線",
         nameEn: "Sotetsu Main Line",
-        operatorId: "odpt.Operator:Sotetsu",
+        operatorId: "Operator:Sotetsu",
         colorHex: "#00205C",
         stations: [
             st("Sotetsu.Main", "Yokohama", "横浜", "Yokohama", "SO01", 35.4657, 139.6224),

@@ -108,10 +108,10 @@ public struct ThroughService: Codable, Hashable {
 // MARK: - Static Train Line
 
 public struct StaticTrainLine {
-    public let id: String          // ODPT-compatible, e.g. "odpt.Railway:JR-East.Yamanote"
+    public let id: String          // e.g. "Railway:JR-East.Yamanote"
     public let nameJa: String
     public let nameEn: String
-    public let operatorId: String  // e.g. "odpt.Operator:JR-East"
+    public let operatorId: String  // e.g. "Operator:JR-East"
     public let colorHex: String
     public let stations: [Station]
     public let hopTimesMinutes: [Double] // count == stations.count - 1

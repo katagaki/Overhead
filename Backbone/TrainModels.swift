@@ -4,7 +4,7 @@ import SwiftUI
 // MARK: - Station
 
 public struct Station: Identifiable, Codable, Hashable {
-    public let id: String          // e.g. "odpt.Station:JR-East.ChuoRapid.Shinjuku"
+    public let id: String          // e.g. "Station:JR-East.ChuoRapid.Shinjuku"
     public let name: String        // Japanese name
     public let nameEn: String      // English/Romaji name
     public let nameKo: String      // Korean name
@@ -49,13 +49,13 @@ public struct Station: Identifiable, Codable, Hashable {
 // MARK: - Train Line
 
 public struct TrainLine: Identifiable, Codable, Hashable {
-    public let id: String           // e.g. "odpt.Railway:JR-East.ChuoRapid"
+    public let id: String           // e.g. "Railway:JR-East.ChuoRapid"
     public let name: String
     public let nameEn: String
     public let nameKo: String
     public let nameZhHans: String
     public let nameZhHant: String
-    public let operatorId: String   // e.g. "odpt.Operator:JR-East"
+    public let operatorId: String   // e.g. "Operator:JR-East"
     public let stations: [Station]
     public let colorHex: String     // Primary accent color
 
@@ -90,47 +90,47 @@ public struct TrainLine: Identifiable, Codable, Hashable {
 
     private static let symbolForRailwayId: [String: String] = [
         // JR East
-        "odpt.Railway:JR-East.Yamanote": "JY",
-        "odpt.Railway:JR-East.KeihinTohoku": "JK",
-        "odpt.Railway:JR-East.ChuoRapid": "JC",
-        "odpt.Railway:JR-East.ChuoSobuLocal": "JB",
-        "odpt.Railway:JR-East.SaikyoKawagoe": "JA",
-        "odpt.Railway:JR-East.Keiyo": "JE",
-        "odpt.Railway:JR-East.Yokohama": "JH",
-        "odpt.Railway:JR-East.Nambu": "JN",
-        "odpt.Railway:JR-East.YokosukaSobu": "JO",
-        "odpt.Railway:JR-East.Tokaido": "JT",
-        "odpt.Railway:JR-East.Utsunomiya": "JU",
-        "odpt.Railway:JR-East.Takasaki": "JU",
-        "odpt.Railway:JR-East.ShonanShinjuku": "JS",
-        "odpt.Railway:JR-East.JobanRapid": "JJ",
-        "odpt.Railway:JR-East.JobanLocal": "JL",
-        "odpt.Railway:JR-East.Musashino": "JM",
-        "odpt.Railway:JR-East.Tsurumi": "JI",
-        "odpt.Railway:JR-East.Ome": "JC",
-        "odpt.Railway:JR-East.Itsukaichi": "JC",
-        "odpt.Railway:JR-East.NaritaExpress": "JO",
-        "odpt.Railway:JR-East.Uchibo": "JR",
-        "odpt.Railway:JR-East.Sotobo": "JR",
-        "odpt.Railway:JR-East.Sagami": "JR",
+        "Railway:JR-East.Yamanote": "JY",
+        "Railway:JR-East.KeihinTohoku": "JK",
+        "Railway:JR-East.ChuoRapid": "JC",
+        "Railway:JR-East.ChuoSobuLocal": "JB",
+        "Railway:JR-East.SaikyoKawagoe": "JA",
+        "Railway:JR-East.Keiyo": "JE",
+        "Railway:JR-East.Yokohama": "JH",
+        "Railway:JR-East.Nambu": "JN",
+        "Railway:JR-East.YokosukaSobu": "JO",
+        "Railway:JR-East.Tokaido": "JT",
+        "Railway:JR-East.Utsunomiya": "JU",
+        "Railway:JR-East.Takasaki": "JU",
+        "Railway:JR-East.ShonanShinjuku": "JS",
+        "Railway:JR-East.JobanRapid": "JJ",
+        "Railway:JR-East.JobanLocal": "JL",
+        "Railway:JR-East.Musashino": "JM",
+        "Railway:JR-East.Tsurumi": "JI",
+        "Railway:JR-East.Ome": "JC",
+        "Railway:JR-East.Itsukaichi": "JC",
+        "Railway:JR-East.NaritaExpress": "JO",
+        "Railway:JR-East.Uchibo": "JR",
+        "Railway:JR-East.Sotobo": "JR",
+        "Railway:JR-East.Sagami": "JR",
         // Tokyo Metro
-        "odpt.Railway:TokyoMetro.Ginza": "G",
-        "odpt.Railway:TokyoMetro.Marunouchi": "M",
-        "odpt.Railway:TokyoMetro.MarunouchiBranch": "Mb",
-        "odpt.Railway:TokyoMetro.Hibiya": "H",
-        "odpt.Railway:TokyoMetro.Tozai": "T",
-        "odpt.Railway:TokyoMetro.Chiyoda": "C",
-        "odpt.Railway:TokyoMetro.Yurakucho": "Y",
-        "odpt.Railway:TokyoMetro.Hanzomon": "Z",
-        "odpt.Railway:TokyoMetro.Namboku": "N",
-        "odpt.Railway:TokyoMetro.Fukutoshin": "F",
+        "Railway:TokyoMetro.Ginza": "G",
+        "Railway:TokyoMetro.Marunouchi": "M",
+        "Railway:TokyoMetro.MarunouchiBranch": "Mb",
+        "Railway:TokyoMetro.Hibiya": "H",
+        "Railway:TokyoMetro.Tozai": "T",
+        "Railway:TokyoMetro.Chiyoda": "C",
+        "Railway:TokyoMetro.Yurakucho": "Y",
+        "Railway:TokyoMetro.Hanzomon": "Z",
+        "Railway:TokyoMetro.Namboku": "N",
+        "Railway:TokyoMetro.Fukutoshin": "F",
         // Toei
-        "odpt.Railway:Toei.Asakusa": "A",
-        "odpt.Railway:Toei.Mita": "I",
-        "odpt.Railway:Toei.Shinjuku": "S",
-        "odpt.Railway:Toei.Oedo": "E",
-        "odpt.Railway:Toei.NipporiToneri": "NT",
-        "odpt.Railway:Toei.Toden": "SA",
+        "Railway:Toei.Asakusa": "A",
+        "Railway:Toei.Mita": "I",
+        "Railway:Toei.Shinjuku": "S",
+        "Railway:Toei.Oedo": "E",
+        "Railway:Toei.NipporiToneri": "NT",
+        "Railway:Toei.Toden": "SA",
     ]
 
     public var localizedName: String {

@@ -5,7 +5,7 @@ import Foundation
 private func st(_ line: String, _ suffix: String, _ ja: String, _ en: String,
                 _ code: String, _ lat: Double, _ lon: Double) -> Station {
     Station(
-        id: "odpt.Station:JR-East.\(line).\(suffix)",
+        id: "Station:JR-East.\(line).\(suffix)",
         name: ja, nameEn: en, stationCode: code,
         latitude: lat, longitude: lon
     )
@@ -16,7 +16,7 @@ private func through(_ junction: String, _ end: ThroughService.LineEnd,
                      _ towardJa: String, _ towardEn: String,
                      to connectingLineId: String? = nil) -> ThroughService {
     ThroughService(
-        junctionStationId: "odpt.Station:JR-East.\(junction)",
+        junctionStationId: "Station:JR-East.\(junction)",
         end: end,
         lineNameJa: lineJa, lineNameEn: lineEn,
         towardJa: towardJa, towardEn: towardEn,
@@ -49,10 +49,10 @@ enum JREastLineData {
     // MARK: - Yamanote Line (JY)
 
     static let yamanote = StaticTrainLine(
-        id: "odpt.Railway:JR-East.Yamanote",
+        id: "Railway:JR-East.Yamanote",
         nameJa: "山手線",
         nameEn: "Yamanote Line",
-        operatorId: "odpt.Operator:JR-East",
+        operatorId: "Operator:JR-East",
         colorHex: "#9ACD32",
         stations: [
             st("Yamanote", "Tokyo", "東京", "Tokyo", "JY01", 35.6812, 139.7671),
@@ -152,10 +152,10 @@ enum JREastLineData {
     // MARK: - Chuo Rapid Line (JC)
 
     static let chuoRapid = StaticTrainLine(
-        id: "odpt.Railway:JR-East.ChuoRapid",
+        id: "Railway:JR-East.ChuoRapid",
         nameJa: "中央線快速",
         nameEn: "Chuo Rapid Line",
-        operatorId: "odpt.Operator:JR-East",
+        operatorId: "Operator:JR-East",
         colorHex: "#F15A22",
         stations: [
             st("ChuoRapid", "Tokyo", "東京", "Tokyo", "JC01", 35.6812, 139.7671),
@@ -251,7 +251,7 @@ enum JREastLineData {
         throughServices: [
             through("ChuoRapid.Tachikawa", .ascending,
                     "青梅線", "JR Ome Line", "青梅方面", "for Ome",
-                    to: "odpt.Railway:JR-East.Ome"),
+                    to: "Railway:JR-East.Ome"),
             through("ChuoRapid.Takao", .ascending,
                     "中央本線", "JR Chuo Main Line", "大月方面", "for Otsuki"),
         ]
@@ -260,10 +260,10 @@ enum JREastLineData {
     // MARK: - Chuo-Sobu Line Local (JB)
 
     static let chuoSobuLocal = StaticTrainLine(
-        id: "odpt.Railway:JR-East.ChuoSobuLocal",
+        id: "Railway:JR-East.ChuoSobuLocal",
         nameJa: "中央・総武線各駅停車",
         nameEn: "Chuo-Sobu Local Line",
-        operatorId: "odpt.Operator:JR-East",
+        operatorId: "Operator:JR-East",
         colorHex: "#FFD400",
         stations: [
             st("ChuoSobuLocal", "Mitaka", "三鷹", "Mitaka", "JB01", 35.7027, 139.5607),
@@ -371,21 +371,21 @@ enum JREastLineData {
             through("ChuoSobuLocal.Nakano", .ascending,
                     "東京メトロ東西線", "Tokyo Metro Tozai Line",
                     "西船橋方面", "for Nishi-funabashi",
-                    to: "odpt.Railway:TokyoMetro.Tozai"),
+                    to: "Railway:TokyoMetro.Tozai"),
             through("ChuoSobuLocal.NishiFunabashi", .descending,
                     "東京メトロ東西線", "Tokyo Metro Tozai Line",
                     "中野方面", "for Nakano",
-                    to: "odpt.Railway:TokyoMetro.Tozai"),
+                    to: "Railway:TokyoMetro.Tozai"),
         ]
     )
 
     // MARK: - Keihin-Tohoku Line (JK, incl. Negishi Line)
 
     static let keihinTohoku = StaticTrainLine(
-        id: "odpt.Railway:JR-East.KeihinTohoku",
+        id: "Railway:JR-East.KeihinTohoku",
         nameJa: "京浜東北線",
         nameEn: "Keihin-Tohoku Line",
-        operatorId: "odpt.Operator:JR-East",
+        operatorId: "Operator:JR-East",
         colorHex: "#00B2E5",
         stations: [
             st("KeihinTohoku", "Ofuna", "大船", "Ofuna", "JK01", 35.3540, 139.5313),
@@ -501,17 +501,17 @@ enum JREastLineData {
             through("KeihinTohoku.HigashiKanagawa", .ascending,
                     "横浜線", "JR Yokohama Line",
                     "町田・八王子方面", "for Machida & Hachioji",
-                    to: "odpt.Railway:JR-East.Yokohama"),
+                    to: "Railway:JR-East.Yokohama"),
         ]
     )
 
     // MARK: - Saikyo Line (JA)
 
     static let saikyo = StaticTrainLine(
-        id: "odpt.Railway:JR-East.SaikyoKawagoe",
+        id: "Railway:JR-East.SaikyoKawagoe",
         nameJa: "埼京線",
         nameEn: "Saikyo Line",
-        operatorId: "odpt.Operator:JR-East",
+        operatorId: "Operator:JR-East",
         colorHex: "#00AC9A",
         stations: [
             st("SaikyoKawagoe", "Osaki", "大崎", "Osaki", "JA08", 35.6197, 139.7286),
@@ -605,10 +605,10 @@ enum JREastLineData {
     // MARK: - Keiyo Line (JE)
 
     static let keiyo = StaticTrainLine(
-        id: "odpt.Railway:JR-East.Keiyo",
+        id: "Railway:JR-East.Keiyo",
         nameJa: "京葉線",
         nameEn: "Keiyo Line",
-        operatorId: "odpt.Operator:JR-East",
+        operatorId: "Operator:JR-East",
         colorHex: "#C9242F",
         stations: [
             st("Keiyo", "Tokyo", "東京", "Tokyo", "JE01", 35.6770, 139.7650),
