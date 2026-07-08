@@ -1,13 +1,13 @@
 import SwiftUI
 import Backbone
 
-// MARK: - Journey Setup View (乗換案内-style)
+// MARK: - Journey Planner Section (乗換案内-style)
 
-/// Shown on the Journey tab. The user picks a departure and arrival station,
-/// optional midpoints (経由), a departure time and walking speed, then
-/// chooses one of the candidate trains — including itineraries with
+/// Top section of the home screen. The user picks a departure and arrival
+/// station, optional midpoints (経由), a departure time and walking speed,
+/// then chooses one of the candidate trains — including itineraries with
 /// transfers (乗り換え) when no single train covers the trip.
-struct JourneySetupView: View {
+struct JourneyPlannerSection: View {
     @ObservedObject var viewModel: JourneyViewModel
 
     @State private var fromSelection: StationSearchHit?
@@ -68,49 +68,29 @@ struct JourneySetupView: View {
         departureMode == .now ? Date() : departureDate
     }
 
-    var body: some View {
-        NavigationStack {
-            Group {
-                if viewModel.isLoading && viewModel.availableLines.isEmpty {
-                    ProgressView("Loading.Lines")
-                } else {
-                    content
-                }
-            }
-            .navigationTitle("Tab.Journey")
-            .task {
-                await viewModel.loadLines()
-                restoreSelections()
-            }
-        }
-    }
-
     // MARK: - Content
 
-    private var content: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                stationCard
+    var body: some View {
+        VStack(spacing: 20) {
+            stationCard
 
-                departureTimeSection
+            departureTimeSection
 
-                walkingSpeedSection
+            walkingSpeedSection
 
-                if let searchError {
-                    noticeRow(icon: "exclamationmark.circle", text: searchError)
-                }
-
-                if hasSearched {
-                    candidateList
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-        }
-        .background(Color(.systemGroupedBackground))
-        .safeAreaInset(edge: .bottom) {
             searchButton
-                .padding(16)
+
+            if let searchError {
+                noticeRow(icon: "exclamationmark.circle", text: searchError)
+            }
+
+            if hasSearched {
+                candidateList
+            }
+        }
+        .task {
+            await viewModel.loadLines()
+            restoreSelections()
         }
         .sheet(item: $pickerTarget) { target in
             stationPickerSheet { hit in
@@ -358,7 +338,7 @@ struct JourneySetupView: View {
         }
     }
 
-    // MARK: - Search Button (bottom safe area)
+    // MARK: - Search Button
 
     @ViewBuilder
     private var searchButton: some View {

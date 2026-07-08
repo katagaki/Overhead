@@ -1,14 +1,11 @@
 import SwiftUI
 import Backbone
 
-/// Compact always-visible summary of the active journey shown in the tab bar
-/// bottom accessory; tapping it re-opens the journey sheet.
-@available(iOS 26.0, *)
-struct JourneyBottomAccessory: View {
+/// Compact always-visible summary of the active journey shown in the bottom
+/// toolbar; tapping it re-opens the journey sheet.
+struct JourneyToolbarAccessory: View {
     @ObservedObject var viewModel: JourneyViewModel
     let onTap: () -> Void
-
-    @Environment(\.tabViewBottomAccessoryPlacement) private var placement
 
     private var lineColor: Color {
         viewModel.selectedLine?.color ?? .accentColor
@@ -22,19 +19,13 @@ struct JourneyBottomAccessory: View {
                     .frame(width: 9, height: 9)
 
                 if let state = viewModel.positionState {
-                    if placement == .inline {
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("Label.NextStation")
+                            .font(.system(size: 9))
+                            .foregroundColor(.secondary)
                         Text(state.nextStationName)
-                            .font(.system(size: 14, weight: .bold))
+                            .font(.system(size: 15, weight: .bold))
                             .lineLimit(1)
-                    } else {
-                        VStack(alignment: .leading, spacing: 0) {
-                            Text("Label.NextStation")
-                                .font(.system(size: 9))
-                                .foregroundColor(.secondary)
-                            Text(state.nextStationName)
-                                .font(.system(size: 15, weight: .bold))
-                                .lineLimit(1)
-                        }
                     }
 
                     Spacer(minLength: 8)
@@ -54,6 +45,7 @@ struct JourneyBottomAccessory: View {
                     Spacer(minLength: 8)
                 }
             }
+            .frame(maxWidth: .infinity)
             .padding(.horizontal, 14)
             .contentShape(Rectangle())
         }

@@ -87,105 +87,56 @@ struct StationSearchRow: View {
     }
 }
 
-// MARK: - Station Picker (search all stations)
+// MARK: - Lines Section (browse all lines)
 
-struct LinePickerView: View {
+/// Home-screen section listing every train line grouped by operator, drawn as
+/// a grid of tappable line badges. Tapping a line opens its station map.
+struct LinesSection: View {
     @ObservedObject var viewModel: JourneyViewModel
-    @State private var searchText = ""
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if viewModel.isLoading {
-                    ProgressView("Loading.Lines")
-                } else if viewModel.availableLines.isEmpty {
-                    emptyState
-                } else {
-                    stationSearchList
-                }
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Tab.Lines")
+                .font(.body)
+                .foregroundColor(.secondary)
+                .padding(.leading, 4)
+
+            if viewModel.availableLines.isEmpty {
+                emptyState
+            } else {
+                browseByLineGrid
             }
-            .navigationTitle("ViewTitle.Stations")
-            .task {
-                await viewModel.loadLines()
-            }
-            .refreshable {
-                await viewModel.forceRefreshLines()
-            }
+        }
+        .task {
+            await viewModel.loadLines()
         }
     }
 
     private var emptyState: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "tram")
-                .font(.system(size: 48))
-                .foregroundColor(.secondary)
-            Text("Error.NoLinesAvailable")
-                .font(.headline)
-                .foregroundColor(.secondary)
-            Button("Button.Retry") {
-                Task { await viewModel.loadLines() }
-            }
-        }
-    }
-
-    // MARK: - Search / Browse
-
-    private var trimmedQuery: String {
-        searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    @ViewBuilder
-    private var stationSearchList: some View {
-        ScrollView {
-            if trimmedQuery.isEmpty {
-                browseByLineGrid
+        HStack(spacing: 12) {
+            if viewModel.isLoading {
+                ProgressView()
+                Text("Loading.Lines")
+                    .font(.system(size: 15))
+                    .foregroundColor(.secondary)
+                Spacer(minLength: 0)
             } else {
-                searchResultsList
-            }
-        }
-        .background(Color(.systemGroupedBackground))
-        .searchable(text: $searchText, prompt: Text("StationSearch.Prompt"))
-    }
-
-    @ViewBuilder
-    private var searchResultsList: some View {
-        let results = StationSearch.search(lines: viewModel.availableLines, query: trimmedQuery)
-        if results.isEmpty {
-            HStack {
-                Image(systemName: "magnifyingglass")
-                Text("StationSearch.NoResults")
-            }
-            .foregroundColor(.secondary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(20)
-        } else {
-            LazyVStack(spacing: 0) {
-                ForEach(results) { hit in
-                    NavigationLink {
-                        StationTimetableView(
-                            station: hit.station,
-                            line: hit.line,
-                            viewModel: viewModel
-                        )
-                    } label: {
-                        HStack {
-                            StationSearchRow(hit: hit)
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(Color(.tertiaryLabel))
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-
-                    Divider()
-                        .padding(.leading, 16)
+                Image(systemName: "tram")
+                    .font(.system(size: 24))
+                    .foregroundColor(.secondary)
+                Text("Error.NoLinesAvailable")
+                    .font(.system(size: 15))
+                    .foregroundColor(.secondary)
+                Spacer(minLength: 0)
+                Button("Button.Retry") {
+                    Task { await viewModel.forceRefreshLines() }
                 }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
     }
 
     private var browseByLineGrid: some View {
@@ -265,8 +216,6 @@ struct LinePickerView: View {
                 }
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
     }
 
     private func lineCell(line: TrainLine) -> some View {
@@ -663,35 +612,26 @@ struct StationPickerView: View {
         let services = StaticTimetableGenerator.services(for: staticLine, calendar: calendar)
             .filter { ($0.direction == .outbound) == direction.isAscending }
 
-        // Earliest train of the day per station, so the next arrival can be
-        // flagged as the 始発 when today's service hasn't started there yet.
-        var firstOfDay: [String: Int] = [:]
+        // 当駅始発: trains originate at the direction's origin terminus, so it
+        // is the only station whose next train is a 始発 — everywhere else the
+        // train arrived from up-line. (Mid-line 始発 needs short-turn data.)
+        let originId = (direction.isAscending ? staticLine.stations.first : staticLine.stations.last)?.id
+
         var best: [String: NextArrival] = [:]
         for service in services {
             for entry in service.timetable {
                 guard let timeStr = entry.arrivalTime ?? entry.departureTime,
                       let secs = TimetableEntry.parseRailTime(timeStr) else { continue }
                 let minutes = secs / 60
-                if firstOfDay[entry.stationId].map({ minutes < $0 }) ?? true {
-                    firstOfDay[entry.stationId] = minutes
-                }
                 guard minutes >= nowMinutes else { continue }
                 if let current = best[entry.stationId], current.minutes <= minutes { continue }
                 best[entry.stationId] = NextArrival(
                     time: timeStr,
                     trainType: service.trainType,
                     minutes: minutes,
-                    isFirstTrain: false
+                    isFirstTrain: entry.stationId == originId
                 )
             }
-        }
-        for (stationId, arrival) in best where arrival.minutes == firstOfDay[stationId] {
-            best[stationId] = NextArrival(
-                time: arrival.time,
-                trainType: arrival.trainType,
-                minutes: arrival.minutes,
-                isFirstTrain: true
-            )
         }
 
         // After the last train has passed a station, fall through to the next
@@ -713,7 +653,7 @@ struct StationPickerView: View {
                     time: timeStr,
                     trainType: service.trainType,
                     minutes: minutes,
-                    isFirstTrain: true
+                    isFirstTrain: entry.stationId == originId
                 )
             }
         }

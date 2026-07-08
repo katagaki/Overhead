@@ -1,34 +1,52 @@
 import SwiftUI
 import Backbone
 
+/// The whole app on one scrolling surface: the journey planner up top, saved
+/// favorites below it, then every train line to browse. Settings and the
+/// end-journey action live in the top-trailing More menu, and an active
+/// journey minimizes into a custom accessory in the bottom toolbar.
 struct RootView: View {
     @ObservedObject var viewModel: JourneyViewModel
-    @State private var selectedTab: Tab = .journey
+
+    @AppStorage("showEnglish") private var showEnglish = true
     @State private var showJourneySheet = false
+    @State private var showAttributions = false
     @Namespace private var journeyZoom
 
     private static let journeyTransitionID = "activeJourney"
 
-    enum Tab: Hashable {
-        case journey
-        case places
-        case lines
-        case more
-    }
-
     var body: some View {
-        Group {
-            if #available(iOS 26.0, *), viewModel.activeJourney != nil {
-                tabView
-                    .tabViewBottomAccessory {
-                        JourneyBottomAccessory(viewModel: viewModel) {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 24) {
+                    JourneyPlannerSection(viewModel: viewModel)
+                    FavoritesSection(viewModel: viewModel)
+                    LinesSection(viewModel: viewModel)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+            }
+            .background(Color(.systemGroupedBackground))
+            .navigationTitle(Text(verbatim: "Overhead"))
+            .toolbarTitleDisplayMode(.inlineLarge)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    moreMenu
+                }
+                if viewModel.activeJourney != nil {
+                    ToolbarItem(placement: .bottomBar) {
+                        JourneyToolbarAccessory(viewModel: viewModel) {
                             showJourneySheet = true
                         }
                         .matchedTransitionSource(id: Self.journeyTransitionID, in: journeyZoom)
                     }
-                    .tabBarMinimizeBehavior(.onScrollDown)
-            } else {
-                tabView
+                }
+            }
+            .navigationDestination(isPresented: $showAttributions) {
+                MoreAttributionsView()
+            }
+            .task {
+                await viewModel.loadLines()
             }
         }
         .tint(viewModel.selectedLine?.color ?? Color.accentColor)
@@ -37,59 +55,41 @@ struct RootView: View {
                 .navigationTransition(.zoom(sourceID: Self.journeyTransitionID, in: journeyZoom))
         }
         .onChange(of: viewModel.activeJourney != nil) { _, hasJourney in
-            if #available(iOS 26.0, *) {
-                // The journey lives in a sheet; dismissing it minimizes the
-                // journey into the tab bar bottom accessory.
-                showJourneySheet = hasJourney
-            } else if hasJourney {
-                selectedTab = .journey
-            } else {
-                showJourneySheet = false
+            // The journey lives in a sheet; dismissing it minimizes the
+            // journey into the bottom toolbar accessory.
+            showJourneySheet = hasJourney
+        }
+    }
+
+    // MARK: - More Menu
+
+    private var moreMenu: some View {
+        Menu {
+            Toggle("Settings.Toggle.ShowEnglish", isOn: $showEnglish)
+
+            if viewModel.activeJourney != nil {
+                Section("Settings.Section.CurrentJourney") {
+                    Button(role: .destructive) {
+                        viewModel.stopJourney()
+                    } label: {
+                        Label("Button.EndJourney", systemImage: "stop.circle.fill")
+                    }
+                }
             }
+
+            Section {
+                Link(destination: URL(string: "https://github.com/katagaki/Overhead")!) {
+                    Label("More.GitHub", systemImage: "chevron.left.forwardslash.chevron.right")
+                }
+                Button {
+                    showAttributions = true
+                } label: {
+                    Label("More.Attributions", systemImage: "info.circle")
+                }
+            }
+        } label: {
+            Image(systemName: "ellipsis")
         }
-    }
-
-    private var tabView: some View {
-        TabView(selection: $selectedTab) {
-            journeyTabContent
-                .tabItem {
-                    Image(systemName: "tram.fill")
-                    Text("Tab.Journey")
-                }
-                .tag(Tab.journey)
-
-            PlacesView(viewModel: viewModel)
-                .tabItem {
-                    Image(systemName: "mappin.and.ellipse")
-                    Text("Tab.Places")
-                }
-                .tag(Tab.places)
-
-            LinePickerView(viewModel: viewModel)
-                .tabItem {
-                    Image(systemName: "map")
-                    Text("Tab.Lines")
-                }
-                .tag(Tab.lines)
-
-            MoreView(viewModel: viewModel)
-                .tabItem {
-                    Image(systemName: "ellipsis")
-                    Text("Tab.More")
-                }
-                .tag(Tab.more)
-        }
-    }
-
-    @ViewBuilder
-    private var journeyTabContent: some View {
-        if #available(iOS 26.0, *) {
-            JourneySetupView(viewModel: viewModel)
-        } else if viewModel.activeJourney != nil {
-            // Pre-26 fallback: no bottom accessory, so keep the journey inline.
-            JourneyView(viewModel: viewModel)
-        } else {
-            JourneySetupView(viewModel: viewModel)
-        }
+        .accessibilityLabel("ViewTitle.More")
     }
 }

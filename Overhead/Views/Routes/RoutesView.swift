@@ -1,61 +1,68 @@
 import SwiftUI
 import Backbone
 
-// MARK: - Places View (場所)
+// MARK: - Favorites Section (場所)
 
-/// Saved places: any number of labelled routes (自宅・職場・学校・カスタム),
-/// each startable with one tap.
-struct PlacesView: View {
+/// Home-screen section for saved places: any number of labelled routes
+/// (自宅・職場・学校・カスタム), each startable with one tap. Rendered as a
+/// custom card so it sits inline in the home scroll view.
+struct FavoritesSection: View {
     @ObservedObject var viewModel: JourneyViewModel
     @State private var places: [SavedPlace] = []
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if places.isEmpty {
-                    emptyState
-                } else {
-                    placesList
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                Text("Section.Favorites")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+
+                Spacer()
+
+                NavigationLink {
+                    PlaceEditorView(
+                        existingPlace: nil,
+                        availableLines: viewModel.availableLines,
+                        onSave: { upsert($0) }
+                    )
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 15, weight: .semibold))
                 }
+                .accessibilityLabel("Button.AddPlace")
             }
-            .navigationTitle("NavigationTitle.Places")
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    NavigationLink {
-                        PlaceEditorView(
-                            existingPlace: nil,
-                            availableLines: viewModel.availableLines,
-                            onSave: { upsert($0) }
-                        )
-                    } label: {
-                        Image(systemName: "plus")
-                    }
-                    .accessibilityLabel("Button.AddPlace")
-                }
+            .padding(.leading, 4)
+            .padding(.trailing, 4)
+
+            if places.isEmpty {
+                emptyState
+            } else {
+                placesList
             }
-            .task {
-                await viewModel.loadLines()
-            }
-            .onAppear { places = SavedPlaceStore.load() }
         }
+        .task {
+            await viewModel.loadLines()
+        }
+        .onAppear { places = SavedPlaceStore.load() }
     }
 
     // MARK: - List
 
     private var placesList: some View {
-        List {
-            ForEach(places) { place in
+        VStack(spacing: 0) {
+            ForEach(Array(places.enumerated()), id: \.element.id) { index, place in
                 if let resolved = resolve(place) {
                     placeRow(place: place, resolved: resolved)
                 } else {
                     brokenPlaceRow(place: place)
                 }
-            }
-            .onDelete { offsets in
-                places.remove(atOffsets: offsets)
-                SavedPlaceStore.save(places)
+                if index < places.count - 1 {
+                    Divider().padding(.leading, 16)
+                }
             }
         }
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
     }
 
     @ViewBuilder
@@ -63,61 +70,70 @@ struct PlacesView: View {
         place: SavedPlace,
         resolved: (line: TrainLine, from: Station, to: Station, isThrough: Bool)
     ) -> some View {
-        NavigationLink {
-            PlaceEditorView(
-                existingPlace: place,
-                availableLines: viewModel.availableLines,
-                onSave: { upsert($0) }
-            )
-        } label: {
-            HStack(spacing: 12) {
-                Image(systemName: place.kind.iconName)
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(width: 36, height: 36)
-                    .background(resolved.line.color)
-                    .clipShape(RoundedRectangle(cornerRadius: 9))
+        HStack(spacing: 12) {
+            NavigationLink {
+                PlaceEditorView(
+                    existingPlace: place,
+                    availableLines: viewModel.availableLines,
+                    onSave: { upsert($0) }
+                )
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: place.kind.iconName)
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 36, height: 36)
+                        .background(resolved.line.color)
+                        .clipShape(RoundedRectangle(cornerRadius: 9))
 
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(displayName(of: place))
-                        .font(.system(size: 16, weight: .semibold))
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(displayName(of: place))
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.primary)
 
-                    HStack(spacing: 5) {
-                        Text(resolved.from.localizedName)
-                        Image(systemName: resolved.isThrough ? "arrow.triangle.branch" : "arrow.right")
-                            .font(.system(size: 10, weight: .semibold))
-                            .foregroundStyle(.tertiary)
-                        Text(resolved.to.localizedName)
-                    }
-                    .font(.system(size: 13))
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-
-                    Text(resolved.line.localizedName)
-                        .font(.system(size: 12))
-                        .foregroundColor(resolved.line.color)
+                        HStack(spacing: 5) {
+                            Text(resolved.from.localizedName)
+                            Image(systemName: resolved.isThrough ? "arrow.triangle.branch" : "arrow.right")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundStyle(.tertiary)
+                            Text(resolved.to.localizedName)
+                        }
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
                         .lineLimit(1)
-                }
 
-                Spacer(minLength: 8)
-
-                Button {
-                    Task {
-                        await viewModel.startJourney(
-                            line: resolved.line,
-                            from: resolved.from,
-                            to: resolved.to
-                        )
+                        Text(resolved.line.localizedName)
+                            .font(.system(size: 12))
+                            .foregroundColor(resolved.line.color)
+                            .lineLimit(1)
                     }
-                } label: {
-                    Image(systemName: "play.circle.fill")
-                        .font(.system(size: 30))
-                        .foregroundColor(resolved.line.color)
+
+                    Spacer(minLength: 8)
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Button.StartJourney")
+                .contentShape(Rectangle())
             }
-            .padding(.vertical, 4)
+            .buttonStyle(.plain)
+
+            Button {
+                Task {
+                    await viewModel.startJourney(
+                        line: resolved.line,
+                        from: resolved.from,
+                        to: resolved.to
+                    )
+                }
+            } label: {
+                Image(systemName: "play.circle.fill")
+                    .font(.system(size: 30))
+                    .foregroundColor(resolved.line.color)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Button.StartJourney")
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .contextMenu {
+            deleteButton(for: place)
         }
     }
 
@@ -127,7 +143,7 @@ struct PlacesView: View {
             Image(systemName: place.kind.iconName)
                 .font(.system(size: 20))
                 .foregroundColor(.secondary)
-                .frame(width: 32)
+                .frame(width: 36)
             VStack(alignment: .leading, spacing: 2) {
                 Text(displayName(of: place))
                     .font(.system(size: 16, weight: .semibold))
@@ -135,23 +151,43 @@ struct PlacesView: View {
                     .font(.system(size: 12))
                     .foregroundColor(.secondary)
             }
+            Spacer(minLength: 8)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .contextMenu {
+            deleteButton(for: place)
+        }
+    }
+
+    private func deleteButton(for place: SavedPlace) -> some View {
+        Button(role: .destructive) {
+            places.removeAll { $0.id == place.id }
+            SavedPlaceStore.save(places)
+        } label: {
+            Label("Button.DeletePlace", systemImage: "trash")
         }
     }
 
     private var emptyState: some View {
-        VStack(spacing: 16) {
+        HStack(spacing: 12) {
             Image(systemName: "mappin.and.ellipse")
-                .font(.system(size: 48))
+                .font(.system(size: 24))
                 .foregroundColor(.secondary)
-            Text("Place.EmptyTitle")
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.secondary)
-            Text("Place.EmptyDescription")
-                .font(.system(size: 13))
-                .foregroundStyle(.tertiary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Place.EmptyTitle")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(.secondary)
+                Text("Place.EmptyDescription")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.tertiary)
+            }
+            Spacer(minLength: 0)
         }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
     }
 
     // MARK: - Helpers
