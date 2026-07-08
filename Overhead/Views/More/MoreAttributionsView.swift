@@ -5,6 +5,24 @@ struct MoreAttributionsView: View {
         List {
             Section {
                 Text(verbatim: """
+                    Some train timetable data (including 当駅始発 originating-\
+                    train times) is derived from the Public Transportation Open \
+                    Data Center (公共交通オープンデータセンター).
+
+                    The source data is provided by the transportation operators \
+                    via the ODPT center and is used under the Creative Commons \
+                    Attribution 4.0 International (CC BY 4.0) license. The data \
+                    is processed by this app and is not guaranteed to be \
+                    accurate or current; it does not represent the views of the \
+                    operators or the ODPT center.
+
+                    https://www.odpt.org
+                    """)
+            } header: {
+                Text(verbatim: "Public Transportation Open Data Center")
+            }
+            Section {
+                Text(verbatim: """
                     Copyright (c) 2014, Indian Type Foundry (info@indiantypefoundry.com).
 
                     This Font Software is licensed under the SIL Open Font License, Version 1.1.

@@ -20,20 +20,13 @@ private func pattern(_ first: String, _ last: String, _ bands: [(String, Double)
 
 private func direction(_ path: String, _ suffix: String, _ ja: String, _ en: String,
                        ascending: Bool,
-                       weekday: ServicePattern, holiday: ServicePattern,
-                       origins: [IntermediateOrigin] = []) -> StaticLineDirection {
+                       weekday: ServicePattern, holiday: ServicePattern) -> StaticLineDirection {
     StaticLineDirection(
         id: "static.RailDirection:\(path).\(suffix)",
         nameJa: ja, nameEn: en,
         isAscending: ascending,
-        weekday: weekday, saturdayHoliday: holiday,
-        intermediateOrigins: origins
+        weekday: weekday, saturdayHoliday: holiday
     )
-}
-
-// 当駅始発 short-turn origin. `w`/`h` describe ONLY trains that start here.
-private func origin(_ stationId: String, _ w: ServicePattern, _ h: ServicePattern) -> IntermediateOrigin {
-    IntermediateOrigin(stationId: stationId, weekday: w, saturdayHoliday: h)
 }
 
 private func through(_ junction: String, _ end: ThroughService.LineEnd,
@@ -138,36 +131,10 @@ enum OdakyuLineData {
             2, 3, 3, 3, 3, 2, 2, 4, 2, 2, 4.5, 6, 6, 3, 6, 6, 8, 3, 3, 3, 3, 3, 4.5,
         ],
         directions: [
-            // 当駅始発 (approximate short-turn patterns): down-direction trains
-            // start at the 相模大野/本厚木 turn-backs; up-direction (toward
-            // 新宿) trains famously originate at 向ヶ丘遊園・成城学園前 in the
-            // morning plus the 相模大野・本厚木 hubs all day.
             direction("Odakyu.Odawara", "Odawara", "小田原方面", "For Odawara", ascending: true,
-                      weekday: odawaraDownWeekday, holiday: odawaraDownHoliday,
-                      origins: [
-                          origin("Station:Odakyu.Odawara.SagamiOno",
-                                 pattern("05:20", "24:35", [("05:20", 20), ("06:30", 14), ("09:30", 24), ("21:00", 14), ("23:00", 20)]),
-                                 pattern("05:20", "24:35", [("05:20", 22), ("07:00", 16), ("10:00", 24), ("21:00", 20)])),
-                          origin("Station:Odakyu.Odawara.HonAtsugi",
-                                 pattern("05:10", "24:40", [("05:10", 22), ("06:30", 15), ("09:30", 26), ("21:00", 15), ("23:00", 18)]),
-                                 pattern("05:10", "24:40", [("05:10", 24), ("07:00", 18), ("10:00", 26), ("21:00", 20)])),
-                      ]),
+                      weekday: odawaraDownWeekday, holiday: odawaraDownHoliday),
             direction("Odakyu.Odawara", "Shinjuku", "新宿方面", "For Shinjuku", ascending: false,
-                      weekday: odawaraUpWeekday, holiday: odawaraUpHoliday,
-                      origins: [
-                          origin("Station:Odakyu.Odawara.MukogaokaYuen",
-                                 pattern("05:00", "24:15", [("05:00", 12), ("06:00", 8), ("09:00", 30), ("17:00", 20), ("22:00", 25)]),
-                                 pattern("05:00", "24:15", [("05:00", 20), ("07:00", 15), ("10:00", 40)])),
-                          origin("Station:Odakyu.Odawara.SeijogakuenMae",
-                                 pattern("05:00", "24:20", [("05:00", 14), ("06:00", 9), ("09:00", 35), ("22:00", 25)]),
-                                 pattern("05:00", "24:20", [("05:00", 22), ("07:00", 16), ("10:00", 45)])),
-                          origin("Station:Odakyu.Odawara.SagamiOno",
-                                 pattern("04:55", "24:10", [("04:55", 15), ("06:00", 8), ("09:30", 20), ("16:30", 12), ("20:00", 20), ("22:00", 25)]),
-                                 pattern("04:55", "24:10", [("04:55", 18), ("07:00", 12), ("10:00", 22), ("20:00", 25)])),
-                          origin("Station:Odakyu.Odawara.HonAtsugi",
-                                 pattern("04:50", "23:55", [("04:50", 16), ("06:00", 9), ("09:30", 22), ("16:30", 13), ("20:00", 22), ("22:00", 26)]),
-                                 pattern("04:50", "23:55", [("04:50", 20), ("07:00", 13), ("10:00", 24), ("20:00", 26)])),
-                      ]),
+                      weekday: odawaraUpWeekday, holiday: odawaraUpHoliday),
         ],
         delayInfo: delayInfo,
         throughServices: [
@@ -231,23 +198,10 @@ enum OdakyuLineData {
         ],
         hopTimesMinutes: [3.5, 2.5, 2.5, 1.5, 3.5, 2.5, 3.5, 2.5, 3.5, 2.5, 2.5, 2.5, 3.5, 2.5, 2.5, 2.5],
         directions: [
-            // 藤沢 is a switchback: the 藤沢–片瀬江ノ島 leg is run almost
-            // entirely by 藤沢始発 shuttles, and many up trains toward 相模大野
-            // also originate there.
             direction("Odakyu.Enoshima", "KataseEnoshima", "藤沢・片瀬江ノ島方面", "For Fujisawa & Katase-Enoshima", ascending: true,
-                      weekday: enoshimaDownWeekday, holiday: enoshimaDownHoliday,
-                      origins: [
-                          origin("Station:Odakyu.Enoshima.Fujisawa",
-                                 pattern("05:10", "24:00", [("05:10", 14), ("06:30", 10), ("09:30", 12), ("20:00", 14), ("22:30", 18)]),
-                                 pattern("05:10", "24:00", [("05:10", 14), ("07:00", 10), ("10:00", 11), ("20:00", 15)])),
-                      ]),
+                      weekday: enoshimaDownWeekday, holiday: enoshimaDownHoliday),
             direction("Odakyu.Enoshima", "SagamiOno", "相模大野方面", "For Sagami-Ono", ascending: false,
-                      weekday: enoshimaUpWeekday, holiday: enoshimaUpHoliday,
-                      origins: [
-                          origin("Station:Odakyu.Enoshima.Fujisawa",
-                                 pattern("05:00", "24:10", [("05:00", 12), ("06:30", 9), ("09:30", 13), ("17:00", 11), ("20:00", 15), ("22:00", 20)]),
-                                 pattern("05:00", "24:10", [("05:00", 13), ("07:00", 10), ("10:00", 13), ("20:00", 18)])),
-                      ]),
+                      weekday: enoshimaUpWeekday, holiday: enoshimaUpHoliday),
         ],
         delayInfo: delayInfo,
         throughServices: [

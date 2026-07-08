@@ -20,20 +20,13 @@ private func pattern(_ first: String, _ last: String, _ bands: [(String, Double)
 
 private func direction(_ path: String, _ suffix: String, _ ja: String, _ en: String,
                        ascending: Bool,
-                       weekday: ServicePattern, holiday: ServicePattern,
-                       origins: [IntermediateOrigin] = []) -> StaticLineDirection {
+                       weekday: ServicePattern, holiday: ServicePattern) -> StaticLineDirection {
     StaticLineDirection(
         id: "static.RailDirection:\(path).\(suffix)",
         nameJa: ja, nameEn: en,
         isAscending: ascending,
-        weekday: weekday, saturdayHoliday: holiday,
-        intermediateOrigins: origins
+        weekday: weekday, saturdayHoliday: holiday
     )
-}
-
-// 当駅始発 short-turn origin. `w`/`h` describe ONLY trains that start here.
-private func origin(_ stationId: String, _ w: ServicePattern, _ h: ServicePattern) -> IntermediateOrigin {
-    IntermediateOrigin(stationId: stationId, weekday: w, saturdayHoliday: h)
 }
 
 private func through(_ junction: String, _ end: ThroughService.LineEnd,
@@ -136,9 +129,6 @@ enum KeikyuLineData {
         directions: [
             // First/last at Sengakuji estimated from verified Shinagawa data
             // (05:02/23:59, ekitan) minus the 2-3 min hop; Sengakuji page 404s.
-            // 当駅始発 (approximate): 京急川崎・金沢文庫 turn back trains toward
-            // 浦賀; 神奈川新町 (depot)・金沢文庫・京急川崎 originate many toward
-            // 品川.
             direction("Keikyu.Main", "Uraga", "横浜・浦賀方面", "For Yokohama & Uraga",
                       ascending: true,
                       weekday: pattern("05:10", "23:56", [
@@ -146,15 +136,7 @@ enum KeikyuLineData {
                       ]),
                       holiday: pattern("05:10", "23:56", [
                           ("05:10", 8), ("07:00", 5), ("10:00", 5), ("20:00", 7),
-                      ]),
-                      origins: [
-                          origin("Station:Keikyu.Main.KeikyuKawasaki",
-                                 pattern("05:20", "24:20", [("05:20", 22), ("06:30", 16), ("09:30", 28), ("22:30", 20)]),
-                                 pattern("05:20", "24:20", [("05:20", 24), ("07:00", 18), ("10:00", 28)])),
-                          origin("Station:Keikyu.Main.KanazawaBunko",
-                                 pattern("05:15", "24:25", [("05:15", 18), ("06:30", 12), ("09:30", 22), ("20:00", 14), ("23:00", 18)]),
-                                 pattern("05:15", "24:25", [("05:15", 20), ("07:00", 14), ("10:00", 22), ("20:00", 18)])),
-                      ]),
+                      ])),
             // Uraga first/last estimated (ekitan page returned 500)
             direction("Keikyu.Main", "Sengakuji", "品川・泉岳寺方面", "For Shinagawa & Sengakuji",
                       ascending: false,
@@ -163,18 +145,7 @@ enum KeikyuLineData {
                       ]),
                       holiday: pattern("04:45", "23:35", [
                           ("04:45", 8), ("07:00", 5), ("10:00", 5), ("20:00", 7),
-                      ]),
-                      origins: [
-                          origin("Station:Keikyu.Main.KanazawaBunko",
-                                 pattern("04:50", "24:00", [("04:50", 16), ("06:00", 10), ("09:30", 22), ("16:30", 13), ("20:00", 22), ("22:00", 26)]),
-                                 pattern("04:50", "24:00", [("04:50", 20), ("07:00", 14), ("10:00", 24), ("20:00", 26)])),
-                          origin("Station:Keikyu.Main.KanagawaShimmachi",
-                                 pattern("04:48", "24:10", [("04:48", 20), ("06:00", 13), ("09:30", 26), ("22:00", 22)]),
-                                 pattern("04:48", "24:10", [("04:48", 24), ("07:00", 18), ("10:00", 28)])),
-                          origin("Station:Keikyu.Main.KeikyuKawasaki",
-                                 pattern("04:52", "24:05", [("04:52", 22), ("06:00", 15), ("09:30", 28), ("22:00", 24)]),
-                                 pattern("04:52", "24:05", [("04:52", 26), ("07:00", 19), ("10:00", 30)])),
-                      ]),
+                      ])),
         ],
         delayInfo: delayInfo,
         throughServices: [

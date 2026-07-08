@@ -20,20 +20,13 @@ private func pattern(_ first: String, _ last: String, _ bands: [(String, Double)
 
 private func direction(_ path: String, _ suffix: String, _ ja: String, _ en: String,
                        ascending: Bool,
-                       weekday: ServicePattern, holiday: ServicePattern,
-                       origins: [IntermediateOrigin] = []) -> StaticLineDirection {
+                       weekday: ServicePattern, holiday: ServicePattern) -> StaticLineDirection {
     StaticLineDirection(
         id: "static.RailDirection:\(path).\(suffix)",
         nameJa: ja, nameEn: en,
         isAscending: ascending,
-        weekday: weekday, saturdayHoliday: holiday,
-        intermediateOrigins: origins
+        weekday: weekday, saturdayHoliday: holiday
     )
-}
-
-// 当駅始発 short-turn origin. `w`/`h` describe ONLY trains that start here.
-private func origin(_ stationId: String, _ w: ServicePattern, _ h: ServicePattern) -> IntermediateOrigin {
-    IntermediateOrigin(stationId: stationId, weekday: w, saturdayHoliday: h)
 }
 
 private func through(_ junction: String, _ end: ThroughService.LineEnd,
@@ -101,7 +94,6 @@ enum TokyuLineData {
             2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
         ],
         directions: [
-            // 当駅始発 (approximate): 武蔵小杉・菊名 turn back some trains.
             direction("Tokyu.Toyoko", "Yokohama", "横浜・元町・中華街方面", "For Yokohama & Motomachi-Chukagai",
                       ascending: true,
                       weekday: pattern("05:00", "24:21", [
@@ -109,15 +101,7 @@ enum TokyuLineData {
                       ]),
                       holiday: pattern("05:00", "24:21", [
                           ("05:00", 7), ("07:00", 5), ("10:00", 5), ("20:00", 7),
-                      ]),
-                      origins: [
-                          origin("Station:Tokyu.Toyoko.MusashiKosugi",
-                                 pattern("05:20", "24:25", [("05:20", 22), ("06:30", 16), ("09:30", 30), ("22:30", 18)]),
-                                 pattern("05:20", "24:25", [("05:20", 24), ("07:00", 18), ("10:00", 30)])),
-                          origin("Station:Tokyu.Toyoko.Kikuna",
-                                 pattern("05:30", "24:30", [("05:30", 26), ("06:30", 20), ("09:30", 34), ("23:00", 20)]),
-                                 pattern("05:30", "24:30", [("05:30", 28), ("07:00", 22), ("10:00", 34)])),
-                      ]),
+                      ])),
             direction("Tokyu.Toyoko", "Shibuya", "渋谷・和光市方面", "For Shibuya & Wakoshi",
                       ascending: false,
                       weekday: pattern("05:00", "24:12", [
@@ -125,15 +109,7 @@ enum TokyuLineData {
                       ]),
                       holiday: pattern("05:00", "24:12", [
                           ("05:00", 7), ("07:00", 5), ("10:00", 5), ("20:00", 7),
-                      ]),
-                      origins: [
-                          origin("Station:Tokyu.Toyoko.Kikuna",
-                                 pattern("04:55", "24:00", [("04:55", 20), ("06:00", 13), ("09:30", 26), ("22:00", 22)]),
-                                 pattern("04:55", "24:00", [("04:55", 24), ("07:00", 18), ("10:00", 28)])),
-                          origin("Station:Tokyu.Toyoko.MusashiKosugi",
-                                 pattern("04:50", "23:55", [("04:50", 24), ("06:00", 16), ("09:30", 30), ("22:00", 22)]),
-                                 pattern("04:50", "23:55", [("04:50", 26), ("07:00", 20), ("10:00", 32)])),
-                      ]),
+                      ])),
         ],
         delayInfo: delayInfo,
         throughServices: [
@@ -189,8 +165,6 @@ enum TokyuLineData {
             2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
         ],
         directions: [
-            // 当駅始発 (approximate): 鷺沼 and 長津田 both have depots and
-            // originate many short-turn trains in both directions.
             direction("Tokyu.DenEnToshi", "ChuoRinkan", "中央林間方面", "For Chuo-Rinkan",
                       ascending: true,
                       weekday: pattern("05:05", "23:58", [
@@ -198,15 +172,7 @@ enum TokyuLineData {
                       ]),
                       holiday: pattern("05:05", "23:58", [
                           ("05:05", 7), ("07:00", 6), ("10:00", 6), ("20:00", 7),
-                      ]),
-                      origins: [
-                          origin("Station:Tokyu.DenEnToshi.Saginuma",
-                                 pattern("05:15", "24:30", [("05:15", 18), ("06:30", 12), ("09:30", 22), ("20:00", 14), ("23:00", 18)]),
-                                 pattern("05:15", "24:30", [("05:15", 20), ("07:00", 14), ("10:00", 22), ("20:00", 18)])),
-                          origin("Station:Tokyu.DenEnToshi.Nagatsuta",
-                                 pattern("05:25", "24:35", [("05:25", 24), ("06:30", 18), ("09:30", 30), ("23:00", 20)]),
-                                 pattern("05:25", "24:35", [("05:25", 26), ("07:00", 20), ("10:00", 30)])),
-                      ]),
+                      ])),
             direction("Tokyu.DenEnToshi", "Shibuya", "渋谷・大手町方面", "For Shibuya & Otemachi",
                       ascending: false,
                       weekday: pattern("05:00", "24:10", [
@@ -214,15 +180,7 @@ enum TokyuLineData {
                       ]),
                       holiday: pattern("05:00", "24:10", [
                           ("05:00", 7), ("07:00", 6), ("10:00", 6), ("20:00", 7),
-                      ]),
-                      origins: [
-                          origin("Station:Tokyu.DenEnToshi.Nagatsuta",
-                                 pattern("04:55", "24:05", [("04:55", 20), ("06:00", 13), ("09:30", 24), ("16:30", 14), ("20:00", 22), ("22:00", 26)]),
-                                 pattern("04:55", "24:05", [("04:55", 24), ("07:00", 16), ("10:00", 26), ("20:00", 26)])),
-                          origin("Station:Tokyu.DenEnToshi.Saginuma",
-                                 pattern("04:50", "24:00", [("04:50", 16), ("06:00", 10), ("09:30", 20), ("16:30", 12), ("20:00", 20), ("22:00", 24)]),
-                                 pattern("04:50", "24:00", [("04:50", 20), ("07:00", 13), ("10:00", 22), ("20:00", 24)])),
-                      ]),
+                      ])),
         ],
         delayInfo: delayInfo,
         throughServices: [

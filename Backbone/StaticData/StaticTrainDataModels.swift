@@ -64,22 +64,22 @@ public struct ServicePattern: Codable, Hashable {
 
 /// A mid-line station where some trains begin their run (当駅始発). Modeled as
 /// short-turn services running from here to the direction's destination
-/// terminus. The pattern should describe ONLY the trains that actually
-/// originate here (typically sparse — early-morning and late-night), since
-/// they are added on top of the full-line services.
+/// terminus. `weekdayDepartures`/`saturdayHolidayDepartures` are the actual
+/// origin departure times ("HH:mm", may exceed 24:00) of the trains that
+/// start here — exact data, not a headway approximation.
 public struct IntermediateOrigin: Codable, Hashable {
     public let stationId: String
-    public let weekday: ServicePattern
-    public let saturdayHoliday: ServicePattern
+    public let weekdayDepartures: [String]
+    public let saturdayHolidayDepartures: [String]
 
-    public init(stationId: String, weekday: ServicePattern, saturdayHoliday: ServicePattern) {
+    public init(stationId: String, weekday: [String], saturdayHoliday: [String]) {
         self.stationId = stationId
-        self.weekday = weekday
-        self.saturdayHoliday = saturdayHoliday
+        self.weekdayDepartures = weekday
+        self.saturdayHolidayDepartures = saturdayHoliday
     }
 
-    public func pattern(for calendar: ScheduleCalendar) -> ServicePattern {
-        calendar == .weekday ? weekday : saturdayHoliday
+    public func departures(for calendar: ScheduleCalendar) -> [String] {
+        calendar == .weekday ? weekdayDepartures : saturdayHolidayDepartures
     }
 }
 
@@ -746,42 +746,48 @@ public enum StaticTimetableGenerator {
         let offsets = cumulativeMinutes(hopTimes: line.hopTimesMinutes, ascending: direction.isAscending)
         guard stations.count == offsets.count, let destination = stations.last else { return [] }
 
-        // Full-line services from the origin terminus, plus short-turn services
-        // originating at each 当駅始発 station.
+        // Full-line services from the origin terminus (headway pattern), plus
+        // short-turn services originating at each 当駅始発 station (exact times).
+        let pattern = direction.pattern(for: calendar)
         var result = runServices(
-            line: line, direction: direction, calendar: calendar,
+            line: line, direction: direction,
             stations: stations, offsets: offsets, destination: destination,
-            startIndex: 0, pattern: direction.pattern(for: calendar), tag: "full"
+            startIndex: 0, originMinutes: departureMinutes(for: pattern),
+            trainType: pattern.trainType, tag: "full"
         )
         for (n, io) in direction.intermediateOrigins.enumerated() {
             guard let startIdx = stations.firstIndex(where: { $0.id == io.stationId }),
-                  startIdx < stations.count - 1 else { continue }
+                  startIdx > 0, startIdx < stations.count - 1 else { continue }
+            let originMinutes = io.departures(for: calendar)
+                .compactMap { parseMinutes($0) }
+                .sorted()
             result += runServices(
-                line: line, direction: direction, calendar: calendar,
+                line: line, direction: direction,
                 stations: stations, offsets: offsets, destination: destination,
-                startIndex: startIdx, pattern: io.pattern(for: calendar), tag: "org\(n)"
+                startIndex: startIdx, originMinutes: originMinutes,
+                trainType: pattern.trainType, tag: "org\(n)"
             )
         }
         return result
     }
 
-    /// Generates services departing `startIndex` and running to the destination
-    /// terminus. When `startIndex == 0` these are the full-line trains; a
-    /// positive index yields short-turn 当駅始発 services.
+    /// Generates services departing `startIndex` at each of `originMinutes` and
+    /// running to the destination terminus. `startIndex == 0` are the full-line
+    /// trains; a positive index yields short-turn 当駅始発 services.
     private static func runServices(
         line: StaticTrainLine,
         direction: StaticLineDirection,
-        calendar: ScheduleCalendar,
         stations: [Station],
         offsets: [Double],
         destination: Station,
         startIndex: Int,
-        pattern: ServicePattern,
+        originMinutes: [Int],
+        trainType: TrainService.TrainType,
         tag: String
     ) -> [TrainService] {
         let baseOffset = offsets[startIndex]
-        return departureMinutes(for: pattern).map { origin in
-            let serviceId = "\(line.id).\(direction.id).\(calendar.rawValue).\(tag).\(timeString(origin))"
+        return originMinutes.map { origin in
+            let serviceId = "\(line.id).\(direction.id).\(tag).\(timeString(origin))"
             let entries = (startIndex..<stations.count).map { i -> TimetableEntry in
                 let time = timeString(origin + Int((offsets[i] - baseOffset).rounded()))
                 return TimetableEntry(
@@ -794,7 +800,7 @@ public enum StaticTimetableGenerator {
             return TrainService(
                 id: serviceId,
                 lineId: line.id,
-                trainType: pattern.trainType,
+                trainType: trainType,
                 direction: direction.isAscending ? .outbound : .inbound,
                 timetable: entries,
                 destinationStationId: destination.id

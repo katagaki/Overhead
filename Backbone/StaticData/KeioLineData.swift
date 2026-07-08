@@ -20,20 +20,13 @@ private func pattern(_ first: String, _ last: String, _ bands: [(String, Double)
 
 private func direction(_ path: String, _ suffix: String, _ ja: String, _ en: String,
                        ascending: Bool,
-                       weekday: ServicePattern, holiday: ServicePattern,
-                       origins: [IntermediateOrigin] = []) -> StaticLineDirection {
+                       weekday: ServicePattern, holiday: ServicePattern) -> StaticLineDirection {
     StaticLineDirection(
         id: "static.RailDirection:\(path).\(suffix)",
         nameJa: ja, nameEn: en,
         isAscending: ascending,
-        weekday: weekday, saturdayHoliday: holiday,
-        intermediateOrigins: origins
+        weekday: weekday, saturdayHoliday: holiday
     )
-}
-
-// 当駅始発 short-turn origin. `w`/`h` describe ONLY trains that start here.
-private func origin(_ stationId: String, _ w: ServicePattern, _ h: ServicePattern) -> IntermediateOrigin {
-    IntermediateOrigin(stationId: stationId, weekday: w, saturdayHoliday: h)
 }
 
 private func through(_ junction: String, _ end: ThroughService.LineEnd,
@@ -114,9 +107,6 @@ enum KeioLineData {
             3, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 3,
         ],
         directions: [
-            // 当駅始発 (approximate): toward 京王八王子, trains turn back at
-            // 調布 and 高幡不動; toward 新宿, morning locals famously originate
-            // at 桜上水・つつじヶ丘 plus the 調布・高幡不動 hubs.
             direction("Keio.Keio", "KeioHachioji", "調布・京王八王子方面", "For Chofu & Keio-hachioji",
                       ascending: true,
                       weekday: pattern("05:29", "24:18", [
@@ -124,15 +114,7 @@ enum KeioLineData {
                       ]),
                       holiday: pattern("05:29", "24:18", [
                           ("05:29", 7), ("07:00", 5), ("10:00", 5), ("20:00", 7),
-                      ]),
-                      origins: [
-                          origin("Station:Keio.Keio.Chofu",
-                                 pattern("05:35", "24:35", [("05:35", 18), ("06:30", 12), ("09:30", 22), ("20:00", 14), ("23:00", 18)]),
-                                 pattern("05:35", "24:35", [("05:35", 20), ("07:00", 14), ("10:00", 22), ("20:00", 18)])),
-                          origin("Station:Keio.Keio.TakahataFudo",
-                                 pattern("05:40", "24:40", [("05:40", 22), ("06:30", 16), ("09:30", 26), ("22:00", 18)]),
-                                 pattern("05:40", "24:40", [("05:40", 24), ("07:00", 18), ("10:00", 26)])),
-                      ]),
+                      ])),
             direction("Keio.Keio", "Shinjuku", "新宿方面", "For Shinjuku",
                       ascending: false,
                       weekday: pattern("04:42", "24:26", [
@@ -140,21 +122,7 @@ enum KeioLineData {
                       ]),
                       holiday: pattern("04:42", "24:26", [
                           ("04:42", 8), ("07:00", 6), ("10:00", 6), ("20:00", 8),
-                      ]),
-                      origins: [
-                          origin("Station:Keio.Keio.Sakurajosui",
-                                 pattern("05:00", "24:20", [("05:00", 14), ("06:00", 9), ("09:00", 35), ("22:00", 22)]),
-                                 pattern("05:00", "24:20", [("05:00", 22), ("07:00", 16), ("10:00", 45)])),
-                          origin("Station:Keio.Keio.Tsutsujigaoka",
-                                 pattern("04:55", "24:15", [("04:55", 14), ("06:00", 9), ("09:00", 28), ("17:00", 18), ("22:00", 22)]),
-                                 pattern("04:55", "24:15", [("04:55", 20), ("07:00", 14), ("10:00", 30)])),
-                          origin("Station:Keio.Keio.Chofu",
-                                 pattern("04:50", "24:10", [("04:50", 15), ("06:00", 9), ("09:30", 20), ("16:30", 13), ("20:00", 20), ("22:00", 24)]),
-                                 pattern("04:50", "24:10", [("04:50", 18), ("07:00", 13), ("10:00", 22), ("20:00", 24)])),
-                          origin("Station:Keio.Keio.TakahataFudo",
-                                 pattern("04:48", "24:00", [("04:48", 18), ("06:00", 11), ("09:30", 24), ("16:30", 15), ("20:00", 24), ("22:00", 28)]),
-                                 pattern("04:48", "24:00", [("04:48", 22), ("07:00", 15), ("10:00", 26), ("20:00", 28)])),
-                      ]),
+                      ])),
         ],
         delayInfo: delayInfo,
         throughServices: [
