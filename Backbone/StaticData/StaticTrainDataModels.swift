@@ -60,6 +60,29 @@ public struct ServicePattern: Codable, Hashable {
     }
 }
 
+// MARK: - Intermediate Origin (当駅始発)
+
+/// A mid-line station where some trains begin their run (当駅始発). Modeled as
+/// short-turn services running from here to the direction's destination
+/// terminus. The pattern should describe ONLY the trains that actually
+/// originate here (typically sparse — early-morning and late-night), since
+/// they are added on top of the full-line services.
+public struct IntermediateOrigin: Codable, Hashable {
+    public let stationId: String
+    public let weekday: ServicePattern
+    public let saturdayHoliday: ServicePattern
+
+    public init(stationId: String, weekday: ServicePattern, saturdayHoliday: ServicePattern) {
+        self.stationId = stationId
+        self.weekday = weekday
+        self.saturdayHoliday = saturdayHoliday
+    }
+
+    public func pattern(for calendar: ScheduleCalendar) -> ServicePattern {
+        calendar == .weekday ? weekday : saturdayHoliday
+    }
+}
+
 // MARK: - Line Direction
 
 public struct StaticLineDirection: Codable, Hashable {
@@ -69,6 +92,23 @@ public struct StaticLineDirection: Codable, Hashable {
     public let isAscending: Bool // true: trains run through `stations` in array order; false: reversed
     public let weekday: ServicePattern
     public let saturdayHoliday: ServicePattern
+    // Mid-line stations that also originate trains (当駅始発), beyond the
+    // origin terminus at index 0. Empty for most lines.
+    public let intermediateOrigins: [IntermediateOrigin]
+
+    public init(
+        id: String, nameJa: String, nameEn: String, isAscending: Bool,
+        weekday: ServicePattern, saturdayHoliday: ServicePattern,
+        intermediateOrigins: [IntermediateOrigin] = []
+    ) {
+        self.id = id
+        self.nameJa = nameJa
+        self.nameEn = nameEn
+        self.isAscending = isAscending
+        self.weekday = weekday
+        self.saturdayHoliday = saturdayHoliday
+        self.intermediateOrigins = intermediateOrigins
+    }
 
     public func pattern(for calendar: ScheduleCalendar) -> ServicePattern {
         calendar == .weekday ? weekday : saturdayHoliday
@@ -702,19 +742,52 @@ public enum StaticTimetableGenerator {
         direction: StaticLineDirection,
         calendar: ScheduleCalendar
     ) -> [TrainService] {
-        let pattern = direction.pattern(for: calendar)
         let stations = orderedStations(line: line, direction: direction)
         let offsets = cumulativeMinutes(hopTimes: line.hopTimesMinutes, ascending: direction.isAscending)
         guard stations.count == offsets.count, let destination = stations.last else { return [] }
 
+        // Full-line services from the origin terminus, plus short-turn services
+        // originating at each 当駅始発 station.
+        var result = runServices(
+            line: line, direction: direction, calendar: calendar,
+            stations: stations, offsets: offsets, destination: destination,
+            startIndex: 0, pattern: direction.pattern(for: calendar), tag: "full"
+        )
+        for (n, io) in direction.intermediateOrigins.enumerated() {
+            guard let startIdx = stations.firstIndex(where: { $0.id == io.stationId }),
+                  startIdx < stations.count - 1 else { continue }
+            result += runServices(
+                line: line, direction: direction, calendar: calendar,
+                stations: stations, offsets: offsets, destination: destination,
+                startIndex: startIdx, pattern: io.pattern(for: calendar), tag: "org\(n)"
+            )
+        }
+        return result
+    }
+
+    /// Generates services departing `startIndex` and running to the destination
+    /// terminus. When `startIndex == 0` these are the full-line trains; a
+    /// positive index yields short-turn 当駅始発 services.
+    private static func runServices(
+        line: StaticTrainLine,
+        direction: StaticLineDirection,
+        calendar: ScheduleCalendar,
+        stations: [Station],
+        offsets: [Double],
+        destination: Station,
+        startIndex: Int,
+        pattern: ServicePattern,
+        tag: String
+    ) -> [TrainService] {
+        let baseOffset = offsets[startIndex]
         return departureMinutes(for: pattern).map { origin in
-            let serviceId = "\(line.id).\(direction.id).\(calendar.rawValue).\(timeString(origin))"
-            let entries = stations.enumerated().map { (i, station) -> TimetableEntry in
-                let time = timeString(origin + Int(offsets[i].rounded()))
+            let serviceId = "\(line.id).\(direction.id).\(calendar.rawValue).\(tag).\(timeString(origin))"
+            let entries = (startIndex..<stations.count).map { i -> TimetableEntry in
+                let time = timeString(origin + Int((offsets[i] - baseOffset).rounded()))
                 return TimetableEntry(
                     id: "\(serviceId)_\(i)",
-                    stationId: station.id,
-                    arrivalTime: i == 0 ? nil : time,
+                    stationId: stations[i].id,
+                    arrivalTime: i == startIndex ? nil : time,
                     departureTime: i == stations.count - 1 ? nil : time
                 )
             }
@@ -737,26 +810,40 @@ public enum StaticTimetableGenerator {
         calendar: ScheduleCalendar
     ) -> [StationTimetableData] {
         line.directions.compactMap { direction in
-            let pattern = direction.pattern(for: calendar)
             let stations = orderedStations(line: line, direction: direction)
-            let offsets = cumulativeMinutes(hopTimes: line.hopTimesMinutes, ascending: direction.isAscending)
-            guard let index = stations.firstIndex(where: { $0.id == stationId }),
-                  index < stations.count - 1,  // no departures toward a direction from its terminus
+            guard stations.contains(where: { $0.id == stationId }),
+                  stations.last?.id != stationId,  // no departures toward a direction from its terminus
                   let destination = stations.last
             else { return nil }
 
-            let offset = Int(offsets[index].rounded())
-            let origins = departureMinutes(for: pattern)
-            let departures = origins.enumerated().map { (i, origin) -> StationDeparture in
-                StationDeparture(
+            // Merge every service passing through this station (full-line and
+            // 当駅始発 short-turns), deduped by minute preferring an originating
+            // train so 始発 is not hidden by a coincident through train.
+            struct Row { let time: String; let type: TrainService.TrainType; let originatesHere: Bool }
+            var byMinute: [Int: Row] = [:]
+            for service in services(for: line, direction: direction, calendar: calendar) {
+                guard let idx = service.timetable.firstIndex(where: { $0.stationId == stationId }),
+                      let time = service.timetable[idx].departureTime,
+                      let secs = TimetableEntry.parseRailTime(time)
+                else { continue }
+                let minute = secs / 60
+                let originatesHere = idx == 0
+                if let existing = byMinute[minute], existing.originatesHere || !originatesHere { continue }
+                byMinute[minute] = Row(time: time, type: service.trainType, originatesHere: originatesHere)
+            }
+            guard let lastMinute = byMinute.keys.max() else { return nil }
+
+            let departures = byMinute.keys.sorted().enumerated().map { (i, minute) -> StationDeparture in
+                let row = byMinute[minute]!
+                return StationDeparture(
                     id: "\(line.id).\(direction.id).\(stationId)_\(i)",
-                    departureTime: timeString(origin + offset),
-                    trainType: pattern.trainType,
+                    departureTime: row.time,
+                    trainType: row.type,
                     destinationName: destination.name,
                     destinationNameEn: destination.nameEn,
                     trainNumber: "",
-                    isFirst: i == 0,
-                    isLast: i == origins.count - 1
+                    isFirst: row.originatesHere,  // 当駅始発
+                    isLast: minute == lastMinute
                 )
             }
 

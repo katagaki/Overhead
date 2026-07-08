@@ -612,13 +612,12 @@ struct StationPickerView: View {
         let services = StaticTimetableGenerator.services(for: staticLine, calendar: calendar)
             .filter { ($0.direction == .outbound) == direction.isAscending }
 
-        // 当駅始発: trains originate at the direction's origin terminus, so it
-        // is the only station whose next train is a 始発 — everywhere else the
-        // train arrived from up-line. (Mid-line 始発 needs short-turn data.)
-        let originId = (direction.isAscending ? staticLine.stations.first : staticLine.stations.last)?.id
-
+        // 当駅始発: a station's next train is a 始発 only when that train
+        // starts its run there — the origin terminus, or a mid-line 当駅始発
+        // station. Trains that arrived from up-line are not 始発.
         var best: [String: NextArrival] = [:]
         for service in services {
+            let serviceOrigin = service.timetable.first?.stationId
             for entry in service.timetable {
                 guard let timeStr = entry.arrivalTime ?? entry.departureTime,
                       let secs = TimetableEntry.parseRailTime(timeStr) else { continue }
@@ -629,7 +628,7 @@ struct StationPickerView: View {
                     time: timeStr,
                     trainType: service.trainType,
                     minutes: minutes,
-                    isFirstTrain: entry.stationId == originId
+                    isFirstTrain: entry.stationId == serviceOrigin
                 )
             }
         }
@@ -643,6 +642,7 @@ struct StationPickerView: View {
             : StaticTimetableGenerator.services(for: staticLine, calendar: tomorrow)
                 .filter { ($0.direction == .outbound) == direction.isAscending }
         for service in tomorrowServices {
+            let serviceOrigin = service.timetable.first?.stationId
             for entry in service.timetable {
                 guard best[entry.stationId] == nil,
                       let timeStr = entry.arrivalTime ?? entry.departureTime,
@@ -653,7 +653,7 @@ struct StationPickerView: View {
                     time: timeStr,
                     trainType: service.trainType,
                     minutes: minutes,
-                    isFirstTrain: entry.stationId == originId
+                    isFirstTrain: entry.stationId == serviceOrigin
                 )
             }
         }
