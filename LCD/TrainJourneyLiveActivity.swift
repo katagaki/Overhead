@@ -608,7 +608,7 @@ struct LCDLineSymbolBadge: View {
     let color: Color
 
     private static let tobuSymbols: Set<String> = ["TS", "TI", "TN", "TD", "TJ"]
-    private static let tokyuStyleSymbols: Set<String> = ["TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD", "MM"]
+    private static let tokyuStyleSymbols: Set<String> = ["TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD"]
     private static let seibuSymbols: Set<String> = ["SI", "SS", "SK", "ST", "SW", "SY"]
     private static let keioSymbols: Set<String> = ["KO", "IN"]
     private static let keikyuRingBlue = Color(hex: "#00A7E1")
@@ -623,9 +623,12 @@ struct LCDLineSymbolBadge: View {
             circleBadge(ringWidth: 2.0, textColor: Self.keikyuLetterBlue, hind: true,
                         ringColor: Self.keikyuRingBlue)
         case "SO":
-            filledBadge(in: AnyShape(RoundedRectangle(cornerRadius: 5)))
+            sotetsuBadge
+        case "MM":
+            minatomiraiBadge
         case _ where Self.keioSymbols.contains(symbol):
-            filledBadge(in: AnyShape(Circle()))
+            // Keio KO logo: white circle, thick ring, line-color letters
+            circleBadge(ringWidth: 3.0, textColor: color, hind: true)
         case _ where Self.tokyuStyleSymbols.contains(symbol):
             filledBadge(in: AnyShape(RoundedRectangle(cornerRadius: 6)))
         case _ where Self.seibuSymbols.contains(symbol):
@@ -662,11 +665,41 @@ struct LCDLineSymbolBadge: View {
             )
     }
 
-    /// Tokyu / Minatomirai / Keio / Sotetsu: line-color fill, white letters
+    /// Tokyu: line-color fill, white letters
     private func filledBadge(in shape: AnyShape) -> some View {
         symbolText(color: .white, inset: 3, hind: true)
             .frame(width: 24, height: 24)
             .background(color, in: shape)
+    }
+
+    /// Minatomirai: line-color fill, white Helvetica letters
+    private var minatomiraiBadge: some View {
+        Text(symbol)
+            .font(.custom("Helvetica-Bold", fixedSize: 10.5))
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
+            .foregroundColor(.white)
+            .padding(.horizontal, 3.5)
+            .frame(width: 24, height: 24)
+            .background(color, in: RoundedRectangle(cornerRadius: 4))
+    }
+
+    /// Sotetsu: navy fill, flat wide white letters over an orange rule
+    /// (signage face approximated by expanded-width SF)
+    private var sotetsuBadge: some View {
+        VStack(spacing: 1.5) {
+            Text(symbol)
+                .font(.system(size: 8.5, weight: .bold))
+                .fontWidth(.expanded)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+                .foregroundColor(.white)
+            Rectangle()
+                .fill(Color(hex: "#EE7B01"))
+                .frame(width: 13.5, height: 1.4)
+        }
+        .frame(width: 24, height: 24)
+        .background(color, in: RoundedRectangle(cornerRadius: 5))
     }
 
     private func symbolText(color: Color, inset: CGFloat, hind: Bool) -> some View {

@@ -9,8 +9,10 @@ import Backbone
 ///   prefix stacked over number in black (e.g. G01, A01, KS01)
 /// - Odakyu: split rounded square — line-color top band with white prefix,
 ///   white bottom with black number (e.g. OH01)
-/// - Tokyu / Minatomirai: FILLED rounded square in the line color with white
-///   stacked code (e.g. TY01, MM03)
+/// - Tokyu: FILLED rounded square in the line color with white stacked code
+///   (e.g. TY01)
+/// - Minatomirai: two-tone filled square — dark navy top band with white MM,
+///   line-color bottom with white number, Helvetica (e.g. MM04)
 /// - Keikyu: white circle, thin light-blue ring, BLUE stacked code (KK01)
 /// - Keio: split circle — line-color top with white prefix, white bottom with
 ///   black number, line-color ring (KO01)
@@ -42,8 +44,6 @@ struct StationNumberBadge: View {
     private static let filledSquarePrefixes: Set<String> = [
         // Tokyu
         "TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD",
-        // Minatomirai
-        "MM",
     ]
     private static let seibuPrefixes: Set<String> = [
         "SI", "SS", "SK", "ST", "SW", "SY",
@@ -54,6 +54,7 @@ struct StationNumberBadge: View {
     private static let keikyuLetterBlue = Color(hex: "#1E50A2")
     private static let seibuLetterColor = Color(hex: "#414D66")
     private static let sotetsuOrange = Color(hex: "#EE7B01")
+    private static let minatomiraiNavy = Color(hex: "#1F2A54")
 
     private var parsed: (prefix: String, number: String) {
         let letters = code.prefix(while: \.isLetter)
@@ -92,6 +93,8 @@ struct StationNumberBadge: View {
             squareBadge(prefix: prefix, number: number, textColor: Self.seibuLetterColor)
         } else if Self.filledSquarePrefixes.contains(prefix) {
             filledSquareBadge(prefix: prefix, number: number)
+        } else if prefix == "MM" {
+            minatomiraiBadge(prefix: prefix, number: number)
         } else if prefix == "KK" {
             keikyuBadge(prefix: prefix, number: number)
         } else if Self.keioPrefixes.contains(prefix) {
@@ -172,6 +175,32 @@ struct StationNumberBadge: View {
         .background(color.opacity(opacity), in: RoundedRectangle(cornerRadius: d * 0.25))
     }
 
+    // MARK: - Minatomirai: Two-Tone Filled Square
+
+    @ViewBuilder
+    private func minatomiraiBadge(prefix: String, number: String) -> some View {
+        let d = badgeDimension
+
+        VStack(spacing: 0) {
+            Text(prefix)
+                .font(.custom("Helvetica-Bold", size: d * 0.28))
+                .kerning(d * 0.05)
+                .frame(maxWidth: .infinity)
+                .frame(height: d * 0.38)
+                .background(Self.minatomiraiNavy.opacity(opacity))
+
+            Text(number)
+                .font(.custom("Helvetica-Bold", size: d * 0.46))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(color.opacity(opacity))
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.6)
+        .foregroundColor(Color.white.opacity(opacity))
+        .frame(width: d, height: d)
+        .clipShape(RoundedRectangle(cornerRadius: d * 0.16))
+    }
+
     // MARK: - Keikyu: White Circle, Light-Blue Ring, Blue Code
 
     @ViewBuilder
@@ -239,21 +268,22 @@ struct StationNumberBadge: View {
     private func sotetsuBadge(prefix: String, number: String) -> some View {
         let d = badgeDimension
 
-        VStack(spacing: d * 0.045) {
+        // Sotetsu signage uses a flat, wide face; expanded-width SF is the
+        // closest system substitute.
+        VStack(spacing: d * 0.07) {
             Text(prefix)
-                .font(.custom("Hind-Bold", size: d * 0.36))
-                .offset(y: d * 0.36 * 0.14)
-                .frame(height: d * 0.30)
+                .font(.system(size: d * 0.30, weight: .bold))
+                .frame(height: d * 0.24)
 
             Rectangle()
                 .fill(Self.sotetsuOrange.opacity(opacity))
-                .frame(width: d * 0.62, height: max(1, d * 0.05))
+                .frame(width: d * 0.64, height: max(1, d * 0.055))
 
             Text(number)
-                .font(.custom("Hind-Bold", size: d * 0.42))
-                .offset(y: d * 0.42 * -0.02)
-                .frame(height: d * 0.34)
+                .font(.system(size: d * 0.36, weight: .bold))
+                .frame(height: d * 0.28)
         }
+        .fontWidth(.expanded)
         .lineLimit(1)
         .minimumScaleFactor(0.6)
         .foregroundColor(Color.white.opacity(opacity))

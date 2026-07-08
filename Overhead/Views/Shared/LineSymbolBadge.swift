@@ -11,11 +11,13 @@ import Backbone
 /// - Tobu (TS/TI/TN/TD/TJ): rounded square, rounder corners than JR,
 ///   color stroke with rounded white core
 /// - Nippori-Toneri Liner (NT): rounded square with pink outer + green inner border
-/// - Tokyu / Minatomirai (TY/DT/MG/…/MM): FILLED rounded square in the line
-///   color with white letters
+/// - Tokyu (TY/DT/MG/…): FILLED rounded square in the line color with white
+///   letters
+/// - Minatomirai (MM): FILLED rounded square, white Helvetica letters
 /// - Keikyu (KK): white circle with a thin light-blue ring and BLUE letters
 ///   (signage is blue regardless of the red line color)
-/// - Keio (KO/IN): filled circle in the line color with white letters
+/// - Keio (KO/IN): white circle with a thick line-color ring and line-color
+///   letters (the official KO logo)
 /// - Seibu (SI/SS/…): Tobu-like bordered rounded square, dark navy letters
 /// - Sotetsu (SO): filled navy rounded square, white letters over an orange rule
 /// (Shapes verified against station signage photos, 2026-07)
@@ -27,7 +29,7 @@ struct LineSymbolBadge: View {
     var dimension: CGFloat = 32
 
     private static let tobuSymbols: Set<String> = ["TS", "TI", "TN", "TD", "TJ"]
-    private static let tokyuStyleSymbols: Set<String> = ["TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD", "MM"]
+    private static let tokyuStyleSymbols: Set<String> = ["TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD"]
     private static let seibuSymbols: Set<String> = ["SI", "SS", "SK", "ST", "SW", "SY"]
     private static let keioSymbols: Set<String> = ["KO", "IN"]
     private static let metroLetterColor = Color(hex: "#232021")
@@ -50,6 +52,8 @@ struct LineSymbolBadge: View {
             keikyuBadge
         case "SO":
             sotetsuBadge
+        case "MM":
+            minatomiraiBadge
         case _ where Self.keioSymbols.contains(symbol):
             keioBadge
         case _ where Self.tokyuStyleSymbols.contains(symbol):
@@ -149,13 +153,25 @@ struct LineSymbolBadge: View {
             )
     }
 
-    // MARK: - Keio: filled circle, white letters
+    // MARK: - Keio: white circle, thick ring, line-color letters (KO logo)
 
     private var keioBadge: some View {
-        symbolText(.custom("Hind-Bold", fixedSize: 14 * f), color: .white, inset: 5 * f,
-                   nudge: 14 * f * 0.085)
+        symbolText(.custom("Hind-Bold", fixedSize: 13 * f), color: color, inset: 5 * f,
+                   nudge: 13 * f * 0.085)
             .frame(width: dimension, height: dimension)
-            .background(color, in: Circle())
+            .background(Color.white, in: Circle())
+            .overlay(
+                Circle()
+                    .strokeBorder(color, lineWidth: 4 * f)
+            )
+    }
+
+    // MARK: - Minatomirai: filled rounded square, white Helvetica letters
+
+    private var minatomiraiBadge: some View {
+        symbolText(.custom("Helvetica-Bold", fixedSize: 13.5 * f), color: .white, inset: 4.5 * f)
+            .frame(width: dimension, height: dimension)
+            .background(color, in: RoundedRectangle(cornerRadius: 5 * f))
     }
 
     // MARK: - Seibu: bordered rounded square, dark navy letters
@@ -174,12 +190,19 @@ struct LineSymbolBadge: View {
     // MARK: - Sotetsu: filled navy square, white letters over orange rule
 
     private var sotetsuBadge: some View {
+        // Sotetsu signage uses a flat, wide face; expanded-width SF is the
+        // closest system substitute (no Hind nudge/kerning needed).
         VStack(spacing: 2 * f) {
-            symbolText(.custom("Hind-Bold", fixedSize: 13 * f), color: .white, inset: 4 * f,
-                       nudge: 13 * f * 0.085)
+            Text(symbol)
+                .font(.system(size: 11.5 * f, weight: .bold))
+                .fontWidth(.expanded)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+                .foregroundColor(.white)
+                .padding(.horizontal, 3 * f)
             Rectangle()
                 .fill(Self.sotetsuOrange)
-                .frame(width: 18 * f, height: max(1, 1.6 * f))
+                .frame(width: 18 * f, height: max(1, 1.8 * f))
         }
         .frame(width: dimension, height: dimension)
         .background(color, in: RoundedRectangle(cornerRadius: 6.5 * f))
