@@ -144,6 +144,16 @@ struct StationTimetableView: View {
                     .foregroundColor(.secondary)
             }
 
+            if departure.isFirst {
+                Text("StationTimetable.FirstTrain")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color.green)
+                    .clipShape(Capsule())
+            }
+
             if departure.isLast {
                 Text("StationTimetable.LastTrain")
                     .font(.system(size: 10, weight: .bold))

@@ -705,6 +705,7 @@ public enum StaticTimetableGenerator {
                     destinationName: destination.name,
                     destinationNameEn: destination.nameEn,
                     trainNumber: "",
+                    isFirst: i == 0,
                     isLast: i == origins.count - 1
                 )
             }

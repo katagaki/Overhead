@@ -305,34 +305,151 @@ struct LinePickerView: View {
 
 // MARK: - Station Picker
 
+/// Line detail (路線): a per-direction train map of the line's stations,
+/// drawn as a custom inset-grouped card, with each station showing the next
+/// arriving train's time and type.
 struct StationPickerView: View {
     let line: TrainLine
     @ObservedObject var viewModel: JourneyViewModel
+    @State private var selectedDirectionIndex = 0
+
+    private let trackWidth: CGFloat = 4
+    private let dotColumnWidth: CGFloat = 24
+    private let cardPadding: CGFloat = 16
+
+    private var staticLine: StaticTrainLine? {
+        StaticTrainData.line(withId: line.id)
+    }
+
+    /// One picker option per physical direction (track): directions with the
+    /// same travel direction but a different terminal station are merged into
+    /// the first one.
+    private var directionOptions: [StaticLineDirection] {
+        guard let staticLine else { return [] }
+        var seenAscending = Set<Bool>()
+        return staticLine.directions.filter { seenAscending.insert($0.isAscending).inserted }
+    }
+
+    private var selectedDirection: StaticLineDirection? {
+        guard !directionOptions.isEmpty else { return nil }
+        return directionOptions[min(selectedDirectionIndex, directionOptions.count - 1)]
+    }
+
+    /// Stations in travel order for the selected direction.
+    private var orderedStations: [Station] {
+        guard let direction = selectedDirection, !direction.isAscending else {
+            return line.stations
+        }
+        return line.stations.reversed()
+    }
 
     var body: some View {
-        Form {
-            if let delayInfo = viewModel.delayCheckInfo(for: line.id) {
-                ServiceStatusSection(delayInfo: delayInfo)
-            }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                if let delayInfo = viewModel.delayCheckInfo(for: line.id) {
+                    ServiceStatusSection(delayInfo: delayInfo)
+                }
 
-            Section("Section.Stations") {
-                ForEach(line.stations) { station in
+                VStack(alignment: .leading, spacing: 8) {
+                    if directionOptions.count > 1 {
+                        directionPicker
+                            .padding(.bottom, 6)
+                    }
+
+                    stationsHeader
+
+                    stationsCard
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle(line.localizedName)
+    }
+
+    // MARK: - Direction Picker
+
+    private var directionPicker: some View {
+        Picker("Label.Direction", selection: $selectedDirectionIndex) {
+            ForEach(Array(directionOptions.enumerated()), id: \.offset) { index, direction in
+                Text(shortDirectionName(of: direction)).tag(index)
+            }
+        }
+        .pickerStyle(.segmented)
+    }
+
+    /// Compact direction name for the segmented control: the part before any
+    /// parenthetical (内回り（上野・池袋方面） → 内回り).
+    private func shortDirectionName(of direction: StaticLineDirection) -> String {
+        let lang = Locale.current.language.languageCode?.identifier ?? "ja"
+        if lang == "ja" {
+            return direction.nameJa.components(separatedBy: "（")[0]
+        }
+        let name = direction.nameEn.isEmpty ? direction.nameJa : direction.nameEn
+        return name.components(separatedBy: " (")[0]
+    }
+
+    private func fullDirectionName(of direction: StaticLineDirection) -> String {
+        let lang = Locale.current.language.languageCode?.identifier ?? "ja"
+        if lang == "ja" || direction.nameEn.isEmpty {
+            return direction.nameJa
+        }
+        return direction.nameEn
+    }
+
+    @ViewBuilder
+    private var stationsHeader: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "arrow.right.circle.fill")
+                .foregroundColor(line.color)
+            if let direction = selectedDirection {
+                Text(fullDirectionName(of: direction))
+                    .font(.system(size: 14, weight: .semibold))
+            } else {
+                Text("Section.Stations")
+                    .font(.system(size: 14, weight: .semibold))
+            }
+        }
+        .foregroundColor(.secondary)
+        .padding(.leading, 4)
+    }
+
+    // MARK: - Stations Card (train map)
+
+    private var stationsCard: some View {
+        TimelineView(.everyMinute) { context in
+            let stations = orderedStations
+            let nextArrivals = nextArrivalsByStation(at: context.date)
+
+            VStack(spacing: 0) {
+                ForEach(Array(stations.enumerated()), id: \.element.id) { index, station in
                     NavigationLink {
                         StationTimetableView(station: station, line: line, viewModel: viewModel)
                     } label: {
-                        stationRow(station: station)
+                        stationMapRow(
+                            station: station,
+                            isFirst: index == 0,
+                            isLast: index == stations.count - 1,
+                            next: nextArrivals[station.id]
+                        )
                     }
+                    .buttonStyle(.plain)
                 }
             }
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
         }
-        .navigationTitle(line.localizedName)
     }
 
     // MARK: - Station Row
 
     @ViewBuilder
-    private func stationRow(station: Station) -> some View {
-        HStack {
+    private func stationMapRow(station: Station, isFirst: Bool, isLast: Bool, next: NextArrival?) -> some View {
+        HStack(spacing: 12) {
+            stationDot(isTerminal: isFirst || isLast)
+                .frame(width: dotColumnWidth)
+
             if !station.stationCode.isEmpty {
                 StationNumberBadge(
                     code: station.stationCode,
@@ -346,12 +463,173 @@ struct StationPickerView: View {
                     color: line.color
                 )
             }
-            VStack(alignment: .leading) {
+
+            VStack(alignment: .leading, spacing: 2) {
                 Text(station.localizedName)
+                    .font(.system(size: 16, weight: isFirst || isLast ? .bold : .medium))
+                    .foregroundColor(.primary)
                 Text(station.nameEn)
                     .font(.system(size: 11))
                     .foregroundColor(.secondary)
             }
+
+            Spacer(minLength: 8)
+
+            nextArrivalView(next)
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(Color(.tertiaryLabel))
         }
+        .padding(.horizontal, cardPadding)
+        .padding(.vertical, 10)
+        .contentShape(Rectangle())
+        // The connecting track runs behind the dots, clipped to half height
+        // at the termini so the line starts and ends on a station.
+        .background(alignment: .leading) {
+            trackSegment(isFirst: isFirst, isLast: isLast)
+        }
+    }
+
+    @ViewBuilder
+    private func trackSegment(isFirst: Bool, isLast: Bool) -> some View {
+        GeometryReader { geo in
+            let top = isFirst ? geo.size.height / 2 : 0
+            let bottom = isLast ? geo.size.height / 2 : 0
+            Rectangle()
+                .fill(line.color)
+                .frame(width: trackWidth, height: max(0, geo.size.height - top - bottom))
+                .offset(x: cardPadding + (dotColumnWidth - trackWidth) / 2, y: top)
+        }
+    }
+
+    @ViewBuilder
+    private func stationDot(isTerminal: Bool) -> some View {
+        let diameter: CGFloat = isTerminal ? 18 : 13
+        ZStack {
+            Circle()
+                .fill(Color(.secondarySystemGroupedBackground))
+            Circle()
+                .strokeBorder(line.color, lineWidth: isTerminal ? 4 : 3)
+        }
+        .frame(width: diameter, height: diameter)
+    }
+
+    // MARK: - Next Arriving Train
+
+    private struct NextArrival {
+        let time: String
+        let trainType: TrainService.TrainType
+        let minutes: Int
+        let isFirstTrain: Bool
+    }
+
+    @ViewBuilder
+    private func nextArrivalView(_ next: NextArrival?) -> some View {
+        if let next {
+            VStack(alignment: .trailing, spacing: 3) {
+                Text(next.time)
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .foregroundColor(.primary)
+                HStack(spacing: 4) {
+                    if next.isFirstTrain {
+                        Text("StationTimetable.FirstTrain")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 2)
+                            .background(Color.green)
+                            .clipShape(Capsule())
+                    }
+                    Text(next.trainType.displayNameJa)
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 2)
+                        .background(line.color)
+                        .clipShape(Capsule())
+                }
+            }
+        } else {
+            Text(verbatim: "—")
+                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                .foregroundColor(Color(.tertiaryLabel))
+        }
+    }
+
+    /// The next train to arrive at each station in the selected direction,
+    /// from the generated timetable for the current service day.
+    private func nextArrivalsByStation(at now: Date) -> [String: NextArrival] {
+        guard let staticLine, let direction = selectedDirection else { return [:] }
+
+        // The rail service day runs past midnight: before 03:00 the clock
+        // reads as 24:xx+ of the previous day's calendar.
+        let calendar = ScheduleCalendar.current(at: now.addingTimeInterval(-3 * 3600))
+        var jst = Calendar(identifier: .gregorian)
+        jst.timeZone = TimeZone(identifier: "Asia/Tokyo")!
+        let comps = jst.dateComponents([.hour, .minute], from: now)
+        var nowMinutes = (comps.hour ?? 0) * 60 + (comps.minute ?? 0)
+        if nowMinutes < 3 * 60 {
+            nowMinutes += 24 * 60
+        }
+
+        let services = StaticTimetableGenerator.services(for: staticLine, calendar: calendar)
+            .filter { ($0.direction == .outbound) == direction.isAscending }
+
+        // Earliest train of the day per station, so the next arrival can be
+        // flagged as the 始発 when today's service hasn't started there yet.
+        var firstOfDay: [String: Int] = [:]
+        var best: [String: NextArrival] = [:]
+        for service in services {
+            for entry in service.timetable {
+                guard let timeStr = entry.arrivalTime ?? entry.departureTime,
+                      let secs = TimetableEntry.parseRailTime(timeStr) else { continue }
+                let minutes = secs / 60
+                if firstOfDay[entry.stationId].map({ minutes < $0 }) ?? true {
+                    firstOfDay[entry.stationId] = minutes
+                }
+                guard minutes >= nowMinutes else { continue }
+                if let current = best[entry.stationId], current.minutes <= minutes { continue }
+                best[entry.stationId] = NextArrival(
+                    time: timeStr,
+                    trainType: service.trainType,
+                    minutes: minutes,
+                    isFirstTrain: false
+                )
+            }
+        }
+        for (stationId, arrival) in best where arrival.minutes == firstOfDay[stationId] {
+            best[stationId] = NextArrival(
+                time: arrival.time,
+                trainType: arrival.trainType,
+                minutes: arrival.minutes,
+                isFirstTrain: true
+            )
+        }
+
+        // After the last train has passed a station, fall through to the next
+        // service day's 始発 instead of showing nothing.
+        let tomorrow = ScheduleCalendar.current(at: now.addingTimeInterval(21 * 3600))
+        var tomorrowFirst: [String: NextArrival] = [:]
+        let tomorrowServices = tomorrow == calendar
+            ? services
+            : StaticTimetableGenerator.services(for: staticLine, calendar: tomorrow)
+                .filter { ($0.direction == .outbound) == direction.isAscending }
+        for service in tomorrowServices {
+            for entry in service.timetable {
+                guard best[entry.stationId] == nil,
+                      let timeStr = entry.arrivalTime ?? entry.departureTime,
+                      let secs = TimetableEntry.parseRailTime(timeStr) else { continue }
+                let minutes = secs / 60
+                if let current = tomorrowFirst[entry.stationId], current.minutes <= minutes { continue }
+                tomorrowFirst[entry.stationId] = NextArrival(
+                    time: timeStr,
+                    trainType: service.trainType,
+                    minutes: minutes,
+                    isFirstTrain: true
+                )
+            }
+        }
+        return best.merging(tomorrowFirst) { current, _ in current }
     }
 }
