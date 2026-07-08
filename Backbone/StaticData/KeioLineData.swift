@@ -55,7 +55,7 @@ enum KeioLineData {
     )
 
     static let lines: [StaticTrainLine] = [
-        keio, sagamihara,
+        keio, sagamihara, takao,
     ]
 
     // MARK: - Keio Line (KO)
@@ -136,7 +136,8 @@ enum KeioLineData {
                     to: "Railway:Keio.Sagamihara"),
             through("Keio.Keio.Kitano", .ascending,
                     "京王高尾線", "Keio Takao Line",
-                    "高尾山口方面", "for Takaosanguchi"),
+                    "高尾山口方面", "for Takaosanguchi",
+                    to: "Railway:Keio.Takao"),
         ]
     )
 
@@ -185,6 +186,57 @@ enum KeioLineData {
         delayInfo: delayInfo,
         throughServices: [
             through("Keio.Sagamihara.Chofu", .descending,
+                    "京王線", "Keio Line",
+                    "明大前・新宿方面", "for Meidaimae & Shinjuku",
+                    to: "Railway:Keio.Keio"),
+        ]
+    )
+
+    // MARK: - Keio Takao Line (KO)
+
+    // Branches off the Keio Line at 北野; most trains through-run to/from
+    // 新宿 on the Keio Line. Station numbers verified against keio.co.jp
+    // (高尾山口 = KO53); coordinates from ja.wikipedia per-station infoboxes.
+    // First/last from ekitan (weekday, July 2026); holiday first/last mirror
+    // weekday and are approximate. Base 各駅停車 pattern; 特急/急行/快速 run
+    // the same corridor but are approximated by headway bands.
+    static let takao = StaticTrainLine(
+        id: "Railway:Keio.Takao",
+        nameJa: "京王高尾線",
+        nameEn: "Keio Takao Line",
+        operatorId: "Operator:Keio",
+        colorHex: "#DD0077",
+        stations: [
+            st("Keio.Takao", "Kitano", "北野", "Kitano", "KO33", 35.6567, 139.3567),
+            st("Keio.Takao", "KeioKatakura", "京王片倉", "Keio-katakura", "KO48", 35.6444, 139.3373),
+            st("Keio.Takao", "Yamada", "山田", "Yamada", "KO49", 35.6444, 139.3213),
+            st("Keio.Takao", "Mejirodai", "めじろ台", "Mejirodai", "KO50", 35.6433, 139.3077),
+            st("Keio.Takao", "Hazama", "狭間", "Hazama", "KO51", 35.6406, 139.2933),
+            st("Keio.Takao", "Takao", "高尾", "Takao", "KO52", 35.6422, 139.2819),
+            st("Keio.Takao", "Takaosanguchi", "高尾山口", "Takaosanguchi", "KO53", 35.6322, 139.2699),
+        ],
+        hopTimesMinutes: [2, 2, 2, 2, 3, 3],
+        directions: [
+            direction("Keio.Takao", "Takaosanguchi", "高尾山口方面", "For Takaosanguchi",
+                      ascending: true,
+                      weekday: pattern("05:12", "24:14", [
+                          ("05:12", 8), ("06:30", 6), ("09:30", 8), ("16:30", 6), ("20:00", 8), ("22:00", 10),
+                      ]),
+                      holiday: pattern("05:12", "24:14", [
+                          ("05:12", 8), ("07:00", 7), ("10:00", 7), ("20:00", 9),
+                      ])),
+            direction("Keio.Takao", "Kitano", "北野・新宿方面", "For Kitano & Shinjuku",
+                      ascending: false,
+                      weekday: pattern("05:07", "24:13", [
+                          ("05:07", 8), ("06:30", 5), ("09:30", 7), ("16:30", 6), ("20:00", 8), ("22:00", 10),
+                      ]),
+                      holiday: pattern("05:07", "24:13", [
+                          ("05:07", 8), ("07:00", 7), ("10:00", 7), ("20:00", 9),
+                      ])),
+        ],
+        delayInfo: delayInfo,
+        throughServices: [
+            through("Keio.Takao.Kitano", .descending,
                     "京王線", "Keio Line",
                     "明大前・新宿方面", "for Meidaimae & Shinjuku",
                     to: "Railway:Keio.Keio"),

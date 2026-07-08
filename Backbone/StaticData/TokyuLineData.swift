@@ -159,7 +159,7 @@ enum TokyuLineData {
             st("Tokyu.DenEnToshi", "Suzukakedai", "すずかけ台", "Suzukakedai", "DT24", 35.5170, 139.4720),
             st("Tokyu.DenEnToshi", "MinamiMachida", "南町田グランベリーパーク", "Minami-machida Grandberry Park", "DT25", 35.5130, 139.4620),
             st("Tokyu.DenEnToshi", "Tsukimino", "つきみ野", "Tsukimino", "DT26", 35.5030, 139.4530),
-            st("Tokyu.DenEnToshi", "ChuoRinkan", "中央林間", "Chuo-rinkan", "DT27", 35.5000, 139.4440),
+            st("Tokyu.DenEnToshi", "ChuoRinkan", "中央林間", "Chuo-rinkan", "DT27", 35.5076, 139.4453),
         ],
         hopTimesMinutes: [
             2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,

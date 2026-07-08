@@ -300,7 +300,7 @@ enum ToeiLineData {
             st("NipporiToneri", "Nippori", "日暮里", "Nippori", "NT01", 35.7278, 139.7708),
             st("NipporiToneri", "NishiNippori", "西日暮里", "Nishi-nippori", "NT02", 35.7324, 139.7669),
             st("NipporiToneri", "AkadoShogakkomae", "赤土小学校前", "Akado-shogakkomae", "NT03", 35.7418, 139.7682),
-            st("NipporiToneri", "Kumanomae", "熊野前", "Kumanomae", "NT04", 35.7478, 139.7732),
+            st("NipporiToneri", "Kumanomae", "熊野前", "Kumanomae", "NT04", 35.7485, 139.7699),
             st("NipporiToneri", "AdachiOdai", "足立小台", "Adachi-odai", "NT05", 35.7555, 139.7735),
             st("NipporiToneri", "OgiOhashi", "扇大橋", "Ogi-ohashi", "NT06", 35.7638, 139.7752),
             st("NipporiToneri", "Koya", "高野", "Koya", "NT07", 35.7688, 139.7745),
