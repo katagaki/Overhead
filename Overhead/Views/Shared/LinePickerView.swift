@@ -343,6 +343,26 @@ struct StationPickerView: View {
         return line.stations.reversed()
     }
 
+    /// Through services (直通) that continue past the terminus in the selected
+    /// travel direction, appended to the end of the map.
+    private var throughServicesForDirection: [ThroughService] {
+        guard let staticLine, let direction = selectedDirection else { return [] }
+        return staticLine.throughServices.filter {
+            ($0.end == .ascending) == direction.isAscending
+        }
+    }
+
+    private func connectingLine(for through: ThroughService) -> TrainLine? {
+        guard let id = through.connectingLineId else { return nil }
+        return StaticTrainData.line(withId: id)?.trainLine
+    }
+
+    private func junctionName(for through: ThroughService) -> String {
+        line.stations.first(where: { $0.id == through.junctionStationId })?.localizedName
+            ?? through.junctionStationId.components(separatedBy: ".").last
+            ?? through.junctionStationId
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -421,6 +441,7 @@ struct StationPickerView: View {
         TimelineView(.everyMinute) { context in
             let stations = orderedStations
             let nextArrivals = nextArrivalsByStation(at: context.date)
+            let branches = throughServicesForDirection
 
             VStack(spacing: 0) {
                 ForEach(Array(stations.enumerated()), id: \.element.id) { index, station in
@@ -431,10 +452,14 @@ struct StationPickerView: View {
                             station: station,
                             isFirst: index == 0,
                             isLast: index == stations.count - 1,
+                            continuesBelow: index == stations.count - 1 && !branches.isEmpty,
                             next: nextArrivals[station.id]
                         )
                     }
                     .buttonStyle(.plain)
+                }
+                ForEach(Array(branches.enumerated()), id: \.offset) { index, through in
+                    throughBranchRow(through: through, isLast: index == branches.count - 1)
                 }
             }
             .background(Color(.secondarySystemGroupedBackground))
@@ -445,7 +470,7 @@ struct StationPickerView: View {
     // MARK: - Station Row
 
     @ViewBuilder
-    private func stationMapRow(station: Station, isFirst: Bool, isLast: Bool, next: NextArrival?) -> some View {
+    private func stationMapRow(station: Station, isFirst: Bool, isLast: Bool, continuesBelow: Bool = false, next: NextArrival?) -> some View {
         HStack(spacing: 12) {
             stationDot(isTerminal: isFirst || isLast)
                 .frame(width: dotColumnWidth)
@@ -487,7 +512,7 @@ struct StationPickerView: View {
         // The connecting track runs behind the dots, clipped to half height
         // at the termini so the line starts and ends on a station.
         .background(alignment: .leading) {
-            trackSegment(isFirst: isFirst, isLast: isLast)
+            trackSegment(isFirst: isFirst, isLast: isLast && !continuesBelow)
         }
     }
 
@@ -513,6 +538,68 @@ struct StationPickerView: View {
                 .strokeBorder(line.color, lineWidth: isTerminal ? 4 : 3)
         }
         .frame(width: diameter, height: diameter)
+    }
+
+    // MARK: - Through-Service Branch Row
+
+    /// A 直通 continuation past the terminus onto a connecting line. Navigable
+    /// when that line is bundled in the app; informational text otherwise.
+    @ViewBuilder
+    private func throughBranchRow(through: ThroughService, isLast: Bool) -> some View {
+        if let connecting = connectingLine(for: through) {
+            NavigationLink {
+                StationPickerView(line: connecting, viewModel: viewModel)
+            } label: {
+                throughBranchLabel(
+                    through: through, accent: connecting.color,
+                    isLast: isLast, navigable: true
+                )
+            }
+            .buttonStyle(.plain)
+        } else {
+            throughBranchLabel(
+                through: through, accent: .secondary,
+                isLast: isLast, navigable: false
+            )
+        }
+    }
+
+    @ViewBuilder
+    private func throughBranchLabel(
+        through: ThroughService, accent: Color, isLast: Bool, navigable: Bool
+    ) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: "arrow.triangle.branch")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(accent)
+                .frame(width: dotColumnWidth)
+
+            Text("StationTimetable.ThroughService \(junctionName(for: through)) \(through.localizedLineName) \(through.localizedToward)")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.primary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Spacer(minLength: 8)
+
+            if navigable {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(Color(.tertiaryLabel))
+            }
+        }
+        .padding(.horizontal, cardPadding)
+        .padding(.vertical, 10)
+        .contentShape(Rectangle())
+        // Continue the track from the terminus down to this branch's node,
+        // clipped to half height at the final branch so the line ends on it.
+        .background(alignment: .leading) {
+            GeometryReader { geo in
+                Rectangle()
+                    .fill(line.color)
+                    .frame(width: trackWidth, height: isLast ? geo.size.height / 2 : geo.size.height)
+                    .offset(x: cardPadding + (dotColumnWidth - trackWidth) / 2, y: 0)
+            }
+        }
     }
 
     // MARK: - Next Arriving Train
