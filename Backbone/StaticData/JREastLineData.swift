@@ -97,7 +97,7 @@ enum JREastLineData {
                 nameEn: "Inner Loop (for Ueno & Ikebukuro)",
                 isAscending: true,
                 weekday: ServicePattern(
-                    first: "04:46", last: "24:30",
+                    first: "04:46", last: "24:38",
                     bands: [
                         HeadwayBand(from: "04:40", headwayMinutes: 6),
                         HeadwayBand(from: "06:30", headwayMinutes: 3.5),
@@ -108,7 +108,7 @@ enum JREastLineData {
                     ]
                 ),
                 saturdayHoliday: ServicePattern(
-                    first: "04:46", last: "24:20",
+                    first: "04:46", last: "24:39",
                     bands: [
                         HeadwayBand(from: "04:40", headwayMinutes: 6),
                         HeadwayBand(from: "07:00", headwayMinutes: 4.5),
@@ -124,7 +124,7 @@ enum JREastLineData {
                 nameEn: "Outer Loop (for Shinagawa & Shibuya)",
                 isAscending: false,
                 weekday: ServicePattern(
-                    first: "04:49", last: "24:46",
+                    first: "04:51", last: "24:48",
                     bands: [
                         HeadwayBand(from: "04:40", headwayMinutes: 6),
                         HeadwayBand(from: "06:30", headwayMinutes: 3.5),
@@ -135,7 +135,7 @@ enum JREastLineData {
                     ]
                 ),
                 saturdayHoliday: ServicePattern(
-                    first: "04:49", last: "24:46",
+                    first: "04:51", last: "24:48",
                     bands: [
                         HeadwayBand(from: "04:40", headwayMinutes: 6),
                         HeadwayBand(from: "07:00", headwayMinutes: 4.5),
@@ -570,7 +570,7 @@ enum JREastLineData {
                 nameEn: "For Osaki",
                 isAscending: false,
                 weekday: ServicePattern(
-                    first: "04:51", last: "24:00",
+                    first: "04:51", last: "23:46",
                     bands: [
                         HeadwayBand(from: "05:00", headwayMinutes: 9),
                         HeadwayBand(from: "06:30", headwayMinutes: 5),

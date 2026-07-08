@@ -88,6 +88,23 @@ enum TokyoMetroLineData {
         pattern(first, last, quietHolidayBands)
     }
 
+    // Hibiya-specific bands (verified against ekitan/Yahoo, 2026-07-08):
+    // rush runs ~2.5 min (23-24 trains/h), and after ~23:50 only sparse
+    // short-turn trains remain (広尾/南千住行き every 13-17 min until 24:28).
+    private static let hibiyaWeekdayBands: [(String, Double)] = [
+        ("05:00", 6), ("07:00", 2.5), ("09:30", 5), ("17:00", 3.5), ("20:00", 5), ("22:00", 6.5), ("23:45", 14),
+    ]
+    private static let hibiyaHolidayBands: [(String, Double)] = [
+        ("05:00", 6), ("07:00", 5), ("10:00", 5), ("20:00", 5.5), ("22:00", 7), ("23:45", 15),
+    ]
+
+    private static func hibiyaWeekday(_ first: String, _ last: String) -> ServicePattern {
+        pattern(first, last, hibiyaWeekdayBands)
+    }
+    private static func hibiyaHoliday(_ first: String, _ last: String) -> ServicePattern {
+        pattern(first, last, hibiyaHolidayBands)
+    }
+
     // MARK: - Ginza Line (G)
 
     static let ginza = StaticTrainLine(
@@ -249,9 +266,9 @@ enum TokyoMetroLineData {
         ],
         directions: [
             direction("Hibiya", "KitaSenju", "北千住方面", "For Kita-senju", ascending: true,
-                      weekday: metroWeekday("05:00", "24:28"), holiday: metroHoliday("05:00", "24:28")),
+                      weekday: hibiyaWeekday("05:00", "24:28"), holiday: hibiyaHoliday("05:00", "24:28")),
             direction("Hibiya", "NakaMeguro", "中目黒方面", "For Naka-meguro", ascending: false,
-                      weekday: metroWeekday("05:00", "24:28"), holiday: metroHoliday("05:00", "24:27")),
+                      weekday: hibiyaWeekday("05:00", "24:28"), holiday: hibiyaHoliday("05:00", "24:27")),
         ],
         delayInfo: delayInfo,
         throughServices: [
@@ -416,8 +433,10 @@ enum TokyoMetroLineData {
             3, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 3, 2, 1, 2, 2, 1, 2, 2, 2, 3, 3,
         ],
         directions: [
+            // Last departure 23:46 is an Ikebukuro-bound through train from
+            // the Tobu Tojo Line, on all calendars
             direction("Yurakucho", "ShinKiba", "新木場方面", "For Shin-kiba", ascending: true,
-                      weekday: quietWeekday("05:00", "23:40"), holiday: quietHoliday("05:00", "23:23")),
+                      weekday: quietWeekday("05:00", "23:46"), holiday: quietHoliday("05:00", "23:46")),
             direction("Yurakucho", "Wakoshi", "和光市方面", "For Wakoshi", ascending: false,
                       weekday: quietWeekday("05:00", "24:01"), holiday: quietHoliday("05:00", "24:01")),
         ],
@@ -514,7 +533,7 @@ enum TokyoMetroLineData {
         ],
         directions: [
             direction("Namboku", "AkabaneIwabuchi", "赤羽岩淵方面", "For Akabane-iwabuchi", ascending: true,
-                      weekday: quietWeekday("05:16", "24:00"), holiday: quietHoliday("05:16", "24:00")),
+                      weekday: quietWeekday("05:16", "23:59"), holiday: quietHoliday("05:16", "23:59")),
             direction("Namboku", "Meguro", "目黒方面", "For Meguro", ascending: false,
                       weekday: quietWeekday("05:01", "24:26"), holiday: quietHoliday("05:01", "24:16")),
         ],

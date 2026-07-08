@@ -83,11 +83,11 @@ extension JREastLineData {
                           ("04:33", 8), ("07:00", 6), ("10:00", 12), ("20:00", 8), ("22:00", 10),
                       ], .rapid)),
             direction("JobanRapid", "Ueno", "上野方面", "For Ueno", ascending: false,
-                      weekday: pattern("04:40", "24:05", [
-                          ("04:40", 8), ("06:00", 5), ("09:30", 7), ("16:30", 6), ("20:00", 8), ("22:00", 10),
+                      weekday: pattern("04:44", "24:18", [
+                          ("04:44", 8), ("06:00", 5), ("09:30", 7), ("16:30", 6), ("20:00", 8), ("22:00", 10),
                       ], .rapid),
-                      holiday: pattern("04:40", "24:05", [
-                          ("04:40", 8), ("07:00", 6), ("10:00", 7), ("20:00", 8), ("22:00", 10),
+                      holiday: pattern("04:44", "24:18", [
+                          ("04:44", 8), ("07:00", 6), ("10:00", 7), ("20:00", 8), ("22:00", 10),
                       ], .rapid)),
         ],
         delayInfo: delayInfo,
@@ -198,18 +198,18 @@ extension JREastLineData {
         ],
         directions: [
             direction("YokosukaSobu", "Chiba", "東京・千葉方面", "For Tokyo & Chiba", ascending: true,
-                      weekday: pattern("04:31", "23:30", [
+                      weekday: pattern("04:31", "23:11", [
                           ("04:31", 15), ("06:30", 15), ("09:30", 20), ("16:30", 15), ("20:00", 20), ("22:00", 30),
                       ], .rapid),
-                      holiday: pattern("04:31", "23:30", [
+                      holiday: pattern("04:31", "23:11", [
                           ("04:31", 15), ("07:00", 15), ("10:00", 20), ("20:00", 25),
                       ], .rapid)),
             direction("YokosukaSobu", "Kurihama", "横浜・久里浜方面", "For Yokohama & Kurihama", ascending: false,
-                      weekday: pattern("04:40", "24:15", [
-                          ("04:40", 10), ("06:30", 5), ("09:30", 9), ("16:30", 7), ("20:00", 9), ("22:00", 12),
+                      weekday: pattern("04:45", "24:15", [
+                          ("04:45", 10), ("06:30", 5), ("09:30", 9), ("16:30", 7), ("20:00", 9), ("22:00", 12),
                       ], .rapid),
-                      holiday: pattern("04:40", "24:15", [
-                          ("04:40", 10), ("07:00", 7), ("10:00", 9), ("20:00", 10),
+                      holiday: pattern("04:45", "24:15", [
+                          ("04:45", 10), ("07:00", 7), ("10:00", 9), ("20:00", 10),
                       ], .rapid)),
         ],
         delayInfo: delayInfo,
@@ -330,15 +330,15 @@ extension JREastLineData {
                       weekday: pattern("06:54", "21:11", [
                           ("06:54", 30), ("09:30", 60), ("16:30", 30), ("20:00", 60),
                       ], .rapid),
-                      holiday: pattern("06:54", "21:11", [
-                          ("06:54", 40), ("10:00", 60), ("16:30", 40),
+                      holiday: pattern("06:57", "21:34", [
+                          ("06:57", 40), ("10:00", 60), ("16:30", 40),
                       ], .rapid)),
             direction("ShonanShinjuku", "Zushi", "横浜・逗子方面", "For Yokohama & Zushi", ascending: false,
-                      weekday: pattern("06:00", "22:26", [
-                          ("06:00", 15), ("07:00", 12), ("09:30", 25), ("16:30", 15), ("20:00", 25),
+                      weekday: pattern("06:07", "22:26", [
+                          ("06:07", 15), ("07:00", 12), ("09:30", 25), ("16:30", 15), ("20:00", 25),
                       ], .rapid),
-                      holiday: pattern("06:00", "22:26", [
-                          ("06:00", 15), ("08:00", 15), ("10:00", 25), ("20:00", 25),
+                      holiday: pattern("06:07", "22:25", [
+                          ("06:07", 15), ("08:00", 15), ("10:00", 25), ("20:00", 25),
                       ], .rapid)),
         ],
         delayInfo: delayInfo,
@@ -396,12 +396,14 @@ extension JREastLineData {
             4, 5, 5, 8, 4, 3, 4, 3, 4, 4, 3, 4, 3, 5, 5, 4, 4, 5, 6, 4, 3, 5, 7,
         ],
         directions: [
+            // First departure from Tokyo is 06:30 — earlier Ueno-Tokyo Line
+            // departures on this corridor are Takasaki Line trains
             direction("Utsunomiya", "Utsunomiya", "宇都宮方面", "For Utsunomiya", ascending: true,
-                      weekday: pattern("05:53", "23:32", [
-                          ("05:53", 15), ("06:30", 15), ("09:30", 14), ("16:30", 10), ("20:00", 14), ("22:00", 18),
+                      weekday: pattern("06:30", "23:32", [
+                          ("06:30", 15), ("09:30", 14), ("16:30", 10), ("20:00", 14), ("22:00", 18),
                       ]),
-                      holiday: pattern("05:53", "23:32", [
-                          ("05:53", 15), ("07:00", 15), ("10:00", 13), ("20:00", 15),
+                      holiday: pattern("06:30", "23:32", [
+                          ("06:30", 15), ("10:00", 13), ("20:00", 15),
                       ])),
             direction("Utsunomiya", "Tokyo", "上野・東京方面", "For Ueno & Tokyo", ascending: false,
                       weekday: pattern("04:37", "22:42", [
@@ -463,11 +465,13 @@ extension JREastLineData {
             4, 5, 5, 8, 4, 3, 4, 4, 2, 3, 4, 4, 4, 3, 3, 5, 5, 5, 4, 5, 4, 4, 6, 5,
         ],
         directions: [
+            // Last departure from Tokyo is 23:19 — later Ueno-Tokyo Line
+            // departures on this corridor are Utsunomiya Line trains
             direction("Takasaki", "Takasaki", "高崎方面", "For Takasaki", ascending: true,
-                      weekday: pattern("05:53", "23:32", [
+                      weekday: pattern("05:53", "23:19", [
                           ("05:53", 15), ("06:30", 15), ("09:30", 14), ("16:30", 10), ("20:00", 14), ("22:00", 18),
                       ]),
-                      holiday: pattern("05:53", "23:32", [
+                      holiday: pattern("05:53", "23:19", [
                           ("05:53", 15), ("07:00", 15), ("10:00", 13), ("20:00", 15),
                       ])),
             direction("Takasaki", "Tokyo", "上野・東京方面", "For Ueno & Tokyo", ascending: false,
@@ -535,11 +539,11 @@ extension JREastLineData {
                           ("04:53", 8), ("07:00", 6), ("10:00", 8), ("20:00", 9),
                       ])),
             direction("Yokohama", "HigashiKanagawa", "東神奈川方面", "For Higashi-Kanagawa", ascending: false,
-                      weekday: pattern("04:50", "23:50", [
-                          ("04:50", 8), ("06:30", 5), ("09:30", 8), ("16:30", 6), ("20:00", 8), ("22:00", 10),
+                      weekday: pattern("04:53", "24:11", [
+                          ("04:53", 8), ("06:30", 5), ("09:30", 8), ("16:30", 6), ("20:00", 8), ("22:00", 10),
                       ]),
-                      holiday: pattern("04:50", "23:50", [
-                          ("04:50", 8), ("07:00", 6), ("10:00", 8), ("20:00", 9),
+                      holiday: pattern("04:53", "24:11", [
+                          ("04:53", 8), ("07:00", 6), ("10:00", 8), ("20:00", 9),
                       ])),
         ],
         delayInfo: delayInfo,
@@ -657,11 +661,11 @@ extension JREastLineData {
                           ("04:59", 10), ("07:00", 8), ("10:00", 10), ("20:00", 12),
                       ])),
             direction("Musashino", "NishiFunabashi", "西船橋方面", "For Nishi-Funabashi", ascending: false,
-                      weekday: pattern("05:00", "23:40", [
-                          ("05:00", 10), ("06:30", 6), ("09:30", 10), ("16:30", 8), ("20:00", 10), ("22:00", 12),
+                      weekday: pattern("05:02", "24:01", [
+                          ("05:02", 10), ("06:30", 6), ("09:30", 10), ("16:30", 8), ("20:00", 10), ("22:00", 12),
                       ]),
-                      holiday: pattern("05:00", "23:40", [
-                          ("05:00", 10), ("07:00", 8), ("10:00", 10), ("20:00", 12),
+                      holiday: pattern("05:01", "24:01", [
+                          ("05:01", 10), ("07:00", 8), ("10:00", 10), ("20:00", 12),
                       ])),
         ],
         delayInfo: delayInfo,
@@ -709,7 +713,7 @@ extension JREastLineData {
                       weekday: pattern("04:35", "23:58", [
                           ("04:35", 10), ("06:00", 6), ("09:30", 11), ("16:30", 8), ("20:00", 10), ("22:00", 14),
                       ]),
-                      holiday: pattern("04:35", "23:58", [
+                      holiday: pattern("04:35", "23:56", [
                           ("04:35", 10), ("07:00", 8), ("10:00", 10), ("20:00", 12),
                       ])),
         ],
@@ -751,15 +755,15 @@ extension JREastLineData {
                       weekday: pattern("05:48", "24:18", [
                           ("05:48", 20), ("06:30", 20), ("09:30", 25), ("16:30", 15), ("20:00", 20), ("22:00", 25),
                       ]),
-                      holiday: pattern("05:48", "24:18", [
-                          ("05:48", 20), ("07:00", 17), ("10:00", 22), ("20:00", 25),
+                      holiday: pattern("05:57", "24:18", [
+                          ("05:57", 20), ("07:00", 17), ("10:00", 22), ("20:00", 25),
                       ])),
             direction("Itsukaichi", "Haijima", "拝島・立川方面", "For Haijima & Tachikawa", ascending: false,
-                      weekday: pattern("05:05", "23:35", [
-                          ("05:05", 20), ("06:30", 12), ("09:30", 25), ("16:30", 15), ("20:00", 20), ("22:00", 25),
+                      weekday: pattern("05:20", "23:53", [
+                          ("05:20", 20), ("06:30", 12), ("09:30", 25), ("16:30", 15), ("20:00", 20), ("22:00", 25),
                       ]),
-                      holiday: pattern("05:05", "23:35", [
-                          ("05:05", 20), ("07:00", 17), ("10:00", 22), ("20:00", 25),
+                      holiday: pattern("05:22", "23:49", [
+                          ("05:22", 20), ("07:00", 17), ("10:00", 22), ("20:00", 25),
                       ])),
         ],
         delayInfo: delayInfo,
