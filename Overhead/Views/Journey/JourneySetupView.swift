@@ -3,8 +3,8 @@ import Backbone
 
 // MARK: - Journey Setup View (乗換案内-style)
 
-/// Shown on the Journey tab. The user picks a departure and arrival station
-/// (searched across every bundled line), an optional departure time, then
+/// Shown on the Journey tab. The user picks a departure and arrival station,
+/// optional midpoints (経由), a departure time and walking speed, then
 /// chooses one of the candidate trains — including itineraries with
 /// transfers (乗り換え) when no single train covers the trip.
 struct JourneySetupView: View {
@@ -12,19 +12,56 @@ struct JourneySetupView: View {
 
     @State private var fromSelection: StationSearchHit?
     @State private var toSelection: StationSearchHit?
-    @State private var showingFromPicker = false
-    @State private var showingToPicker = false
+    @State private var viaSelections: [StationSearchHit] = []
+    @State private var pickerTarget: PickerTarget?
 
     @State private var departureMode: DepartureMode = .now
     @State private var departureDate = Date()
+    @AppStorage("journey.walkingSpeed") private var walkingSpeedRaw = WalkingSpeed.normal.rawValue
+    @AppStorage("journey.setup.stations") private var storedStationsJSON = ""
 
     @State private var candidates: [TrainCandidate] = []
     @State private var hasSearched = false
+    @State private var isSearching = false
     @State private var searchError: LocalizedStringKey?
+    @StateObject private var walkingEstimator = WalkingTimeEstimator()
+
+    private static let maxViaCount = 3
+
+    private struct StoredStation: Codable {
+        var lineId: String
+        var stationId: String
+    }
+
+    private struct StoredSetup: Codable {
+        var from: StoredStation?
+        var vias: [StoredStation]
+        var to: StoredStation?
+    }
 
     enum DepartureMode: Hashable {
         case now
         case scheduled
+    }
+
+    enum PickerTarget: Identifiable {
+        case from
+        case to
+        case via(Int)
+        case addVia
+
+        var id: String {
+            switch self {
+            case .from: return "from"
+            case .to: return "to"
+            case .via(let index): return "via\(index)"
+            case .addVia: return "addVia"
+            }
+        }
+    }
+
+    private var walkingSpeed: WalkingSpeed {
+        WalkingSpeed(rawValue: walkingSpeedRaw) ?? .normal
     }
 
     private var effectiveDeparture: Date {
@@ -43,6 +80,7 @@ struct JourneySetupView: View {
             .navigationTitle("Tab.Journey")
             .task {
                 await viewModel.loadLines()
+                restoreSelections()
             }
         }
     }
@@ -55,6 +93,8 @@ struct JourneySetupView: View {
                 stationCard
 
                 departureTimeSection
+
+                walkingSpeedSection
 
                 if let searchError {
                     noticeRow(icon: "exclamationmark.circle", text: searchError)
@@ -72,15 +112,21 @@ struct JourneySetupView: View {
             searchButton
                 .padding(16)
         }
-        .sheet(isPresented: $showingFromPicker) {
+        .sheet(item: $pickerTarget) { target in
             stationPickerSheet { hit in
-                fromSelection = hit
-                invalidateResults()
-            }
-        }
-        .sheet(isPresented: $showingToPicker) {
-            stationPickerSheet { hit in
-                toSelection = hit
+                switch target {
+                case .from:
+                    fromSelection = hit
+                case .to:
+                    toSelection = hit
+                case .via(let index):
+                    if viaSelections.indices.contains(index) {
+                        viaSelections[index] = hit
+                    }
+                case .addVia:
+                    viaSelections.append(hit)
+                }
+                persistSelections()
                 invalidateResults()
             }
         }
@@ -91,6 +137,7 @@ struct JourneySetupView: View {
             StationSearchSelectionView(
                 lines: viewModel.availableLines,
                 showsCloseButton: true,
+                mergesStations: true,
                 onSelect: onSelect
             )
         }
@@ -102,32 +149,92 @@ struct JourneySetupView: View {
         HStack(spacing: 12) {
             VStack(spacing: 0) {
                 stationField(label: "Setup.From", selection: fromSelection) {
-                    showingFromPicker = true
+                    pickerTarget = .from
+                }
+
+                ForEach(Array(viaSelections.enumerated()), id: \.offset) { index, via in
+                    fieldDivider
+                    viaField(index: index, selection: via)
                 }
 
                 fieldDivider
 
                 stationField(label: "Setup.To", selection: toSelection) {
-                    showingToPicker = true
+                    pickerTarget = .to
                 }
             }
 
-            Button {
-                swapStations()
-            } label: {
-                Image(systemName: "arrow.up.arrow.down")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(fromSelection != nil || toSelection != nil ? .accentColor : .secondary)
-                    .frame(width: 36, height: 36)
-                    .background(Color(.tertiarySystemFill))
-                    .clipShape(Circle())
+            VStack(spacing: 10) {
+                Button {
+                    swapStations()
+                } label: {
+                    Image(systemName: "arrow.up.arrow.down")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(fromSelection != nil || toSelection != nil ? .accentColor : .secondary)
+                        .frame(width: 36, height: 36)
+                        .background(Color(.tertiarySystemFill))
+                        .clipShape(Circle())
+                }
+                .accessibilityLabel("Setup.Swap")
+                .disabled(fromSelection == nil && toSelection == nil)
+
+                Button {
+                    pickerTarget = .addVia
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(viaSelections.count < Self.maxViaCount ? .accentColor : .secondary)
+                        .frame(width: 36, height: 36)
+                        .background(Color(.tertiarySystemFill))
+                        .clipShape(Circle())
+                }
+                .accessibilityLabel("Setup.AddVia")
+                .disabled(viaSelections.count >= Self.maxViaCount)
             }
-            .accessibilityLabel("Setup.Swap")
-            .disabled(fromSelection == nil && toSelection == nil)
         }
         .padding(14)
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+    }
+
+    @ViewBuilder
+    private func viaField(index: Int, selection: StationSearchHit) -> some View {
+        HStack(spacing: 10) {
+            Button {
+                pickerTarget = .via(index)
+            } label: {
+                HStack(spacing: 10) {
+                    Text("Setup.Via")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(.secondary)
+                        .frame(width: 44, height: 22)
+                        .background(Color(.tertiarySystemFill))
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+
+                    Text(selection.station.localizedName)
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+
+                    Spacer(minLength: 0)
+                }
+                .padding(.vertical, 10)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                viaSelections.remove(at: index)
+                persistSelections()
+                invalidateResults()
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 18))
+                    .foregroundColor(Color(.tertiaryLabel))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Setup.RemoveVia")
+        }
     }
 
     @ViewBuilder
@@ -224,18 +331,50 @@ struct JourneySetupView: View {
         }
     }
 
+    // MARK: - Walking Speed Section
+
+    private var walkingSpeedSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Setup.WalkingSpeed")
+                .font(.body)
+                .foregroundColor(.secondary)
+                .padding(.leading, 4)
+
+            Picker("Setup.WalkingSpeed", selection: Binding(
+                get: { walkingSpeed },
+                set: { walkingSpeedRaw = $0.rawValue }
+            )) {
+                ForEach(WalkingSpeed.allCases) { speed in
+                    Text(speed.label).tag(speed)
+                }
+            }
+            .pickerStyle(.segmented)
+            .onChange(of: walkingSpeedRaw) { _, _ in
+                invalidateResults()
+            }
+            .padding(14)
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+        }
+    }
+
     // MARK: - Search Button (bottom safe area)
 
     @ViewBuilder
     private var searchButton: some View {
         let label = HStack(spacing: 6) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 15, weight: .semibold))
-            Text("Setup.SearchTrains")
+            if isSearching {
+                ProgressView()
+                    .controlSize(.small)
+            } else {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 15, weight: .semibold))
+            }
+            Text(hasSearched ? "Setup.SearchAgain" : "Setup.SearchTrains")
                 .font(.system(size: 16, weight: .bold))
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 2)
+        .padding(.vertical, 8)
 
         if #available(iOS 26.0, *) {
             Button {
@@ -245,7 +384,7 @@ struct JourneySetupView: View {
             }
             .buttonStyle(.glassProminent)
             .buttonBorderShape(.capsule)
-            .disabled(!canSearch)
+            .disabled(!canSearch || isSearching)
         } else {
             Button {
                 search()
@@ -254,13 +393,19 @@ struct JourneySetupView: View {
             }
             .buttonStyle(.borderedProminent)
             .buttonBorderShape(.capsule)
-            .disabled(!canSearch)
+            .disabled(!canSearch || isSearching)
         }
     }
 
+    /// Station names along the journey: from, midpoints, to.
+    private var waypointNames: [String]? {
+        guard let from = fromSelection, let to = toSelection else { return nil }
+        return [from.station.name] + viaSelections.map(\.station.name) + [to.station.name]
+    }
+
     private var canSearch: Bool {
-        guard let from = fromSelection, let to = toSelection else { return false }
-        return from.station.name != to.station.name
+        guard let names = waypointNames else { return false }
+        return zip(names, names.dropFirst()).allSatisfy { $0 != $1 }
     }
 
     // MARK: - Candidate List
@@ -497,6 +642,8 @@ struct JourneySetupView: View {
         let from = fromSelection
         fromSelection = toSelection
         toSelection = from
+        viaSelections.reverse()
+        persistSelections()
         invalidateResults()
     }
 
@@ -507,20 +654,64 @@ struct JourneySetupView: View {
     }
 
     private func search() {
-        guard let from = fromSelection, let to = toSelection else { return }
+        guard let names = waypointNames, !isSearching else { return }
         searchError = nil
+        isSearching = true
 
-        candidates = viewModel.searchTrainCandidates(
-            fromName: from.station.name,
-            toName: to.station.name,
-            departure: effectiveDeparture
-        )
-        hasSearched = true
+        Task {
+            // When leaving now, trains departing before the user can walk to
+            // the station are excluded outright.
+            var departure = effectiveDeparture
+            if departureMode == .now,
+               let station = fromSelection?.station,
+               let walkSeconds = await walkingEstimator.walkingSeconds(to: station) {
+                departure = departure.addingTimeInterval(walkSeconds * walkingSpeed.paceMultiplier)
+            }
 
-        if candidates.isEmpty
-            && !viewModel.routeExists(fromName: from.station.name, toName: to.station.name) {
-            hasSearched = false
-            searchError = "Setup.NoRoute"
+            candidates = viewModel.searchTrainCandidates(
+                stationNames: names,
+                departure: departure,
+                transferMinutes: walkingSpeed.transferMinutes
+            )
+            hasSearched = true
+            isSearching = false
+
+            if candidates.isEmpty && !viewModel.routeExists(through: names) {
+                hasSearched = false
+                searchError = "Setup.NoRoute"
+            }
         }
+    }
+
+    // MARK: - Selection Persistence
+
+    private func persistSelections() {
+        let setup = StoredSetup(
+            from: fromSelection.map { StoredStation(lineId: $0.line.id, stationId: $0.station.id) },
+            vias: viaSelections.map { StoredStation(lineId: $0.line.id, stationId: $0.station.id) },
+            to: toSelection.map { StoredStation(lineId: $0.line.id, stationId: $0.station.id) }
+        )
+        guard let data = try? JSONEncoder().encode(setup),
+              let json = String(data: data, encoding: .utf8)
+        else { return }
+        storedStationsJSON = json
+    }
+
+    private func restoreSelections() {
+        guard fromSelection == nil, toSelection == nil, viaSelections.isEmpty,
+              let data = storedStationsJSON.data(using: .utf8),
+              let setup = try? JSONDecoder().decode(StoredSetup.self, from: data)
+        else { return }
+        fromSelection = hit(for: setup.from)
+        viaSelections = setup.vias.compactMap { hit(for: $0) }
+        toSelection = hit(for: setup.to)
+    }
+
+    private func hit(for stored: StoredStation?) -> StationSearchHit? {
+        guard let stored,
+              let line = viewModel.availableLines.first(where: { $0.id == stored.lineId }),
+              let station = line.stations.first(where: { $0.id == stored.stationId })
+        else { return nil }
+        return StationSearchHit(line: line, station: station)
     }
 }

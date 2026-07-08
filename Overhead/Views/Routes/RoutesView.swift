@@ -370,6 +370,9 @@ struct StationSearchSelectionView: View {
     /// Whether to show a close button (for sheet presentation). When pushed
     /// onto an existing navigation stack, the back button suffices.
     var showsCloseButton: Bool = false
+    /// Shows the same physical station as a single row with every line's
+    /// badge. Use only when the caller doesn't need a specific boarding line.
+    var mergesStations: Bool = false
     let onSelect: (StationSearchHit) -> Void
 
     @State private var searchText = ""
@@ -380,37 +383,23 @@ struct StationSearchSelectionView: View {
         searchText.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    /// Every hit for each Japanese station name, across all lines.
+    private var hitsByName: [String: [StationSearchHit]] {
+        var result: [String: [StationSearchHit]] = [:]
+        for line in lines {
+            for station in line.stations {
+                result[station.name, default: []].append(StationSearchHit(line: line, station: station))
+            }
+        }
+        return result
+    }
+
     var body: some View {
         List {
             if trimmedQuery.isEmpty {
-                if !nearbyProvider.nearestStations.isEmpty {
-                    Section("StationSearch.Nearby") {
-                        ForEach(nearbyProvider.nearestStations) { nearby in
-                            nearbyRow(nearby)
-                        }
-                    }
-                }
-
-                ForEach(lines) { line in
-                    Section(line.localizedName) {
-                        ForEach(line.stations) { station in
-                            selectionRow(hit: StationSearchHit(line: line, station: station))
-                        }
-                    }
-                }
+                emptyQueryContent
             } else {
-                let results = StationSearch.search(lines: lines, query: trimmedQuery)
-                if results.isEmpty {
-                    HStack {
-                        Image(systemName: "magnifyingglass")
-                        Text("StationSearch.NoResults")
-                    }
-                    .foregroundColor(.secondary)
-                } else {
-                    ForEach(results) { hit in
-                        selectionRow(hit: hit)
-                    }
-                }
+                searchResultsContent
             }
         }
         .listStyle(.grouped)
@@ -442,6 +431,78 @@ struct StationSearchSelectionView: View {
         }
     }
 
+    // MARK: - List Content
+
+    @ViewBuilder
+    private var emptyQueryContent: some View {
+        let allHits = mergesStations ? hitsByName : [:]
+
+        if !nearbyProvider.nearestStations.isEmpty {
+            Section("StationSearch.Nearby") {
+                ForEach(nearbyProvider.nearestStations) { nearby in
+                    nearbyRow(nearby, allHits: allHits)
+                }
+            }
+        }
+
+        ForEach(lines) { line in
+            Section(line.localizedName) {
+                ForEach(line.stations) { station in
+                    let hit = StationSearchHit(line: line, station: station)
+                    if mergesStations {
+                        mergedRow(
+                            primary: hit,
+                            hits: allHits[station.name] ?? [hit]
+                        )
+                    } else {
+                        selectionRow(hit: hit)
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var searchResultsContent: some View {
+        let results = StationSearch.search(lines: lines, query: trimmedQuery)
+        if results.isEmpty {
+            HStack {
+                Image(systemName: "magnifyingglass")
+                Text("StationSearch.NoResults")
+            }
+            .foregroundColor(.secondary)
+        } else if mergesStations {
+            let merged = mergeByStationName(results)
+            ForEach(merged, id: \.primary.id) { group in
+                mergedRow(primary: group.primary, hits: group.hits)
+            }
+        } else {
+            ForEach(results) { hit in
+                selectionRow(hit: hit)
+            }
+        }
+    }
+
+    /// Groups ranked search results by station name, preserving rank order.
+    private func mergeByStationName(
+        _ results: [StationSearchHit]
+    ) -> [(primary: StationSearchHit, hits: [StationSearchHit])] {
+        var order: [String] = []
+        var grouped: [String: [StationSearchHit]] = [:]
+        for hit in results {
+            if grouped[hit.station.name] == nil {
+                order.append(hit.station.name)
+            }
+            grouped[hit.station.name, default: []].append(hit)
+        }
+        return order.compactMap { name in
+            guard let hits = grouped[name], let primary = hits.first else { return nil }
+            return (primary, hits)
+        }
+    }
+
+    // MARK: - Rows
+
     private func selectionRow(hit: StationSearchHit) -> some View {
         Button {
             onSelect(hit)
@@ -452,19 +513,119 @@ struct StationSearchSelectionView: View {
         .foregroundColor(.primary)
     }
 
-    private func nearbyRow(_ nearby: NearbyStation) -> some View {
+    private func mergedRow(
+        primary: StationSearchHit,
+        hits: [StationSearchHit],
+        subtitle: String? = nil
+    ) -> some View {
         Button {
-            onSelect(nearby.hit)
+            onSelect(primary)
             dismiss()
         } label: {
-            HStack {
-                StationSearchRow(hit: nearby.hit)
-                Spacer()
-                Text(nearby.formattedDistance)
-                    .font(.system(size: 12, design: .rounded))
-                    .foregroundColor(.secondary)
-            }
+            MergedStationRow(primary: primary, hits: hits, subtitle: subtitle)
         }
         .foregroundColor(.primary)
+    }
+
+    @ViewBuilder
+    private func nearbyRow(_ nearby: NearbyStation, allHits: [String: [StationSearchHit]] = [:]) -> some View {
+        if mergesStations {
+            mergedRow(
+                primary: nearby.hit,
+                hits: allHits[nearby.hit.station.name] ?? [nearby.hit],
+                subtitle: nearby.formattedDistance
+            )
+        } else {
+            Button {
+                onSelect(nearby.hit)
+                dismiss()
+            } label: {
+                HStack {
+                    StationSearchRow(hit: nearby.hit)
+                    Spacer()
+                    Text(nearby.formattedDistance)
+                        .font(.system(size: 12, design: .rounded))
+                        .foregroundColor(.secondary)
+                }
+            }
+            .foregroundColor(.primary)
+        }
+    }
+}
+
+// MARK: - Merged Station Row
+
+/// One row per physical station: name on the left edge, the badge of every
+/// line serving it on the right edge.
+struct MergedStationRow: View {
+    let primary: StationSearchHit
+    let hits: [StationSearchHit]
+    /// Secondary text under the name (e.g. distance for nearby rows).
+    var subtitle: String? = nil
+
+    private static let maxBadges = 4
+
+    /// Numbered lines first, in station-code order, like station signage.
+    private var orderedHits: [StationSearchHit] {
+        hits.sorted {
+            switch ($0.station.stationCode.isEmpty, $1.station.stationCode.isEmpty) {
+            case (false, true): return true
+            case (true, false): return false
+            default: return $0.station.stationCode < $1.station.stationCode
+            }
+        }
+    }
+
+    var body: some View {
+        HStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(primary.station.localizedName)
+                    .font(.system(size: 16, weight: .semibold))
+                if let subtitle {
+                    Text(subtitle)
+                        .font(.system(size: 12, design: .rounded))
+                        .foregroundColor(.secondary)
+                } else if primary.station.nameEn != primary.station.localizedName {
+                    Text(primary.station.nameEn)
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Spacer(minLength: 8)
+
+            HStack(spacing: 4) {
+                let ordered = orderedHits
+                ForEach(ordered.prefix(Self.maxBadges)) { hit in
+                    badge(for: hit)
+                }
+                if ordered.count > Self.maxBadges {
+                    Text(verbatim: "+\(ordered.count - Self.maxBadges)")
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func badge(for hit: StationSearchHit) -> some View {
+        if !hit.station.stationCode.isEmpty {
+            StationNumberBadge(
+                code: hit.station.stationCode,
+                color: hit.line.color,
+                size: .compact,
+                stationName: hit.station.name
+            )
+        } else if !hit.line.lineSymbol.isEmpty {
+            LineSymbolBadge(
+                symbol: hit.line.lineSymbol,
+                color: hit.line.color
+            )
+        } else {
+            RoundedRectangle(cornerRadius: 3)
+                .fill(hit.line.color)
+                .frame(width: 8, height: 32)
+        }
     }
 }

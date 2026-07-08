@@ -159,16 +159,21 @@ final class JourneyViewModel: ObservableObject {
 
     // MARK: - Departure Search (乗換案内-style)
 
-    /// All boardable itineraries between two stations (matched by Japanese
-    /// name across lines), departing at or after `departure`, sorted by
-    /// departure time. Falls back to routes with transfers (乗り換え) when no
-    /// single-train route exists.
+    /// All boardable itineraries visiting `stationNames` in order (from, any
+    /// midpoints, to — matched by Japanese name across lines), departing at
+    /// or after `departure`. `transferMinutes` is the platform-walk time
+    /// assumed at each transfer, from the user's walking speed.
     func searchTrainCandidates(
-        fromName: String,
-        toName: String,
+        stationNames: [String],
         departure: Date,
+        transferMinutes: Double = StaticTrainData.transferBufferMinutes,
         limit: Int = 12
     ) -> [TrainCandidate] {
+        guard stationNames.count >= 2,
+              let fromName = stationNames.first,
+              let toName = stationNames.last
+        else { return [] }
+
         let calendar = ScheduleCalendar.current(at: departure)
         var jstCal = Calendar(identifier: .gregorian)
         jstCal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
@@ -178,22 +183,36 @@ final class JourneyViewModel: ObservableObject {
         // service day are the ones to show.
         let targetSec = target < 4 * 3600 ? target + 24 * 3600 : target
 
-        let direct = directCandidates(
-            fromName: fromName, toName: toName,
-            targetSec: targetSec, calendar: calendar, limit: limit
-        )
-        if !direct.isEmpty { return direct }
+        // Without midpoints, single-train routes (including 直通) win outright.
+        if stationNames.count == 2 {
+            let direct = directCandidates(
+                fromName: fromName, toName: toName,
+                targetSec: targetSec, calendar: calendar, limit: limit
+            )
+            if !direct.isEmpty { return direct }
+        }
 
-        return transferCandidates(
-            fromName: fromName, toName: toName,
-            targetSec: targetSec, calendar: calendar, limit: 8
+        guard let plan = StaticTrainData.planTransferRoute(
+            throughStationNames: stationNames,
+            transferMinutes: transferMinutes
+        ) else { return [] }
+
+        return candidates(
+            forPlan: plan,
+            targetSec: targetSec, calendar: calendar,
+            transferMinutes: transferMinutes, limit: 8
         )
     }
 
-    /// Whether any route (direct or with transfers) exists between two stations.
-    func routeExists(fromName: String, toName: String) -> Bool {
-        !StaticTrainData.directRoutes(fromStationName: fromName, toStationName: toName).isEmpty
-            || StaticTrainData.planTransferRoute(fromStationName: fromName, toStationName: toName) != nil
+    /// Whether a route (direct or with transfers) exists between each
+    /// consecutive pair of station names.
+    func routeExists(through stationNames: [String]) -> Bool {
+        guard stationNames.count >= 2 else { return false }
+        return zip(stationNames, stationNames.dropFirst()).allSatisfy { from, to in
+            from != to
+                && (!StaticTrainData.directRoutes(fromStationName: from, toStationName: to).isEmpty
+                    || StaticTrainData.planTransferRoute(fromStationName: from, toStationName: to) != nil)
+        }
     }
 
     private func directCandidates(
@@ -238,25 +257,45 @@ final class JourneyViewModel: ObservableObject {
         return Array(candidates.sorted { $0.departureSeconds < $1.departureSeconds }.prefix(limit))
     }
 
-    /// Builds connecting itineraries along a planned multi-leg route.
-    private func transferCandidates(
-        fromName: String,
-        toName: String,
+    /// Builds boardable itineraries along a planned route (one or more legs).
+    private func candidates(
+        forPlan plan: [StaticTrainData.TransferLeg],
         targetSec: Int,
         calendar: ScheduleCalendar,
+        transferMinutes: Double,
         limit: Int
     ) -> [TrainCandidate] {
-        guard let plan = StaticTrainData.planTransferRoute(
-            fromStationName: fromName,
-            toStationName: toName
-        ), plan.count >= 2 else { return [] }
+        guard let firstLeg = plan.first else { return [] }
 
-        let bufferSec = Int(StaticTrainData.transferBufferMinutes * 60)
-        let firstLeg = plan[0]
+        let bufferSec = Int(transferMinutes * 60)
         let firstRides = rides(on: firstLeg.staticLine,
                                fromId: firstLeg.fromStation.id, toId: firstLeg.toStation.id,
                                departingAtOrAfter: targetSec, calendar: calendar,
                                limit: limit)
+
+        // A plan that stayed on one line is plain direct rides — no composite.
+        if plan.count == 1 {
+            return firstRides.map { ride in
+                let line = firstLeg.staticLine.trainLine
+                let leg = CandidateLeg(
+                    service: ride.service,
+                    line: line,
+                    fromStation: firstLeg.fromStation,
+                    toStation: firstLeg.toStation,
+                    departureSeconds: ride.departure,
+                    arrivalSeconds: ride.arrival
+                )
+                return TrainCandidate(
+                    id: "\(ride.service.id)|\(firstLeg.staticLine.id)|\(firstLeg.fromStation.id)|\(firstLeg.toStation.id)",
+                    legs: [leg],
+                    isThrough: false,
+                    journeyLine: line,
+                    journeyService: ride.service,
+                    fromStation: firstLeg.fromStation,
+                    toStation: firstLeg.toStation
+                )
+            }
+        }
 
         var candidates: [TrainCandidate] = []
         for firstRide in firstRides {

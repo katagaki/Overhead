@@ -379,19 +379,69 @@ public enum StaticTrainData {
     /// Time assumed for walking between platforms when changing trains.
     public static let transferBufferMinutes: Double = 5
 
+    /// Plans a route visiting every station name in `names` in order,
+    /// concatenating per-pair plans. Legs continuing on the same line in the
+    /// same direction merge, so an on-path midpoint adds no fake transfer.
+    public static func planTransferRoute(
+        throughStationNames names: [String],
+        maxTransfers: Int = 2,
+        transferMinutes: Double = transferBufferMinutes
+    ) -> [TransferLeg]? {
+        guard names.count >= 2 else { return nil }
+        var plan: [TransferLeg] = []
+        for (from, to) in zip(names, names.dropFirst()) {
+            guard from != to,
+                  var segment = planTransferRoute(
+                      fromStationName: from,
+                      toStationName: to,
+                      maxTransfers: maxTransfers,
+                      transferMinutes: transferMinutes
+                  )
+            else { return nil }
+
+            if let last = plan.last, let first = segment.first,
+               last.staticLine.id == first.staticLine.id,
+               last.toStation.id == first.fromStation.id,
+               continuesSameDirection(last, first) {
+                plan.removeLast()
+                segment[0] = TransferLeg(
+                    staticLine: first.staticLine,
+                    fromStation: last.fromStation,
+                    toStation: first.toStation
+                )
+            }
+            plan.append(contentsOf: segment)
+        }
+        return plan.isEmpty ? nil : plan
+    }
+
+    /// Whether `second` keeps riding the same line the same way `first` was
+    /// going — i.e. the two legs are one continuous ride, not a switchback.
+    private static func continuesSameDirection(_ first: TransferLeg, _ second: TransferLeg) -> Bool {
+        let stations = first.staticLine.stations
+        guard let aFrom = stations.firstIndex(where: { $0.id == first.fromStation.id }),
+              let aTo = stations.firstIndex(where: { $0.id == first.toStation.id }),
+              let bFrom = stations.firstIndex(where: { $0.id == second.fromStation.id }),
+              let bTo = stations.firstIndex(where: { $0.id == second.toStation.id })
+        else { return false }
+        return (aTo > aFrom) == (bTo > bFrom)
+    }
+
     /// Plans a route between two physical stations (identified by Japanese
     /// name), changing trains at same-name stations when no single ride
     /// exists. Returns ordered legs, or nil when unreachable within
     /// `maxTransfers` changes. Shortest ride-time route via Dijkstra, with a
-    /// fixed penalty per transfer so direct rides win when comparable.
+    /// penalty per transfer (scaled by walking speed) so direct rides win
+    /// when comparable.
     public static func planTransferRoute(
         fromStationName: String,
         toStationName: String,
-        maxTransfers: Int = 2
+        maxTransfers: Int = 2,
+        transferMinutes: Double = transferBufferMinutes
     ) -> [TransferLeg]? {
         guard fromStationName != toStationName else { return nil }
         let lines = allLines
-        let transferPenalty = transferBufferMinutes + 3  // walk + expected wait
+        let transferPenalty = transferMinutes + 3  // walk + expected wait
 
         // Node = (line index, station index on that line)
         struct Node: Hashable {
