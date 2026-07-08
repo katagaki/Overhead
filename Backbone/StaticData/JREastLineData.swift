@@ -692,6 +692,10 @@ enum JREastLineData {
             through("Keiyo.Soga", .ascending,
                     "内房線・外房線", "JR Uchibo & Sotobo Lines",
                     "君津・上総一ノ宮方面", "for Kimitsu & Kazusa-Ichinomiya"),
+            through("Keiyo.IchikawaShiohama", .ascending,
+                    "武蔵野線", "JR Musashino Line",
+                    "西船橋・南流山方面", "for Nishi-Funabashi & Minami-Nagareyama",
+                    to: "Railway:JR-East.KeiyoBranch"),
         ]
     )
 }

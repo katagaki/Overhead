@@ -5,6 +5,9 @@ struct RootView: View {
     @ObservedObject var viewModel: JourneyViewModel
     @State private var selectedTab: Tab = .journey
     @State private var showJourneySheet = false
+    @Namespace private var journeyZoom
+
+    private static let journeyTransitionID = "activeJourney"
 
     enum Tab: Hashable {
         case journey
@@ -21,6 +24,7 @@ struct RootView: View {
                         JourneyBottomAccessory(viewModel: viewModel) {
                             showJourneySheet = true
                         }
+                        .matchedTransitionSource(id: Self.journeyTransitionID, in: journeyZoom)
                     }
                     .tabBarMinimizeBehavior(.onScrollDown)
             } else {
@@ -30,6 +34,7 @@ struct RootView: View {
         .tint(viewModel.selectedLine?.color ?? Color.accentColor)
         .sheet(isPresented: $showJourneySheet) {
             JourneySheetView(viewModel: viewModel)
+                .navigationTransition(.zoom(sourceID: Self.journeyTransitionID, in: journeyZoom))
         }
         .onChange(of: viewModel.activeJourney != nil) { _, hasJourney in
             if #available(iOS 26.0, *) {

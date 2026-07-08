@@ -389,14 +389,13 @@ enum KeiseiLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
+            // 押上線 (羽田空港方面) is reached by chaining through 京成本線
+            // at 青砥 — 京成高砂 is not on 押上線, so a direct through to it
+            // could never resolve.
             through("Keisei.NaritaSkyAccess.KeiseiTakasago", .descending,
                     "京成本線", "Keisei Main Line",
                     "京成上野方面", "for Keisei-Ueno",
                     to: "Railway:Keisei.Main"),
-            through("Keisei.NaritaSkyAccess.KeiseiTakasago", .descending,
-                    "京成押上線・都営浅草線・京急線", "Keisei Oshiage, Toei Asakusa & Keikyu Lines",
-                    "羽田空港方面", "for Haneda Airport",
-                    to: "Railway:Keisei.Oshiage"),
         ]
     )
 }

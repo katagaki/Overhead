@@ -608,6 +608,7 @@ struct LCDLineSymbolBadge: View {
     let color: Color
 
     private static let tobuSymbols: Set<String> = ["TS", "TI", "TN", "TD", "TJ"]
+    private static let odakyuSymbols: Set<String> = ["OH", "OE", "OT"]
     private static let tokyuStyleSymbols: Set<String> = ["TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD"]
     private static let seibuSymbols: Set<String> = ["SI", "SS", "SK", "ST", "SW", "SY"]
     private static let keioSymbols: Set<String> = ["KO", "IN"]
@@ -617,8 +618,10 @@ struct LCDLineSymbolBadge: View {
 
     var body: some View {
         switch symbol {
+        case "NT":
+            nipporiToneriBadge
         case "KS":
-            circleBadge(ringWidth: 2.4, textColor: color, hind: true)
+            keiseiBadge
         case "KK":
             circleBadge(ringWidth: 2.0, textColor: Self.keikyuLetterBlue, hind: true,
                         ringColor: Self.keikyuRingBlue)
@@ -632,7 +635,10 @@ struct LCDLineSymbolBadge: View {
         case _ where Self.tokyuStyleSymbols.contains(symbol):
             filledBadge(in: AnyShape(RoundedRectangle(cornerRadius: 6)))
         case _ where Self.seibuSymbols.contains(symbol):
-            squareBadge(cornerRadius: 5.5, borderWidth: 2.6, textColor: Self.seibuLetterColor)
+            seibuTrainBadge
+        case _ where Self.odakyuSymbols.contains(symbol):
+            // Odakyu: very round squircle, line-color ring and letters
+            squircleBadge(cornerRadius: 10, borderWidth: 2.6, textColor: color)
         case _ where Self.tobuSymbols.contains(symbol):
             squareBadge(cornerRadius: 5.5, borderWidth: 2.6)
         case _ where symbol.hasPrefix("J"):
@@ -662,6 +668,89 @@ struct LCDLineSymbolBadge: View {
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius)
                     .strokeBorder(color, lineWidth: borderWidth)
+            )
+    }
+
+    private func squircleBadge(cornerRadius: CGFloat, borderWidth: CGFloat,
+                               textColor: Color) -> some View {
+        symbolText(color: textColor, inset: borderWidth + 1, hind: true)
+            .frame(width: 24, height: 24)
+            .background(Color.white, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .strokeBorder(color, lineWidth: borderWidth)
+            )
+    }
+
+    /// Seibu: the train-front logo — color body, white face with the letters,
+    /// two lights, splayed legs (mirrors LineSymbolBadge.seibuBadge at 24pt)
+    private var seibuTrainBadge: some View {
+        ZStack {
+            LCDSeibuTrainLegs()
+                .fill(color)
+
+            UnevenRoundedRectangle(
+                topLeadingRadius: 7.2, bottomLeadingRadius: 1.7,
+                bottomTrailingRadius: 1.7, topTrailingRadius: 7.2,
+                style: .continuous
+            )
+            .fill(color)
+            .frame(width: 19.7, height: 16.8)
+            .offset(y: -3.6)
+
+            RoundedRectangle(cornerRadius: 2.4, style: .continuous)
+                .fill(Color.white)
+                .frame(width: 14.4, height: 9.1)
+                .offset(y: -5.3)
+
+            Text(symbol)
+                .font(.custom("Hind-Bold", fixedSize: 7.2))
+                .kerning(symbol.count > 1 ? -0.4 : 0)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+                .foregroundColor(.black)
+                .frame(width: 13.4)
+                .offset(y: -4.7)
+
+            ForEach([-1.0, 1.0], id: \.self) { side in
+                Circle()
+                    .fill(Color.white)
+                    .frame(width: 2.6, height: 2.6)
+                    .offset(x: side * 4.8, y: 2.4)
+            }
+        }
+        .frame(width: 24, height: 24)
+    }
+
+    /// Nippori-Toneri Liner: pink outer + green inner border
+    private var nipporiToneriBadge: some View {
+        symbolText(color: .black, inset: 6, hind: true)
+            .frame(width: 24, height: 24)
+            .background(Color.white, in: RoundedRectangle(cornerRadius: 3.8))
+            .overlay(
+                RoundedRectangle(cornerRadius: 3.8)
+                    .strokeBorder(color, lineWidth: 1.8)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 1.8)
+                    .strokeBorder(Color(hex: "#69B444"), lineWidth: 1.1)
+                    .padding(2.9)
+            )
+    }
+
+    /// Keisei: white circle, color ring, line-color regular Helvetica letters
+    private var keiseiBadge: some View {
+        Text(symbol)
+            .font(.custom("Helvetica", fixedSize: symbol.count > 1 ? 11 : 13.5))
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
+            .foregroundColor(color)
+            .padding(.horizontal, 3.4)
+            .frame(width: 24, height: 24)
+            .background(Color.white, in: Circle())
+            .overlay(
+                Circle()
+                    .strokeBorder(color, lineWidth: 2.4)
             )
     }
 
@@ -715,5 +804,28 @@ struct LCDLineSymbolBadge: View {
             // Hind's tall metrics leave caps 0.085em above the box center
             .offset(y: hind ? size * 0.085 : 0)
             .padding(.horizontal, inset)
+    }
+}
+
+// MARK: - Seibu Train Legs (LCD copy)
+
+/// The splayed legs under the Seibu train-front logo. Duplicated from the
+/// main app's SeibuTrainLegs because the LCD target is self-contained.
+struct LCDSeibuTrainLegs: Shape {
+    func path(in rect: CGRect) -> Path {
+        var p = Path()
+        let w = rect.width
+        let h = rect.height
+        p.move(to: CGPoint(x: 0.40 * w, y: 0.60 * h))
+        p.addLine(to: CGPoint(x: 0.53 * w, y: 0.60 * h))
+        p.addLine(to: CGPoint(x: 0.27 * w, y: 1.00 * h))
+        p.addLine(to: CGPoint(x: 0.10 * w, y: 1.00 * h))
+        p.closeSubpath()
+        p.move(to: CGPoint(x: 0.60 * w, y: 0.60 * h))
+        p.addLine(to: CGPoint(x: 0.47 * w, y: 0.60 * h))
+        p.addLine(to: CGPoint(x: 0.73 * w, y: 1.00 * h))
+        p.addLine(to: CGPoint(x: 0.90 * w, y: 1.00 * h))
+        p.closeSubpath()
+        return p
     }
 }

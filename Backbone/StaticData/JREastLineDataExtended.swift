@@ -49,7 +49,8 @@ extension JREastLineData {
     static var extendedLines: [StaticTrainLine] {
         [
             jobanRapid, jobanLocal, yokosukaSobu, tokaido, shonanShinjuku,
-            utsunomiya, takasaki, yokohamaLine, nambu, musashino, ome, itsukaichi,
+            utsunomiya, takasaki, yokohamaLine, nambu, musashino, keiyoBranch,
+            ome, itsukaichi,
         ]
     }
 
@@ -61,28 +62,40 @@ extension JREastLineData {
         nameEn: "Joban Rapid Line",
         operatorId: "Operator:JR-East",
         colorHex: "#00B261",
+        // The 品川–東京–上野 corridor (上野東京ライン) is part of the official
+        // JJ line: through trains all continue to 品川, so it is modeled as
+        // line stations rather than a through service.
         stations: [
-            st("JobanRapid", "Ueno", "上野", "Ueno", "JJ01", 35.7141, 139.7774),
-            st("JobanRapid", "Nippori", "日暮里", "Nippori", "JJ02", 35.7278, 139.7708),
-            st("JobanRapid", "Mikawashima", "三河島", "Mikawashima", "JJ03", 35.7325, 139.7794),
-            st("JobanRapid", "MinamiSenju", "南千住", "Minami-Senju", "JJ04", 35.7333, 139.7995),
-            st("JobanRapid", "KitaSenju", "北千住", "Kita-Senju", "JJ05", 35.7497, 139.8047),
-            st("JobanRapid", "Matsudo", "松戸", "Matsudo", "JJ06", 35.7841, 139.9010),
-            st("JobanRapid", "Kashiwa", "柏", "Kashiwa", "JJ07", 35.8622, 139.9707),
-            st("JobanRapid", "Abiko", "我孫子", "Abiko", "JJ08", 35.8687, 140.0277),
-            st("JobanRapid", "Tennodai", "天王台", "Tennodai", "JJ09", 35.8700, 140.0672),
-            st("JobanRapid", "Toride", "取手", "Toride", "JJ10", 35.8973, 140.0629),
+            st("JobanRapid", "Shinagawa", "品川", "Shinagawa", "JJ01", 35.6285, 139.7388),
+            st("JobanRapid", "Shimbashi", "新橋", "Shimbashi", "JJ02", 35.6663, 139.7583),
+            st("JobanRapid", "Tokyo", "東京", "Tokyo", "JJ03", 35.6812, 139.7671),
+            st("JobanRapid", "Ueno", "上野", "Ueno", "JJ04", 35.7141, 139.7774),
+            st("JobanRapid", "Nippori", "日暮里", "Nippori", "JJ05", 35.7278, 139.7708),
+            st("JobanRapid", "Mikawashima", "三河島", "Mikawashima", "JJ06", 35.7325, 139.7794),
+            st("JobanRapid", "MinamiSenju", "南千住", "Minami-Senju", "JJ07", 35.7333, 139.7995),
+            st("JobanRapid", "KitaSenju", "北千住", "Kita-Senju", "JJ08", 35.7497, 139.8047),
+            st("JobanRapid", "Matsudo", "松戸", "Matsudo", "JJ09", 35.7841, 139.9010),
+            st("JobanRapid", "Kashiwa", "柏", "Kashiwa", "JJ10", 35.8622, 139.9707),
+            st("JobanRapid", "Abiko", "我孫子", "Abiko", "JJ11", 35.8687, 140.0277),
+            st("JobanRapid", "Tennodai", "天王台", "Tennodai", "JJ12", 35.8700, 140.0672),
+            st("JobanRapid", "Toride", "取手", "Toride", "JJ13", 35.8973, 140.0629),
         ],
-        hopTimesMinutes: [4, 3, 3, 3, 7, 6, 6, 3, 4],
+        hopTimesMinutes: [5, 3, 5, 4, 3, 3, 3, 7, 6, 6, 3, 4],
         directions: [
+            // NOTE: the down direction's origin moved 上野 → 品川 when the
+            // corridor was added. The verified 上野 times (first 04:33 /
+            // last 24:33, March-2026 revision) are preserved by shifting the
+            // origin pattern back by the 13-minute 品川→上野 run; early
+            // trains that really originate at 上野 appear as phantom 品川
+            // departures (full-line-only generator).
             direction("JobanRapid", "Toride", "取手方面", "For Toride", ascending: true,
-                      weekday: pattern("04:33", "24:33", [
-                          ("04:33", 8), ("06:30", 5), ("09:30", 12), ("16:30", 6), ("20:00", 8), ("22:00", 10),
+                      weekday: pattern("04:20", "24:20", [
+                          ("04:20", 8), ("06:17", 5), ("09:17", 12), ("16:17", 6), ("19:47", 8), ("21:47", 10),
                       ], .rapid),
-                      holiday: pattern("04:33", "24:33", [
-                          ("04:33", 8), ("07:00", 6), ("10:00", 12), ("20:00", 8), ("22:00", 10),
+                      holiday: pattern("04:20", "24:20", [
+                          ("04:20", 8), ("06:47", 6), ("09:47", 12), ("19:47", 8), ("21:47", 10),
                       ], .rapid)),
-            direction("JobanRapid", "Ueno", "上野方面", "For Ueno", ascending: false,
+            direction("JobanRapid", "Ueno", "上野・品川方面", "For Ueno & Shinagawa", ascending: false,
                       weekday: pattern("04:44", "24:18", [
                           ("04:44", 8), ("06:00", 5), ("09:30", 7), ("16:30", 6), ("20:00", 8), ("22:00", 10),
                       ], .rapid),
@@ -92,9 +105,6 @@ extension JREastLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("JobanRapid.Ueno", .descending,
-                    "上野東京ライン", "Ueno-Tokyo Line", "品川方面", "for Shinagawa",
-                    to: "Railway:JR-East.Tokaido"),
             through("JobanRapid.Toride", .ascending,
                     "常磐線", "JR Joban Line", "土浦・水戸方面", "for Tsuchiura & Mito"),
         ]
@@ -280,10 +290,6 @@ extension JREastLineData {
                     "高崎線（上野東京ライン）", "JR Takasaki Line (via Ueno-Tokyo Line)",
                     "高崎方面", "for Takasaki",
                     to: "Railway:JR-East.Takasaki"),
-            through("Tokaido.Tokyo", .descending,
-                    "常磐線（上野東京ライン）", "JR Joban Line (via Ueno-Tokyo Line)",
-                    "取手・土浦方面", "for Toride & Tsuchiura",
-                    to: "Railway:JR-East.JobanRapid"),
             through("Tokaido.Ofuna", .descending,
                     "湘南新宿ライン", "Shonan-Shinjuku Line",
                     "渋谷・新宿方面", "for Shibuya & Shinjuku",
@@ -672,7 +678,57 @@ extension JREastLineData {
         throughServices: [
             through("Musashino.NishiFunabashi", .descending,
                     "京葉線", "JR Keiyo Line",
-                    "東京・海浜幕張方面", "for Tokyo & Kaihim-Makuhari",
+                    "東京方面", "for Tokyo",
+                    to: "Railway:JR-East.KeiyoBranch"),
+        ]
+    )
+
+    // MARK: - Keiyo Line Nishi-Funabashi Branch
+
+    /// Bridge line for the 武蔵野線⇄京葉線 through service: the 西船橋–市川塩浜
+    /// connecting track is on neither line's station list, so through
+    /// resolution needs it as its own line (same pattern as 西武有楽町線).
+    /// Patterns approximate the through-train window (estimated).
+    static let keiyoBranch = StaticTrainLine(
+        id: "Railway:JR-East.KeiyoBranch",
+        nameJa: "京葉線（西船橋支線）",
+        nameEn: "Keiyo Line Nishi-Funabashi Branch",
+        operatorId: "Operator:JR-East",
+        colorHex: "#C9242F",
+        stations: [
+            // No station codes: 西船橋 carries JM/JE codes on its own lines,
+            // and the first station's code letters would set the line symbol.
+            st("KeiyoBranch", "NishiFunabashi", "西船橋", "Nishi-Funabashi", "", 35.7075, 139.9594),
+            st("KeiyoBranch", "IchikawaShiohama", "市川塩浜", "Ichikawa-Shiohama", "", 35.6569, 139.9343),
+        ],
+        hopTimesMinutes: [6],
+        directions: [
+            direction("KeiyoBranch", "IchikawaShiohama", "市川塩浜・東京方面", "For Ichikawa-Shiohama & Tokyo",
+                      ascending: true,
+                      weekday: pattern("05:10", "23:30", [
+                          ("05:10", 12), ("07:00", 8), ("10:00", 15), ("17:00", 10), ("20:00", 15),
+                      ]),
+                      holiday: pattern("05:10", "23:30", [
+                          ("05:10", 12), ("07:00", 10), ("10:00", 15), ("20:00", 15),
+                      ])),
+            direction("KeiyoBranch", "NishiFunabashi", "西船橋方面", "For Nishi-Funabashi",
+                      ascending: false,
+                      weekday: pattern("05:30", "24:05", [
+                          ("05:30", 12), ("07:00", 8), ("10:00", 15), ("17:00", 10), ("20:00", 15),
+                      ]),
+                      holiday: pattern("05:30", "24:05", [
+                          ("05:30", 12), ("07:00", 10), ("10:00", 15), ("20:00", 15),
+                      ])),
+        ],
+        delayInfo: delayInfo,
+        throughServices: [
+            through("KeiyoBranch.NishiFunabashi", .descending,
+                    "武蔵野線", "JR Musashino Line",
+                    "南流山・府中本町方面", "for Minami-Nagareyama & Fuchu-Hommachi",
+                    to: "Railway:JR-East.Musashino"),
+            through("KeiyoBranch.IchikawaShiohama", .ascending,
+                    "京葉線", "JR Keiyo Line",
+                    "東京方面", "for Tokyo",
                     to: "Railway:JR-East.Keiyo"),
         ]
     )

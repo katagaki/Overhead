@@ -55,7 +55,7 @@ enum SeibuLineData {
     )
 
     static let lines: [StaticTrainLine] = [
-        ikebukuro, seibuYurakucho,
+        ikebukuro, seibuYurakucho, shinjuku,
     ]
 
     // MARK: - Seibu Ikebukuro Line (SI)
@@ -83,7 +83,7 @@ enum SeibuLineData {
             st("Seibu.Ikebukuro", "HigashiKurume", "東久留米", "Higashi-kurume", "SI14", 35.7577, 139.5297),
             st("Seibu.Ikebukuro", "Kiyose", "清瀬", "Kiyose", "SI15", 35.7697, 139.5187),
             st("Seibu.Ikebukuro", "Akitsu", "秋津", "Akitsu", "SI16", 35.7727, 139.4937),
-            st("Seibu.Ikebukuro", "Tokorozawa", "所沢", "Tokorozawa", "SI17", 35.7867, 139.4687),
+            st("Seibu.Ikebukuro", "Tokorozawa", "所沢", "Tokorozawa", "SI17", 35.7867, 139.4733),
             st("Seibu.Ikebukuro", "NishiTokorozawa", "西所沢", "Nishi-tokorozawa", "SI18", 35.7897, 139.4487),
             st("Seibu.Ikebukuro", "Kotesashi", "小手指", "Kotesashi", "SI19", 35.7937, 139.4247),
             st("Seibu.Ikebukuro", "Sayamagaoka", "狭山ヶ丘", "Sayamagaoka", "SI20", 35.8027, 139.4087),
@@ -176,6 +176,77 @@ enum SeibuLineData {
                     "西武池袋線", "Seibu Ikebukuro Line",
                     "所沢・飯能方面", "for Tokorozawa & Hanno",
                     to: "Railway:Seibu.Ikebukuro"),
+        ]
+    )
+
+    // MARK: - Seibu Shinjuku Line (SS)
+
+    // First/last: ekitan + Yahoo, July 2026 (medium confidence).
+    // Coordinates: ja.wikipedia per-station infoboxes, 2026-07-08.
+    static let shinjuku = StaticTrainLine(
+        id: "Railway:Seibu.Shinjuku",
+        nameJa: "西武新宿線",
+        nameEn: "Seibu Shinjuku Line",
+        operatorId: "Operator:Seibu",
+        colorHex: "#00A6BF",
+        stations: [
+            st("Seibu.Shinjuku", "SeibuShinjuku", "西武新宿", "Seibu-Shinjuku", "SS01", 35.6963, 139.7000),
+            st("Seibu.Shinjuku", "Takadanobaba", "高田馬場", "Takadanobaba", "SS02", 35.7131, 139.7041),
+            st("Seibu.Shinjuku", "ShimoOchiai", "下落合", "Shimo-ochiai", "SS03", 35.7158, 139.6951),
+            st("Seibu.Shinjuku", "Nakai", "中井", "Nakai", "SS04", 35.7151, 139.6872),
+            st("Seibu.Shinjuku", "Araiyakushimae", "新井薬師前", "Araiyakushi-mae", "SS05", 35.7158, 139.6719),
+            st("Seibu.Shinjuku", "Numabukuro", "沼袋", "Numabukuro", "SS06", 35.7194, 139.6638),
+            st("Seibu.Shinjuku", "Nogata", "野方", "Nogata", "SS07", 35.7197, 139.6528),
+            st("Seibu.Shinjuku", "ToritsuKasei", "都立家政", "Toritsu-kasei", "SS08", 35.7223, 139.6446),
+            st("Seibu.Shinjuku", "Saginomiya", "鷺ノ宮", "Saginomiya", "SS09", 35.7226, 139.6389),
+            st("Seibu.Shinjuku", "ShimoIgusa", "下井草", "Shimo-igusa", "SS10", 35.7239, 139.6243),
+            st("Seibu.Shinjuku", "Iogi", "井荻", "Iogi", "SS11", 35.7245, 139.6147),
+            st("Seibu.Shinjuku", "KamiIgusa", "上井草", "Kami-igusa", "SS12", 35.7251, 139.6036),
+            st("Seibu.Shinjuku", "KamiShakujii", "上石神井", "Kami-shakujii", "SS13", 35.7263, 139.5921),
+            st("Seibu.Shinjuku", "MusashiSeki", "武蔵関", "Musashi-seki", "SS14", 35.7276, 139.5769),
+            st("Seibu.Shinjuku", "HigashiFushimi", "東伏見", "Higashi-fushimi", "SS15", 35.7287, 139.5643),
+            st("Seibu.Shinjuku", "SeibuYagisawa", "西武柳沢", "Seibu-yagisawa", "SS16", 35.7286, 139.5526),
+            st("Seibu.Shinjuku", "Tanashi", "田無", "Tanashi", "SS17", 35.7274, 139.5393),
+            st("Seibu.Shinjuku", "HanaKoganei", "花小金井", "Hana-koganei", "SS18", 35.7261, 139.5132),
+            st("Seibu.Shinjuku", "Kodaira", "小平", "Kodaira", "SS19", 35.7370, 139.4883),
+            st("Seibu.Shinjuku", "Kumegawa", "久米川", "Kumegawa", "SS20", 35.7500, 139.4720),
+            st("Seibu.Shinjuku", "HigashiMurayama", "東村山", "Higashi-murayama", "SS21", 35.7606, 139.4658),
+            st("Seibu.Shinjuku", "Tokorozawa", "所沢", "Tokorozawa", "SS22", 35.7867, 139.4733),
+            st("Seibu.Shinjuku", "KokuKoen", "航空公園", "Koku-koen", "SS23", 35.7984, 139.4657),
+            st("Seibu.Shinjuku", "ShinTokorozawa", "新所沢", "Shin-tokorozawa", "SS24", 35.8067, 139.4561),
+            st("Seibu.Shinjuku", "Iriso", "入曽", "Iriso", "SS25", 35.8325, 139.4272),
+            st("Seibu.Shinjuku", "Sayamashi", "狭山市", "Sayamashi", "SS26", 35.8569, 139.4131),
+            st("Seibu.Shinjuku", "ShinSayama", "新狭山", "Shin-sayama", "SS27", 35.8741, 139.4333),
+            st("Seibu.Shinjuku", "MinamiOtsuka", "南大塚", "Minami-otsuka", "SS28", 35.8898, 139.4543),
+            st("Seibu.Shinjuku", "HonKawagoe", "本川越", "Hon-kawagoe", "SS29", 35.9142, 139.4814),
+        ],
+        hopTimesMinutes: [
+            3, 2, 1, 2, 1, 2, 1, 1, 2, 1, 2, 2, 2, 2,
+            1, 2, 3, 3, 2, 2, 4, 2, 2, 4, 3, 3, 3, 4,
+        ],
+        directions: [
+            direction("Seibu.Shinjuku", "HonKawagoe", "所沢・本川越方面", "For Tokorozawa & Hon-Kawagoe",
+                      ascending: true,
+                      weekday: pattern("05:01", "24:17", [
+                          ("05:01", 8), ("06:30", 4), ("09:30", 5), ("16:30", 5), ("20:00", 6), ("22:00", 8),
+                      ]),
+                      holiday: pattern("05:01", "24:17", [
+                          ("05:01", 8), ("07:00", 5), ("10:00", 5), ("20:00", 8),
+                      ])),
+            direction("Seibu.Shinjuku", "SeibuShinjuku", "高田馬場・西武新宿方面", "For Takadanobaba & Seibu-Shinjuku",
+                      ascending: false,
+                      weekday: pattern("04:54", "23:31", [
+                          ("04:54", 10), ("06:30", 5), ("09:30", 8), ("16:30", 6), ("20:00", 8), ("22:00", 10),
+                      ]),
+                      holiday: pattern("04:54", "23:31", [
+                          ("04:54", 10), ("07:00", 8), ("10:00", 8), ("20:00", 10),
+                      ])),
+        ],
+        delayInfo: delayInfo,
+        throughServices: [
+            through("Seibu.Shinjuku.Kodaira", .ascending,
+                    "西武拝島線", "Seibu Haijima Line",
+                    "拝島方面", "for Haijima"),
         ]
     )
 }
