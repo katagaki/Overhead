@@ -16,3 +16,6 @@ build/
 # Claude Code
 .claude/settings.local.json
 CLAUDE.md
+
+# Secrets (ODPT key etc.) — never commit
+.env
