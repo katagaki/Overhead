@@ -696,10 +696,11 @@ extension JREastLineData {
         operatorId: "Operator:JR-East",
         colorHex: "#C9242F",
         stations: [
-            // No station codes: 西船橋 carries JM/JE codes on its own lines,
-            // and the first station's code letters would set the line symbol.
+            // 西船橋 has no JE number (it is JM10/JB30), so it stays empty —
+            // the line symbol falls through to 市川塩浜's JE09, badging the
+            // branch as JE like the Keiyo mainline.
             st("KeiyoBranch", "NishiFunabashi", "西船橋", "Nishi-Funabashi", "", 35.7075, 139.9594),
-            st("KeiyoBranch", "IchikawaShiohama", "市川塩浜", "Ichikawa-Shiohama", "", 35.6569, 139.9343),
+            st("KeiyoBranch", "IchikawaShiohama", "市川塩浜", "Ichikawa-Shiohama", "JE09", 35.6569, 139.9343),
         ],
         hopTimesMinutes: [6],
         directions: [
