@@ -594,7 +594,8 @@ enum JREastLineData {
         delayInfo: delayInfo,
         throughServices: [
             through("SaikyoKawagoe.Osaki", .descending,
-                    "りんかい線", "Rinkai Line", "新木場方面", "for Shin-Kiba"),
+                    "りんかい線", "Rinkai Line", "新木場方面", "for Shin-Kiba",
+                    to: "Railway:TWR.Rinkai"),
             through("SaikyoKawagoe.Osaki", .descending,
                     "相鉄線", "Sotetsu Line", "海老名方面", "for Ebina"),
             through("SaikyoKawagoe.Omiya", .ascending,

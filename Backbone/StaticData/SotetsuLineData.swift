@@ -81,9 +81,9 @@ enum SotetsuLineData {
             st("Sotetsu.Main", "Hoshikawa", "星川", "Hoshikawa", "SO05", 35.4527, 139.5897),
             st("Sotetsu.Main", "Wadamachi", "和田町", "Wadamachi", "SO06", 35.4547, 139.5797),
             st("Sotetsu.Main", "Kamihoshikawa", "上星川", "Kami-hoshikawa", "SO07", 35.4587, 139.5697),
-            st("Sotetsu.Main", "Nishiya", "西谷", "Nishiya", "SO08", 35.4637, 139.5567),
+            st("Sotetsu.Main", "Nishiya", "西谷", "Nishiya", "SO08", 35.47789, 139.56562),
             st("Sotetsu.Main", "Tsurugamine", "鶴ヶ峰", "Tsurugamine", "SO09", 35.4677, 139.5457),
-            st("Sotetsu.Main", "Futamatagawa", "二俣川", "Futamata-gawa", "SO10", 35.4617, 139.5307),
+            st("Sotetsu.Main", "Futamatagawa", "二俣川", "Futamata-gawa", "SO10", 35.46338, 139.53232),
             st("Sotetsu.Main", "Kibogaoka", "希望ヶ丘", "Kibogaoka", "SO11", 35.4587, 139.5177),
             st("Sotetsu.Main", "Mitsukyo", "三ツ境", "Mitsukyo", "SO12", 35.4617, 139.5027),
             st("Sotetsu.Main", "Seya", "瀬谷", "Seya", "SO13", 35.4667, 139.4877),
@@ -146,12 +146,14 @@ enum SotetsuLineData {
         ],
         delayInfo: delayInfo,
         throughServices: [
-            through("Sotetsu.Main.Nishiya", .ascending,
+            through("Sotetsu.Main.Nishiya", .descending,
                     "相鉄新横浜線", "Sotetsu Shin-Yokohama Line",
-                    "新横浜・東急線・ＪＲ線方面", "for Shin-Yokohama and the Tokyu & JR Lines"),
+                    "新横浜・東急線・ＪＲ線方面", "for Shin-Yokohama and the Tokyu & JR Lines",
+                    to: "Railway:Sotetsu.SotetsuShinYokohama"),
             through("Sotetsu.Main.Futamatagawa", .ascending,
                     "相鉄いずみ野線", "Sotetsu Izumino Line",
-                    "湘南台方面", "for Shonandai"),
+                    "湘南台方面", "for Shonandai",
+                    to: "Railway:Sotetsu.Izumino"),
         ]
     )
 }

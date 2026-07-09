@@ -185,10 +185,15 @@ public enum StaticTrainData {
         + TokyuLineData.lines
         + KeikyuLineData.lines
         + KeioLineData.lines
+        + KeioInokashiraLineData.lines
         + SeibuLineData.lines
         + SotetsuLineData.lines
+        + SotetsuIzuminoLineData.lines
+        + SotetsuShinYokohamaLineData.lines
         + MinatomiraiLineData.lines
         + SaitamaRapidLineData.lines
+        + RinkaiLineData.lines
+        + TsukubaExpressLineData.lines
 
     private static let linesById: [String: StaticTrainLine] = Dictionary(
         allLines.map { ($0.id, $0) },
