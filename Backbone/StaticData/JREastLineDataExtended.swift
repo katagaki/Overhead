@@ -144,15 +144,20 @@ extension JREastLineData {
                       holiday: pattern("04:58", "24:52", [
                           ("04:58", 8), ("07:00", 7), ("10:00", 8), ("20:00", 9),
                       ])),
-            // NOTE: only the Toride end is rush-hours-only (midday locals
-            // originate at Abiko); the direction as a whole runs all day and
-            // feeds the 千代田線/小田急線 through service, so model all-day.
+            // NOTE: only the Toride end is rush-hours-only (weekday 06:26–
+            // 20:07, none on holidays; midday locals originate at Abiko); the
+            // direction as a whole runs all day and feeds the 千代田線/小田急線
+            // through service, so model all-day. The verified 我孫子 times
+            // (first 04:29 / last 24:29 both day types, July-2026 pages) are
+            // preserved by shifting the origin pattern back by the 7-minute
+            // 取手→我孫子 run; early trains that really originate at 我孫子
+            // appear as phantom 取手 departures (full-line-only generator).
             direction("JobanLocal", "Ayase", "綾瀬方面", "For Ayase", ascending: false,
-                      weekday: pattern("04:40", "24:00", [
-                          ("04:40", 8), ("07:00", 6.5), ("09:30", 8), ("16:30", 5), ("20:00", 8), ("22:00", 10),
+                      weekday: pattern("04:22", "24:22", [
+                          ("04:22", 8), ("07:00", 6.5), ("09:30", 8), ("16:30", 5), ("20:00", 8), ("22:00", 10),
                       ]),
-                      holiday: pattern("04:40", "24:00", [
-                          ("04:40", 8), ("07:00", 7), ("10:00", 8), ("20:00", 9),
+                      holiday: pattern("04:22", "24:22", [
+                          ("04:22", 8), ("07:00", 7), ("10:00", 8), ("20:00", 9),
                       ])),
         ],
         delayInfo: delayInfo,
