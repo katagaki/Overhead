@@ -418,8 +418,10 @@ struct StationNumberBadge: View {
         let d = badgeDimension
 
         VStack(spacing: 0) {
+            // The KS/HS letters are bold condensed, matching the line symbol
+            // badge (user 2026-07-10); the number stays regular Helvetica.
             Text(prefix)
-                .font(.custom("Helvetica", size: d * 0.30))
+                .font(.system(size: d * 0.30, weight: .bold).width(.condensed))
                 .frame(height: d * 0.34)
                 .offset(y: 0.6)
 

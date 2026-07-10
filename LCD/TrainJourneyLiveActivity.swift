@@ -664,7 +664,7 @@ struct LCDLineSymbolBadge: View {
             squareBadge(cornerRadius: 3, borderWidth: 2.6)
         default:
             // Metro/Toei symbols use Futura like the real signage
-            circleBadge(ringWidth: 3.8, textColor: .black, hind: false)
+            circleBadge(ringWidth: 4.7, textColor: .black, hind: false)
         }
     }
 
@@ -694,6 +694,9 @@ struct LCDLineSymbolBadge: View {
     private func circleBadge(ringWidth: CGFloat, textColor: Color, hind: Bool,
                              ringColor: Color? = nil) -> some View {
         symbolText(color: textColor, inset: ringWidth + 1, hind: hind)
+            // Futura-Bold's "M" sits low in its line box; lift it so it stays
+            // optically centered inside the thick ring
+            .offset(y: !hind && symbol == "M" ? -0.6 : 0)
             .frame(width: 24, height: 24)
             .background(Color.white, in: Circle())
             .overlay(
@@ -780,10 +783,11 @@ struct LCDLineSymbolBadge: View {
             )
     }
 
-    /// Keisei: white circle, color ring, line-color regular Helvetica letters
+    /// Keisei: white circle, color ring, line-color bold condensed letters
+    /// (mirrors LineSymbolBadge.keiseiBadge at 24pt)
     private var keiseiBadge: some View {
         Text(symbol)
-            .font(.custom("Helvetica", fixedSize: symbol.count > 1 ? 11 : 13.5))
+            .font(.system(size: symbol.count > 1 ? 11 : 13.5, weight: .bold).width(.condensed))
             .lineLimit(1)
             .minimumScaleFactor(0.5)
             .foregroundColor(color)
@@ -791,8 +795,9 @@ struct LCDLineSymbolBadge: View {
             .frame(width: 24, height: 24)
             .background(Color.white, in: Circle())
             .overlay(
+                // Thicker than before, but lighter than the Metro ring (4.7)
                 Circle()
-                    .strokeBorder(color, lineWidth: 2.4)
+                    .strokeBorder(color, lineWidth: 3.1)
             )
     }
 

@@ -132,15 +132,21 @@ struct LineSymbolBadge: View {
             }
     }
 
-    // MARK: - Keisei: blue ring, line-color regular Helvetica letters
+    // MARK: - Keisei: blue ring, line-color bold condensed letters
 
+    /// The LINE badge's KS is bold and condensed (user 2026-07-10) — unlike
+    /// the STATION number badge, which keeps regular Helvetica. Both are
+    /// circles. SF's .fontWidth(.condensed) approximates the narrow face.
     private var keiseiBadge: some View {
-        symbolText(.custom("Helvetica", fixedSize: 15 * f), color: color, inset: 4.5 * f)
+        symbolText(.system(size: 15 * f, weight: .bold).width(.condensed),
+                   color: color, inset: 4.5 * f)
             .frame(width: dimension, height: dimension)
             .background(Color.white, in: Circle())
             .overlay(
+                // Thicker than before, but deliberately lighter than the
+                // Metro ring (6.2 * f)
                 Circle()
-                    .strokeBorder(color, lineWidth: 3.2 * f)
+                    .strokeBorder(color, lineWidth: 4.2 * f)
             )
     }
 
@@ -294,11 +300,14 @@ struct LineSymbolBadge: View {
                    color: Self.metroLetterColor, inset: 7 * f)
             // Futura-Bold's "C" has uneven side bearings — nudge to optical center
             .offset(x: symbol == "C" ? -0.75 * f : 0)
+            // Futura-Bold's "M" sits low in its line box; lift it so it stays
+            // optically centered inside the thick ring
+            .offset(y: symbol == "M" ? -0.8 * f : 0)
             .frame(width: dimension, height: dimension)
             .background(Color.white, in: Circle())
             .overlay(
                 Circle()
-                    .strokeBorder(color, lineWidth: 5 * f)
+                    .strokeBorder(color, lineWidth: 6.2 * f)
             )
     }
 
