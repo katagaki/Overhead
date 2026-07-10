@@ -44,6 +44,11 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
     // Snap distance thresholds (meters from rail line)
     private let closeSnapDistance: Double = 150      // Clearly on the line
     private let farSnapDistance: Double = 500         // Probably underground or drifting
+    // An ACCURATE fix beyond this distance from the line means the user has
+    // genuinely strayed off the journey's route (e.g. standing in 東京 while
+    // the journey runs 新宿→秋葉原) — not GPS noise. Snapping would produce a
+    // confidently wrong position, so the timetable takes over instead.
+    private let offRouteDistance: Double = 500
 
     // How long since last good GPS fix before falling back (seconds)
     private let gpsStalenessThreshold: TimeInterval = 45
@@ -203,6 +208,18 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         }
 
         let snapResult = snapToLine(location: location.coordinate)
+
+        // Off-route check: the GPS fix is trustworthy AND clearly far from
+        // the line — the user isn't on this train. Don't blend the snapped
+        // position (it would be confidently wrong); fall back to timetable.
+        if location.horizontalAccuracy <= acceptableAccuracy,
+           snapResult.distance > offRouteDistance {
+            trackingMode = .timetable
+            lastGoodGPSTime = nil
+            positionState = timetableState
+            updateLiveActivity()
+            return
+        }
 
         let gpsConfidence = computeGPSConfidence(
             accuracy: location.horizontalAccuracy,

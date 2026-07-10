@@ -21,6 +21,18 @@ struct JourneySheetView: View {
                             Label("Button.EndJourney", systemImage: "stop.circle")
                         }
                         .tint(.red)
+                        // Attached to the button so the dialog anchors to it
+                        // instead of popping from the middle of the sheet.
+                        .confirmationDialog(
+                            "Journey.End.ConfirmTitle",
+                            isPresented: $showingEndConfirmation,
+                            titleVisibility: .visible
+                        ) {
+                            Button("Button.EndJourney", role: .destructive) {
+                                viewModel.stopJourney()
+                            }
+                            Button("Button.KeepJourney", role: .cancel) {}
+                        }
                     }
 
                     ToolbarItem(placement: .topBarTrailing) {
@@ -38,16 +50,6 @@ struct JourneySheetView: View {
                             .accessibilityLabel("Button.Close")
                         }
                     }
-                }
-                .confirmationDialog(
-                    "Journey.End.ConfirmTitle",
-                    isPresented: $showingEndConfirmation,
-                    titleVisibility: .visible
-                ) {
-                    Button("Button.EndJourney", role: .destructive) {
-                        viewModel.stopJourney()
-                    }
-                    Button("Button.KeepJourney", role: .cancel) {}
                 }
         }
         .presentationDragIndicator(.visible)

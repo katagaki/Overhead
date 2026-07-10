@@ -66,7 +66,9 @@ struct RootView: View {
                 await viewModel.loadLines()
             }
         }
-        .tint(viewModel.selectedLine?.color ?? Color.accentColor)
+        // The app keeps its own purple accent (AccentColor, matching the app
+        // icon) everywhere — the selected line's color is deliberately NOT
+        // used as a global tint; line colors appear only in line-specific UI.
         .sheet(isPresented: $showJourneySheet) {
             JourneySheetView(viewModel: viewModel)
                 .navigationTransition(.zoom(sourceID: Self.journeyTransitionID, in: journeyZoom))

@@ -165,7 +165,9 @@ final class LiveActivityManager {
         )
         let content = ActivityContent(state: finalState, staleDate: nil)
         Task {
-            await activity.end(content, dismissalPolicy: .after(.now + 300))
+            // Ending the journey removes the Live Activity right away rather
+            // than leaving the arrived state on the lock screen.
+            await activity.end(content, dismissalPolicy: .immediate)
         }
         currentActivity = nil
         scheduledDeparture = nil
