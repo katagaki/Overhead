@@ -318,27 +318,29 @@ struct StationPickerView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                if let delayInfo = viewModel.delayCheckInfo(for: line.id) {
-                    ServiceStatusSection(delayInfo: delayInfo)
+            VStack(alignment: .leading, spacing: 8) {
+                if directionOptions.count > 1 {
+                    directionPicker
+                        .padding(.bottom, 6)
                 }
 
-                VStack(alignment: .leading, spacing: 8) {
-                    if directionOptions.count > 1 {
-                        directionPicker
-                            .padding(.bottom, 6)
-                    }
+                stationsHeader
 
-                    stationsHeader
-
-                    stationsCard
-                }
+                stationsCard
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
         }
         .background(Color(.systemGroupedBackground))
+        .safeAreaInset(edge: .top) {
+            if let delayInfo = viewModel.delayCheckInfo(for: line.id) {
+                ServiceStatusSection(delayInfo: delayInfo)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 8)
+            }
+        }
         .navigationTitle(line.localizedName)
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     // MARK: - Direction Picker
@@ -503,31 +505,21 @@ struct StationPickerView: View {
             NavigationLink {
                 StationPickerView(line: connecting, viewModel: viewModel)
             } label: {
-                throughBranchLabel(
-                    through: through, accent: connecting.color,
-                    isLast: isLast, navigable: true
-                )
+                throughBranchLabel(through: through, isLast: isLast, navigable: true)
             }
             .buttonStyle(.plain)
         } else {
-            throughBranchLabel(
-                through: through, accent: .secondary,
-                isLast: isLast, navigable: false
-            )
+            throughBranchLabel(through: through, isLast: isLast, navigable: false)
         }
     }
 
     @ViewBuilder
     private func throughBranchLabel(
-        through: ThroughService, accent: Color, isLast: Bool, navigable: Bool
+        through: ThroughService, isLast: Bool, navigable: Bool
     ) -> some View {
         HStack(spacing: 12) {
-            Image(systemName: "arrow.triangle.branch")
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(accent)
-                .frame(width: dotColumnWidth)
-
             Text("StationTimetable.ThroughService \(junctionName(for: through)) \(through.localizedLineName) \(through.localizedToward)")
+                .padding(.leading, dotColumnWidth + 12)
                 .font(.system(size: 13, weight: .medium))
                 .foregroundColor(.primary)
                 .fixedSize(horizontal: false, vertical: true)

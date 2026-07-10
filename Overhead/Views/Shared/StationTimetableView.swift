@@ -19,6 +19,7 @@ struct StationTimetableView: View {
             }
         }
         .navigationTitle(station.localizedName)
+        .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             viewModel.loadStationTimetable(stationId: station.id)
         }
@@ -27,32 +28,45 @@ struct StationTimetableView: View {
     // MARK: - Timetable List
 
     private var timetableList: some View {
-        List {
-            ForEach(viewModel.stationTimetable, id: \.railDirection) { timetable in
-                Section {
-                    let upcoming = upcomingDepartures(from: timetable.departures)
-                    if upcoming.isEmpty {
-                        Text("StationTimetable.NoMoreTrains")
-                            .foregroundColor(.secondary)
-                            .font(.system(size: 14))
-                    } else {
-                        ForEach(upcoming) { departure in
-                            departureRow(departure: departure)
+        TimelineView(.everyMinute) { context in
+            let nowMinutes = railNowMinutes(at: context.date)
+            ScrollViewReader { proxy in
+                List {
+                    ForEach(viewModel.stationTimetable, id: \.railDirection) { timetable in
+                        Section {
+                            if timetable.departures.isEmpty {
+                                Text("StationTimetable.NoMoreTrains")
+                                    .foregroundColor(.secondary)
+                                    .font(.system(size: 14))
+                            } else {
+                                ForEach(timetable.departures) { departure in
+                                    departureRow(
+                                        departure: departure,
+                                        isPast: isPast(departure, nowMinutes: nowMinutes)
+                                    )
+                                    .id(rowId(timetable, departure))
+                                }
+                            }
+                            connectingThroughServiceRows(for: timetable)
+                        } header: {
+                            HStack(spacing: 6) {
+                                Image(systemName: "arrow.right.circle.fill")
+                                    .foregroundColor(line.color)
+                                Text(timetable.localizedDirectionName)
+                                    .font(.system(size: 14, weight: .semibold))
+                            }
+                        } footer: {
+                            throughServiceFooter(for: timetable)
                         }
                     }
-                    connectingThroughServiceRows(for: timetable)
-                } header: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "arrow.right.circle.fill")
-                            .foregroundColor(line.color)
-                        Text(timetable.localizedDirectionName)
-                            .font(.system(size: 14, weight: .semibold))
-                    }
-                } footer: {
-                    throughServiceFooter(for: timetable)
+                }
+                .onAppear {
+                    scrollToNextDeparture(proxy: proxy)
+                }
+                .onChange(of: viewModel.stationTimetable.count) {
+                    scrollToNextDeparture(proxy: proxy)
                 }
             }
-
         }
     }
 
@@ -122,7 +136,7 @@ struct StationTimetableView: View {
     // MARK: - Departure Row
 
     @ViewBuilder
-    private func departureRow(departure: StationDeparture) -> some View {
+    private func departureRow(departure: StationDeparture, isPast: Bool) -> some View {
         HStack(spacing: 12) {
             Text(departure.departureTime)
                 .font(.system(size: 17, weight: .semibold, design: .rounded))
@@ -165,6 +179,7 @@ struct StationTimetableView: View {
             }
         }
         .padding(.vertical, 2)
+        .opacity(isPast ? 0.6 : 1)
     }
 
     // MARK: - No Data
@@ -182,18 +197,43 @@ struct StationTimetableView: View {
 
     // MARK: - Helpers
 
-    private func upcomingDepartures(from departures: [StationDeparture]) -> [StationDeparture] {
+    /// Current time in rail minutes (Asia/Tokyo). Before 03:00 the clock is
+    /// treated as 24+ so post-midnight departures in 0-notation-free data
+    /// (24:52 etc.) compare correctly and the morning trains stay "past".
+    private func railNowMinutes(at date: Date) -> Int {
         let tz = TimeZone(identifier: "Asia/Tokyo")!
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = tz
-        let comps = cal.dateComponents([.hour, .minute], from: Date())
-        let nowMinutes = (comps.hour ?? 0) * 60 + (comps.minute ?? 0)
-
-        let upcoming = departures.filter { dep in
-            guard let secs = TimetableEntry.parseRailTime(dep.departureTime) else { return false }
-            return secs / 60 >= nowMinutes - 1
+        let comps = cal.dateComponents([.hour, .minute], from: date)
+        var nowMinutes = (comps.hour ?? 0) * 60 + (comps.minute ?? 0)
+        if nowMinutes < 180 {
+            nowMinutes += 1440
         }
+        return nowMinutes
+    }
 
-        return Array(upcoming.prefix(20))
+    private func isPast(_ departure: StationDeparture, nowMinutes: Int) -> Bool {
+        guard let secs = TimetableEntry.parseRailTime(departure.departureTime) else { return false }
+        return secs / 60 < nowMinutes - 1
+    }
+
+    private func rowId(_ timetable: StationTimetableData, _ departure: StationDeparture) -> String {
+        "\(timetable.railDirection)#\(departure.id)"
+    }
+
+    /// Jumps (without animation) to the first upcoming departure of the first
+    /// direction that still has one, so the list opens at "the next train"
+    /// with the past times scrolled away above.
+    private func scrollToNextDeparture(proxy: ScrollViewProxy) {
+        let nowMinutes = railNowMinutes(at: Date())
+        for timetable in viewModel.stationTimetable {
+            if let next = timetable.departures.first(where: { !isPast($0, nowMinutes: nowMinutes) }) {
+                let target = rowId(timetable, next)
+                DispatchQueue.main.async {
+                    proxy.scrollTo(target, anchor: .top)
+                }
+                return
+            }
+        }
     }
 }
