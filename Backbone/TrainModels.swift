@@ -194,14 +194,18 @@ public struct TrainService: Identifiable, Codable {
     public let direction: Direction
     public let timetable: [TimetableEntry]
     public let destinationStationId: String
+    // Whether the train truly begins its run at the first timetable entry
+    // (当駅始発); false for through-runs entering from a connecting line.
+    public let originatesAtStart: Bool
 
-    public init(id: String, lineId: String, trainType: TrainType, direction: Direction, timetable: [TimetableEntry], destinationStationId: String) {
+    public init(id: String, lineId: String, trainType: TrainType, direction: Direction, timetable: [TimetableEntry], destinationStationId: String, originatesAtStart: Bool = true) {
         self.id = id
         self.lineId = lineId
         self.trainType = trainType
         self.direction = direction
         self.timetable = timetable
         self.destinationStationId = destinationStationId
+        self.originatesAtStart = originatesAtStart
     }
 
     public enum TrainType: String, Codable {

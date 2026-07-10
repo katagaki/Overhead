@@ -44,6 +44,26 @@ public struct HeadwayBand: Codable, Hashable {
     public let headwayMinutes: Double
 }
 
+// MARK: - Exact Run
+
+/// One real train run departing a known origin at an exact time. Unlike the
+/// headway-band approximation this can also express early termination
+/// (`terminusStationId`, e.g. 松戸行き on a line that continues to 取手) and
+/// whether the train truly starts its run here (`startsHere` = 当駅始発; false
+/// for through-runs entering from a connecting line, e.g. 千代田線 trains
+/// entering the 常磐線各駅停車 at 綾瀬).
+public struct ExactRun: Codable, Hashable {
+    public let departure: String          // "HH:mm" at the run's origin, may exceed 24:00
+    public let terminusStationId: String? // nil = runs to the direction's terminus
+    public let startsHere: Bool           // 当駅始発 at the run's origin
+
+    public init(_ departure: String, terminusStationId: String? = nil, startsHere: Bool = true) {
+        self.departure = departure
+        self.terminusStationId = terminusStationId
+        self.startsHere = startsHere
+    }
+}
+
 // MARK: - Service Pattern
 
 public struct ServicePattern: Codable, Hashable {
@@ -51,12 +71,18 @@ public struct ServicePattern: Codable, Hashable {
     public let lastDeparture: String   // "HH:mm", may exceed 24:00
     public let bands: [HeadwayBand]    // ordered by time
     public let trainType: TrainService.TrainType
+    // When set, the generator uses these real runs verbatim and ignores the
+    // band approximation entirely. An empty array means no full-line service
+    // for this calendar (e.g. the 取手 end of the 常磐線各駅停車 on holidays).
+    public let exactRuns: [ExactRun]?
 
-    init(first: String, last: String, bands: [HeadwayBand], trainType: TrainService.TrainType = .local) {
+    init(first: String, last: String, bands: [HeadwayBand],
+         trainType: TrainService.TrainType = .local, exactRuns: [ExactRun]? = nil) {
         self.firstDeparture = first
         self.lastDeparture = last
         self.bands = bands
         self.trainType = trainType
+        self.exactRuns = exactRuns
     }
 }
 
@@ -71,15 +97,33 @@ public struct IntermediateOrigin: Codable, Hashable {
     public let stationId: String
     public let weekdayDepartures: [String]
     public let saturdayHolidayDepartures: [String]
+    // Optional richer form: exact runs with per-train termini. Preferred by
+    // the generator over the plain departure strings when set.
+    public let weekdayRuns: [ExactRun]?
+    public let saturdayHolidayRuns: [ExactRun]?
 
     public init(stationId: String, weekday: [String], saturdayHoliday: [String]) {
         self.stationId = stationId
         self.weekdayDepartures = weekday
         self.saturdayHolidayDepartures = saturdayHoliday
+        self.weekdayRuns = nil
+        self.saturdayHolidayRuns = nil
+    }
+
+    public init(stationId: String, weekdayRuns: [ExactRun], saturdayHolidayRuns: [ExactRun]) {
+        self.stationId = stationId
+        self.weekdayDepartures = []
+        self.saturdayHolidayDepartures = []
+        self.weekdayRuns = weekdayRuns
+        self.saturdayHolidayRuns = saturdayHolidayRuns
     }
 
     public func departures(for calendar: ScheduleCalendar) -> [String] {
         calendar == .weekday ? weekdayDepartures : saturdayHolidayDepartures
+    }
+
+    public func runs(for calendar: ScheduleCalendar) -> [ExactRun]? {
+        calendar == .weekday ? weekdayRuns : saturdayHolidayRuns
     }
 }
 
@@ -751,29 +795,94 @@ public enum StaticTimetableGenerator {
         let offsets = cumulativeMinutes(hopTimes: line.hopTimesMinutes, ascending: direction.isAscending)
         guard stations.count == offsets.count, let destination = stations.last else { return [] }
 
-        // Full-line services from the origin terminus (headway pattern), plus
-        // short-turn services originating at each 当駅始発 station (exact times).
+        // Full-line services from the origin terminus (real exact runs when
+        // available, else the headway pattern), plus short-turn services
+        // originating at each 当駅始発 station (exact times).
         let pattern = direction.pattern(for: calendar)
-        var result = runServices(
-            line: line, direction: direction,
-            stations: stations, offsets: offsets, destination: destination,
-            startIndex: 0, originMinutes: departureMinutes(for: pattern),
-            trainType: pattern.trainType, tag: "full"
-        )
+        var result: [TrainService]
+        if let exact = pattern.exactRuns {
+            result = exactRunServices(
+                line: line, direction: direction,
+                stations: stations, offsets: offsets,
+                startIndex: 0, runs: exact,
+                trainType: pattern.trainType, tag: "full"
+            )
+        } else {
+            result = runServices(
+                line: line, direction: direction,
+                stations: stations, offsets: offsets, destination: destination,
+                startIndex: 0, originMinutes: departureMinutes(for: pattern),
+                trainType: pattern.trainType, tag: "full"
+            )
+        }
         for (n, io) in direction.intermediateOrigins.enumerated() {
             guard let startIdx = stations.firstIndex(where: { $0.id == io.stationId }),
                   startIdx > 0, startIdx < stations.count - 1 else { continue }
-            let originMinutes = io.departures(for: calendar)
-                .compactMap { parseMinutes($0) }
-                .sorted()
-            result += runServices(
-                line: line, direction: direction,
-                stations: stations, offsets: offsets, destination: destination,
-                startIndex: startIdx, originMinutes: originMinutes,
-                trainType: pattern.trainType, tag: "org\(n)"
-            )
+            if let ioRuns = io.runs(for: calendar) {
+                result += exactRunServices(
+                    line: line, direction: direction,
+                    stations: stations, offsets: offsets,
+                    startIndex: startIdx, runs: ioRuns,
+                    trainType: pattern.trainType, tag: "org\(n)"
+                )
+            } else {
+                let originMinutes = io.departures(for: calendar)
+                    .compactMap { parseMinutes($0) }
+                    .sorted()
+                result += runServices(
+                    line: line, direction: direction,
+                    stations: stations, offsets: offsets, destination: destination,
+                    startIndex: startIdx, originMinutes: originMinutes,
+                    trainType: pattern.trainType, tag: "org\(n)"
+                )
+            }
         }
         return result
+    }
+
+    /// Generates one service per real run, honoring per-run early termination
+    /// (松戸行き etc.) and the 当駅始発 flag of the run's origin.
+    private static func exactRunServices(
+        line: StaticTrainLine,
+        direction: StaticLineDirection,
+        stations: [Station],
+        offsets: [Double],
+        startIndex: Int,
+        runs: [ExactRun],
+        trainType: TrainService.TrainType,
+        tag: String
+    ) -> [TrainService] {
+        let baseOffset = offsets[startIndex]
+        return runs.compactMap { run in
+            guard let origin = parseMinutes(run.departure) else { return nil }
+            let endIndex: Int
+            if let terminusId = run.terminusStationId {
+                guard let idx = stations.firstIndex(where: { $0.id == terminusId }),
+                      idx > startIndex else { return nil }
+                endIndex = idx
+            } else {
+                endIndex = stations.count - 1
+            }
+            let serviceId = "\(line.id).\(direction.id).\(tag).\(timeString(origin))"
+            let entries = (startIndex...endIndex).map { i -> TimetableEntry in
+                let time = timeString(origin + Int((offsets[i] - baseOffset).rounded()))
+                return TimetableEntry(
+                    id: "\(serviceId)_\(i)",
+                    stationId: stations[i].id,
+                    arrivalTime: i == startIndex ? nil : time,
+                    departureTime: i == endIndex ? nil : time
+                )
+            }
+            return TrainService(
+                id: serviceId,
+                lineId: line.id,
+                trainType: trainType,
+                direction: direction.isAscending ? .outbound : .inbound,
+                timetable: entries,
+                destinationStationId: stations[endIndex].id,
+                originatesAtStart: run.startsHere
+            )
+        }
     }
 
     /// Generates services departing `startIndex` at each of `originMinutes` and
@@ -830,7 +939,8 @@ public enum StaticTimetableGenerator {
             // Merge every service passing through this station (full-line and
             // 当駅始発 short-turns), deduped by minute preferring an originating
             // train so 始発 is not hidden by a coincident through train.
-            struct Row { let time: String; let type: TrainService.TrainType; let originatesHere: Bool }
+            struct Row { let time: String; let type: TrainService.TrainType; let originatesHere: Bool; let dest: Station }
+            let stationsById = Dictionary(uniqueKeysWithValues: stations.map { ($0.id, $0) })
             var byMinute: [Int: Row] = [:]
             for service in services(for: line, direction: direction, calendar: calendar) {
                 guard let idx = service.timetable.firstIndex(where: { $0.stationId == stationId }),
@@ -838,9 +948,10 @@ public enum StaticTimetableGenerator {
                       let secs = TimetableEntry.parseRailTime(time)
                 else { continue }
                 let minute = secs / 60
-                let originatesHere = idx == 0
+                let originatesHere = idx == 0 && service.originatesAtStart
                 if let existing = byMinute[minute], existing.originatesHere || !originatesHere { continue }
-                byMinute[minute] = Row(time: time, type: service.trainType, originatesHere: originatesHere)
+                let dest = stationsById[service.destinationStationId] ?? destination
+                byMinute[minute] = Row(time: time, type: service.trainType, originatesHere: originatesHere, dest: dest)
             }
             guard let lastMinute = byMinute.keys.max() else { return nil }
 
@@ -850,8 +961,8 @@ public enum StaticTimetableGenerator {
                     id: "\(line.id).\(direction.id).\(stationId)_\(i)",
                     departureTime: row.time,
                     trainType: row.type,
-                    destinationName: destination.name,
-                    destinationNameEn: destination.nameEn,
+                    destinationName: row.dest.name,
+                    destinationNameEn: row.dest.nameEn,
                     trainNumber: "",
                     isFirst: row.originatesHere,  // 当駅始発
                     isLast: minute == lastMinute
