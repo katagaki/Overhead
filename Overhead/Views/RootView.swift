@@ -10,13 +10,18 @@ struct RootView: View {
 
     @AppStorage("showEnglish") private var showEnglish = true
     @State private var showJourneySheet = false
-    @State private var showAttributions = false
+    @State private var navigationPath = NavigationPath()
     @Namespace private var journeyZoom
 
     private static let journeyTransitionID = "activeJourney"
 
+    // Pushed screens reachable from the root.
+    private enum Destination: Hashable {
+        case attributions
+    }
+
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             ScrollView {
                 VStack(spacing: 24) {
                     JourneyPlannerSection(viewModel: viewModel)
@@ -33,17 +38,29 @@ struct RootView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     moreMenu
                 }
+            }
+            // The journey accessory lives in a bottom safe-area inset, NOT a
+            // .bottomBar toolbar item: with any navigationDestination on this
+            // stack, a bottom-bar item inserted after the initial render
+            // (like this one, appearing when a journey starts) never shows
+            // up (iOS 26). The inset + glass capsule replicates the look.
+            .safeAreaInset(edge: .bottom) {
                 if viewModel.activeJourney != nil {
-                    ToolbarItem(placement: .bottomBar) {
-                        JourneyToolbarAccessory(viewModel: viewModel) {
-                            showJourneySheet = true
-                        }
-                        .matchedTransitionSource(id: Self.journeyTransitionID, in: journeyZoom)
+                    JourneyToolbarAccessory(viewModel: viewModel) {
+                        showJourneySheet = true
                     }
+                    .padding(.vertical, 12)
+                    .glassEffect(.regular.interactive(), in: .capsule)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 4)
+                    .matchedTransitionSource(id: Self.journeyTransitionID, in: journeyZoom)
                 }
             }
-            .navigationDestination(isPresented: $showAttributions) {
-                MoreAttributionsView()
+            .navigationDestination(for: Destination.self) { destination in
+                switch destination {
+                case .attributions:
+                    MoreAttributionsView()
+                }
             }
             .task {
                 await viewModel.loadLines()
@@ -82,7 +99,7 @@ struct RootView: View {
                     Label("More.GitHub", systemImage: "chevron.left.forwardslash.chevron.right")
                 }
                 Button {
-                    showAttributions = true
+                    navigationPath.append(Destination.attributions)
                 } label: {
                     Label("More.Attributions", systemImage: "info.circle")
                 }

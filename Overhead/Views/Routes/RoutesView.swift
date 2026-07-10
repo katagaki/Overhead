@@ -412,6 +412,7 @@ struct StationSearchSelectionView: View {
     let onSelect: (StationSearchHit) -> Void
 
     @State private var searchText = ""
+    @FocusState private var searchFocused: Bool
     @StateObject private var nearbyProvider = NearbyStationsProvider()
     @Environment(\.dismiss) private var dismiss
 
@@ -440,6 +441,7 @@ struct StationSearchSelectionView: View {
         }
         .listStyle(.grouped)
         .searchable(text: $searchText, prompt: Text("StationSearch.Prompt"))
+        .searchFocused($searchFocused)
         .navigationTitle("ViewTitle.Stations")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -464,6 +466,7 @@ struct StationSearchSelectionView: View {
         }
         .onAppear {
             nearbyProvider.refresh(lines: lines)
+            searchFocused = true
         }
     }
 
