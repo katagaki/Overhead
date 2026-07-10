@@ -20,6 +20,11 @@ struct TrainJourneyAttributes: ActivityAttributes {
         // Together with the arrival timestamp this drives timer-based views
         // that keep advancing while the app is suspended (no GPS needed).
         var departureTimestamp: Double
+        // Delay-adjusted scheduled window of the current inter-station
+        // segment; drives the self-advancing next-station countdown that
+        // stays live even when no further updates arrive.
+        var segmentStartTimestamp: Double
+        var nextStationArrivalTimestamp: Double
 
         var status: TrainPositionState.Status {
             TrainPositionState.Status(rawValue: statusRaw) ?? .onTime
@@ -44,6 +49,14 @@ struct TrainJourneyAttributes: ActivityAttributes {
             return start...end
         }
 
+        /// Timer interval of the current segment (to the next station).
+        var segmentInterval: ClosedRange<Date> {
+            let start = Date(timeIntervalSince1970: segmentStartTimestamp)
+            let end = max(Date(timeIntervalSince1970: nextStationArrivalTimestamp),
+                          start.addingTimeInterval(1))
+            return start...end
+        }
+
         var lastRefresh: Date {
             Date(timeIntervalSince1970: lastRefreshTimestamp)
         }
@@ -63,6 +76,10 @@ struct TrainJourneyAttributes: ActivityAttributes {
     let stationCount: Int
     // Whether the train stops at each station (false = express skip)
     let stationStops: [Bool]
+    // Scheduled time at each station (epoch seconds, no delay applied;
+    // skipped stations carry the previous stop's time). Static for the whole
+    // journey, so self-updating views can lean on it without updates.
+    let stationTimes: [Double]
     let refreshURLString: String
 }
 
@@ -82,6 +99,9 @@ final class LiveActivityManager {
     // used to compute the timer interval for self-updating Live Activity views.
     private var scheduledDeparture: Date?
     private var scheduledArrival: Date?
+    // Scheduled time at each journey station, aligned with the attributes'
+    // stationNames; drives the per-segment countdown in content states.
+    private var stationTimes: [Date] = []
 
     var hasActiveActivity: Bool { currentActivity != nil }
 
@@ -95,6 +115,10 @@ final class LiveActivityManager {
         let stations = journey.journeyStations
         let timetableIds = Set(journey.journeyTimetable.map(\.stationId))
         let stationStops = stations.map { timetableIds.contains($0.id) }
+
+        lastDelayFetchTime = Date()
+        (scheduledDeparture, scheduledArrival) = Self.scheduledTimes(for: journey)
+        stationTimes = Self.stationTimes(for: journey)
 
         let attributes = TrainJourneyAttributes(
             lineName: journey.line.name,
@@ -110,11 +134,10 @@ final class LiveActivityManager {
             stationNamesEn: stations.map(\.nameEn),
             stationCount: stations.count,
             stationStops: stationStops,
+            stationTimes: stationTimes.map(\.timeIntervalSince1970),
             refreshURLString: Self.refreshURLScheme
         )
 
-        lastDelayFetchTime = Date()
-        (scheduledDeparture, scheduledArrival) = Self.scheduledTimes(for: journey)
         let state = contentState(from: positionState)
 
         do {
@@ -161,7 +184,9 @@ final class LiveActivityManager {
             statusRaw: TrainPositionState.Status.arrived.rawValue,
             trackingModeRaw: "Timetable",
             lastRefreshTimestamp: Date().timeIntervalSince1970,
-            departureTimestamp: (scheduledDeparture ?? Date()).timeIntervalSince1970
+            departureTimestamp: (scheduledDeparture ?? Date()).timeIntervalSince1970,
+            segmentStartTimestamp: Date().timeIntervalSince1970,
+            nextStationArrivalTimestamp: Date().timeIntervalSince1970
         )
         let content = ActivityContent(state: finalState, staleDate: nil)
         Task {
@@ -172,11 +197,24 @@ final class LiveActivityManager {
         currentActivity = nil
         scheduledDeparture = nil
         scheduledArrival = nil
+        stationTimes = []
     }
 
     private func contentState(from state: TrainPositionState) -> TrainJourneyAttributes.ContentState {
         let delaySeconds = TimeInterval(state.delayMinutes * 60)
         let departure = (scheduledDeparture ?? Date()).addingTimeInterval(delaySeconds)
+
+        // Delay-adjusted scheduled window of the current segment. When the
+        // app stops delivering updates, the countdown to the next station
+        // keeps running off these fixed dates.
+        var segmentStart = departure
+        var nextArrival = (scheduledArrival ?? Date()).addingTimeInterval(delaySeconds)
+        if stationTimes.indices.contains(state.segmentFrom),
+           stationTimes.indices.contains(state.segmentTo) {
+            segmentStart = stationTimes[state.segmentFrom].addingTimeInterval(delaySeconds)
+            nextArrival = stationTimes[state.segmentTo].addingTimeInterval(delaySeconds)
+        }
+
         return .init(
             progress: state.progress,
             currentStationIndex: state.currentStationIndex,
@@ -187,8 +225,26 @@ final class LiveActivityManager {
             statusRaw: state.status.rawValue,
             trackingModeRaw: state.trackingModeRaw,
             lastRefreshTimestamp: lastDelayFetchTime.timeIntervalSince1970,
-            departureTimestamp: departure.timeIntervalSince1970
+            departureTimestamp: departure.timeIntervalSince1970,
+            segmentStartTimestamp: segmentStart.timeIntervalSince1970,
+            nextStationArrivalTimestamp: nextArrival.timeIntervalSince1970
         )
+    }
+
+    /// Scheduled time at each journey station (arrival preferred, else
+    /// departure); stations the service skips carry the previous stop's time.
+    private static func stationTimes(for journey: Journey) -> [Date] {
+        let timetable = journey.journeyTimetable
+        var times: [Date] = []
+        var last: Date?
+        for station in journey.journeyStations {
+            if let entry = timetable.first(where: { $0.stationId == station.id }),
+               let secs = entry.arrivalSeconds() ?? entry.departureSeconds() {
+                last = dateFromRailSeconds(secs)
+            }
+            times.append(last ?? Date())
+        }
+        return times
     }
 
     /// Scheduled departure and arrival dates from the journey's timetable.

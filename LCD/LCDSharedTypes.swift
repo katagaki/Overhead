@@ -22,6 +22,11 @@ struct TrainJourneyAttributes: ActivityAttributes {
         // Together with the arrival timestamp this drives timer-based views
         // that keep advancing while the app is suspended (no GPS needed).
         var departureTimestamp: Double
+        // Delay-adjusted scheduled window of the current inter-station
+        // segment; drives the self-advancing next-station countdown that
+        // stays live even when no further updates arrive.
+        var segmentStartTimestamp: Double
+        var nextStationArrivalTimestamp: Double
 
         var status: TrainPositionStatus {
             TrainPositionStatus(rawValue: statusRaw) ?? .onTime
@@ -45,6 +50,14 @@ struct TrainJourneyAttributes: ActivityAttributes {
             return start...end
         }
 
+        /// Timer interval of the current segment (to the next station).
+        var segmentInterval: ClosedRange<Date> {
+            let start = Date(timeIntervalSince1970: segmentStartTimestamp)
+            let end = max(Date(timeIntervalSince1970: nextStationArrivalTimestamp),
+                          start.addingTimeInterval(1))
+            return start...end
+        }
+
         var lastRefresh: Date {
             Date(timeIntervalSince1970: lastRefreshTimestamp)
         }
@@ -63,6 +76,10 @@ struct TrainJourneyAttributes: ActivityAttributes {
     let stationNamesEn: [String]
     let stationCount: Int
     let stationStops: [Bool]
+    // Scheduled time at each station (epoch seconds, no delay applied;
+    // skipped stations carry the previous stop's time). Static for the whole
+    // journey, so self-updating views can lean on it without updates.
+    let stationTimes: [Double]
     let refreshURLString: String
 }
 

@@ -128,8 +128,12 @@ struct TrainJourneyLiveActivity: Widget {
                         .font(.system(size: 12, weight: .bold, design: .rounded))
                         .foregroundColor(.red)
                 } else {
-                    Text(formatTime(context.state.estimatedArrival))
+                    // Counts down to the next station on its own, with no
+                    // updates from the app.
+                    Text(timerInterval: context.state.segmentInterval, countsDown: true)
                         .font(.system(size: 12, design: .rounded))
+                        .monospacedDigit()
+                        .frame(maxWidth: 44)
                 }
 
             } minimal: {
@@ -232,8 +236,19 @@ struct LockScreenLiveActivityView: View {
                     Text("Label.NextStation")
                         .font(.system(size: 9))
                         .foregroundColor(.secondary)
-                    Text(context.state.nextStationName)
-                        .font(.system(size: 16, weight: .bold))
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                        Text(context.state.nextStationName)
+                            .font(.system(size: 16, weight: .bold))
+                        // Counts down to the next station's scheduled arrival
+                        // on its own, even when no updates arrive.
+                        if context.state.status != .arrived, context.state.status != .notStarted {
+                            Text(timerInterval: context.state.segmentInterval, countsDown: true)
+                                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                                .monospacedDigit()
+                                .foregroundColor(.secondary)
+                                .frame(maxWidth: 40, alignment: .leading)
+                        }
+                    }
                     Text(context.state.nextStationNameEn)
                         .font(.system(size: 10))
                         .foregroundColor(.secondary)
