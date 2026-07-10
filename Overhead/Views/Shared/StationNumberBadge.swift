@@ -49,6 +49,8 @@ struct StationNumberBadge: View {
     private static let filledSquarePrefixes: Set<String> = [
         // Tokyu
         "TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD",
+        // Tsukuba Express (same filled-square style as Tokyu)
+        "TX",
     ]
     private static let seibuPrefixes: Set<String> = [
         "SI", "SS", "SK", "ST", "SW", "SY",
@@ -62,6 +64,7 @@ struct StationNumberBadge: View {
     private static let seibuLetterColor = Color(hex: "#111D16")
     private static let sotetsuOrange = Color(hex: "#EE7B01")
     private static let minatomiraiNavy = Color(hex: "#1F2A54")
+    private static let rinkaiLightBlue = Color(hex: "#96C7C1")
 
     private var parsed: (prefix: String, number: String) {
         let letters = code.prefix(while: \.isLetter)
@@ -114,6 +117,8 @@ struct StationNumberBadge: View {
             keiseiBadge(prefix: prefix, number: number)
         } else if prefix == "NT" {
             nipporiToneriBadge(prefix: prefix, number: number)
+        } else if prefix == "R" {
+            rinkaiBadge(prefix: prefix, number: number)
         } else {
             circleBadge(prefix: prefix, number: number)
         }
@@ -330,6 +335,43 @@ struct StationNumberBadge: View {
             Circle()
                 .strokeBorder(color.opacity(opacity), lineWidth: d * 0.13)
         )
+    }
+
+    // MARK: - Rinkai: Filled Navy Circle, Light Blue Outer Ring
+
+    /// Matches TWR Rinkai signage (user photo 2026-07-10): white stacked code
+    /// on a filled navy circle, a thin white separator ring, and a pale blue
+    /// outer ring (~11% of the diameter).
+    @ViewBuilder
+    private func rinkaiBadge(prefix: String, number: String) -> some View {
+        let d = badgeDimension
+
+        VStack(spacing: 0) {
+            Text(prefix)
+                .font(.custom("Helvetica-Bold", size: d * 0.28))
+                .frame(height: d * 0.25)
+
+            Text(number)
+                .font(.custom("Helvetica-Bold", size: d * 0.38))
+                .frame(height: d * 0.34)
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.6)
+        .foregroundColor(Color.white.opacity(opacity))
+        .frame(width: d, height: d)
+        .background {
+            ZStack {
+                Circle()
+                    .fill(Self.rinkaiLightBlue)
+                Circle()
+                    .fill(Color.white)
+                    .padding(d * 0.11)
+                Circle()
+                    .fill(color)
+                    .padding(d * 0.14)
+            }
+            .opacity(opacity)
+        }
     }
 
     // MARK: - Nippori-Toneri Liner: Pink Outer + Green Inner Border

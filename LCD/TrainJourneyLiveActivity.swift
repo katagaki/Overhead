@@ -609,17 +609,21 @@ struct LCDLineSymbolBadge: View {
 
     private static let tobuSymbols: Set<String> = ["TS", "TI", "TN", "TD", "TJ"]
     private static let odakyuSymbols: Set<String> = ["OH", "OE", "OT"]
-    private static let tokyuStyleSymbols: Set<String> = ["TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD"]
+    // Tsukuba Express (TX) signage uses the same filled-square style as Tokyu.
+    private static let tokyuStyleSymbols: Set<String> = ["TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD", "TX"]
     private static let seibuSymbols: Set<String> = ["SI", "SS", "SK", "ST", "SW", "SY"]
     private static let keioSymbols: Set<String> = ["KO", "IN"]
     private static let keikyuRingBlue = Color(hex: "#00A7E1")
     private static let keikyuLetterBlue = Color(hex: "#1E50A2")
     private static let seibuLetterColor = Color(hex: "#414D66")
+    private static let rinkaiLightBlue = Color(hex: "#96C7C1")
 
     var body: some View {
         switch symbol {
         case "NT":
             nipporiToneriBadge
+        case "R":
+            rinkaiBadge
         case "KS":
             keiseiBadge
         case "KK":
@@ -647,6 +651,29 @@ struct LCDLineSymbolBadge: View {
             // Metro/Toei symbols use Futura like the real signage
             circleBadge(ringWidth: 3.8, textColor: .black, hind: false)
         }
+    }
+
+    /// Rinkai: white letter on a filled navy circle, thin white separator
+    /// ring, pale blue outer ring (mirrors LineSymbolBadge.rinkaiBadge at 24pt)
+    private var rinkaiBadge: some View {
+        Text(symbol)
+            .font(.custom("Helvetica-Bold", fixedSize: 10))
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
+            .foregroundColor(.white)
+            .frame(width: 24, height: 24)
+            .background {
+                ZStack {
+                    Circle()
+                        .fill(Self.rinkaiLightBlue)
+                    Circle()
+                        .fill(Color.white)
+                        .padding(2.6)
+                    Circle()
+                        .fill(color)
+                        .padding(3.4)
+                }
+            }
     }
 
     private func circleBadge(ringWidth: CGFloat, textColor: Color, hind: Bool,

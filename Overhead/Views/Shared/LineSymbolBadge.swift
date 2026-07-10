@@ -33,7 +33,8 @@ struct LineSymbolBadge: View {
 
     private static let tobuSymbols: Set<String> = ["TS", "TI", "TN", "TD", "TJ"]
     private static let odakyuSymbols: Set<String> = ["OH", "OE", "OT"]
-    private static let tokyuStyleSymbols: Set<String> = ["TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD"]
+    // Tsukuba Express (TX) signage uses the same filled-square style as Tokyu.
+    private static let tokyuStyleSymbols: Set<String> = ["TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD", "TX"]
     private static let seibuSymbols: Set<String> = ["SI", "SS", "SK", "ST", "SW", "SY"]
     private static let keioSymbols: Set<String> = ["KO", "IN"]
     private static let metroLetterColor = Color(hex: "#232021")
@@ -42,6 +43,7 @@ struct LineSymbolBadge: View {
     private static let keikyuLetterBlue = Color(hex: "#1E50A2")
     private static let seibuLetterColor = Color(hex: "#414D66")
     private static let sotetsuOrange = Color(hex: "#EE7B01")
+    private static let rinkaiLightBlue = Color(hex: "#96C7C1")
 
     /// Scale factor relative to the 32pt reference design.
     private var f: CGFloat { dimension / 32 }
@@ -58,6 +60,8 @@ struct LineSymbolBadge: View {
             sotetsuBadge
         case "MM":
             minatomiraiBadge
+        case "R":
+            rinkaiBadge
         case _ where Self.keioSymbols.contains(symbol):
             keioBadge
         case _ where Self.tokyuStyleSymbols.contains(symbol):
@@ -104,6 +108,28 @@ struct LineSymbolBadge: View {
                 RoundedRectangle(cornerRadius: 7 * f)
                     .strokeBorder(color, lineWidth: 3.5 * f)
             )
+    }
+
+    // MARK: - Rinkai: filled navy circle inside a light blue outer ring
+
+    /// Matches TWR Rinkai signage (user photo 2026-07-10): white letter on a
+    /// filled navy circle, a thin white separator ring, and a pale blue outer
+    /// ring (~11% of the diameter).
+    private var rinkaiBadge: some View {
+        symbolText(.custom("Helvetica-Bold", fixedSize: 13 * f), color: .white, inset: 5.5 * f)
+            .frame(width: dimension, height: dimension)
+            .background {
+                ZStack {
+                    Circle()
+                        .fill(Self.rinkaiLightBlue)
+                    Circle()
+                        .fill(Color.white)
+                        .padding(3.5 * f)
+                    Circle()
+                        .fill(color)
+                        .padding(4.5 * f)
+                }
+            }
     }
 
     // MARK: - Keisei: blue ring, line-color regular Helvetica letters

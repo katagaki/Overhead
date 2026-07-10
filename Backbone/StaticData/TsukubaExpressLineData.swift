@@ -68,7 +68,9 @@ enum TsukubaExpressLineData {
         nameJa: "つくばエクスプレス",
         nameEn: "Tsukuba Express",
         operatorId: "Operator:MIR",
-        colorHex: "#000084",
+        // Slate-leaning navy (user-tuned 2026-07-10 from ja.wiki's saturated
+        // #000084, which read too blue against the real TX signage)
+        colorHex: "#2E3A5C",
         stations: [
             st("MIR.TsukubaExpress", "Akihabara", "秋葉原", "Akihabara", "TX01", 35.69894, 139.77428),
             st("MIR.TsukubaExpress", "ShinOkachimachi", "新御徒町", "Shin-okachimachi", "TX02", 35.70711, 139.78194),
