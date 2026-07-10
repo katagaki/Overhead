@@ -63,6 +63,7 @@
 		7B5E01E02F76257300861ADF /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		E49DCE832FFCFB2B005BA3DF /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
 		E49DCEF12FFD1371005BA3DF /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
+		E49DD0293000C7F8005BA3DF /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
 		E4D93A0B2FF7F7C6004D37D7 /* Backbone.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Backbone.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -188,11 +189,17 @@
 			isa = PBXGroup;
 			children = (
 				E49DCE832FFCFB2B005BA3DF /* Overhead.xcodeproj */,
+				E49DCEF12FFD1371005BA3DF /* Overhead.xcodeproj */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 		E49DCEF22FFD1371005BA3DF /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E49DD02A3000C7F8005BA3DF /* Products */ = {
 			isa = PBXGroup;
 			name = Products;
 			sourceTree = "<group>";
@@ -323,6 +330,10 @@
 				{
 					ProductGroup = E49DCE842FFCFB2B005BA3DF /* Products */;
 					ProjectRef = E49DCE832FFCFB2B005BA3DF /* Overhead.xcodeproj */;
+				},
+				{
+					ProductGroup = E49DD02A3000C7F8005BA3DF /* Products */;
+					ProjectRef = E49DD0293000C7F8005BA3DF /* Overhead.xcodeproj */;
 				},
 			);
 			projectRoot = "";

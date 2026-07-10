@@ -9,6 +9,8 @@ struct TrainJourneyAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
         var progress: Double
         var currentStationIndex: Int?
+        // Segment target; valid between stations, nil once arrived.
+        var nextStationIndex: Int?
         var nextStationName: String
         var nextStationNameEn: String
         var delayMinutes: Int
@@ -62,6 +64,16 @@ struct TrainJourneyAttributes: ActivityAttributes {
         }
     }
 
+    /// The line ridden from `stationIndex` onward. One-seat rides have a
+    /// single entry at index 0; each transfer adds one at its station.
+    struct LegLine: Codable, Hashable {
+        let stationIndex: Int
+        let lineSymbol: String
+        let lineColorHex: String
+        let lineName: String
+        let lineNameEn: String
+    }
+
     let lineName: String
     let lineNameEn: String
     let lineColorHex: String
@@ -80,7 +92,26 @@ struct TrainJourneyAttributes: ActivityAttributes {
     // skipped stations carry the previous stop's time). Static for the whole
     // journey, so self-updating views can lean on it without updates.
     let stationTimes: [Double]
+    // Empty string where a station has no code.
+    let stationCodes: [String]
+    let legLines: [LegLine]
     let refreshURLString: String
+
+    var destinationCode: String { stationCodes.last ?? "" }
+
+    /// Riders are still on the arriving leg at the transfer station itself;
+    /// the new leg takes over once the train departs it.
+    func currentLeg(nextIndex: Int?) -> LegLine? {
+        guard !legLines.isEmpty else { return nil }
+        let next = max(nextIndex ?? stationCount, 1)
+        return legLines.last { $0.stationIndex < next } ?? legLines.first
+    }
+
+    /// Nil for the rest of a straight (one-seat) ride.
+    func upcomingTransfer(nextIndex: Int?) -> LegLine? {
+        guard let next = nextIndex else { return nil }
+        return legLines.first { $0.stationIndex > 0 && $0.stationIndex >= max(next, 1) }
+    }
 }
 
 // MARK: - Live Activity Manager
@@ -90,7 +121,6 @@ final class LiveActivityManager {
     static let shared = LiveActivityManager()
     private init() {}
 
-    // Opened by the Live Activity refresh button
     static let refreshURLScheme = "overhead://refresh-delay"
 
     private(set) var currentActivity: Activity<TrainJourneyAttributes>?
@@ -108,13 +138,25 @@ final class LiveActivityManager {
     func startActivity(
         journey: Journey,
         positionState: TrainPositionState,
-        lineColorHex: String
+        lineColorHex: String,
+        legLines: [TrainJourneyAttributes.LegLine] = []
     ) {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
 
         let stations = journey.journeyStations
         let timetableIds = Set(journey.journeyTimetable.map(\.stationId))
         let stationStops = stations.map { timetableIds.contains($0.id) }
+
+        // A one-seat ride stays on the journey line the whole way.
+        let resolvedLegLines = legLines.isEmpty
+            ? [TrainJourneyAttributes.LegLine(
+                stationIndex: 0,
+                lineSymbol: journey.line.lineSymbol,
+                lineColorHex: lineColorHex,
+                lineName: journey.line.name,
+                lineNameEn: journey.line.nameEn
+            )]
+            : legLines
 
         lastDelayFetchTime = Date()
         (scheduledDeparture, scheduledArrival) = Self.scheduledTimes(for: journey)
@@ -135,6 +177,8 @@ final class LiveActivityManager {
             stationCount: stations.count,
             stationStops: stationStops,
             stationTimes: stationTimes.map(\.timeIntervalSince1970),
+            stationCodes: stations.map(\.stationCode),
+            legLines: resolvedLegLines,
             refreshURLString: Self.refreshURLScheme
         )
 
@@ -177,6 +221,7 @@ final class LiveActivityManager {
         let finalState = TrainJourneyAttributes.ContentState(
             progress: 1.0,
             currentStationIndex: nil,
+            nextStationIndex: nil,
             nextStationName: "",
             nextStationNameEn: "",
             delayMinutes: 0,
@@ -218,6 +263,7 @@ final class LiveActivityManager {
         return .init(
             progress: state.progress,
             currentStationIndex: state.currentStationIndex,
+            nextStationIndex: state.status == .arrived ? nil : state.segmentTo,
             nextStationName: state.nextStationName,
             nextStationNameEn: state.nextStationNameEn,
             delayMinutes: state.delayMinutes,

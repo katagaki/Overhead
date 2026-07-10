@@ -479,11 +479,30 @@ final class JourneyViewModel: ObservableObject {
         locationTracker.startTracking(journey: journey, delay: nil)
         positionState = TrainPositionEngine.computePosition(journey: journey, delay: nil)
 
+        // The boarded line at station 0, plus each connecting line at its
+        // transfer station.
+        let journeyStations = journey.journeyStations
+        var legLines: [TrainJourneyAttributes.LegLine] = []
+        for (index, leg) in candidate.legs.enumerated() {
+            let stationIndex = index == 0
+                ? 0
+                : journeyStations.firstIndex { $0.id == candidate.legs[index - 1].toStation.id }
+            guard let stationIndex else { continue }
+            legLines.append(.init(
+                stationIndex: stationIndex,
+                lineSymbol: leg.line.lineSymbol,
+                lineColorHex: leg.line.colorHex,
+                lineName: leg.line.name,
+                lineNameEn: leg.line.nameEn
+            ))
+        }
+
         if let state = positionState {
             LiveActivityManager.shared.startActivity(
                 journey: journey,
                 positionState: state,
-                lineColorHex: candidate.journeyLine.colorHex
+                lineColorHex: candidate.journeyLine.colorHex,
+                legLines: legLines
             )
         }
     }

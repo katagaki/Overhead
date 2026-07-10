@@ -7,313 +7,400 @@ import ActivityKit
 struct TrainJourneyLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: TrainJourneyAttributes.self) { context in
-            LockScreenLiveActivityView(context: context)
+            LockScreenLiveActivityView(attributes: context.attributes, state: context.state)
                 .containerBackground(.clear, for: .widget)
 
         } dynamicIsland: { context in
-            DynamicIsland {
+            let attrs = context.attributes
+            let state = context.state
+            let nextIndex = state.nextStationIndex
+            let leg = attrs.currentLeg(nextIndex: nextIndex)
+            let legSymbol = leg?.lineSymbol ?? attrs.lineSymbol
+            let legColor = Color(hex: leg?.lineColorHex ?? attrs.lineColorHex)
+
+            return DynamicIsland {
+                // The island's rounded corners clip anything hugging its
+                // edges, so the badges keep clear of them.
                 DynamicIslandExpandedRegion(.leading) {
-                    EmptyView()
+                    if !legSymbol.isEmpty {
+                        LCDLineSymbolBadge(symbol: legSymbol, color: legColor)
+                            .sized(22)
+                            .padding(.leading, 8)
+                            .padding(.top, 6)
+                    }
                 }
 
                 DynamicIslandExpandedRegion(.trailing) {
-                    EmptyView()
+                    IslandRideAheadBadge(attributes: attrs, state: state)
+                        .padding(.trailing, 8)
+                        .padding(.top, 6)
                 }
 
                 DynamicIslandExpandedRegion(.center) {
-                    ExpandedIslandLineView(context: context)
+                    ExpandedIslandLineView(attributes: attrs, state: state)
                         .padding(.horizontal, 4)
+                        .padding(.top, 10)
                 }
 
                 DynamicIslandExpandedRegion(.bottom) {
-                    VStack(spacing: 8) {
-                        HStack {
-                            HStack(spacing: 6) {
-                                if !context.attributes.lineSymbol.isEmpty {
-                                    LCDLineSymbolBadge(
-                                        symbol: context.attributes.lineSymbol,
-                                        color: Color(hex: context.attributes.lineColorHex)
-                                    )
-                                }
-                                VStack(alignment: .leading, spacing: 1) {
-                                    Text(context.attributes.lineName)
-                                        .font(.system(size: 13, weight: .bold))
-                                        .foregroundColor(Color(hex: context.attributes.lineColorHex))
-                                    HStack(spacing: 4) {
-                                        Text(context.attributes.trainType)
-                                            .font(.system(size: 10))
-                                            .foregroundColor(.secondary)
-                                        if context.state.isTimetableMode {
-                                            Text("Badge.Timetable")
-                                                .font(.system(size: 8, weight: .bold))
-                                                .foregroundColor(.orange)
-                                                .padding(.horizontal, 4)
-                                                .padding(.vertical, 1)
-                                                .background(Color.orange.opacity(0.2))
-                                                .clipShape(Capsule())
-                                        }
-                                    }
-                                }
-                            }
-
-                            Spacer()
-
-                            VStack(alignment: .trailing, spacing: 1) {
-                                if context.state.isDelayed {
-                                    Text("LiveActivity.Delay.Minutes \(context.state.delayMinutes)")
-                                        .font(.system(size: 13, weight: .bold, design: .rounded))
-                                        .foregroundColor(.red)
-                                } else {
-                                    Text("Status.OnTime")
-                                        .font(.system(size: 13, weight: .medium))
-                                        .foregroundColor(.green)
-                                }
-                                HStack(spacing: 3) {
-                                    Text(formatTime(context.state.estimatedArrival))
-                                        .font(.system(size: 10, design: .rounded))
-                                        .foregroundColor(.secondary)
-                                    if context.state.status != .arrived && context.state.status != .notStarted {
-                                        Text(timerInterval: context.state.journeyInterval, countsDown: true)
-                                            .font(.system(size: 10, weight: .semibold, design: .rounded))
-                                            .monospacedDigit()
-                                            .multilineTextAlignment(.trailing)
-                                            .frame(maxWidth: 48)
-                                    }
-                                }
-                            }
-                        }
-
-                        HStack {
-                            HStack(spacing: 4) {
-                                Image(systemName: "arrow.right")
-                                    .font(.system(size: 10))
-                                    .foregroundColor(.secondary)
-                                Text("LiveActivity.NextIs \(context.state.nextStationName)")
-                                    .font(.system(size: 13, weight: .semibold))
-                            }
-
-                            Spacer()
-
-                            Link(destination: URL(string: context.attributes.refreshURLString)!) {
-                                HStack(spacing: 3) {
-                                    Image(systemName: "arrow.clockwise")
-                                        .font(.system(size: 10, weight: .semibold))
-                                    Text(refreshAgeText(context.state.lastRefresh))
-                                        .font(.system(size: 9))
-                                }
-                                .foregroundColor(Color(hex: context.attributes.lineColorHex))
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Color(hex: context.attributes.lineColorHex).opacity(0.15))
-                                .clipShape(Capsule())
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 4)
+                    ExpandedIslandBottomView(attributes: attrs, state: state)
                 }
 
             } compactLeading: {
-                HStack(spacing: 3) {
-                    Circle()
-                        .fill(Color(hex: context.attributes.lineColorHex))
-                        .frame(width: 8, height: 8)
-                    Text(context.state.nextStationName.prefix(3))
+                if !legSymbol.isEmpty {
+                    LCDLineSymbolBadge(symbol: legSymbol, color: legColor)
+                        .sized(23)
+                        .padding(.leading, 1)
+                } else {
+                    HStack(spacing: 3) {
+                        Circle()
+                            .fill(legColor)
+                            .frame(width: 8, height: 8)
+                        Text(state.nextStationName.prefix(3))
+                            .font(.system(size: 12, weight: .bold))
+                            .lineLimit(1)
+                    }
+                }
+
+            } compactTrailing: {
+                if state.isDelayed {
+                    Text("+\(state.delayMinutes)")
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .foregroundColor(.red)
+                } else if let transfer = attrs.upcomingTransfer(nextIndex: nextIndex),
+                          !transfer.lineSymbol.isEmpty {
+                    LCDLineSymbolBadge(symbol: transfer.lineSymbol,
+                                       color: Color(hex: transfer.lineColorHex))
+                        .sized(23)
+                        .padding(.trailing, 1)
+                } else if !attrs.destinationCode.isEmpty {
+                    LCDStationNumberBadge(code: attrs.destinationCode,
+                                          color: Color(hex: attrs.legLines.last?.lineColorHex ?? attrs.lineColorHex),
+                                          dimension: 23)
+                        .padding(.trailing, 1)
+                } else {
+                    Text(attrs.destinationName.prefix(3))
                         .font(.system(size: 12, weight: .bold))
                         .lineLimit(1)
                 }
 
-            } compactTrailing: {
-                if context.state.isDelayed {
-                    Text("+\(context.state.delayMinutes)")
-                        .font(.system(size: 12, weight: .bold, design: .rounded))
-                        .foregroundColor(.red)
-                } else {
-                    // Counts down to the next station on its own, with no
-                    // updates from the app.
-                    Text(timerInterval: context.state.segmentInterval, countsDown: true)
-                        .font(.system(size: 12, design: .rounded))
-                        .monospacedDigit()
-                        .frame(maxWidth: 44)
-                }
-
             } minimal: {
                 // Timer-driven ring keeps filling while the app is suspended.
-                ProgressView(timerInterval: context.state.journeyInterval, countsDown: false) {
+                ProgressView(timerInterval: state.journeyInterval, countsDown: false) {
                 } currentValueLabel: {
                     Circle()
-                        .fill(Color(hex: context.attributes.lineColorHex))
+                        .fill(legColor)
                         .frame(width: 6, height: 6)
                 }
                 .progressViewStyle(.circular)
-                .tint(Color(hex: context.attributes.lineColorHex))
+                .tint(legColor)
             }
         }
-    }
-
-    private func formatTime(_ date: Date) -> String {
-        let f = DateFormatter()
-        f.dateFormat = "HH:mm"
-        f.timeZone = TimeZone(identifier: "Asia/Tokyo")
-        return f.string(from: date)
-    }
-
-    private func refreshAgeText(_ lastRefresh: Date) -> String {
-        let seconds = Int(-lastRefresh.timeIntervalSinceNow)
-        if seconds < 30 { return String(localized: "Time.Now") }
-        let minutes = seconds / 60
-        if minutes < 1 { return String(localized: "Time.LessThanOneMinuteAgo") }
-        return String(localized: "Time.MinutesAgo \(minutes)")
+        // Lets the lock screen's two bands run to the container's edges.
+        .contentMarginsDisabled()
     }
 }
 
-// MARK: - Lock Screen Live Activity View
+// MARK: - Expanded Island Bottom View
 
-struct LockScreenLiveActivityView: View {
-    let context: ActivityViewContext<TrainJourneyAttributes>
+struct ExpandedIslandBottomView: View {
+    let attributes: TrainJourneyAttributes
+    let state: TrainJourneyAttributes.ContentState
 
-    private var lineColor: Color { Color(hex: context.attributes.lineColorHex) }
+    private var leg: TrainJourneyAttributes.LegLine? {
+        attributes.currentLeg(nextIndex: state.nextStationIndex)
+    }
+
+    private var legColor: Color {
+        Color(hex: leg?.lineColorHex ?? attributes.lineColorHex)
+    }
+
+    private var nextStationCode: String {
+        guard let idx = state.nextStationIndex,
+              attributes.stationCodes.indices.contains(idx) else { return "" }
+        return attributes.stationCodes[idx]
+    }
+
+    /// Fixed so the station name stays optically centered between the columns.
+    private static let sideColumnWidth: CGFloat = 92
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                HStack(spacing: 8) {
-                    if !context.attributes.lineSymbol.isEmpty {
-                        LCDLineSymbolBadge(
-                            symbol: context.attributes.lineSymbol,
-                            color: lineColor
-                        )
-                    }
+        ZStack {
+            HStack(alignment: .center, spacing: 8) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(leg?.lineName ?? attributes.lineName)
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(legColor)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
 
-                    VStack(alignment: .leading, spacing: 0) {
-                        HStack(spacing: 6) {
-                            Text(context.attributes.lineName)
-                                .font(.system(size: 14, weight: .bold))
-                            trackingModeBadge
-                        }
-                        Text("Destination.Suffix \(context.attributes.trainType) \(context.attributes.destinationName)")
-                            .font(.system(size: 10))
-                            .foregroundColor(.secondary)
-                    }
-                }
-
-                Spacer()
-
-                if context.state.isDelayed {
-                    HStack(spacing: 3) {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .font(.system(size: 10))
-                        Text("LiveActivity.Delay.Badge \(context.state.delayMinutes)")
-                            .font(.system(size: 12, weight: .bold, design: .rounded))
-                    }
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(Color.red.opacity(0.9))
-                    .clipShape(Capsule())
-                } else {
-                    Text("Status.OnTimeOperation")
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.green)
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
-            .padding(.bottom, 8)
-
-            LCDLineView(
-                stationNames: context.attributes.stationNames,
-                stationCount: context.attributes.stationCount,
-                progress: context.state.progress,
-                currentStationIndex: context.state.currentStationIndex,
-                lineColor: lineColor,
-                stationStops: context.attributes.stationStops,
-                journeyInterval: context.state.journeyInterval
-            )
-            .padding(.horizontal, 16)
-
-            HStack {
-                VStack(alignment: .leading, spacing: 1) {
-                    Text("Label.NextStation")
-                        .font(.system(size: 9))
+                    Text("Destination.Suffix \(attributes.trainType) \(attributes.destinationName)")
+                        .font(.system(size: 9, weight: .medium))
                         .foregroundColor(.secondary)
-                    HStack(alignment: .firstTextBaseline, spacing: 6) {
-                        Text(context.state.nextStationName)
-                            .font(.system(size: 16, weight: .bold))
-                        // Counts down to the next station's scheduled arrival
-                        // on its own, even when no updates arrive.
-                        if context.state.status != .arrived, context.state.status != .notStarted {
-                            Text(timerInterval: context.state.segmentInterval, countsDown: true)
-                                .font(.system(size: 11, weight: .semibold, design: .rounded))
-                                .monospacedDigit()
-                                .foregroundColor(.secondary)
-                                .frame(maxWidth: 40, alignment: .leading)
-                        }
-                    }
-                    Text(context.state.nextStationNameEn)
-                        .font(.system(size: 10))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+
+                    trackingModeBadge
+                }
+                .frame(width: Self.sideColumnWidth, alignment: .leading)
+
+                Spacer(minLength: 0)
+
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text("Label.EstimatedArrival")
+                        .font(.system(size: 8))
                         .foregroundColor(.secondary)
+                    Text(Self.formatTime(state.estimatedArrival))
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundColor(.primary)
                 }
-
-                Spacer()
-
-                VStack(alignment: .trailing, spacing: 4) {
-                    VStack(alignment: .trailing, spacing: 1) {
-                        Text("Label.EstimatedArrival")
-                            .font(.system(size: 9))
-                            .foregroundColor(.secondary)
-                        Text(formatTime(context.state.estimatedArrival))
-                            .font(.system(size: 20, weight: .bold, design: .rounded))
-                            .foregroundColor(context.state.isDelayed ? .red : .primary)
-
-                        // Self-updating even while the app is suspended
-                        if context.state.status == .notStarted {
-                            Text("LiveActivity.DepartsAt \(formatTime(context.state.departure))")
-                                .font(.system(size: 10, weight: .semibold, design: .rounded))
-                                .foregroundColor(.orange)
-                        } else if context.state.status != .arrived {
-                            HStack(spacing: 3) {
-                                Text("Label.TimeRemaining")
-                                    .font(.system(size: 9))
-                                    .foregroundColor(.secondary)
-                                Text(timerInterval: context.state.journeyInterval, countsDown: true)
-                                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                                    .monospacedDigit()
-                                    .multilineTextAlignment(.trailing)
-                                    .frame(maxWidth: 56)
-                            }
-                        }
-                    }
-
-                    Link(destination: URL(string: context.attributes.refreshURLString)!) {
-                        HStack(spacing: 3) {
-                            Image(systemName: "arrow.clockwise")
-                                .font(.system(size: 9, weight: .semibold))
-                            Text("Button.RefreshDelayInfo")
-                                .font(.system(size: 9, weight: .medium))
-                            Text("(\(refreshAgeText(context.state.lastRefresh)))")
-                                .font(.system(size: 8))
-                                .foregroundColor(.secondary)
-                        }
-                        .foregroundColor(lineColor)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(lineColor.opacity(0.1))
-                        .clipShape(Capsule())
-                    }
-                }
+                .frame(width: Self.sideColumnWidth, alignment: .trailing)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
-            .padding(.bottom, 12)
+
+            nextStationDisplay
         }
-        .background(.clear)
+        .padding(.horizontal, 8)
+        .padding(.top, 2)
+    }
+
+    private var nextStationDisplay: some View {
+        VStack(spacing: 1) {
+            HStack(spacing: 5) {
+                if !nextStationCode.isEmpty {
+                    LCDStationNumberBadge(code: nextStationCode, color: legColor, dimension: 22)
+                }
+                Text(state.nextStationName)
+                    .font(.system(size: 21, weight: .bold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+            }
+            Text(state.nextStationNameEn)
+                .font(.system(size: 8))
+                .foregroundColor(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .padding(.horizontal, Self.sideColumnWidth + 2)
     }
 
     // MARK: - Tracking Mode Badge
 
     @ViewBuilder
     private var trackingModeBadge: some View {
-        let mode = context.state.trackingModeRaw
+        let mode = state.trackingModeRaw
+        if mode == "Timetable" {
+            islandModeBadge("clock.fill", "Badge.Timetable", .orange)
+        } else if mode == "GPS" {
+            islandModeBadge("location.fill", "Badge.GPS", .green)
+        } else {
+            islandModeBadge("location.fill", "Badge.GPSPlusTimetable", .blue)
+        }
+    }
+
+    private func islandModeBadge(_ icon: String, _ key: LocalizedStringKey,
+                                 _ color: Color) -> some View {
+        HStack(spacing: 2) {
+            Image(systemName: icon)
+                .font(.system(size: 7))
+            Text(key)
+                .font(.system(size: 8, weight: .bold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .foregroundColor(color)
+        .padding(.horizontal, 5)
+        .padding(.vertical, 2)
+        .background(color.opacity(0.15))
+        .clipShape(Capsule())
+    }
+
+    static func formatTime(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.dateFormat = "HH:mm"
+        f.timeZone = TimeZone(identifier: "Asia/Tokyo")
+        return f.string(from: date)
+    }
+}
+
+// MARK: - Island Ride-Ahead Badge
+
+/// The next line to transfer to, or the station to get off at on a straight ride.
+struct IslandRideAheadBadge: View {
+    let attributes: TrainJourneyAttributes
+    let state: TrainJourneyAttributes.ContentState
+
+    var body: some View {
+        let nextIndex = state.nextStationIndex
+
+        if let transfer = attributes.upcomingTransfer(nextIndex: nextIndex),
+           !transfer.lineSymbol.isEmpty {
+            VStack(spacing: 2) {
+                LCDLineSymbolBadge(symbol: transfer.lineSymbol,
+                                   color: Color(hex: transfer.lineColorHex))
+                    .sized(22)
+                Text("Label.Transfer")
+                    .font(.system(size: 8))
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+            }
+        } else if !attributes.destinationCode.isEmpty {
+            VStack(spacing: 2) {
+                LCDStationNumberBadge(
+                    code: attributes.destinationCode,
+                    color: Color(hex: attributes.legLines.last?.lineColorHex ?? attributes.lineColorHex),
+                    dimension: 22
+                )
+                Text("Label.GetOffAt")
+                    .font(.system(size: 8))
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+            }
+        } else {
+            VStack(spacing: 2) {
+                Text(attributes.destinationName)
+                    .font(.system(size: 11, weight: .bold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                Text("Label.GetOffAt")
+                    .font(.system(size: 8))
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+            }
+        }
+    }
+}
+
+// MARK: - Lock Screen Live Activity View
+
+struct LockScreenLiveActivityView: View {
+    let attributes: TrainJourneyAttributes
+    let state: TrainJourneyAttributes.ContentState
+
+    private var lineColor: Color { Color(hex: attributes.lineColorHex) }
+
+    private var currentLeg: TrainJourneyAttributes.LegLine? {
+        attributes.currentLeg(nextIndex: state.nextStationIndex)
+    }
+
+    private var legColor: Color {
+        currentLeg.map { Color(hex: $0.lineColorHex) } ?? lineColor
+    }
+
+    private var nextStationCode: String {
+        guard let idx = state.nextStationIndex,
+              attributes.stationCodes.indices.contains(idx) else { return "" }
+        return attributes.stationCodes[idx]
+    }
+
+    /// Fixed so the station name stays optically centered between the columns.
+    private static let topSideColumnWidth: CGFloat = 96
+
+    /// Ink for the white band. The bands are opaque enough that the text
+    /// cannot follow the system color scheme.
+    private static let darkInk = Color.black.opacity(0.9)
+    private static let darkInkSecondary = Color.black.opacity(0.65)
+
+    var body: some View {
+        VStack(spacing: 0) {
+            topPanel
+            bottomPanel
+        }
+        .background(.clear)
+    }
+
+    // MARK: Top panel — terminal, big station name, mode
+
+    private var topPanel: some View {
+        ZStack {
+            HStack(alignment: .center, spacing: 8) {
+                Text("Destination.Suffix \(attributes.trainType) \(attributes.destinationName)")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .frame(width: Self.topSideColumnWidth, alignment: .leading)
+
+                Spacer(minLength: 0)
+
+                trackingModeBadge
+                    .frame(width: Self.topSideColumnWidth, alignment: .trailing)
+            }
+
+            nextStationDisplay
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity)
+        .background(Color.black)
+    }
+
+    private var nextStationDisplay: some View {
+        VStack(spacing: 1) {
+            HStack(spacing: 6) {
+                if !nextStationCode.isEmpty {
+                    LCDStationNumberBadge(code: nextStationCode, color: legColor, dimension: 24)
+                }
+                Text(state.nextStationName)
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+            }
+            Text(state.nextStationNameEn)
+                .font(.system(size: 9))
+                .foregroundColor(.white.opacity(0.65))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .padding(.horizontal, Self.topSideColumnWidth + 4)
+    }
+
+    // MARK: Bottom panel — the timeline, with the ETA on its trailing edge
+
+    private var bottomPanel: some View {
+        VStack(spacing: 2) {
+            LCDLineView(
+                stationNames: attributes.stationNames,
+                stationCount: attributes.stationCount,
+                progress: state.progress,
+                currentStationIndex: state.currentStationIndex,
+                lineColor: lineColor,
+                stationStops: attributes.stationStops,
+                journeyInterval: state.journeyInterval,
+                nextStationIndexOverride: state.nextStationIndex,
+                onLightBackground: true
+            )
+
+            HStack(alignment: .firstTextBaseline, spacing: 5) {
+                // Self-updating even while the app is suspended
+                if state.status == .notStarted {
+                    Text("LiveActivity.DepartsAt \(ExpandedIslandBottomView.formatTime(state.departure))")
+                        .font(.system(size: 10, weight: .semibold, design: .rounded))
+                        .foregroundColor(Self.darkInk)
+                }
+
+                Spacer(minLength: 8)
+
+                Text("Label.EstimatedArrival")
+                    .font(.system(size: 9))
+                    .foregroundColor(Self.darkInkSecondary)
+                Text(ExpandedIslandBottomView.formatTime(state.estimatedArrival))
+                    .font(.system(size: 19, weight: .bold, design: .rounded))
+                    .foregroundColor(Self.darkInk)
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.top, 8)
+        .padding(.bottom, 8)
+        .frame(maxWidth: .infinity)
+        .background(Color.white)
+    }
+
+    // MARK: - Tracking Mode Badge
+
+    @ViewBuilder
+    private var trackingModeBadge: some View {
+        let mode = state.trackingModeRaw
         if mode == "Timetable" {
             HStack(spacing: 2) {
                 Image(systemName: "clock.fill")
@@ -352,21 +439,6 @@ struct LockScreenLiveActivityView: View {
             .clipShape(Capsule())
         }
     }
-
-    private func formatTime(_ date: Date) -> String {
-        let f = DateFormatter()
-        f.dateFormat = "HH:mm"
-        f.timeZone = TimeZone(identifier: "Asia/Tokyo")
-        return f.string(from: date)
-    }
-
-    private func refreshAgeText(_ lastRefresh: Date) -> String {
-        let seconds = Int(-lastRefresh.timeIntervalSinceNow)
-        if seconds < 30 { return String(localized: "Time.Now") }
-        let minutes = seconds / 60
-        if minutes < 1 { return String(localized: "Time.LessThanOneMinuteAgo") }
-        return String(localized: "Time.MinutesAgo \(minutes)")
-    }
 }
 
 // MARK: - LCD Line View (Horizontal - for Lock Screen)
@@ -381,9 +453,32 @@ struct LCDLineView: View {
     // When set, the progress fill is timer-driven so it keeps advancing while
     // the app is suspended (no GPS or background updates required).
     var journeyInterval: ClosedRange<Date>? = nil
+    // Valid mid-segment, unlike the dwell-only currentStationIndex.
+    var nextStationIndexOverride: Int? = nil
+    // Flips the ink for the lock screen's white band.
+    var onLightBackground: Bool = false
 
-    /// Next station index derived from current
+    // On the light band these must be black-on-translucent rather than a
+    // light grey: the linear ProgressView lays its own translucent grey track
+    // over this one, washing out anything paler than the ink below.
+    private var trackColor: Color {
+        onLightBackground ? Color.black.opacity(0.35) : Color(white: 0.3)
+    }
+    private var futureDotColor: Color {
+        onLightBackground ? Color.black.opacity(0.4) : Color(white: 0.35)
+    }
+    private var terminalFill: Color { onLightBackground ? .white : .black }
+    private var labelColor: Color {
+        onLightBackground ? Color.black.opacity(0.7) : Color.secondary
+    }
+    private func skippedDotColor(isPast: Bool) -> Color {
+        if onLightBackground { return Color.black.opacity(isPast ? 0.45 : 0.25) }
+        return Color(white: isPast ? 0.35 : 0.2)
+    }
+
+    /// Next station index: explicit when provided, else derived from current
     private var nextStationIndex: Int? {
+        if let next = nextStationIndexOverride, next < stationCount { return next }
         guard let current = currentStationIndex, current + 1 < stationCount else { return nil }
         return current + 1
     }
@@ -393,10 +488,14 @@ struct LCDLineView: View {
         return stationStops[index]
     }
 
+    /// Tall enough for the station labels above the track and the emphasized
+    /// circles on it.
+    private static let height: CGFloat = 34
+
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
-            let h: CGFloat = 44
+            let h = Self.height
             let baseRadius: CGFloat = stationCount > 10 ? 4 : 5
             let skippedRadius: CGFloat = max(2, baseRadius - 1.5)
             let emphasisRadius: CGFloat = baseRadius + 2
@@ -408,20 +507,22 @@ struct LCDLineView: View {
             ZStack(alignment: .topLeading) {
                 // Background track — thin line centered through circles
                 RoundedRectangle(cornerRadius: 1)
-                    .fill(Color(white: 0.3))
+                    .fill(trackColor)
                     .frame(width: lineWidth, height: trackHeight)
                     .offset(x: padding, y: centerY - trackHeight / 2)
 
-                // Filled progress track — timer-driven when an interval is
-                // available so it advances even without app updates.
+                // Timer-driven so it advances without app updates. The linear
+                // style is a fixed 4pt capsule with its own unfilled track, so
+                // clip it to the band or that track sits proud of this one.
                 if let interval = journeyInterval {
                     ProgressView(timerInterval: interval, countsDown: false) {
                     } currentValueLabel: {
                     }
                     .progressViewStyle(.linear)
                     .tint(lineColor)
-                    .frame(width: lineWidth)
-                    .offset(x: padding, y: centerY - 2)
+                    .frame(width: lineWidth, height: trackHeight)
+                    .clipped()
+                    .position(x: padding + lineWidth / 2, y: centerY)
                 } else {
                     RoundedRectangle(cornerRadius: 1)
                         .fill(lineColor)
@@ -446,25 +547,25 @@ struct LCDLineView: View {
                         ZStack {
                             if isTerminal {
                                 Circle()
-                                    .fill(Color.black)
+                                    .fill(terminalFill)
                                     .frame(width: r * 2, height: r * 2)
                                 Circle()
-                                    .strokeBorder(isPast ? lineColor : Color(white: 0.4), lineWidth: 2)
+                                    .strokeBorder(isPast ? lineColor : trackColor, lineWidth: 2)
                                     .frame(width: r * 2, height: r * 2)
                             } else if !stops {
                                 // Skipped station: small solid dot
                                 Circle()
-                                    .fill(isPast ? Color(white: 0.35) : Color(white: 0.2))
+                                    .fill(skippedDotColor(isPast: isPast))
                                     .frame(width: r * 2, height: r * 2)
                             } else {
                                 Circle()
-                                    .fill(isPast ? lineColor : Color(white: 0.35))
+                                    .fill(isPast ? lineColor : futureDotColor)
                                     .frame(width: r * 2, height: r * 2)
                             }
 
                             if isCurrent {
                                 Circle()
-                                    .fill(Color.white)
+                                    .fill(terminalFill)
                                     .frame(width: r, height: r)
                                 Circle()
                                     .strokeBorder(lineColor, lineWidth: 1.5)
@@ -484,7 +585,7 @@ struct LCDLineView: View {
                             Text(truncatedName(stationNames[i]))
                                 .font(.system(size: isCurrent || isNext ? 9 : 8,
                                               weight: isCurrent || isNext ? .bold : .regular))
-                                .foregroundColor(isCurrent ? lineColor : isNext ? lineColor : .secondary)
+                                .foregroundColor(isCurrent || isNext ? lineColor : labelColor)
                                 .lineLimit(1)
                                 .frame(width: 40)
                                 .position(x: x, y: centerY - r - 9)
@@ -492,16 +593,10 @@ struct LCDLineView: View {
                     }
                 }
 
-                // Train indicator
-                let trainX = padding + lineWidth * progress
-                Image(systemName: "arrowtriangle.up.fill")
-                    .font(.system(size: 7))
-                    .foregroundColor(lineColor)
-                    .position(x: trainX, y: centerY + emphasisRadius + 8)
             }
             .frame(height: h)
         }
-        .frame(height: 44)
+        .frame(height: Self.height)
     }
 
     private func shouldShowLabel(index: Int, isCurrent: Bool, isNext: Bool) -> Bool {
@@ -521,19 +616,22 @@ struct LCDLineView: View {
 // MARK: - Expanded Island Line View
 
 struct ExpandedIslandLineView: View {
-    let context: ActivityViewContext<TrainJourneyAttributes>
+    let attributes: TrainJourneyAttributes
+    let state: TrainJourneyAttributes.ContentState
 
-    private var lineColor: Color { Color(hex: context.attributes.lineColorHex) }
+    private var lineColor: Color { Color(hex: attributes.lineColorHex) }
 
-    /// Next station index derived from current
+    /// Next station index: from the content state when valid, else derived
     private var nextStationIndex: Int? {
-        guard let current = context.state.currentStationIndex,
-              current + 1 < context.attributes.stationCount else { return nil }
+        if let next = state.nextStationIndex,
+           next < attributes.stationCount { return next }
+        guard let current = state.currentStationIndex,
+              current + 1 < attributes.stationCount else { return nil }
         return current + 1
     }
 
     private func stopsAt(_ index: Int) -> Bool {
-        let stops = context.attributes.stationStops
+        let stops = attributes.stationStops
         guard !stops.isEmpty, index < stops.count else { return true }
         return stops[index]
     }
@@ -541,7 +639,7 @@ struct ExpandedIslandLineView: View {
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
-            let count = context.attributes.stationCount
+            let count = attributes.stationCount
             let baseR: CGFloat = count > 8 ? 2.5 : 3.5
             let skippedR: CGFloat = max(1.5, baseR - 1)
             let emphR: CGFloat = baseR + 1.5
@@ -555,21 +653,23 @@ struct ExpandedIslandLineView: View {
                     .frame(width: w - pad * 2, height: trackHeight)
                     .offset(x: pad)
 
-                // Filled track — timer-driven so it advances while the app is suspended
-                ProgressView(timerInterval: context.state.journeyInterval, countsDown: false) {
+                // Clipped to the band so the linear style's own 4pt unfilled
+                // track doesn't show around this one.
+                ProgressView(timerInterval: state.journeyInterval, countsDown: false) {
                 } currentValueLabel: {
                 }
                 .progressViewStyle(.linear)
                 .tint(lineColor)
-                .frame(width: w - pad * 2)
-                .offset(x: pad)
+                .frame(width: w - pad * 2, height: trackHeight)
+                .clipped()
+                .position(x: pad + (w - pad * 2) / 2, y: 6)
 
                 // Station dots
                 ForEach(0..<count, id: \.self) { i in
                     let frac = count > 1 ? Double(i) / Double(count - 1) : 0
                     let x = pad + (w - pad * 2) * frac
-                    let isPast = frac <= context.state.progress + 0.01
-                    let isCurrent = context.state.currentStationIndex == i
+                    let isPast = frac <= state.progress + 0.01
+                    let isCurrent = state.currentStationIndex == i
                     let isNext = nextStationIndex == i
                     let isTerminal = i == 0 || i == count - 1
                     let stops = stopsAt(i)
@@ -611,268 +711,5 @@ struct ExpandedIslandLineView: View {
             .frame(height: 12)
         }
         .frame(height: 12)
-    }
-}
-
-// MARK: - LCD Line Symbol Badge
-
-/// Compact line symbol badge for Live Activity (self-contained, no dependency on main app target).
-/// Mirrors the operator styles of the app's LineSymbolBadge at 24pt.
-struct LCDLineSymbolBadge: View {
-    let symbol: String
-    let color: Color
-
-    private static let tobuSymbols: Set<String> = ["TS", "TI", "TN", "TD", "TJ"]
-    private static let odakyuSymbols: Set<String> = ["OH", "OE", "OT"]
-    // Tsukuba Express (TX) signage uses the same filled-square style as Tokyu.
-    private static let tokyuStyleSymbols: Set<String> = ["TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD", "TX"]
-    private static let seibuSymbols: Set<String> = ["SI", "SS", "SK", "ST", "SW", "SY"]
-    private static let keioSymbols: Set<String> = ["KO", "IN"]
-    private static let keikyuRingBlue = Color(hex: "#00A7E1")
-    private static let keikyuLetterBlue = Color(hex: "#1E50A2")
-    private static let seibuLetterColor = Color(hex: "#414D66")
-    private static let rinkaiLightBlue = Color(hex: "#96C7C1")
-
-    var body: some View {
-        switch symbol {
-        case "NT":
-            nipporiToneriBadge
-        case "R":
-            rinkaiBadge
-        case "KS":
-            keiseiBadge
-        case "KK":
-            circleBadge(ringWidth: 2.0, textColor: Self.keikyuLetterBlue, hind: true,
-                        ringColor: Self.keikyuRingBlue)
-        case "SO":
-            sotetsuBadge
-        case "MM":
-            minatomiraiBadge
-        case _ where Self.keioSymbols.contains(symbol):
-            // Keio KO logo: white circle, thick ring, line-color letters
-            circleBadge(ringWidth: 3.0, textColor: color, hind: true)
-        case _ where Self.tokyuStyleSymbols.contains(symbol):
-            filledBadge(in: AnyShape(RoundedRectangle(cornerRadius: 6)))
-        case _ where Self.seibuSymbols.contains(symbol):
-            seibuTrainBadge
-        case _ where Self.odakyuSymbols.contains(symbol):
-            // Odakyu: very round squircle, line-color ring and letters
-            squircleBadge(cornerRadius: 10, borderWidth: 2.6, textColor: color)
-        case _ where Self.tobuSymbols.contains(symbol):
-            squareBadge(cornerRadius: 5.5, borderWidth: 2.6)
-        case _ where symbol.hasPrefix("J"):
-            squareBadge(cornerRadius: 3, borderWidth: 2.6)
-        default:
-            // Metro/Toei symbols use Futura like the real signage
-            circleBadge(ringWidth: 4.7, textColor: .black, hind: false)
-        }
-    }
-
-    /// Rinkai: white letter on a filled navy circle, thin white separator
-    /// ring, pale blue outer ring (mirrors LineSymbolBadge.rinkaiBadge at 24pt)
-    private var rinkaiBadge: some View {
-        Text(symbol)
-            .font(.custom("Helvetica-Bold", fixedSize: 10))
-            .lineLimit(1)
-            .minimumScaleFactor(0.5)
-            .foregroundColor(.white)
-            .frame(width: 24, height: 24)
-            .background {
-                ZStack {
-                    Circle()
-                        .fill(Self.rinkaiLightBlue)
-                    Circle()
-                        .fill(Color.white)
-                        .padding(2.6)
-                    Circle()
-                        .fill(color)
-                        .padding(3.4)
-                }
-            }
-    }
-
-    private func circleBadge(ringWidth: CGFloat, textColor: Color, hind: Bool,
-                             ringColor: Color? = nil) -> some View {
-        symbolText(color: textColor, inset: ringWidth + 1, hind: hind)
-            // Futura-Bold's "M" sits low in its line box; lift it so it stays
-            // optically centered inside the thick ring
-            .offset(y: !hind && symbol == "M" ? -0.6 : 0)
-            .frame(width: 24, height: 24)
-            .background(Color.white, in: Circle())
-            .overlay(
-                Circle()
-                    .strokeBorder(ringColor ?? color, lineWidth: ringWidth)
-            )
-    }
-
-    private func squareBadge(cornerRadius: CGFloat, borderWidth: CGFloat,
-                             textColor: Color = .black) -> some View {
-        symbolText(color: textColor, inset: borderWidth + 1, hind: true)
-            .frame(width: 24, height: 24)
-            .background(Color.white, in: RoundedRectangle(cornerRadius: cornerRadius))
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius)
-                    .strokeBorder(color, lineWidth: borderWidth)
-            )
-    }
-
-    private func squircleBadge(cornerRadius: CGFloat, borderWidth: CGFloat,
-                               textColor: Color) -> some View {
-        symbolText(color: textColor, inset: borderWidth + 1, hind: true)
-            .frame(width: 24, height: 24)
-            .background(Color.white, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .strokeBorder(color, lineWidth: borderWidth)
-            )
-    }
-
-    /// Seibu: the train-front logo — color body, white face with the letters,
-    /// two lights, splayed legs (mirrors LineSymbolBadge.seibuBadge at 24pt)
-    private var seibuTrainBadge: some View {
-        ZStack {
-            LCDSeibuTrainLegs()
-                .fill(color)
-
-            UnevenRoundedRectangle(
-                topLeadingRadius: 7.2, bottomLeadingRadius: 1.7,
-                bottomTrailingRadius: 1.7, topTrailingRadius: 7.2,
-                style: .continuous
-            )
-            .fill(color)
-            .frame(width: 19.7, height: 16.8)
-            .offset(y: -3.6)
-
-            RoundedRectangle(cornerRadius: 2.4, style: .continuous)
-                .fill(Color.white)
-                .frame(width: 14.4, height: 9.1)
-                .offset(y: -5.3)
-
-            Text(symbol)
-                .font(.custom("Hind-Bold", fixedSize: 7.2))
-                .kerning(symbol.count > 1 ? -0.4 : 0)
-                .lineLimit(1)
-                .minimumScaleFactor(0.5)
-                .foregroundColor(.black)
-                .frame(width: 13.4)
-                .offset(y: -4.7)
-
-            ForEach([-1.0, 1.0], id: \.self) { side in
-                Circle()
-                    .fill(Color.white)
-                    .frame(width: 2.6, height: 2.6)
-                    .offset(x: side * 4.8, y: 2.4)
-            }
-        }
-        .frame(width: 24, height: 24)
-    }
-
-    /// Nippori-Toneri Liner: pink outer + green inner border
-    private var nipporiToneriBadge: some View {
-        symbolText(color: .black, inset: 6, hind: true)
-            .frame(width: 24, height: 24)
-            .background(Color.white, in: RoundedRectangle(cornerRadius: 3.8))
-            .overlay(
-                RoundedRectangle(cornerRadius: 3.8)
-                    .strokeBorder(color, lineWidth: 1.8)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 1.8)
-                    .strokeBorder(Color(hex: "#69B444"), lineWidth: 1.1)
-                    .padding(2.9)
-            )
-    }
-
-    /// Keisei: white circle, color ring, line-color bold condensed letters
-    /// (mirrors LineSymbolBadge.keiseiBadge at 24pt)
-    private var keiseiBadge: some View {
-        Text(symbol)
-            .font(.system(size: symbol.count > 1 ? 11 : 13.5, weight: .bold).width(.condensed))
-            .lineLimit(1)
-            .minimumScaleFactor(0.5)
-            .foregroundColor(color)
-            .padding(.horizontal, 3.4)
-            .frame(width: 24, height: 24)
-            .background(Color.white, in: Circle())
-            .overlay(
-                // Thicker than before, but lighter than the Metro ring (4.7)
-                Circle()
-                    .strokeBorder(color, lineWidth: 3.1)
-            )
-    }
-
-    /// Tokyu: line-color fill, white letters
-    private func filledBadge(in shape: AnyShape) -> some View {
-        symbolText(color: .white, inset: 3, hind: true)
-            .frame(width: 24, height: 24)
-            .background(color, in: shape)
-    }
-
-    /// Minatomirai: line-color fill, white Helvetica letters
-    private var minatomiraiBadge: some View {
-        Text(symbol)
-            .font(.custom("Helvetica-Bold", fixedSize: 10.5))
-            .lineLimit(1)
-            .minimumScaleFactor(0.5)
-            .foregroundColor(.white)
-            .padding(.horizontal, 3.5)
-            .frame(width: 24, height: 24)
-            .background(color, in: RoundedRectangle(cornerRadius: 4))
-    }
-
-    /// Sotetsu: navy fill, flat wide white letters over an orange rule
-    /// (signage face approximated by expanded-width SF)
-    private var sotetsuBadge: some View {
-        VStack(spacing: 1.5) {
-            Text(symbol)
-                .font(.system(size: 8.5, weight: .bold))
-                .fontWidth(.expanded)
-                .lineLimit(1)
-                .minimumScaleFactor(0.5)
-                .foregroundColor(.white)
-            Rectangle()
-                .fill(Color(hex: "#EE7B01"))
-                .frame(width: 13.5, height: 1.4)
-        }
-        .frame(width: 24, height: 24)
-        .background(color, in: RoundedRectangle(cornerRadius: 5))
-    }
-
-    private func symbolText(color: Color, inset: CGFloat, hind: Bool) -> some View {
-        let size: CGFloat = symbol.count > 1 ? 11.5 : 14
-        return Text(symbol)
-            .font(hind
-                  ? .custom("Hind-Bold", fixedSize: size)
-                  : .custom("Futura-Bold", fixedSize: symbol.count > 1 ? 9 : 11.5))
-            .kerning(symbol.count > 1 ? -0.4 : 0)
-            .lineLimit(1)
-            .minimumScaleFactor(0.5)
-            .foregroundColor(color)
-            // Hind's tall metrics leave caps 0.085em above the box center
-            .offset(y: hind ? size * 0.085 : 0)
-            .padding(.horizontal, inset)
-    }
-}
-
-// MARK: - Seibu Train Legs (LCD copy)
-
-/// The splayed legs under the Seibu train-front logo. Duplicated from the
-/// main app's SeibuTrainLegs because the LCD target is self-contained.
-struct LCDSeibuTrainLegs: Shape {
-    func path(in rect: CGRect) -> Path {
-        var p = Path()
-        let w = rect.width
-        let h = rect.height
-        p.move(to: CGPoint(x: 0.40 * w, y: 0.60 * h))
-        p.addLine(to: CGPoint(x: 0.53 * w, y: 0.60 * h))
-        p.addLine(to: CGPoint(x: 0.27 * w, y: 1.00 * h))
-        p.addLine(to: CGPoint(x: 0.10 * w, y: 1.00 * h))
-        p.closeSubpath()
-        p.move(to: CGPoint(x: 0.60 * w, y: 0.60 * h))
-        p.addLine(to: CGPoint(x: 0.47 * w, y: 0.60 * h))
-        p.addLine(to: CGPoint(x: 0.73 * w, y: 1.00 * h))
-        p.addLine(to: CGPoint(x: 0.90 * w, y: 1.00 * h))
-        p.closeSubpath()
-        return p
     }
 }

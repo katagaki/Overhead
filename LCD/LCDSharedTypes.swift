@@ -11,6 +11,8 @@ struct TrainJourneyAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
         var progress: Double
         var currentStationIndex: Int?
+        // Segment target; valid between stations, nil once arrived.
+        var nextStationIndex: Int?
         var nextStationName: String
         var nextStationNameEn: String
         var delayMinutes: Int
@@ -63,6 +65,16 @@ struct TrainJourneyAttributes: ActivityAttributes {
         }
     }
 
+    /// The line ridden from `stationIndex` onward. One-seat rides have a
+    /// single entry at index 0; each transfer adds one at its station.
+    struct LegLine: Codable, Hashable {
+        let stationIndex: Int
+        let lineSymbol: String
+        let lineColorHex: String
+        let lineName: String
+        let lineNameEn: String
+    }
+
     let lineName: String
     let lineNameEn: String
     let lineColorHex: String
@@ -80,7 +92,26 @@ struct TrainJourneyAttributes: ActivityAttributes {
     // skipped stations carry the previous stop's time). Static for the whole
     // journey, so self-updating views can lean on it without updates.
     let stationTimes: [Double]
+    // Empty string where a station has no code.
+    let stationCodes: [String]
+    let legLines: [LegLine]
     let refreshURLString: String
+
+    var destinationCode: String { stationCodes.last ?? "" }
+
+    /// Riders are still on the arriving leg at the transfer station itself;
+    /// the new leg takes over once the train departs it.
+    func currentLeg(nextIndex: Int?) -> LegLine? {
+        guard !legLines.isEmpty else { return nil }
+        let next = max(nextIndex ?? stationCount, 1)
+        return legLines.last { $0.stationIndex < next } ?? legLines.first
+    }
+
+    /// Nil for the rest of a straight (one-seat) ride.
+    func upcomingTransfer(nextIndex: Int?) -> LegLine? {
+        guard let next = nextIndex else { return nil }
+        return legLines.first { $0.stationIndex > 0 && $0.stationIndex >= max(next, 1) }
+    }
 }
 
 // MARK: - Train Position Status (widget-side mirror)
