@@ -56,11 +56,18 @@ public struct ExactRun: Codable, Hashable {
     public let departure: String          // "HH:mm" at the run's origin, may exceed 24:00
     public let terminusStationId: String? // nil = runs to the direction's terminus
     public let startsHere: Bool           // 当駅始発 at the run's origin
+    // The run continues past its last in-line station onto another line
+    // (直通), e.g. 青梅行き leaving the 中央線快速 at 立川. Ignored by the
+    // plain-line generator; composite through-lines use it to tell which runs
+    // actually traverse a mid-line junction.
+    public let continuesBeyond: Bool
 
-    public init(_ departure: String, terminusStationId: String? = nil, startsHere: Bool = true) {
+    public init(_ departure: String, terminusStationId: String? = nil,
+                startsHere: Bool = true, continuesBeyond: Bool = false) {
         self.departure = departure
         self.terminusStationId = terminusStationId
         self.startsHere = startsHere
+        self.continuesBeyond = continuesBeyond
     }
 }
 
@@ -758,33 +765,84 @@ public enum StaticTrainData {
             ?? origin.directions[0]
 
         // Trains past the junction are the connecting direction's runs, so when
-        // that direction has exact data originating at the junction (e.g. the
-        // 常磐線各駅停車 down runs entering at 綾瀬), those runs — with their
-        // true per-train termini (我孫子行き/柏行き etc.) — are the through
-        // trains. Shift them back by the ride time to the junction. Otherwise
-        // approximate with the origin line's own pattern, keeping its 当駅始発
-        // origins so mid-line-originating through trains are not lost.
+        // that direction has exact data entering at the junction — its full
+        // pattern originating there (常磐線各停 down runs at 綾瀬) or an
+        // IntermediateOrigin at the junction (中央線快速 up runs at 立川,
+        // thru = 青梅線から直通) — those runs, with their true per-train
+        // termini, are the through trains. Shift them back by the ride time
+        // to the junction. Otherwise approximate with the origin line's own
+        // pattern, keeping its 当駅始発 origins; when the junction is mid-line
+        // (立川), origin-side exact runs only traverse it if they are marked
+        // continuesBeyond with the junction as terminus (青梅行き).
         let junctionOffset = originHops.reduce(0, +)
+        let junctionTargetId = target.stations[tIdx].id
         let connectingDirection = target.directions.first {
             $0.isAscending == group.connectingAscending
         }
         let connectingOriginatesAtJunction = group.connectingAscending
             ? tIdx == 0
             : tIdx == target.stations.count - 1
+        // Junction at the origin direction's terminus (綾瀬 on the 常磐線各停):
+        // every run reaching the terminus is assumed to continue through.
+        let junctionIsOriginTerminus = originAscending
+            ? jIdx == origin.stations.count - 1
+            : jIdx == 0
+
+        // Origin-side runs rebased onto the composite past a mid-line
+        // junction: only 直通 runs leaving the line there actually continue.
+        func rebasedRuns(_ runs: [ExactRun]) -> [ExactRun] {
+            runs.compactMap { run in
+                guard run.continuesBeyond, run.terminusStationId == service.junctionStationId
+                else { return nil }
+                return ExactRun(run.departure, terminusStationId: nil, startsHere: run.startsHere)
+            }
+        }
+        func rebasedPattern(_ pattern: ServicePattern) -> ServicePattern {
+            guard !junctionIsOriginTerminus, let runs = pattern.exactRuns else { return pattern }
+            return ServicePattern(
+                first: pattern.firstDeparture, last: pattern.lastDeparture,
+                bands: [], trainType: pattern.trainType, exactRuns: rebasedRuns(runs)
+            )
+        }
+        func rebasedOrigin(_ io: IntermediateOrigin) -> IntermediateOrigin {
+            guard !junctionIsOriginTerminus,
+                  io.weekdayRuns != nil || io.saturdayHolidayRuns != nil
+            else { return io }
+            return IntermediateOrigin(
+                stationId: io.stationId,
+                weekdayRuns: rebasedRuns(io.weekdayRuns ?? []),
+                saturdayHolidayRuns: rebasedRuns(io.saturdayHolidayRuns ?? [])
+            )
+        }
 
         let weekday: ServicePattern
         let saturdayHoliday: ServicePattern
         let intermediateOrigins: [IntermediateOrigin]
         if let connecting = connectingDirection, connectingOriginatesAtJunction,
-           let throughWeekday = junctionRunPattern(connecting.weekday, minusMinutes: junctionOffset),
-           let throughHoliday = junctionRunPattern(connecting.saturdayHoliday, minusMinutes: junctionOffset) {
+           let throughWeekday = junctionRunPattern(
+               runs: connecting.weekday.exactRuns,
+               trainType: connecting.weekday.trainType, minusMinutes: junctionOffset),
+           let throughHoliday = junctionRunPattern(
+               runs: connecting.saturdayHoliday.exactRuns,
+               trainType: connecting.saturdayHoliday.trainType, minusMinutes: junctionOffset) {
             weekday = throughWeekday
             saturdayHoliday = throughHoliday
             intermediateOrigins = connecting.intermediateOrigins
+        } else if let connecting = connectingDirection,
+                  let junctionIO = connecting.intermediateOrigins.first(where: { $0.stationId == junctionTargetId }),
+                  let throughWeekday = junctionRunPattern(
+                      runs: junctionIO.weekdayRuns,
+                      trainType: connecting.weekday.trainType, minusMinutes: junctionOffset),
+                  let throughHoliday = junctionRunPattern(
+                      runs: junctionIO.saturdayHolidayRuns,
+                      trainType: connecting.saturdayHoliday.trainType, minusMinutes: junctionOffset) {
+            weekday = throughWeekday
+            saturdayHoliday = throughHoliday
+            intermediateOrigins = connecting.intermediateOrigins.filter { $0.stationId != junctionTargetId }
         } else {
-            weekday = basis.weekday
-            saturdayHoliday = basis.saturdayHoliday
-            intermediateOrigins = basis.intermediateOrigins
+            weekday = rebasedPattern(basis.weekday)
+            saturdayHoliday = rebasedPattern(basis.saturdayHoliday)
+            intermediateOrigins = basis.intermediateOrigins.map(rebasedOrigin)
         }
 
         let direction = StaticLineDirection(
@@ -810,16 +868,17 @@ public enum StaticTrainData {
         )
     }
 
-    /// Rebases a junction-originating exact-run pattern onto a composite line:
-    /// keeps only the runs entering at the junction (`startsHere == false` —
+    /// Rebases exact runs entering a connecting line at a junction onto a
+    /// composite line: keeps only the through runs (`startsHere == false` —
     /// 当駅始発 runs never came from the origin line), shifted earlier by the
     /// origin-side ride time so their departure is at the composite's origin.
-    /// nil when the pattern has no exact runs (headway bands can't be rebased).
+    /// nil when there is no exact-run data (headway bands can't be rebased).
     private static func junctionRunPattern(
-        _ pattern: ServicePattern,
+        runs: [ExactRun]?,
+        trainType: TrainService.TrainType,
         minusMinutes offset: Double
     ) -> ServicePattern? {
-        guard let runs = pattern.exactRuns else { return nil }
+        guard let runs else { return nil }
         let shift = Int(offset.rounded())
         let shifted: [ExactRun] = runs.compactMap { run in
             guard !run.startsHere,
@@ -829,14 +888,15 @@ public enum StaticTrainData {
             return ExactRun(
                 String(format: "%02d:%02d", minutes / 60, minutes % 60),
                 terminusStationId: run.terminusStationId,
-                startsHere: false
+                startsHere: false,
+                continuesBeyond: run.continuesBeyond
             )
         }
         return ServicePattern(
-            first: shifted.first?.departure ?? pattern.firstDeparture,
-            last: shifted.last?.departure ?? pattern.lastDeparture,
+            first: shifted.first?.departure ?? "",
+            last: shifted.last?.departure ?? "",
             bands: [],
-            trainType: pattern.trainType,
+            trainType: trainType,
             exactRuns: shifted
         )
     }
