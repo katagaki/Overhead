@@ -65,6 +65,8 @@ struct StationNumberBadge: View {
     private static let sotetsuOrange = Color(hex: "#EE7B01")
     private static let minatomiraiNavy = Color(hex: "#1F2A54")
     private static let rinkaiLightBlue = Color(hex: "#96C7C1")
+    // Tama Monorail numbering is green even though its route line is orange.
+    private static let tamaGreen = Color(hex: "#009A44")
 
     private var parsed: (prefix: String, number: String) {
         let letters = code.prefix(while: \.isLetter)
@@ -119,9 +121,70 @@ struct StationNumberBadge: View {
             nipporiToneriBadge(prefix: prefix, number: number)
         } else if prefix == "R" {
             rinkaiBadge(prefix: prefix, number: number)
+        } else if prefix == "TT" {
+            tamaBadge(prefix: prefix, number: number)
+        } else if prefix == "B" {
+            yokohamaBadge(prefix: prefix, number: number)
         } else {
             circleBadge(prefix: prefix, number: number)
         }
+    }
+
+    // MARK: - Tama Monorail: JR-style square, green frame and code
+
+    @ViewBuilder
+    private func tamaBadge(prefix: String, number: String) -> some View {
+        let d = badgeDimension
+        let prefixSize = d * 0.58
+        let numberSize = d * 0.79
+
+        VStack(spacing: 1) {
+            Text(prefix)
+                .font(.custom("Hind-Bold", size: prefixSize))
+                .offset(y: prefixSize * 0.24)
+                .frame(maxWidth: .infinity)
+                .frame(height: prefixSize * 0.75)
+
+            Text(number)
+                .font(.custom("Hind-Bold", size: numberSize))
+                .offset(y: numberSize * -0.06)
+                .frame(maxWidth: .infinity)
+                .frame(height: numberSize * 0.75)
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.6)
+        .foregroundColor(Self.tamaGreen.opacity(opacity))
+        .frame(width: d, height: d)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .overlay(
+            RoundedRectangle(cornerRadius: 6)
+                .strokeBorder(Self.tamaGreen.opacity(opacity), lineWidth: 3)
+        )
+    }
+
+    // MARK: - Yokohama Municipal: filled line-color circle, white stacked code
+
+    @ViewBuilder
+    private func yokohamaBadge(prefix: String, number: String) -> some View {
+        let d = badgeDimension
+
+        VStack(spacing: 0) {
+            Text(prefix)
+                .font(.custom("Helvetica-Bold", size: d * 0.34))
+                .frame(height: d * 0.34)
+                .offset(y: d * 0.04)
+
+            Text(number)
+                .font(.custom("Helvetica-Bold", size: d * 0.44))
+                .frame(height: d * 0.40)
+                .offset(y: d * -0.02)
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.6)
+        .foregroundColor(Color.white.opacity(opacity))
+        .frame(width: d, height: d)
+        .background(color.opacity(opacity), in: Circle())
     }
 
     // MARK: - JR East / Tobu: Rounded Square Frame

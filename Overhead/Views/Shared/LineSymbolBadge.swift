@@ -44,6 +44,9 @@ struct LineSymbolBadge: View {
     private static let seibuLetterColor = Color(hex: "#414D66")
     private static let sotetsuOrange = Color(hex: "#EE7B01")
     private static let rinkaiLightBlue = Color(hex: "#96C7C1")
+    // Tama Monorail signage numbers are green even though the line/route is
+    // drawn orange, so the TT badge uses a fixed green, not the line color.
+    private static let tamaGreen = Color(hex: "#009A44")
 
     /// Scale factor relative to the 32pt reference design.
     private var f: CGFloat { dimension / 32 }
@@ -62,6 +65,10 @@ struct LineSymbolBadge: View {
             minatomiraiBadge
         case "R":
             rinkaiBadge
+        case "TT":
+            tamaBadge
+        case "B":
+            yokohamaBadge
         case _ where Self.keioSymbols.contains(symbol):
             keioBadge
         case _ where Self.tokyuStyleSymbols.contains(symbol):
@@ -130,6 +137,34 @@ struct LineSymbolBadge: View {
                         .padding(4.5 * f)
                 }
             }
+    }
+
+    // MARK: - Tama Monorail: JR-style rounded square in green
+
+    /// Same rounded-square shape as JR East but rendered in the Tama Monorail
+    /// green (its route line is orange, but the station numbering is green).
+    private var tamaBadge: some View {
+        symbolText(.custom("Hind-Bold", fixedSize: (symbol.count > 1 ? 18.5 : 20) * f),
+                   color: Self.tamaGreen, inset: 4 * f,
+                   nudge: (symbol.count > 1 ? 16.5 : 20) * f * 0.085)
+            .frame(width: dimension, height: dimension)
+            .background {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 4 * f)
+                        .fill(Self.tamaGreen)
+                    Rectangle()
+                        .fill(Color.white)
+                        .padding(3.5 * f)
+                }
+            }
+    }
+
+    // MARK: - Yokohama Municipal: filled line-color circle, white letter
+
+    private var yokohamaBadge: some View {
+        symbolText(.custom("Helvetica-Bold", fixedSize: 16 * f), color: .white, inset: 5 * f)
+            .frame(width: dimension, height: dimension)
+            .background(color, in: Circle())
     }
 
     // MARK: - Keisei: blue ring, line-color bold condensed letters

@@ -18,6 +18,7 @@ struct LCDLineSymbolBadge: View {
     private static let keikyuLetterBlue = Color(hex: "#1E50A2")
     private static let seibuLetterColor = Color(hex: "#414D66")
     private static let rinkaiLightBlue = Color(hex: "#96C7C1")
+    private static let tamaGreen = Color(hex: "#009A44")
 
     var body: some View {
         switch symbol {
@@ -25,6 +26,11 @@ struct LCDLineSymbolBadge: View {
             nipporiToneriBadge
         case "R":
             rinkaiBadge
+        case "TT":
+            tamaBadge
+        case "B":
+            // Yokohama Municipal: filled line-color circle, white letter
+            filledBadge(in: AnyShape(Circle()))
         case "KS":
             keiseiBadge
         case "KK":
@@ -99,6 +105,17 @@ struct LCDLineSymbolBadge: View {
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius)
                     .strokeBorder(color, lineWidth: borderWidth)
+            )
+    }
+
+    /// Tama Monorail: JR-style square rendered in green (route line is orange)
+    private var tamaBadge: some View {
+        symbolText(color: Self.tamaGreen, inset: 3.6, hind: true)
+            .frame(width: 24, height: 24)
+            .background(Color.white, in: RoundedRectangle(cornerRadius: 3))
+            .overlay(
+                RoundedRectangle(cornerRadius: 3)
+                    .strokeBorder(Self.tamaGreen, lineWidth: 2.6)
             )
     }
 
@@ -289,6 +306,7 @@ struct LCDStationNumberBadge: View {
     private static let sotetsuOrange = Color(hex: "#EE7B01")
     private static let minatomiraiNavy = Color(hex: "#1F2A54")
     private static let rinkaiLightBlue = Color(hex: "#96C7C1")
+    private static let tamaGreen = Color(hex: "#009A44")
 
     private var parsed: (prefix: String, number: String) {
         let letters = code.prefix(while: \.isLetter)
@@ -323,9 +341,70 @@ struct LCDStationNumberBadge: View {
             nipporiToneriBadge(prefix: prefix, number: number)
         } else if prefix == "R" {
             rinkaiBadge(prefix: prefix, number: number)
+        } else if prefix == "TT" {
+            tamaBadge(prefix: prefix, number: number)
+        } else if prefix == "B" {
+            yokohamaBadge(prefix: prefix, number: number)
         } else {
             circleBadge(prefix: prefix, number: number)
         }
+    }
+
+    // MARK: Tama Monorail: JR-style square, green frame and code
+
+    @ViewBuilder
+    private func tamaBadge(prefix: String, number: String) -> some View {
+        let d = dimension
+        let prefixSize = d * 0.58
+        let numberSize = d * 0.79
+
+        VStack(spacing: 1) {
+            Text(prefix)
+                .font(.custom("Hind-Bold", fixedSize: prefixSize))
+                .offset(y: prefixSize * 0.24)
+                .frame(maxWidth: .infinity)
+                .frame(height: prefixSize * 0.75)
+
+            Text(number)
+                .font(.custom("Hind-Bold", fixedSize: numberSize))
+                .offset(y: numberSize * -0.06)
+                .frame(maxWidth: .infinity)
+                .frame(height: numberSize * 0.75)
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.6)
+        .foregroundColor(Self.tamaGreen)
+        .frame(width: d, height: d)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: d * 0.21))
+        .overlay(
+            RoundedRectangle(cornerRadius: d * 0.21)
+                .strokeBorder(Self.tamaGreen, lineWidth: d * 0.107)
+        )
+    }
+
+    // MARK: Yokohama Municipal: filled line-color circle, white stacked code
+
+    @ViewBuilder
+    private func yokohamaBadge(prefix: String, number: String) -> some View {
+        let d = dimension
+
+        VStack(spacing: 0) {
+            Text(prefix)
+                .font(.custom("Helvetica-Bold", fixedSize: d * 0.34))
+                .frame(height: d * 0.34)
+                .offset(y: d * 0.04)
+
+            Text(number)
+                .font(.custom("Helvetica-Bold", fixedSize: d * 0.44))
+                .frame(height: d * 0.40)
+                .offset(y: d * -0.02)
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.6)
+        .foregroundColor(.white)
+        .frame(width: d, height: d)
+        .background(color, in: Circle())
     }
 
     // MARK: JR East / Tobu: rounded square frame

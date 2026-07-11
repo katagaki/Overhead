@@ -156,7 +156,9 @@ struct LinesSection: View {
             "Operator:Minatomirai",
             "Operator:SaitamaRailway",
             "Operator:TWR",
-            "Operator:MIR"
+            "Operator:MIR",
+            "Operator:TamaMonorail",
+            "Operator:YokohamaMunicipal"
         ]
         // Operators missing from knownOrder still get a section at the end
         // instead of silently disappearing from the browser
@@ -177,7 +179,9 @@ struct LinesSection: View {
             "Operator:Minatomirai": "みなとみらい線",
             "Operator:SaitamaRailway": "埼玉高速鉄道",
             "Operator:TWR": "りんかい線",
-            "Operator:MIR": "つくばエクスプレス"
+            "Operator:MIR": "つくばエクスプレス",
+            "Operator:TamaMonorail": "多摩都市モノレール",
+            "Operator:YokohamaMunicipal": "横浜市営地下鉄"
         ]
         let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 3)
 
