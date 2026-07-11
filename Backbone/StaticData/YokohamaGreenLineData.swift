@@ -57,7 +57,7 @@ enum YokohamaGreenLineData {
         nameJa: "横浜市営地下鉄グリーンライン",
         nameEn: "Yokohama Municipal Subway Green Line",
         operatorId: "Operator:YokohamaMunicipal",
-        colorHex: "#40CC40",
+        colorHex: "#4BA672",
         stations: [
             st("YokohamaMunicipal.Green", "Nakayama", "中山", "Nakayama", "G01", 35.515143, 139.540439),
             st("YokohamaMunicipal.Green", "Kawawacho", "川和町", "Kawawacho", "G02", 35.528382, 139.549265),

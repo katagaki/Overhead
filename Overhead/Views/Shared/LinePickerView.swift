@@ -183,7 +183,7 @@ struct LinesSection: View {
             "Operator:TamaMonorail": "多摩都市モノレール",
             "Operator:YokohamaMunicipal": "横浜市営地下鉄"
         ]
-        let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 3)
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 2)
 
         return LazyVStack(alignment: .leading, spacing: 20) {
             ForEach(sectionOrder, id: \.self) { operatorId in
@@ -227,7 +227,7 @@ struct LinesSection: View {
     }
 
     private func lineCell(line: TrainLine) -> some View {
-        VStack(spacing: 8) {
+        HStack(spacing: 10) {
             if !line.lineSymbol.isEmpty {
                 LineSymbolBadge(
                     symbol: line.lineSymbol,
@@ -240,20 +240,17 @@ struct LinesSection: View {
                     .frame(width: 44, height: 44)
             }
 
-            // Fixed two-line text area so every cell is the same height and
-            // single-line names sit at the same position as wrapped ones
-            Text(line.localizedName)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(.primary)
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .minimumScaleFactor(0.75)
-                .frame(maxWidth: .infinity)
-                .frame(height: 32, alignment: .top)
+            HorizontallyFittedText(
+                text: line.localizedName,
+                font: .system(size: 12, weight: .semibold),
+                alignment: .leading
+            )
+            .foregroundColor(.primary)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.vertical, 12)
-        .padding(.horizontal, 6)
-        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
         .contentShape(Rectangle())
@@ -405,7 +402,12 @@ struct StationPickerView: View {
             VStack(spacing: 0) {
                 ForEach(Array(stations.enumerated()), id: \.element.id) { index, station in
                     NavigationLink {
-                        StationTimetableView(station: station, line: line, viewModel: viewModel)
+                        StationTimetableView(
+                            station: station,
+                            line: line,
+                            preferredDirectionId: selectedDirection?.id,
+                            viewModel: viewModel
+                        )
                     } label: {
                         stationMapRow(
                             station: station,
@@ -658,5 +660,66 @@ struct StationPickerView: View {
             }
         }
         return best.merging(tomorrowFirst) { current, _ in current }
+    }
+}
+
+// MARK: - Horizontally Fitted Text
+
+/// A single-line label that squashes glyphs horizontally (preserving cap
+/// height) when the text is wider than its container.
+struct HorizontallyFittedText: View {
+    let text: String
+    let font: Font
+    var alignment: Alignment = .center
+
+    @State private var naturalWidth: CGFloat = 0
+
+    /// Squash toward the aligned edge so compressed text stays pinned to it.
+    private var scaleAnchor: UnitPoint {
+        if alignment.horizontal == .leading { return .leading }
+        if alignment.horizontal == .trailing { return .trailing }
+        return .center
+    }
+
+    var body: some View {
+        // Hidden copy reserves the intrinsic height.
+        Text(text)
+            .font(font)
+            .lineLimit(1)
+            .hidden()
+            .overlay {
+                GeometryReader { geo in
+                    let scale = naturalWidth > geo.size.width && naturalWidth > 0
+                        ? geo.size.width / naturalWidth
+                        : 1
+                    Text(text)
+                        .font(font)
+                        .lineLimit(1)
+                        .fixedSize()
+                        .scaleEffect(x: scale, y: 1, anchor: scaleAnchor)
+                        .frame(width: geo.size.width, height: geo.size.height,
+                               alignment: alignment)
+                }
+            }
+            .background {
+                // Off-screen copy measures the natural width.
+                Text(text)
+                    .font(font)
+                    .lineLimit(1)
+                    .fixedSize()
+                    .hidden()
+                    .background(GeometryReader { proxy in
+                        Color.clear.preference(key: FittedTextWidthKey.self,
+                                               value: proxy.size.width)
+                    })
+            }
+            .onPreferenceChange(FittedTextWidthKey.self) { naturalWidth = $0 }
+    }
+}
+
+private struct FittedTextWidthKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
     }
 }

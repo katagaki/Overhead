@@ -66,7 +66,7 @@ struct StationNumberBadge: View {
     private static let minatomiraiNavy = Color(hex: "#1F2A54")
     private static let rinkaiLightBlue = Color(hex: "#96C7C1")
     // Tama Monorail numbering is green even though its route line is orange.
-    private static let tamaGreen = Color(hex: "#009A44")
+    private static let tamaGreen = Color(hex: "#3C605F")
 
     private var parsed: (prefix: String, number: String) {
         let letters = code.prefix(while: \.isLetter)
@@ -174,12 +174,12 @@ struct StationNumberBadge: View {
         VStack(spacing: 0) {
             Text(prefix)
                 .font(.custom("Helvetica-Bold", size: d * 0.34))
-                .frame(height: d * 0.34)
+                .frame(height: d * 0.44)
                 .offset(y: d * 0.04)
 
             Text(number)
                 .font(.custom("Helvetica-Bold", size: d * 0.44))
-                .frame(height: d * 0.40)
+                .frame(height: d * 0.50)
                 .offset(y: d * -0.02)
         }
         .lineLimit(1)
@@ -583,6 +583,10 @@ struct StationNumberBadge: View {
         ("OH05", .teal, "代々木上原"),   // Odakyu squircle with rule
         ("KS55", .blue, "千葉中央"),     // Keisei Helvetica circle
         ("NT01", .pink, "日暮里"),       // Nippori-Toneri double border
+        ("R04", Color(hex: "#222D65"), "東京テレポート"), // Rinkai navy circle
+        ("TT12", Color(hex: "#F08300"), "立川北"),    // Tama Monorail green square
+        ("B25", Color(hex: "#3577BC"), "新横浜"),     // Yokohama Blue filled circle
+        ("G05", Color(hex: "#4BA672"), "センター北"), // Yokohama Green filled circle
     ]
 
     LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 16) {

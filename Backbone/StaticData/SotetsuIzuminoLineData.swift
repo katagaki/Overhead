@@ -68,7 +68,7 @@ enum SotetsuIzuminoLineData {
         nameJa: "相鉄いずみ野線",
         nameEn: "Sotetsu Izumino Line",
         operatorId: "Operator:Sotetsu",
-        colorHex: "#00205C",
+        colorHex: "#35519D",
         stations: [
             st("Sotetsu.Izumino", "Futamatagawa", "二俣川", "Futamata-gawa", "SO10", 35.46338, 139.53232),
             st("Sotetsu.Izumino", "MinamiMakigahara", "南万騎が原", "Minami-makigahara", "SO31", 35.45234, 139.52636),

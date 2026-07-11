@@ -72,7 +72,7 @@ enum SotetsuLineData {
         nameJa: "相鉄本線",
         nameEn: "Sotetsu Main Line",
         operatorId: "Operator:Sotetsu",
-        colorHex: "#00205C",
+        colorHex: "#35519D",
         stations: [
             st("Sotetsu.Main", "Yokohama", "横浜", "Yokohama", "SO01", 35.4657, 139.6224),
             st("Sotetsu.Main", "Hiranumabashi", "平沼橋", "Hiranumabashi", "SO02", 35.4597, 139.6157),

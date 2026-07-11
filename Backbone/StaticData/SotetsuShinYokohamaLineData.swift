@@ -68,7 +68,7 @@ enum SotetsuShinYokohamaLineData {
         nameJa: "相鉄新横浜線",
         nameEn: "Sotetsu Shin-Yokohama Line",
         operatorId: "Operator:Sotetsu",
-        colorHex: "#00205C",
+        colorHex: "#35519D",
         stations: [
             st("Sotetsu.SotetsuShinYokohama", "Nishiya", "西谷", "Nishiya", "SO08", 35.47789, 139.56562),
             st("Sotetsu.SotetsuShinYokohama", "HazawaYokohamaKokudai", "羽沢横浜国大", "Hazawa-yokohama-kokudai", "SO51", 35.48102, 139.58614),

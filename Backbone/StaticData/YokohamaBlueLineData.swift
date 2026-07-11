@@ -57,7 +57,7 @@ enum YokohamaBlueLineData {
         nameJa: "横浜市営地下鉄ブルーライン",
         nameEn: "Yokohama Municipal Subway Blue Line",
         operatorId: "Operator:YokohamaMunicipal",
-        colorHex: "#006BF0",
+        colorHex: "#3577BC",
         stations: [
             st("YokohamaMunicipal.Blue", "Shonandai", "湘南台", "Shonandai", "B01", 35.396565, 139.466502),
             st("YokohamaMunicipal.Blue", "Shimoiida", "下飯田", "Shimoiida", "B02", 35.403362, 139.482969),

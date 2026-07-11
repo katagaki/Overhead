@@ -6,7 +6,7 @@ import UIKit
 
 extension Color {
     /// True when green clearly dominates red in the line color. Used to tell
-    /// the Yokohama Municipal Green Line (#40CC40) apart from Tokyo Metro Ginza
+    /// the Yokohama Municipal Green Line (#4BA672) apart from Tokyo Metro Ginza
     /// (orange), which share the "G" station-code prefix — the line color is
     /// the only discriminator available in both the app and the Live Activity.
     var isGreenDominant: Bool {
@@ -65,7 +65,7 @@ struct LineSymbolBadge: View {
     private static let rinkaiLightBlue = Color(hex: "#96C7C1")
     // Tama Monorail signage numbers are green even though the line/route is
     // drawn orange, so the TT badge uses a fixed green, not the line color.
-    private static let tamaGreen = Color(hex: "#009A44")
+    private static let tamaGreen = Color(hex: "#3C605F")
 
     /// Scale factor relative to the 32pt reference design.
     private var f: CGFloat { dimension / 32 }
@@ -196,7 +196,7 @@ struct LineSymbolBadge: View {
     /// the STATION number badge, which keeps regular Helvetica. Both are
     /// circles. SF's .fontWidth(.condensed) approximates the narrow face.
     private var keiseiBadge: some View {
-        symbolText(.system(size: 15 * f, weight: .bold).width(.condensed),
+        symbolText(.system(size: 17 * f, weight: .bold).width(.condensed),
                    color: color, inset: 4.5 * f)
             .frame(width: dimension, height: dimension)
             .background(Color.white, in: Circle())
@@ -422,6 +422,10 @@ struct SeibuTrainLegs: Shape {
         ("KK", .pink),    // Keikyu blue-ring circle
         ("KO", .pink),    // Keio logo circle
         ("SO", .indigo),  // Sotetsu orange rule
+        ("R", Color(hex: "#222D65")),   // Rinkai navy circle, light-blue ring
+        ("TT", Color(hex: "#F08300")),  // Tama Monorail green JR-style square
+        ("B", Color(hex: "#3577BC")),   // Yokohama Blue filled circle
+        ("G", Color(hex: "#40CC40")),   // Yokohama Green filled circle
     ]
 
     VStack(spacing: 20) {

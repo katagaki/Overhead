@@ -5,7 +5,7 @@ import UIKit
 
 extension Color {
     /// True when green clearly dominates red — distinguishes the Yokohama
-    /// Municipal Green Line (#40CC40) from Tokyo Metro Ginza (orange), which
+    /// Municipal Green Line (#4BA672) from Tokyo Metro Ginza (orange), which
     /// share the "G" prefix. Mirrors the app target's Color.isGreenDominant
     /// (the LCD target is self-contained and can't import it).
     var isGreenDominant: Bool {
@@ -37,7 +37,7 @@ struct LCDLineSymbolBadge: View {
     private static let keikyuLetterBlue = Color(hex: "#1E50A2")
     private static let seibuLetterColor = Color(hex: "#414D66")
     private static let rinkaiLightBlue = Color(hex: "#96C7C1")
-    private static let tamaGreen = Color(hex: "#009A44")
+    private static let tamaGreen = Color(hex: "#3C605F")
 
     var body: some View {
         switch symbol {
@@ -264,11 +264,12 @@ struct LCDLineSymbolBadge: View {
     }
 
     private func symbolText(color: Color, inset: CGFloat, hind: Bool) -> some View {
-        let size: CGFloat = symbol.count > 1 ? 11.5 : 14
+        // LineSymbolBadge's fill ratio scaled to this badge's 24pt frame.
+        let size: CGFloat = symbol.count > 1 ? 13.875 : 15
         return Text(symbol)
             .font(hind
                   ? .custom("Hind-Bold", fixedSize: size)
-                  : .custom("Futura-Bold", fixedSize: symbol.count > 1 ? 9 : 11.5))
+                  : .custom("Futura-Bold", fixedSize: symbol.count > 1 ? 8.25 : 11.25))
             .kerning(symbol.count > 1 ? -0.4 : 0)
             .lineLimit(1)
             .minimumScaleFactor(0.5)
@@ -328,7 +329,7 @@ struct LCDStationNumberBadge: View {
     private static let sotetsuOrange = Color(hex: "#EE7B01")
     private static let minatomiraiNavy = Color(hex: "#1F2A54")
     private static let rinkaiLightBlue = Color(hex: "#96C7C1")
-    private static let tamaGreen = Color(hex: "#009A44")
+    private static let tamaGreen = Color(hex: "#3C605F")
 
     private var parsed: (prefix: String, number: String) {
         let letters = code.prefix(while: \.isLetter)

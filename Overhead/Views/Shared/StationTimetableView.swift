@@ -6,6 +6,8 @@ import Backbone
 struct StationTimetableView: View {
     let station: Station
     let line: TrainLine
+    /// Direction the user was browsing; the initial scroll prefers its next departure.
+    var preferredDirectionId: String? = nil
     @ObservedObject var viewModel: JourneyViewModel
 
     var body: some View {
@@ -221,12 +223,12 @@ struct StationTimetableView: View {
         "\(timetable.railDirection)#\(departure.id)"
     }
 
-    /// Jumps (without animation) to the first upcoming departure of the first
-    /// direction that still has one, so the list opens at "the next train"
-    /// with the past times scrolled away above.
+    /// Jumps (without animation) to the next upcoming departure, preferring
+    /// the browsed direction, so the list opens at "the next train".
     private func scrollToNextDeparture(proxy: ScrollViewProxy) {
         let nowMinutes = railNowMinutes(at: Date())
-        for timetable in viewModel.stationTimetable {
+        let ordered = orderedTimetablesByPreferredDirection()
+        for timetable in ordered {
             if let next = timetable.departures.first(where: { !isPast($0, nowMinutes: nowMinutes) }) {
                 let target = rowId(timetable, next)
                 DispatchQueue.main.async {
@@ -235,5 +237,29 @@ struct StationTimetableView: View {
                 return
             }
         }
+    }
+
+    private func orderedTimetablesByPreferredDirection() -> [StationTimetableData] {
+        guard let preferredDirectionId else { return viewModel.stationTimetable }
+        guard let preferred = viewModel.stationTimetable.first(where: {
+            matchesPreferredDirection($0, preferredDirectionId: preferredDirectionId)
+        }) else {
+            return viewModel.stationTimetable
+        }
+        return [preferred] + viewModel.stationTimetable.filter { $0.railDirection != preferred.railDirection }
+    }
+
+    /// The picker merges same-travel-direction directions onto one option, so
+    /// match on the shared `isAscending` axis rather than the exact direction id.
+    private func matchesPreferredDirection(
+        _ timetable: StationTimetableData,
+        preferredDirectionId: String
+    ) -> Bool {
+        if timetable.railDirection == preferredDirectionId { return true }
+        guard let staticLine = StaticTrainData.line(withId: line.id),
+              let preferred = staticLine.directions.first(where: { $0.id == preferredDirectionId }),
+              let sectionDir = staticLine.directions.first(where: { $0.id == timetable.railDirection })
+        else { return false }
+        return preferred.isAscending == sectionDir.isAscending
     }
 }

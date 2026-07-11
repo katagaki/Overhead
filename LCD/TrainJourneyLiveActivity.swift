@@ -458,21 +458,19 @@ struct LCDLineView: View {
     // Flips the ink for the lock screen's white band.
     var onLightBackground: Bool = false
 
-    // On the light band these must be black-on-translucent rather than a
-    // light grey: the linear ProgressView lays its own translucent grey track
-    // over this one, washing out anything paler than the ink below.
+    // Solid greys so dots don't double-darken where they overlap the track.
     private var trackColor: Color {
-        onLightBackground ? Color.black.opacity(0.35) : Color(white: 0.3)
+        onLightBackground ? Color(white: 0.65) : Color(white: 0.3)
     }
     private var futureDotColor: Color {
-        onLightBackground ? Color.black.opacity(0.4) : Color(white: 0.35)
+        onLightBackground ? Color(white: 0.6) : Color(white: 0.35)
     }
     private var terminalFill: Color { onLightBackground ? .white : .black }
     private var labelColor: Color {
-        onLightBackground ? Color.black.opacity(0.7) : Color.secondary
+        onLightBackground ? Color(white: 0.3) : Color.secondary
     }
     private func skippedDotColor(isPast: Bool) -> Color {
-        if onLightBackground { return Color.black.opacity(isPast ? 0.45 : 0.25) }
+        if onLightBackground { return Color(white: isPast ? 0.55 : 0.75) }
         return Color(white: isPast ? 0.35 : 0.2)
     }
 
