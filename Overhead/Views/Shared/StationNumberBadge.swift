@@ -123,7 +123,9 @@ struct StationNumberBadge: View {
             rinkaiBadge(prefix: prefix, number: number)
         } else if prefix == "TT" {
             tamaBadge(prefix: prefix, number: number)
-        } else if prefix == "B" {
+        } else if prefix == "B" || (prefix == "G" && color.isGreenDominant) {
+            // "G" is shared with Tokyo Metro Ginza (orange); only the Yokohama
+            // Municipal Green Line's green color routes here.
             yokohamaBadge(prefix: prefix, number: number)
         } else {
             circleBadge(prefix: prefix, number: number)

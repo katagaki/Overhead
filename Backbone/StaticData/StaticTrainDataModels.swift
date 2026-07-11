@@ -240,6 +240,7 @@ public enum StaticTrainData {
         + TsukubaExpressLineData.lines
         + TamaMonorailLineData.lines
         + YokohamaBlueLineData.lines
+        + YokohamaGreenLineData.lines
 
     private static let linesById: [String: StaticTrainLine] = Dictionary(
         allLines.map { ($0.id, $0) },

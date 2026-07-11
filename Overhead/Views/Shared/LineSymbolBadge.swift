@@ -1,5 +1,24 @@
 import SwiftUI
 import Backbone
+#if canImport(UIKit)
+import UIKit
+#endif
+
+extension Color {
+    /// True when green clearly dominates red in the line color. Used to tell
+    /// the Yokohama Municipal Green Line (#40CC40) apart from Tokyo Metro Ginza
+    /// (orange), which share the "G" station-code prefix — the line color is
+    /// the only discriminator available in both the app and the Live Activity.
+    var isGreenDominant: Bool {
+        #if canImport(UIKit)
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        UIColor(self).getRed(&r, green: &g, blue: &b, alpha: &a)
+        return g > r + 0.2
+        #else
+        return false
+        #endif
+    }
+}
 
 // MARK: - Line Symbol Badge
 /// Renders line symbol badges matching each operator's official signage:
@@ -68,6 +87,10 @@ struct LineSymbolBadge: View {
         case "TT":
             tamaBadge
         case "B":
+            yokohamaBadge
+        case "G" where color.isGreenDominant:
+            // Yokohama Municipal Green Line shares "G" with Tokyo Metro Ginza;
+            // the green line color is what tells them apart (Ginza is orange).
             yokohamaBadge
         case _ where Self.keioSymbols.contains(symbol):
             keioBadge

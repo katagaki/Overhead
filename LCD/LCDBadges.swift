@@ -1,4 +1,23 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
+
+extension Color {
+    /// True when green clearly dominates red — distinguishes the Yokohama
+    /// Municipal Green Line (#40CC40) from Tokyo Metro Ginza (orange), which
+    /// share the "G" prefix. Mirrors the app target's Color.isGreenDominant
+    /// (the LCD target is self-contained and can't import it).
+    var isGreenDominant: Bool {
+        #if canImport(UIKit)
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        UIColor(self).getRed(&r, green: &g, blue: &b, alpha: &a)
+        return g > r + 0.2
+        #else
+        return false
+        #endif
+    }
+}
 
 // MARK: - LCD Line Symbol Badge
 
@@ -30,6 +49,9 @@ struct LCDLineSymbolBadge: View {
             tamaBadge
         case "B":
             // Yokohama Municipal: filled line-color circle, white letter
+            filledBadge(in: AnyShape(Circle()))
+        case "G" where color.isGreenDominant:
+            // Green Line shares "G" with Ginza; its green color routes here
             filledBadge(in: AnyShape(Circle()))
         case "KS":
             keiseiBadge
@@ -343,7 +365,7 @@ struct LCDStationNumberBadge: View {
             rinkaiBadge(prefix: prefix, number: number)
         } else if prefix == "TT" {
             tamaBadge(prefix: prefix, number: number)
-        } else if prefix == "B" {
+        } else if prefix == "B" || (prefix == "G" && color.isGreenDominant) {
             yokohamaBadge(prefix: prefix, number: number)
         } else {
             circleBadge(prefix: prefix, number: number)
