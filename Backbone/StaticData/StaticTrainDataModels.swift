@@ -238,6 +238,8 @@ public enum StaticTrainData {
         + SaitamaRapidLineData.lines
         + RinkaiLineData.lines
         + TsukubaExpressLineData.lines
+        + TamaMonorailLineData.lines
+        + YokohamaBlueLineData.lines
 
     private static let linesById: [String: StaticTrainLine] = Dictionary(
         allLines.map { ($0.id, $0) },
@@ -753,13 +755,45 @@ public enum StaticTrainData {
 
         let basis = origin.directions.first(where: { $0.isAscending == originAscending })
             ?? origin.directions[0]
+
+        // Trains past the junction are the connecting direction's runs, so when
+        // that direction has exact data originating at the junction (e.g. the
+        // 常磐線各駅停車 down runs entering at 綾瀬), those runs — with their
+        // true per-train termini (我孫子行き/柏行き etc.) — are the through
+        // trains. Shift them back by the ride time to the junction. Otherwise
+        // approximate with the origin line's own pattern, keeping its 当駅始発
+        // origins so mid-line-originating through trains are not lost.
+        let junctionOffset = originHops.reduce(0, +)
+        let connectingDirection = target.directions.first {
+            $0.isAscending == group.connectingAscending
+        }
+        let connectingOriginatesAtJunction = group.connectingAscending
+            ? tIdx == 0
+            : tIdx == target.stations.count - 1
+
+        let weekday: ServicePattern
+        let saturdayHoliday: ServicePattern
+        let intermediateOrigins: [IntermediateOrigin]
+        if let connecting = connectingDirection, connectingOriginatesAtJunction,
+           let throughWeekday = junctionRunPattern(connecting.weekday, minusMinutes: junctionOffset),
+           let throughHoliday = junctionRunPattern(connecting.saturdayHoliday, minusMinutes: junctionOffset) {
+            weekday = throughWeekday
+            saturdayHoliday = throughHoliday
+            intermediateOrigins = connecting.intermediateOrigins
+        } else {
+            weekday = basis.weekday
+            saturdayHoliday = basis.saturdayHoliday
+            intermediateOrigins = basis.intermediateOrigins
+        }
+
         let direction = StaticLineDirection(
             id: "static.RailDirection:Composite.\(origin.id).\(target.id)",
             nameJa: service.towardJa,
             nameEn: service.towardEn,
             isAscending: true,
-            weekday: basis.weekday,
-            saturdayHoliday: basis.saturdayHoliday
+            weekday: weekday,
+            saturdayHoliday: saturdayHoliday,
+            intermediateOrigins: intermediateOrigins
         )
 
         return StaticTrainLine(
@@ -772,6 +806,37 @@ public enum StaticTrainData {
             hopTimesMinutes: hops,
             directions: [direction],
             delayInfo: origin.delayInfo
+        )
+    }
+
+    /// Rebases a junction-originating exact-run pattern onto a composite line:
+    /// keeps only the runs entering at the junction (`startsHere == false` —
+    /// 当駅始発 runs never came from the origin line), shifted earlier by the
+    /// origin-side ride time so their departure is at the composite's origin.
+    /// nil when the pattern has no exact runs (headway bands can't be rebased).
+    private static func junctionRunPattern(
+        _ pattern: ServicePattern,
+        minusMinutes offset: Double
+    ) -> ServicePattern? {
+        guard let runs = pattern.exactRuns else { return nil }
+        let shift = Int(offset.rounded())
+        let shifted: [ExactRun] = runs.compactMap { run in
+            guard !run.startsHere,
+                  let depSec = TimetableEntry.parseRailTime(run.departure)
+            else { return nil }
+            let minutes = max(0, depSec / 60 - shift)
+            return ExactRun(
+                String(format: "%02d:%02d", minutes / 60, minutes % 60),
+                terminusStationId: run.terminusStationId,
+                startsHere: false
+            )
+        }
+        return ServicePattern(
+            first: shifted.first?.departure ?? pattern.firstDeparture,
+            last: shifted.last?.departure ?? pattern.lastDeparture,
+            bands: [],
+            trainType: pattern.trainType,
+            exactRuns: shifted
         )
     }
 }
