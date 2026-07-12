@@ -534,11 +534,12 @@ struct VerticalLCDLine: View {
                         stationName: target.station.name
                     )
                 }
-                Text(target.line.localizedName)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(target.line.color)
+                Text(target.station.localizedName)
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(isPast ? .secondary : .primary)
                     .lineLimit(1)
             }
+            .padding(.leading, 8)
             .padding(.bottom, 14)
 
             Spacer()
