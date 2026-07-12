@@ -292,6 +292,18 @@ struct LockScreenLiveActivityView: View {
         return attributes.stationCodes[idx]
     }
 
+    /// The leg boundaries (transfer/change stations) along the journey.
+    private var transferIndices: [Int] {
+        attributes.legLines.dropFirst().map(\.stationIndex)
+    }
+
+    /// The transfer at the immediate next stop, if the next station is a
+    /// change point — used to surface 乗換 info on the bottom-left.
+    private var transferAtNextStop: TrainJourneyAttributes.LegLine? {
+        guard let next = state.nextStationIndex else { return nil }
+        return attributes.legLines.first { $0.stationIndex == next && $0.stationIndex > 0 }
+    }
+
     /// Fixed so the station name stays optically centered between the columns.
     private static let topSideColumnWidth: CGFloat = 96
 
@@ -368,12 +380,16 @@ struct LockScreenLiveActivityView: View {
                 stationStops: attributes.stationStops,
                 journeyInterval: state.journeyInterval,
                 nextStationIndexOverride: state.nextStationIndex,
-                onLightBackground: true
+                onLightBackground: true,
+                transferIndices: transferIndices
             )
 
             HStack(alignment: .firstTextBaseline, spacing: 5) {
-                // Self-updating even while the app is suspended
-                if state.status == .notStarted {
+                // Bottom-left: a 乗換 cue when the next stop is a change point,
+                // otherwise the pre-departure countdown (or nothing mid-ride).
+                if let transfer = transferAtNextStop {
+                    transferCue(transfer)
+                } else if state.status == .notStarted {
                     Text("LiveActivity.DepartsAt \(ExpandedIslandBottomView.formatTime(state.departure))")
                         .font(.system(size: 10, weight: .semibold, design: .rounded))
                         .foregroundColor(Self.darkInk)
@@ -394,6 +410,27 @@ struct LockScreenLiveActivityView: View {
         .padding(.bottom, 8)
         .frame(maxWidth: .infinity)
         .background(Color.white)
+    }
+
+    // MARK: - Transfer Cue (bottom-left, next stop is a change)
+
+    @ViewBuilder
+    private func transferCue(_ transfer: TrainJourneyAttributes.LegLine) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: "arrow.triangle.2.circlepath")
+                .font(.system(size: 9, weight: .bold))
+                .foregroundColor(.orange)
+            if !transfer.lineSymbol.isEmpty {
+                LCDLineSymbolBadge(symbol: transfer.lineSymbol,
+                                   color: Color(hex: transfer.lineColorHex))
+                    .sized(16)
+            }
+            Text(transfer.lineName)
+                .font(.system(size: 10, weight: .bold))
+                .foregroundColor(Color(hex: transfer.lineColorHex))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
     }
 
     // MARK: - Tracking Mode Badge
@@ -457,6 +494,9 @@ struct LCDLineView: View {
     var nextStationIndexOverride: Int? = nil
     // Flips the ink for the lock screen's white band.
     var onLightBackground: Bool = false
+    // Transfer stations (leg boundaries): labeled above the line alongside
+    // the terminals. All other stations render as unlabeled dots.
+    var transferIndices: [Int] = []
 
     // Solid greys so dots don't double-darken where they overlap the track.
     private var trackColor: Color {
@@ -486,21 +526,20 @@ struct LCDLineView: View {
         return stationStops[index]
     }
 
-    /// Tall enough for the station labels above the track and the emphasized
-    /// circles on it.
-    private static let height: CGFloat = 34
+    /// Tall enough for the terminal/transfer labels above the track, the
+    /// emphasized circles on it, and the next-station label below it.
+    private static let height: CGFloat = 46
 
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
-            let h = Self.height
             let baseRadius: CGFloat = stationCount > 10 ? 4 : 5
             let skippedRadius: CGFloat = max(2, baseRadius - 1.5)
             let emphasisRadius: CGFloat = baseRadius + 2
             let padding: CGFloat = emphasisRadius + 3
             let lineWidth = w - padding * 2
             let trackHeight: CGFloat = 2
-            let centerY: CGFloat = h / 2 + 4 // offset down to leave room for labels above
+            let centerY: CGFloat = 20 // room for labels above AND below
 
             ZStack(alignment: .topLeading) {
                 // Background track — thin line centered through circles
@@ -528,49 +567,35 @@ struct LCDLineView: View {
                         .offset(x: padding, y: centerY - trackHeight / 2)
                 }
 
-                // Station circles + labels (positioned independently so circles stay centered on track)
+                // Only key stations are drawn on the line: the start, each
+                // transfer (change) point, and the end — labeled above the
+                // track. The next stop is marked and labeled BELOW the track.
+                // The current station is intentionally omitted; it is already
+                // shown in the panel above.
                 ForEach(0..<stationCount, id: \.self) { i in
                     let frac = stationCount > 1 ? Double(i) / Double(stationCount - 1) : 0
                     let x = padding + lineWidth * frac
                     let isPast = frac <= progress + 0.01
-                    let isCurrent = currentStationIndex == i
                     let isNext = nextStationIndex == i
                     let isTerminal = i == 0 || i == stationCount - 1
-                    let stops = stopsAt(i)
-                    let isEmphasized = isCurrent || isNext || isTerminal
-                    let r = isEmphasized ? emphasisRadius : (stops ? baseRadius : skippedRadius)
+                    let isTransfer = transferIndices.contains(i)
+                    let isKey = isNext || isTerminal || isTransfer
+                    let r = emphasisRadius
 
-                    Group {
+                    if isKey {
                         // Station circle — centered on track
                         ZStack {
-                            if isTerminal {
-                                Circle()
-                                    .fill(terminalFill)
-                                    .frame(width: r * 2, height: r * 2)
-                                Circle()
-                                    .strokeBorder(isPast ? lineColor : trackColor, lineWidth: 2)
-                                    .frame(width: r * 2, height: r * 2)
-                            } else if !stops {
-                                // Skipped station: small solid dot
-                                Circle()
-                                    .fill(skippedDotColor(isPast: isPast))
-                                    .frame(width: r * 2, height: r * 2)
-                            } else {
-                                Circle()
-                                    .fill(isPast ? lineColor : futureDotColor)
-                                    .frame(width: r * 2, height: r * 2)
-                            }
+                            Circle()
+                                .fill(terminalFill)
+                                .frame(width: r * 2, height: r * 2)
+                            Circle()
+                                .strokeBorder(isPast ? lineColor : trackColor, lineWidth: 2)
+                                .frame(width: r * 2, height: r * 2)
 
-                            if isCurrent {
+                            if isNext {
                                 Circle()
-                                    .fill(terminalFill)
+                                    .fill(lineColor)
                                     .frame(width: r, height: r)
-                                Circle()
-                                    .strokeBorder(lineColor, lineWidth: 1.5)
-                                    .frame(width: r * 2 + 6, height: r * 2 + 6)
-                            }
-
-                            if isNext && !isCurrent {
                                 Circle()
                                     .strokeBorder(lineColor, lineWidth: 1.5)
                                     .frame(width: r * 2 + 4, height: r * 2 + 4)
@@ -578,31 +603,34 @@ struct LCDLineView: View {
                         }
                         .position(x: x, y: centerY)
 
-                        // Station label — positioned above the circle (only for stopping stations)
-                        if stops, shouldShowLabel(index: i, isCurrent: isCurrent, isNext: isNext) {
+                        // Terminal/transfer labels above the track (skipped
+                        // when the station is the next stop — it is labeled
+                        // below the track instead).
+                        if (isTerminal || isTransfer) && !isNext {
                             Text(truncatedName(stationNames[i]))
-                                .font(.system(size: isCurrent || isNext ? 9 : 8,
-                                              weight: isCurrent || isNext ? .bold : .regular))
-                                .foregroundColor(isCurrent || isNext ? lineColor : labelColor)
+                                .font(.system(size: 8, weight: isTransfer ? .bold : .regular))
+                                .foregroundColor(isTransfer ? lineColor : labelColor)
                                 .lineLimit(1)
                                 .frame(width: 40)
                                 .position(x: x, y: centerY - r - 9)
+                        }
+
+                        // Next station labeled below the track
+                        if isNext {
+                            Text(truncatedName(stationNames[i]))
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundColor(lineColor)
+                                .lineLimit(1)
+                                .frame(width: 44)
+                                .position(x: x, y: centerY + r + 10)
                         }
                     }
                 }
 
             }
-            .frame(height: h)
+            .frame(height: Self.height)
         }
         .frame(height: Self.height)
-    }
-
-    private func shouldShowLabel(index: Int, isCurrent: Bool, isNext: Bool) -> Bool {
-        if index == 0 || index == stationCount - 1 { return true }
-        if isCurrent || isNext { return true }
-        if stationCount <= 6 { return true }
-        let step = max(2, stationCount / 5)
-        return index % step == 0
     }
 
     private func truncatedName(_ name: String) -> String {
@@ -628,19 +656,16 @@ struct ExpandedIslandLineView: View {
         return current + 1
     }
 
-    private func stopsAt(_ index: Int) -> Bool {
-        let stops = attributes.stationStops
-        guard !stops.isEmpty, index < stops.count else { return true }
-        return stops[index]
+    /// Leg boundaries (transfer/change stations) along the journey.
+    private var transferIndices: [Int] {
+        attributes.legLines.dropFirst().map(\.stationIndex)
     }
 
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
             let count = attributes.stationCount
-            let baseR: CGFloat = count > 8 ? 2.5 : 3.5
-            let skippedR: CGFloat = max(1.5, baseR - 1)
-            let emphR: CGFloat = baseR + 1.5
+            let emphR: CGFloat = 5
             let pad: CGFloat = emphR + 2
             let trackHeight: CGFloat = 1.5
 
@@ -662,48 +687,41 @@ struct ExpandedIslandLineView: View {
                 .clipped()
                 .position(x: pad + (w - pad * 2) / 2, y: 6)
 
-                // Station dots
+                // Only the start, transfers (change points), end, and the next
+                // stop are marked — the current station is omitted (it is shown
+                // in the panel above).
                 ForEach(0..<count, id: \.self) { i in
                     let frac = count > 1 ? Double(i) / Double(count - 1) : 0
                     let x = pad + (w - pad * 2) * frac
                     let isPast = frac <= state.progress + 0.01
-                    let isCurrent = state.currentStationIndex == i
                     let isNext = nextStationIndex == i
                     let isTerminal = i == 0 || i == count - 1
-                    let stops = stopsAt(i)
-                    let r = (isCurrent || isNext || isTerminal) ? emphR : (stops ? baseR : skippedR)
+                    let isTransfer = transferIndices.contains(i)
+                    let r = emphR
 
-                    ZStack {
-                        if !stops && !isTerminal && !isCurrent && !isNext {
-                            // Skipped station: small solid dot
-                            Circle()
-                                .fill(isPast ? Color(white: 0.35) : Color(white: 0.2))
-                                .frame(width: r * 2, height: r * 2)
-                        } else {
+                    if isNext || isTerminal || isTransfer {
+                        ZStack {
                             Circle()
                                 .fill(isPast ? lineColor : Color(white: 0.4))
                                 .frame(width: r * 2, height: r * 2)
-                        }
 
-                        if isTerminal {
-                            Circle()
-                                .strokeBorder(isPast ? lineColor : Color(white: 0.4), lineWidth: 1.5)
-                                .frame(width: r * 2 + 3, height: r * 2 + 3)
-                        }
+                            if isTerminal || isTransfer {
+                                Circle()
+                                    .strokeBorder(isPast ? lineColor : Color(white: 0.4), lineWidth: 1.5)
+                                    .frame(width: r * 2 + 3, height: r * 2 + 3)
+                            }
 
-                        if isCurrent {
-                            Circle()
-                                .fill(Color.white)
-                                .frame(width: r, height: r)
+                            if isNext {
+                                Circle()
+                                    .fill(Color.white)
+                                    .frame(width: r, height: r)
+                                Circle()
+                                    .strokeBorder(lineColor, lineWidth: 1)
+                                    .frame(width: r * 2 + 3, height: r * 2 + 3)
+                            }
                         }
-
-                        if isNext && !isCurrent {
-                            Circle()
-                                .strokeBorder(lineColor, lineWidth: 1)
-                                .frame(width: r * 2 + 3, height: r * 2 + 3)
-                        }
+                        .position(x: x, y: 6)
                     }
-                    .position(x: x, y: 6)
                 }
             }
             .frame(height: 12)
