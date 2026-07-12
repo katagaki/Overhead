@@ -61,13 +61,19 @@ public struct ExactRun: Codable, Hashable {
     // plain-line generator; composite through-lines use it to tell which runs
     // actually traverse a mid-line junction.
     public let continuesBeyond: Bool
+    // The run's train type when it differs from its ServicePattern's default
+    // (e.g. an 急行 sharing a list with 各停). nil = inherit the pattern type.
+    // Skip-stop types resolve their stops via the line's `stopPatterns`.
+    public let trainType: TrainService.TrainType?
 
     public init(_ departure: String, terminusStationId: String? = nil,
-                startsHere: Bool = true, continuesBeyond: Bool = false) {
+                startsHere: Bool = true, continuesBeyond: Bool = false,
+                trainType: TrainService.TrainType? = nil) {
         self.departure = departure
         self.terminusStationId = terminusStationId
         self.startsHere = startsHere
         self.continuesBeyond = continuesBeyond
+        self.trainType = trainType
     }
 }
 
@@ -209,6 +215,12 @@ public struct StaticTrainLine {
     public let directions: [StaticLineDirection]
     public let delayInfo: DelayCheckInfo
     public var throughServices: [ThroughService] = [] // 直通運転
+    // Stop patterns for skip-stop train types (急行/準急/快速 etc.): the set of
+    // station indices (into `stations`) where a train of that type stops. A
+    // type absent from this map (and .local) stops everywhere. The generator
+    // emits timetable entries only at these stops, so skips flow through to
+    // stationStops, the journey view, and the Live Activity automatically.
+    public var stopPatterns: [TrainService.TrainType: Set<Int>] = [:]
 
     public var trainLine: TrainLine {
         TrainLine(
@@ -989,8 +1001,16 @@ public enum StaticTimetableGenerator {
             } else {
                 endIndex = stations.count - 1
             }
+            // A run may override the pattern's type (e.g. an 急行 sharing a
+            // list with 各停); skip-stop types stop only at their pattern's
+            // stations (origin and terminus always included).
+            let effectiveType = run.trainType ?? trainType
+            let stopSet = line.stopPatterns[effectiveType]
             let serviceId = "\(line.id).\(direction.id).\(tag).\(timeString(origin))"
-            let entries = (startIndex...endIndex).map { i -> TimetableEntry in
+            let entries = (startIndex...endIndex).compactMap { i -> TimetableEntry? in
+                if let stopSet, i != startIndex, i != endIndex, !stopSet.contains(i) {
+                    return nil  // express passes through this station
+                }
                 let time = timeString(origin + Int((offsets[i] - baseOffset).rounded()))
                 return TimetableEntry(
                     id: "\(serviceId)_\(i)",
@@ -1002,7 +1022,7 @@ public enum StaticTimetableGenerator {
             return TrainService(
                 id: serviceId,
                 lineId: line.id,
-                trainType: trainType,
+                trainType: effectiveType,
                 direction: direction.isAscending ? .outbound : .inbound,
                 timetable: entries,
                 destinationStationId: stations[endIndex].id,

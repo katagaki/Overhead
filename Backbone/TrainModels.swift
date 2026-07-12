@@ -210,23 +210,43 @@ public struct TrainService: Identifiable, Codable {
 
     public enum TrainType: String, Codable {
         case local = "Local"
+        case semiExpress = "SemiExpress"
+        case sectionSemiExpress = "SectionSemiExpress"
         case rapid = "Rapid"
-        case express = "Express"
-        case limitedExpress = "LimitedExpress"
         case commuterRapid = "CommuterRapid"
         case specialRapid = "SpecialRapid"
+        case express = "Express"
+        case sectionExpress = "SectionExpress"
+        case rapidExpress = "RapidExpress"
+        case commuterExpress = "CommuterExpress"
+        case commuterSemiExpress = "CommuterSemiExpress"
+        case liner = "Liner"
+        case limitedExpress = "LimitedExpress"
+        case commuterLimitedExpress = "CommuterLimitedExpress"
 
         public var displayName: String { rawValue }
         public var displayNameJa: String {
             switch self {
             case .local: return "各停"
+            case .semiExpress: return "準急"
+            case .sectionSemiExpress: return "区間準急"
             case .rapid: return "快速"
-            case .express: return "急行"
-            case .limitedExpress: return "特急"
             case .commuterRapid: return "通勤快速"
             case .specialRapid: return "特別快速"
+            case .express: return "急行"
+            case .sectionExpress: return "区間急行"
+            case .rapidExpress: return "快速急行"
+            case .commuterExpress: return "通勤急行"
+            case .commuterSemiExpress: return "通勤準急"
+            case .liner: return "ライナー"
+            case .limitedExpress: return "特急"
+            case .commuterLimitedExpress: return "通勤特急"
             }
         }
+
+        /// Stations passed through (not stopped at) are only meaningful for
+        /// types that run a skip-stop pattern. Local always stops everywhere.
+        public var skipsStations: Bool { self != .local }
     }
 
     public enum Direction: String, Codable {
