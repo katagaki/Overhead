@@ -417,9 +417,10 @@ struct LockScreenLiveActivityView: View {
     @ViewBuilder
     private func transferCue(_ transfer: TrainJourneyAttributes.LegLine) -> some View {
         HStack(spacing: 4) {
-            Image(systemName: "arrow.triangle.2.circlepath")
+            Text("Label.NextTransfer")
                 .font(.system(size: 9, weight: .bold))
                 .foregroundColor(.orange)
+                .lineLimit(1)
             if !transfer.lineSymbol.isEmpty {
                 LCDLineSymbolBadge(symbol: transfer.lineSymbol,
                                    color: Color(hex: transfer.lineColorHex))

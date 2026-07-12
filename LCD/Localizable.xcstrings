@@ -1,776 +1,810 @@
 {
-  "sourceLanguage" : "ja",
-  "strings" : {
-    "+%lld" : {
-      "shouldTranslate" : false
+  "sourceLanguage": "ja",
+  "strings": {
+    "+%lld": {
+      "shouldTranslate": false
     },
-    "Badge.GPS" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GPS"
+    "Badge.GPS": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPS"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GPS"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPS"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GPS"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPS"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GPS"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPS"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GPS"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPS"
           }
         }
       }
     },
-    "Badge.GPSPlusTimetable" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GPS+Timetable"
+    "Badge.GPSPlusTimetable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPS+Timetable"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GPS+時刻表"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPS+時刻表"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GPS+시간표"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPS+시간표"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GPS+时刻表"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPS+时刻表"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GPS+時刻表"
-          }
-        }
-      }
-    },
-    "Badge.Timetable" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Timetable"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "時刻表"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "시간표"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "时刻表"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "時刻表"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPS+時刻表"
           }
         }
       }
     },
-    "Button.RefreshDelayInfo" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Refresh delay info"
+    "Badge.Timetable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timetable"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "遅延情報を更新"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時刻表"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "지연 정보 새로고침"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시간표"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "刷新延误信息"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "时刻表"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "重新整理延誤資訊"
-          }
-        }
-      }
-    },
-    "Destination.Suffix %@ %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ to %2$@"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ %2$@行"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ %2$@행"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ 至%2$@"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ 至%2$@"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時刻表"
           }
         }
       }
     },
-    "Label.EstimatedArrival" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ETA"
+    "Button.RefreshDelayInfo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh delay info"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "到着予定"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "遅延情報を更新"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "도착 예정"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "지연 정보 새로고침"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "预计到达"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刷新延误信息"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "預計抵達"
-          }
-        }
-      }
-    },
-    "Label.GetOffAt" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Get off"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下車"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "하차"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下车"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下車"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新整理延誤資訊"
           }
         }
       }
     },
-    "Label.NextStation" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Next"
+    "Destination.Suffix %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ to %2$@"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "次は"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ %2$@行"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "다음"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ %2$@행"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下一站"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ 至%2$@"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下一站"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ 至%2$@"
           }
         }
       }
     },
-    "Label.TimeRemaining" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Left"
+    "Label.EstimatedArrival": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ETA"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "残り"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "到着予定"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "남음"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "도착 예정"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "剩余"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "预计到达"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "剩餘"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預計抵達"
           }
         }
       }
     },
-    "Label.Transfer" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Transfer"
+    "Label.GetOffAt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Get off"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "乗換"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下車"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "환승"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "하차"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "换乘"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下车"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "轉乘"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下車"
           }
         }
       }
     },
-    "LiveActivity.Delay.Badge %lld" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delayed +%lld min"
+    "Label.NextStation": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "遅延 +%lld分"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "次は"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "지연 +%lld분"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다음"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "延误 +%lld分钟"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下一站"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "延誤 +%lld分鐘"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下一站"
           }
         }
       }
     },
-    "LiveActivity.Delay.Minutes %lld" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+%lld min"
+    "Label.NextTransfer": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next transfer"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+%lld分"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "次の乗換"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+%lld분"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다음 환승"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+%lld分钟"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下一个换乘"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+%lld分鐘"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下一個轉乘"
           }
         }
       }
     },
-    "LiveActivity.DepartsAt %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Departs %@"
+    "Label.TimeRemaining": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Left"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ 発車"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "残り"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ 출발"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "남음"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ 发车"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剩余"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ 發車"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剩餘"
           }
         }
       }
     },
-    "LiveActivity.NextIs %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Next: %@"
+    "Label.Transfer": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transfer"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "次は %@"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "乗換"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "다음: %@"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "환승"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下一站: %@"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "换乘"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下一站: %@"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "轉乘"
           }
         }
       }
     },
-    "Route.Home" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Home"
+    "LiveActivity.Delay.Badge %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delayed +%lld min"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "自宅"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "遅延 +%lld分"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "집"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "지연 +%lld분"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "家"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "延误 +%lld分钟"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "家"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "延誤 +%lld分鐘"
           }
         }
       }
     },
-    "Route.School" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "School"
+    "LiveActivity.Delay.Minutes %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld min"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "学校"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld分"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "학교"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld분"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "学校"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld分钟"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "學校"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld分鐘"
           }
         }
       }
     },
-    "Route.Work" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Work"
+    "LiveActivity.DepartsAt %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Departs %@"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "職場"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 発車"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "직장"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 출발"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "公司"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 发车"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "公司"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 發車"
           }
         }
       }
     },
-    "Status.OnTime" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "On Time"
+    "LiveActivity.NextIs %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next: %@"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "定刻"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "次は %@"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "정시"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다음: %@"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "正点"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下一站: %@"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "準點"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下一站: %@"
           }
         }
       }
     },
-    "Status.OnTimeOperation" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "On Schedule"
+    "Route.Home": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Home"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "定刻運転"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自宅"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "정시 운행"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "집"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "正常运行"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "家"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "正常運行"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "家"
           }
         }
       }
     },
-    "Time.LessThanOneMinuteAgo" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "<1 min ago"
+    "Route.School": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "School"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "<1分前"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "学校"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "<1분 전"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "학교"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "<1分钟前"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "学校"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "<1分鐘前"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "學校"
           }
         }
       }
     },
-    "Time.MinutesAgo %lld" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld min ago"
+    "Route.Work": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Work"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld分前"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "職場"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld분 전"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "직장"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld分钟前"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "公司"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld分鐘前"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "公司"
           }
         }
       }
     },
-    "Time.Now" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Now"
+    "Status.OnTime": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On Time"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "今"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "定刻"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "지금"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "정시"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "刚刚"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正点"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "剛剛"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "準點"
+          }
+        }
+      }
+    },
+    "Status.OnTimeOperation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On Schedule"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "定刻運転"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "정시 운행"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正常运行"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正常運行"
+          }
+        }
+      }
+    },
+    "Time.LessThanOneMinuteAgo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "<1 min ago"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "<1分前"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "<1분 전"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "<1分钟前"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "<1分鐘前"
+          }
+        }
+      }
+    },
+    "Time.MinutesAgo %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld min ago"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld分前"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld분 전"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld分钟前"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld分鐘前"
+          }
+        }
+      }
+    },
+    "Time.Now": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Now"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "지금"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刚刚"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剛剛"
           }
         }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }
