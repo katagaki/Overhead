@@ -21,13 +21,17 @@ private func pattern(_ first: String, _ last: String, _ bands: [(String, Double)
 private func direction(_ path: String, _ suffix: String, _ ja: String, _ en: String,
                        ascending: Bool,
                        weekday: ServicePattern, holiday: ServicePattern,
-                       origins: [IntermediateOrigin] = []) -> StaticLineDirection {
+                       origins: [IntermediateOrigin] = [],
+                       expressWeekday: [ExactRun] = [],
+                       expressHoliday: [ExactRun] = []) -> StaticLineDirection {
     StaticLineDirection(
         id: "static.RailDirection:\(path).\(suffix)",
         nameJa: ja, nameEn: en,
         isAscending: ascending,
         weekday: weekday, saturdayHoliday: holiday,
-        intermediateOrigins: origins
+        intermediateOrigins: origins,
+        expressWeekdayRuns: expressWeekday,
+        expressSaturdayHolidayRuns: expressHoliday
     )
 }
 
@@ -86,7 +90,9 @@ enum SotetsuIzuminoLineData {
             direction("Sotetsu.Izumino", "Shonandai", "湘南台方面", "For Shonandai",
                       ascending: true,
                       weekday: pattern("05:02", "24:47", [("05:02", 10), ("06:00", 6), ("09:00", 10), ("18:00", 9), ("19:00", 8), ("20:00", 9), ("21:00", 10), ("22:00", 13), ("23:00", 14), ("24:00", 20)]),
-                      holiday: pattern("05:02", "24:47", [("05:02", 15), ("06:00", 13), ("07:00", 10), ("22:00", 12), ("23:00", 16), ("24:00", 20)])
+                      holiday: pattern("05:02", "24:47", [("05:02", 15), ("06:00", 13), ("07:00", 10), ("22:00", 12), ("23:00", 16), ("24:00", 20)]),
+                      expressWeekday: izuminoAscExpressWd,
+                      expressHoliday: izuminoAscExpressHol
             ),
             direction("Sotetsu.Izumino", "Futamatagawa", "二俣川・横浜方面", "For Futamata-gawa & Yokohama",
                       ascending: false,
@@ -96,7 +102,9 @@ enum SotetsuIzuminoLineData {
                           origin("Station:Sotetsu.Izumino.Izumino",
                                  ["04:43"],
                                  ["04:43"]),
-                      ]
+                      ],
+                      expressWeekday: izuminoDescExpressWd,
+                      expressHoliday: izuminoDescExpressHol
             ),
         ],
         delayInfo: delayInfo,
@@ -107,4 +115,105 @@ enum SotetsuIzuminoLineData {
                     to: "Railway:Sotetsu.Main"),
         ]
     )
+
+    // MARK: - Izumino Express Runs (ODPT, July-2026)
+
+private static let izuminoAscExpressHol: [ExactRun] = [
+    ExactRun("07:12", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("07:33", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("07:53", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("08:00", startsHere: false, trainType: .limitedExpress, stopIndices: [0, 4, 7]),
+    ExactRun("09:43", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("10:13", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("10:43", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("11:13", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("13:13", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("14:13", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("15:43", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("17:03", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("20:23", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("21:13", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("22:15", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("23:18", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("24:06", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+]
+private static let izuminoAscExpressWd: [ExactRun] = [
+    ExactRun("05:50", startsHere: false, trainType: .limitedExpress, stopIndices: [0, 4, 7]),
+    ExactRun("06:20", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("06:37", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("06:45", startsHere: false, trainType: .limitedExpress, stopIndices: [0, 4, 7]),
+    ExactRun("06:54", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("07:02", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("07:07", startsHere: false, trainType: .limitedExpress, stopIndices: [0, 4, 7]),
+    ExactRun("07:12", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("07:38", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("07:42", startsHere: false, trainType: .limitedExpress, stopIndices: [0, 4, 7]),
+    ExactRun("07:56", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("08:08", startsHere: false, trainType: .limitedExpress, stopIndices: [0, 4, 7]),
+    ExactRun("08:13", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("08:30", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("08:34", startsHere: false, trainType: .limitedExpress, stopIndices: [0, 4, 7]),
+    ExactRun("08:40", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("10:13", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("15:13", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("16:13", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("17:50", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("18:06", startsHere: false, trainType: .limitedExpress, stopIndices: [0, 4, 7]),
+    ExactRun("18:09", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("18:35", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("19:10", startsHere: false, trainType: .limitedExpress, stopIndices: [0, 4, 7]),
+    ExactRun("19:18", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("19:40", startsHere: false, trainType: .limitedExpress, stopIndices: [0, 4, 7]),
+    ExactRun("19:48", startsHere: false, trainType: .rapid, stopIndices: [0, 1, 2, 3, 4, 5, 6, 7]),
+    ExactRun("20:10", startsHere: false, trainType: .limitedExpress, stopIndices: [0, 4, 7]),
+]
+private static let izuminoDescExpressHol: [ExactRun] = [
+    ExactRun("06:48", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("07:18", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("07:48", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("08:33", continuesBeyond: true, trainType: .limitedExpress, stopIndices: [7, 4, 0]),
+    ExactRun("09:38", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("10:08", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("10:38", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("13:38", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("14:38", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("17:28", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("18:18", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("21:49", continuesBeyond: true, trainType: .limitedExpress, stopIndices: [7, 4, 0]),
+    ExactRun("22:17", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("22:59", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+]
+private static let izuminoDescExpressWd: [ExactRun] = [
+    ExactRun("06:26", continuesBeyond: true, trainType: .commuterExpress, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("06:44", continuesBeyond: true, trainType: .commuterLimitedExpress, stopIndices: [7, 4, 0]),
+    ExactRun("07:02", continuesBeyond: true, trainType: .commuterExpress, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("07:12", continuesBeyond: true, trainType: .commuterLimitedExpress, stopIndices: [7, 4, 0]),
+    ExactRun("07:17", continuesBeyond: true, trainType: .commuterExpress, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("07:32", continuesBeyond: true, trainType: .commuterExpress, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("07:47", continuesBeyond: true, trainType: .commuterExpress, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("08:03", continuesBeyond: true, trainType: .commuterLimitedExpress, stopIndices: [7, 4, 0]),
+    ExactRun("08:18", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("08:23", continuesBeyond: true, trainType: .commuterLimitedExpress, stopIndices: [7, 4, 0]),
+    ExactRun("08:41", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("08:51", continuesBeyond: true, trainType: .commuterLimitedExpress, stopIndices: [7, 4, 0]),
+    ExactRun("09:00", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("09:58", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("10:38", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("15:38", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("16:08", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("17:34", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("18:12", continuesBeyond: true, trainType: .limitedExpress, stopIndices: [7, 4, 0]),
+    ExactRun("18:13", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("18:32", continuesBeyond: true, trainType: .limitedExpress, stopIndices: [7, 4, 0]),
+    ExactRun("18:50", continuesBeyond: true, trainType: .limitedExpress, stopIndices: [7, 4, 0]),
+    ExactRun("18:57", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("19:32", continuesBeyond: true, trainType: .limitedExpress, stopIndices: [7, 4, 0]),
+    ExactRun("19:43", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+    ExactRun("19:50", continuesBeyond: true, trainType: .limitedExpress, stopIndices: [7, 4, 0]),
+    ExactRun("20:16", continuesBeyond: true, trainType: .limitedExpress, stopIndices: [7, 4, 0]),
+    ExactRun("20:50", continuesBeyond: true, trainType: .limitedExpress, stopIndices: [7, 4, 0]),
+    ExactRun("21:34", continuesBeyond: true, trainType: .limitedExpress, stopIndices: [7, 4, 0]),
+    ExactRun("23:00", continuesBeyond: true, trainType: .rapid, stopIndices: [7, 6, 5, 4, 3, 2, 1, 0]),
+]
+
 }
