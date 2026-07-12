@@ -224,6 +224,9 @@ enum JREastLineData {
             2, 2, 5, 4, 4, 2, 2, 2, 2, 2, 3, 2,
             2, 2, 3, 2, 2, 3, 3, 3, 5, 3, 3,
         ],
+        // Real per-station times per run (658 grid), incl. holiday 快速 skips
+        // of 高円寺/阿佐ケ谷/西荻窪 (negative sentinel) → 1:1 station timetables.
+        exactStationTimes: chuoRapidExactTimes,
         // Real exact runs, July-2026 revision (timetables.jreast.co.jp).
         // 快速 only: 中央特快・青梅特快・通勤快速・特急・むさしの号 are
         // excluded (their stop patterns skip stations the all-stops line
@@ -556,7 +559,8 @@ enum JREastLineData {
         jc("17:01", thru: true), jc("17:10", thru: true), jc("17:15"), jc("17:46", thru: true),
         jc("18:24", thru: true), jc("18:52", thru: true), jc("19:08", thru: true), jc("19:25", thru: true),
         jc("19:32", thru: true), jc("20:12", thru: true), jc("20:23", thru: true), jc("20:37", thru: true),
-        jc("21:09", thru: true), jc("21:16"), jc("21:31", thru: true), jc("21:47", thru: true),
+        jc("20:57", thru: true), jc("21:09", thru: true), jc("21:16"), jc("21:25", thru: true),
+        jc("21:31", thru: true), jc("21:47", thru: true),
         jc("22:04"), jc("23:05", thru: true),
     ]
 
@@ -636,6 +640,8 @@ enum JREastLineData {
             3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
             2, 3, 2, 3, 3, 3, 3, 3, 2, 2, 3, 2, 3, 3, 3, 2, 3, 2, 2,
         ],
+        // Real per-station times per run (659 grid) → 1:1 station timetables.
+        exactStationTimes: chuoSobuLocalExactTimes,
         // Real exact runs, July-2026 revision (timetables.jreast.co.jp).
         // Per-train termini are honored: 千葉/三鷹 full runs plus 中野・津田沼
         // turnbacks, late-night 御茶ノ水行き, and 東西線直通 runs leaving at
@@ -1243,6 +1249,9 @@ enum JREastLineData {
             4, 3, 2, 3, 2, 3, 3, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 3, 3, 2, 2, 3, 2,
             2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 2, 3, 3, 2, 2, 2, 3,
         ],
+        // Real per-station times per run (623 grid), incl. midday 快速 skips
+        // (negative sentinel) → 1:1 station timetables.
+        exactStationTimes: keihinTohokuExactTimes,
         // Real exact runs, July-2026 revision (timetables.jreast.co.jp).
         // Per-train termini are honored: 南浦和・赤羽・東十条 turnbacks on the
         // north end, 蒲田・鶴見・桜木町・磯子 on the south, plus 横浜線直通

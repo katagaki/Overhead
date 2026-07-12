@@ -236,6 +236,19 @@ public struct StaticTrainLine {
     public let colorHex: String
     public let stations: [Station]
     public let hopTimesMinutes: [Double] // count == stations.count - 1
+    // Optional per-direction override for the descending (up) direction, in the
+    // same ascending-station orientation as hopTimesMinutes. Set only when up
+    // and down running times differ enough to matter (dwell asymmetry).
+    public var upHopTimesMinutes: [Double]? = nil
+    // Exact per-station times for individual runs, so station timetables match
+    // the source 1:1 instead of projecting from the origin via hop times. Key:
+    // "<calendar.rawValue>|<startStationId>|<HH:mm origin departure>"; value:
+    // consecutive minutes-since-midnight at each station from the run's start to
+    // its terminus (travel order); a negative value means the run passes that
+    // station (skip-stop). A run whose (calendar, start, departure) is absent
+    // falls back to hop projection. Only lines with per-run dwell that a
+    // median-hop model can't reproduce need this (e.g. Joban Rapid).
+    public var exactStationTimes: [String: [Int]]? = nil
     public let directions: [StaticLineDirection]
     public let delayInfo: DelayCheckInfo
     public var throughServices: [ThroughService] = [] // 直通運転
@@ -954,7 +967,8 @@ public enum StaticTimetableGenerator {
         calendar: ScheduleCalendar
     ) -> [TrainService] {
         let stations = orderedStations(line: line, direction: direction)
-        let offsets = cumulativeMinutes(hopTimes: line.hopTimesMinutes, ascending: direction.isAscending)
+        let hopTimes = (direction.isAscending ? nil : line.upHopTimesMinutes) ?? line.hopTimesMinutes
+        let offsets = cumulativeMinutes(hopTimes: hopTimes, ascending: direction.isAscending)
         guard stations.count == offsets.count, let destination = stations.last else { return [] }
 
         // Full-line services from the origin terminus (real exact runs when
@@ -967,7 +981,7 @@ public enum StaticTimetableGenerator {
                 line: line, direction: direction,
                 stations: stations, offsets: offsets,
                 startIndex: 0, runs: exact,
-                trainType: pattern.trainType, tag: "full"
+                trainType: pattern.trainType, tag: "full", calendar: calendar
             )
         } else {
             result = runServices(
@@ -985,7 +999,7 @@ public enum StaticTimetableGenerator {
                     line: line, direction: direction,
                     stations: stations, offsets: offsets,
                     startIndex: startIdx, runs: ioRuns,
-                    trainType: pattern.trainType, tag: "org\(n)"
+                    trainType: pattern.trainType, tag: "org\(n)", calendar: calendar
                 )
             } else {
                 let originMinutes = io.departures(for: calendar)
@@ -1008,7 +1022,7 @@ public enum StaticTimetableGenerator {
                 line: line, direction: direction,
                 stations: stations, offsets: offsets,
                 startIndex: 0, runs: expressRuns,
-                trainType: pattern.trainType, tag: "exp"
+                trainType: pattern.trainType, tag: "exp", calendar: calendar
             )
         }
         return result
@@ -1024,13 +1038,22 @@ public enum StaticTimetableGenerator {
         startIndex: Int,
         runs: [ExactRun],
         trainType: TrainService.TrainType,
-        tag: String
+        tag: String,
+        calendar: ScheduleCalendar
     ) -> [TrainService] {
         let baseOffset = offsets[startIndex]
         return runs.compactMap { run in
             guard let origin = parseMinutes(run.departure) else { return nil }
+            // Real per-station times for this run (1:1 with the source), keyed by
+            // (calendar, start station, origin departure). When present they are
+            // emitted verbatim and drive the terminus; otherwise fall back to the
+            // hop-time projection below.
+            let exactKey = "\(calendar.rawValue)|\(direction.isAscending ? "A" : "D")|\(stations[startIndex].id)|\(run.departure)"
+            let exactTimes = line.exactStationTimes?[exactKey]
             let endIndex: Int
-            if let terminusId = run.terminusStationId {
+            if let exactTimes {
+                endIndex = min(startIndex + exactTimes.count - 1, stations.count - 1)
+            } else if let terminusId = run.terminusStationId {
                 guard let idx = stations.firstIndex(where: { $0.id == terminusId }),
                       idx > startIndex else { return nil }
                 endIndex = idx
@@ -1050,6 +1073,19 @@ public enum StaticTimetableGenerator {
             let serviceId = "\(line.id).\(direction.id).\(tag).\(timeString(origin))"
             let entries = (startIndex...endIndex).compactMap { i -> TimetableEntry? in
                 let absI = direction.isAscending ? i : (n - 1 - i)
+                if let exactTimes {
+                    // Skip-stop runs mark passed stations with a negative sentinel;
+                    // all-stops runs have a real minute at every position.
+                    let m = exactTimes[i - startIndex]
+                    guard m >= 0 else { return nil }
+                    let time = timeString(m)
+                    return TimetableEntry(
+                        id: "\(serviceId)_\(i)",
+                        stationId: stations[i].id,
+                        arrivalTime: i == startIndex ? nil : time,
+                        departureTime: i == endIndex ? nil : time
+                    )
+                }
                 if let stopSet, i != startIndex, i != endIndex, !stopSet.contains(absI) {
                     return nil  // express passes through this station
                 }

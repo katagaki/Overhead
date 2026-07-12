@@ -99,11 +99,18 @@ extension JREastLineData {
             st("JobanRapid", "Tennodai", "天王台", "Tennodai", "JJ12", 35.8700, 140.0672),
             st("JobanRapid", "Toride", "取手", "Toride", "JJ13", 35.8973, 140.0629),
         ],
-        // Measured from real July-2026 train pairs (median dep-to-dep per hop,
-        // both directions): 東京→上野 7 (Ueno dwell), 北千住→松戸 9, 松戸→柏 8,
-        // 柏→我孫子 5. Values match the down direction exactly; up runs a few
-        // minutes longer (station dwell), so up times err early, never late.
+        // Down-direction medians (dep-to-dep per hop) from the July-2026 grid
+        // (642d1/d2): 東京→上野 7 (Ueno dwell), 北千住→松戸 9, 松戸→柏 8, 柏→我孫子 5.
         hopTimesMinutes: [5, 4, 7, 3, 2, 3, 3, 9, 8, 5, 3, 4],
+        // Up trains run a different profile (medians from the July-2026 up grid,
+        // 快速/普通 all-stops): slower over 柏/我孫子 (dwell), faster on the 上野
+        // approach. 取手→松戸 is 22 min up vs 20 down, so up times no longer
+        // land early. Same ascending orientation as hopTimesMinutes.
+        upHopTimesMinutes: [5, 3, 6, 3, 2, 3, 3, 9, 9, 5, 4, 4],
+        // Real per-station times per run (642 grids) → station timetables match
+        // the source 1:1; hop projection above is only the fallback for any run
+        // without a grid match. See JobanRapidExactTimes.swift.
+        exactStationTimes: jobanRapidExactTimes,
         // Real exact runs, July-2026 revision (timetables.jreast.co.jp).
         // Down trains originate at 品川 (through-corridor, 06:35–22:56 only),
         // 上野 (the many 上野始発, incl. the 04:33 first), plus single
@@ -535,6 +542,8 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
             st("JobanLocal", "Toride", "取手", "Toride", "JL32", 35.8973, 140.0629),
         ],
         hopTimesMinutes: [3, 2, 4, 3, 2, 2, 2, 3, 3, 3, 3, 3, 4],
+        // Real per-station times per run (641 grid) → 1:1 station timetables.
+        exactStationTimes: jobanLocalExactTimes,
         // Real exact runs, July-2026 revision (timetables.jreast.co.jp),
         // including per-train termini: most down trains terminate at 我孫子,
         // 取手 is reached only by weekday rush trains (none on holidays), and
