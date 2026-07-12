@@ -1,0 +1,649 @@
+[
+    {
+        "colorHex": "#2E3A5C",
+        "delayInfo": {
+            "checkMethodEn": "Check the Tsukuba Express (Metropolitan Intercity Railway) service information page. Delays and suspensions are posted as they occur.",
+            "checkMethodJa": "つくばエクスプレス（首都圏新都市鉄道）の運行情報ページで確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
+            "statusPageURL": "https://www.mir.co.jp/",
+            "statusPageURLEn": "https://www.mir.co.jp/en/"
+        },
+        "directions": [
+            {
+                "expressSaturdayHolidayRuns": [],
+                "expressWeekdayRuns": [],
+                "id": "static.RailDirection:MIR.TsukubaExpress.Tsukuba",
+                "intermediateOrigins": [
+                    {
+                        "saturdayHolidayDepartures": [
+                            "05:20",
+                            "05:39"
+                        ],
+                        "stationId": "Station:MIR.TsukubaExpress.Moriya",
+                        "weekdayDepartures": [
+                            "05:20",
+                            "05:39",
+                            "06:00"
+                        ]
+                    }
+                ],
+                "isAscending": true,
+                "nameEn": "For Tsukuba",
+                "nameJa": "つくば方面",
+                "saturdayHoliday": {
+                    "bands": [
+                        {
+                            "from": "05:08",
+                            "headwayMinutes": 11
+                        },
+                        {
+                            "from": "06:00",
+                            "headwayMinutes": 5
+                        },
+                        {
+                            "from": "08:00",
+                            "headwayMinutes": 4
+                        },
+                        {
+                            "from": "09:00",
+                            "headwayMinutes": 5
+                        },
+                        {
+                            "from": "10:00",
+                            "headwayMinutes": 7
+                        },
+                        {
+                            "from": "22:00",
+                            "headwayMinutes": 8
+                        },
+                        {
+                            "from": "23:00",
+                            "headwayMinutes": 10
+                        }
+                    ],
+                    "firstDeparture": "05:08",
+                    "lastDeparture": "24:07",
+                    "trainType": "Local"
+                },
+                "weekday": {
+                    "bands": [
+                        {
+                            "from": "05:08",
+                            "headwayMinutes": 11
+                        },
+                        {
+                            "from": "06:00",
+                            "headwayMinutes": 4
+                        },
+                        {
+                            "from": "07:00",
+                            "headwayMinutes": 3
+                        },
+                        {
+                            "from": "08:00",
+                            "headwayMinutes": 2
+                        },
+                        {
+                            "from": "09:00",
+                            "headwayMinutes": 4
+                        },
+                        {
+                            "from": "10:00",
+                            "headwayMinutes": 5
+                        },
+                        {
+                            "from": "11:00",
+                            "headwayMinutes": 7
+                        },
+                        {
+                            "from": "17:00",
+                            "headwayMinutes": 4
+                        },
+                        {
+                            "from": "18:00",
+                            "headwayMinutes": 3
+                        },
+                        {
+                            "from": "19:00",
+                            "headwayMinutes": 4
+                        },
+                        {
+                            "from": "20:00",
+                            "headwayMinutes": 5
+                        },
+                        {
+                            "from": "21:00",
+                            "headwayMinutes": 6
+                        },
+                        {
+                            "from": "23:00",
+                            "headwayMinutes": 9
+                        }
+                    ],
+                    "firstDeparture": "05:08",
+                    "lastDeparture": "24:07",
+                    "trainType": "Local"
+                }
+            },
+            {
+                "expressSaturdayHolidayRuns": [],
+                "expressWeekdayRuns": [],
+                "id": "static.RailDirection:MIR.TsukubaExpress.Akihabara",
+                "intermediateOrigins": [
+                    {
+                        "saturdayHolidayDepartures": [
+                            "05:03",
+                            "05:17",
+                            "08:08"
+                        ],
+                        "stationId": "Station:MIR.TsukubaExpress.Yashio",
+                        "weekdayDepartures": [
+                            "05:03",
+                            "05:17",
+                            "06:10",
+                            "06:25",
+                            "06:40",
+                            "07:20",
+                            "07:50",
+                            "08:02",
+                            "08:18",
+                            "08:35",
+                            "08:52"
+                        ]
+                    },
+                    {
+                        "saturdayHolidayDepartures": [
+                            "05:04",
+                            "05:09",
+                            "05:20",
+                            "05:31",
+                            "05:41",
+                            "05:52",
+                            "06:01",
+                            "06:12",
+                            "06:16",
+                            "06:34",
+                            "06:49",
+                            "06:57",
+                            "07:04",
+                            "07:19",
+                            "07:27",
+                            "07:34",
+                            "07:49",
+                            "07:57",
+                            "08:04",
+                            "08:19",
+                            "08:27",
+                            "08:34",
+                            "08:49",
+                            "08:57",
+                            "09:09",
+                            "09:17",
+                            "09:39",
+                            "09:47",
+                            "10:09",
+                            "10:17",
+                            "10:39",
+                            "10:47",
+                            "11:09",
+                            "11:17",
+                            "11:39",
+                            "11:47",
+                            "12:09",
+                            "12:17",
+                            "12:39",
+                            "12:47",
+                            "13:09",
+                            "13:17",
+                            "13:39",
+                            "13:47",
+                            "14:09",
+                            "14:17",
+                            "14:39",
+                            "14:47",
+                            "15:09",
+                            "15:17",
+                            "15:39",
+                            "15:47",
+                            "16:09",
+                            "16:17",
+                            "16:39",
+                            "16:47",
+                            "17:09",
+                            "17:17",
+                            "17:39",
+                            "17:47",
+                            "18:09",
+                            "18:17",
+                            "18:39",
+                            "18:47",
+                            "19:09",
+                            "19:17",
+                            "19:39",
+                            "19:47",
+                            "20:09",
+                            "20:17",
+                            "20:39",
+                            "20:47",
+                            "21:17",
+                            "21:41",
+                            "22:08",
+                            "22:28",
+                            "23:08"
+                        ],
+                        "stationId": "Station:MIR.TsukubaExpress.Moriya",
+                        "weekdayDepartures": [
+                            "05:04",
+                            "05:09",
+                            "05:20",
+                            "05:31",
+                            "05:41",
+                            "05:52",
+                            "05:57",
+                            "06:06",
+                            "06:13",
+                            "06:22",
+                            "06:27",
+                            "06:34",
+                            "06:38",
+                            "06:44",
+                            "06:47",
+                            "06:55",
+                            "06:59",
+                            "07:04",
+                            "07:10",
+                            "07:15",
+                            "07:18",
+                            "07:23",
+                            "07:29",
+                            "07:34",
+                            "07:37",
+                            "07:43",
+                            "07:48",
+                            "07:51",
+                            "07:57",
+                            "07:59",
+                            "08:06",
+                            "08:14",
+                            "08:22",
+                            "08:30",
+                            "08:40",
+                            "08:49",
+                            "09:06",
+                            "09:21",
+                            "09:37",
+                            "09:47",
+                            "10:09",
+                            "10:17",
+                            "10:39",
+                            "10:47",
+                            "11:09",
+                            "11:17",
+                            "11:39",
+                            "11:47",
+                            "12:09",
+                            "12:17",
+                            "12:39",
+                            "12:47",
+                            "13:09",
+                            "13:17",
+                            "13:39",
+                            "13:47",
+                            "14:09",
+                            "14:17",
+                            "14:39",
+                            "14:47",
+                            "15:09",
+                            "15:17",
+                            "15:39",
+                            "15:47",
+                            "16:09",
+                            "16:17",
+                            "16:34",
+                            "16:42",
+                            "16:51",
+                            "17:01",
+                            "17:11",
+                            "17:19",
+                            "17:23",
+                            "17:34",
+                            "17:44",
+                            "17:52",
+                            "17:55",
+                            "18:03",
+                            "18:06",
+                            "18:13",
+                            "18:24",
+                            "18:31",
+                            "18:36",
+                            "18:54",
+                            "19:01",
+                            "19:06",
+                            "19:24",
+                            "19:35",
+                            "19:54",
+                            "20:16",
+                            "20:25",
+                            "20:47",
+                            "20:58",
+                            "21:10",
+                            "21:34",
+                            "21:48",
+                            "22:00",
+                            "22:12",
+                            "22:25",
+                            "22:48",
+                            "22:59"
+                        ]
+                    }
+                ],
+                "isAscending": false,
+                "nameEn": "For Akihabara",
+                "nameJa": "秋葉原方面",
+                "saturdayHoliday": {
+                    "bands": [
+                        {
+                            "from": "05:06",
+                            "headwayMinutes": 15
+                        },
+                        {
+                            "from": "06:00",
+                            "headwayMinutes": 9
+                        },
+                        {
+                            "from": "08:00",
+                            "headwayMinutes": 13
+                        },
+                        {
+                            "from": "09:00",
+                            "headwayMinutes": 8
+                        },
+                        {
+                            "from": "21:00",
+                            "headwayMinutes": 12
+                        },
+                        {
+                            "from": "22:00",
+                            "headwayMinutes": 15
+                        },
+                        {
+                            "from": "23:00",
+                            "headwayMinutes": 12
+                        }
+                    ],
+                    "firstDeparture": "05:06",
+                    "lastDeparture": "24:00",
+                    "trainType": "Local"
+                },
+                "weekday": {
+                    "bands": [
+                        {
+                            "from": "05:06",
+                            "headwayMinutes": 15
+                        },
+                        {
+                            "from": "06:00",
+                            "headwayMinutes": 8
+                        },
+                        {
+                            "from": "08:00",
+                            "headwayMinutes": 10
+                        },
+                        {
+                            "from": "09:00",
+                            "headwayMinutes": 8
+                        },
+                        {
+                            "from": "16:00",
+                            "headwayMinutes": 9
+                        },
+                        {
+                            "from": "18:00",
+                            "headwayMinutes": 8
+                        },
+                        {
+                            "from": "20:00",
+                            "headwayMinutes": 9
+                        },
+                        {
+                            "from": "21:00",
+                            "headwayMinutes": 12
+                        }
+                    ],
+                    "firstDeparture": "05:06",
+                    "lastDeparture": "24:00",
+                    "trainType": "Local"
+                }
+            }
+        ],
+        "hopTimesMinutes": [3, 3, 3, 3, 3, 2, 4, 4, 3, 2, 3, 3, 2, 4, 5, 3, 3, 4, 3],
+        "id": "Railway:MIR.TsukubaExpress",
+        "isLoop": false,
+        "nameEn": "Tsukuba Express",
+        "nameJa": "つくばエクスプレス",
+        "operatorId": "Operator:MIR",
+        "stations": [
+            {
+                "id": "Station:MIR.TsukubaExpress.Akihabara",
+                "latitude": 35.69894,
+                "longitude": 139.77428,
+                "name": "秋葉原",
+                "nameEn": "Akihabara",
+                "nameKo": "",
+                "nameZhHans": "",
+                "nameZhHant": "",
+                "stationCode": "TX01"
+            },
+            {
+                "id": "Station:MIR.TsukubaExpress.ShinOkachimachi",
+                "latitude": 35.70711,
+                "longitude": 139.78194,
+                "name": "新御徒町",
+                "nameEn": "Shin-okachimachi",
+                "nameKo": "",
+                "nameZhHans": "",
+                "nameZhHant": "",
+                "stationCode": "TX02"
+            },
+            {
+                "id": "Station:MIR.TsukubaExpress.Asakusa",
+                "latitude": 35.714,
+                "longitude": 139.79239,
+                "name": "浅草",
+                "nameEn": "Asakusa",
+                "nameKo": "",
+                "nameZhHans": "",
+                "nameZhHant": "",
+                "stationCode": "TX03"
+            },
+            {
+                "id": "Station:MIR.TsukubaExpress.MinamiSenju",
+                "latitude": 35.73344,
+                "longitude": 139.79911,
+                "name": "南千住",
+                "nameEn": "Minami-senju",
+                "nameKo": "",
+                "nameZhHans": "",
+                "nameZhHant": "",
+                "stationCode": "TX04"
+            },
+            {
+                "id": "Station:MIR.TsukubaExpress.KitaSenju",
+                "latitude": 35.74975,
+                "longitude": 139.80533,
+                "name": "北千住",
+                "nameEn": "Kita-senju",
+                "nameKo": "",
+                "nameZhHans": "",
+                "nameZhHant": "",
+                "stationCode": "TX05"
+            },
+            {
+                "id": "Station:MIR.TsukubaExpress.Aoi",
+                "latitude": 35.7725,
+                "longitude": 139.82033,
+                "name": "青井",
+                "nameEn": "Aoi",
+                "nameKo": "",
+                "nameZhHans": "",
+                "nameZhHant": "",
+                "stationCode": "TX06"
+            },
+            {
+                "id": "Station:MIR.TsukubaExpress.Rokucho",
+                "latitude": 35.78492,
+                "longitude": 139.82181,
+                "name": "六町",
+                "nameEn": "Rokucho",
+                "nameKo": "",
+                "nameZhHans": "",
+                "nameZhHant": "",
+                "stationCode": "TX07"
+            },
+            {
+                "id": "Station:MIR.TsukubaExpress.Yashio",
+                "latitude": 35.80786,
+                "longitude": 139.84483,
+                "name": "八潮",
+                "nameEn": "Yashio",
+                "nameKo": "",
+                "nameZhHans": "",
+                "nameZhHant": "",
+                "stationCode": "TX08"
+            },
+            {
+                "id": "Station:MIR.TsukubaExpress.MisatoChuo",
+                "latitude": 35.82417,
+                "longitude": 139.87806,
+                "name": "三郷中央",
+                "nameEn": "Misato-chuo",
+                "nameKo": "",
+                "nameZhHans": "",
+                "nameZhHant": "",
+                "stationCode": "TX09"
+            },
+            {
+                "id": "Station:MIR.TsukubaExpress.MinamiNagareyama",
+                "latitude": 35.83786,
+                "longitude": 139.90433,
+                "name": "南流山",
+                "nameEn": "Minami-nagareyama",
+                "nameKo": "",
+                "nameZhHans": "",
+                "nameZhHant": "",
+                "stationCode": "TX10"
+            },
+            {
+                "id": "Station:MIR.TsukubaExpress.NagareyamaCentralPark",
+                "latitude": 35.85447,
+                "longitude": 139.91522,
+                "name": "流山セントラルパーク",
+                "nameEn": "Nagareyama-centralpark",
+                "nameKo": "",
+                "nameZhHans": "",
+                "nameZhHant": "",
+                "stationCode": "TX11"
+            },
+            {
+                "id": "Station:MIR.TsukubaExpress.NagareyamaOtakanomori",
+                "latitude": 35.87186,
+                "longitude": 139.92506,
+                "name": "流山おおたかの森",
+                "nameEn": "Nagareyama-otakanomori",
+                "nameKo": "",
+                "nameZhHans": "",
+                "nameZhHant": "",
+                "stationCode": "TX12"
+            },
+            {
+                "id": "Station:MIR.TsukubaExpress.KashiwanohaCampus",
+                "latitude": 35.89336,
+                "longitude": 139.9525,
+                "name": "柏の葉キャンパス",
+                "nameEn": "Kashiwanoha-campus",
+                "nameKo": "",
+                "nameZhHans": "",
+                "nameZhHant": "",
+                "stationCode": "TX13"
+            },
+            {
+                "id": "Station:MIR.TsukubaExpress.KashiwaTanaka",
+                "latitude": 35.911,
+                "longitude": 139.9575,
+                "name": "柏たなか",
+                "nameEn": "Kashiwa-tanaka",
+                "nameKo": "",
+                "nameZhHans": "",
+                "nameZhHant": "",
+                "stationCode": "TX14"
+            },
+            {
+                "id": "Station:MIR.TsukubaExpress.Moriya",
+                "latitude": 35.95069,
+                "longitude": 139.99225,
+                "name": "守谷",
+                "nameEn": "Moriya",
+                "nameKo": "",
+                "nameZhHans": "",
+                "nameZhHant": "",
+                "stationCode": "TX15"
+            },
+            {
+                "id": "Station:MIR.TsukubaExpress.Miraidaira",
+                "latitude": 35.99475,
+                "longitude": 140.03831,
+                "name": "みらい平",
+                "nameEn": "Miraidaira",
+                "nameKo": "",
+                "nameZhHans": "",
+                "nameZhHant": "",
+                "stationCode": "TX16"
+            },
+            {
+                "id": "Station:MIR.TsukubaExpress.Midorino",
+                "latitude": 36.02994,
+                "longitude": 140.05625,
+                "name": "みどりの",
+                "nameEn": "Midorino",
+                "nameKo": "",
+                "nameZhHans": "",
+                "nameZhHant": "",
+                "stationCode": "TX17"
+            },
+            {
+                "id": "Station:MIR.TsukubaExpress.BampakuKinenKoen",
+                "latitude": 36.05847,
+                "longitude": 140.05944,
+                "name": "万博記念公園",
+                "nameEn": "Bampaku-kinen-koen",
+                "nameKo": "",
+                "nameZhHans": "",
+                "nameZhHant": "",
+                "stationCode": "TX18"
+            },
+            {
+                "id": "Station:MIR.TsukubaExpress.KenkyuGakuen",
+                "latitude": 36.08217,
+                "longitude": 140.08239,
+                "name": "研究学園",
+                "nameEn": "Kenkyu-gakuen",
+                "nameKo": "",
+                "nameZhHans": "",
+                "nameZhHant": "",
+                "stationCode": "TX19"
+            },
+            {
+                "id": "Station:MIR.TsukubaExpress.Tsukuba",
+                "latitude": 36.08256,
+                "longitude": 140.11169,
+                "name": "つくば",
+                "nameEn": "Tsukuba",
+                "nameKo": "",
+                "nameZhHans": "",
+                "nameZhHant": "",
+                "stationCode": "TX20"
+            }
+        ],
+        "stopPatterns": [],
+        "throughServices": []
+    }
+]

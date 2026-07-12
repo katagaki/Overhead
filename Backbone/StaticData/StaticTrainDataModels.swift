@@ -231,7 +231,7 @@ public struct ThroughService: Codable, Hashable {
 /// One real train from the source timetable. `stops` are minutes-since-midnight
 /// at each station in travel order starting at `startIndex` (abs index into
 /// `line.stations`); a negative value means the train passes that station.
-public struct TimetableRun: Hashable, Sendable {
+public struct TimetableRun: Hashable, Sendable, Codable {
     public let calendar: ScheduleCalendar
     public let ascending: Bool
     public let startIndex: Int
@@ -252,7 +252,7 @@ public struct TimetableRun: Hashable, Sendable {
 
 // MARK: - Static Train Line
 
-public struct StaticTrainLine {
+public struct StaticTrainLine: Codable, Hashable {
     public let id: String          // e.g. "Railway:JR-East.Yamanote"
     public let nameJa: String
     public let nameEn: String
@@ -309,28 +309,16 @@ public struct StaticTrainLine {
 
 public enum StaticTrainData {
 
-    static let allLines: [StaticTrainLine] =
-        JREastLineData.lines
-        + TokyoMetroLineData.lines
-        + ToeiLineData.lines
-        + KeiseiLineData.lines
-        + TobuLineData.lines
-        + OdakyuLineData.lines
-        + TokyuLineData.lines
-        + KeikyuLineData.lines
-        + KeioLineData.lines
-        + KeioInokashiraLineData.lines
-        + SeibuLineData.lines
-        + SotetsuLineData.lines
-        + SotetsuIzuminoLineData.lines
-        + SotetsuShinYokohamaLineData.lines
-        + MinatomiraiLineData.lines
-        + SaitamaRapidLineData.lines
-        + RinkaiLineData.lines
-        + TsukubaExpressLineData.lines
-        + TamaMonorailLineData.lines
-        + YokohamaBlueLineData.lines
-        + YokohamaGreenLineData.lines
+    // One JSON resource per operator; see LineStore and StaticData/Lines/.
+    private static let lineResources = [
+        "JREastLine", "TokyoMetroLine", "ToeiLine", "KeiseiLine", "TobuLine",
+        "OdakyuLine", "TokyuLine", "KeikyuLine", "KeioLine", "KeioInokashiraLine",
+        "SeibuLine", "SotetsuLine", "SotetsuIzuminoLine", "SotetsuShinYokohamaLine",
+        "MinatomiraiLine", "SaitamaRapidLine", "RinkaiLine", "TsukubaExpressLine",
+        "TamaMonorailLine", "YokohamaBlueLine", "YokohamaGreenLine",
+    ]
+
+    static let allLines: [StaticTrainLine] = lineResources.flatMap { LineStore.lines($0) }
 
     private static let linesById: [String: StaticTrainLine] = Dictionary(
         allLines.map { ($0.id, $0) },
