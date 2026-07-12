@@ -160,11 +160,21 @@ public struct StaticLineDirection: Codable, Hashable {
     // Mid-line stations that also originate trains (当駅始発), beyond the
     // origin terminus at index 0. Empty for most lines.
     public let intermediateOrigins: [IntermediateOrigin]
+    // Express/skip-stop runs that ORIGINATE at the direction's terminus
+    // (index 0), layered ON TOP of the base pattern's local service. Each run
+    // carries its own trainType + per-run stopIndices, so a band-modeled local
+    // line can gain real 急行/準急 trains without discarding its locals.
+    // Non-origin express runs go through `intermediateOrigins` (whose ExactRuns
+    // now also carry type + stops).
+    public let expressWeekdayRuns: [ExactRun]
+    public let expressSaturdayHolidayRuns: [ExactRun]
 
     public init(
         id: String, nameJa: String, nameEn: String, isAscending: Bool,
         weekday: ServicePattern, saturdayHoliday: ServicePattern,
-        intermediateOrigins: [IntermediateOrigin] = []
+        intermediateOrigins: [IntermediateOrigin] = [],
+        expressWeekdayRuns: [ExactRun] = [],
+        expressSaturdayHolidayRuns: [ExactRun] = []
     ) {
         self.id = id
         self.nameJa = nameJa
@@ -173,10 +183,16 @@ public struct StaticLineDirection: Codable, Hashable {
         self.weekday = weekday
         self.saturdayHoliday = saturdayHoliday
         self.intermediateOrigins = intermediateOrigins
+        self.expressWeekdayRuns = expressWeekdayRuns
+        self.expressSaturdayHolidayRuns = expressSaturdayHolidayRuns
     }
 
     public func pattern(for calendar: ScheduleCalendar) -> ServicePattern {
         calendar == .weekday ? weekday : saturdayHoliday
+    }
+
+    public func expressRuns(for calendar: ScheduleCalendar) -> [ExactRun] {
+        calendar == .weekday ? expressWeekdayRuns : expressSaturdayHolidayRuns
     }
 }
 
@@ -982,6 +998,18 @@ public enum StaticTimetableGenerator {
                     trainType: pattern.trainType, tag: "org\(n)"
                 )
             }
+        }
+        // Express/skip-stop runs originating at the direction terminus, layered
+        // on top of the base local service. Each run supplies its own type +
+        // stopIndices, so `trainType` here is only a fallback.
+        let expressRuns = direction.expressRuns(for: calendar)
+        if !expressRuns.isEmpty {
+            result += exactRunServices(
+                line: line, direction: direction,
+                stations: stations, offsets: offsets,
+                startIndex: 0, runs: expressRuns,
+                trainType: pattern.trainType, tag: "exp"
+            )
         }
         return result
     }
