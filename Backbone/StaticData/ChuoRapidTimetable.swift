@@ -2,7 +2,7 @@
 // Real per-station times per chuoRapid run for 1:1 station timetables.
 // key: "<calendar>|<A/D>|<startStationId>|<HH:mm>"  value: minutes/station (travel order, -1=passes).
 extension JREastLineData {
-    static let chuoRapidExactTimes: [String: [Int]] = [
+    static let chuoRapidTimetable: [String: [Int]] = [
         "SaturdayHoliday|A|Station:JR-East.ChuoRapid.Mitaka|04:39": [279,281,283,286,288,291,293,296,300,303,307,310,314],
         "SaturdayHoliday|A|Station:JR-East.ChuoRapid.Mitaka|04:58": [298,300,303,305,308,310,312,316,319,322,326,329,333],
         "SaturdayHoliday|A|Station:JR-East.ChuoRapid.MusashiKoganei|04:29": [269,272,274,277,280,283,286,291,294,297],

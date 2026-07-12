@@ -123,6 +123,10 @@ enum JREastLineData {
             2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2,
             2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2,
         ],
+        // Real per-train timetable (630 grid) → 1:1 station timetables. Loop line:
+        // trains wrap the 有楽町→東京 seam (isLoop) so their runs stay contiguous.
+        timetableRuns: yamanoteTimetable,
+        isLoop: true,
         directions: [
             StaticLineDirection(
                 id: "static.RailDirection:JR-East.Yamanote.InnerLoop",
@@ -226,7 +230,7 @@ enum JREastLineData {
         ],
         // Real per-station times per run (658 grid), incl. holiday 快速 skips
         // of 高円寺/阿佐ケ谷/西荻窪 (negative sentinel) → 1:1 station timetables.
-        exactStationTimes: chuoRapidExactTimes,
+        exactStationTimes: chuoRapidTimetable,
         // Real exact runs, July-2026 revision (timetables.jreast.co.jp).
         // 快速 only: 中央特快・青梅特快・通勤快速・特急・むさしの号 are
         // excluded (their stop patterns skip stations the all-stops line
@@ -641,7 +645,7 @@ enum JREastLineData {
             2, 3, 2, 3, 3, 3, 3, 3, 2, 2, 3, 2, 3, 3, 3, 2, 3, 2, 2,
         ],
         // Real per-station times per run (659 grid) → 1:1 station timetables.
-        exactStationTimes: chuoSobuLocalExactTimes,
+        exactStationTimes: chuoSobuLocalTimetable,
         // Real exact runs, July-2026 revision (timetables.jreast.co.jp).
         // Per-train termini are honored: 千葉/三鷹 full runs plus 中野・津田沼
         // turnbacks, late-night 御茶ノ水行き, and 東西線直通 runs leaving at
@@ -1251,7 +1255,7 @@ enum JREastLineData {
         ],
         // Real per-station times per run (623 grid), incl. midday 快速 skips
         // (negative sentinel) → 1:1 station timetables.
-        exactStationTimes: keihinTohokuExactTimes,
+        exactStationTimes: keihinTohokuTimetable,
         // Real exact runs, July-2026 revision (timetables.jreast.co.jp).
         // Per-train termini are honored: 南浦和・赤羽・東十条 turnbacks on the
         // north end, 蒲田・鶴見・桜木町・磯子 on the south, plus 横浜線直通
@@ -1896,6 +1900,8 @@ enum JREastLineData {
         hopTimesMinutes: [
             5, 3, 5, 6, 3, 2, 3, 3, 2, 3, 2, 2, 3, 2, 2, 2, 2, 3,
         ],
+        // Real per-train timetable (628 grid) → 1:1 station timetables.
+        timetableRuns: saikyoTimetable,
         directions: [
             StaticLineDirection(
                 id: "static.RailDirection:JR-East.SaikyoKawagoe.Omiya",
@@ -1993,6 +1999,8 @@ enum JREastLineData {
         hopTimesMinutes: [
             2, 2, 3, 2, 3, 3, 3, 3, 3, 3, 3, 2, 2, 3, 2, 4, 4,
         ],
+        // Real per-train timetable (624 grid) → 1:1 station timetables.
+        timetableRuns: keiyoTimetable,
         directions: [
             StaticLineDirection(
                 id: "static.RailDirection:JR-East.Keiyo.Soga",

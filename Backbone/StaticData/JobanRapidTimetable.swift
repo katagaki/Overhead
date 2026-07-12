@@ -2,7 +2,7 @@
 // Real per-station times per run so Joban Rapid station timetables match 1:1.
 // key: "<calendar>|<A=asc/D=desc>|<startStationId>|<HH:mm>"  value: minutes/station, travel order.
 extension JREastLineData {
-    static let jobanRapidExactTimes: [String: [Int]] = [
+    static let jobanRapidTimetable: [String: [Int]] = [
         "SaturdayHoliday|A|Station:JR-East.JobanRapid.Abiko|06:26": [386,390,393],
         "SaturdayHoliday|A|Station:JR-East.JobanRapid.Matsudo|04:36": [276,284,289,292,296],
         "SaturdayHoliday|A|Station:JR-East.JobanRapid.Shinagawa|06:35": [395,400,404,409,414,416,420,423,434,442,447,450,453],

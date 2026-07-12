@@ -2,7 +2,7 @@
 // Real per-station times per keihinTohoku run for 1:1 station timetables.
 // key: "<calendar>|<A/D>|<startStationId>|<HH:mm>"  value: minutes/station (travel order, -1=passes).
 extension JREastLineData {
-    static let keihinTohokuExactTimes: [String: [Int]] = [
+    static let keihinTohokuTimetable: [String: [Int]] = [
         "SaturdayHoliday|A|Station:JR-East.KeihinTohoku.Isogo|04:20": [260,263,265,267,269,271,275,277,280,284,288,293,296,299,302,304,306,309,311,313,315,317,319,321,323,325,327,329,331,333,336,338,341,344,346,349,353,355,358,360,362,365],
         "SaturdayHoliday|A|Station:JR-East.KeihinTohoku.Isogo|04:30": [270,273,275,277,279,281,285,287,290,294,298,303,306,309,312,314,316,319,321,323,325,327,329,331,333,335,337,339,341,343,346,348,351,354,356,359,363,365,368,370,372,375],
         "SaturdayHoliday|A|Station:JR-East.KeihinTohoku.Isogo|04:41": [281,284,286,288,290,293,296,298,301,305,309,314,317,320,323,325,328,330,332,334,336,339,341,342,344,346,348,350,352,355,357,359,362,365,368,370,374,377,379,381,383,386],

@@ -208,7 +208,7 @@ public struct TrainService: Identifiable, Codable {
         self.originatesAtStart = originatesAtStart
     }
 
-    public enum TrainType: String, Codable {
+    public enum TrainType: String, Codable, Sendable {
         case local = "Local"
         case semiExpress = "SemiExpress"
         case sectionSemiExpress = "SectionSemiExpress"

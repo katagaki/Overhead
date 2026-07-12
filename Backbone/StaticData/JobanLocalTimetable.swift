@@ -2,7 +2,7 @@
 // Real per-station times per jobanLocal run for 1:1 station timetables.
 // key: "<calendar>|<A/D>|<startStationId>|<HH:mm>"  value: minutes/station (travel order, -1=passes).
 extension JREastLineData {
-    static let jobanLocalExactTimes: [String: [Int]] = [
+    static let jobanLocalTimetable: [String: [Int]] = [
         "SaturdayHoliday|A|Station:JR-East.JobanLocal.Ayase|04:58": [298,300,303,307,310,312,315,317,320,323,325,329],
         "SaturdayHoliday|A|Station:JR-East.JobanLocal.Ayase|05:19": [319,321,324,328,331,333,336,338,341,344,347,349],
         "SaturdayHoliday|A|Station:JR-East.JobanLocal.Ayase|05:40": [340,343,345,349,352,354,356,358,361,364,367,370],

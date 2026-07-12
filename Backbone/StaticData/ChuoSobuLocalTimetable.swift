@@ -2,7 +2,7 @@
 // Real per-station times per chuoSobuLocal run for 1:1 station timetables.
 // key: "<calendar>|<A/D>|<startStationId>|<HH:mm>"  value: minutes/station (travel order, -1=passes).
 extension JREastLineData {
-    static let chuoSobuLocalExactTimes: [String: [Int]] = [
+    static let chuoSobuLocalTimetable: [String: [Int]] = [
         "SaturdayHoliday|A|Station:JR-East.ChuoSobuLocal.Mitaka|04:35": [275,277,280,282,285,287,292,294,296,301,303,305,307,309,311,313,315,318,320,322,324,327,329,331,334,337,340,343,345,348,351,353,357,360,362,365,368,370,372],
         "SaturdayHoliday|A|Station:JR-East.ChuoSobuLocal.Mitaka|04:54": [294,296,299,302,304,306,309,312,314,316,318,320,322,324,326,328,330,333,335,336,338,341,343,346,348,351,355,357,359,362,365,368,371,374,377,379,382,384,387],
         "SaturdayHoliday|A|Station:JR-East.ChuoSobuLocal.Mitaka|05:08": [308,311,313,316,318,320,324,326,328,331,332,334,336,338,340,342,344,347,349,351,353,356,358,360,363,366,369,372,374,377,380,382,386,389,391,394,397,399,401],

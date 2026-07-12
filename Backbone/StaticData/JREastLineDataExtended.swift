@@ -109,8 +109,8 @@ extension JREastLineData {
         upHopTimesMinutes: [5, 3, 6, 3, 2, 3, 3, 9, 9, 5, 4, 4],
         // Real per-station times per run (642 grids) → station timetables match
         // the source 1:1; hop projection above is only the fallback for any run
-        // without a grid match. See JobanRapidExactTimes.swift.
-        exactStationTimes: jobanRapidExactTimes,
+        // without a grid match. See JobanRapidTimetable.swift.
+        exactStationTimes: jobanRapidTimetable,
         // Real exact runs, July-2026 revision (timetables.jreast.co.jp).
         // Down trains originate at 品川 (through-corridor, 06:35–22:56 only),
         // 上野 (the many 上野始発, incl. the 04:33 first), plus single
@@ -543,7 +543,7 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
         ],
         hopTimesMinutes: [3, 2, 4, 3, 2, 2, 2, 3, 3, 3, 3, 3, 4],
         // Real per-station times per run (641 grid) → 1:1 station timetables.
-        exactStationTimes: jobanLocalExactTimes,
+        exactStationTimes: jobanLocalTimetable,
         // Real exact runs, July-2026 revision (timetables.jreast.co.jp),
         // including per-train termini: most down trains terminate at 我孫子,
         // 取手 is reached only by weekday rush trains (none on holidays), and
@@ -627,6 +627,8 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
             6, 5, 3, 4, 3, 4, 3, 3, 5, 4, 5, 3, 9, 3,
             5, 5, 5, 3, 2, 2, 4, 5, 5, 6, 4, 7, 4,
         ],
+        // Real per-train timetable (station-page scrape) → 1:1 station timetables.
+        timetableRuns: yokosukaSobuTimetable,
         directions: [
             direction("YokosukaSobu", "Chiba", "東京・千葉方面", "For Tokyo & Chiba", ascending: true,
                       weekday: pattern("04:31", "23:11", [
@@ -686,6 +688,8 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
         hopTimesMinutes: [
             3, 5, 9, 8, 10, 5, 5, 4, 4, 5, 4, 5, 4, 3, 4, 3, 4, 5, 4, 5,
         ],
+        // Real per-train timetable (station-page scrape) → 1:1 station timetables.
+        timetableRuns: tokaidoTimetable,
         directions: [
             direction("Tokaido", "Atami", "小田原・熱海方面", "For Odawara & Atami", ascending: true,
                       weekday: pattern("05:20", "23:54", [
@@ -755,6 +759,8 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
         hopTimesMinutes: [
             4, 3, 3, 5, 4, 5, 3, 9, 3, 5, 4, 4, 2, 5, 6, 10, 9, 6,
         ],
+        // Real per-train timetable (station-page scrape) → 1:1 station timetables.
+        timetableRuns: shonanShinjukuTimetable,
         directions: [
             // 逗子 has a real morning service GAP (07:47→09:34 weekday,
             // 06:57→09:28 holiday), then ~30-min clockface — verified July-2026.
@@ -827,6 +833,8 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
         hopTimesMinutes: [
             6, 6, 5, 9, 4, 3, 4, 3, 4, 4, 3, 3, 3, 5, 7, 4, 4, 6, 7, 3, 4, 6, 7,
         ],
+        // Real per-train timetable (station-page scrape) → 1:1 station timetables.
+        timetableRuns: utsunomiyaTimetable,
         directions: [
             // First departure from Tokyo is 06:30 — earlier Ueno-Tokyo Line
             // departures on this corridor are Takasaki Line trains
@@ -896,6 +904,8 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
         hopTimesMinutes: [
             6, 6, 5, 9, 4, 3, 5, 4, 3, 3, 4, 4, 4, 4, 3, 5, 6, 5, 4, 5, 4, 4, 5, 5,
         ],
+        // Real per-train timetable (station-page scrape) → 1:1 station timetables.
+        timetableRuns: takasakiTimetable,
         directions: [
             // Last departure from Tokyo is 23:19 — later Ueno-Tokyo Line
             // departures on this corridor are Utsunomiya Line trains
@@ -965,6 +975,8 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
         hopTimesMinutes: [
             3, 3, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 2, 3,
         ],
+        // Real per-train timetable (608 grid) → 1:1 station timetables.
+        timetableRuns: yokohamaLineTimetable,
         directions: [
             direction("Yokohama", "Hachioji", "八王子方面", "For Hachioji", ascending: true,
                       weekday: pattern("04:53", "24:04", [
@@ -1032,6 +1044,8 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
         hopTimesMinutes: [
             3, 2, 2, 2, 2, 2, 3, 2, 3, 2, 2, 2, 2, 3, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2,
         ],
+        // Real per-train timetable (703 grid) → 1:1 station timetables.
+        timetableRuns: nambuTimetable,
         directions: [
             // 川崎 morning peak is ~20 trains/h (verified July-2026) — far
             // denser than the reverse direction.
@@ -1093,6 +1107,8 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
         hopTimesMinutes: [
             3, 3, 2, 2, 4, 2, 2, 2, 2, 2, 2, 3, 4, 4, 3, 3, 2, 4, 3, 3, 3, 5, 3, 3, 2,
         ],
+        // Real per-train timetable (708 grid) → 1:1 station timetables.
+        timetableRuns: musashinoTimetable,
         directions: [
             direction("Musashino", "FuchuHommachi", "府中本町方面", "For Fuchu-Hommachi", ascending: true,
                       weekday: pattern("04:59", "24:02", [
@@ -1195,6 +1211,8 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
         ],
         // Hops measured from real July-2026 train pairs (median, both directions).
         hopTimesMinutes: [3, 2, 2, 2, 3, 3, 2, 3, 3, 3, 2, 2],
+        // Real per-train timetable (652 grid) → 1:1 station timetables.
+        timetableRuns: omeTimetable,
         directions: [
             direction("Ome", "Ome", "青梅方面", "For Ome", ascending: true,
                       weekday: pattern("04:46", "24:23", [
@@ -1247,6 +1265,8 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
         ],
         // Hops measured from real July-2026 train pairs (median, both directions).
         hopTimesMinutes: [2, 3, 4, 2, 2, 4],
+        // Real per-train timetable (652 grid) → 1:1 station timetables.
+        timetableRuns: itsukaichiTimetable,
         directions: [
             direction("Itsukaichi", "MusashiItsukaichi", "武蔵五日市方面", "For Musashi-Itsukaichi", ascending: true,
                       weekday: pattern("05:48", "24:18", [

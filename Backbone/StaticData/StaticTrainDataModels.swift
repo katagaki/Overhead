@@ -4,7 +4,7 @@ import Foundation
 
 // MARK: - Schedule Calendar
 
-public enum ScheduleCalendar: String, Codable, CaseIterable {
+public enum ScheduleCalendar: String, Codable, CaseIterable, Sendable {
     case weekday = "Weekday"
     case saturdayHoliday = "SaturdayHoliday"
 
@@ -226,6 +226,30 @@ public struct ThroughService: Codable, Hashable {
     }
 }
 
+// MARK: - Timetable Run
+
+/// One real train from the source timetable. `stops` are minutes-since-midnight
+/// at each station in travel order starting at `startIndex` (abs index into
+/// `line.stations`); a negative value means the train passes that station.
+public struct TimetableRun: Hashable, Sendable {
+    public let calendar: ScheduleCalendar
+    public let ascending: Bool
+    public let startIndex: Int
+    public let stops: [Int]
+    public let startsHere: Bool
+    public let type: TrainService.TrainType
+    // Whether the last stop is a real terminus (no onward departure). False for a
+    // loop train continuing through the seam, whose last listed stop still departs.
+    public let terminates: Bool
+    public init(_ calendar: ScheduleCalendar, _ ascending: Bool, _ startIndex: Int,
+                _ startsHere: Bool, _ type: TrainService.TrainType, _ stops: [Int],
+                terminates: Bool = true) {
+        self.calendar = calendar; self.ascending = ascending; self.startIndex = startIndex
+        self.startsHere = startsHere; self.type = type; self.stops = stops
+        self.terminates = terminates
+    }
+}
+
 // MARK: - Static Train Line
 
 public struct StaticTrainLine {
@@ -249,6 +273,16 @@ public struct StaticTrainLine {
     // falls back to hop projection. Only lines with per-run dwell that a
     // median-hop model can't reproduce need this (e.g. Joban Rapid).
     public var exactStationTimes: [String: [Int]]? = nil
+    // Full real timetable: one entry per actual train (from the source grid), so
+    // station timetables and same-line journeys are 1:1 without any band/origin
+    // modeling. When set, `services(for:calendar:)` builds services DIRECTLY from
+    // these and ignores `directions`' patterns for enumeration (directions are
+    // still used for names/ascending and 直通 composites read them unchanged, so
+    // this is composite-safe). Use for lines that were headway-band approximated.
+    public var timetableRuns: [TimetableRun]? = nil
+    // Loop line (Yamanote): station indices wrap mod stations.count in
+    // timetableServices so trains crossing the last→first seam are contiguous.
+    public var isLoop: Bool = false
     public let directions: [StaticLineDirection]
     public let delayInfo: DelayCheckInfo
     public var throughServices: [ThroughService] = [] // 直通運転
@@ -958,7 +992,53 @@ public enum StaticTimetableGenerator {
     // MARK: Train Services
 
     public static func services(for line: StaticTrainLine, calendar: ScheduleCalendar) -> [TrainService] {
-        line.directions.flatMap { services(for: line, direction: $0, calendar: calendar) }
+        if let runs = line.timetableRuns {
+            return timetableServices(line: line, runs: runs.filter { $0.calendar == calendar })
+        }
+        return line.directions.flatMap { services(for: line, direction: $0, calendar: calendar) }
+    }
+
+    /// Builds one service per real train from `line.timetableRuns` (1:1 with the
+    /// source). Bypasses band/exact/IO enumeration; 直通 composites are unaffected
+    /// because they read `line.directions` patterns, not these services.
+    private static func timetableServices(line: StaticTrainLine, runs: [TimetableRun]) -> [TrainService] {
+        let n = line.stations.count
+        // Absolute station index for travel-order position k: step +1 ascending,
+        // -1 descending, straight from `startIndex`. On a loop line it wraps mod n
+        // (Yamanote trains cross the 有楽町→東京 seam); otherwise out-of-range = nil.
+        func absIndex(_ start: Int, _ k: Int, ascending: Bool) -> Int? {
+            let raw = start + (ascending ? k : -k)
+            if line.isLoop { return ((raw % n) + n) % n }
+            return (raw >= 0 && raw < n) ? raw : nil
+        }
+        return runs.compactMap { run in
+            guard let first = run.stops.first else { return nil }
+            let lastIdx = run.stops.count - 1
+            guard let destAbs = absIndex(run.startIndex, lastIdx, ascending: run.ascending) else { return nil }
+            let serviceId = "\(line.id).\(run.ascending ? "A" : "D").tt.\(run.startIndex).\(timeString(first))"
+            let entries = run.stops.indices.compactMap { k -> TimetableEntry? in
+                let m = run.stops[k]
+                guard m >= 0 else { return nil }   // train passes this station
+                guard let abs = absIndex(run.startIndex, k, ascending: run.ascending) else { return nil }
+                let time = timeString(m)
+                return TimetableEntry(
+                    id: "\(serviceId)_\(k)",
+                    stationId: line.stations[abs].id,
+                    arrivalTime: k == 0 ? nil : time,
+                    departureTime: (k == lastIdx && run.terminates) ? nil : time
+                )
+            }
+            guard entries.count >= 2 else { return nil }
+            return TrainService(
+                id: serviceId,
+                lineId: line.id,
+                trainType: run.type,
+                direction: run.ascending ? .outbound : .inbound,
+                timetable: entries,
+                destinationStationId: line.stations[destAbs].id,
+                originatesAtStart: run.startsHere
+            )
+        }
     }
 
     private static func services(
