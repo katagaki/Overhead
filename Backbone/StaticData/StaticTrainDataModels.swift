@@ -1041,11 +1041,16 @@ public enum StaticTimetableGenerator {
             // list with 各停); skip-stop types stop only at their pattern's
             // stations (origin and terminus always included). A run's own
             // `stopIndices` wins over the line's per-type pattern.
+            // stopIndices / stopPatterns are ABSOLUTE indices into
+            // `line.stations` (ascending order); `stations`/`i` here are
+            // direction-ordered, so map i -> absolute before testing.
             let effectiveType = run.trainType ?? trainType
             let stopSet = run.stopIndices.map(Set.init) ?? line.stopPatterns[effectiveType]
+            let n = stations.count
             let serviceId = "\(line.id).\(direction.id).\(tag).\(timeString(origin))"
             let entries = (startIndex...endIndex).compactMap { i -> TimetableEntry? in
-                if let stopSet, i != startIndex, i != endIndex, !stopSet.contains(i) {
+                let absI = direction.isAscending ? i : (n - 1 - i)
+                if let stopSet, i != startIndex, i != endIndex, !stopSet.contains(absI) {
                     return nil  // express passes through this station
                 }
                 let time = timeString(origin + Int((offsets[i] - baseOffset).rounded()))
