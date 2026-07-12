@@ -65,15 +65,23 @@ public struct ExactRun: Codable, Hashable {
     // (e.g. an 急行 sharing a list with 各停). nil = inherit the pattern type.
     // Skip-stop types resolve their stops via the line's `stopPatterns`.
     public let trainType: TrainService.TrainType?
+    // Explicit stop stations (indices into the line's `stations`) for this one
+    // run, used when a type's stop pattern is NOT uniform across trains (e.g.
+    // Tobu 急行, where different trains of the same type stop differently).
+    // Takes precedence over the line's per-type `stopPatterns`; nil falls back
+    // to that pattern, then to all-stops. Origin/terminus are always stops.
+    public let stopIndices: [Int]?
 
     public init(_ departure: String, terminusStationId: String? = nil,
                 startsHere: Bool = true, continuesBeyond: Bool = false,
-                trainType: TrainService.TrainType? = nil) {
+                trainType: TrainService.TrainType? = nil,
+                stopIndices: [Int]? = nil) {
         self.departure = departure
         self.terminusStationId = terminusStationId
         self.startsHere = startsHere
         self.continuesBeyond = continuesBeyond
         self.trainType = trainType
+        self.stopIndices = stopIndices
     }
 }
 
@@ -1003,9 +1011,10 @@ public enum StaticTimetableGenerator {
             }
             // A run may override the pattern's type (e.g. an 急行 sharing a
             // list with 各停); skip-stop types stop only at their pattern's
-            // stations (origin and terminus always included).
+            // stations (origin and terminus always included). A run's own
+            // `stopIndices` wins over the line's per-type pattern.
             let effectiveType = run.trainType ?? trainType
-            let stopSet = line.stopPatterns[effectiveType]
+            let stopSet = run.stopIndices.map(Set.init) ?? line.stopPatterns[effectiveType]
             let serviceId = "\(line.id).\(direction.id).\(tag).\(timeString(origin))"
             let entries = (startIndex...endIndex).compactMap { i -> TimetableEntry? in
                 if let stopSet, i != startIndex, i != endIndex, !stopSet.contains(i) {
