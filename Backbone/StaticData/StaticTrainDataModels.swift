@@ -65,15 +65,23 @@ public struct ExactRun: Codable, Hashable {
     // (e.g. an 急行 sharing a list with 各停). nil = inherit the pattern type.
     // Skip-stop types resolve their stops via the line's `stopPatterns`.
     public let trainType: TrainService.TrainType?
+    // Explicit stop stations (indices into the line's `stations`) for this one
+    // run, used when a type's stop pattern is NOT uniform across trains (e.g.
+    // Tobu 急行, where different trains of the same type stop differently).
+    // Takes precedence over the line's per-type `stopPatterns`; nil falls back
+    // to that pattern, then to all-stops. Origin/terminus are always stops.
+    public let stopIndices: [Int]?
 
     public init(_ departure: String, terminusStationId: String? = nil,
                 startsHere: Bool = true, continuesBeyond: Bool = false,
-                trainType: TrainService.TrainType? = nil) {
+                trainType: TrainService.TrainType? = nil,
+                stopIndices: [Int]? = nil) {
         self.departure = departure
         self.terminusStationId = terminusStationId
         self.startsHere = startsHere
         self.continuesBeyond = continuesBeyond
         self.trainType = trainType
+        self.stopIndices = stopIndices
     }
 }
 
@@ -152,11 +160,21 @@ public struct StaticLineDirection: Codable, Hashable {
     // Mid-line stations that also originate trains (当駅始発), beyond the
     // origin terminus at index 0. Empty for most lines.
     public let intermediateOrigins: [IntermediateOrigin]
+    // Express/skip-stop runs that ORIGINATE at the direction's terminus
+    // (index 0), layered ON TOP of the base pattern's local service. Each run
+    // carries its own trainType + per-run stopIndices, so a band-modeled local
+    // line can gain real 急行/準急 trains without discarding its locals.
+    // Non-origin express runs go through `intermediateOrigins` (whose ExactRuns
+    // now also carry type + stops).
+    public let expressWeekdayRuns: [ExactRun]
+    public let expressSaturdayHolidayRuns: [ExactRun]
 
     public init(
         id: String, nameJa: String, nameEn: String, isAscending: Bool,
         weekday: ServicePattern, saturdayHoliday: ServicePattern,
-        intermediateOrigins: [IntermediateOrigin] = []
+        intermediateOrigins: [IntermediateOrigin] = [],
+        expressWeekdayRuns: [ExactRun] = [],
+        expressSaturdayHolidayRuns: [ExactRun] = []
     ) {
         self.id = id
         self.nameJa = nameJa
@@ -165,10 +183,16 @@ public struct StaticLineDirection: Codable, Hashable {
         self.weekday = weekday
         self.saturdayHoliday = saturdayHoliday
         self.intermediateOrigins = intermediateOrigins
+        self.expressWeekdayRuns = expressWeekdayRuns
+        self.expressSaturdayHolidayRuns = expressSaturdayHolidayRuns
     }
 
     public func pattern(for calendar: ScheduleCalendar) -> ServicePattern {
         calendar == .weekday ? weekday : saturdayHoliday
+    }
+
+    public func expressRuns(for calendar: ScheduleCalendar) -> [ExactRun] {
+        calendar == .weekday ? expressWeekdayRuns : expressSaturdayHolidayRuns
     }
 }
 
@@ -975,6 +999,18 @@ public enum StaticTimetableGenerator {
                 )
             }
         }
+        // Express/skip-stop runs originating at the direction terminus, layered
+        // on top of the base local service. Each run supplies its own type +
+        // stopIndices, so `trainType` here is only a fallback.
+        let expressRuns = direction.expressRuns(for: calendar)
+        if !expressRuns.isEmpty {
+            result += exactRunServices(
+                line: line, direction: direction,
+                stations: stations, offsets: offsets,
+                startIndex: 0, runs: expressRuns,
+                trainType: pattern.trainType, tag: "exp"
+            )
+        }
         return result
     }
 
@@ -1003,9 +1039,10 @@ public enum StaticTimetableGenerator {
             }
             // A run may override the pattern's type (e.g. an 急行 sharing a
             // list with 各停); skip-stop types stop only at their pattern's
-            // stations (origin and terminus always included).
+            // stations (origin and terminus always included). A run's own
+            // `stopIndices` wins over the line's per-type pattern.
             let effectiveType = run.trainType ?? trainType
-            let stopSet = line.stopPatterns[effectiveType]
+            let stopSet = run.stopIndices.map(Set.init) ?? line.stopPatterns[effectiveType]
             let serviceId = "\(line.id).\(direction.id).\(tag).\(timeString(origin))"
             let entries = (startIndex...endIndex).compactMap { i -> TimetableEntry? in
                 if let stopSet, i != startIndex, i != endIndex, !stopSet.contains(i) {
