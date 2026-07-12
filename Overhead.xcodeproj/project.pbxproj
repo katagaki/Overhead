@@ -66,6 +66,7 @@
 		E49DD0293000C7F8005BA3DF /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
 		E4D93A0B2FF7F7C6004D37D7 /* Backbone.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Backbone.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4EC35DF300126A300C9FF2A /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
+		E4EC3AED300384AC00C9FF2A /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -192,6 +193,7 @@
 				E49DCE832FFCFB2B005BA3DF /* Overhead.xcodeproj */,
 				E49DCEF12FFD1371005BA3DF /* Overhead.xcodeproj */,
 				E49DD0293000C7F8005BA3DF /* Overhead.xcodeproj */,
+				E4EC35DF300126A300C9FF2A /* Overhead.xcodeproj */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -207,6 +209,11 @@
 			sourceTree = "<group>";
 		};
 		E4EC35E0300126A300C9FF2A /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E4EC3AEE300384AC00C9FF2A /* Products */ = {
 			isa = PBXGroup;
 			name = Products;
 			sourceTree = "<group>";
@@ -333,6 +340,10 @@
 				{
 					ProductGroup = E4EC35E0300126A300C9FF2A /* Products */;
 					ProjectRef = E4EC35DF300126A300C9FF2A /* Overhead.xcodeproj */;
+				},
+				{
+					ProductGroup = E4EC3AEE300384AC00C9FF2A /* Products */;
+					ProjectRef = E4EC3AED300384AC00C9FF2A /* Overhead.xcodeproj */;
 				},
 				{
 					ProductGroup = E49DCEF22FFD1371005BA3DF /* Products */;
