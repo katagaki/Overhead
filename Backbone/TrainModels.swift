@@ -221,6 +221,7 @@ public struct TrainService: Identifiable, Codable {
         case commuterExpress = "CommuterExpress"
         case commuterSemiExpress = "CommuterSemiExpress"
         case liner = "Liner"
+        case rapidLimitedExpress = "RapidLimitedExpress"
         case limitedExpress = "LimitedExpress"
         case commuterLimitedExpress = "CommuterLimitedExpress"
 
@@ -239,6 +240,7 @@ public struct TrainService: Identifiable, Codable {
             case .commuterExpress: return "通勤急行"
             case .commuterSemiExpress: return "通勤準急"
             case .liner: return "ライナー"
+            case .rapidLimitedExpress: return "快特"
             case .limitedExpress: return "特急"
             case .commuterLimitedExpress: return "通勤特急"
             }
