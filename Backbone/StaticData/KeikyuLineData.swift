@@ -199,13 +199,14 @@ enum KeikyuLineData {
         // official 停車駅案内 (rosen-zu.net / jorudan; times & types from ODPT
         // StationTimetable). 快特: 泉岳寺・品川・京急蒲田・京急川崎・横浜・上大岡・
         // 金沢文庫・金沢八景・横須賀中央・堀ノ内. 特急: adds 青物横丁・平和島・
-        // 神奈川新町・追浜・汐入. エアポート急行(急行): 品川方面 stops
+        // 神奈川新町・追浜・汐入・京急大津・馬堀海岸・浦賀 (特急 continues past
+        // 堀ノ内 to 浦賀, all-stop on that tail). エアポート急行(急行): 品川方面 stops
         // 青物横丁・立会川・平和島; 横浜方面 stops 京急川崎・京急鶴見・神奈川新町・
         // 京急東神奈川・日ノ出町・井土ヶ谷・弘明寺・杉田・能見台 (union; segments
         // never overlap through 京急蒲田 so per-run clipping is exact).
         stopPatterns: [
             .rapidLimitedExpress: [0, 1, 11, 14, 25, 32, 37, 38, 44, 46],
-            .limitedExpress: [0, 1, 4, 8, 11, 14, 22, 25, 32, 37, 38, 39, 43, 44, 46],
+            .limitedExpress: [0, 1, 4, 8, 11, 14, 22, 25, 32, 37, 38, 39, 43, 44, 46, 47, 48, 49],
             .express: [0, 1, 4, 6, 8, 11, 14, 17, 22, 23, 25, 27, 30, 31, 32, 34, 36, 37, 38],
         ]
     )
