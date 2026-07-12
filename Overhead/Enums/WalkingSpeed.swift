@@ -1,8 +1,6 @@
 import SwiftUI
 import Backbone
 
-// MARK: - Walking Speed
-
 /// How fast the user walks — scales transfer buffers and walking ETAs.
 enum WalkingSpeed: String, CaseIterable, Identifiable {
     case slow

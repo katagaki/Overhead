@@ -1,10 +1,8 @@
 import Foundation
 import Backbone
 
-// MARK: - Timetable-Based Position Engine
-// Computes train position purely from timetable + current time + delay offset.
-// Used as the fallback when GPS is unavailable (underground, etc.)
-
+/// Computes train position purely from timetable + current time + delay offset.
+/// Used as the fallback when GPS is unavailable (underground, etc.)
 enum TrainPositionEngine {
 
     static func computePosition(

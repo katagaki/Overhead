@@ -61,6 +61,7 @@
 		7B5E01DC2F76257200861ADF /* LCDExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LCDExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		7B5E01DE2F76257200861ADF /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		7B5E01E02F76257300861ADF /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		E417077F30044A1B003E53FF /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
 		E49DCE832FFCFB2B005BA3DF /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
 		E49DCEF12FFD1371005BA3DF /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
 		E49DD0293000C7F8005BA3DF /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
@@ -182,6 +183,11 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		E417078030044A1B003E53FF /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
 		E49DCE842FFCFB2B005BA3DF /* Products */ = {
 			isa = PBXGroup;
 			name = Products;
@@ -194,6 +200,7 @@
 				E49DCEF12FFD1371005BA3DF /* Overhead.xcodeproj */,
 				E49DD0293000C7F8005BA3DF /* Overhead.xcodeproj */,
 				E4EC35DF300126A300C9FF2A /* Overhead.xcodeproj */,
+				E4EC3AED300384AC00C9FF2A /* Overhead.xcodeproj */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -337,6 +344,10 @@
 			productRefGroup = 7B5E01CB2F7624FC00861ADF /* Products */;
 			projectDirPath = "";
 			projectReferences = (
+				{
+					ProductGroup = E417078030044A1B003E53FF /* Products */;
+					ProjectRef = E417077F30044A1B003E53FF /* Overhead.xcodeproj */;
+				},
 				{
 					ProductGroup = E4EC35E0300126A300C9FF2A /* Products */;
 					ProjectRef = E4EC35DF300126A300C9FF2A /* Overhead.xcodeproj */;
