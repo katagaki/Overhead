@@ -321,6 +321,13 @@ struct VerticalLCDLine: View {
     private let terminalRadius: CGFloat = 12
     private let currentRadius: CGFloat = 12
 
+    /// Color of the line each station actually belongs to. Composite journeys
+    /// keep per-leg station ids, so stations after a 乗り換え resolve to the
+    /// connecting line's color instead of the whole journey's (first-leg) color.
+    private func stationColor(_ station: Station) -> Color {
+        StaticTrainData.line(containingStationId: station.id)?.trainLine.color ?? lineColor
+    }
+
     var body: some View {
         let stations = journey.journeyStations
         let timetable = journey.journeyTimetable
@@ -341,6 +348,10 @@ struct VerticalLCDLine: View {
                     ? transferTarget(at: station, nextStation: stations[index + 1])
                     : nil
                 let segFrac = segmentFillFraction(stationIndex: index, totalStations: stations.count)
+                let rowColor = stationColor(station)
+                // The track below a row runs toward the NEXT station, so it
+                // takes that station's line color (matters right after 乗換).
+                let segColor = index < stations.count - 1 ? stationColor(stations[index + 1]) : rowColor
 
                 HStack(alignment: .top, spacing: 0) {
                     timeColumn(for: station, timetable: timetable, isPast: isPast, isCurrent: isCurrent,
@@ -351,7 +362,8 @@ struct VerticalLCDLine: View {
                         isPast: isPast,
                         isCurrent: isCurrent,
                         isTerminal: isTerminal,
-                        isNext: isNext
+                        isNext: isNext,
+                        color: rowColor
                     )
                     .frame(width: 40)
 
@@ -361,7 +373,8 @@ struct VerticalLCDLine: View {
                         isCurrent: isCurrent,
                         isNext: isNext && !isTransfer,
                         isTerminal: isTerminal,
-                        isTransfer: isTransfer
+                        isTransfer: isTransfer,
+                        color: rowColor
                     )
                     .padding(.bottom, isLast ? 0 : 14)
 
@@ -376,7 +389,7 @@ struct VerticalLCDLine: View {
                 .background(alignment: .topLeading) {
                     if !isLast {
                         trackSegment(filled: isPast, fillFraction: target == nil ? segFrac : min(1, segFrac * 2),
-                                     dashed: isTransfer)
+                                     dashed: isTransfer, color: segColor)
                             .frame(width: trackWidth)
                             .padding(.top, stationDotRadius(isTerminal: isTerminal, isCurrent: isCurrent))
                             .padding(.leading, 56 + 20 - trackWidth / 2)
@@ -434,7 +447,8 @@ struct VerticalLCDLine: View {
     // MARK: - Track Segment
 
     @ViewBuilder
-    private func trackSegment(filled: Bool, fillFraction: Double, dashed: Bool = false) -> some View {
+    private func trackSegment(filled: Bool, fillFraction: Double, dashed: Bool = false, color: Color? = nil) -> some View {
+        let strokeColor = color ?? lineColor
         if dashed {
             ZStack(alignment: .top) {
                 VerticalDashLine()
@@ -443,7 +457,7 @@ struct VerticalLCDLine: View {
 
                 GeometryReader { geo in
                     VerticalDashLine()
-                        .stroke(lineColor,
+                        .stroke(strokeColor,
                                 style: StrokeStyle(lineWidth: trackWidth, lineCap: .round, dash: [1, 8]))
                         .frame(height: max(0, geo.size.height * fillFraction))
                         .clipped()
@@ -456,7 +470,7 @@ struct VerticalLCDLine: View {
 
                 GeometryReader { geo in
                     RoundedRectangle(cornerRadius: trackWidth / 2)
-                        .fill(lineColor)
+                        .fill(strokeColor)
                         .frame(height: max(0, geo.size.height * fillFraction))
                 }
             }
@@ -531,7 +545,7 @@ struct VerticalLCDLine: View {
         }
         .frame(minHeight: stationSpacing * 0.8, alignment: .top)
         .background(alignment: .topLeading) {
-            trackSegment(filled: isPast, fillFraction: fillFraction)
+            trackSegment(filled: isPast, fillFraction: fillFraction, color: target.line.color)
                 .frame(width: trackWidth)
                 .padding(.top, circleRadius)
                 .padding(.leading, 56 + 20 - trackWidth / 2)
@@ -541,34 +555,35 @@ struct VerticalLCDLine: View {
     // MARK: - Station Circle
 
     @ViewBuilder
-    private func stationCircle(isPast: Bool, isCurrent: Bool, isTerminal: Bool, isNext: Bool) -> some View {
+    private func stationCircle(isPast: Bool, isCurrent: Bool, isTerminal: Bool, isNext: Bool, color: Color? = nil) -> some View {
         let r = isCurrent ? currentRadius : (isTerminal ? terminalRadius : circleRadius)
+        let ringColor = color ?? lineColor
 
         ZStack {
             if isCurrent {
                 Circle()
-                    .fill(lineColor)
+                    .fill(ringColor)
                     .frame(width: r * 2, height: r * 2)
                 Circle()
                     .fill(Color.white)
                     .frame(width: r * 0.7, height: r * 0.7)
-                    .shadow(color: lineColor, radius: 3)
+                    .shadow(color: ringColor, radius: 3)
                 Circle()
-                    .strokeBorder(lineColor, lineWidth: 2)
+                    .strokeBorder(ringColor, lineWidth: 2)
                     .frame(width: r * 2 + 10, height: r * 2 + 10)
             } else if isTerminal {
                 Circle()
                     .fill(Color(.systemBackground))
                     .frame(width: r * 2, height: r * 2)
                 Circle()
-                    .strokeBorder(isPast ? lineColor : Color(.systemGray3), lineWidth: 3)
+                    .strokeBorder(isPast ? ringColor : Color(.systemGray3), lineWidth: 3)
                     .frame(width: r * 2, height: r * 2)
                 Circle()
-                    .fill(isPast ? lineColor : Color(.systemGray5))
+                    .fill(isPast ? ringColor : Color(.systemGray5))
                     .frame(width: r * 2 - 10, height: r * 2 - 10)
             } else if isPast {
                 Circle()
-                    .fill(lineColor)
+                    .fill(ringColor)
                     .frame(width: r * 2, height: r * 2)
             } else {
                 Circle()
@@ -581,7 +596,7 @@ struct VerticalLCDLine: View {
 
             if isNext && !isCurrent {
                 Circle()
-                    .strokeBorder(lineColor, lineWidth: 2)
+                    .strokeBorder(ringColor, lineWidth: 2)
                     .frame(width: r * 2 + 6, height: r * 2 + 6)
             }
         }
@@ -590,13 +605,14 @@ struct VerticalLCDLine: View {
     // MARK: - Station Label
 
     @ViewBuilder
-    private func stationLabel(station: Station, isPast: Bool, isCurrent: Bool, isNext: Bool, isTerminal: Bool, isTransfer: Bool = false) -> some View {
+    private func stationLabel(station: Station, isPast: Bool, isCurrent: Bool, isNext: Bool, isTerminal: Bool, isTransfer: Bool = false, color: Color? = nil) -> some View {
+        let accent = color ?? lineColor
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 6) {
                 if !station.stationCode.isEmpty {
                     StationNumberBadge(
                         code: station.stationCode,
-                        color: lineColor,
+                        color: accent,
                         opacity: isPast && !isCurrent ? 0.4 : 1.0,
                         size: .regular,
                         stationName: station.name
@@ -635,7 +651,7 @@ struct VerticalLCDLine: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(lineColor)
+                    .background(accent)
                     .clipShape(Capsule())
                     .padding(.top, 2)
             }
@@ -643,10 +659,10 @@ struct VerticalLCDLine: View {
             if isNext && !isCurrent {
                 Text("Label.NextStop")
                     .font(.system(size: 10, weight: .semibold))
-                    .foregroundColor(lineColor)
+                    .foregroundColor(accent)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(lineColor.opacity(0.1))
+                    .background(accent.opacity(0.1))
                     .clipShape(Capsule())
                     .padding(.top, 2)
             }

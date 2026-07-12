@@ -99,7 +99,11 @@ extension JREastLineData {
             st("JobanRapid", "Tennodai", "天王台", "Tennodai", "JJ12", 35.8700, 140.0672),
             st("JobanRapid", "Toride", "取手", "Toride", "JJ13", 35.8973, 140.0629),
         ],
-        hopTimesMinutes: [5, 3, 5, 4, 3, 3, 3, 7, 6, 6, 3, 4],
+        // Measured from real July-2026 train pairs (median dep-to-dep per hop,
+        // both directions): 東京→上野 7 (Ueno dwell), 北千住→松戸 9, 松戸→柏 8,
+        // 柏→我孫子 5. Values match the down direction exactly; up runs a few
+        // minutes longer (station dwell), so up times err early, never late.
+        hopTimesMinutes: [5, 4, 7, 3, 2, 3, 3, 9, 8, 5, 3, 4],
         // Real exact runs, July-2026 revision (timetables.jreast.co.jp).
         // Down trains originate at 品川 (through-corridor, 06:35–22:56 only),
         // 上野 (the many 上野始発, incl. the 04:33 first), plus single
@@ -608,9 +612,11 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
             st("YokosukaSobu", "Inage", "稲毛", "Inage", "JO27", 35.6333, 140.0900),
             st("YokosukaSobu", "Chiba", "千葉", "Chiba", "JO28", 35.6131, 140.1136),
         ],
+        // Measured from real July-2026 train pairs (median, both directions);
+        // 横浜→新川崎 is 9, 武蔵小杉→西大井 5 (was overstated).
         hopTimesMinutes: [
-            4, 4, 3, 3, 3, 5, 3, 3, 5, 4, 4, 4, 7, 3,
-            7, 5, 4, 3, 2, 2, 4, 5, 5, 6, 4, 6, 5,
+            6, 5, 3, 4, 3, 4, 3, 3, 5, 4, 5, 3, 9, 3,
+            5, 5, 5, 3, 2, 2, 4, 5, 5, 6, 4, 7, 4,
         ],
         directions: [
             direction("YokosukaSobu", "Chiba", "東京・千葉方面", "For Tokyo & Chiba", ascending: true,
@@ -622,7 +628,7 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
                       ], .rapid)),
             direction("YokosukaSobu", "Kurihama", "横浜・久里浜方面", "For Yokohama & Kurihama", ascending: false,
                       weekday: pattern("04:45", "24:15", [
-                          ("04:45", 10), ("06:30", 5), ("09:30", 9), ("16:30", 7), ("20:00", 9), ("22:00", 12),
+                          ("04:45", 10), ("06:30", 8.5), ("09:30", 9), ("16:30", 7), ("20:00", 9), ("22:00", 12),
                       ], .rapid),
                       holiday: pattern("04:45", "24:15", [
                           ("04:45", 10), ("07:00", 7), ("10:00", 9), ("20:00", 10),
@@ -667,8 +673,9 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
             st("Tokaido", "Yugawara", "湯河原", "Yugawara", "JT20", 35.1472, 139.1078),
             st("Tokaido", "Atami", "熱海", "Atami", "JT21", 35.1038, 139.0778),
         ],
+        // Measured from real July-2026 train pairs (median, both directions).
         hopTimesMinutes: [
-            3, 5, 8, 8, 10, 5, 4, 3, 3, 5, 4, 4, 4, 3, 4, 3, 4, 5, 3, 5,
+            3, 5, 9, 8, 10, 5, 5, 4, 4, 5, 4, 5, 4, 3, 4, 3, 4, 5, 4, 5,
         ],
         directions: [
             direction("Tokaido", "Atami", "小田原・熱海方面", "For Odawara & Atami", ascending: true,
@@ -678,12 +685,14 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
                       holiday: pattern("05:20", "23:54", [
                           ("05:20", 10), ("07:00", 7), ("10:00", 9), ("20:00", 11),
                       ])),
+            // 熱海 departures run ~3/h all day (verified July-2026); mid-line
+            // 小田原/平塚 origins are not expressible in the band model.
             direction("Tokaido", "Tokyo", "東京方面", "For Tokyo", ascending: false,
                       weekday: pattern("04:35", "23:07", [
-                          ("04:35", 10), ("06:00", 5), ("09:30", 20), ("16:30", 7), ("20:00", 10), ("22:00", 12),
+                          ("04:35", 20),
                       ]),
                       holiday: pattern("04:35", "23:07", [
-                          ("04:35", 10), ("07:00", 7), ("10:00", 20), ("20:00", 11),
+                          ("04:35", 20),
                       ])),
         ],
         delayInfo: delayInfo,
@@ -735,15 +744,17 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
             st("ShonanShinjuku", "Omiya", "大宮", "Omiya", "JS24", 35.9064, 139.6238),
         ],
         hopTimesMinutes: [
-            6, 3, 3, 5, 4, 4, 4, 6, 3, 7, 3, 5, 3, 5, 5, 10, 8, 8,
+            4, 3, 3, 5, 4, 5, 3, 9, 3, 5, 4, 4, 2, 5, 6, 10, 9, 6,
         ],
         directions: [
+            // 逗子 has a real morning service GAP (07:47→09:34 weekday,
+            // 06:57→09:28 holiday), then ~30-min clockface — verified July-2026.
             direction("ShonanShinjuku", "Omiya", "新宿・大宮方面", "For Shinjuku & Omiya", ascending: true,
                       weekday: pattern("06:54", "21:11", [
-                          ("06:54", 30), ("09:30", 60), ("16:30", 30), ("20:00", 60),
+                          ("06:54", 25), ("07:47", 107), ("09:34", 30),
                       ], .rapid),
                       holiday: pattern("06:57", "21:34", [
-                          ("06:57", 40), ("10:00", 60), ("16:30", 40),
+                          ("06:57", 151), ("09:28", 30),
                       ], .rapid)),
             direction("ShonanShinjuku", "Zushi", "横浜・逗子方面", "For Yokohama & Zushi", ascending: false,
                       weekday: pattern("06:07", "22:26", [
@@ -805,24 +816,24 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
             st("Utsunomiya", "Utsunomiya", "宇都宮", "Utsunomiya", "", 36.5591, 139.8988),
         ],
         hopTimesMinutes: [
-            4, 5, 5, 8, 4, 3, 4, 3, 4, 4, 3, 4, 3, 5, 5, 4, 4, 5, 6, 4, 3, 5, 7,
+            6, 6, 5, 9, 4, 3, 4, 3, 4, 4, 3, 3, 3, 5, 7, 4, 4, 6, 7, 3, 4, 6, 7,
         ],
         directions: [
             // First departure from Tokyo is 06:30 — earlier Ueno-Tokyo Line
             // departures on this corridor are Takasaki Line trains
             direction("Utsunomiya", "Utsunomiya", "宇都宮方面", "For Utsunomiya", ascending: true,
                       weekday: pattern("06:30", "23:32", [
-                          ("06:30", 15), ("09:30", 14), ("16:30", 10), ("20:00", 14), ("22:00", 18),
+                          ("06:30", 15), ("09:30", 20), ("16:30", 10), ("20:00", 20),
                       ]),
                       holiday: pattern("06:30", "23:32", [
-                          ("06:30", 15), ("10:00", 13), ("20:00", 15),
+                          ("06:30", 25), ("10:00", 20), ("20:00", 20),
                       ])),
             direction("Utsunomiya", "Tokyo", "上野・東京方面", "For Ueno & Tokyo", ascending: false,
                       weekday: pattern("04:37", "22:42", [
-                          ("04:37", 15), ("06:00", 15), ("09:30", 14), ("16:30", 10), ("20:00", 14), ("22:00", 18),
+                          ("04:37", 15), ("06:00", 15), ("09:30", 20), ("16:30", 10), ("20:00", 20),
                       ]),
                       holiday: pattern("04:37", "22:42", [
-                          ("04:37", 15), ("07:00", 10), ("10:00", 13), ("20:00", 15),
+                          ("04:37", 15), ("07:00", 12), ("10:00", 20), ("20:00", 20),
                       ])),
         ],
         delayInfo: delayInfo,
@@ -874,21 +885,23 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
             st("Takasaki", "Takasaki", "高崎", "Takasaki", "", 36.3222, 139.0128),
         ],
         hopTimesMinutes: [
-            4, 5, 5, 8, 4, 3, 4, 4, 2, 3, 4, 4, 4, 3, 3, 5, 5, 5, 4, 5, 4, 4, 6, 5,
+            6, 6, 5, 9, 4, 3, 5, 4, 3, 3, 4, 4, 4, 4, 3, 5, 6, 5, 4, 5, 4, 4, 5, 5,
         ],
         directions: [
             // Last departure from Tokyo is 23:19 — later Ueno-Tokyo Line
             // departures on this corridor are Utsunomiya Line trains
             direction("Takasaki", "Takasaki", "高崎方面", "For Takasaki", ascending: true,
                       weekday: pattern("05:53", "23:19", [
-                          ("05:53", 15), ("06:30", 15), ("09:30", 14), ("16:30", 10), ("20:00", 14), ("22:00", 18),
+                          ("05:53", 15), ("06:30", 15), ("09:30", 18), ("16:30", 10), ("20:00", 25),
                       ]),
                       holiday: pattern("05:53", "23:19", [
-                          ("05:53", 15), ("07:00", 15), ("10:00", 13), ("20:00", 15),
+                          ("05:53", 15), ("07:00", 15), ("10:00", 18), ("20:00", 20),
                       ])),
+            // 高崎-origin mornings run only ~2-4/h (verified July-2026); the
+            // dense 06:00 headway was a down-corridor figure, not the origin's.
             direction("Takasaki", "Tokyo", "上野・東京方面", "For Ueno & Tokyo", ascending: false,
                       weekday: pattern("05:10", "23:06", [
-                          ("05:10", 15), ("06:00", 15), ("09:30", 30), ("16:30", 10), ("20:00", 14), ("22:00", 18),
+                          ("05:10", 20), ("06:00", 20), ("09:30", 30), ("16:30", 12), ("20:00", 20),
                       ]),
                       holiday: pattern("05:10", "23:06", [
                           ("05:10", 15), ("07:00", 15), ("10:00", 30), ("20:00", 15),
@@ -939,8 +952,9 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
             st("Yokohama", "Katakura", "片倉", "Katakura", "JH31", 35.6421, 139.3352),
             st("Yokohama", "Hachioji", "八王子", "Hachioji", "JH32", 35.6553, 139.3390),
         ],
+        // Hops measured from real July-2026 train pairs (median, both directions).
         hopTimesMinutes: [
-            3, 3, 2, 2, 3, 3, 2, 3, 3, 3, 3, 3, 2, 2, 3, 3, 3, 3, 3,
+            3, 3, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 2, 3,
         ],
         directions: [
             direction("Yokohama", "Hachioji", "八王子方面", "For Hachioji", ascending: true,
@@ -950,12 +964,14 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
                       holiday: pattern("04:53", "24:04", [
                           ("04:53", 8), ("07:00", 6), ("10:00", 8), ("20:00", 9),
                       ])),
+            // 八王子 departures run a flat ~6/h through the day (verified
+            // July-2026); the descending bands are NOT mirrors of ascending.
             direction("Yokohama", "HigashiKanagawa", "東神奈川方面", "For Higashi-Kanagawa", ascending: false,
                       weekday: pattern("04:53", "24:11", [
-                          ("04:53", 8), ("06:30", 5), ("09:30", 8), ("16:30", 6), ("20:00", 8), ("22:00", 10),
+                          ("04:53", 10), ("06:30", 7), ("09:00", 10), ("21:00", 12),
                       ]),
                       holiday: pattern("04:53", "24:11", [
-                          ("04:53", 8), ("07:00", 6), ("10:00", 8), ("20:00", 9),
+                          ("04:53", 10), ("07:00", 9), ("10:00", 10), ("20:00", 10),
                       ])),
         ],
         delayInfo: delayInfo,
@@ -1003,20 +1019,23 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
             st("Nambu", "NishiKunitachi", "西国立", "Nishi-Kunitachi", "JN25", 35.6932, 139.4228),
             st("Nambu", "Tachikawa", "立川", "Tachikawa", "JN26", 35.6980, 139.4139),
         ],
+        // Hops measured from real July-2026 train pairs (median, both directions).
         hopTimesMinutes: [
-            2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 3, 2, 2, 2, 3, 2,
+            3, 2, 2, 2, 2, 2, 3, 2, 3, 2, 2, 2, 2, 3, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2,
         ],
         directions: [
+            // 川崎 morning peak is ~20 trains/h (verified July-2026) — far
+            // denser than the reverse direction.
             direction("Nambu", "Tachikawa", "立川方面", "For Tachikawa", ascending: true,
                       weekday: pattern("04:48", "24:26", [
-                          ("04:48", 8), ("06:30", 7.5), ("09:30", 7), ("16:30", 6), ("20:00", 8), ("22:00", 10),
+                          ("04:48", 8), ("06:30", 4), ("09:30", 7), ("16:30", 5.5), ("20:00", 8), ("22:00", 10),
                       ]),
                       holiday: pattern("04:48", "24:26", [
                           ("04:48", 8), ("07:00", 6), ("10:00", 7.5), ("20:00", 9),
                       ])),
             direction("Nambu", "Kawasaki", "川崎方面", "For Kawasaki", ascending: false,
                       weekday: pattern("04:46", "24:02", [
-                          ("04:46", 8), ("06:30", 4.5), ("09:30", 7), ("16:30", 6), ("20:00", 8), ("22:00", 10),
+                          ("04:46", 8), ("06:30", 6), ("09:30", 7), ("16:30", 9), ("20:00", 8), ("22:00", 10),
                       ]),
                       holiday: pattern("04:46", "24:02", [
                           ("04:46", 8), ("07:00", 6), ("10:00", 7.5), ("20:00", 9),
@@ -1061,8 +1080,9 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
             st("Musashino", "KitaFuchu", "北府中", "Kita-Fuchu", "JM34", 35.6788, 139.4738),
             st("Musashino", "FuchuHommachi", "府中本町", "Fuchu-Hommachi", "JM35", 35.6618, 139.4788),
         ],
+        // Hops measured from real July-2026 train pairs (median, both directions).
         hopTimesMinutes: [
-            3, 3, 2, 3, 4, 2, 3, 2, 2, 2, 2, 3, 3, 3, 3, 2, 2, 3, 3, 3, 3, 4, 3, 2, 2,
+            3, 3, 2, 2, 4, 2, 2, 2, 2, 2, 2, 3, 4, 4, 3, 3, 2, 4, 3, 3, 3, 5, 3, 3, 2,
         ],
         directions: [
             direction("Musashino", "FuchuHommachi", "府中本町方面", "For Fuchu-Hommachi", ascending: true,
@@ -1094,7 +1114,8 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
     /// Bridge line for the 武蔵野線⇄京葉線 through service: the 西船橋–市川塩浜
     /// connecting track is on neither line's station list, so through
     /// resolution needs it as its own line (same pattern as 西武有楽町線).
-    /// Patterns approximate the through-train window (estimated).
+    /// Windows/headways verified against the real 西船橋 東京方面 and
+    /// 市川塩浜 西船橋方面 pages, July-2026 revision (~3 through trains/h).
     static let keiyoBranch = StaticTrainLine(
         id: "Railway:JR-East.KeiyoBranch",
         nameJa: "京葉線（西船橋支線）",
@@ -1112,19 +1133,19 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
         directions: [
             direction("KeiyoBranch", "IchikawaShiohama", "市川塩浜・東京方面", "For Ichikawa-Shiohama & Tokyo",
                       ascending: true,
-                      weekday: pattern("05:10", "23:30", [
-                          ("05:10", 12), ("07:00", 8), ("10:00", 15), ("17:00", 10), ("20:00", 15),
+                      weekday: pattern("05:45", "23:27", [
+                          ("05:45", 25), ("07:00", 9), ("09:00", 20),
                       ]),
-                      holiday: pattern("05:10", "23:30", [
-                          ("05:10", 12), ("07:00", 10), ("10:00", 15), ("20:00", 15),
+                      holiday: pattern("05:45", "23:28", [
+                          ("05:45", 25), ("07:00", 15), ("09:00", 20),
                       ])),
             direction("KeiyoBranch", "NishiFunabashi", "西船橋方面", "For Nishi-Funabashi",
                       ascending: false,
-                      weekday: pattern("05:30", "24:05", [
-                          ("05:30", 12), ("07:00", 8), ("10:00", 15), ("17:00", 10), ("20:00", 15),
+                      weekday: pattern("06:25", "23:56", [
+                          ("06:25", 20), ("17:00", 15), ("20:00", 20),
                       ]),
-                      holiday: pattern("05:30", "24:05", [
-                          ("05:30", 12), ("07:00", 10), ("10:00", 15), ("20:00", 15),
+                      holiday: pattern("06:38", "23:56", [
+                          ("06:38", 20),
                       ])),
         ],
         delayInfo: delayInfo,
@@ -1163,21 +1184,24 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
             st("Ome", "HigashiOme", "東青梅", "Higashi-Ome", "JC61", 35.7898, 139.2648),
             st("Ome", "Ome", "青梅", "Ome", "JC62", 35.7878, 139.2438),
         ],
-        hopTimesMinutes: [3, 2, 2, 2, 4, 2, 2, 3, 3, 3, 3, 3],
+        // Hops measured from real July-2026 train pairs (median, both directions).
+        hopTimesMinutes: [3, 2, 2, 2, 3, 3, 2, 3, 3, 3, 2, 2],
         directions: [
             direction("Ome", "Ome", "青梅方面", "For Ome", ascending: true,
                       weekday: pattern("04:46", "24:23", [
-                          ("04:46", 10), ("06:30", 6), ("09:30", 11), ("16:30", 8), ("20:00", 10), ("22:00", 14),
+                          ("04:46", 10), ("06:30", 6), ("09:30", 11), ("16:30", 8), ("20:00", 7.5), ("22:00", 14),
                       ]),
                       holiday: pattern("04:46", "24:21", [
                           ("04:46", 10), ("07:00", 8), ("10:00", 10), ("20:00", 12),
                       ])),
+            // 青梅 departures run ~5/h nearly all day (verified July-2026);
+            // NOT a mirror of the 立川 volumes.
             direction("Ome", "Tachikawa", "立川方面", "For Tachikawa", ascending: false,
                       weekday: pattern("04:35", "23:58", [
-                          ("04:35", 10), ("06:00", 6), ("09:30", 11), ("16:30", 8), ("20:00", 10), ("22:00", 14),
+                          ("04:35", 12), ("06:00", 9), ("09:30", 12), ("20:00", 12), ("22:00", 15),
                       ]),
                       holiday: pattern("04:35", "23:56", [
-                          ("04:35", 10), ("07:00", 8), ("10:00", 10), ("20:00", 12),
+                          ("04:35", 12), ("07:00", 12), ("10:00", 13), ("20:00", 15),
                       ])),
         ],
         delayInfo: delayInfo,
@@ -1212,18 +1236,19 @@ private static let jobanLocalUpMatsudoHol: [ExactRun] = [
             st("Itsukaichi", "MusashiMasuko", "武蔵増戸", "Musashi-Masuko", "JC85", 35.7240, 139.2560),
             st("Itsukaichi", "MusashiItsukaichi", "武蔵五日市", "Musashi-Itsukaichi", "JC86", 35.7253, 139.2177),
         ],
-        hopTimesMinutes: [3, 2, 3, 2, 2, 3],
+        // Hops measured from real July-2026 train pairs (median, both directions).
+        hopTimesMinutes: [2, 3, 4, 2, 2, 4],
         directions: [
             direction("Itsukaichi", "MusashiItsukaichi", "武蔵五日市方面", "For Musashi-Itsukaichi", ascending: true,
                       weekday: pattern("05:48", "24:18", [
                           ("05:48", 20), ("06:30", 20), ("09:30", 25), ("16:30", 15), ("20:00", 20), ("22:00", 25),
                       ]),
                       holiday: pattern("05:57", "24:18", [
-                          ("05:57", 20), ("07:00", 17), ("10:00", 22), ("20:00", 25),
+                          ("05:57", 20), ("07:00", 20), ("10:00", 22), ("20:00", 25),
                       ])),
             direction("Itsukaichi", "Haijima", "拝島・立川方面", "For Haijima & Tachikawa", ascending: false,
                       weekday: pattern("05:20", "23:53", [
-                          ("05:20", 20), ("06:30", 12), ("09:30", 25), ("16:30", 15), ("20:00", 20), ("22:00", 25),
+                          ("05:20", 20), ("06:30", 15), ("09:30", 25), ("16:30", 15), ("20:00", 20), ("22:00", 25),
                       ]),
                       holiday: pattern("05:22", "23:49", [
                           ("05:22", 20), ("07:00", 17), ("10:00", 22), ("20:00", 25),
