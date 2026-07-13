@@ -11,7 +11,7 @@ struct JourneySheetView: View {
 
     var body: some View {
         NavigationStack {
-            JourneyView(viewModel: viewModel, showsEndButton: false)
+            JourneyView(viewModel: viewModel)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {

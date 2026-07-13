@@ -782,6 +782,7 @@
       }
     },
     "Journey.Delay.Minutes %lld" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
