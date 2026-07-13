@@ -28,6 +28,11 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
 
     // MARK: - Config
 
+    // User preference: GPS only, GPS + timetable, or timetable only.
+    // Read live so switching modes mid-journey takes effect on the next tick.
+    private var journeyMode: JourneyMode { .current }
+    private var gpsStarted = false
+
     private let locationManager = CLLocationManager()
     private var journey: Journey?
     private var delay: DelayInfo?
@@ -85,14 +90,10 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         // Always start the timetable tick — it's the baseline
         startTimetableTick()
 
-        let status = locationManager.authorizationStatus
-        if status == .notDetermined {
-            locationManager.requestWhenInUseAuthorization()
-        } else if status == .authorizedWhenInUse || status == .authorizedAlways {
-            beginGPSUpdates()
-        } else {
-            locationError = "\(String(localized: "LocationError.NotAuthorized"))"
+        if journeyMode == .timetable {
             trackingMode = .timetable
+        } else {
+            requestGPSIfAuthorized()
         }
 
         isTracking = true
@@ -103,6 +104,8 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
 
     func stopTracking() {
         locationManager.stopUpdatingLocation()
+        gpsStarted = false
+        currentLocation = nil
         timetableTimer?.invalidate()
         timetableTimer = nil
         isTracking = false
@@ -110,6 +113,32 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         stationCoordinates = []
         recentAccuracies = []
         lastGoodGPSTime = nil
+    }
+
+    private func requestGPSIfAuthorized() {
+        switch locationManager.authorizationStatus {
+        case .notDetermined:
+            locationManager.requestWhenInUseAuthorization()
+        case .authorizedWhenInUse, .authorizedAlways:
+            beginGPSUpdates()
+        default:
+            locationError = "\(String(localized: "LocationError.NotAuthorized"))"
+            trackingMode = .timetable
+        }
+    }
+
+    /// Starts or stops GPS updates to match the journey mode preference —
+    /// called on every tick so mid-journey changes take effect.
+    private func syncGPSToJourneyMode() {
+        if journeyMode == .timetable {
+            guard gpsStarted else { return }
+            locationManager.stopUpdatingLocation()
+            gpsStarted = false
+            currentLocation = nil
+            lastGoodGPSTime = nil
+        } else if !gpsStarted {
+            requestGPSIfAuthorized()
+        }
     }
 
     func updateDelay(_ delay: DelayInfo?) {
@@ -136,21 +165,39 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
     private func tickTimetable() {
         guard let journey else { return }
 
+        syncGPSToJourneyMode()
+
         let timetableState = TrainPositionEngine.computePosition(
             journey: journey, delay: delay
         )
 
-        // If GPS is stale or we're in timetable mode, this becomes the source of truth
-        let gpsFresh = isGPSFresh()
-
-        if !gpsFresh || trackingMode == .timetable {
-            if gpsFresh == false && trackingMode == .gps {
+        switch journeyMode {
+        case .timetable:
+            if trackingMode != .timetable {
                 trackingMode = .timetable
             }
             positionState = timetableState
             updateLiveActivity()
+
+        case .gps:
+            // GPS drives once a fix exists — the timetable only bootstraps
+            if currentLocation == nil {
+                positionState = timetableState
+                updateLiveActivity()
+            }
+
+        case .hybrid:
+            // If GPS is stale, the timetable becomes the source of truth
+            let gpsFresh = isGPSFresh()
+            if !gpsFresh || trackingMode == .timetable {
+                if gpsFresh == false && trackingMode == .gps {
+                    trackingMode = .timetable
+                }
+                positionState = timetableState
+                updateLiveActivity()
+            }
+            // If GPS is active and fresh, the GPS path handles updates — don't override
         }
-        // If GPS is active and fresh, the GPS path handles updates — don't override
     }
 
     // MARK: - CLLocationManagerDelegate
@@ -158,7 +205,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         switch manager.authorizationStatus {
         case .authorizedWhenInUse, .authorizedAlways:
-            if journey != nil { beginGPSUpdates() }
+            if journey != nil, journeyMode != .timetable { beginGPSUpdates() }
         case .denied, .restricted:
             locationError = "\(String(localized: "LocationError.NotAuthorized"))"
             trackingMode = .timetable
@@ -188,6 +235,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
     // MARK: - Core Calculation
 
     private func recalculate() {
+        guard journeyMode != .timetable else { return }
         guard let journey, let location = currentLocation else { return }
 
         let stations = journey.journeyStations
@@ -208,6 +256,20 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         }
 
         let snapResult = snapToLine(location: location.coordinate)
+
+        // GPS-only mode trusts the fix outright — no blending, no fallback
+        if journeyMode == .gps {
+            trackingMode = .gps
+            lastGoodGPSTime = Date()
+            positionState = buildGPSState(
+                snapResult: snapResult,
+                location: location.coordinate,
+                journey: journey,
+                stations: stations
+            )
+            updateLiveActivity()
+            return
+        }
 
         // Off-route check: the GPS fix is trustworthy AND clearly far from
         // the line — the user isn't on this train. Don't blend the snapped
@@ -586,6 +648,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
 
     private func beginGPSUpdates() {
         locationManager.startUpdatingLocation()
+        gpsStarted = true
         locationError = nil
     }
 

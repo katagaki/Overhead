@@ -8,7 +8,7 @@ import Backbone
 struct RootView: View {
     @ObservedObject var viewModel: JourneyViewModel
 
-    @AppStorage("showEnglish") private var showEnglish = true
+    @AppStorage(JourneyMode.storageKey) private var journeyMode = JourneyMode.hybrid
     @State private var showJourneySheet = false
     @State private var navigationPath = NavigationPath()
     @Namespace private var journeyZoom
@@ -84,7 +84,15 @@ struct RootView: View {
 
     private var moreMenu: some View {
         Menu {
-            Toggle("Settings.Toggle.ShowEnglish", isOn: $showEnglish)
+            Section("Settings.Section.JourneyMode") {
+                Picker("Settings.Section.JourneyMode", selection: $journeyMode) {
+                    ForEach(JourneyMode.allCases) { mode in
+                        Text(mode.label).tag(mode)
+                    }
+                }
+                .pickerStyle(.inline)
+            }
+            .labelsVisibility(.visible)
 
             if viewModel.activeJourney != nil {
                 Section("Settings.Section.CurrentJourney") {
