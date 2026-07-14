@@ -274,15 +274,39 @@ private struct LEDRaster {
     }
 
     init(segments: [LEDPage.Segment]) {
+        // Like the real panels: a flat-terminal gothic for Japanese (Zen
+        // Kaku Gothic New — no flared stroke tips to muddy the dots) and a
+        // serif face for Latin runs.
+        let jaFont = UIFont(name: "MPLUS1p-Regular", size: 15)
+            ?? UIFont.systemFont(ofSize: 14, weight: .regular)
+        let latinFont = UIFont(name: "TimesNewRomanPSMT", size: 15)
+            ?? UIFont.systemFont(ofSize: 14, weight: .regular)
+
         let attributed = NSMutableAttributedString()
         for segment in segments {
-            attributed.append(NSAttributedString(
-                string: segment.text,
-                attributes: [
-                    .font: UIFont.systemFont(ofSize: 14, weight: .regular),
-                    .foregroundColor: segment.color.uiColor,
-                ]
-            ))
+            // Split into ASCII / non-ASCII runs so each script gets its face.
+            var run = ""
+            var runIsASCII: Bool?
+            func flush() {
+                guard !run.isEmpty else { return }
+                attributed.append(NSAttributedString(
+                    string: run,
+                    attributes: [
+                        .font: runIsASCII == true ? latinFont : jaFont,
+                        .foregroundColor: segment.color.uiColor,
+                    ]
+                ))
+                run = ""
+            }
+            for char in segment.text {
+                let ascii = char.isASCII
+                if ascii != runIsASCII {
+                    flush()
+                    runIsASCII = ascii
+                }
+                run.append(char)
+            }
+            flush()
         }
 
         let textSize = attributed.size()
