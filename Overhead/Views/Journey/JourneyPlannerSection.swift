@@ -24,6 +24,8 @@ struct JourneyPlannerSection: View {
     @State private var hasSearched = false
     @State private var isSearching = false
     @State private var searchError: LocalizedStringKey?
+    /// Walk-to-station minutes applied to the last search (depart-now only).
+    @State private var searchWalkMinutes: Int?
     @StateObject private var walkingEstimator = WalkingTimeEstimator()
 
     private static let maxViaCount = 3
@@ -401,6 +403,13 @@ struct JourneyPlannerSection: View {
                     .foregroundColor(.secondary)
                     .padding(.leading, 4)
 
+                // The walk to the station is shown separately — candidate
+                // rows always show the trains' actual times.
+                if let walkMinutes = searchWalkMinutes,
+                   let fromName = fromSelection?.station.localizedName {
+                    noticeRow(icon: "figure.walk", text: "Setup.WalkEstimate \(fromName) \(walkMinutes)")
+                }
+
                 VStack(spacing: 0) {
                     ForEach(Array(candidates.enumerated()), id: \.element.id) { index, candidate in
                         candidateRow(candidate)
@@ -445,7 +454,8 @@ struct JourneyPlannerSection: View {
                                  ? "Candidate.DepartsNow"
                                  : "Candidate.DepartsIn \(waitMinutes)")
                                 .font(.system(size: 12, weight: .bold))
-                                .foregroundColor(waitMinutes <= 3 ? .red : .green)
+                                // Tight when there's barely more time than the walk
+                                .foregroundColor(waitMinutes <= (searchWalkMinutes ?? 0) + 3 ? .red : .green)
                         }
                     }
 
@@ -453,6 +463,16 @@ struct JourneyPlannerSection: View {
                         Text("Candidate.Duration \(candidate.durationMinutes)")
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
+
+                        if let walkMinutes = searchWalkMinutes {
+                            Text("Candidate.Walk \(walkMinutes)")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color(.tertiarySystemFill))
+                                .clipShape(Capsule())
+                        }
 
                         if candidate.transferCount > 0 {
                             Text("Candidate.Transfers \(candidate.transferCount)")
@@ -631,6 +651,7 @@ struct JourneyPlannerSection: View {
         candidates = []
         hasSearched = false
         searchError = nil
+        searchWalkMinutes = nil
     }
 
     private func search() {
@@ -642,12 +663,16 @@ struct JourneyPlannerSection: View {
             // When leaving now, trains departing before the user can walk to
             // the station are excluded outright.
             var departure = effectiveDeparture
+            var walkMinutes: Int?
             if departureMode == .now,
                walkingSpeed != .none,
                let station = fromSelection?.station,
                let walkSeconds = await walkingEstimator.walkingSeconds(to: station) {
-                departure = departure.addingTimeInterval(walkSeconds * walkingSpeed.paceMultiplier)
+                let adjusted = walkSeconds * walkingSpeed.paceMultiplier
+                departure = departure.addingTimeInterval(adjusted)
+                walkMinutes = max(1, Int((adjusted / 60).rounded()))
             }
+            searchWalkMinutes = walkMinutes
 
             candidates = viewModel.searchTrainCandidates(
                 stationNames: names,
