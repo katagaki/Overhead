@@ -142,6 +142,9 @@ final class LiveActivityManager {
         legLines: [TrainJourneyAttributes.LegLine] = []
     ) {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+        // The Live Activity's self-advancing views are schedule-driven and
+        // can't run off a journey without times.
+        guard journey.hasSchedule else { return }
 
         let stations = journey.journeyStations
         let timetableIds = Set(journey.journeyTimetable.map(\.stationId))

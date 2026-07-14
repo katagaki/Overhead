@@ -9,6 +9,7 @@ enum TrackingMode: String, Codable {
     case gps = "GPS"                     // GPS is good — using snapped location
     case timetable = "Timetable"         // GPS unreliable — using schedule + delay
     case blended = "Blended"             // Mixing both signals with confidence weights
+    case manual = "Manual"               // No schedule and no usable GPS — user flips stations
 }
 
 // MARK: - Location-Based Train Tracker
@@ -63,6 +64,10 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
 
     private var lastGoodGPSTime: Date?
 
+    // Station the user last confirmed (or GPS last established) on a
+    // schedule-less journey; the prev/next buttons move it.
+    private var manualStationIndex = 0
+
     private var recentAccuracies: [Double] = []
     private let accuracyWindowSize = 5
 
@@ -84,6 +89,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         self.delay = delay
         self.recentAccuracies = []
         self.lastGoodGPSTime = nil
+        self.manualStationIndex = 0
 
         stationCoordinates = buildStationCoordinates(for: journey)
 
@@ -167,6 +173,11 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
 
         syncGPSToJourneyMode()
 
+        guard journey.hasSchedule else {
+            tickScheduleless(journey)
+            return
+        }
+
         let timetableState = TrainPositionEngine.computePosition(
             journey: journey, delay: delay
         )
@@ -198,6 +209,58 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
             }
             // If GPS is active and fresh, the GPS path handles updates — don't override
         }
+    }
+
+    // MARK: - Schedule-less Journeys (時刻表無視)
+
+    /// Tick for a journey with no schedule: GPS drives when fresh, otherwise
+    /// the manually flipped station is the position.
+    private func tickScheduleless(_ journey: Journey) {
+        switch journeyMode {
+        case .timetable:
+            trackingMode = .manual
+            positionState = manualPositionState(journey: journey)
+        case .gps, .hybrid:
+            if !isGPSFresh() {
+                trackingMode = .manual
+                positionState = manualPositionState(journey: journey)
+            }
+            // Fresh GPS keeps driving via the location delegate path
+        }
+        updateLiveActivity()
+    }
+
+    /// Moves the manual position by `delta` stations and republishes.
+    func stepManualStation(_ delta: Int) {
+        guard let journey else { return }
+        let count = journey.journeyStations.count
+        manualStationIndex = min(max(manualStationIndex + delta, 0), max(count - 1, 0))
+        trackingMode = .manual
+        positionState = manualPositionState(journey: journey)
+        updateLiveActivity()
+    }
+
+    private func manualPositionState(journey: Journey) -> TrainPositionState {
+        let stations = journey.journeyStations
+        let last = max(stations.count - 1, 0)
+        let idx = min(max(manualStationIndex, 0), last)
+        let nextIdx = min(idx + 1, last)
+        let next = stations.isEmpty
+            ? Station(id: "", name: "", nameEn: "", stationCode: "", latitude: nil, longitude: nil)
+            : stations[nextIdx]
+        return TrainPositionState(
+            progress: last > 0 ? Double(idx) / Double(last) : 1,
+            segmentFrom: idx,
+            segmentTo: nextIdx,
+            segmentProgress: 0,
+            currentStationIndex: idx,
+            nextStationName: next.name,
+            nextStationNameEn: next.nameEn,
+            delayMinutes: 0,
+            estimatedArrival: Date(),
+            status: idx >= last ? .arrived : .onTime,
+            trackingModeRaw: TrackingMode.manual.rawValue
+        )
     }
 
     // MARK: - CLLocationManagerDelegate
@@ -249,13 +312,44 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         )
 
         guard stationCoordinates.count >= 2 else {
-            trackingMode = .timetable
-            positionState = timetableState
+            trackingMode = journey.hasSchedule ? .timetable : .manual
+            positionState = journey.hasSchedule
+                ? timetableState
+                : manualPositionState(journey: journey)
             updateLiveActivity()
             return
         }
 
         let snapResult = snapToLine(location: location.coordinate)
+
+        // Schedule-less journey: GPS drives when trustworthy, manual otherwise
+        if !journey.hasSchedule {
+            let confidence = computeGPSConfidence(
+                accuracy: location.horizontalAccuracy,
+                snapDistance: snapResult.distance,
+                age: -location.timestamp.timeIntervalSinceNow
+            )
+            if confidence >= 0.5, snapResult.distance <= offRouteDistance {
+                trackingMode = .gps
+                lastGoodGPSTime = Date()
+                let gpsState = buildGPSState(
+                    snapResult: snapResult,
+                    location: location.coordinate,
+                    journey: journey,
+                    stations: stations
+                )
+                // Keep the manual index in sync so flipping resumes from the
+                // last known station when the signal drops.
+                manualStationIndex = gpsState.currentStationIndex ?? snapResult.segmentFrom
+                positionState = gpsState
+            } else {
+                trackingMode = .manual
+                lastGoodGPSTime = nil
+                positionState = manualPositionState(journey: journey)
+            }
+            updateLiveActivity()
+            return
+        }
 
         // GPS-only mode trusts the fix outright — no blending, no fallback
         if journeyMode == .gps {

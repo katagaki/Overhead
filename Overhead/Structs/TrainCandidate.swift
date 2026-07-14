@@ -36,6 +36,9 @@ struct TrainCandidate: Identifiable {
     /// Boarding/alighting stations, with IDs valid on `journeyLine`.
     let fromStation: Station
     let toStation: Station
+    /// False for timetable-ignoring searches: leg seconds are hop-time
+    /// estimates from 0, not clock times.
+    var hasSchedule: Bool = true
 
     var transferCount: Int { legs.count - 1 }
 

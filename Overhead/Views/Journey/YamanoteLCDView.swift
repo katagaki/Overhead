@@ -251,12 +251,14 @@ struct YamanoteLCDView: View {
             Rectangle()
                 .fill(Color.white)
                 .frame(width: 21, height: 21 * 10 / 16)
-            Text(verbatim: "\(col.minutes ?? 0)")
-                .font(.system(size: 10.5, weight: .bold))
-                .foregroundColor(.black)
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-                .frame(width: 19)
+            if let minutes = col.minutes {
+                Text(verbatim: "\(minutes)")
+                    .font(.system(size: 10.5, weight: .bold))
+                    .foregroundColor(.black)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .frame(width: 19)
+            }
         }
     }
 
@@ -310,13 +312,14 @@ struct YamanoteLCDView: View {
 
         let upcoming = stations[(ref + 1)...]
             .compactMap { station -> LCDStop? in
-                guard let entry = entries[station.id],
-                      let arr = entry.arrivalSeconds() ?? entry.departureSeconds()
-                else { return nil }  // express passes this station
+                // No entry at all = express passes this station. An entry
+                // with no times (schedule-less journey) is still a stop.
+                guard let entry = entries[station.id] else { return nil }
+                let arr = entry.arrivalSeconds() ?? entry.departureSeconds()
                 return LCDStop(
                     id: station.id,
                     station: station,
-                    minutes: max(0, (arr + delaySec - nowSec + 59) / 60),
+                    minutes: arr.map { max(0, ($0 + delaySec - nowSec + 59) / 60) },
                     isCurrent: false,
                     transfers: transfers(at: station)
                 )

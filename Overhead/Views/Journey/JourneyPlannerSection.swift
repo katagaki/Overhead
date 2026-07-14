@@ -18,7 +18,10 @@ struct JourneyPlannerSection: View {
     @State private var departureMode: DepartureMode = .now
     @State private var departureDate = Date()
     @AppStorage("journey.walkingSpeed") private var walkingSpeedRaw = WalkingSpeed.normal.rawValue
+    @AppStorage("journey.avoidedLines") private var avoidedLinesJSON = ""
+    @AppStorage("journey.ignoreTimetable") private var ignoreTimetable = false
     @AppStorage("journey.setup.stations") private var storedStationsJSON = ""
+    @State private var showAvoidLinesSheet = false
 
     @State private var candidates: [TrainCandidate] = []
     @State private var hasSearched = false
@@ -66,6 +69,25 @@ struct JourneyPlannerSection: View {
         WalkingSpeed(rawValue: walkingSpeedRaw) ?? .normal
     }
 
+    private var avoidedLineIds: Set<String> {
+        guard let data = avoidedLinesJSON.data(using: .utf8),
+              let ids = try? JSONDecoder().decode([String].self, from: data)
+        else { return [] }
+        return Set(ids)
+    }
+
+    private var avoidedLineIdsBinding: Binding<Set<String>> {
+        Binding(
+            get: { avoidedLineIds },
+            set: { newValue in
+                let ids = newValue.sorted()
+                avoidedLinesJSON = (try? JSONEncoder().encode(ids))
+                    .flatMap { String(data: $0, encoding: .utf8) } ?? ""
+                invalidateResults()
+            }
+        )
+    }
+
     private var effectiveDeparture: Date {
         departureMode == .now ? Date() : departureDate
     }
@@ -78,7 +100,7 @@ struct JourneyPlannerSection: View {
 
             departureTimeSection
 
-            walkingSpeedSection
+            customizationSection
 
             searchButton
 
@@ -275,7 +297,7 @@ struct JourneyPlannerSection: View {
     private var departureTimeSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Setup.DepartureTime")
-                .font(.body)
+                .font(.body.weight(.semibold))
                 .foregroundColor(.secondary)
                 .padding(.leading, 4)
 
@@ -313,31 +335,120 @@ struct JourneyPlannerSection: View {
         }
     }
 
-    // MARK: - Walking Speed Section
+    // MARK: - Customization Section
 
-    private var walkingSpeedSection: some View {
+    /// Horizontal grid of per-search customizations: each icon is one
+    /// setting, highlighted while that setting is active.
+    private var customizationSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Setup.WalkingSpeed")
-                .font(.body)
+            Text("Setup.Customize")
+                .font(.body.weight(.semibold))
                 .foregroundColor(.secondary)
                 .padding(.leading, 4)
 
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(alignment: .top, spacing: 4) {
+                    walkingSpeedItem
+                    avoidLinesItem
+                    ignoreTimetableItem
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 14)
+            }
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+            .onChange(of: walkingSpeedRaw) { _, _ in
+                invalidateResults()
+            }
+            .onChange(of: ignoreTimetable) { _, _ in
+                invalidateResults()
+            }
+        }
+        .sheet(isPresented: $showAvoidLinesSheet) {
+            AvoidLinesSheet(
+                lines: viewModel.availableLines,
+                avoidedLineIds: avoidedLineIdsBinding
+            )
+        }
+    }
+
+    private var walkingSpeedItem: some View {
+        Menu {
             Picker("Setup.WalkingSpeed", selection: Binding(
                 get: { walkingSpeed },
                 set: { walkingSpeedRaw = $0.rawValue }
             )) {
                 ForEach(WalkingSpeed.allCases) { speed in
-                    Text(speed.label).tag(speed)
+                    Label(speed.label, systemImage: speed.iconName).tag(speed)
                 }
             }
-            .pickerStyle(.segmented)
-            .onChange(of: walkingSpeedRaw) { _, _ in
-                invalidateResults()
-            }
-            .padding(14)
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+        } label: {
+            customizationItem(
+                icon: walkingSpeed.iconName,
+                label: "Setup.WalkingSpeed",
+                active: walkingSpeed != .none
+            )
         }
+        .buttonStyle(.plain)
+    }
+
+    private var avoidLinesItem: some View {
+        Button {
+            showAvoidLinesSheet = true
+        } label: {
+            customizationItem(
+                icon: "tram.fill",
+                label: "Setup.AvoidLines",
+                active: !avoidedLineIds.isEmpty,
+                slashed: true
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var ignoreTimetableItem: some View {
+        Button {
+            ignoreTimetable.toggle()
+        } label: {
+            customizationItem(
+                icon: "clock.badge.xmark",
+                label: "Setup.IgnoreTimetable",
+                active: ignoreTimetable
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    @ViewBuilder
+    private func customizationItem(
+        icon: String,
+        label: LocalizedStringKey,
+        active: Bool,
+        slashed: Bool = false
+    ) -> some View {
+        VStack(spacing: 6) {
+            ZStack {
+                Circle()
+                    .fill(active ? Color.accentColor : Color(.tertiarySystemFill))
+                Image(systemName: icon)
+                    .font(.system(size: 20, weight: .semibold))
+                if slashed {
+                    Image(systemName: "line.diagonal")
+                        .font(.system(size: 34, weight: .regular))
+                        .rotationEffect(.degrees(90))
+                }
+            }
+            .foregroundColor(active ? .white : .primary)
+            .frame(width: 56, height: 56)
+
+            Text(label)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(.secondary)
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
+        }
+        .frame(width: 82)
+        .contentShape(Rectangle())
     }
 
     // MARK: - Search Button
@@ -398,8 +509,8 @@ struct JourneyPlannerSection: View {
             noticeRow(icon: "tram", text: "Setup.NoTrains")
         } else {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Setup.Candidates")
-                    .font(.body)
+                Text(ignoreTimetable ? "Setup.Routes" : "Setup.Candidates")
+                    .font(.body.weight(.semibold))
                     .foregroundColor(.secondary)
                     .padding(.leading, 4)
 
@@ -433,57 +544,10 @@ struct JourneyPlannerSection: View {
             viewModel.startJourney(candidate: candidate)
         } label: {
             VStack(alignment: .leading, spacing: 8) {
-                VStack(alignment: .leading, spacing: 3) {
-                    HStack(alignment: .center, spacing: 8) {
-                        Text(displayTime(candidate.departureTime))
-                            .font(.system(size: 22, weight: .bold, design: .rounded))
-                            .lineLimit(1)
-                            .fixedSize()
-                        Image(systemName: "arrow.right")
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(.secondary)
-                        Text(displayTime(candidate.arrivalTime))
-                            .font(.system(size: 22, weight: .bold, design: .rounded))
-                            .lineLimit(1)
-                            .fixedSize()
-
-                        Spacer()
-
-                        if let waitMinutes {
-                            Text(waitMinutes == 0
-                                 ? "Candidate.DepartsNow"
-                                 : "Candidate.DepartsIn \(waitMinutes)")
-                                .font(.system(size: 12, weight: .bold))
-                                // Tight when there's barely more time than the walk
-                                .foregroundColor(waitMinutes <= (searchWalkMinutes ?? 0) + 3 ? .red : .green)
-                        }
-                    }
-
-                    HStack(spacing: 8) {
-                        Text("Candidate.Duration \(candidate.durationMinutes)")
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
-
-                        if let walkMinutes = searchWalkMinutes {
-                            Text("Candidate.Walk \(walkMinutes)")
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundColor(.secondary)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(Color(.tertiarySystemFill))
-                                .clipShape(Capsule())
-                        }
-
-                        if candidate.transferCount > 0 {
-                            Text("Candidate.Transfers \(candidate.transferCount)")
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundColor(.secondary)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(Color(.tertiarySystemFill))
-                                .clipShape(Capsule())
-                        }
-                    }
+                if candidate.hasSchedule {
+                    scheduledCandidateHeader(candidate, waitMinutes: waitMinutes)
+                } else {
+                    untimedCandidateHeader(candidate)
                 }
 
                 if candidate.legs.count == 1, let leg = candidate.legs.first {
@@ -500,6 +564,84 @@ struct JourneyPlannerSection: View {
     }
 
     @ViewBuilder
+    private func untimedCandidateHeader(_ candidate: TrainCandidate) -> some View {
+        HStack(alignment: .center, spacing: 8) {
+            Text("Candidate.EstimatedDuration \(candidate.durationMinutes)")
+                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .lineLimit(1)
+                .fixedSize()
+
+            if candidate.transferCount > 0 {
+                Text("Candidate.Transfers \(candidate.transferCount)")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color(.tertiarySystemFill))
+                    .clipShape(Capsule())
+            }
+
+            Spacer()
+        }
+    }
+
+    @ViewBuilder
+    private func scheduledCandidateHeader(_ candidate: TrainCandidate, waitMinutes: Int?) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(alignment: .center, spacing: 8) {
+                Text(displayTime(candidate.departureTime))
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .lineLimit(1)
+                    .fixedSize()
+                Image(systemName: "arrow.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.secondary)
+                Text(displayTime(candidate.arrivalTime))
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .lineLimit(1)
+                    .fixedSize()
+
+                Spacer()
+
+                if let waitMinutes {
+                    Text(waitMinutes == 0
+                         ? "Candidate.DepartsNow"
+                         : "Candidate.DepartsIn \(waitMinutes)")
+                        .font(.system(size: 12, weight: .bold))
+                        // Tight when there's barely more time than the walk
+                        .foregroundColor(waitMinutes <= (searchWalkMinutes ?? 0) + 3 ? .red : .green)
+                }
+            }
+
+            HStack(spacing: 8) {
+                Text("Candidate.Duration \(candidate.durationMinutes)")
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary)
+
+                if let walkMinutes = searchWalkMinutes {
+                    Text("Candidate.Walk \(walkMinutes)")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color(.tertiarySystemFill))
+                        .clipShape(Capsule())
+                }
+
+                if candidate.transferCount > 0 {
+                    Text("Candidate.Transfers \(candidate.transferCount)")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color(.tertiarySystemFill))
+                        .clipShape(Capsule())
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
     private func singleLegSummary(candidate: TrainCandidate, leg: CandidateLeg) -> some View {
         HStack(spacing: 6) {
             RoundedRectangle(cornerRadius: 2)
@@ -511,19 +653,22 @@ struct JourneyPlannerSection: View {
                 .foregroundColor(leg.line.color)
                 .lineLimit(1)
 
-            Text(leg.service.trainType.displayNameJa)
-                .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.white)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(leg.line.color)
-                .clipShape(RoundedRectangle(cornerRadius: 4))
+            // Untimed candidates ride no concrete train — no type or 行き先.
+            if candidate.hasSchedule {
+                Text(leg.service.trainType.displayNameJa)
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(leg.line.color)
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
 
-            if let destination = destinationName(of: candidate) {
-                Text("Candidate.For \(destination)")
-                    .font(.system(size: 12))
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
+                if let destination = destinationName(of: candidate) {
+                    Text("Candidate.For \(destination)")
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                }
             }
 
             if candidate.isThrough {
@@ -560,9 +705,11 @@ struct JourneyPlannerSection: View {
                     Text(leg.fromStation.localizedName)
                         .font(.system(size: 12))
                         .lineLimit(1)
-                    Text(displayTime(leg.departureTime))
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .fixedSize()
+                    if candidate.hasSchedule {
+                        Text(displayTime(leg.departureTime))
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .fixedSize()
+                    }
 
                     Image(systemName: "arrow.right")
                         .font(.system(size: 9, weight: .semibold))
@@ -571,10 +718,12 @@ struct JourneyPlannerSection: View {
                     Text(leg.toStation.localizedName)
                         .font(.system(size: 12))
                         .lineLimit(1)
-                    Text(displayTime(leg.arrivalTime))
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .foregroundColor(.secondary)
-                        .fixedSize()
+                    if candidate.hasSchedule {
+                        Text(displayTime(leg.arrivalTime))
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .foregroundColor(.secondary)
+                            .fixedSize()
+                    }
 
                     if index < candidate.legs.count - 1 {
                         Text("Candidate.TransferBadge")
@@ -660,29 +809,49 @@ struct JourneyPlannerSection: View {
         isSearching = true
 
         Task {
+            let avoided = avoidedLineIds
+
+            // Timetable-ignoring search: route alternatives, no times.
+            if ignoreTimetable {
+                searchWalkMinutes = nil
+                candidates = viewModel.searchRouteOptions(
+                    stationNames: names,
+                    transferMinutes: walkingSpeed.transferMinutes,
+                    avoidingLineIds: avoided
+                )
+                hasSearched = true
+                isSearching = false
+                if candidates.isEmpty {
+                    hasSearched = false
+                    searchError = "Setup.NoRoute"
+                }
+                return
+            }
+
             // When leaving now, trains departing before the user can walk to
-            // the station are excluded outright.
+            // the station are excluded outright. Beyond ~2 hours the user
+            // clearly isn't walking there right now, so no offset applies.
             var departure = effectiveDeparture
             var walkMinutes: Int?
             if departureMode == .now,
-               walkingSpeed != .none,
                let station = fromSelection?.station,
-               let walkSeconds = await walkingEstimator.walkingSeconds(to: station) {
-                let adjusted = walkSeconds * walkingSpeed.paceMultiplier
-                departure = departure.addingTimeInterval(adjusted)
-                walkMinutes = max(1, Int((adjusted / 60).rounded()))
+               let walkSeconds = await walkingEstimator.walkingSeconds(to: station, speed: walkingSpeed),
+               walkSeconds <= 120 * 60 {
+                departure = departure.addingTimeInterval(walkSeconds)
+                walkMinutes = max(1, Int((walkSeconds / 60).rounded(.up)))
             }
             searchWalkMinutes = walkMinutes
 
             candidates = viewModel.searchTrainCandidates(
                 stationNames: names,
                 departure: departure,
-                transferMinutes: walkingSpeed.transferMinutes
+                transferMinutes: walkingSpeed.transferMinutes,
+                avoidingLineIds: avoided
             )
             hasSearched = true
             isSearching = false
 
-            if candidates.isEmpty && !viewModel.routeExists(through: names) {
+            if candidates.isEmpty && !viewModel.routeExists(through: names, avoidingLineIds: avoided) {
                 hasSearched = false
                 searchError = "Setup.NoRoute"
             }

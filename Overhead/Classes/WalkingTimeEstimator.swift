@@ -19,13 +19,17 @@ final class WalkingTimeEstimator: NSObject, ObservableObject, CLLocationManagerD
         locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
     }
 
-    /// Walking seconds to `station`, or nil when location or coordinates are
-    /// unavailable. Falls back to a straight-line estimate when the MapKit
-    /// ETA request fails (e.g. offline).
-    func walkingSeconds(to station: Station) async -> TimeInterval? {
-        guard let lat = station.latitude, let lon = station.longitude,
+    /// Walking seconds to `station` at the given pace, including the fixed
+    /// entrance-to-platform overhead. Nil when walking is disabled or location
+    /// or coordinates are unavailable. Falls back to a straight-line estimate
+    /// when the MapKit ETA request fails (e.g. offline).
+    func walkingSeconds(to station: Station, speed: WalkingSpeed) async -> TimeInterval? {
+        guard let pace = speed.paceMetersPerMinute,
+              let lat = station.latitude, let lon = station.longitude,
               let origin = await currentLocation()
         else { return nil }
+
+        let accessSeconds = speed.stationAccessMinutes * 60
 
         let request = MKDirections.Request()
         request.source = MKMapItem(placemark: MKPlacemark(coordinate: origin.coordinate))
@@ -35,12 +39,12 @@ final class WalkingTimeEstimator: NSObject, ObservableObject, CLLocationManagerD
         request.transportType = .walking
 
         if let eta = try? await MKDirections(request: request).calculateETA() {
-            return eta.expectedTravelTime
+            return eta.expectedTravelTime * speed.paceMultiplier + accessSeconds
         }
 
-        // Straight-line distance with a detour factor, at 80m/min
+        // Straight-line distance with a detour factor, at the user's pace
         let meters = origin.distance(from: CLLocation(latitude: lat, longitude: lon))
-        return meters * 1.4 / (80.0 / 60.0)
+        return meters * 1.4 / (pace / 60) + accessSeconds
     }
 
     private func currentLocation() async -> CLLocation? {

@@ -11,7 +11,7 @@ struct LinesSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Tab.Lines")
-                .font(.body)
+                .font(.body.weight(.semibold))
                 .foregroundColor(.secondary)
                 .padding(.leading, 4)
 
@@ -54,85 +54,27 @@ struct LinesSection: View {
     }
 
     private var browseByLineGrid: some View {
-        let grouped = Dictionary(grouping: viewModel.availableLines) { $0.operatorId }
-        let knownOrder = [
-            "Operator:JR-East",
-            "Operator:TokyoMetro",
-            "Operator:Toei",
-            "Operator:Keisei",
-            "Operator:Tobu",
-            "Operator:Odakyu",
-            "Operator:Tokyu",
-            "Operator:Keikyu",
-            "Operator:Keio",
-            "Operator:Seibu",
-            "Operator:Sotetsu",
-            "Operator:Minatomirai",
-            "Operator:SaitamaRailway",
-            "Operator:TWR",
-            "Operator:MIR",
-            "Operator:TamaMonorail",
-            "Operator:YokohamaMunicipal"
-        ]
-        // Operators missing from knownOrder still get a section at the end
-        // instead of silently disappearing from the browser
-        let sectionOrder = knownOrder.filter { grouped[$0] != nil }
-            + grouped.keys.filter { !knownOrder.contains($0) }.sorted()
-        let sectionTitles: [String: String] = [
-            "Operator:JR-East": "JR",
-            "Operator:TokyoMetro": "東京メトロ",
-            "Operator:Toei": "都営",
-            "Operator:Keisei": "京成",
-            "Operator:Tobu": "東武",
-            "Operator:Odakyu": "小田急",
-            "Operator:Tokyu": "東急",
-            "Operator:Keikyu": "京急",
-            "Operator:Keio": "京王",
-            "Operator:Seibu": "西武",
-            "Operator:Sotetsu": "相鉄",
-            "Operator:Minatomirai": "みなとみらい線",
-            "Operator:SaitamaRailway": "埼玉高速鉄道",
-            "Operator:TWR": "りんかい線",
-            "Operator:MIR": "つくばエクスプレス",
-            "Operator:TamaMonorail": "多摩都市モノレール",
-            "Operator:YokohamaMunicipal": "横浜市営地下鉄"
-        ]
         let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 2)
 
         return LazyVStack(alignment: .leading, spacing: 20) {
-            ForEach(sectionOrder, id: \.self) { operatorId in
-                if let lines = grouped[operatorId] {
-                    // Symbol order (JA, JB, JC… / A, C, E…); symbol-less lines last
-                    let sorted = lines.sorted {
-                        switch ($0.lineSymbol.isEmpty, $1.lineSymbol.isEmpty) {
-                        case (false, false):
-                            return $0.lineSymbol == $1.lineSymbol
-                                ? $0.localizedName < $1.localizedName
-                                : $0.lineSymbol < $1.lineSymbol
-                        case (false, true): return true
-                        case (true, false): return false
-                        case (true, true): return $0.localizedName < $1.localizedName
-                        }
-                    }
+            ForEach(OperatorSections.sections(for: viewModel.availableLines), id: \.operatorId) { section in
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(section.title)
+                        .font(.body.weight(.semibold))
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 4)
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(sectionTitles[operatorId] ?? operatorId)
-                            .font(.body)
-                            .foregroundColor(.secondary)
-                            .padding(.leading, 4)
-
-                        LazyVGrid(columns: columns, spacing: 10) {
-                            ForEach(sorted) { line in
-                                NavigationLink {
-                                    StationPickerView(
-                                        line: line,
-                                        viewModel: viewModel
-                                    )
-                                } label: {
-                                    lineCell(line: line)
-                                }
-                                .buttonStyle(.plain)
+                    LazyVGrid(columns: columns, spacing: 10) {
+                        ForEach(section.lines) { line in
+                            NavigationLink {
+                                StationPickerView(
+                                    line: line,
+                                    viewModel: viewModel
+                                )
+                            } label: {
+                                lineCell(line: line)
                             }
+                            .buttonStyle(.plain)
                         }
                     }
                 }

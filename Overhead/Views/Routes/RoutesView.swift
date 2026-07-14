@@ -14,7 +14,7 @@ struct FavoritesSection: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
                 Text("Section.Favorites")
-                    .font(.body)
+                    .font(.body.weight(.semibold))
                     .foregroundColor(.secondary)
 
                 Spacer()

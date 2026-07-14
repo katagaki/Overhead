@@ -30,13 +30,16 @@ struct JourneyToolbarAccessory: View {
 
                     Spacer(minLength: 8)
 
-                    VStack(alignment: .trailing, spacing: 0) {
-                        Text("Label.EstimatedArrival")
-                            .font(.system(size: 9))
-                            .foregroundColor(.secondary)
-                        Text(Self.timeString(state.estimatedArrival))
-                            .font(.system(size: 15, weight: .semibold, design: .rounded))
-                            .foregroundColor(state.delayMinutes > 0 ? .red : .primary)
+                    // Schedule-less journeys have no meaningful ETA.
+                    if viewModel.activeJourney?.hasSchedule != false {
+                        VStack(alignment: .trailing, spacing: 0) {
+                            Text("Label.EstimatedArrival")
+                                .font(.system(size: 9))
+                                .foregroundColor(.secondary)
+                            Text(Self.timeString(state.estimatedArrival))
+                                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                .foregroundColor(state.delayMinutes > 0 ? .red : .primary)
+                        }
                     }
                 } else if let journey = viewModel.activeJourney {
                     Text(journey.line.localizedName)

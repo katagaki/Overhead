@@ -10,8 +10,11 @@ public struct Journey: Identifiable, Codable {
     /// Stations where the passenger changes trains (乗り換え) on a multi-leg
     /// itinerary. Empty for single-ride and through (直通) journeys.
     public let transferStationIds: [String]
+    /// False for journeys planned while ignoring the timetable — the service's
+    /// entries carry no times, so position comes from GPS or manual flipping.
+    public let hasSchedule: Bool
 
-    public init(id: UUID, service: TrainService, line: TrainLine, boardingStationId: String, alightingStationId: String, startedAt: Date, transferStationIds: [String] = []) {
+    public init(id: UUID, service: TrainService, line: TrainLine, boardingStationId: String, alightingStationId: String, startedAt: Date, transferStationIds: [String] = [], hasSchedule: Bool = true) {
         self.id = id
         self.service = service
         self.line = line
@@ -19,6 +22,7 @@ public struct Journey: Identifiable, Codable {
         self.alightingStationId = alightingStationId
         self.startedAt = startedAt
         self.transferStationIds = transferStationIds
+        self.hasSchedule = hasSchedule
     }
 
     public var journeyStations: [Station] {

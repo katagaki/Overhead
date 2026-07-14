@@ -205,7 +205,7 @@ struct MetroLCDView: View {
                             } else if col.isPassed {
                                 passedBox
                             } else {
-                                minuteBox(col.minutes ?? 0)
+                                minuteBox(col.minutes)
                             }
                         }
                         .frame(width: colWidth)
@@ -276,8 +276,8 @@ struct MetroLCDView: View {
         }
     }
 
-    private func minuteBox(_ minutes: Int) -> some View {
-        Text(verbatim: "\(minutes)")
+    private func minuteBox(_ minutes: Int?) -> some View {
+        Text(verbatim: minutes.map(String.init) ?? "")
             .font(.system(size: 10, weight: .heavy))
             .foregroundColor(.black)
             .lineLimit(1)
@@ -386,12 +386,13 @@ struct MetroLCDView: View {
             .filter { $0 > ref }
             .compactMap { idx -> MetroColumn? in
                 let station = stations[idx]
-                guard let entry = entries[station.id],
-                      let arr = entry.arrivalSeconds() ?? entry.departureSeconds()
-                else { return nil }
+                // No entry at all = express passes this station. An entry
+                // with no times (schedule-less journey) is still a stop.
+                guard let entry = entries[station.id] else { return nil }
+                let arr = entry.arrivalSeconds() ?? entry.departureSeconds()
                 return MetroColumn(
                     id: station.id, station: station,
-                    minutes: max(0, (arr + delaySec - nowSec + 59) / 60),
+                    minutes: arr.map { max(0, ($0 + delaySec - nowSec + 59) / 60) },
                     isPassed: false, isCurrent: false,
                     transfers: transfers(at: station)
                 )

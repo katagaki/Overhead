@@ -55,8 +55,14 @@ struct JourneyView: View {
                         .padding(.bottom, 8)
                     }
                     .safeAreaInset(edge: .bottom) {
-                        trackingModeCapsule
-                            .padding(.vertical, 8)
+                        Group {
+                            if viewModel.trackingMode == .manual {
+                                manualStationControl(journey: journey, state: state)
+                            } else {
+                                trackingModeCapsule
+                            }
+                        }
+                        .padding(.vertical, 8)
                     }
                     .onAppear {
                         if let idx = state.currentStationIndex {
@@ -166,6 +172,7 @@ struct JourneyView: View {
         case .gps: return "location.fill"
         case .timetable: return "clock.fill"
         case .blended: return "location.circle"
+        case .manual: return "hand.draw.fill"
         }
     }
 
@@ -174,6 +181,7 @@ struct JourneyView: View {
         case .gps: return "TrackingMode.GPS"
         case .timetable: return "TrackingMode.Timetable"
         case .blended: return "TrackingMode.Blended"
+        case .manual: return "TrackingMode.Manual"
         }
     }
 
@@ -182,6 +190,64 @@ struct JourneyView: View {
         case .gps: return .green
         case .timetable: return .orange
         case .blended: return .blue
+        case .manual: return .purple
+        }
+    }
+
+    // MARK: - Manual Station Flipper (schedule-less journeys)
+
+    /// Replaces the tracking capsule when no schedule and no usable GPS can
+    /// place the train: the user flips between stations by hand.
+    @ViewBuilder
+    private func manualStationControl(journey: Journey, state: TrainPositionState) -> some View {
+        let stations = journey.journeyStations
+        let index = min(max(state.currentStationIndex ?? state.segmentFrom, 0),
+                        max(stations.count - 1, 0))
+
+        let content = HStack(spacing: 14) {
+            Button {
+                viewModel.stepManualStation(-1)
+            } label: {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 15, weight: .bold))
+                    .frame(width: 34, height: 34)
+                    .contentShape(Circle())
+            }
+            .disabled(index <= 0)
+            .accessibilityLabel("Journey.PreviousStation")
+
+            VStack(spacing: 1) {
+                Text("TrackingMode.Manual")
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundColor(.secondary)
+                Text(stations.isEmpty ? "" : stations[index].localizedName)
+                    .font(.system(size: 14, weight: .bold))
+                    .lineLimit(1)
+            }
+            .frame(minWidth: 100)
+
+            Button {
+                viewModel.stepManualStation(1)
+            } label: {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 15, weight: .bold))
+                    .frame(width: 34, height: 34)
+                    .contentShape(Circle())
+            }
+            .disabled(index >= stations.count - 1)
+            .accessibilityLabel("Journey.NextStation")
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+
+        if #available(iOS 26.0, *) {
+            content
+                .glassEffect(.regular.interactive())
+        } else {
+            content
+                .background {
+                    Capsule().fill(.ultraThinMaterial)
+                }
         }
     }
 

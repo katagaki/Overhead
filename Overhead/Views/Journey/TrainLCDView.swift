@@ -254,17 +254,19 @@ struct TrainLCDView: View {
             Circle()
                 .fill(Color.white)
                 .frame(width: 14, height: 14)
-            Text(verbatim: "\(col.minutes ?? 0)")
-                .font(.system(size: 9, weight: .bold))
-                .foregroundColor(.black)
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-                .frame(width: 12)
-            if showsUnit {
-                Text(verbatim: "(分)")
-                    .font(.system(size: 6, weight: .bold))
-                    .foregroundColor(.white)
-                    .offset(x: 13)
+            if let minutes = col.minutes {
+                Text(verbatim: "\(minutes)")
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundColor(.black)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .frame(width: 12)
+                if showsUnit {
+                    Text(verbatim: "(分)")
+                        .font(.system(size: 6, weight: .bold))
+                        .foregroundColor(.white)
+                        .offset(x: 13)
+                }
             }
         }
     }
@@ -324,13 +326,14 @@ struct TrainLCDView: View {
 
         let upcoming = stations[(ref + 1)...]
             .compactMap { station -> LCDStop? in
-                guard let entry = entries[station.id],
-                      let arr = entry.arrivalSeconds() ?? entry.departureSeconds()
-                else { return nil }  // express passes this station
+                // No entry at all = express passes this station. An entry
+                // with no times (schedule-less journey) is still a stop.
+                guard let entry = entries[station.id] else { return nil }
+                let arr = entry.arrivalSeconds() ?? entry.departureSeconds()
                 return LCDStop(
                     id: station.id,
                     station: station,
-                    minutes: max(0, (arr + delaySec - nowSec + 59) / 60),
+                    minutes: arr.map { max(0, ($0 + delaySec - nowSec + 59) / 60) },
                     isCurrent: false,
                     transfers: transfers(at: station)
                 )

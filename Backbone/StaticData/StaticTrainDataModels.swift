@@ -496,12 +496,20 @@ public enum StaticTrainData {
     /// station, so names are the cross-line join key).
     public static func directRoutes(
         fromStationName: String,
-        toStationName: String
+        toStationName: String,
+        avoidingLineIds: Set<String> = []
     ) -> [DirectRouteOption] {
         guard fromStationName != toStationName else { return [] }
+        // Composite (直通) line IDs are "origin+connecting" — avoiding either
+        // component avoids the composite.
+        func isAvoided(_ lineId: String) -> Bool {
+            guard !avoidingLineIds.isEmpty else { return false }
+            return lineId.split(separator: "+").contains { avoidingLineIds.contains(String($0)) }
+        }
         var options: [DirectRouteOption] = []
         for line in allLines {
-            guard let from = line.stations.first(where: { $0.name == fromStationName }) else { continue }
+            guard !isAvoided(line.id),
+                  let from = line.stations.first(where: { $0.name == fromStationName }) else { continue }
 
             if let to = line.stations.first(where: { $0.name == toStationName }) {
                 if let resolved = resolveJourneyLine(
@@ -522,7 +530,8 @@ public enum StaticTrainData {
                 guard let to = group.stations.first(where: { $0.name == toStationName }),
                       let resolved = resolveJourneyLine(
                           lineId: line.id, fromStationId: from.id, toStationId: to.id
-                      )
+                      ),
+                      !isAvoided(resolved.staticLine.id)
                 else { continue }
                 options.append(DirectRouteOption(
                     staticLine: resolved.staticLine,
@@ -549,13 +558,57 @@ public enum StaticTrainData {
     /// Time assumed for walking between platforms when changing trains.
     public static let transferBufferMinutes: Double = 5
 
+    /// Station path and hop-time estimate of the ride between two stations on
+    /// `line`, independent of any timetable. On a loop line the shorter way
+    /// around wins, wrapping at the seam.
+    public static func estimatedRide(
+        on line: StaticTrainLine,
+        fromStationId: String,
+        toStationId: String
+    ) -> (stations: [Station], minutes: Double)? {
+        let stations = line.stations
+        guard let fromIdx = stations.firstIndex(where: { $0.id == fromStationId }),
+              let toIdx = stations.firstIndex(where: { $0.id == toStationId }),
+              fromIdx != toIdx
+        else { return nil }
+
+        let hops = line.hopTimesMinutes
+        let range = min(fromIdx, toIdx)..<max(fromIdx, toIdx)
+        let directMinutes = hops[range].reduce(0, +)
+        let directPath: [Station] = fromIdx < toIdx
+            ? Array(stations[fromIdx...toIdx])
+            : Array(stations[toIdx...fromIdx].reversed())
+
+        guard line.isLoop, hops.count == stations.count - 1, stations.count > 2 else {
+            return (directPath, directMinutes)
+        }
+
+        // The seam hop (last→first) has no entry in hopTimesMinutes — assume
+        // an average hop.
+        let total = hops.reduce(0, +)
+        let seamHop = total / Double(hops.count)
+        let wrapMinutes = total + seamHop - directMinutes
+        guard wrapMinutes < directMinutes else { return (directPath, directMinutes) }
+
+        let count = stations.count
+        let step = fromIdx < toIdx ? -1 : 1
+        var path = [stations[fromIdx]]
+        var idx = fromIdx
+        while idx != toIdx {
+            idx = ((idx + step) % count + count) % count
+            path.append(stations[idx])
+        }
+        return (path, wrapMinutes)
+    }
+
     /// Plans a route visiting every station name in `names` in order,
     /// concatenating per-pair plans. Legs continuing on the same line in the
     /// same direction merge, so an on-path midpoint adds no fake transfer.
     public static func planTransferRoute(
         throughStationNames names: [String],
         maxTransfers: Int = 2,
-        transferMinutes: Double = transferBufferMinutes
+        transferMinutes: Double = transferBufferMinutes,
+        avoidingLineIds: Set<String> = []
     ) -> [TransferLeg]? {
         guard names.count >= 2 else { return nil }
         var plan: [TransferLeg] = []
@@ -565,7 +618,8 @@ public enum StaticTrainData {
                       fromStationName: from,
                       toStationName: to,
                       maxTransfers: maxTransfers,
-                      transferMinutes: transferMinutes
+                      transferMinutes: transferMinutes,
+                      avoidingLineIds: avoidingLineIds
                   )
             else { return nil }
 
@@ -607,10 +661,13 @@ public enum StaticTrainData {
         fromStationName: String,
         toStationName: String,
         maxTransfers: Int = 2,
-        transferMinutes: Double = transferBufferMinutes
+        transferMinutes: Double = transferBufferMinutes,
+        avoidingLineIds: Set<String> = []
     ) -> [TransferLeg]? {
         guard fromStationName != toStationName else { return nil }
-        let lines = allLines
+        let lines = avoidingLineIds.isEmpty
+            ? allLines
+            : allLines.filter { !avoidingLineIds.contains($0.id) }
         let transferPenalty = transferMinutes + 3  // walk + expected wait
 
         // Node = (line index, station index on that line)

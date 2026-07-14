@@ -187,6 +187,7 @@ final class JourneyViewModel: ObservableObject {
         stationNames: [String],
         departure: Date,
         transferMinutes: Double = StaticTrainData.transferBufferMinutes,
+        avoidingLineIds: Set<String> = [],
         limit: Int = 12
     ) -> [TrainCandidate] {
         guard stationNames.count >= 2,
@@ -207,14 +208,16 @@ final class JourneyViewModel: ObservableObject {
         if stationNames.count == 2 {
             let direct = directCandidates(
                 fromName: fromName, toName: toName,
-                targetSec: targetSec, calendar: calendar, limit: limit
+                targetSec: targetSec, calendar: calendar,
+                avoidingLineIds: avoidingLineIds, limit: limit
             )
             if !direct.isEmpty { return direct }
         }
 
         guard let plan = StaticTrainData.planTransferRoute(
             throughStationNames: stationNames,
-            transferMinutes: transferMinutes
+            transferMinutes: transferMinutes,
+            avoidingLineIds: avoidingLineIds
         ) else { return [] }
 
         return candidates(
@@ -226,12 +229,14 @@ final class JourneyViewModel: ObservableObject {
 
     /// Whether a route (direct or with transfers) exists between each
     /// consecutive pair of station names.
-    func routeExists(through stationNames: [String]) -> Bool {
+    func routeExists(through stationNames: [String], avoidingLineIds: Set<String> = []) -> Bool {
         guard stationNames.count >= 2 else { return false }
         return zip(stationNames, stationNames.dropFirst()).allSatisfy { from, to in
             from != to
-                && (!StaticTrainData.directRoutes(fromStationName: from, toStationName: to).isEmpty
-                    || StaticTrainData.planTransferRoute(fromStationName: from, toStationName: to) != nil)
+                && (!StaticTrainData.directRoutes(fromStationName: from, toStationName: to,
+                                                  avoidingLineIds: avoidingLineIds).isEmpty
+                    || StaticTrainData.planTransferRoute(fromStationName: from, toStationName: to,
+                                                         avoidingLineIds: avoidingLineIds) != nil)
         }
     }
 
@@ -240,11 +245,13 @@ final class JourneyViewModel: ObservableObject {
         toName: String,
         targetSec: Int,
         calendar: ScheduleCalendar,
+        avoidingLineIds: Set<String>,
         limit: Int
     ) -> [TrainCandidate] {
         let routes = StaticTrainData.directRoutes(
             fromStationName: fromName,
-            toStationName: toName
+            toStationName: toName,
+            avoidingLineIds: avoidingLineIds
         )
 
         var candidates: [TrainCandidate] = []
@@ -275,6 +282,201 @@ final class JourneyViewModel: ObservableObject {
         }
 
         return Array(candidates.sorted { $0.departureSeconds < $1.departureSeconds }.prefix(limit))
+    }
+
+    // MARK: - Timetable-less Route Search (時刻表無視)
+
+    /// Route alternatives with no times attached: every direct line option,
+    /// plus transfer plans (the best one, then variations that avoid the
+    /// lines already suggested). Durations are hop-time estimates.
+    func searchRouteOptions(
+        stationNames: [String],
+        transferMinutes: Double,
+        avoidingLineIds: Set<String> = []
+    ) -> [TrainCandidate] {
+        guard stationNames.count >= 2,
+              let fromName = stationNames.first,
+              let toName = stationNames.last
+        else { return [] }
+
+        var results: [TrainCandidate] = []
+        var seen = Set<String>()
+        func add(_ candidate: TrainCandidate?) {
+            guard let candidate else { return }
+            let key = candidate.legs
+                .map { "\($0.line.id)|\($0.fromStation.id)|\($0.toStation.id)" }
+                .joined(separator: "+")
+            if seen.insert(key).inserted { results.append(candidate) }
+        }
+
+        if stationNames.count == 2 {
+            for route in StaticTrainData.directRoutes(
+                fromStationName: fromName, toStationName: toName,
+                avoidingLineIds: avoidingLineIds
+            ) {
+                add(untimedCandidate(for: route))
+            }
+        }
+
+        // Re-plan with each found plan's lines excluded to surface variety.
+        var avoid = avoidingLineIds
+        for _ in 0..<3 {
+            guard let plan = StaticTrainData.planTransferRoute(
+                throughStationNames: stationNames,
+                transferMinutes: transferMinutes,
+                avoidingLineIds: avoid
+            ) else { break }
+            add(untimedCandidate(forPlan: plan, transferMinutes: transferMinutes))
+            let planLines = Set(plan.map(\.staticLine.id))
+            if planLines.isSubset(of: avoid) { break }
+            avoid.formUnion(planLines)
+        }
+
+        return results.sorted { $0.durationMinutes < $1.durationMinutes }
+    }
+
+    /// Synthetic no-times service riding `staticLine` between two of its
+    /// stations, with the covered stations in travel order (loop-aware).
+    private func untimedRide(
+        on staticLine: StaticTrainLine,
+        from: Station,
+        to: Station
+    ) -> (service: TrainService, stations: [Station], minutes: Int)? {
+        guard let ride = StaticTrainData.estimatedRide(
+            on: staticLine, fromStationId: from.id, toStationId: to.id
+        ) else { return nil }
+
+        let entries = ride.stations.enumerated().map { i, station in
+            TimetableEntry(
+                id: "untimed_\(staticLine.id)_\(i)",
+                stationId: station.id,
+                arrivalTime: nil,
+                departureTime: nil
+            )
+        }
+        let service = TrainService(
+            id: "untimed.\(staticLine.id).\(from.id).\(to.id)",
+            lineId: staticLine.id,
+            trainType: .local,
+            direction: .outbound,
+            timetable: entries,
+            destinationStationId: to.id
+        )
+        return (service, ride.stations, Int(ride.minutes.rounded(.up)))
+    }
+
+    private func untimedCandidate(for route: StaticTrainData.DirectRouteOption) -> TrainCandidate? {
+        guard let ride = untimedRide(
+            on: route.staticLine, from: route.fromStation, to: route.toStation
+        ) else { return nil }
+        let leg = CandidateLeg(
+            service: ride.service,
+            line: route.boardingLine.trainLine,
+            fromStation: route.fromStation,
+            toStation: route.toStation,
+            departureSeconds: 0,
+            arrivalSeconds: ride.minutes * 60
+        )
+        return TrainCandidate(
+            id: "untimed|\(route.id)",
+            legs: [leg],
+            isThrough: route.isThrough,
+            journeyLine: route.staticLine.trainLine,
+            journeyService: ride.service,
+            fromStation: route.fromStation,
+            toStation: route.toStation,
+            hasSchedule: false
+        )
+    }
+
+    private func untimedCandidate(
+        forPlan plan: [StaticTrainData.TransferLeg],
+        transferMinutes: Double
+    ) -> TrainCandidate? {
+        guard let firstLeg = plan.first, let lastLeg = plan.last else { return nil }
+
+        if plan.count == 1 {
+            guard let ride = untimedRide(
+                on: firstLeg.staticLine, from: firstLeg.fromStation, to: firstLeg.toStation
+            ) else { return nil }
+            let leg = CandidateLeg(
+                service: ride.service,
+                line: firstLeg.staticLine.trainLine,
+                fromStation: firstLeg.fromStation,
+                toStation: firstLeg.toStation,
+                departureSeconds: 0,
+                arrivalSeconds: ride.minutes * 60
+            )
+            return TrainCandidate(
+                id: "untimed|\(firstLeg.staticLine.id)|\(firstLeg.fromStation.id)|\(firstLeg.toStation.id)",
+                legs: [leg],
+                isThrough: false,
+                journeyLine: firstLeg.staticLine.trainLine,
+                journeyService: ride.service,
+                fromStation: firstLeg.fromStation,
+                toStation: firstLeg.toStation,
+                hasSchedule: false
+            )
+        }
+
+        var legs: [CandidateLeg] = []
+        var stations: [Station] = []
+        var cursor = 0
+        for (index, planLeg) in plan.enumerated() {
+            guard let ride = untimedRide(
+                on: planLeg.staticLine, from: planLeg.fromStation, to: planLeg.toStation
+            ) else { return nil }
+            legs.append(CandidateLeg(
+                service: ride.service,
+                line: planLeg.staticLine.trainLine,
+                fromStation: planLeg.fromStation,
+                toStation: planLeg.toStation,
+                departureSeconds: cursor,
+                arrivalSeconds: cursor + ride.minutes * 60
+            ))
+            cursor += ride.minutes * 60 + Int(transferMinutes * 60)
+            // The transfer station keeps the arriving leg's station ID.
+            stations.append(contentsOf: index == 0 ? ride.stations : Array(ride.stations.dropFirst()))
+        }
+
+        let compositeId = plan.map(\.staticLine.trainLine.id).joined(separator: "+")
+        let entries = stations.enumerated().map { i, station in
+            TimetableEntry(
+                id: "untimed_\(compositeId)_\(i)",
+                stationId: station.id,
+                arrivalTime: nil,
+                departureTime: nil
+            )
+        }
+        guard let destination = stations.last else { return nil }
+
+        let first = legs[0]
+        let journeyLine = TrainLine(
+            id: compositeId,
+            name: plan.map(\.staticLine.trainLine.name).joined(separator: "〜"),
+            nameEn: plan.map(\.staticLine.trainLine.nameEn).joined(separator: " – "),
+            operatorId: first.line.operatorId,
+            stations: stations,
+            colorHex: first.line.colorHex
+        )
+        let journeyService = TrainService(
+            id: "untimed.composite.\(compositeId)",
+            lineId: compositeId,
+            trainType: .local,
+            direction: .outbound,
+            timetable: entries,
+            destinationStationId: destination.id
+        )
+        return TrainCandidate(
+            id: "untimed|\(compositeId)|\(first.fromStation.id)|\(lastLeg.toStation.id)",
+            legs: legs,
+            isThrough: false,
+            journeyLine: journeyLine,
+            journeyService: journeyService,
+            fromStation: first.fromStation,
+            toStation: lastLeg.toStation,
+            hasSchedule: false
+        )
     }
 
     /// Builds boardable itineraries along a planned route (one or more legs).
@@ -498,7 +700,8 @@ final class JourneyViewModel: ObservableObject {
             boardingStationId: candidate.fromStation.id,
             alightingStationId: candidate.toStation.id,
             startedAt: Date(),
-            transferStationIds: candidate.transferStationIds
+            transferStationIds: candidate.transferStationIds,
+            hasSchedule: candidate.hasSchedule
         )
 
         activeJourney = journey
@@ -506,7 +709,9 @@ final class JourneyViewModel: ObservableObject {
         errorMessage = nil
 
         locationTracker.startTracking(journey: journey, delay: nil)
-        positionState = TrainPositionEngine.computePosition(journey: journey, delay: nil)
+        positionState = candidate.hasSchedule
+            ? TrainPositionEngine.computePosition(journey: journey, delay: nil)
+            : locationTracker.positionState
 
         // The boarded line at station 0, plus each connecting line at its
         // transfer station.
@@ -534,6 +739,12 @@ final class JourneyViewModel: ObservableObject {
                 legLines: legLines
             )
         }
+    }
+
+    // MARK: - Manual Station Flipping (schedule-less journeys)
+
+    func stepManualStation(_ delta: Int) {
+        locationTracker.stepManualStation(delta)
     }
 
     // MARK: - Overwrite Confirmation
