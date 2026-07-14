@@ -279,7 +279,7 @@ private struct LEDRaster {
             attributed.append(NSAttributedString(
                 string: segment.text,
                 attributes: [
-                    .font: UIFont.systemFont(ofSize: 14, weight: .medium),
+                    .font: UIFont.systemFont(ofSize: 14, weight: .regular),
                     .foregroundColor: segment.color.uiColor,
                 ]
             ))
@@ -297,6 +297,11 @@ private struct LEDRaster {
         ).image { ctx in
             UIColor.black.setFill()
             ctx.fill(CGRect(x: 0, y: 0, width: width, height: height))
+            // Aliased text — one pixel per dot, like a real bitmap font.
+            // Antialiased edges otherwise pass the threshold and fatten
+            // every stroke.
+            ctx.cgContext.setShouldAntialias(false)
+            ctx.cgContext.setShouldSmoothFonts(false)
             attributed.draw(at: CGPoint(x: 0, y: (CGFloat(height) - textSize.height) / 2))
         }
 

@@ -148,8 +148,12 @@ struct MetroLCDView: View {
                     .foregroundColor(.black)
                     .lineLimit(1)
                     .minimumScaleFactor(0.35)
+                    // Centered in whatever space remains right of the badge.
+                    .frame(maxWidth: .infinity)
+                    .padding(.trailing, 8)
+            } else {
+                Spacer(minLength: 8)
             }
-            Spacer(minLength: 8)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(

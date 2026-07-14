@@ -20,6 +20,8 @@ struct MillenniumLCDView: View {
     private static let headerHeight: CGFloat = 34
     private static let stripInset: CGFloat = 8
     private static let nodeAreaHeight: CGFloat = 20
+    // Strip height (designHeight − header − bottom inset) minus the node area.
+    private static let namesAreaHeight: CGFloat = 54
     private static let lineY: CGFloat = 14      // thin line's center in the node area
     private static let badgeDiameter: CGFloat = 12
     private static let maxColumns = 9
@@ -192,16 +194,28 @@ struct MillenniumLCDView: View {
         .clipShape(RoundedRectangle(cornerRadius: 4))
     }
 
+    /// Characters justified top-to-bottom in a fixed height so the first and
+    /// last characters align across columns; names too long to fit are
+    /// condensed vertically instead (same treatment as the Metro LCD).
     private func verticalName(_ name: String, passed: Bool) -> some View {
         let chars = Array(name)
-        let size = min(9, 56 / (CGFloat(chars.count) * 1.2))
+        let charBox: CGFloat = 9.5
+        let available = Self.namesAreaHeight - 8
+        let natural = charBox * CGFloat(chars.count)
+
         return VStack(spacing: 0) {
             ForEach(chars.indices, id: \.self) { i in
+                if i > 0 { Spacer(minLength: 0) }
                 Text(String(chars[i]))
-                    .font(.system(size: size, weight: .bold))
+                    .font(.system(size: 9, weight: .bold))
+                    .frame(height: charBox)
             }
         }
+        .frame(height: max(available, natural))
+        .scaleEffect(x: 1, y: min(1, available / natural), anchor: .top)
         .foregroundColor(passed ? Self.passedGray : Self.panelNavy)
+        .padding(.top, 4)
+        .frame(height: Self.namesAreaHeight, alignment: .top)
     }
 
     /// The station's real numbering badge; a plain dot when it has no code.
