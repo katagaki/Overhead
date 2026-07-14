@@ -76,7 +76,30 @@ struct RootView: View {
         .onChange(of: viewModel.activeJourney != nil) { _, hasJourney in
             // The journey lives in a sheet; dismissing it minimizes the
             // journey into the bottom toolbar accessory.
-            showJourneySheet = hasJourney
+            guard hasJourney else { showJourneySheet = false; return }
+            // Starting a journey inserts the accessory (the zoom source) and
+            // would present the sheet in the same transaction — the source
+            // isn't laid out yet, so the very first zoom falls back to a plain
+            // slide-up. Present on the next runloop so the source exists first.
+            DispatchQueue.main.async { showJourneySheet = true }
+        }
+        // Selecting a journey while one is active overwrites it — but only
+        // after confirming, since the swap silently ends the journey in
+        // progress. Overwriting keeps activeJourney non-nil, so the onChange
+        // above won't fire; open the sheet explicitly on confirm.
+        .alert(
+            "Journey.Overwrite.ConfirmTitle",
+            isPresented: $viewModel.showOverwriteConfirmation
+        ) {
+            Button("Button.Overwrite", role: .destructive) {
+                viewModel.confirmOverwrite()
+                showJourneySheet = true
+            }
+            Button("Button.Cancel", role: .cancel) {
+                viewModel.cancelOverwrite()
+            }
+        } message: {
+            Text("Journey.Overwrite.ConfirmMessage")
         }
     }
 

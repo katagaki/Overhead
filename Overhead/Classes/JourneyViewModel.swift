@@ -17,6 +17,7 @@ final class JourneyViewModel: ObservableObject {
     @Published var trackingMode: TrackingMode = .timetable
     @Published var isLoading = false
     @Published var isStartingJourney = false
+    @Published var showOverwriteConfirmation = false
     @Published var errorMessage: String?
     @Published var locationError: String?
     @Published var stationTimetable: [StationTimetableData] = []
@@ -28,6 +29,10 @@ final class JourneyViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private var timetableCache: [String: [TrainService]] = [:]
     private var linesLoaded = false
+
+    // A journey selected while another is active waits here until the user
+    // confirms overwriting the one in progress.
+    private var pendingStart: (() -> Void)?
 
     init(previewMode: Bool = false) {
         bindLocationTracker()
@@ -78,6 +83,21 @@ final class JourneyViewModel: ObservableObject {
     // MARK: - Start Journey
 
     func startJourney(
+        line: TrainLine,
+        from boardingStation: Station,
+        to alightingStation: Station
+    ) async {
+        if activeJourney != nil {
+            pendingStart = { [weak self] in
+                Task { await self?.performStartJourney(line: line, from: boardingStation, to: alightingStation) }
+            }
+            showOverwriteConfirmation = true
+            return
+        }
+        await performStartJourney(line: line, from: boardingStation, to: alightingStation)
+    }
+
+    private func performStartJourney(
         line: TrainLine,
         from boardingStation: Station,
         to alightingStation: Station
@@ -460,6 +480,15 @@ final class JourneyViewModel: ObservableObject {
 
     /// Starts a journey on a specific itinerary chosen from the departure search.
     func startJourney(candidate: TrainCandidate) {
+        if activeJourney != nil {
+            pendingStart = { [weak self] in self?.performStartJourney(candidate: candidate) }
+            showOverwriteConfirmation = true
+            return
+        }
+        performStartJourney(candidate: candidate)
+    }
+
+    private func performStartJourney(candidate: TrainCandidate) {
         LiveActivityManager.shared.endActivity()
 
         let journey = Journey(
@@ -505,6 +534,20 @@ final class JourneyViewModel: ObservableObject {
                 legLines: legLines
             )
         }
+    }
+
+    // MARK: - Overwrite Confirmation
+
+    /// Proceeds with a journey that was held back because another was active.
+    func confirmOverwrite() {
+        let start = pendingStart
+        pendingStart = nil
+        start?()
+    }
+
+    /// Discards the held-back journey, keeping the one in progress.
+    func cancelOverwrite() {
+        pendingStart = nil
     }
 
     // MARK: - Stop Journey
