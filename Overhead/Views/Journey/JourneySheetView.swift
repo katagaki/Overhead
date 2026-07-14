@@ -8,6 +8,7 @@ struct JourneySheetView: View {
     @ObservedObject var viewModel: JourneyViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var showingEndConfirmation = false
+    @AppStorage(TrainLCDStyle.storageKey) private var lcdStyleRaw = TrainLCDStyle.joban.rawValue
 
     var body: some View {
         NavigationStack {
@@ -34,6 +35,20 @@ struct JourneySheetView: View {
                             Button("Button.KeepJourney", role: .cancel) {}
                         }
                     }
+
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Menu {
+                            Picker("Button.LCDStyle", selection: $lcdStyleRaw) {
+                                ForEach(TrainLCDStyle.allCases) { style in
+                                    Text(verbatim: style.label).tag(style.rawValue)
+                                }
+                            }
+                        } label: {
+                            Label("Button.LCDStyle", systemImage: "ellipsis")
+                        }
+                    }
+
+                    ToolbarSpacer(.fixed, placement: .topBarTrailing)
 
                     ToolbarItem(placement: .topBarTrailing) {
                         if #available(iOS 26.0, *) {

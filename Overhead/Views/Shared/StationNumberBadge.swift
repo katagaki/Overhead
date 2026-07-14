@@ -95,6 +95,18 @@ struct StationNumberBadge: View {
         }
     }
 
+    /// True when the badge for `code` renders as a circle. Mirrors `body`'s
+    /// dispatch; `color` disambiguates the shared "G" prefix.
+    static func rendersAsCircle(code: String, color: Color) -> Bool {
+        let prefix = String(code.prefix(while: \.isLetter))
+        if prefix.hasPrefix("J") || squarePrefixes.contains(prefix) { return false }
+        if seibuPrefixes.contains(prefix) { return false }
+        if filledSquarePrefixes.contains(prefix) { return false }
+        if splitPrefixes.contains(prefix) { return false }
+        if ["MM", "SO", "NT", "TT"].contains(prefix) { return false }
+        return true
+    }
+
     var body: some View {
         let (prefix, number) = parsed
 

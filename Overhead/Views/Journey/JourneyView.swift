@@ -5,6 +5,7 @@ import Backbone
 
 struct JourneyView: View {
     @ObservedObject var viewModel: JourneyViewModel
+    @AppStorage(TrainLCDStyle.storageKey) private var lcdStyleRaw = TrainLCDStyle.joban.rawValue
 
     private var lineColor: Color {
         viewModel.selectedLine?.color ?? .gray
@@ -36,9 +37,16 @@ struct JourneyView: View {
                         }
                     }
                     .safeAreaInset(edge: .top) {
-                        TrainLCDView(journey: journey, state: state, lineColor: lineColor)
-                            .padding(.horizontal, 12)
-                            .padding(.bottom, 8)
+                        Group {
+                            switch TrainLCDStyle(rawValue: lcdStyleRaw) ?? .joban {
+                            case .joban:
+                                TrainLCDView(journey: journey, state: state, lineColor: lineColor)
+                            case .tokyoMetro:
+                                MetroLCDView(journey: journey, state: state, lineColor: lineColor)
+                            }
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.bottom, 8)
                     }
                     .safeAreaInset(edge: .bottom) {
                         trackingModeCapsule
