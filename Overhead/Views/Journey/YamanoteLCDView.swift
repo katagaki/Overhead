@@ -1,18 +1,20 @@
 import SwiftUI
 import Backbone
 
-// MARK: - Train LCD View
+// MARK: - Yamanote LCD View
 
-/// Simulation of the in-car overhead LCD (16:9): black header with the train
-/// type plate, terminus, next station and car number, over a white strip with
-/// the upcoming stops progressing right to left toward an arrow tip.
-struct TrainLCDView: View {
+/// Simulation of the E235-series in-car LCD (16:9): gray header bar with the
+/// train type in outlined line-color text (wrapping every two kanji), a white
+/// box holding the next station's badge and name, and the car number — over a
+/// Joban-style stop progression whose arrow marker is line-colored with no
+/// center circle.
+struct YamanoteLCDView: View {
     let journey: Journey
     let state: TrainPositionState
     let lineColor: Color
 
-    /// LCD chrome color (plate, band, car box). Some lines' in-car identity
-    /// differs from their wayfinding color; badges keep `lineColor`.
+    /// LCD chrome color (type text, band, car box). Some lines' in-car
+    /// identity differs from their wayfinding color; badges keep `lineColor`.
     private var displayColor: Color {
         let firstLegId = journey.line.id.split(separator: "+").first.map(String.init)
             ?? journey.line.id
@@ -26,22 +28,16 @@ struct TrainLCDView: View {
     private static let designHeight: CGFloat = designWidth * 9 / 16
     private static let headerHeight: CGFloat = designHeight * 0.3
     private static let maxUpcomingStops = 7
-    private static let lcdRed = Color(hex: "#D7000F")
+    private static let barGray = Color(hex: "#B3B6BB")
 
     private static let allLines = StaticTrainData.trainLines()
-    private static let clockFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "H:mm"
-        f.timeZone = TimeZone(identifier: "Asia/Tokyo")
-        return f
-    }()
 
     var body: some View {
         TimelineView(.everyMinute) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
                 VStack(spacing: 0) {
-                    header(now: context.date)
+                    header
                         .frame(height: Self.headerHeight)
                     progression(now: context.date)
                         .frame(maxHeight: .infinity)
@@ -56,99 +52,93 @@ struct TrainLCDView: View {
         }
     }
 
-    // MARK: - Header (black area)
+    // MARK: - Header (gray bar)
 
-    private func header(now: Date) -> some View {
-        HStack(alignment: .top, spacing: 10) {
-            destinationPlate
-
-            VStack(spacing: 0) {
-                HStack(alignment: .top, spacing: 3) {
-                    Text(headlineLabel)
-                        .font(.system(size: 12, weight: .bold))
-                    Spacer()
-                    Text(verbatim: "現在時刻")
-                        .font(.system(size: 8, weight: .medium))
-                        .opacity(0.85)
-                    Text(Self.clockFormatter.string(from: now))
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(.black)
-                        .padding(.horizontal, 3)
-                        .background(Color.white, in: RoundedRectangle(cornerRadius: 2))
-                }
-                .foregroundColor(.white)
-
-                if let station = headlineStation {
-                    HStack(spacing: 8) {
-                        if !station.stationCode.isEmpty {
-                            // Black keyline around the badge, outside its
-                            // colored frame.
-                            scaledStationBadge(station, dimension: 26)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 26 * 0.21 + 1.5)
-                                        .strokeBorder(Color.black, lineWidth: 1.5)
-                                        .padding(-1.5)
-                                )
-                        }
-                        Text(station.name)
-                            .font(.system(size: 30, weight: .bold))
-                            .foregroundColor(.white)
-                            .kerning(5.0)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.3)
-                    }
-                    .frame(maxHeight: .infinity)
-                }
-            }
-            .padding(.top, 2)
-            .padding(.bottom, 2)
-
-            carColumn
-                .padding(.top, 2)
+    private var header: some View {
+        ZStack {
+            stationBox
         }
-        .padding(.trailing, 2)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(hue: 0.0, saturation: 0.0, brightness: 0.1))
+        .overlay(alignment: .topLeading) {
+            outlinedType
+                .padding(.top, 4)
+                .padding(.leading, 7)
+        }
+        .overlay(alignment: .topTrailing) {
+            carColumn
+                .padding(.top, 4)
+                .padding(.trailing, 7)
+        }
+        .background(Self.barGray)
     }
 
-    /// Line-color plate with an arrow tip: train type in a white box over the
-    /// terminus name and ゆき.
-    private var destinationPlate: some View {
-        VStack(spacing: 2) {
-            Text(typeName)
-                .font(.system(size: 15, weight: .black))
-                .kerning(typeKerning)
-                // Kerning trails the last glyph too; pad the leading edge by
-                // the same amount so the text stays centered.
-                .padding(.leading, typeKerning)
-                .foregroundColor(displayColor)
-                .lineLimit(1)
-                .minimumScaleFactor(0.5)
-                .modifier(ItalicSkew())
-                .frame(maxWidth: .infinity)
-                .frame(height: 18)
-                .background(Color.white, in: RoundedRectangle(cornerRadius: 3))
-
-            Spacer(minLength: 0)
-
-            Text(destinationStation?.name ?? "")
-                .font(.system(size: 16, weight: .heavy))
-                .lineLimit(1)
-                .kerning(3.0)
-                .minimumScaleFactor(0.5)
-                .shadow(color: .black.opacity(0.85), radius: 1, x: 0, y: 0)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-
-            Text(verbatim: "ゆき")
-                .font(.system(size: 8, weight: .bold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity, alignment: .trailing)
+    /// Train type in line color with a white outline, wrapped every 2 kanji
+    /// (各駅停車 → 各駅 / 停車).
+    private var outlinedType: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(Array(typeLines.enumerated()), id: \.offset) { _, line in
+                outlinedText(line, size: 15)
+            }
         }
-        .padding(EdgeInsets(top: 4, leading: 5, bottom: 3, trailing: 16))
-        .frame(width: 102)
-        .frame(maxHeight: .infinity)
-        .background(PlateShape().fill(displayColor))
+    }
+
+    private func outlinedText(_ text: String, size: CGFloat) -> some View {
+        // SwiftUI has no glyph stroke; stack offset white copies behind.
+        ZStack {
+            ForEach(0..<8, id: \.self) { i in
+                let angle = CGFloat(i) * .pi / 4
+                Text(text)
+                    .font(.system(size: size, weight: .heavy))
+                    .foregroundColor(.white)
+                    .offset(x: cos(angle) * 1.1, y: sin(angle) * 1.1)
+            }
+            Text(text)
+                .font(.system(size: size, weight: .heavy))
+                .foregroundColor(displayColor)
+        }
+    }
+
+    private static let boxHeight: CGFloat = 44
+
+    /// White hard-edged box: the station's badge docked left at near-full
+    /// height, the name's characters spread across the remaining width.
+    private var stationBox: some View {
+        HStack(spacing: 0) {
+            if let station = headlineStation {
+                if !station.stationCode.isEmpty {
+                    scaledStationBadge(station, dimension: Self.boxHeight - 9)
+                        .padding(4.5)
+                }
+                spreadName(station.name)
+                    .padding(.horizontal, 14)
+                    .frame(maxWidth: .infinity)
+            }
+        }
+        .frame(width: 190, height: Self.boxHeight)
+        .background(Color.white)
+        .overlay(
+            Rectangle().strokeBorder(
+                LinearGradient(
+                    colors: [Color(hex: "#D8DADD"), Color(hex: "#6E7176")],
+                    startPoint: .top, endPoint: .bottom
+                ),
+                lineWidth: 1.5
+            )
+        )
+    }
+
+    /// Characters distributed evenly across the available width.
+    private func spreadName(_ name: String) -> some View {
+        let chars = Array(name)
+        let size: CGFloat = chars.count <= 4 ? 27 : 18
+        return HStack(spacing: 0) {
+            ForEach(chars.indices, id: \.self) { i in
+                if i > 0 { Spacer(minLength: 0) }
+                Text(String(chars[i]))
+                    .font(.system(size: size, weight: .heavy))
+                    .foregroundColor(.black)
+            }
+        }
     }
 
     private var carColumn: some View {
@@ -160,11 +150,11 @@ struct TrainLCDView: View {
                 .background(Color.white, in: RoundedRectangle(cornerRadius: 2))
             Text(verbatim: "号車")
                 .font(.system(size: 8, weight: .bold))
-                .foregroundColor(.white)
+                .foregroundColor(.black)
         }
     }
 
-    // MARK: - Progression (white area)
+    // MARK: - Progression (white area, Joban-style)
 
     private func progression(now: Date) -> some View {
         let columns = stops(now: now)
@@ -177,20 +167,30 @@ struct TrainLCDView: View {
                         .frame(width: colWidth, height: 52, alignment: .bottom)
                 }
             }
-            .padding(.bottom, 2)
+
+            // Station codes horizontally under the names, not badges.
+            HStack(spacing: 0) {
+                ForEach(columns) { col in
+                    Text(hyphenatedCode(col.station))
+                        .font(.system(size: 6.5, weight: .heavy))
+                        .foregroundColor(.black)
+                        .frame(width: colWidth, height: 8)
+                }
+            }
 
             ZStack(alignment: .leading) {
-                ArrowBandShape()
+                // Runs past the content padding to the display's right edge.
+                YamanoteArrowBandShape()
                     .fill(displayColor)
                     .frame(height: 17)
-                    .padding(.trailing, max(0, colWidth / 2 - 6))
+                    .padding(.trailing, -10)
                 HStack(spacing: 0) {
                     ForEach(columns) { col in
                         Group {
                             if col.isCurrent {
                                 currentMarker
                             } else {
-                                minuteCircle(col, showsUnit: col.id == columns.first?.id)
+                                minuteBox(col)
                             }
                         }
                         .frame(width: colWidth)
@@ -198,16 +198,11 @@ struct TrainLCDView: View {
                 }
             }
             .frame(height: 21)
-
-            HStack(spacing: 0) {
-                ForEach(columns) { col in
-                    Group {
-                        if !col.station.stationCode.isEmpty {
-                            scaledStationBadge(col.station, dimension: 15)
-                        }
-                    }
-                    .frame(width: colWidth, height: 16)
-                }
+            .overlay(alignment: .trailing) {
+                Text(verbatim: "（分）")
+                    .font(.system(size: 6.5, weight: .bold))
+                    .foregroundColor(.white)
+                    .offset(x: 9)
             }
 
             HStack(alignment: .top, spacing: 0) {
@@ -216,7 +211,7 @@ struct TrainLCDView: View {
                         .frame(width: colWidth, alignment: .topLeading)
                 }
             }
-            .padding(.top, 2)
+            .padding(.top, 3)
             .frame(maxHeight: .infinity, alignment: .top)
         }
         .padding(.horizontal, 10)
@@ -249,37 +244,28 @@ struct TrainLCDView: View {
         .foregroundColor(.black)
     }
 
-    private func minuteCircle(_ col: LCDStop, showsUnit: Bool) -> some View {
+    /// White 16:10 rectangle with the minute count — the E235 uses boxes,
+    /// not the E233's circles.
+    private func minuteBox(_ col: LCDStop) -> some View {
         ZStack {
-            Circle()
+            Rectangle()
                 .fill(Color.white)
-                .frame(width: 14, height: 14)
+                .frame(width: 21, height: 21 * 10 / 16)
             Text(verbatim: "\(col.minutes ?? 0)")
-                .font(.system(size: 9, weight: .bold))
+                .font(.system(size: 10.5, weight: .bold))
                 .foregroundColor(.black)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
-                .frame(width: 12)
-            if showsUnit {
-                Text(verbatim: "(分)")
-                    .font(.system(size: 6, weight: .bold))
-                    .foregroundColor(.white)
-                    .offset(x: 13)
-            }
+                .frame(width: 19)
         }
     }
 
+    /// Line-colored arrow marker — no center circle, unlike the Joban one.
     private var currentMarker: some View {
-        ZStack {
-            ArrowBandShape()
-                .fill(Self.lcdRed)
-                .overlay(ArrowBandShape().stroke(Color.white, lineWidth: 1.5))
-                .frame(width: 27, height: 21)
-            Circle()
-                .fill(Color.white)
-                .frame(width: 8, height: 8)
-                .offset(x: 2.5)
-        }
+        YamanoteArrowBandShape()
+            .fill(displayColor)
+            .overlay(YamanoteArrowBandShape().stroke(Color.white, lineWidth: 1.5))
+            .frame(width: 27, height: 21)
     }
 
     private func transferList(_ lines: [TrainLine]) -> some View {
@@ -304,7 +290,7 @@ struct TrainLCDView: View {
     private struct LCDStop: Identifiable {
         let id: String
         let station: Station
-        let minutes: Int?    // nil for the current column (red marker)
+        let minutes: Int?    // nil for the current column (marker)
         let isCurrent: Bool
         let transfers: [TrainLine]
     }
@@ -362,10 +348,6 @@ struct TrainLCDView: View {
         )
     }
 
-    private var headlineLabel: String {
-        state.currentStationIndex != nil ? "ただいま" : "つぎは"
-    }
-
     private var headlineStation: Station? {
         let stations = journey.journeyStations
         guard !stations.isEmpty else { return nil }
@@ -373,22 +355,25 @@ struct TrainLCDView: View {
         return stations[max(0, min(index, stations.count - 1))]
     }
 
-    private var destinationStation: Station? {
-        journey.line.stations.first { $0.id == journey.service.destinationStationId }
-            ?? journey.journeyStations.last
-    }
-
     private var typeName: String {
         journey.service.trainType == .local ? "各駅停車" : journey.service.trainType.displayNameJa
     }
 
-    private var typeKerning: CGFloat {
-        switch typeName.count {
-        case ...2: return 12
-        case 3: return 5
-        case 4: return 1.5
-        default: return 0
+    /// Wrapped every 2 characters: 各駅停車 → [各駅, 停車].
+    private var typeLines: [String] {
+        let chars = Array(typeName)
+        return stride(from: 0, to: chars.count, by: 2).map {
+            String(chars[$0..<min($0 + 2, chars.count)])
         }
+    }
+
+    /// "JY28" → "JY-28", matching the code style under the names.
+    private func hyphenatedCode(_ station: Station) -> String {
+        let code = station.stationCode
+        let letters = code.prefix(while: \.isLetter)
+        let digits = code.drop(while: \.isLetter)
+        guard !letters.isEmpty, !digits.isEmpty else { return code }
+        return "\(letters)-\(digits)"
     }
 
     /// No car data exists — derive a stable 1...10 from the journey ID so the
@@ -427,23 +412,8 @@ struct TrainLCDView: View {
 
 // MARK: - Shapes
 
-/// Rectangle with an arrow tip on the trailing edge (the destination plate).
-private struct PlateShape: Shape {
-    func path(in rect: CGRect) -> Path {
-        let tip: CGFloat = 12
-        var p = Path()
-        p.move(to: CGPoint(x: rect.minX, y: rect.minY))
-        p.addLine(to: CGPoint(x: rect.maxX - tip, y: rect.minY))
-        p.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
-        p.addLine(to: CGPoint(x: rect.maxX - tip, y: rect.maxY))
-        p.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
-        p.closeSubpath()
-        return p
-    }
-}
-
 /// Horizontal band with an arrow tip on the leading edge (direction of travel).
-private struct ArrowBandShape: Shape {
+private struct YamanoteArrowBandShape: Shape {
     func path(in rect: CGRect) -> Path {
         let tip: CGFloat = 6
         var p = Path()
@@ -454,26 +424,5 @@ private struct ArrowBandShape: Shape {
         p.addLine(to: CGPoint(x: rect.minX + tip, y: rect.maxY))
         p.closeSubpath()
         return p
-    }
-}
-
-// MARK: - Italic Skew
-
-/// Synthetic italic — system fonts don't oblique CJK glyphs, so shear the
-/// rendered text instead.
-private struct ItalicSkew: ViewModifier {
-    func body(content: Content) -> some View {
-        content.modifier(SkewEffect(shear: 0.22))
-    }
-}
-
-private struct SkewEffect: GeometryEffect {
-    var shear: CGFloat
-
-    func effectValue(size: CGSize) -> ProjectionTransform {
-        ProjectionTransform(CGAffineTransform(
-            a: 1, b: 0, c: -shear, d: 1,
-            tx: shear * size.height / 2, ty: 0
-        ))
     }
 }

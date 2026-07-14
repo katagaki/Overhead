@@ -41,8 +41,14 @@ struct JourneyView: View {
                             switch TrainLCDStyle(rawValue: lcdStyleRaw) ?? .joban {
                             case .joban:
                                 TrainLCDView(journey: journey, state: state, lineColor: lineColor)
+                            case .yamanote:
+                                YamanoteLCDView(journey: journey, state: state, lineColor: lineColor)
                             case .tokyoMetro:
                                 MetroLCDView(journey: journey, state: state, lineColor: lineColor)
+                            case .ledMatrix:
+                                LEDMatrixView(journey: journey, state: state, lineColor: lineColor)
+                            case .millennium:
+                                MillenniumLCDView(journey: journey, state: state, lineColor: lineColor)
                             }
                         }
                         .padding(.horizontal, 12)
