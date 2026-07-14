@@ -331,10 +331,6 @@ struct VerticalLCDLine: View {
                     .foregroundColor(isPast && !isCurrent ? .secondary : .primary)
             }
 
-            Text(station.nameEn)
-                .font(.system(size: 11))
-                .foregroundColor(isPast && !isCurrent ? .secondary.opacity(0.5) : .secondary)
-
             if isTransfer {
                 HStack(spacing: 3) {
                     Image(systemName: "arrow.triangle.2.circlepath")

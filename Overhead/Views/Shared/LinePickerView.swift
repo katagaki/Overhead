@@ -248,9 +248,6 @@ struct StationPickerView: View {
                 Text(station.localizedName)
                     .font(.system(size: 16, weight: isFirst || isLast ? .bold : .medium))
                     .foregroundColor(.primary)
-                Text(station.nameEn)
-                    .font(.system(size: 11))
-                    .foregroundColor(.secondary)
             }
 
             Spacer(minLength: 8)
@@ -383,7 +380,7 @@ struct StationPickerView: View {
                 }
             }
         } else {
-            Text(verbatim: "—")
+            Text(verbatim: "–")
                 .font(.system(size: 15, weight: .semibold, design: .rounded))
                 .foregroundColor(Color(.tertiaryLabel))
         }
