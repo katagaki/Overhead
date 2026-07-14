@@ -643,6 +643,7 @@ struct JourneyPlannerSection: View {
             // the station are excluded outright.
             var departure = effectiveDeparture
             if departureMode == .now,
+               walkingSpeed != .none,
                let station = fromSelection?.station,
                let walkSeconds = await walkingEstimator.walkingSeconds(to: station) {
                 departure = departure.addingTimeInterval(walkSeconds * walkingSpeed.paceMultiplier)
