@@ -110,7 +110,7 @@ struct YamanoteLCDView: View {
                         .padding(4.5)
                 }
                 spreadName(station.name)
-                    .padding(.horizontal, 14)
+                    .padding(.horizontal, 20)
                     .frame(maxWidth: .infinity)
             }
         }

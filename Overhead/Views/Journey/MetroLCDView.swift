@@ -148,9 +148,10 @@ struct MetroLCDView: View {
                     .foregroundColor(.black)
                     .lineLimit(1)
                     .minimumScaleFactor(0.35)
-                    // Centered in whatever space remains right of the badge.
+                    // Centered in whatever space remains right of the badge,
+                    // nudged left of true center by the trailing padding.
                     .frame(maxWidth: .infinity)
-                    .padding(.trailing, 8)
+                    .padding(.trailing, 28)
             } else {
                 Spacer(minLength: 8)
             }

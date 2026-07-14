@@ -6,7 +6,7 @@ enum TrainLCDStyle: String, CaseIterable, Identifiable {
     case yamanote
     case tokyoMetro
     case ledMatrix
-    case millennium
+    case kivotos
 
     static let storageKey = "journey.lcdStyle"
 
@@ -20,7 +20,7 @@ enum TrainLCDStyle: String, CaseIterable, Identifiable {
         case .yamanote: return "山手線風"
         case .tokyoMetro: return "東京メトロ風"
         case .ledMatrix: return "3色LED風"
-        case .millennium: return "ミレニアムモノレール風"
+        case .kivotos: return "キヴォトス広域都市鉄道風"
         }
     }
 }

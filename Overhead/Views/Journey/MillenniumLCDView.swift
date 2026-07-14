@@ -22,7 +22,9 @@ struct MillenniumLCDView: View {
     private static let nodeAreaHeight: CGFloat = 20
     // Strip height (designHeight − header − bottom inset) minus the node area.
     private static let namesAreaHeight: CGFloat = 54
-    private static let lineY: CGFloat = 14      // thin line's center in the node area
+    // Thin line's center in the node area — high enough that the badges
+    // riding it clear the strip's bottom edge.
+    private static let lineY: CGFloat = 11.5
     private static let badgeDiameter: CGFloat = 12
     private static let maxColumns = 9
     private static let panelNavy = Color(hex: "#19265C")
@@ -58,7 +60,7 @@ struct MillenniumLCDView: View {
     private var header: some View {
         HStack(spacing: 8) {
             typePlate
-                .frame(width: 88, alignment: .leading)
+                .frame(width: 108, alignment: .leading)
 
             Spacer(minLength: 0)
 
@@ -85,7 +87,7 @@ struct MillenniumLCDView: View {
                     .font(.system(size: 7, weight: .bold))
                     .foregroundColor(.white.opacity(0.85))
             }
-            .frame(width: 88, alignment: .trailing)
+            .frame(width: 108, alignment: .trailing)
         }
         .padding(.horizontal, 10)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -106,9 +108,12 @@ struct MillenniumLCDView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
         }
-        .padding(.horizontal, 9)
-        .frame(height: 26)
-        .frame(minWidth: 76)
+        // Inset past the skew depth so the text stays within the
+        // parallelogram's straight region.
+        .padding(.horizontal, 30)
+        // Edge to edge vertically: panel top down to the white strip's top.
+        .frame(maxHeight: .infinity)
+        .frame(minWidth: 104)
         .background(SlantedPlateShape().fill(Self.plateBlue))
         .overlay(
             PlateEdgeStripes()
@@ -181,14 +186,14 @@ struct MillenniumLCDView: View {
                 Color.white
                 // Faint watermark parallelogram, same slant as the plate,
                 // with the same flanking stripes.
-                SlantedPlateShape(skew: 24)
+                SlantedPlateShape(skew: 56)
                     .fill(Self.plateBlue.opacity(0.22))
                     .overlay(
-                        PlateEdgeStripes(skew: 24, gap: 8)
+                        PlateEdgeStripes(skew: 56, gap: 8)
                             .stroke(Self.plateBlue.opacity(0.22), lineWidth: 2.5)
                     )
                     .frame(width: 115)
-                    .offset(x: 122)
+                    .offset(x: 180)
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: 4))
@@ -339,7 +344,7 @@ private struct MillenniumArrowShape: Shape {
 
 /// Thin decorative lines flanking the plate, parallel to its slanted edges.
 private struct PlateEdgeStripes: Shape {
-    var skew: CGFloat = 7
+    var skew: CGFloat = 26
     var gap: CGFloat = 4
 
     func path(in rect: CGRect) -> Path {
@@ -354,7 +359,7 @@ private struct PlateEdgeStripes: Shape {
 
 /// Parallelogram leaning left (the type plate and strip watermark).
 private struct SlantedPlateShape: Shape {
-    var skew: CGFloat = 7
+    var skew: CGFloat = 26
 
     func path(in rect: CGRect) -> Path {
         var p = Path()

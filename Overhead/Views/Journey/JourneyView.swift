@@ -47,7 +47,7 @@ struct JourneyView: View {
                                 MetroLCDView(journey: journey, state: state, lineColor: lineColor)
                             case .ledMatrix:
                                 LEDMatrixView(journey: journey, state: state, lineColor: lineColor)
-                            case .millennium:
+                            case .kivotos:
                                 MillenniumLCDView(journey: journey, state: state, lineColor: lineColor)
                             }
                         }
