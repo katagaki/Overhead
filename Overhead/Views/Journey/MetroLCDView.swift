@@ -67,23 +67,40 @@ struct MetroLCDView: View {
     // MARK: - Destination Strip (top, white)
 
     private var destinationStrip: some View {
-        HStack(alignment: .lastTextBaseline, spacing: 4) {
-            Text(destinationStation?.name ?? "")
-                .font(.system(size: 15, weight: .heavy))
-                .lineLimit(1)
-                .minimumScaleFactor(0.5)
-            Text(verbatim: "ゆき")
-                .font(.system(size: 15, weight: .heavy))
+        HStack(spacing: 8) {
+            typeBox
+            HStack(alignment: .lastTextBaseline, spacing: 4) {
+                Text(destinationStation?.name ?? "")
+                    .font(.system(size: 15, weight: .heavy))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                Text(verbatim: "ゆき")
+                    .font(.system(size: 15, weight: .heavy))
+            }
+            .foregroundColor(.black)
             Spacer()
         }
-        .foregroundColor(.black)
-        .padding(.leading, 12)
+        .padding(.leading, 6)
         .overlay(alignment: .trailing) {
             carBox
                 .padding(.trailing, 8)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .metalBandGradient(.white)
+    }
+
+    /// Train type in white italic on a line-color box with the metallic
+    /// sheen.
+    private var typeBox: some View {
+        Text(typeName)
+            .font(.system(size: 13, weight: .heavy))
+            .foregroundColor(.white)
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
+            .modifier(MetroSkewEffect(shear: 0.22))
+            .frame(width: 66, height: 19)
+            .metalBandGradient(displayColor)
+            .clipShape(RoundedRectangle(cornerRadius: 2))
     }
 
     private var carBox: some View {
@@ -109,7 +126,7 @@ struct MetroLCDView: View {
             Text(headlineLabel)
                 .font(.system(size: 13, weight: .bold))
                 .foregroundColor(.black)
-                .padding(.leading, 16)
+                .padding(.leading, 52)
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .padding(.bottom, 5)
             if let station = headlineStation {
@@ -418,6 +435,10 @@ struct MetroLCDView: View {
             ?? journey.journeyStations.last
     }
 
+    private var typeName: String {
+        journey.service.trainType == .local ? "各駅停車" : journey.service.trainType.displayNameJa
+    }
+
     /// No car data exists — derive a stable 1...10 from the journey ID so the
     /// display stays constant for the ride.
     private var carNumber: Int {
@@ -449,6 +470,21 @@ struct MetroLCDView: View {
         var s = (c.hour ?? 0) * 3600 + (c.minute ?? 0) * 60 + (c.second ?? 0)
         if s < 4 * 3600 { s += 24 * 3600 }
         return s
+    }
+}
+
+// MARK: - Skew Effect
+
+/// Synthetic italic — system fonts don't oblique CJK glyphs, so shear the
+/// rendered text instead.
+private struct MetroSkewEffect: GeometryEffect {
+    var shear: CGFloat
+
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        ProjectionTransform(CGAffineTransform(
+            a: 1, b: 0, c: -shear, d: 1,
+            tx: shear * size.height / 2, ty: 0
+        ))
     }
 }
 
