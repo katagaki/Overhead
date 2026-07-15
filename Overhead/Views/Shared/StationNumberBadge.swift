@@ -32,6 +32,8 @@ struct StationNumberBadge: View {
     var size: BadgeSize = .regular
     /// Japanese station name (currently unused; kept for future variants).
     var stationName: String? = nil
+    /// Forces a shape for user-created lines, whose codes match no operator.
+    var styleOverride: BadgeStyle? = nil
 
     enum BadgeSize {
         case compact  // For list rows
@@ -97,7 +99,8 @@ struct StationNumberBadge: View {
 
     /// True when the badge for `code` renders as a circle. Mirrors `body`'s
     /// dispatch; `color` disambiguates the shared "G" prefix.
-    static func rendersAsCircle(code: String, color: Color) -> Bool {
+    static func rendersAsCircle(code: String, color: Color, styleOverride: BadgeStyle? = nil) -> Bool {
+        if let styleOverride { return styleOverride == .ring }
         let prefix = String(code.prefix(while: \.isLetter))
         if prefix.hasPrefix("J") || squarePrefixes.contains(prefix) { return false }
         if seibuPrefixes.contains(prefix) { return false }
@@ -110,6 +113,20 @@ struct StationNumberBadge: View {
     var body: some View {
         let (prefix, number) = parsed
 
+        if let styleOverride {
+            switch styleOverride {
+            case .rounded: squareBadge(prefix: prefix, number: number)
+            case .ring: circleBadge(prefix: prefix, number: number)
+            case .filled: filledSquareBadge(prefix: prefix, number: number)
+            case .square: plainSquareBadge(prefix: prefix, number: number)
+            }
+        } else {
+            operatorBadge(prefix: prefix, number: number)
+        }
+    }
+
+    @ViewBuilder
+    private func operatorBadge(prefix: String, number: String) -> some View {
         // JR station codes start with "J" (JC, JY, JK, JB, etc.)
         if prefix.hasPrefix("J") || Self.squarePrefixes.contains(prefix) {
             squareBadge(prefix: prefix, number: number)
@@ -237,6 +254,39 @@ struct StationNumberBadge: View {
         .overlay(
             RoundedRectangle(cornerRadius: 6)
                 .strokeBorder(color.opacity(opacity), lineWidth: 3)
+        )
+    }
+
+    // MARK: - Custom: Thin-Border Sharp Square
+
+    @ViewBuilder
+    private func plainSquareBadge(prefix: String, number: String) -> some View {
+        let d = badgeDimension
+        let prefixSize = d * 0.58
+        let numberSize = d * 0.79
+
+        VStack(spacing: 1) {
+            Text(prefix)
+                .font(.custom("Hind-Bold", size: prefixSize))
+                .offset(y: prefixSize * 0.24)
+                .frame(maxWidth: .infinity)
+                .frame(height: prefixSize * 0.75)
+
+            Text(number)
+                .font(.custom("Hind-Bold", size: numberSize))
+                .offset(y: numberSize * -0.06)
+                .frame(maxWidth: .infinity)
+                .frame(height: numberSize * 0.75)
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.6)
+        .foregroundColor(Color.black.opacity(opacity))
+        .frame(width: d, height: d)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 2))
+        .overlay(
+            RoundedRectangle(cornerRadius: 2)
+                .strokeBorder(color.opacity(opacity), lineWidth: 2)
         )
     }
 

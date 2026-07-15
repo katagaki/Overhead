@@ -49,6 +49,8 @@ struct LineSymbolBadge: View {
     let color: Color
     /// Badge side length; all internal metrics scale proportionally.
     var dimension: CGFloat = 32
+    /// Forces a shape for user-created lines, whose symbols match no operator.
+    var styleOverride: BadgeStyle? = nil
 
     private static let tobuSymbols: Set<String> = ["TS", "TI", "TN", "TD", "TJ"]
     private static let odakyuSymbols: Set<String> = ["OH", "OE", "OT"]
@@ -71,6 +73,36 @@ struct LineSymbolBadge: View {
     private var f: CGFloat { dimension / 32 }
 
     var body: some View {
+        if let styleOverride {
+            customBadge(styleOverride)
+        } else {
+            operatorBadge
+        }
+    }
+
+    // MARK: - Custom line symbol badges
+
+    @ViewBuilder
+    private func customBadge(_ style: BadgeStyle) -> some View {
+        switch style {
+        case .rounded: jrBadge
+        case .ring: metroBadge
+        case .filled: tokyuBadge
+        case .square:
+            symbolText(.custom("Hind-Bold", fixedSize: (symbol.count > 1 ? 18.5 : 20) * f),
+                       color: .black, inset: 4 * f,
+                       nudge: (symbol.count > 1 ? 16.5 : 20) * f * 0.085)
+                .frame(width: dimension, height: dimension)
+                .background(Color.white, in: RoundedRectangle(cornerRadius: 2 * f))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 2 * f)
+                        .strokeBorder(color, lineWidth: 2 * f)
+                )
+        }
+    }
+
+    @ViewBuilder
+    private var operatorBadge: some View {
         switch symbol {
         case "NT":
             nipporiToneriBadge

@@ -11,8 +11,11 @@ public struct TrainLine: Identifiable, Codable, Hashable {
     public let operatorId: String   // e.g. "Operator:JR-East"
     public let stations: [Station]
     public let colorHex: String     // Primary accent color
+    /// Set only by user-created (Custom:) lines, whose station codes match no
+    /// operator; nil leaves badge shape to the code-prefix dispatch.
+    public var badgeStyle: BadgeStyle?
 
-    public init(id: String, name: String, nameEn: String, nameKo: String = "", nameZhHans: String = "", nameZhHant: String = "", operatorId: String, stations: [Station], colorHex: String) {
+    public init(id: String, name: String, nameEn: String, nameKo: String = "", nameZhHans: String = "", nameZhHant: String = "", operatorId: String, stations: [Station], colorHex: String, badgeStyle: BadgeStyle? = nil) {
         self.id = id
         self.name = name
         self.nameEn = nameEn
@@ -22,7 +25,12 @@ public struct TrainLine: Identifiable, Codable, Hashable {
         self.operatorId = operatorId
         self.stations = stations
         self.colorHex = colorHex
+        self.badgeStyle = badgeStyle
     }
+
+    /// True for user-created lines. These never enter the static route graph,
+    /// so they can't be transferred to/from built-in lines.
+    public var isCustom: Bool { id.hasPrefix("Custom:") }
 
     public var color: Color {
         Color(hex: colorHex)

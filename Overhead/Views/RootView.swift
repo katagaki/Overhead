@@ -7,6 +7,7 @@ import Backbone
 /// journey minimizes into a custom accessory in the bottom toolbar.
 struct RootView: View {
     @ObservedObject var viewModel: JourneyViewModel
+    @ObservedObject private var customStore = CustomLineStore.shared
 
     @AppStorage(JourneyMode.storageKey) private var journeyMode = JourneyMode.hybrid
     @State private var showJourneySheet = false
@@ -27,6 +28,7 @@ struct RootView: View {
                 VStack(spacing: 24) {
                     JourneyPlannerSection(viewModel: viewModel)
                     FavoritesSection(viewModel: viewModel)
+                    CustomLinesSection(viewModel: viewModel)
                     LinesSection(viewModel: viewModel)
                 }
                 .padding(.horizontal, 16)
@@ -63,6 +65,9 @@ struct RootView: View {
                     MoreAttributionsView()
                 }
             }
+            .navigationDestination(for: CustomLineRoute.self) { route in
+                CustomLineEditorView(route: route)
+            }
             .task {
                 await viewModel.loadLines()
             }
@@ -73,6 +78,9 @@ struct RootView: View {
         .sheet(isPresented: $showJourneySheet) {
             JourneySheetView(viewModel: viewModel)
                 .navigationTransition(.zoom(sourceID: Self.journeyTransitionID, in: journeyZoom))
+        }
+        .sheet(item: $customStore.incomingPackage) { package in
+            CustomLineImportView(package: package)
         }
         .onChange(of: viewModel.activeJourney != nil) { _, hasJourney in
             // The journey lives in a sheet; dismissing it minimizes the

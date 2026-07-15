@@ -785,6 +785,61 @@ final class JourneyViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Custom (DIY) Line Journeys
+
+    /// Rides a user-created line from `fromId` to `toId`. Custom lines never
+    /// enter StaticTrainData, so this bypasses route resolution entirely and
+    /// builds the service directly — they can't transfer to built-in lines.
+    func startCustomJourney(line: CustomLine, fromId: String, toId: String) {
+        if activeJourney != nil {
+            pendingStart = { [weak self] in self?.performStartCustomJourney(line: line, fromId: fromId, toId: toId) }
+            showOverwriteConfirmation = true
+            return
+        }
+        performStartCustomJourney(line: line, fromId: fromId, toId: toId)
+    }
+
+    private func performStartCustomJourney(line: CustomLine, fromId: String, toId: String) {
+        LiveActivityManager.shared.endActivity()
+
+        let scheduled = CustomJourneyBuilder.scheduledService(line: line, fromId: fromId, toId: toId)
+        guard let service = scheduled
+            ?? CustomJourneyBuilder.untimedService(line: line, fromId: fromId, toId: toId)
+        else {
+            errorMessage = "No matching train found for this time"
+            return
+        }
+        let hasSchedule = scheduled != nil
+        let journeyLine = line.trainLine
+
+        let journey = Journey(
+            id: UUID(),
+            service: service,
+            line: journeyLine,
+            boardingStationId: fromId,
+            alightingStationId: toId,
+            startedAt: Date(),
+            hasSchedule: hasSchedule
+        )
+
+        activeJourney = journey
+        selectedLine = journeyLine
+        errorMessage = nil
+
+        locationTracker.startTracking(journey: journey, delay: nil)
+        positionState = hasSchedule
+            ? TrainPositionEngine.computePosition(journey: journey, delay: nil)
+            : locationTracker.positionState
+
+        if let state = positionState {
+            startLiveActivity(
+                journey: journey,
+                positionState: state,
+                lineColorHex: journeyLine.colorHex
+            )
+        }
+    }
+
     // MARK: - Manual Station Flipping (schedule-less journeys)
 
     func stepManualStation(_ delta: Int) {

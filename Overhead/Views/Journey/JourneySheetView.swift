@@ -8,6 +8,7 @@ struct JourneySheetView: View {
     @ObservedObject var viewModel: JourneyViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var showingEndConfirmation = false
+    @State private var shareImage: ShareableImage?
     @AppStorage(TrainLCDStyle.storageKey) private var lcdStyleRaw = TrainLCDStyle.joban.rawValue
     @AppStorage(TrainLCDOrientation.storageKey) private var lcdOrientationRaw = TrainLCDOrientation.left.rawValue
 
@@ -35,6 +36,17 @@ struct JourneySheetView: View {
                             }
                             Button("Button.KeepJourney", role: .cancel) {}
                         }
+                    }
+
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            if let image = renderLCDImage() {
+                                shareImage = ShareableImage(image: image)
+                            }
+                        } label: {
+                            Label("Button.ShareImage", systemImage: "square.and.arrow.up")
+                        }
+                        .disabled(viewModel.activeJourney == nil || viewModel.positionState == nil)
                     }
 
                     ToolbarItem(placement: .topBarTrailing) {
@@ -74,5 +86,42 @@ struct JourneySheetView: View {
                 }
         }
         .presentationDragIndicator(.visible)
+        .sheet(item: $shareImage) { shareable in
+            ActivityView(items: [shareable.image])
+        }
+    }
+
+    // MARK: - LCD snapshot
+
+    /// Renders the current LCD (in the selected style) to a @3x image for
+    /// sharing. Works for built-in and custom lines alike.
+    @MainActor
+    private func renderLCDImage() -> UIImage? {
+        guard let journey = viewModel.activeJourney,
+              let state = viewModel.positionState else { return nil }
+        let color = viewModel.selectedLine?.color ?? .gray
+        let orientation = TrainLCDOrientation(rawValue: lcdOrientationRaw) ?? .left
+
+        let lcd = Group {
+            switch TrainLCDStyle(rawValue: lcdStyleRaw) ?? .joban {
+            case .joban:
+                TrainLCDView(journey: journey, state: state, lineColor: color, orientation: orientation)
+            case .yamanote:
+                YamanoteLCDView(journey: journey, state: state, lineColor: color, orientation: orientation)
+            case .tokyoMetro:
+                MetroLCDView(journey: journey, state: state, lineColor: color, orientation: orientation)
+            case .ledMatrix:
+                LEDMatrixView(journey: journey, state: state, lineColor: color)
+            case .kivotos:
+                MillenniumLCDView(journey: journey, state: state, lineColor: color, orientation: orientation)
+            }
+        }
+        .frame(width: 360)
+        .padding(12)
+        .background(Color(.systemBackground))
+
+        let renderer = ImageRenderer(content: lcd)
+        renderer.scale = 3
+        return renderer.uiImage
     }
 }

@@ -16,6 +16,13 @@ struct OverheadApp: App {
     }
 
     private func handleDeepLink(_ url: URL) {
+        if url.isFileURL {
+            if url.pathExtension.lowercased() == "ohl" {
+                CustomLineStore.shared.receiveFile(at: url)
+            }
+            return
+        }
+
         guard url.scheme == "overhead" else { return }
 
         switch url.host {

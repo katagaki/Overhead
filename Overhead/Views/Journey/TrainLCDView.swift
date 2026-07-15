@@ -362,6 +362,10 @@ struct TrainLCDView: View {
     /// Other bundled lines serving the same physical station (matched by
     /// Japanese name), excluding the line(s) being ridden.
     private func transfers(at station: Station) -> [TrainLine] {
+        // Custom lines never interchange with built-in lines; skip the
+        // name-match lookup so a made-up station can't borrow a real one's
+        // transfers (e.g. a custom 大鳥居 showing 京急空港線).
+        guard !journey.line.isCustom else { return [] }
         let ridden = Set(journey.line.id.split(separator: "+").map(String.init))
         return Array(
             Self.allLines
@@ -418,7 +422,8 @@ struct TrainLCDView: View {
             code: station.stationCode,
             color: stationColor(station),
             size: .regular,
-            stationName: station.name
+            stationName: station.name,
+            styleOverride: journey.line.badgeStyle
         )
         .scaleEffect(dimension / 28)
         .frame(width: dimension, height: dimension)
