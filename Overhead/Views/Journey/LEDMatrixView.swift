@@ -5,9 +5,9 @@ import Backbone
 // MARK: - LED Matrix View
 
 /// Simulation of the 3-color LED dot-matrix above the doors of older stock:
-/// a wide black housing with a 16-row dot grid cycling static JA/EN
-/// next-station pages and scrolling full-sentence messages, orange text with
-/// green train types and red delay notices.
+/// two stacked 16-row lines — the top holds the next station, flipping
+/// between JA and EN, while the bottom scrolls full-sentence messages.
+/// Green text with orange for key information and red delay notices.
 struct LEDMatrixView: View {
     let journey: Journey
     let state: TrainPositionState
@@ -17,7 +17,9 @@ struct LEDMatrixView: View {
     // stays proportional on any device.
     private static let designWidth: CGFloat = 360
     private static let gridColumns = 120
-    private static let gridRows = LEDRaster.rows
+    private static let lineRows = LEDRaster.rows
+    private static let lineGap = 2
+    private static let gridRows = lineRows * 2 + lineGap
     private static let dotPitch: CGFloat = 2.8
     private static let bezelX: CGFloat = (designWidth - CGFloat(gridColumns) * dotPitch) / 2
     private static let bezelY: CGFloat = 7
@@ -27,7 +29,7 @@ struct LEDMatrixView: View {
 
     /// Rasterizing is (comparatively) slow; keep pages per message set so
     /// body stays cheap. Keyed by everything the panel says.
-    @MainActor private static var pageCache: [String: [LEDPage]] = [:]
+    @MainActor private static var pageCache: [String: LEDPanelPages] = [:]
 
     var body: some View {
         let pages = currentPages
@@ -48,9 +50,10 @@ struct LEDMatrixView: View {
     }
 
     /// Unlit LEDs, drawn once — a faint grid so the panel reads as hardware.
+    /// The gap rows between the two lines are housing, not dots.
     private var offDots: some View {
         Canvas { ctx, _ in
-            for row in 0..<Self.gridRows {
+            for row in 0..<Self.gridRows where !Self.isGapRow(row) {
                 for col in 0..<Self.gridColumns {
                     ctx.fill(
                         Path(ellipseIn: Self.dotRect(col: col, row: row)),
@@ -61,25 +64,34 @@ struct LEDMatrixView: View {
         }
     }
 
-    private func onDots(_ pages: [LEDPage]) -> some View {
+    private func onDots(_ pages: LEDPanelPages) -> some View {
         TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { context in
             Canvas { ctx, _ in
-                guard !pages.isEmpty else { return }
-                let (page, columnOffset) = frame(at: context.date, pages: pages)
-                for col in 0..<Self.gridColumns {
-                    let sourceColumn = col + columnOffset
-                    guard sourceColumn >= 0, sourceColumn < page.raster.width else { continue }
-                    for row in 0..<Self.gridRows {
-                        let colorIndex = page.raster.dot(column: sourceColumn, row: row)
-                        guard colorIndex > 0 else { continue }
-                        ctx.fill(
-                            Path(ellipseIn: Self.dotRect(col: col, row: row)),
-                            with: .color(LEDColor(rawValue: colorIndex - 1)!.color)
-                        )
-                    }
-                }
+                drawLine(ctx, pages: pages.top, at: context.date, rowBase: 0)
+                drawLine(ctx, pages: pages.bottom, at: context.date, rowBase: Self.lineRows + Self.lineGap)
             }
         }
+    }
+
+    private func drawLine(_ ctx: GraphicsContext, pages: [LEDPage], at date: Date, rowBase: Int) {
+        guard !pages.isEmpty else { return }
+        let (page, columnOffset) = frame(at: date, pages: pages)
+        for col in 0..<Self.gridColumns {
+            let sourceColumn = col + columnOffset
+            guard sourceColumn >= 0, sourceColumn < page.raster.width else { continue }
+            for row in 0..<Self.lineRows {
+                let colorIndex = page.raster.dot(column: sourceColumn, row: row)
+                guard colorIndex > 0 else { continue }
+                ctx.fill(
+                    Path(ellipseIn: Self.dotRect(col: col, row: rowBase + row)),
+                    with: .color(LEDColor(rawValue: colorIndex - 1)!.color)
+                )
+            }
+        }
+    }
+
+    private static func isGapRow(_ row: Int) -> Bool {
+        row >= lineRows && row < lineRows + lineGap
     }
 
     private static func dotRect(col: Int, row: Int) -> CGRect {
@@ -129,7 +141,7 @@ struct LEDMatrixView: View {
             + "\(id)|\(state.currentStationIndex != nil)|\(state.delayMinutes)"
     }
 
-    private var currentPages: [LEDPage] {
+    private var currentPages: LEDPanelPages {
         let key = pageKey
         if let cached = Self.pageCache[key] { return cached }
         let built = buildPages()
@@ -137,46 +149,51 @@ struct LEDMatrixView: View {
         return built
     }
 
-    private func buildPages() -> [LEDPage] {
+    private func buildPages() -> LEDPanelPages {
         let dwelling = state.currentStationIndex != nil
-        guard let station = headlineStation else { return [] }
+        guard let station = headlineStation else { return LEDPanelPages(top: [], bottom: []) }
         let destination = destinationStation
         let type = typeNameJa
         let lineJa = strippedLineName
 
-        var built: [LEDPage] = []
-        // Static JA / EN next-station pages.
-        built.append(LEDPage(segments: [
+        // Top line: the next station held statically, flipping JA / EN.
+        var top: [LEDPage] = []
+        top.append(LEDPage(segments: [
             .init(text: dwelling ? "ただいま " : "つぎは ", color: .green),
             .init(text: station.name, color: .orange),
         ], scrolls: false))
-        built.append(LEDPage(segments: dwelling
+        top.append(LEDPage(segments: dwelling
             ? [.init(text: station.nameEn, color: .orange)]
             : [.init(text: "Next ", color: .green),
                .init(text: station.nameEn, color: .orange)],
             scrolls: false))
-        // Scrolling full-sentence JA / EN pages.
-        built.append(LEDPage(segments: [
-            .init(text: "この電車は、\(lineJa) ", color: .orange),
-            .init(text: type, color: .green),
-            .init(text: " \(destination?.name ?? "")ゆきです。", color: .orange),
-        ], scrolls: true))
-        built.append(LEDPage(segments: [
-            .init(text: "This is the ", color: .orange),
-            .init(text: typeNameEn, color: .green),
-            .init(text: " train bound for \(destination?.nameEn ?? "").", color: .orange),
-        ], scrolls: true))
-        if state.delayMinutes > 0 {
-            built.append(LEDPage(segments: [
-                .init(text: "ただいま、約\(state.delayMinutes)分遅れて運転しております。ご迷惑をおかけいたします。", color: .red),
-            ], scrolls: true))
-        }
         // A page wider than the panel can't hold statically; scroll it.
-        return built.map { page in
-            page.raster.width > Self.gridColumns && !page.scrolls
+        top = top.map { page in
+            page.raster.width > Self.gridColumns
                 ? LEDPage(segments: page.segments, scrolls: true)
                 : page
         }
+
+        // Bottom line: scrolling full-sentence JA / EN pages.
+        var bottom: [LEDPage] = []
+        bottom.append(LEDPage(segments: [
+            .init(text: "この電車は、\(lineJa) ", color: .green),
+            .init(text: "\(type) \(destination?.name ?? "")ゆき", color: .orange),
+            .init(text: "です。", color: .green),
+        ], scrolls: true))
+        bottom.append(LEDPage(segments: [
+            .init(text: "This is the ", color: .green),
+            .init(text: typeNameEn, color: .orange),
+            .init(text: " train bound for ", color: .green),
+            .init(text: destination?.nameEn ?? "", color: .orange),
+            .init(text: ".", color: .green),
+        ], scrolls: true))
+        if state.delayMinutes > 0 {
+            bottom.append(LEDPage(segments: [
+                .init(text: "ただいま、約\(state.delayMinutes)分遅れて運転しております。ご迷惑をおかけいたします。", color: .red),
+            ], scrolls: true))
+        }
+        return LEDPanelPages(top: top, bottom: bottom)
     }
 
     private var headlineStation: Station? {
@@ -220,6 +237,11 @@ struct LEDMatrixView: View {
 }
 
 // MARK: - LED Page
+
+private struct LEDPanelPages {
+    let top: [LEDPage]
+    let bottom: [LEDPage]
+}
 
 private struct LEDPage {
     struct Segment {
