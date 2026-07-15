@@ -128,6 +128,9 @@ struct MillenniumLCDView: View {
     private var strip: some View {
         // Built left to right; facing left mirrors the columns and marker.
         let (builtCols, builtSlot) = columns()
+        // While dwelling, the arrow sits mid-column over the current station —
+        // hide that badge so the arrow takes its place.
+        let dwelling = state.currentStationIndex != nil
         let mirrored = orientation == .left
         let cols = mirrored ? Array(builtCols.reversed()) : builtCols
         let markerSlot = mirrored ? CGFloat(builtCols.count) - builtSlot : builtSlot
@@ -170,8 +173,14 @@ struct MillenniumLCDView: View {
 
                 HStack(spacing: 0) {
                     ForEach(cols) { col in
-                        stationBadge(for: col.station, dimension: Self.badgeDiameter, dimmed: col.isPassed)
-                            .frame(width: colWidth)
+                        Group {
+                            if dwelling && col.isHighlighted {
+                                Color.clear
+                            } else {
+                                stationBadge(for: col.station, dimension: Self.badgeDiameter, dimmed: col.isPassed)
+                            }
+                        }
+                        .frame(width: colWidth)
                     }
                 }
                 .offset(y: Self.lineY - Self.badgeDiameter / 2)
