@@ -12,6 +12,7 @@ struct YamanoteLCDView: View {
     let journey: Journey
     let state: TrainPositionState
     let lineColor: Color
+    let orientation: TrainLCDOrientation
 
     /// LCD chrome color (type text, band, car box). Some lines' in-car
     /// identity differs from their wayfinding color; badges keep `lineColor`.
@@ -179,11 +180,11 @@ struct YamanoteLCDView: View {
             }
 
             ZStack(alignment: .leading) {
-                // Runs past the content padding to the display's right edge.
-                YamanoteArrowBandShape()
+                // Runs past the content padding to the display's tail edge.
+                YamanoteArrowBandShape(tipOnTrailing: orientation == .right)
                     .fill(displayColor)
                     .frame(height: 17)
-                    .padding(.trailing, -10)
+                    .padding(orientation == .right ? .leading : .trailing, -10)
                 HStack(spacing: 0) {
                     ForEach(columns) { col in
                         Group {
@@ -198,11 +199,11 @@ struct YamanoteLCDView: View {
                 }
             }
             .frame(height: 21)
-            .overlay(alignment: .trailing) {
+            .overlay(alignment: orientation == .right ? .leading : .trailing) {
                 Text(verbatim: "（分）")
                     .font(.system(size: 6.5, weight: .bold))
                     .foregroundColor(.white)
-                    .offset(x: 9)
+                    .offset(x: orientation == .right ? -9 : 9)
             }
 
             HStack(alignment: .top, spacing: 0) {
@@ -264,9 +265,10 @@ struct YamanoteLCDView: View {
 
     /// Line-colored arrow marker — no center circle, unlike the Joban one.
     private var currentMarker: some View {
-        YamanoteArrowBandShape()
+        let flipped = orientation == .right
+        return YamanoteArrowBandShape(tipOnTrailing: flipped)
             .fill(displayColor)
-            .overlay(YamanoteArrowBandShape().stroke(Color.white, lineWidth: 1.5))
+            .overlay(YamanoteArrowBandShape(tipOnTrailing: flipped).stroke(Color.white, lineWidth: 1.5))
             .frame(width: 27, height: 21)
     }
 
@@ -297,8 +299,9 @@ struct YamanoteLCDView: View {
         let transfers: [TrainLine]
     }
 
-    /// Columns left to right: farthest upcoming stop first, the station the
-    /// train is at (or just left) last, so travel reads right to left.
+    /// Columns in travel order per `orientation`: facing left puts the
+    /// farthest upcoming stop first and the current station last, so travel
+    /// reads right to left; facing right mirrors that.
     private func stops(now: Date) -> [LCDStop] {
         let stations = journey.journeyStations
         guard !stations.isEmpty else { return [] }
@@ -334,7 +337,7 @@ struct YamanoteLCDView: View {
             isCurrent: true,
             transfers: transfers(at: stations[ref])
         ))
-        return columns
+        return orientation == .right ? columns.reversed() : columns
     }
 
     /// Other bundled lines serving the same physical station (matched by
@@ -415,8 +418,11 @@ struct YamanoteLCDView: View {
 
 // MARK: - Shapes
 
-/// Horizontal band with an arrow tip on the leading edge (direction of travel).
+/// Horizontal band with an arrow tip on the leading edge (direction of
+/// travel), or the trailing edge when `tipOnTrailing`.
 private struct YamanoteArrowBandShape: Shape {
+    var tipOnTrailing = false
+
     func path(in rect: CGRect) -> Path {
         let tip: CGFloat = 6
         var p = Path()
@@ -426,6 +432,6 @@ private struct YamanoteArrowBandShape: Shape {
         p.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
         p.addLine(to: CGPoint(x: rect.minX + tip, y: rect.maxY))
         p.closeSubpath()
-        return p
+        return tipOnTrailing ? p.mirroredHorizontally(in: rect) : p
     }
 }

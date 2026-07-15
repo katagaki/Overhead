@@ -9,6 +9,7 @@ struct JourneySheetView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showingEndConfirmation = false
     @AppStorage(TrainLCDStyle.storageKey) private var lcdStyleRaw = TrainLCDStyle.joban.rawValue
+    @AppStorage(TrainLCDOrientation.storageKey) private var lcdOrientationRaw = TrainLCDOrientation.left.rawValue
 
     var body: some View {
         NavigationStack {
@@ -41,6 +42,11 @@ struct JourneySheetView: View {
                             Picker("Button.LCDStyle", selection: $lcdStyleRaw) {
                                 ForEach(TrainLCDStyle.allCases) { style in
                                     Text(verbatim: style.label).tag(style.rawValue)
+                                }
+                            }
+                            Picker("Button.LCDOrientation", selection: $lcdOrientationRaw) {
+                                ForEach(TrainLCDOrientation.allCases) { orientation in
+                                    Text(verbatim: orientation.label).tag(orientation.rawValue)
                                 }
                             }
                         } label: {

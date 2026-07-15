@@ -15,6 +15,7 @@ struct MetroLCDView: View {
     let journey: Journey
     let state: TrainPositionState
     let lineColor: Color
+    let orientation: TrainLCDOrientation
 
     /// LCD chrome color (band). Some lines' in-car identity differs from
     /// their wayfinding color; badges keep `lineColor`.
@@ -180,10 +181,16 @@ struct MetroLCDView: View {
     // MARK: - Progression (white area)
 
     private func progression(now: Date) -> some View {
-        let (cols, markerSlot) = columns(now: now)
+        // Built left to right; facing left mirrors the columns, the marker
+        // slot, and the insets (the wide one holds the 分 label at the tail).
+        let (builtCols, builtSlot) = columns(now: now)
+        let mirrored = orientation == .left
+        let cols = mirrored ? Array(builtCols.reversed()) : builtCols
+        let markerSlot = mirrored ? CGFloat(builtCols.count) - builtSlot : builtSlot
+        let leadInset = mirrored ? Self.columnsTrailing : Self.columnsLeading
         let colWidth = (Self.designWidth - Self.columnsLeading - Self.columnsTrailing)
             / CGFloat(max(cols.count, 1))
-        let markerCenter = Self.columnsLeading + markerSlot * colWidth
+        let markerCenter = leadInset + markerSlot * colWidth
 
         return VStack(spacing: 0) {
             HStack(alignment: .bottom, spacing: 0) {
@@ -192,7 +199,7 @@ struct MetroLCDView: View {
                         .frame(width: colWidth, alignment: .bottomLeading)
                 }
             }
-            .padding(.leading, Self.columnsLeading)
+            .padding(.leading, leadInset)
             .padding(.bottom, 3)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
 
@@ -211,11 +218,11 @@ struct MetroLCDView: View {
                         .frame(width: colWidth)
                     }
                 }
-                .padding(.leading, Self.columnsLeading)
+                .padding(.leading, leadInset)
 
-                DirectionMarker()
+                DirectionMarker(pointsLeading: mirrored)
                     .fill(Self.markerBlue)
-                    .overlay(DirectionMarker().stroke(Color.white, lineWidth: 1.2))
+                    .overlay(DirectionMarker(pointsLeading: mirrored).stroke(Color.white, lineWidth: 1.2))
                     .frame(width: 17, height: Self.bandHeight)
                     .offset(x: max(0, markerCenter - 8.5))
             }
@@ -226,12 +233,12 @@ struct MetroLCDView: View {
             // child primitive (boxes, digits, marker) instead of the strip.
             .compositingGroup()
             .shadow(color: .black.opacity(0.4), radius: 0.8, x: 0, y: 1)
-            .overlay(alignment: .bottomTrailing) {
+            .overlay(alignment: mirrored ? .bottomLeading : .bottomTrailing) {
                 Text(verbatim: "分")
                     .font(.system(size: 8, weight: .bold))
                     .foregroundColor(.white)
                     .shadow(color: .black.opacity(0.6), radius: 0.5, x: 0, y: 0.8)
-                    .padding(.trailing, 9)
+                    .padding(mirrored ? .leading : .trailing, 9)
                     .padding(.bottom, 2)
             }
 
@@ -243,7 +250,7 @@ struct MetroLCDView: View {
                         .frame(width: colWidth)
                 }
             }
-            .padding(.leading, Self.columnsLeading)
+            .padding(.leading, leadInset)
             .frame(height: Self.codesHeight)
             .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -257,7 +264,7 @@ struct MetroLCDView: View {
                         .frame(width: colWidth)
                 }
             }
-            .padding(.leading, Self.columnsLeading)
+            .padding(.leading, leadInset)
             .frame(height: Self.namesHeight)
             .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -497,8 +504,10 @@ private struct MetroSkewEffect: GeometryEffect {
 // MARK: - Direction Marker
 
 /// Right-pointing arrow with a chevron-notched tail (the blue "here" marker
-/// riding the band).
+/// riding the band); points left when `pointsLeading`.
 private struct DirectionMarker: Shape {
+    var pointsLeading = false
+
     func path(in rect: CGRect) -> Path {
         let notch = rect.width * 0.42
         var p = Path()
@@ -509,7 +518,7 @@ private struct DirectionMarker: Shape {
         p.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
         p.addLine(to: CGPoint(x: rect.minX + notch, y: rect.midY))
         p.closeSubpath()
-        return p
+        return pointsLeading ? p.mirroredHorizontally(in: rect) : p
     }
 }
 

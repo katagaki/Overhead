@@ -12,6 +12,7 @@ struct MillenniumLCDView: View {
     let journey: Journey
     let state: TrainPositionState
     let lineColor: Color
+    let orientation: TrainLCDOrientation
 
     // Fixed design canvas, scaled to the available width so every metric
     // (fonts, badges, strokes) stays proportional on any device.
@@ -124,7 +125,11 @@ struct MillenniumLCDView: View {
     // MARK: - Route Strip (white)
 
     private var strip: some View {
-        let (cols, markerSlot) = columns()
+        // Built left to right; facing left mirrors the columns and marker.
+        let (builtCols, builtSlot) = columns()
+        let mirrored = orientation == .left
+        let cols = mirrored ? Array(builtCols.reversed()) : builtCols
+        let markerSlot = mirrored ? CGFloat(builtCols.count) - builtSlot : builtSlot
         let colWidth = (Self.designWidth - Self.stripInset * 2) / CGFloat(max(cols.count, 1))
         let markerX = markerSlot * colWidth
         // 70% of the station badge, in the Tokyo Metro notched-arrow shape.
@@ -154,10 +159,10 @@ struct MillenniumLCDView: View {
                 // Thin line: gray behind the train, blue ahead.
                 HStack(spacing: 0) {
                     Rectangle()
-                        .fill(Self.passedGray)
+                        .fill(mirrored ? Self.bandBlue : Self.passedGray)
                         .frame(width: max(0, markerX))
                     Rectangle()
-                        .fill(Self.bandBlue)
+                        .fill(mirrored ? Self.passedGray : Self.bandBlue)
                 }
                 .frame(height: 2.5)
                 .offset(y: Self.lineY - 1.25)
@@ -171,7 +176,7 @@ struct MillenniumLCDView: View {
                 .offset(y: Self.lineY - Self.badgeDiameter / 2)
 
                 // Vertically centered on the line, straddling it.
-                MillenniumArrowShape()
+                MillenniumArrowShape(pointsLeading: mirrored)
                     .fill(Self.arrowRed)
                     .frame(width: arrowWidth, height: arrowWidth * 0.9)
                     .offset(
@@ -324,8 +329,10 @@ struct MillenniumLCDView: View {
 // MARK: - Arrow Shape
 
 /// Right-pointing arrow with a chevron-notched tail (the red position marker
-/// above the line).
+/// above the line); points left when `pointsLeading`.
 private struct MillenniumArrowShape: Shape {
+    var pointsLeading = false
+
     func path(in rect: CGRect) -> Path {
         let notch = rect.width * 0.42
         var p = Path()
@@ -336,7 +343,7 @@ private struct MillenniumArrowShape: Shape {
         p.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
         p.addLine(to: CGPoint(x: rect.minX + notch, y: rect.midY))
         p.closeSubpath()
-        return p
+        return pointsLeading ? p.mirroredHorizontally(in: rect) : p
     }
 }
 

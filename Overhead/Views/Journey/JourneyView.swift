@@ -6,6 +6,7 @@ import Backbone
 struct JourneyView: View {
     @ObservedObject var viewModel: JourneyViewModel
     @AppStorage(TrainLCDStyle.storageKey) private var lcdStyleRaw = TrainLCDStyle.joban.rawValue
+    @AppStorage(TrainLCDOrientation.storageKey) private var lcdOrientationRaw = TrainLCDOrientation.left.rawValue
 
     private var lineColor: Color {
         viewModel.selectedLine?.color ?? .gray
@@ -38,17 +39,18 @@ struct JourneyView: View {
                     }
                     .safeAreaInset(edge: .top) {
                         Group {
+                            let orientation = TrainLCDOrientation(rawValue: lcdOrientationRaw) ?? .left
                             switch TrainLCDStyle(rawValue: lcdStyleRaw) ?? .joban {
                             case .joban:
-                                TrainLCDView(journey: journey, state: state, lineColor: lineColor)
+                                TrainLCDView(journey: journey, state: state, lineColor: lineColor, orientation: orientation)
                             case .yamanote:
-                                YamanoteLCDView(journey: journey, state: state, lineColor: lineColor)
+                                YamanoteLCDView(journey: journey, state: state, lineColor: lineColor, orientation: orientation)
                             case .tokyoMetro:
-                                MetroLCDView(journey: journey, state: state, lineColor: lineColor)
+                                MetroLCDView(journey: journey, state: state, lineColor: lineColor, orientation: orientation)
                             case .ledMatrix:
                                 LEDMatrixView(journey: journey, state: state, lineColor: lineColor)
                             case .kivotos:
-                                MillenniumLCDView(journey: journey, state: state, lineColor: lineColor)
+                                MillenniumLCDView(journey: journey, state: state, lineColor: lineColor, orientation: orientation)
                             }
                         }
                         .padding(.horizontal, 12)

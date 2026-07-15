@@ -10,6 +10,7 @@ struct TrainLCDView: View {
     let journey: Journey
     let state: TrainPositionState
     let lineColor: Color
+    let orientation: TrainLCDOrientation
 
     /// LCD chrome color (plate, band, car box). Some lines' in-car identity
     /// differs from their wayfinding color; badges keep `lineColor`.
@@ -180,17 +181,18 @@ struct TrainLCDView: View {
             .padding(.bottom, 2)
 
             ZStack(alignment: .leading) {
-                ArrowBandShape()
+                ArrowBandShape(tipOnTrailing: orientation == .right)
                     .fill(displayColor)
                     .frame(height: 17)
-                    .padding(.trailing, max(0, colWidth / 2 - 6))
+                    .padding(orientation == .right ? .leading : .trailing, max(0, colWidth / 2 - 6))
                 HStack(spacing: 0) {
                     ForEach(columns) { col in
                         Group {
                             if col.isCurrent {
                                 currentMarker
                             } else {
-                                minuteCircle(col, showsUnit: col.id == columns.first?.id)
+                                // The (分) unit rides the farthest stop's circle.
+                                minuteCircle(col, showsUnit: col.id == farthestId(in: columns))
                             }
                         }
                         .frame(width: colWidth)
@@ -265,22 +267,23 @@ struct TrainLCDView: View {
                     Text(verbatim: "(分)")
                         .font(.system(size: 6, weight: .bold))
                         .foregroundColor(.white)
-                        .offset(x: 13)
+                        .offset(x: orientation == .right ? -13 : 13)
                 }
             }
         }
     }
 
     private var currentMarker: some View {
-        ZStack {
-            ArrowBandShape()
+        let flipped = orientation == .right
+        return ZStack {
+            ArrowBandShape(tipOnTrailing: flipped)
                 .fill(Self.lcdRed)
-                .overlay(ArrowBandShape().stroke(Color.white, lineWidth: 1.5))
+                .overlay(ArrowBandShape(tipOnTrailing: flipped).stroke(Color.white, lineWidth: 1.5))
                 .frame(width: 27, height: 21)
             Circle()
                 .fill(Color.white)
                 .frame(width: 8, height: 8)
-                .offset(x: 2.5)
+                .offset(x: flipped ? -2.5 : 2.5)
         }
     }
 
@@ -311,8 +314,9 @@ struct TrainLCDView: View {
         let transfers: [TrainLine]
     }
 
-    /// Columns left to right: farthest upcoming stop first, the station the
-    /// train is at (or just left) last, so travel reads right to left.
+    /// Columns in travel order per `orientation`: facing left puts the
+    /// farthest upcoming stop first and the current station last, so travel
+    /// reads right to left; facing right mirrors that.
     private func stops(now: Date) -> [LCDStop] {
         let stations = journey.journeyStations
         guard !stations.isEmpty else { return [] }
@@ -348,7 +352,11 @@ struct TrainLCDView: View {
             isCurrent: true,
             transfers: transfers(at: stations[ref])
         ))
-        return columns
+        return orientation == .right ? columns.reversed() : columns
+    }
+
+    private func farthestId(in columns: [LCDStop]) -> String? {
+        orientation == .right ? columns.last?.id : columns.first?.id
     }
 
     /// Other bundled lines serving the same physical station (matched by
@@ -445,8 +453,11 @@ private struct PlateShape: Shape {
     }
 }
 
-/// Horizontal band with an arrow tip on the leading edge (direction of travel).
+/// Horizontal band with an arrow tip on the leading edge (direction of
+/// travel), or the trailing edge when `tipOnTrailing`.
 private struct ArrowBandShape: Shape {
+    var tipOnTrailing = false
+
     func path(in rect: CGRect) -> Path {
         let tip: CGFloat = 6
         var p = Path()
@@ -456,7 +467,14 @@ private struct ArrowBandShape: Shape {
         p.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
         p.addLine(to: CGPoint(x: rect.minX + tip, y: rect.maxY))
         p.closeSubpath()
-        return p
+        return tipOnTrailing ? p.mirroredHorizontally(in: rect) : p
+    }
+}
+
+extension Path {
+    /// The same path flipped about the rect's vertical centerline.
+    func mirroredHorizontally(in rect: CGRect) -> Path {
+        applying(CGAffineTransform(a: -1, b: 0, c: 0, d: 1, tx: rect.minX + rect.maxX, ty: 0))
     }
 }
 
