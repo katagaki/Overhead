@@ -1,4 +1,5 @@
 import SwiftUI
+import CoreLocation
 import Backbone
 
 // MARK: - Custom Stations Editor
