@@ -34,6 +34,10 @@ final class JourneyViewModel: ObservableObject {
     // confirms overwriting the one in progress.
     private var pendingStart: (() -> Void)?
 
+    // A Live Activity held back because the location permission prompt is
+    // still up — it starts the moment the user grants access.
+    private var pendingActivityStart: (() -> Void)?
+
     init(previewMode: Bool = false) {
         bindLocationTracker()
         if previewMode {
@@ -62,6 +66,16 @@ final class JourneyViewModel: ObservableObject {
         locationTracker.$locationError
             .receive(on: DispatchQueue.main)
             .assign(to: &$locationError)
+
+        // Granting location mid-prompt releases a held-back Live Activity
+        locationTracker.$isLocationAuthorized
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] authorized in
+                guard let self, authorized else { return }
+                self.pendingActivityStart?()
+                self.pendingActivityStart = nil
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - Load Lines
@@ -167,7 +181,7 @@ final class JourneyViewModel: ObservableObject {
 
         // Start Live Activity
         if let state = positionState {
-            LiveActivityManager.shared.startActivity(
+            startLiveActivity(
                 journey: journey,
                 positionState: state,
                 lineColorHex: line.colorHex
@@ -175,6 +189,36 @@ final class JourneyViewModel: ObservableObject {
         }
 
         isStartingJourney = false
+    }
+
+    /// Starts the Live Activity only once location is authorized — without
+    /// location keeping the app alive in the background, the activity would
+    /// freeze at its last state. While the permission prompt is undecided,
+    /// the start waits for the grant; a denial drops it.
+    private func startLiveActivity(
+        journey: Journey,
+        positionState: TrainPositionState,
+        lineColorHex: String,
+        legLines: [TrainJourneyAttributes.LegLine] = []
+    ) {
+        guard locationTracker.isLocationAuthorized else {
+            pendingActivityStart = { [weak self] in
+                guard let self, self.activeJourney?.id == journey.id else { return }
+                LiveActivityManager.shared.startActivity(
+                    journey: journey,
+                    positionState: self.positionState ?? positionState,
+                    lineColorHex: lineColorHex,
+                    legLines: legLines
+                )
+            }
+            return
+        }
+        LiveActivityManager.shared.startActivity(
+            journey: journey,
+            positionState: positionState,
+            lineColorHex: lineColorHex,
+            legLines: legLines
+        )
     }
 
     // MARK: - Departure Search (乗換案内-style)
@@ -732,7 +776,7 @@ final class JourneyViewModel: ObservableObject {
         }
 
         if let state = positionState {
-            LiveActivityManager.shared.startActivity(
+            startLiveActivity(
                 journey: journey,
                 positionState: state,
                 lineColorHex: candidate.journeyLine.colorHex,
@@ -766,6 +810,7 @@ final class JourneyViewModel: ObservableObject {
     func stopJourney() {
         locationTracker.stopTracking()
         LiveActivityManager.shared.endActivity()
+        pendingActivityStart = nil
         activeJourney = nil
         positionState = nil
         currentDelay = nil

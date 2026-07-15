@@ -10,6 +10,7 @@ struct RootView: View {
 
     @AppStorage(JourneyMode.storageKey) private var journeyMode = JourneyMode.hybrid
     @State private var showJourneySheet = false
+    @State private var showTimetableModeNotice = false
     @State private var navigationPath = NavigationPath()
     @Namespace private var journeyZoom
 
@@ -100,6 +101,17 @@ struct RootView: View {
             }
         } message: {
             Text("Journey.Overwrite.ConfirmMessage")
+        }
+        // Timetable mode still runs a low-power location session — without
+        // it the app suspends and the Live Activity stops updating.
+        .onChange(of: journeyMode) { _, newMode in
+            if newMode == .timetable { showTimetableModeNotice = true }
+        }
+        .alert(
+            "JourneyMode.TimetableNotice.Title",
+            isPresented: $showTimetableModeNotice
+        ) {} message: {
+            Text("JourneyMode.TimetableNotice.Message")
         }
     }
 

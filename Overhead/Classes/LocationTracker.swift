@@ -26,6 +26,9 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
     @Published var trackingMode: TrackingMode = .timetable
     @Published var isTracking = false
     @Published var locationError: String?
+    // Live Activity updates depend on location keeping the app alive in the
+    // background, so activity starts are gated on this.
+    @Published var isLocationAuthorized = false
 
     // MARK: - Config
 
@@ -41,6 +44,13 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
 
     // Meters moved before recalculating
     private let distanceFilter: CLLocationDistance = 20
+
+    // Coarse profile for timetable mode: the session isn't a position source
+    // there — it only keeps the app running in the background so the
+    // timetable tick can keep updating the Live Activity. Cell-tower-level
+    // accuracy costs next to nothing in battery.
+    private let keepAliveAccuracy = kCLLocationAccuracyThreeKilometers
+    private let keepAliveDistanceFilter: CLLocationDistance = 1000
 
     // GPS accuracy thresholds (meters)
     private let excellentAccuracy: Double = 30      // Full GPS trust
@@ -98,9 +108,10 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
 
         if journeyMode == .timetable {
             trackingMode = .timetable
-        } else {
-            requestGPSIfAuthorized()
         }
+        // Location runs in every mode: as the position source for GPS and
+        // hybrid, and as a low-power keep-alive in timetable mode.
+        requestGPSIfAuthorized()
 
         isTracking = true
 
@@ -133,17 +144,20 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         }
     }
 
-    /// Starts or stops GPS updates to match the journey mode preference —
-    /// called on every tick so mid-journey changes take effect.
+    /// Matches the location session to the journey mode preference — called
+    /// on every tick so mid-journey changes take effect. The session never
+    /// stops in timetable mode: it drops to the coarse keep-alive profile,
+    /// which keeps the app (and thus the tick) alive in the background.
     private func syncGPSToJourneyMode() {
-        if journeyMode == .timetable {
-            guard gpsStarted else { return }
-            locationManager.stopUpdatingLocation()
-            gpsStarted = false
+        guard gpsStarted else {
+            requestGPSIfAuthorized()
+            return
+        }
+        applyAccuracyProfile()
+        if journeyMode == .timetable, currentLocation != nil {
+            // Drop the stale fix so a later switch back to GPS re-locks fresh
             currentLocation = nil
             lastGoodGPSTime = nil
-        } else if !gpsStarted {
-            requestGPSIfAuthorized()
         }
     }
 
@@ -268,17 +282,22 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         switch manager.authorizationStatus {
         case .authorizedWhenInUse, .authorizedAlways:
-            if journey != nil, journeyMode != .timetable { beginGPSUpdates() }
+            isLocationAuthorized = true
+            if journey != nil { beginGPSUpdates() }
         case .denied, .restricted:
+            isLocationAuthorized = false
             locationError = "\(String(localized: "LocationError.NotAuthorized"))"
             trackingMode = .timetable
         default:
-            break
+            isLocationAuthorized = false
         }
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last, journey != nil else { return }
+
+        // Timetable mode's coarse fixes are keep-alive only, never a position
+        guard journeyMode != .timetable else { return }
 
         let age = -location.timestamp.timeIntervalSinceNow
         guard age < 20 else { return }
@@ -741,9 +760,22 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
     // MARK: - Helpers
 
     private func beginGPSUpdates() {
+        applyAccuracyProfile()
         locationManager.startUpdatingLocation()
         gpsStarted = true
         locationError = nil
+    }
+
+    /// Precise fixes when GPS drives the position; coarse fixes in timetable
+    /// mode, where the session is only a background keep-alive.
+    private func applyAccuracyProfile() {
+        if journeyMode == .timetable {
+            locationManager.desiredAccuracy = keepAliveAccuracy
+            locationManager.distanceFilter = keepAliveDistanceFilter
+        } else {
+            locationManager.desiredAccuracy = kCLLocationAccuracyBest
+            locationManager.distanceFilter = distanceFilter
+        }
     }
 
     private func updateLiveActivity() {

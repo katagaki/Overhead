@@ -1267,6 +1267,74 @@
         }
       }
     },
+    "JourneyMode.TimetableNotice.Message": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timetable Only mode still uses location services at low power, so that the timetable and Live Activity keep updating in the background."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時刻表のみモードでも、バックグラウンドで時刻表とライブアクティビティを更新し続けるため、低電力で位置情報サービスを使用します。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시간표만 모드에서도 백그라운드에서 시간표와 라이브 활동을 계속 업데이트하기 위해 저전력으로 위치 서비스를 사용합니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅时刻表模式仍会以低功耗使用定位服务，以便在后台持续更新时刻表和实时活动。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "僅時刻表模式仍會以低功耗使用定位服務，以便在背景持續更新時刻表和即時動態。"
+          }
+        }
+      }
+    },
+    "JourneyMode.TimetableNotice.Title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Location Is Still Used"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "位置情報は引き続き使用されます"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "위치 서비스는 계속 사용됩니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仍会使用定位服务"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仍會使用定位服務"
+          }
+        }
+      }
+    },
     "Label.CurrentLocation": {
       "localizations": {
         "en": {
