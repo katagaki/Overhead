@@ -7,6 +7,7 @@ import Backbone
 /// a grid of tappable line badges. Tapping a line opens its station map.
 struct LinesSection: View {
     @ObservedObject var viewModel: JourneyViewModel
+    @State private var collapsedOperators: Set<String> = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -58,24 +59,52 @@ struct LinesSection: View {
 
         return LazyVStack(alignment: .leading, spacing: 20) {
             ForEach(OperatorSections.sections(for: viewModel.availableLines), id: \.operatorId) { section in
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(section.title)
-                        .font(.body.weight(.semibold))
-                        .foregroundColor(.secondary)
-                        .padding(.leading, 4)
+                let isCollapsed = collapsedOperators.contains(section.operatorId)
 
-                    LazyVGrid(columns: columns, spacing: 10) {
-                        ForEach(section.lines) { line in
-                            NavigationLink {
-                                StationPickerView(
-                                    line: line,
-                                    viewModel: viewModel
-                                )
-                            } label: {
-                                lineCell(line: line)
+                VStack(alignment: .leading, spacing: 8) {
+                    Button {
+                        withAnimation(.smooth.speed(2.0)) {
+                            if isCollapsed {
+                                collapsedOperators.remove(section.operatorId)
+                            } else {
+                                collapsedOperators.insert(section.operatorId)
                             }
-                            .buttonStyle(.plain)
                         }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text(section.title)
+                                .font(.body.weight(.semibold))
+                                .foregroundColor(.secondary)
+                            Image(systemName: "chevron.down")
+                                .font(.caption.weight(.semibold))
+                                .foregroundColor(.secondary)
+                                .rotationEffect(.degrees(isCollapsed ? -90 : 0))
+                            Spacer(minLength: 0)
+                        }
+                        .padding(.leading, 4)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+
+                    if !isCollapsed {
+                        LazyVGrid(columns: columns, spacing: 10) {
+                            ForEach(section.lines) { line in
+                                NavigationLink {
+                                    StationPickerView(
+                                        line: line,
+                                        viewModel: viewModel
+                                    )
+                                } label: {
+                                    lineCell(line: line)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .transition(
+                            .scale(0.96, anchor: .top)
+                                .combined(with: .opacity)
+                                .combined(with: .blurReplace)
+                        )
                     }
                 }
             }
