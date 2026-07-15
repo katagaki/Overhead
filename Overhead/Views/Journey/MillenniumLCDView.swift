@@ -68,11 +68,12 @@ struct MillenniumLCDView: View {
             if let station = headlineStation {
                 HStack(spacing: 5) {
                     stationBadge(for: station, dimension: 18)
-                    Text(station.name)
-                        .font(.system(size: 15, weight: .heavy))
-                        .foregroundColor(.white)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.5)
+                    HorizontallySquashed(maxWidth: 190) {
+                        Text(station.name)
+                            .font(.system(size: 15, weight: .heavy))
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                    }
                 }
             }
 
@@ -208,24 +209,12 @@ struct MillenniumLCDView: View {
     /// last characters align across columns; names too long to fit are
     /// condensed vertically instead (same treatment as the Metro LCD).
     private func verticalName(_ name: String, passed: Bool) -> some View {
-        let chars = Array(name)
-        let charBox: CGFloat = 9.5
-        let available = Self.namesAreaHeight - 8
-        let natural = charBox * CGFloat(chars.count)
-
-        return VStack(spacing: 0) {
-            ForEach(chars.indices, id: \.self) { i in
-                if i > 0 { Spacer(minLength: 0) }
-                Text(String(chars[i]))
-                    .font(.system(size: 9, weight: .bold))
-                    .frame(height: charBox)
-            }
-        }
-        .frame(height: max(available, natural))
-        .scaleEffect(x: 1, y: min(1, available / natural), anchor: .top)
-        .foregroundColor(passed ? Self.passedGray : Self.panelNavy)
-        .padding(.top, 4)
-        .frame(height: Self.namesAreaHeight, alignment: .top)
+        VerticalStationName(name: name, fontSize: 9, charBox: 9.5,
+                            availableHeight: Self.namesAreaHeight - 8,
+                            color: passed ? Self.passedGray : Self.panelNavy,
+                            columnAnchor: .top, justifiedSingle: true)
+            .padding(.top, 4)
+            .frame(height: Self.namesAreaHeight, alignment: .top)
     }
 
     /// The station's real numbering badge; a plain dot when it has no code.

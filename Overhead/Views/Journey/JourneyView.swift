@@ -43,14 +43,28 @@ struct JourneyView: View {
                             switch TrainLCDStyle(rawValue: lcdStyleRaw) ?? .joban {
                             case .joban:
                                 TrainLCDView(journey: journey, state: state, lineColor: lineColor, orientation: orientation)
+                            case .chuoSobu:
+                                ChuoSobuLineLCDView(journey: journey, state: state, lineColor: lineColor, orientation: orientation)
                             case .yamanote:
-                                YamanoteLCDView(journey: journey, state: state, lineColor: lineColor, orientation: orientation)
+                                LoopLCDView(journey: journey, state: state, lineColor: lineColor, orientation: orientation)
                             case .tokyoMetro:
                                 MetroLCDView(journey: journey, state: state, lineColor: lineColor, orientation: orientation)
                             case .ledMatrix:
                                 LEDMatrixView(journey: journey, state: state, lineColor: lineColor)
                             case .kivotos:
                                 MillenniumLCDView(journey: journey, state: state, lineColor: lineColor, orientation: orientation)
+                            case .shinkansen:
+                                ShinkansenTickerView(journey: journey, state: state, lineColor: lineColor)
+                            case .hankyu:
+                                HankyuLCDView(journey: journey, state: state, lineColor: lineColor, orientation: orientation)
+                            case .tube:
+                                TubeLCDView(journey: journey, state: state, lineColor: lineColor)
+                            case .find:
+                                FindLCDView(journey: journey, state: state, lineColor: lineColor, orientation: orientation)
+                            case .neon:
+                                NeonLCDView(journey: journey, state: state, lineColor: lineColor, orientation: orientation)
+                            case .galaxy:
+                                GalaxyLCDView(journey: journey, state: state, lineColor: lineColor, orientation: orientation)
                             }
                         }
                         .padding(.horizontal, 12)
@@ -65,6 +79,8 @@ struct JourneyView: View {
                             }
                         }
                         .padding(.vertical, 8)
+                        .frame(maxWidth: .infinity)
+                        .contentShape(Rectangle())
                     }
                     .onAppear {
                         if let idx = state.currentStationIndex {
@@ -122,8 +138,7 @@ struct JourneyView: View {
 
     // MARK: - Tracking Mode Capsule (bottom safe area)
 
-    /// Floating glass capsule summarizing the tracking mode; tapping it
-    /// refreshes the position.
+    /// Glass capsule summarizing the tracking mode; tap to refresh position.
     @ViewBuilder
     private var trackingModeCapsule: some View {
         let mode = viewModel.trackingMode
@@ -198,8 +213,7 @@ struct JourneyView: View {
 
     // MARK: - Manual Station Flipper (schedule-less journeys)
 
-    /// Replaces the tracking capsule when no schedule and no usable GPS can
-    /// place the train: the user flips between stations by hand.
+    /// Manual station flipper for journeys with no schedule and no usable GPS.
     @ViewBuilder
     private func manualStationControl(journey: Journey, state: TrainPositionState) -> some View {
         let stations = journey.journeyStations
@@ -269,10 +283,7 @@ struct JourneyView: View {
         }
     }
 
-    /// Line name without train-type qualifiers — the type is shown in its own
-    /// pill, so 中央線快速 renders as 中央線 + [快速]. Composite itineraries
-    /// (legs joined with 〜) are cleaned per segment, so
-    /// 常磐線快速〜千代田線 renders as 常磐線〜千代田線.
+    /// Line name without train-type qualifiers, cleaned per 〜-joined segment.
     private func lineDisplayName(for journey: Journey) -> String {
         // Longest first so 特別快速 strips before 快速
         let suffixes = ["通勤快速", "特別快速", "各駅停車", "快速", "急行", "特急"]

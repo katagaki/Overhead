@@ -5,20 +5,18 @@ import Backbone
 // MARK: - LED Matrix View
 
 /// Simulation of the 3-color LED dot-matrix above the doors of older stock:
-/// two stacked 16-row lines — the top holds the next station, flipping
-/// between JA and EN, while the bottom scrolls full-sentence messages.
-/// Green text with orange for key information and red delay notices.
+/// two stacked lines, green with orange highlights and red delay notices.
 struct LEDMatrixView: View {
     let journey: Journey
     let state: TrainPositionState
     let lineColor: Color
 
-    // Fixed design canvas, scaled to the available width so the dot pitch
-    // stays proportional on any device.
+    // Fixed design canvas, scaled to the available width.
     private static let designWidth: CGFloat = 360
     private static let gridColumns = 120
     private static let lineRows = LEDRaster.rows
-    private static let lineGap = 2
+    // Real panels are a single matrix carrying two lines — no housing gap.
+    private static let lineGap = 0
     private static let gridRows = lineRows * 2 + lineGap
     private static let dotPitch: CGFloat = 2.8
     private static let bezelX: CGFloat = (designWidth - CGFloat(gridColumns) * dotPitch) / 2
@@ -27,8 +25,7 @@ struct LEDMatrixView: View {
     private static let staticPageSeconds: Double = 3.8
     private static let scrollDotsPerSecond: Double = 42
 
-    /// Rasterizing is (comparatively) slow; keep pages per message set so
-    /// body stays cheap. Keyed by everything the panel says.
+    /// Cached rasterized pages, keyed by everything the panel says.
     @MainActor private static var pageCache: [String: LEDPanelPages] = [:]
 
     var body: some View {
@@ -49,8 +46,7 @@ struct LEDMatrixView: View {
         .glassEffect(.regular.tint(Color(red: 0.2, green: 0.26, blue: 0.33).opacity(0.4)), in: RoundedRectangle(cornerRadius: 12))
     }
 
-    /// Unlit LEDs, drawn once — a faint grid so the panel reads as hardware.
-    /// The gap rows between the two lines are housing, not dots.
+    /// Unlit LEDs, drawn once.
     private var offDots: some View {
         Canvas { ctx, _ in
             for row in 0..<Self.gridRows where !Self.isGapRow(row) {
@@ -105,8 +101,6 @@ struct LEDMatrixView: View {
     // MARK: - Page Cycle
 
     /// The page on screen at `date` and its scroll offset in source columns.
-    /// Static pages hold centered; scrolling pages enter from the right edge
-    /// and run off the left.
     private func frame(at date: Date, pages: [LEDPage]) -> (LEDPage, Int) {
         let cycle = pages.reduce(0) { $0 + duration(of: $1) }
         var t = date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: cycle)
@@ -212,8 +206,7 @@ struct LEDMatrixView: View {
         journey.service.trainType == .local ? "各駅停車" : journey.service.trainType.displayNameJa
     }
 
-    /// First leg's line name without a trailing train-type qualifier — the
-    /// type is spoken separately (常磐線各駅停車 → 常磐線).
+    /// First leg's line name without a trailing train-type qualifier.
     private var strippedLineName: String {
         let component = journey.line.name.components(separatedBy: "〜").first
             ?? journey.line.name
@@ -282,8 +275,7 @@ private enum LEDColor: UInt8 {
 
 // MARK: - LED Raster
 
-/// Text rasterized to the dot grid: draws the colored segments into a
-/// 16px-tall bitmap at 1x and quantizes each pixel to off/orange/green/red.
+/// Text rasterized to the dot grid, each pixel quantized to off/orange/green/red.
 private struct LEDRaster {
     static let rows = 16
 
@@ -296,9 +288,7 @@ private struct LEDRaster {
     }
 
     init(segments: [LEDPage.Segment]) {
-        // Like the real panels: a flat-terminal gothic for Japanese (Zen
-        // Kaku Gothic New — no flared stroke tips to muddy the dots) and a
-        // serif face for Latin runs.
+        // Flat-terminal gothic for Japanese, serif for Latin runs.
         let jaFont = UIFont(name: "MPLUS1p-Regular", size: 15)
             ?? UIFont.systemFont(ofSize: 14, weight: .regular)
         let latinFont = UIFont(name: "TimesNewRomanPSMT", size: 15)
@@ -343,9 +333,7 @@ private struct LEDRaster {
         ).image { ctx in
             UIColor.black.setFill()
             ctx.fill(CGRect(x: 0, y: 0, width: width, height: height))
-            // Aliased text — one pixel per dot, like a real bitmap font.
-            // Antialiased edges otherwise pass the threshold and fatten
-            // every stroke.
+            // Aliased text — one pixel per dot; antialiasing would fatten strokes.
             ctx.cgContext.setShouldAntialias(false)
             ctx.cgContext.setShouldSmoothFonts(false)
             attributed.draw(at: CGPoint(x: 0, y: (CGFloat(height) - textSize.height) / 2))
@@ -360,9 +348,8 @@ private struct LEDRaster {
             for row in 0..<min(height, cg.height) {
                 for col in 0..<min(width, cg.width) {
                     let p = row * bytesPerRow + col * bytesPerPixel
-                    // Byte order varies (RGBA/BGRA); green is at index 1 in
-                    // both, and blue is negligible in every LED color, so
-                    // treat max(first, third) as red.
+                    // Byte order varies (RGBA/BGRA); green is index 1 in both,
+                    // blue negligible, so max(first, third) is red.
                     let r = max(Int(bytes[p]), Int(bytes[p + 2]))
                     let g = Int(bytes[p + 1])
                     guard r + g > 130 else { continue }  // dark pixel: LED off

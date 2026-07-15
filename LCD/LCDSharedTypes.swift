@@ -2,8 +2,7 @@ import Foundation
 import SwiftUI
 import ActivityKit
 
-// MARK: - Shared types needed by both the app target and the widget extension.
-// These must match the definitions in the main app exactly.
+// MARK: - Shared types (must match the main app's definitions)
 
 // MARK: - Live Activity Attributes
 
@@ -20,13 +19,8 @@ struct TrainJourneyAttributes: ActivityAttributes {
         var statusRaw: String
         var trackingModeRaw: String
         var lastRefreshTimestamp: Double
-        // Scheduled departure from the boarding station (delay-adjusted).
-        // Together with the arrival timestamp this drives timer-based views
-        // that keep advancing while the app is suspended (no GPS needed).
+        // Delay-adjusted; drives timer-based views while the app is suspended.
         var departureTimestamp: Double
-        // Delay-adjusted scheduled window of the current inter-station
-        // segment; drives the self-advancing next-station countdown that
-        // stays live even when no further updates arrive.
         var segmentStartTimestamp: Double
         var nextStationArrivalTimestamp: Double
 
@@ -88,16 +82,26 @@ struct TrainJourneyAttributes: ActivityAttributes {
     let stationNamesEn: [String]
     let stationCount: Int
     let stationStops: [Bool]
-    // Scheduled time at each station (epoch seconds, no delay applied;
-    // skipped stations carry the previous stop's time). Static for the whole
-    // journey, so self-updating views can lean on it without updates.
+    // Epoch seconds, no delay; skipped stations carry the previous stop's time.
     let stationTimes: [Double]
     // Empty string where a station has no code.
     let stationCodes: [String]
+    // Each station keeps its own line's color (through-services differ).
+    let stationColors: [String]
     let legLines: [LegLine]
     let refreshURLString: String
 
     var destinationCode: String { stationCodes.last ?? "" }
+
+    /// The next station's own line color, for its station-number badge.
+    func stationColorHex(at index: Int?) -> String {
+        guard let idx = index, stationColors.indices.contains(idx) else {
+            return lineColorHex
+        }
+        return stationColors[idx]
+    }
+
+    var destinationColorHex: String { stationColors.last ?? lineColorHex }
 
     /// Riders are still on the arriving leg at the transfer station itself;
     /// the new leg takes over once the train departs it.

@@ -2,13 +2,12 @@ import SwiftUI
 import Backbone
 
 // MARK: - Custom Line Editor
-//
-// Native Form. Edits a draft CustomLine and autosaves to the store on change.
-// Stations and timetable open in their own pushed editors.
 
 struct CustomLineEditorView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var store = CustomLineStore.shared
+    @AppStorage(TrainLCDStyle.storageKey) private var lcdStyleRaw = TrainLCDStyle.joban.rawValue
+    @AppStorage(TrainLCDOrientation.storageKey) private var lcdOrientationRaw = TrainLCDOrientation.left.rawValue
 
     @State private var draft: CustomLine
     @State private var isNew: Bool
@@ -28,13 +27,6 @@ struct CustomLineEditorView: View {
 
     var body: some View {
         Form {
-            Section {
-                CustomLinePreview(line: draft)
-                    .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
-            } header: {
-                Text(verbatim: "プレビュー")
-            }
-
             Section {
                 LabeledContent {
                     TextField("", text: $draft.name, prompt: Text(verbatim: "例：山彦電鉄本線"))
@@ -113,6 +105,16 @@ struct CustomLineEditorView: View {
         }
         .navigationTitle(Text(verbatim: isNew ? "新しい路線" : "路線を編集"))
         .navigationBarTitleDisplayMode(.inline)
+        .safeAreaInset(edge: .top) {
+            CustomLinePreview(
+                line: draft,
+                style: TrainLCDStyle(rawValue: lcdStyleRaw) ?? .joban,
+                orientation: TrainLCDOrientation(rawValue: lcdOrientationRaw) ?? .left
+            )
+            .padding(.horizontal, 12)
+            .padding(.bottom, 8)
+            .background(Color(.systemGroupedBackground))
+        }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 ShareLink(
@@ -126,10 +128,31 @@ struct CustomLineEditorView: View {
                 }
                 .disabled(draft.stations.isEmpty)
             }
+
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    ForEach(TrainLCDStyleCategory.allCases) { category in
+                        Section(category.label) {
+                            Picker("Button.LCDStyle", selection: $lcdStyleRaw) {
+                                ForEach(category.styles) { style in
+                                    Text(verbatim: style.label).tag(style.rawValue)
+                                }
+                            }
+                            .pickerStyle(.inline)
+                        }
+                    }
+                    Picker("Button.LCDOrientation", selection: $lcdOrientationRaw) {
+                        ForEach(TrainLCDOrientation.allCases) { orientation in
+                            Text(verbatim: orientation.label).tag(orientation.rawValue)
+                        }
+                    }
+                } label: {
+                    Label("Button.LCDStyle", systemImage: "widget.medium")
+                }
+            }
         }
         .onChange(of: draft) { _, newValue in
-            // Persist edits live; skip a blank brand-new line so backing out
-            // without entering anything leaves no junk behind.
+            // Skip a blank brand-new line so backing out leaves no junk behind.
             guard !(newValue.name.isEmpty && newValue.stations.isEmpty && newValue.symbol.isEmpty) else { return }
             store.upsert(newValue)
             isNew = false
@@ -183,14 +206,16 @@ struct CustomLineEditorView: View {
 
 // MARK: - Live LCD preview
 
-/// A faithful preview of the draft line, reusing the real Joban-style LCD view
-/// so color, badge shape, and symbol read exactly as they will while riding.
+/// Preview of the draft line, reusing the real LCD views.
 struct CustomLinePreview: View {
     let line: CustomLine
+    var style: TrainLCDStyle = .joban
+    var orientation: TrainLCDOrientation = .left
 
     var body: some View {
         if line.stations.count >= 2, let journey, let state {
-            TrainLCDView(journey: journey, state: state, lineColor: line.color, orientation: .left)
+            StyledTrainLCDView(style: style, journey: journey, state: state,
+                               lineColor: line.color, orientation: orientation)
         } else {
             placeholder
         }

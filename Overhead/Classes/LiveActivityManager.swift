@@ -18,13 +18,9 @@ struct TrainJourneyAttributes: ActivityAttributes {
         var statusRaw: String
         var trackingModeRaw: String          // "GPS", "Timetable", "Blended"
         var lastRefreshTimestamp: Double      // When delay data was last fetched
-        // Scheduled departure from the boarding station (delay-adjusted).
-        // Together with the arrival timestamp this drives timer-based views
-        // that keep advancing while the app is suspended (no GPS needed).
+        // Delay-adjusted; drives timer-based views while the app is suspended.
         var departureTimestamp: Double
-        // Delay-adjusted scheduled window of the current inter-station
-        // segment; drives the self-advancing next-station countdown that
-        // stays live even when no further updates arrive.
+        // Delay-adjusted segment window; drives the self-advancing next-station countdown.
         var segmentStartTimestamp: Double
         var nextStationArrivalTimestamp: Double
 
@@ -64,8 +60,7 @@ struct TrainJourneyAttributes: ActivityAttributes {
         }
     }
 
-    /// The line ridden from `stationIndex` onward. One-seat rides have a
-    /// single entry at index 0; each transfer adds one at its station.
+    /// The line ridden from `stationIndex` onward; each transfer adds an entry.
     struct LegLine: Codable, Hashable {
         let stationIndex: Int
         let lineSymbol: String
@@ -88,19 +83,28 @@ struct TrainJourneyAttributes: ActivityAttributes {
     let stationCount: Int
     // Whether the train stops at each station (false = express skip)
     let stationStops: [Bool]
-    // Scheduled time at each station (epoch seconds, no delay applied;
-    // skipped stations carry the previous stop's time). Static for the whole
-    // journey, so self-updating views can lean on it without updates.
+    // Scheduled time per station (epoch seconds, no delay); skipped stations carry the previous stop's time.
     let stationTimes: [Double]
     // Empty string where a station has no code.
     let stationCodes: [String]
+    // Per-station line color (hex); through-service stops keep their own line's color.
+    let stationColors: [String]
     let legLines: [LegLine]
     let refreshURLString: String
 
     var destinationCode: String { stationCodes.last ?? "" }
 
-    /// Riders are still on the arriving leg at the transfer station itself;
-    /// the new leg takes over once the train departs it.
+    /// The next station's own line color, for its station-number badge.
+    func stationColorHex(at index: Int?) -> String {
+        guard let idx = index, stationColors.indices.contains(idx) else {
+            return lineColorHex
+        }
+        return stationColors[idx]
+    }
+
+    var destinationColorHex: String { stationColors.last ?? lineColorHex }
+
+    /// Still the arriving leg at the transfer station; the new leg takes over on departure.
     func currentLeg(nextIndex: Int?) -> LegLine? {
         guard !legLines.isEmpty else { return nil }
         let next = max(nextIndex ?? stationCount, 1)
@@ -125,12 +129,10 @@ final class LiveActivityManager {
 
     private(set) var currentActivity: Activity<TrainJourneyAttributes>?
     private var lastDelayFetchTime = Date()
-    // Scheduled departure/arrival of the active journey (before delay adjustment),
-    // used to compute the timer interval for self-updating Live Activity views.
+    // Scheduled departure/arrival (pre-delay); drives the self-updating timer interval.
     private var scheduledDeparture: Date?
     private var scheduledArrival: Date?
-    // Scheduled time at each journey station, aligned with the attributes'
-    // stationNames; drives the per-segment countdown in content states.
+    // Scheduled time per station (aligned with stationNames); drives the per-segment countdown.
     private var stationTimes: [Date] = []
 
     var hasActiveActivity: Bool { currentActivity != nil }
@@ -142,13 +144,17 @@ final class LiveActivityManager {
         legLines: [TrainJourneyAttributes.LegLine] = []
     ) {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
-        // The Live Activity's self-advancing views are schedule-driven and
-        // can't run off a journey without times.
+        // Self-advancing views are schedule-driven; need journey times.
         guard journey.hasSchedule else { return }
 
         let stations = journey.journeyStations
         let timetableIds = Set(journey.journeyTimetable.map(\.stationId))
         let stationStops = stations.map { timetableIds.contains($0.id) }
+
+        // Each station keeps its own line's color (matches the in-app LCD views).
+        let stationColors = stations.map {
+            StaticTrainData.line(containingStationId: $0.id)?.trainLine.colorHex ?? lineColorHex
+        }
 
         // A one-seat ride stays on the journey line the whole way.
         let resolvedLegLines = legLines.isEmpty
@@ -181,6 +187,7 @@ final class LiveActivityManager {
             stationStops: stationStops,
             stationTimes: stationTimes.map(\.timeIntervalSince1970),
             stationCodes: stations.map(\.stationCode),
+            stationColors: stationColors,
             legLines: resolvedLegLines,
             refreshURLString: Self.refreshURLScheme
         )
@@ -209,8 +216,7 @@ final class LiveActivityManager {
         }
     }
 
-    // The activity keeps advancing on its own via timer-driven views, so it
-    // only truly goes stale well after the scheduled arrival.
+    // Timer-driven views self-advance, so it only goes stale well past arrival.
     private func staleDate(for state: TrainJourneyAttributes.ContentState) -> Date {
         max(state.estimatedArrival.addingTimeInterval(600), Date().addingTimeInterval(600))
     }
@@ -238,8 +244,7 @@ final class LiveActivityManager {
         )
         let content = ActivityContent(state: finalState, staleDate: nil)
         Task {
-            // Ending the journey removes the Live Activity right away rather
-            // than leaving the arrived state on the lock screen.
+            // Remove immediately rather than leaving the arrived state on the lock screen.
             await activity.end(content, dismissalPolicy: .immediate)
         }
         currentActivity = nil
@@ -252,9 +257,7 @@ final class LiveActivityManager {
         let delaySeconds = TimeInterval(state.delayMinutes * 60)
         let departure = (scheduledDeparture ?? Date()).addingTimeInterval(delaySeconds)
 
-        // Delay-adjusted scheduled window of the current segment. When the
-        // app stops delivering updates, the countdown to the next station
-        // keeps running off these fixed dates.
+        // Delay-adjusted segment window; the next-station countdown runs off these fixed dates.
         var segmentStart = departure
         var nextArrival = (scheduledArrival ?? Date()).addingTimeInterval(delaySeconds)
         if stationTimes.indices.contains(state.segmentFrom),
@@ -280,8 +283,7 @@ final class LiveActivityManager {
         )
     }
 
-    /// Scheduled time at each journey station (arrival preferred, else
-    /// departure); stations the service skips carry the previous stop's time.
+    /// Scheduled time per station (arrival else departure); skipped stations carry the previous time.
     private static func stationTimes(for journey: Journey) -> [Date] {
         let timetable = journey.journeyTimetable
         var times: [Date] = []

@@ -1,10 +1,7 @@
 import SwiftUI
 import Backbone
 
-/// The whole app on one scrolling surface: the journey planner up top, saved
-/// favorites below it, then every train line to browse. Settings and the
-/// end-journey action live in the top-trailing More menu, and an active
-/// journey minimizes into a custom accessory in the bottom toolbar.
+/// The whole app on one scrolling surface: planner, favorites, and lines to browse.
 struct RootView: View {
     @ObservedObject var viewModel: JourneyViewModel
     @ObservedObject private var customStore = CustomLineStore.shared
@@ -28,8 +25,8 @@ struct RootView: View {
                 VStack(spacing: 24) {
                     JourneyPlannerSection(viewModel: viewModel)
                     FavoritesSection(viewModel: viewModel)
-                    CustomLinesSection(viewModel: viewModel)
                     LinesSection(viewModel: viewModel)
+                    CustomLinesSection(viewModel: viewModel)
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
@@ -42,11 +39,8 @@ struct RootView: View {
                     moreMenu
                 }
             }
-            // The journey accessory lives in a bottom safe-area inset, NOT a
-            // .bottomBar toolbar item: with any navigationDestination on this
-            // stack, a bottom-bar item inserted after the initial render
-            // (like this one, appearing when a journey starts) never shows
-            // up (iOS 26). The inset + glass capsule replicates the look.
+            // Safe-area inset, not a .bottomBar item: a late-inserted bottom-bar
+            // item never shows with a navigationDestination on the stack (iOS 26).
             .safeAreaInset(edge: .bottom) {
                 if viewModel.activeJourney != nil {
                     JourneyToolbarAccessory(viewModel: viewModel) {
@@ -70,11 +64,30 @@ struct RootView: View {
             }
             .task {
                 await viewModel.loadLines()
+                // TEMP: headless LCD verification hook — remove before commit.
+                if let styleIndex = CommandLine.arguments.firstIndex(of: "-autoLCDStyle"),
+                   CommandLine.arguments.indices.contains(styleIndex + 1) {
+                    UserDefaults.standard.set(
+                        CommandLine.arguments[styleIndex + 1],
+                        forKey: TrainLCDStyle.storageKey
+                    )
+                }
+                if CommandLine.arguments.contains("-autoJourney") {
+                    var boarding = "綾瀬"
+                    if let i = CommandLine.arguments.firstIndex(of: "-autoJourneyFrom"),
+                       CommandLine.arguments.indices.contains(i + 1) {
+                        boarding = CommandLine.arguments[i + 1]
+                    }
+                    if let line = StaticTrainData.trainLines()
+                        .first(where: { $0.id == "Railway:JR-East.JobanLocal" }),
+                       let from = line.stations.first(where: { $0.name == boarding }),
+                       let to = line.stations.first(where: { $0.name == "我孫子" }) {
+                        await viewModel.startJourney(line: line, from: from, to: to)
+                    }
+                }
             }
         }
-        // The app keeps its own purple accent (AccentColor, matching the app
-        // icon) everywhere — the selected line's color is deliberately NOT
-        // used as a global tint; line colors appear only in line-specific UI.
+        // Keep the app's purple accent globally; line colors stay line-specific.
         .sheet(isPresented: $showJourneySheet) {
             JourneySheetView(viewModel: viewModel)
                 .navigationTransition(.zoom(sourceID: Self.journeyTransitionID, in: journeyZoom))
@@ -83,19 +96,11 @@ struct RootView: View {
             CustomLineImportView(package: package)
         }
         .onChange(of: viewModel.activeJourney != nil) { _, hasJourney in
-            // The journey lives in a sheet; dismissing it minimizes the
-            // journey into the bottom toolbar accessory.
             guard hasJourney else { showJourneySheet = false; return }
-            // Starting a journey inserts the accessory (the zoom source) and
-            // would present the sheet in the same transaction — the source
-            // isn't laid out yet, so the very first zoom falls back to a plain
-            // slide-up. Present on the next runloop so the source exists first.
+            // Present next runloop so the zoom source is laid out first.
             DispatchQueue.main.async { showJourneySheet = true }
         }
-        // Selecting a journey while one is active overwrites it — but only
-        // after confirming, since the swap silently ends the journey in
-        // progress. Overwriting keeps activeJourney non-nil, so the onChange
-        // above won't fire; open the sheet explicitly on confirm.
+        // Overwriting keeps activeJourney non-nil, so onChange won't fire — open here.
         .alert(
             "Journey.Overwrite.ConfirmTitle",
             isPresented: $viewModel.showOverwriteConfirmation
@@ -110,8 +115,7 @@ struct RootView: View {
         } message: {
             Text("Journey.Overwrite.ConfirmMessage")
         }
-        // Timetable mode still runs a low-power location session — without
-        // it the app suspends and the Live Activity stops updating.
+        // Timetable mode keeps a low-power location session so the app isn't suspended.
         .onChange(of: journeyMode) { _, newMode in
             if newMode == .timetable { showTimetableModeNotice = true }
         }

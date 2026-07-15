@@ -145,15 +145,16 @@ struct MetroLCDView: View {
                         scaledStationBadge(station, dimension: 31)
                     }
                 }
-                Text(station.name)
-                    .font(.system(size: 32, weight: .heavy))
-                    .foregroundColor(.black)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.35)
-                    // Centered in whatever space remains right of the badge,
-                    // nudged left of true center by the trailing padding.
-                    .frame(maxWidth: .infinity)
-                    .padding(.trailing, 28)
+                HorizontallySquashed {
+                    Text(station.name)
+                        .font(.system(size: 32, weight: .heavy))
+                        .foregroundColor(.black)
+                        .lineLimit(1)
+                }
+                // Centered in whatever space remains right of the badge,
+                // nudged left of true center by the trailing padding.
+                .frame(maxWidth: .infinity)
+                .padding(.trailing, 28)
             } else {
                 Spacer(minLength: 8)
             }
@@ -321,24 +322,12 @@ struct MetroLCDView: View {
     /// align across columns; names too long to fit are condensed vertically
     /// instead, like the real display.
     private func verticalName(_ name: String, passed: Bool) -> some View {
-        let chars = Array(name)
-        let charBox: CGFloat = 12
-        let available = Self.namesHeight - 8
-        let natural = charBox * CGFloat(chars.count)
-
-        return VStack(spacing: 0) {
-            ForEach(chars.indices, id: \.self) { i in
-                if i > 0 { Spacer(minLength: 0) }
-                Text(String(chars[i]))
-                    .font(.system(size: 11.5, weight: .bold))
-                    .frame(height: charBox)
-            }
-        }
-        .frame(height: max(available, natural))
-        .scaleEffect(x: 1, y: min(1, available / natural), anchor: .top)
-        .foregroundColor(passed ? Self.passedGray : .black)
-        .padding(.top, 4)
-        .frame(height: Self.namesHeight, alignment: .top)
+        VerticalStationName(name: name, fontSize: 11.5, charBox: 12,
+                            availableHeight: Self.namesHeight - 8,
+                            color: passed ? Self.passedGray : .black,
+                            columnAnchor: .top, justifiedSingle: true)
+            .padding(.top, 4)
+            .frame(height: Self.namesHeight, alignment: .top)
     }
 
     // MARK: - Data

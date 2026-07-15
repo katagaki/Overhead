@@ -1,21 +1,16 @@
 import SwiftUI
 import Backbone
 
-// MARK: - Yamanote LCD View
+// MARK: - Chuo-Sobu Line LCD View
 
-/// Simulation of the E235-series in-car LCD (16:9): gray header bar with the
-/// train type in outlined line-color text (wrapping every two kanji), a white
-/// box holding the next station's badge and name, and the car number — over a
-/// Joban-style stop progression whose arrow marker is line-colored with no
-/// center circle.
-struct YamanoteLCDView: View {
+/// Simulation of the E235-series in-car LCD (16:9), Joban-style stop progression.
+struct ChuoSobuLineLCDView: View {
     let journey: Journey
     let state: TrainPositionState
     let lineColor: Color
     let orientation: TrainLCDOrientation
 
-    /// LCD chrome color (type text, band, car box). Some lines' in-car
-    /// identity differs from their wayfinding color; badges keep `lineColor`.
+    /// LCD chrome color (type text, band, car box); badges keep `lineColor`.
     private var displayColor: Color {
         let firstLegId = journey.line.id.split(separator: "+").first.map(String.init)
             ?? journey.line.id
@@ -23,8 +18,7 @@ struct YamanoteLCDView: View {
         return Color(hex: hex)
     }
 
-    // Fixed design canvas, scaled to the available width so every metric
-    // (fonts, badges, strokes) stays proportional on any device.
+    // Fixed design canvas, scaled to available width.
     private static let designWidth: CGFloat = 360
     private static let designHeight: CGFloat = designWidth * 9 / 16
     private static let headerHeight: CGFloat = designHeight * 0.3
@@ -73,8 +67,7 @@ struct YamanoteLCDView: View {
         .background(Self.barGray)
     }
 
-    /// Train type in line color with a white outline, wrapped every 2 kanji
-    /// (各駅停車 → 各駅 / 停車).
+    /// Train type in line color with white outline, wrapped every 2 kanji.
     private var outlinedType: some View {
         VStack(alignment: .leading, spacing: 0) {
             ForEach(Array(typeLines.enumerated()), id: \.offset) { _, line in
@@ -101,8 +94,7 @@ struct YamanoteLCDView: View {
 
     private static let boxHeight: CGFloat = 44
 
-    /// White hard-edged box: the station's badge docked left at near-full
-    /// height, the name's characters spread across the remaining width.
+    /// White box: badge docked left, name spread across the rest.
     private var stationBox: some View {
         HStack(spacing: 0) {
             if let station = headlineStation {
@@ -128,18 +120,12 @@ struct YamanoteLCDView: View {
         )
     }
 
-    /// Characters distributed evenly across the available width.
+    /// Characters spread across the box; long names squash horizontally to
+    /// stay on one line.
     private func spreadName(_ name: String) -> some View {
         let chars = Array(name)
         let size: CGFloat = chars.count <= 4 ? 27 : 18
-        return HStack(spacing: 0) {
-            ForEach(chars.indices, id: \.self) { i in
-                if i > 0 { Spacer(minLength: 0) }
-                Text(String(chars[i]))
-                    .font(.system(size: size, weight: .heavy))
-                    .foregroundColor(.black)
-            }
-        }
+        return SpreadSquashName(chars: chars, size: size)
     }
 
     private var carColumn: some View {
@@ -228,25 +214,14 @@ struct YamanoteLCDView: View {
         }
     }
 
+    // Long names squash vertically; mixed kanji/katakana names split into
+    // parallel columns with the shorter part spaced out, like the real display.
     private func verticalName(_ name: String) -> some View {
-        let chars = Array(name)
-        let charBox: CGFloat = 12
-        let natural = charBox * CGFloat(chars.count)
-        return VStack(spacing: 0) {
-            ForEach(chars.indices, id: \.self) { i in
-                Text(String(chars[i]))
-                    .font(.system(size: 11, weight: .bold))
-                    .frame(height: charBox)
-            }
-        }
-        // Names too long for the row squash vertically at full glyph size,
-        // like the real display.
-        .scaleEffect(x: 1, y: min(1, 52 / natural), anchor: .bottom)
-        .foregroundColor(.black)
+        VerticalStationName(name: name, fontSize: 11, charBox: 12,
+                            availableHeight: 52, color: .black, columnAnchor: .bottom)
     }
 
-    /// White 16:10 rectangle with the minute count — the E235 uses boxes,
-    /// not the E233's circles.
+    /// Minute-count box (E235 uses boxes, not the E233's circles).
     private func minuteBox(_ col: LCDStop) -> some View {
         ZStack {
             Rectangle()
@@ -299,9 +274,7 @@ struct YamanoteLCDView: View {
         let transfers: [TrainLine]
     }
 
-    /// Columns in travel order per `orientation`: facing left puts the
-    /// farthest upcoming stop first and the current station last, so travel
-    /// reads right to left; facing right mirrors that.
+    /// Columns in travel order per `orientation`.
     private func stops(now: Date) -> [LCDStop] {
         let stations = journey.journeyStations
         guard !stations.isEmpty else { return [] }
@@ -315,8 +288,7 @@ struct YamanoteLCDView: View {
 
         let upcoming = stations[(ref + 1)...]
             .compactMap { station -> LCDStop? in
-                // No entry at all = express passes this station. An entry
-                // with no times (schedule-less journey) is still a stop.
+                // No entry = express passes; entry without times is still a stop.
                 guard let entry = entries[station.id] else { return nil }
                 let arr = entry.arrivalSeconds() ?? entry.departureSeconds()
                 return LCDStop(
@@ -340,8 +312,7 @@ struct YamanoteLCDView: View {
         return orientation == .right ? columns.reversed() : columns
     }
 
-    /// Other bundled lines serving the same physical station (matched by
-    /// Japanese name), excluding the line(s) being ridden.
+    /// Other lines serving the same station, excluding the ridden line(s).
     private func transfers(at station: Station) -> [TrainLine] {
         // Custom lines never interchange with built-in lines (see TrainLCDView).
         guard !journey.line.isCustom else { return [] }
@@ -384,8 +355,7 @@ struct YamanoteLCDView: View {
         return "\(letters)-\(digits)"
     }
 
-    /// No car data exists — derive a stable 1...10 from the journey ID so the
-    /// display stays constant for the ride.
+    /// Stable 1...10 derived from the journey ID (no real car data).
     private var carNumber: Int {
         Int(journey.id.uuid.0 % 10) + 1
     }
@@ -407,8 +377,7 @@ struct YamanoteLCDView: View {
         .frame(width: dimension, height: dimension)
     }
 
-    /// Seconds since midnight JST; early-morning hours count as 24:00+ to
-    /// match rail-convention timetable times.
+    /// Seconds since midnight JST; pre-04:00 counts as 24:00+ (rail convention).
     private static func railSeconds(at date: Date) -> Int {
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
@@ -421,8 +390,7 @@ struct YamanoteLCDView: View {
 
 // MARK: - Shapes
 
-/// Horizontal band with an arrow tip on the leading edge (direction of
-/// travel), or the trailing edge when `tipOnTrailing`.
+/// Horizontal band with an arrow tip on the leading edge (or trailing when `tipOnTrailing`).
 private struct YamanoteArrowBandShape: Shape {
     var tipOnTrailing = false
 

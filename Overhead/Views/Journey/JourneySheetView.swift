@@ -1,9 +1,7 @@
 import SwiftUI
 import Backbone
 
-/// Wraps the journey view for sheet presentation: a toolbar with a proper
-/// close button (minimizes back into the tab bar accessory) and an
-/// end-journey action with confirmation.
+/// Wraps the journey view for sheet presentation.
 struct JourneySheetView: View {
     @ObservedObject var viewModel: JourneyViewModel
     @Environment(\.dismiss) private var dismiss
@@ -24,8 +22,7 @@ struct JourneySheetView: View {
                             Label("Button.EndJourney", systemImage: "stop.circle")
                         }
                         .tint(.red)
-                        // Attached to the button so the dialog anchors to it
-                        // instead of popping from the middle of the sheet.
+                        // Attached to the button so the dialog anchors to it.
                         .confirmationDialog(
                             "Journey.End.ConfirmTitle",
                             isPresented: $showingEndConfirmation,
@@ -51,9 +48,14 @@ struct JourneySheetView: View {
 
                     ToolbarItem(placement: .topBarTrailing) {
                         Menu {
-                            Picker("Button.LCDStyle", selection: $lcdStyleRaw) {
-                                ForEach(TrainLCDStyle.allCases) { style in
-                                    Text(verbatim: style.label).tag(style.rawValue)
+                            ForEach(TrainLCDStyleCategory.allCases) { category in
+                                Section(category.label) {
+                                    Picker("Button.LCDStyle", selection: $lcdStyleRaw) {
+                                        ForEach(category.styles) { style in
+                                            Text(verbatim: style.label).tag(style.rawValue)
+                                        }
+                                    }
+                                    .pickerStyle(.inline)
                                 }
                             }
                             Picker("Button.LCDOrientation", selection: $lcdOrientationRaw) {
@@ -62,7 +64,7 @@ struct JourneySheetView: View {
                                 }
                             }
                         } label: {
-                            Label("Button.LCDStyle", systemImage: "ellipsis")
+                            Label("Button.LCDStyle", systemImage: "widget.medium")
                         }
                     }
 
@@ -93,8 +95,7 @@ struct JourneySheetView: View {
 
     // MARK: - LCD snapshot
 
-    /// Renders the current LCD (in the selected style) to a @3x image for
-    /// sharing. Works for built-in and custom lines alike.
+    /// Renders the current LCD to a @3x image for sharing.
     @MainActor
     private func renderLCDImage() -> UIImage? {
         guard let journey = viewModel.activeJourney,
@@ -106,14 +107,28 @@ struct JourneySheetView: View {
             switch TrainLCDStyle(rawValue: lcdStyleRaw) ?? .joban {
             case .joban:
                 TrainLCDView(journey: journey, state: state, lineColor: color, orientation: orientation)
+            case .chuoSobu:
+                ChuoSobuLineLCDView(journey: journey, state: state, lineColor: color, orientation: orientation)
             case .yamanote:
-                YamanoteLCDView(journey: journey, state: state, lineColor: color, orientation: orientation)
+                LoopLCDView(journey: journey, state: state, lineColor: color, orientation: orientation)
             case .tokyoMetro:
                 MetroLCDView(journey: journey, state: state, lineColor: color, orientation: orientation)
             case .ledMatrix:
                 LEDMatrixView(journey: journey, state: state, lineColor: color)
             case .kivotos:
                 MillenniumLCDView(journey: journey, state: state, lineColor: color, orientation: orientation)
+            case .shinkansen:
+                ShinkansenTickerView(journey: journey, state: state, lineColor: color)
+            case .hankyu:
+                HankyuLCDView(journey: journey, state: state, lineColor: color, orientation: orientation)
+            case .tube:
+                TubeLCDView(journey: journey, state: state, lineColor: color)
+            case .find:
+                FindLCDView(journey: journey, state: state, lineColor: color, orientation: orientation)
+            case .neon:
+                NeonLCDView(journey: journey, state: state, lineColor: color, orientation: orientation)
+            case .galaxy:
+                GalaxyLCDView(journey: journey, state: state, lineColor: color, orientation: orientation)
             }
         }
         .frame(width: 360)

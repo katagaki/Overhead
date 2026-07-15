@@ -91,12 +91,13 @@ struct TrainLCDView: View {
                                         .padding(-1.5)
                                 )
                         }
-                        Text(station.name)
-                            .font(.system(size: 30, weight: .bold))
-                            .foregroundColor(.white)
-                            .kerning(5.0)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.3)
+                        HorizontallySquashed(maxWidth: 172) {
+                            Text(station.name)
+                                .font(.system(size: 30, weight: .bold))
+                                .foregroundColor(.white)
+                                .kerning(5.0)
+                                .lineLimit(1)
+                        }
                     }
                     .frame(maxHeight: .infinity)
                 }
@@ -234,21 +235,11 @@ struct TrainLCDView: View {
         }
     }
 
+    // Names too long for the row squash vertically at full glyph size; mixed
+    // kanji/katakana names split into parallel columns, like the real display.
     private func verticalName(_ name: String) -> some View {
-        let chars = Array(name)
-        let charBox: CGFloat = 12
-        let natural = charBox * CGFloat(chars.count)
-        return VStack(spacing: 0) {
-            ForEach(chars.indices, id: \.self) { i in
-                Text(String(chars[i]))
-                    .font(.system(size: 11, weight: .bold))
-                    .frame(height: charBox)
-            }
-        }
-        // Names too long for the row squash vertically at full glyph size,
-        // like the real display.
-        .scaleEffect(x: 1, y: min(1, 52 / natural), anchor: .bottom)
-        .foregroundColor(.black)
+        VerticalStationName(name: name, fontSize: 11, charBox: 12,
+                            availableHeight: 52, color: .black, columnAnchor: .bottom)
     }
 
     private func minuteCircle(_ col: LCDStop, showsUnit: Bool) -> some View {
