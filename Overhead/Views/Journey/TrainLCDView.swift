@@ -25,10 +25,12 @@ struct TrainLCDView: View {
     // (fonts, badges, strokes) stays proportional on any device.
     private static let designWidth: CGFloat = 360
     private static let designHeight: CGFloat = designWidth * 9 / 16
-    private static let headerHeight: CGFloat = designHeight * 0.3
+    private static let headerHeight: CGFloat = designHeight * 0.33
     private static let maxUpcomingStops = 7
     private static let lcdRed = Color(hex: "#D7000F")
     private static let passedOpacity: CGFloat = 0.4
+    private static let passedBandGray = Color(hex: "#8E9196")
+    private static let languageFlipSeconds = 4.0
 
     private static let allLines = StaticTrainData.trainLines()
     private static let clockFormatter: DateFormatter = {
@@ -39,11 +41,14 @@ struct TrainLCDView: View {
     }()
 
     var body: some View {
-        TimelineView(.everyMinute) { context in
+        TimelineView(.periodic(from: .now, by: 1.0)) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
+                let english = Int(
+                    context.date.timeIntervalSinceReferenceDate / Self.languageFlipSeconds
+                ) % 2 == 1
                 VStack(spacing: 0) {
-                    header(now: context.date)
+                    header(now: context.date, english: english)
                         .frame(height: Self.headerHeight)
                     progression(now: context.date)
                         .frame(maxHeight: .infinity)
@@ -60,16 +65,16 @@ struct TrainLCDView: View {
 
     // MARK: - Header (black area)
 
-    private func header(now: Date) -> some View {
+    private func header(now: Date, english: Bool) -> some View {
         HStack(alignment: .top, spacing: 10) {
-            destinationPlate
+            destinationPlate(english: english)
 
             VStack(spacing: 0) {
                 HStack(alignment: .top, spacing: 3) {
-                    Text(headlineLabel)
-                        .font(.system(size: 12, weight: .bold))
+                    Text(headlineLabel(english: english))
+                        .font(.system(size: english ? 10 : 12, weight: .bold))
                     Spacer()
-                    Text(verbatim: "現在時刻")
+                    Text(verbatim: english ? "Time" : "現在時刻")
                         .font(.system(size: 8, weight: .medium))
                         .opacity(0.85)
                     Text(Self.clockFormatter.string(from: now))
@@ -81,6 +86,8 @@ struct TrainLCDView: View {
                 .foregroundColor(.white)
 
                 if let station = headlineStation {
+                    // Badge docks at the black area's leading edge; the name
+                    // centers in whatever space remains.
                     HStack(spacing: 8) {
                         if !station.stationCode.isEmpty {
                             // Black keyline around the badge, outside its
@@ -92,21 +99,24 @@ struct TrainLCDView: View {
                                         .padding(-1.5)
                                 )
                         }
-                        HorizontallySquashed(maxWidth: 172) {
-                            Text(station.name)
-                                .font(.system(size: 30, weight: .bold))
+                        // Fills the remaining width so the header areas stay
+                        // fixed; overlong names squash into it.
+                        HorizontallySquashed {
+                            Text(english ? station.nameEn : station.name)
+                                .font(.system(size: 34, weight: .bold))
                                 .foregroundColor(.white)
-                                .kerning(5.0)
+                                .kerning(english ? 0 : 5.0)
                                 .lineLimit(1)
                         }
+                        .frame(maxWidth: .infinity)
                     }
-                    .frame(maxHeight: .infinity)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
             .padding(.top, 2)
             .padding(.bottom, 2)
 
-            carColumn
+            carColumn(english: english)
                 .padding(.top, 2)
         }
         .padding(.trailing, 2)
@@ -115,15 +125,16 @@ struct TrainLCDView: View {
     }
 
     /// Line-color plate with an arrow tip: train type in a white box over the
-    /// terminus name and ゆき.
-    private var destinationPlate: some View {
+    /// terminus name and ゆき. The design never changes with the language —
+    /// only the text flips ("Local" / "for Abiko", ゆき hidden).
+    private func destinationPlate(english: Bool) -> some View {
         VStack(spacing: 2) {
-            Text(typeName)
+            Text(english ? typeNameEn : typeName)
                 .font(.system(size: 15, weight: .black))
-                .kerning(typeKerning)
+                .kerning(english ? 0 : typeKerning)
                 // Kerning trails the last glyph too; pad the leading edge by
                 // the same amount so the text stays centered.
-                .padding(.leading, typeKerning)
+                .padding(.leading, english ? 0 : typeKerning)
                 .foregroundColor(displayColor)
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
@@ -134,18 +145,37 @@ struct TrainLCDView: View {
 
             Spacer(minLength: 0)
 
-            Text(destinationStation?.name ?? "")
-                .font(.system(size: 16, weight: .heavy))
-                .lineLimit(1)
-                .kerning(3.0)
-                .minimumScaleFactor(0.5)
-                .shadow(color: .black.opacity(0.85), radius: 1, x: 0, y: 0)
+            if english {
+                // Small "for" label; the name squashes horizontally at full
+                // glyph height when too long.
+                HStack(alignment: .bottom, spacing: 3) {
+                    Text(verbatim: "for")
+                        .font(.system(size: 8, weight: .bold))
+                        .padding(.bottom, 2)
+                    HorizontallySquashed(maxWidth: 60) {
+                        Text(verbatim: destinationStation?.nameEn ?? "")
+                            .font(.system(size: 13, weight: .heavy))
+                            .lineLimit(1)
+                            .shadow(color: .black.opacity(0.85), radius: 1, x: 0, y: 0)
+                    }
+                }
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
+            } else {
+                Text(destinationStation?.name ?? "")
+                    .font(.system(size: 16, weight: .heavy))
+                    .lineLimit(1)
+                    .kerning(3.0)
+                    .minimumScaleFactor(0.5)
+                    .shadow(color: .black.opacity(0.85), radius: 1, x: 0, y: 0)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+            }
 
             Text(verbatim: "ゆき")
                 .font(.system(size: 8, weight: .bold))
                 .foregroundColor(.white)
+                .opacity(english ? 0 : 1)
                 .frame(maxWidth: .infinity, alignment: .trailing)
         }
         .padding(EdgeInsets(top: 4, leading: 5, bottom: 3, trailing: 16))
@@ -154,24 +184,49 @@ struct TrainLCDView: View {
         .background(PlateShape().fill(displayColor))
     }
 
-    private var carColumn: some View {
-        VStack(spacing: 2) {
-            Text(verbatim: "\(carNumber)")
-                .font(.system(size: 15, weight: .heavy))
-                .foregroundColor(displayColor)
-                .frame(width: 26, height: 20)
-                .background(Color.white, in: RoundedRectangle(cornerRadius: 2))
-            Text(verbatim: "号車")
-                .font(.system(size: 8, weight: .bold))
-                .foregroundColor(.white)
+    /// Fixed-width in both languages so the black area never reflows when the
+    /// display flips.
+    @ViewBuilder
+    private func carColumn(english: Bool) -> some View {
+        let numberBox = Text(verbatim: "\(carNumber)")
+            .font(.system(size: 16, weight: .heavy))
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .foregroundColor(displayColor)
+            .frame(width: 18, height: 18)
+            .background(Color.white, in: RoundedRectangle(cornerRadius: 2))
+        Group {
+            if english {
+                // Label rides the top edge like the Time label, not centered
+                // on the box.
+                HStack(alignment: .top, spacing: 3) {
+                    Text(verbatim: "Car No.")
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundColor(.white)
+                        .lineLimit(1)
+                        .fixedSize()
+                    numberBox
+                }
+            } else {
+                VStack(alignment: .trailing, spacing: 2) {
+                    numberBox
+                    Text(verbatim: "号車")
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundColor(.white)
+                }
+            }
         }
+        .frame(width: 56, alignment: .trailing)
     }
 
     // MARK: - Progression (white area)
 
     private func progression(now: Date) -> some View {
-        let columns = stops(now: now)
+        let (columns, markerSlot) = stops(now: now)
         let colWidth = (Self.designWidth - 20) / CGFloat(max(columns.count, 1))
+        // Marker rides the band absolutely: centered on the dwelling column, or
+        // on the boundary between two columns while moving.
+        let markerCenter = markerSlot * colWidth
 
         return VStack(spacing: 0) {
             HStack(spacing: 0) {
@@ -184,22 +239,52 @@ struct TrainLCDView: View {
             .padding(.bottom, 2)
 
             ZStack(alignment: .leading) {
+                let tailPad = max(0, colWidth / 2 - 6)
+                let totalWidth = colWidth * CGFloat(max(columns.count, 1))
                 ArrowBandShape(tipOnTrailing: orientation == .right)
                     .fill(displayColor)
                     .frame(height: 17)
-                    .padding(orientation == .right ? .leading : .trailing, max(0, colWidth / 2 - 6))
+                    .padding(orientation == .right ? .leading : .trailing, tailPad)
+                // The stretch behind the train turns gray, marker to tail edge.
+                if orientation == .right {
+                    Rectangle()
+                        .fill(Self.passedBandGray)
+                        .frame(width: max(0, markerCenter - tailPad), height: 17)
+                        .offset(x: tailPad)
+                } else {
+                    Rectangle()
+                        .fill(Self.passedBandGray)
+                        .frame(width: max(0, totalWidth - tailPad - markerCenter), height: 17)
+                        .offset(x: markerCenter)
+                }
                 HStack(spacing: 0) {
                     ForEach(columns) { col in
                         Group {
+                            // The dwelling column stays clear so the marker
+                            // overlay shows through.
                             if col.isCurrent {
-                                currentMarker
+                                Color.clear
+                            } else if col.isPassed {
+                                // Passed stops shrink to a plain dot, the same
+                                // size as the dwelling marker's.
+                                Circle()
+                                    .fill(Color.white)
+                                    .frame(width: 8, height: 8)
                             } else {
                                 // The (分) unit rides the farthest stop's circle.
                                 minuteCircle(col, showsUnit: col.id == farthestId(in: columns))
                             }
                         }
                         .frame(width: colWidth)
-                        .opacity(col.isPassed ? Self.passedOpacity : 1)
+                    }
+                }
+                Group {
+                    if state.currentStationIndex != nil {
+                        currentMarker
+                            .offset(x: markerCenter - 27 / 2)
+                    } else {
+                        movingMarker
+                            .offset(x: markerCenter - 11 / 2)
                     }
                 }
             }
@@ -213,7 +298,6 @@ struct TrainLCDView: View {
                         }
                     }
                     .frame(width: colWidth, height: 16)
-                    .opacity(col.isPassed ? Self.passedOpacity : 1)
                 }
             }
 
@@ -283,6 +367,15 @@ struct TrainLCDView: View {
         }
     }
 
+    /// The in-transit marker: a solid chevron pointing the direction of travel.
+    private var movingMarker: some View {
+        let flipped = orientation == .right
+        return TravelChevronShape(pointsTrailing: flipped)
+            .fill(Self.lcdRed)
+            .overlay(TravelChevronShape(pointsTrailing: flipped).stroke(Color.white, lineWidth: 1.5))
+            .frame(width: 11, height: 20)
+    }
+
     private func transferList(_ lines: [TrainLine]) -> some View {
         VStack(alignment: .leading, spacing: 1) {
             ForEach(lines) { line in
@@ -311,19 +404,22 @@ struct TrainLCDView: View {
         let transfers: [TrainLine]
     }
 
-    /// Columns in travel order per `orientation`: facing left puts the
-    /// farthest upcoming stop first and the current station last, so travel
-    /// reads right to left; facing right mirrors that. When few stops remain
-    /// the strip is backfilled with already-passed stations (dimmed) so it
-    /// stays full-width instead of collapsing to a few wide columns.
-    private func stops(now: Date) -> [LCDStop] {
+    /// Columns and the marker slot (in column-widths from the leading edge).
+    /// Facing left puts the farthest upcoming stop first, so travel reads right
+    /// to left; facing right mirrors both the columns and the slot. Dwelling at
+    /// a station gives it its own column with the marker centered on it (ただいま);
+    /// while moving, the departed station trails as a dimmed passed column and
+    /// the marker sits on the boundary toward the next stop (つぎは). Remaining
+    /// slots backfill with passed stations so the strip stays full-width.
+    private func stops(now: Date) -> ([LCDStop], CGFloat) {
         let stations = journey.journeyStations
-        guard !stations.isEmpty else { return [] }
+        guard !stations.isEmpty else { return ([], 0) }
         let entries = Dictionary(
             journey.journeyTimetable.map { ($0.stationId, $0) },
             uniquingKeysWith: { a, _ in a }
         )
-        let ref = max(0, min(state.currentStationIndex ?? state.segmentFrom, stations.count - 1))
+        let dwellIndex = state.currentStationIndex.map { max(0, min($0, stations.count - 1)) }
+        let ref = dwellIndex ?? max(0, min(state.segmentFrom, stations.count - 1))
         let nowSec = Self.railSeconds(at: now)
         let delaySec = state.delayMinutes * 60
 
@@ -345,20 +441,25 @@ struct TrainLCDView: View {
             .prefix(Self.maxUpcomingStops)
 
         var columns = Array(upcoming.reversed())
-        columns.append(LCDStop(
-            id: stations[ref].id,
-            station: stations[ref],
-            minutes: nil,
-            isCurrent: true,
-            isPassed: false,
-            transfers: transfers(at: stations[ref])
-        ))
+        let upcomingCount = columns.count
 
-        // Fill the remaining slots with passed stations, nearest first so they
-        // sit just behind the current marker (express-skipped stops excluded).
+        // Dwelling → a current column for ref; the marker centers on it. Moving
+        // → no current column; ref (the departed station) trails as passed and
+        // the marker rides the boundary between it and the next stop.
+        if dwellIndex != nil {
+            columns.append(LCDStop(
+                id: stations[ref].id, station: stations[ref], minutes: nil,
+                isCurrent: true, isPassed: false, transfers: transfers(at: stations[ref])
+            ))
+        }
+        let markerSlot = CGFloat(upcomingCount) + (dwellIndex != nil ? 0.5 : 0)
+
+        // Passed stations fill the rest, nearest first; while moving that
+        // includes ref itself (express-skipped stops excluded).
+        let passedUpper = dwellIndex != nil ? ref : ref + 1
         let deficit = Self.maxUpcomingStops + 1 - columns.count
         if deficit > 0 {
-            let passed = stations[..<ref]
+            let passed = stations[..<passedUpper]
                 .filter { entries[$0.id] != nil }
                 .suffix(deficit)
                 .reversed()
@@ -371,7 +472,11 @@ struct TrainLCDView: View {
                 }
             columns.append(contentsOf: passed)
         }
-        return orientation == .right ? columns.reversed() : columns
+
+        if orientation == .right {
+            return (columns.reversed(), CGFloat(columns.count) - markerSlot)
+        }
+        return (columns, markerSlot)
     }
 
     private func farthestId(in columns: [LCDStop]) -> String? {
@@ -396,8 +501,11 @@ struct TrainLCDView: View {
         )
     }
 
-    private var headlineLabel: String {
-        state.currentStationIndex != nil ? "ただいま" : "つぎは"
+    private func headlineLabel(english: Bool) -> String {
+        if english {
+            return state.currentStationIndex != nil ? "Now stopping at" : "Next"
+        }
+        return state.currentStationIndex != nil ? "ただいま" : "つぎは"
     }
 
     private var headlineStation: Station? {
@@ -414,6 +522,14 @@ struct TrainLCDView: View {
 
     private var typeName: String {
         journey.service.trainType == .local ? "各駅停車" : journey.service.trainType.displayNameJa
+    }
+
+    /// Raw type names are camel-cased ("CommuterRapid") — space them out.
+    private var typeNameEn: String {
+        journey.service.trainType.rawValue.reduce(into: "") { result, char in
+            if char.isUppercase && !result.isEmpty { result.append(" ") }
+            result.append(char)
+        }
     }
 
     private var typeKerning: CGFloat {
@@ -474,6 +590,24 @@ private struct PlateShape: Shape {
         p.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
         p.closeSubpath()
         return p
+    }
+}
+
+/// Solid mitered chevron with vertical end cuts, pointing leading (the
+/// in-transit train marker); mirrored when `pointsTrailing`.
+private struct TravelChevronShape: Shape {
+    var pointsTrailing = false
+
+    func path(in rect: CGRect) -> Path {
+        var p = Path()
+        p.move(to: CGPoint(x: rect.width / 3, y: rect.minY))
+        p.addLine(to: CGPoint(x: rect.minX, y: rect.midY))
+        p.addLine(to: CGPoint(x: rect.width / 3, y: rect.maxY))
+        p.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        p.addLine(to: CGPoint(x: rect.width * 2 / 3, y: rect.midY))
+        p.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+        p.closeSubpath()
+        return pointsTrailing ? p.mirroredHorizontally(in: rect) : p
     }
 }
 

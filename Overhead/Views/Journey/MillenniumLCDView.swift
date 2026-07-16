@@ -180,7 +180,9 @@ struct MillenniumLCDView: View {
                                 stationBadge(for: col.station, dimension: Self.badgeDiameter, dimmed: col.isPassed)
                             }
                         }
-                        .frame(width: colWidth)
+                        // The clear slot must match the badge height or it
+                        // inflates the row and sinks every badge off the line.
+                        .frame(width: colWidth, height: Self.badgeDiameter)
                     }
                 }
                 .offset(y: Self.lineY - Self.badgeDiameter / 2)

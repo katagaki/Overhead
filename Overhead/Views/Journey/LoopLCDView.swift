@@ -158,7 +158,7 @@ struct LoopLCDView: View {
     // MARK: - Arc Body
 
     private func arcBody(now: Date) -> some View {
-        let stops = upcomingStops(now: now)
+        let stops = arcStops(now: now)
         let mirrored = orientation == .right
 
         return ZStack {
@@ -412,19 +412,27 @@ struct LoopLCDView: View {
         let minutes: Int?
     }
 
-    /// The next stops in travel order with minutes to arrival, nearest first.
-    private func upcomingStops(now: Date) -> [ArcStop] {
+    /// Stops to draw along the arc, nearest first. While dwelling the current
+    /// station leads (gold, no minutes) so the train chevron tucks behind it —
+    /// "ただいま"; while moving the nearest upcoming stop leads, so the train
+    /// reads as approaching it — "次は".
+    private func arcStops(now: Date) -> [ArcStop] {
         let stations = journey.journeyStations
         guard !stations.isEmpty else { return [] }
         let entries = Dictionary(
             journey.journeyTimetable.map { ($0.stationId, $0) },
             uniquingKeysWith: { a, _ in a }
         )
-        let ref = max(0, min(state.currentStationIndex ?? state.segmentFrom, stations.count - 1))
+        let dwellIndex = state.currentStationIndex.map { max(0, min($0, stations.count - 1)) }
+        let ref = dwellIndex ?? max(0, min(state.segmentFrom, stations.count - 1))
         let nowSec = Self.railSeconds(at: now)
         let delaySec = state.delayMinutes * 60
 
-        return Array(
+        var result: [ArcStop] = []
+        if let dwell = dwellIndex {
+            result.append(ArcStop(id: stations[dwell].id, station: stations[dwell], minutes: nil))
+        }
+        result.append(contentsOf:
             stations[min(ref + 1, stations.count)...]
                 .compactMap { station -> ArcStop? in
                     guard let entry = entries[station.id] else { return nil }
@@ -435,8 +443,8 @@ struct LoopLCDView: View {
                         minutes: arr.map { max(0, ($0 + delaySec - nowSec + 59) / 60) }
                     )
                 }
-                .prefix(Self.maxStops)
         )
+        return Array(result.prefix(Self.maxStops))
     }
 
     private var headlineLabel: String {
