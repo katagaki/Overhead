@@ -28,6 +28,7 @@ struct TrainLCDView: View {
     private static let headerHeight: CGFloat = designHeight * 0.3
     private static let maxUpcomingStops = 7
     private static let lcdRed = Color(hex: "#D7000F")
+    private static let passedOpacity: CGFloat = 0.4
 
     private static let allLines = StaticTrainData.trainLines()
     private static let clockFormatter: DateFormatter = {
@@ -177,6 +178,7 @@ struct TrainLCDView: View {
                 ForEach(columns) { col in
                     verticalName(col.station.name)
                         .frame(width: colWidth, height: 52, alignment: .bottom)
+                        .opacity(col.isPassed ? Self.passedOpacity : 1)
                 }
             }
             .padding(.bottom, 2)
@@ -197,6 +199,7 @@ struct TrainLCDView: View {
                             }
                         }
                         .frame(width: colWidth)
+                        .opacity(col.isPassed ? Self.passedOpacity : 1)
                     }
                 }
             }
@@ -210,6 +213,7 @@ struct TrainLCDView: View {
                         }
                     }
                     .frame(width: colWidth, height: 16)
+                    .opacity(col.isPassed ? Self.passedOpacity : 1)
                 }
             }
 
@@ -217,6 +221,7 @@ struct TrainLCDView: View {
                 ForEach(columns) { col in
                     transferList(col.transfers)
                         .frame(width: colWidth, alignment: .topLeading)
+                        .opacity(col.isPassed ? Self.passedOpacity : 1)
                 }
             }
             .padding(.top, 2)
@@ -300,14 +305,17 @@ struct TrainLCDView: View {
     private struct LCDStop: Identifiable {
         let id: String
         let station: Station
-        let minutes: Int?    // nil for the current column (red marker)
+        let minutes: Int?    // nil for the current column (red marker) and passed stops
         let isCurrent: Bool
+        let isPassed: Bool
         let transfers: [TrainLine]
     }
 
     /// Columns in travel order per `orientation`: facing left puts the
     /// farthest upcoming stop first and the current station last, so travel
-    /// reads right to left; facing right mirrors that.
+    /// reads right to left; facing right mirrors that. When few stops remain
+    /// the strip is backfilled with already-passed stations (dimmed) so it
+    /// stays full-width instead of collapsing to a few wide columns.
     private func stops(now: Date) -> [LCDStop] {
         let stations = journey.journeyStations
         guard !stations.isEmpty else { return [] }
@@ -330,6 +338,7 @@ struct TrainLCDView: View {
                     station: station,
                     minutes: arr.map { max(0, ($0 + delaySec - nowSec + 59) / 60) },
                     isCurrent: false,
+                    isPassed: false,
                     transfers: transfers(at: station)
                 )
             }
@@ -341,8 +350,27 @@ struct TrainLCDView: View {
             station: stations[ref],
             minutes: nil,
             isCurrent: true,
+            isPassed: false,
             transfers: transfers(at: stations[ref])
         ))
+
+        // Fill the remaining slots with passed stations, nearest first so they
+        // sit just behind the current marker (express-skipped stops excluded).
+        let deficit = Self.maxUpcomingStops + 1 - columns.count
+        if deficit > 0 {
+            let passed = stations[..<ref]
+                .filter { entries[$0.id] != nil }
+                .suffix(deficit)
+                .reversed()
+                .map { station in
+                    LCDStop(
+                        id: station.id, station: station, minutes: nil,
+                        isCurrent: false, isPassed: true,
+                        transfers: transfers(at: station)
+                    )
+                }
+            columns.append(contentsOf: passed)
+        }
         return orientation == .right ? columns.reversed() : columns
     }
 

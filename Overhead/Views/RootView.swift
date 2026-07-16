@@ -64,27 +64,6 @@ struct RootView: View {
             }
             .task {
                 await viewModel.loadLines()
-                // TEMP: headless LCD verification hook — remove before commit.
-                if let styleIndex = CommandLine.arguments.firstIndex(of: "-autoLCDStyle"),
-                   CommandLine.arguments.indices.contains(styleIndex + 1) {
-                    UserDefaults.standard.set(
-                        CommandLine.arguments[styleIndex + 1],
-                        forKey: TrainLCDStyle.storageKey
-                    )
-                }
-                if CommandLine.arguments.contains("-autoJourney") {
-                    var boarding = "綾瀬"
-                    if let i = CommandLine.arguments.firstIndex(of: "-autoJourneyFrom"),
-                       CommandLine.arguments.indices.contains(i + 1) {
-                        boarding = CommandLine.arguments[i + 1]
-                    }
-                    if let line = StaticTrainData.trainLines()
-                        .first(where: { $0.id == "Railway:JR-East.JobanLocal" }),
-                       let from = line.stations.first(where: { $0.name == boarding }),
-                       let to = line.stations.first(where: { $0.name == "我孫子" }) {
-                        await viewModel.startJourney(line: line, from: from, to: to)
-                    }
-                }
             }
         }
         // Keep the app's purple accent globally; line colors stay line-specific.
