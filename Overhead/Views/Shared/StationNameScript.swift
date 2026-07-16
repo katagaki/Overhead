@@ -2,9 +2,11 @@ import SwiftUI
 
 // MARK: - Kanji ↔ Katakana Splitting
 
-/// Splits a station name where kanji meets katakana so mixed-script names break
-/// across two lines (高輪ゲートウェイ → ["高輪", "ゲートウェイ"], トリニティ学門前
-/// → ["トリニティ", "学門前"]). Single-script names return `[name]`.
+/// Splits a station name into two parts only when it's a clean kanji/katakana
+/// pair whose katakana half is a real word (> 3 chars): 高輪ゲートウェイ →
+/// ["高輪", "ゲートウェイ"], トリニティ学門前 → ["トリニティ", "学門前"].
+/// Anything else — single-script names, three-part names, or a lone connector
+/// kana like the ノ in 新御茶ノ水 — returns `[name]` unsplit.
 enum StationNameScript {
     private enum Kind { case kanji, katakana }
 
@@ -28,12 +30,14 @@ enum StationNameScript {
 
     static func segments(of name: String) -> [String] {
         var segments: [String] = []
+        var kinds: [Kind?] = []
         var current = ""
         var currentKind: Kind?
         for character in name {
             let k = kind(of: character)
             if let k, let cur = currentKind, k != cur {
                 segments.append(current)
+                kinds.append(cur)
                 current = String(character)
                 currentKind = k
             } else {
@@ -41,8 +45,19 @@ enum StationNameScript {
                 if currentKind == nil { currentKind = k }
             }
         }
-        if !current.isEmpty { segments.append(current) }
-        return segments.isEmpty ? [name] : segments
+        if !current.isEmpty {
+            segments.append(current)
+            kinds.append(currentKind)
+        }
+        // Only break into columns for a clean two-part name whose katakana half
+        // is a real word (> 3 chars). A three-part name (新御茶ノ水) or a short
+        // affix stays a single column.
+        guard segments.count == 2,
+              let katakana = zip(segments, kinds).first(where: { $0.1 == .katakana })?.0,
+              katakana.count > 3 else {
+            return [name]
+        }
+        return segments
     }
 }
 
