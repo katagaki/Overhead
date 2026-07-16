@@ -3,10 +3,6 @@ import CoreLocation
 import Backbone
 
 // MARK: - Custom Stations Editor
-//
-// Reorderable native List of the line's stations, plus per-segment ride times.
-// Editing writes straight back through the `line` binding, which the parent
-// autosaves.
 
 struct CustomStationsEditorView: View {
     @Binding var line: CustomLine

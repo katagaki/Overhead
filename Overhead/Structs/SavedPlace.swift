@@ -3,9 +3,7 @@ import Backbone
 
 // MARK: - Saved Place
 
-/// A saved place on the 場所 tab: a labelled route to somewhere the user goes
-/// often. Unlike the old fixed home/work/school slots, any number of places
-/// (including several 職場/学校 and custom-named ones) can be saved.
+/// A saved place on the 場所 tab: a labelled route to somewhere the user goes often.
 struct SavedPlace: Identifiable, Codable, Equatable {
     var id: UUID
     var kind: Kind

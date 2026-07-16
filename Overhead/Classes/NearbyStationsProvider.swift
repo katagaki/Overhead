@@ -74,8 +74,7 @@ final class NearbyStationsProvider: NSObject, ObservableObject, CLLocationManage
     // MARK: - Computation
 
     private func compute(around location: CLLocation) {
-        // The same physical station appears on several lines; keep only the
-        // closest entry per station name.
+        // Keep only the closest entry per station name.
         var bestByName: [String: NearbyStation] = [:]
         for line in lines {
             for station in line.stations {

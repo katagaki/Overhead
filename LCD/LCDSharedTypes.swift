@@ -59,8 +59,7 @@ struct TrainJourneyAttributes: ActivityAttributes {
         }
     }
 
-    /// The line ridden from `stationIndex` onward. One-seat rides have a
-    /// single entry at index 0; each transfer adds one at its station.
+    /// The line ridden from `stationIndex` onward; each transfer adds an entry.
     struct LegLine: Codable, Hashable {
         let stationIndex: Int
         let lineSymbol: String

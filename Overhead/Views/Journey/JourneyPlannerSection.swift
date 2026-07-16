@@ -3,10 +3,6 @@ import Backbone
 
 // MARK: - Journey Planner Section (乗換案内-style)
 
-/// Top section of the home screen. The user picks a departure and arrival
-/// station, optional midpoints (経由), a departure time and walking speed,
-/// then chooses one of the candidate trains — including itineraries with
-/// transfers (乗り換え) when no single train covers the trip.
 struct JourneyPlannerSection: View {
     @ObservedObject var viewModel: JourneyViewModel
 
@@ -27,7 +23,6 @@ struct JourneyPlannerSection: View {
     @State private var hasSearched = false
     @State private var isSearching = false
     @State private var searchError: LocalizedStringKey?
-    /// Walk-to-station minutes applied to the last search (depart-now only).
     @State private var searchWalkMinutes: Int?
     @StateObject private var walkingEstimator = WalkingTimeEstimator()
 
@@ -277,7 +272,6 @@ struct JourneyPlannerSection: View {
 
     private var fieldDivider: some View {
         HStack(spacing: 10) {
-            // Small connector aligned under the labels
             VStack(spacing: 2) {
                 ForEach(0..<3, id: \.self) { _ in
                     Circle()
@@ -337,8 +331,6 @@ struct JourneyPlannerSection: View {
 
     // MARK: - Customization Section
 
-    /// Horizontal grid of per-search customizations: each icon is one
-    /// setting, highlighted while that setting is active.
     private var customizationSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Setup.Customize")
@@ -490,7 +482,6 @@ struct JourneyPlannerSection: View {
         }
     }
 
-    /// Station names along the journey: from, midpoints, to.
     private var waypointNames: [String]? {
         guard let from = fromSelection, let to = toSelection else { return nil }
         return [from.station.name] + viaSelections.map(\.station.name) + [to.station.name]
@@ -514,8 +505,6 @@ struct JourneyPlannerSection: View {
                     .foregroundColor(.secondary)
                     .padding(.leading, 4)
 
-                // The walk to the station is shown separately — candidate
-                // rows always show the trains' actual times.
                 if let walkMinutes = searchWalkMinutes,
                    let fromName = fromSelection?.station.localizedName {
                     noticeRow(icon: "figure.walk", text: "Setup.WalkEstimate \(fromName) \(walkMinutes)")
@@ -608,7 +597,6 @@ struct JourneyPlannerSection: View {
                          ? "Candidate.DepartsNow"
                          : "Candidate.DepartsIn \(waitMinutes)")
                         .font(.system(size: 12, weight: .bold))
-                        // Tight when there's barely more time than the walk
                         .foregroundColor(waitMinutes <= (searchWalkMinutes ?? 0) + 3 ? .red : .green)
                 }
             }
@@ -653,7 +641,6 @@ struct JourneyPlannerSection: View {
                 .foregroundColor(leg.line.color)
                 .lineLimit(1)
 
-            // Untimed candidates ride no concrete train — no type or 行き先.
             if candidate.hasSchedule {
                 Text(leg.service.trainType.displayNameJa)
                     .font(.system(size: 11, weight: .bold))
@@ -685,8 +672,6 @@ struct JourneyPlannerSection: View {
         }
     }
 
-    /// Per-leg breakdown for itineraries with transfers, e.g.
-    /// 山手線 東京 10:02 → 神田 10:04 [乗換]
     @ViewBuilder
     private func transferSummary(_ candidate: TrainCandidate) -> some View {
         VStack(alignment: .leading, spacing: 5) {
@@ -753,7 +738,6 @@ struct JourneyPlannerSection: View {
             .localizedName
     }
 
-    /// Minutes from now until departure — only shown for near-term departures today.
     private func minutesUntilDeparture(_ candidate: TrainCandidate) -> Int? {
         let interval = candidate.departureDate(reference: effectiveDeparture).timeIntervalSinceNow
         guard interval > -60 else { return nil }
@@ -762,7 +746,6 @@ struct JourneyPlannerSection: View {
         return max(0, minutes)
     }
 
-    /// Renders rail times past 24:00 as clock times (24:15 → 0:15).
     private func displayTime(_ railTime: String) -> String {
         guard let sec = TimetableEntry.parseRailTime(railTime), sec >= 24 * 3600 else {
             return railTime
@@ -811,7 +794,6 @@ struct JourneyPlannerSection: View {
         Task {
             let avoided = avoidedLineIds
 
-            // Timetable-ignoring search: route alternatives, no times.
             if ignoreTimetable {
                 searchWalkMinutes = nil
                 candidates = viewModel.searchRouteOptions(
@@ -828,9 +810,6 @@ struct JourneyPlannerSection: View {
                 return
             }
 
-            // When leaving now, trains departing before the user can walk to
-            // the station are excluded outright. Beyond ~2 hours the user
-            // clearly isn't walking there right now, so no offset applies.
             var departure = effectiveDeparture
             var walkMinutes: Int?
             if departureMode == .now,

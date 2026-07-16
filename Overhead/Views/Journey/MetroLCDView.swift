@@ -6,19 +6,12 @@ import UIKit
 
 // MARK: - Metro LCD View
 
-/// Simulation of the Tokyo Metro in-car LCD (16:9): white destination strip,
-/// silver headline band with the next station, and a metallic line-color band
-/// running left to right — up to two already-passed stations trail behind the
-/// blue direction marker, transfers sit above the band and vertical station
-/// names below it.
 struct MetroLCDView: View {
     let journey: Journey
     let state: TrainPositionState
     let lineColor: Color
     let orientation: TrainLCDOrientation
 
-    /// LCD chrome color (band). Some lines' in-car identity differs from
-    /// their wayfinding color; badges keep `lineColor`.
     private var displayColor: Color {
         let firstLegId = journey.line.id.split(separator: "+").first.map(String.init)
             ?? journey.line.id
@@ -26,8 +19,6 @@ struct MetroLCDView: View {
         return Color(hex: hex)
     }
 
-    // Fixed design canvas, scaled to the available width so every metric
-    // (fonts, badges, strokes) stays proportional on any device.
     private static let designWidth: CGFloat = 360
     private static let designHeight: CGFloat = designWidth * 9 / 16
     private static let destStripHeight: CGFloat = 25
@@ -90,8 +81,6 @@ struct MetroLCDView: View {
         .metalBandGradient(.white)
     }
 
-    /// Train type in white italic on a line-color box with the metallic
-    /// sheen.
     private var typeBox: some View {
         Text(typeName)
             .font(.system(size: 13, weight: .heavy))
@@ -132,9 +121,6 @@ struct MetroLCDView: View {
                 .padding(.bottom, 5)
             if let station = headlineStation {
                 if !station.stationCode.isEmpty {
-                    // Circle badges sit low so the bottom just clips at the
-                    // band edge, the curve peeking at the rule; other shapes
-                    // stay centered and unmasked.
                     if StationNumberBadge.rendersAsCircle(
                         code: station.stationCode, color: stationColor(station),
                         styleOverride: journey.line.badgeStyle
@@ -151,8 +137,6 @@ struct MetroLCDView: View {
                         .foregroundColor(.black)
                         .lineLimit(1)
                 }
-                // Centered in whatever space remains right of the badge,
-                // nudged left of true center by the trailing padding.
                 .frame(maxWidth: .infinity)
                 .padding(.trailing, 28)
             } else {
@@ -171,8 +155,6 @@ struct MetroLCDView: View {
             )
         )
         .clipped()
-        // Line-color rule along the band's bottom edge; the clipped badge
-        // bottom meets it.
         .overlay(alignment: .bottom) {
             Rectangle()
                 .fill(displayColor)
@@ -183,8 +165,6 @@ struct MetroLCDView: View {
     // MARK: - Progression (white area)
 
     private func progression(now: Date) -> some View {
-        // Built left to right; facing left mirrors the columns, the marker
-        // slot, and the insets (the wide one holds the 分 label at the tail).
         let (builtCols, builtSlot) = columns(now: now)
         let mirrored = orientation == .left
         let cols = mirrored ? Array(builtCols.reversed()) : builtCols
@@ -210,7 +190,7 @@ struct MetroLCDView: View {
                     ForEach(cols) { col in
                         Group {
                             if col.isCurrent {
-                                Color.clear  // marker overlays this slot
+                                Color.clear
                             } else if col.isPassed {
                                 passedBox
                             } else {
@@ -231,8 +211,6 @@ struct MetroLCDView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .frame(height: Self.bandHeight)
             .metalBandGradient(displayColor)
-            // Flatten before shadowing — .shadow alone re-applies to every
-            // child primitive (boxes, digits, marker) instead of the strip.
             .compositingGroup()
             .shadow(color: .black.opacity(0.4), radius: 0.8, x: 0, y: 1)
             .overlay(alignment: mirrored ? .bottomLeading : .bottomTrailing) {
@@ -270,7 +248,6 @@ struct MetroLCDView: View {
             .frame(height: Self.namesHeight)
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            // Clear strip under the names so the disclaimer never collides.
             Color.clear
                 .frame(height: 9)
         }
@@ -318,9 +295,6 @@ struct MetroLCDView: View {
         .padding(.horizontal, 1)
     }
 
-    /// Characters justified top-to-bottom so the first and last characters
-    /// align across columns; names too long to fit are condensed vertically
-    /// instead, like the real display.
     private func verticalName(_ name: String, passed: Bool) -> some View {
         VerticalStationName(name: name, fontSize: 11.5, charBox: 12,
                             availableHeight: Self.namesHeight - 8,
@@ -341,10 +315,6 @@ struct MetroLCDView: View {
         let transfers: [TrainLine]
     }
 
-    /// Columns left to right in travel direction: up to 2 already-passed
-    /// stations, then the rest of the journey. `markerSlot` positions the
-    /// blue marker in column widths from the columns' leading edge — on the
-    /// boundary while moving, mid-column while dwelling.
     private func columns(now: Date) -> ([MetroColumn], CGFloat) {
         let stations = journey.journeyStations
         guard !stations.isEmpty else { return ([], 0) }
@@ -357,7 +327,6 @@ struct MetroLCDView: View {
         let nowSec = Self.railSeconds(at: now)
         let delaySec = state.delayMinutes * 60
 
-        // Express-passed stations (no timetable entry) never get a column.
         let previous = stations.indices
             .filter { $0 < ref || (dwellIndex == nil && $0 == ref) }
             .filter { entries[stations[$0].id] != nil }
@@ -383,8 +352,6 @@ struct MetroLCDView: View {
             .filter { $0 > ref }
             .compactMap { idx -> MetroColumn? in
                 let station = stations[idx]
-                // No entry at all = express passes this station. An entry
-                // with no times (schedule-less journey) is still a stop.
                 guard let entry = entries[station.id] else { return nil }
                 let arr = entry.arrivalSeconds() ?? entry.departureSeconds()
                 return MetroColumn(
@@ -399,10 +366,7 @@ struct MetroLCDView: View {
         return (cols, markerSlot)
     }
 
-    /// Other bundled lines serving the same physical station (matched by
-    /// Japanese name), excluding the line(s) being ridden.
     private func transfers(at station: Station) -> [TrainLine] {
-        // Custom lines never interchange with built-in lines (see TrainLCDView).
         guard !journey.line.isCustom else { return [] }
         let ridden = Set(journey.line.id.split(separator: "+").map(String.init))
         return Array(
@@ -415,7 +379,6 @@ struct MetroLCDView: View {
         )
     }
 
-    /// "G06" → "G-06", matching the code style under the band.
     private func hyphenatedCode(_ station: Station) -> String {
         let code = station.stationCode
         let letters = code.prefix(while: \.isLetter)
@@ -444,8 +407,6 @@ struct MetroLCDView: View {
         journey.service.trainType == .local ? "各駅停車" : journey.service.trainType.displayNameJa
     }
 
-    /// No car data exists — derive a stable 1...10 from the journey ID so the
-    /// display stays constant for the ride.
     private var carNumber: Int {
         Int(journey.id.uuid.0 % 10) + 1
     }
@@ -467,8 +428,6 @@ struct MetroLCDView: View {
         .frame(width: dimension, height: dimension)
     }
 
-    /// Seconds since midnight JST; early-morning hours count as 24:00+ to
-    /// match rail-convention timetable times.
     private static func railSeconds(at date: Date) -> Int {
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
@@ -481,8 +440,6 @@ struct MetroLCDView: View {
 
 // MARK: - Skew Effect
 
-/// Synthetic italic — system fonts don't oblique CJK glyphs, so shear the
-/// rendered text instead.
 private struct MetroSkewEffect: GeometryEffect {
     var shear: CGFloat
 
@@ -496,8 +453,6 @@ private struct MetroSkewEffect: GeometryEffect {
 
 // MARK: - Direction Marker
 
-/// Right-pointing arrow with a chevron-notched tail (the blue "here" marker
-/// riding the band); points left when `pointsLeading`.
 private struct DirectionMarker: Shape {
     var pointsLeading = false
 
@@ -517,9 +472,6 @@ private struct DirectionMarker: Shape {
 
 // MARK: - Metal Band Gradient
 
-/// Backs the modified view with the LCD band's metal-sheen gradient: flat
-/// base color to the middle, a −10%-luminance crease just past it, easing
-/// back to the base color at the bottom edge.
 private struct MetalBandGradient: ViewModifier {
     let base: Color
 
@@ -545,7 +497,6 @@ private extension View {
 }
 
 private extension Color {
-    /// The same hue and saturation with HSB brightness scaled by `factor`.
     func luminanceScaled(by factor: CGFloat) -> Color {
         #if canImport(UIKit)
         var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0

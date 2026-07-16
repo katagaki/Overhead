@@ -12,8 +12,6 @@ struct StationSearchHit: Identifiable {
 
 enum StationSearch {
 
-    /// Searches every station on every line by localized name, Japanese name,
-    /// English name, or station code.
     static func search(lines: [TrainLine], query: String) -> [StationSearchHit] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return [] }
@@ -53,9 +51,6 @@ enum StationSearch {
 
 // MARK: - Station Picker
 
-/// Line detail (路線): a per-direction train map of the line's stations,
-/// drawn as a custom inset-grouped card, with each station showing the next
-/// arriving train's time and type.
 struct StationPickerView: View {
     let line: TrainLine
     @ObservedObject var viewModel: JourneyViewModel
@@ -69,9 +64,6 @@ struct StationPickerView: View {
         StaticTrainData.line(withId: line.id)
     }
 
-    /// One picker option per physical direction (track): directions with the
-    /// same travel direction but a different terminal station are merged into
-    /// the first one.
     private var directionOptions: [StaticLineDirection] {
         guard let staticLine else { return [] }
         var seenAscending = Set<Bool>()
@@ -83,7 +75,6 @@ struct StationPickerView: View {
         return directionOptions[min(selectedDirectionIndex, directionOptions.count - 1)]
     }
 
-    /// Stations in travel order for the selected direction.
     private var orderedStations: [Station] {
         guard let direction = selectedDirection, !direction.isAscending else {
             return line.stations
@@ -91,8 +82,6 @@ struct StationPickerView: View {
         return line.stations.reversed()
     }
 
-    /// Through services (直通) that continue past the terminus in the selected
-    /// travel direction, appended to the end of the map.
     private var throughServicesForDirection: [ThroughService] {
         guard let staticLine, let direction = selectedDirection else { return [] }
         return staticLine.throughServices.filter {
@@ -149,8 +138,6 @@ struct StationPickerView: View {
         .pickerStyle(.segmented)
     }
 
-    /// Compact direction name for the segmented control: the part before any
-    /// parenthetical (内回り（上野・池袋方面） → 内回り).
     private func shortDirectionName(of direction: StaticLineDirection) -> String {
         let lang = Locale.current.language.languageCode?.identifier ?? "ja"
         if lang == "ja" {
@@ -261,8 +248,6 @@ struct StationPickerView: View {
         .padding(.horizontal, cardPadding)
         .padding(.vertical, 10)
         .contentShape(Rectangle())
-        // The connecting track runs behind the dots, clipped to half height
-        // at the termini so the line starts and ends on a station.
         .background(alignment: .leading) {
             trackSegment(isFirst: isFirst, isLast: isLast && !continuesBelow)
         }
@@ -294,8 +279,6 @@ struct StationPickerView: View {
 
     // MARK: - Through-Service Branch Row
 
-    /// A 直通 continuation past the terminus onto a connecting line. Navigable
-    /// when that line is bundled in the app; informational text otherwise.
     @ViewBuilder
     private func throughBranchRow(through: ThroughService, isLast: Bool) -> some View {
         if let connecting = connectingLine(for: through) {
@@ -332,8 +315,6 @@ struct StationPickerView: View {
         .padding(.horizontal, cardPadding)
         .padding(.vertical, 10)
         .contentShape(Rectangle())
-        // Continue the track from the terminus down to this branch's node,
-        // clipped to half height at the final branch so the line ends on it.
         .background(alignment: .leading) {
             GeometryReader { geo in
                 Rectangle()
@@ -386,13 +367,9 @@ struct StationPickerView: View {
         }
     }
 
-    /// The next train to arrive at each station in the selected direction,
-    /// from the generated timetable for the current service day.
     private func nextArrivalsByStation(at now: Date) -> [String: NextArrival] {
         guard let staticLine, let direction = selectedDirection else { return [:] }
 
-        // The rail service day runs past midnight: before 03:00 the clock
-        // reads as 24:xx+ of the previous day's calendar.
         let calendar = ScheduleCalendar.current(at: now.addingTimeInterval(-3 * 3600))
         var jst = Calendar(identifier: .gregorian)
         jst.timeZone = TimeZone(identifier: "Asia/Tokyo")!
@@ -405,9 +382,6 @@ struct StationPickerView: View {
         let services = StaticTimetableGenerator.services(for: staticLine, calendar: calendar)
             .filter { ($0.direction == .outbound) == direction.isAscending }
 
-        // 当駅始発: a station's next train is a 始発 only when that train
-        // starts its run there — the origin terminus, or a mid-line 当駅始発
-        // station. Trains that arrived from up-line are not 始発.
         var best: [String: NextArrival] = [:]
         for service in services {
             let serviceOrigin = service.timetable.first?.stationId
@@ -426,8 +400,6 @@ struct StationPickerView: View {
             }
         }
 
-        // After the last train has passed a station, fall through to the next
-        // service day's 始発 instead of showing nothing.
         let tomorrow = ScheduleCalendar.current(at: now.addingTimeInterval(21 * 3600))
         var tomorrowFirst: [String: NextArrival] = [:]
         let tomorrowServices = tomorrow == calendar

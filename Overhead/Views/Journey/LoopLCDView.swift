@@ -26,7 +26,7 @@ struct LoopLCDView: View {
     private static let markerRed = Color(hex: "#7A2B20")
     private static let languageFlipSeconds = 4.0
 
-    // Stop layout, dialed in by hand: arc position, circle radius, per-label nudges.
+    // Stop layout, dialed in by hand.
     private static let stopT: [CGFloat] = [0.2, 0.33, 0.44, 0.53, 0.62]
     private static let stopRadius: [CGFloat] = [10.7, 10.0, 9.5, 8.2, 7.9]
     private static let labelDX: [CGFloat] = [-5, -8, -13, -4, -4.35]
@@ -35,8 +35,7 @@ struct LoopLCDView: View {
     private static let arrowT: CGFloat = 0.14
     private static let nextGold = Color(hex: "#EFC13D")
 
-    // Cubic sweep, ends past the white edges so the panel clips them flat;
-    // dialed in by hand.
+    // Cubic sweep, ends past the white edges so the panel clips them flat.
     private static let arcNear = CGPoint(x: 114, y: 176)
     private static let arcControl1 = CGPoint(x: 113, y: 60)
     private static let arcControl2 = CGPoint(x: 267, y: -5)
@@ -76,7 +75,6 @@ struct LoopLCDView: View {
 
     private func header(english: Bool) -> some View {
         HStack(spacing: 0) {
-            // Terminal, hugging the bottom.
             VStack(alignment: .trailing, spacing: -1) {
                 Text(destinationStation?.name ?? "")
                     .font(.system(size: 12.5, weight: .heavy))
@@ -97,7 +95,6 @@ struct LoopLCDView: View {
                 .padding(.bottom, 3)
                 .padding(.leading, 7)
 
-            // Top-aligned with the color box.
             Text(english ? "Next" : headlineLabel)
                 .font(.system(size: 10, weight: .bold))
                 .foregroundColor(.white)
@@ -110,7 +107,6 @@ struct LoopLCDView: View {
                 .padding(.horizontal, 22)
                 .offset(y: 3)
 
-            // Car number, stacked and sheared, tucked into the top-right corner.
             VStack(alignment: .center, spacing: -2) {
                 Text(verbatim: "\(carNumber)")
                     .font(.system(size: 14, weight: .regular))
@@ -128,7 +124,6 @@ struct LoopLCDView: View {
         .background(Color(hue: 0, saturation: 0, brightness: 0.08))
     }
 
-    /// The station name spread across the header; English stays one centered run.
     @ViewBuilder
     private func spreadName(english: Bool) -> some View {
         if let station = headlineStation {
@@ -139,8 +134,6 @@ struct LoopLCDView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.4)
             } else {
-                // Fixed gaps scaled to name length so short names still spread;
-                // long names squash horizontally to stay on one line.
                 let chars = Array(station.name)
                 HorizontallySquashed {
                     HStack(spacing: 90 / CGFloat(max(chars.count, 2))) {
@@ -167,8 +160,6 @@ struct LoopLCDView: View {
                     mirrored ? CGPoint(x: size.width - p.x, y: p.y) : p
                 }
 
-                // Tapered band as one filled polygon: each edge is the
-                // centerline offset along its normal by the local half-width.
                 let samples = 25
                 var upperEdge: [CGPoint] = []
                 var lowerEdge: [CGPoint] = []
@@ -187,7 +178,6 @@ struct LoopLCDView: View {
                 band.closeSubpath()
                 ctx.fill(band, with: .color(displayColor))
 
-                // Faux depth: a shadow line hugging the band's lower edge.
                 var shadow = Path()
                 for (i, t) in (0...samples).map({ (CGFloat($0) / CGFloat(samples)) }).enumerated() {
                     let p = arcPoint(t)
@@ -201,7 +191,6 @@ struct LoopLCDView: View {
                     style: StrokeStyle(lineWidth: 2.5, lineCap: .butt)
                 )
 
-                // Stops: minute circles shrinking with distance.
                 for (index, stop) in stops.enumerated() {
                     let t = Self.stopT[min(index, Self.stopT.count - 1)]
                     let p = x(arcPoint(t))
@@ -210,7 +199,6 @@ struct LoopLCDView: View {
                         x: p.x - radius, y: p.y - radius,
                         width: radius * 2, height: radius * 2
                     )
-                    // The nearest stop rides a gold circle with a white rim.
                     ctx.fill(
                         Path(ellipseIn: circleRect),
                         with: .color(index == 0 ? Self.nextGold : .white)
@@ -264,8 +252,6 @@ struct LoopLCDView: View {
                         y: p.y + labelDY
                     )
                     let labelAnchor: UnitPoint = mirrored ? .leading : .trailing
-                    // Long names would run off the screen edge the label grows
-                    // toward, so squash them horizontally to fit that gap.
                     let labelRoom = mirrored
                         ? size.width - labelPoint.x - 4
                         : labelPoint.x - 4
@@ -283,16 +269,15 @@ struct LoopLCDView: View {
                     }
                 }
 
-                // The train: an upward chevron, rotated toward the direction of travel.
                 let markerCenter = x(arcPoint(Self.arrowT))
                 let sx: CGFloat = mirrored ? -1 : 1
                 let chevron: [CGPoint] = [
-                    CGPoint(x: -15, y: 0),   // left arm end, top
-                    CGPoint(x: 0, y: -6),    // apex, outer
-                    CGPoint(x: 15, y: 0),    // right arm end, top
-                    CGPoint(x: 15, y: 12),   // right arm end, bottom
-                    CGPoint(x: 0, y: 6),     // apex, inner
-                    CGPoint(x: -15, y: 12),  // left arm end, bottom
+                    CGPoint(x: -15, y: 0),
+                    CGPoint(x: 0, y: -6),
+                    CGPoint(x: 15, y: 0),
+                    CGPoint(x: 15, y: 12),
+                    CGPoint(x: 0, y: 6),
+                    CGPoint(x: -15, y: 12),
                 ]
                 var marker = Path()
                 marker.move(to: CGPoint(x: sx * chevron[0].x, y: chevron[0].y))
@@ -339,7 +324,6 @@ struct LoopLCDView: View {
         )
     }
 
-    /// The band's shadow: the line color, darkened.
     private var arcShadowColor: Color {
         let ui = UIColor(displayColor)
         var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
@@ -349,7 +333,6 @@ struct LoopLCDView: View {
         return Color(hue: h, saturation: s, brightness: b * 0.55, opacity: a)
     }
 
-    /// Unit tangent to the arc, pointing up it (toward the far end).
     private func arcTangent(_ t: CGFloat) -> CGPoint {
         let mt = 1 - t
         let a = 3 * mt * mt
@@ -365,10 +348,8 @@ struct LoopLCDView: View {
         return CGPoint(x: dx / length, y: dy / length)
     }
 
-    /// Unit normal to the arc pointing toward its lower-right side.
     private func arcNormal(_ t: CGFloat) -> CGPoint {
         let tangent = arcTangent(t)
-        // Rotating the tangent -90° puts the normal on the lower-right side.
         return CGPoint(x: -tangent.y, y: tangent.x)
     }
 
@@ -412,10 +393,8 @@ struct LoopLCDView: View {
         let minutes: Int?
     }
 
-    /// Stops to draw along the arc, nearest first. While dwelling the current
-    /// station leads (gold, no minutes) so the train chevron tucks behind it —
-    /// "ただいま"; while moving the nearest upcoming stop leads, so the train
-    /// reads as approaching it — "次は".
+    /// Nearest first; while dwelling the current station leads ("ただいま"),
+    /// else the nearest upcoming stop leads ("次は").
     private func arcStops(now: Date) -> [ArcStop] {
         let stations = journey.journeyStations
         guard !stations.isEmpty else { return [] }
@@ -463,7 +442,7 @@ struct LoopLCDView: View {
             ?? journey.journeyStations.last
     }
 
-    /// No car data exists — derive a stable 1...10 from the journey ID.
+    /// No car data exists; derive a stable 1...10 from the journey ID.
     private var carNumber: Int {
         Int(journey.id.uuid.0 % 10) + 1
     }
@@ -481,7 +460,6 @@ struct LoopLCDView: View {
         )
     }
 
-    /// Synthetic italic — system fonts don't oblique CJK glyphs.
     private struct CarNumberSkew: GeometryEffect {
         func effectValue(size: CGSize) -> ProjectionTransform {
             ProjectionTransform(CGAffineTransform(
@@ -491,7 +469,6 @@ struct LoopLCDView: View {
         }
     }
 
-    /// Seconds since midnight JST; early-morning hours count as 24:00+.
     private static func railSeconds(at date: Date) -> Int {
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = TimeZone(identifier: "Asia/Tokyo")!

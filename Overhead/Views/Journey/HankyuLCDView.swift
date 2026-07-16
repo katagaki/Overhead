@@ -99,7 +99,6 @@ struct HankyuLCDView: View {
         .background(headerBackground)
     }
 
-    /// Type plate: black white-outlined tab, flush left, rounded on its right end.
     private var typeTab: some View {
         let radius: CGFloat = 8.5
         let shape = UnevenRoundedRectangle(
@@ -126,15 +125,12 @@ struct HankyuLCDView: View {
             )
             .overlay(shape.strokeBorder(Color.white, lineWidth: 1.2))
             .padding(.vertical, 1.5)
-            // Hide the outline's left run beyond the screen edge.
             .padding(.leading, -1.5)
     }
 
-    /// Glossy two-tone bar split by a diagonal seam.
     private var headerBackground: some View {
         ZStack {
             displayColor
-            // Dark seam edge peeking out 1.5pt left of the lighter zone.
             DiagonalSplitShape(topFraction: 0.516, bottomFraction: 0.566)
                 .fill(displayColor.hsbScaled(saturation: 1, brightness: 0.72))
             DiagonalSplitShape(topFraction: 0.52, bottomFraction: 0.57)
@@ -154,14 +150,11 @@ struct HankyuLCDView: View {
 
     // MARK: - Route Map
 
-    // Vertical layout, bottom up: 3 pad / 9 caption / 2 / 14 circle row / 2 / names
     private static let captionHeight: CGFloat = 9
     private static let circleRowHeight: CGFloat = 14
-    // The band is as tall as the circles; they read as holes punched in it.
     private static let lineHeight: CGFloat = 10.5
     private static let circleCenterFromBottom: CGFloat = 3 + captionHeight + 2 + circleRowHeight / 2
 
-    /// Glossy tube shading for the route line.
     private func lineGradient(_ base: Color) -> LinearGradient {
         LinearGradient(
             colors: [
@@ -255,7 +248,6 @@ struct HankyuLCDView: View {
         }
     }
 
-    // Sized so the outline's outer edge stays within the band height.
     private func stationCircle(_ col: MapStop) -> some View {
         Circle()
             .fill(col.isNext ? Self.nextYellow : Color.white)
@@ -350,11 +342,9 @@ struct HankyuLCDView: View {
 
     private struct MapModel {
         let stops: [MapStop]
-        /// Train marker position in display-order index units; nil when no room behind headline.
         let trainPos: Double?
     }
 
-    /// A window around the current station, in display order per `orientation`.
     private var mapModel: MapModel {
         let stations = journey.journeyStations
         guard !stations.isEmpty else { return MapModel(stops: [], trainPos: 0) }
@@ -362,7 +352,6 @@ struct HankyuLCDView: View {
         let start = max(0, min(ref - 5, stations.count - Self.maxStops))
         let window = Array(stations[start..<min(start + Self.maxStops, stations.count)])
 
-        // The ≫ marker sits discretely just before the つぎは/ただいま station.
         let headline = headlineIndex
         let rawPos = Double(headline - start) - 0.42
         let travelPos: Double? = rawPos < 0 ? nil : min(rawPos, Double(window.count - 1))
@@ -407,7 +396,6 @@ struct HankyuLCDView: View {
     }
 }
 
-/// Everything right of a diagonal from `topFraction` (top) to `bottomFraction` (bottom).
 private struct DiagonalSplitShape: Shape {
     let topFraction: CGFloat
     let bottomFraction: CGFloat
@@ -423,7 +411,6 @@ private struct DiagonalSplitShape: Shape {
     }
 }
 
-/// A single solid mitered chevron (>), pointing right.
 private struct TrainChevronShape: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()

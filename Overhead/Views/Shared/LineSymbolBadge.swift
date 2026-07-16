@@ -5,10 +5,7 @@ import UIKit
 #endif
 
 extension Color {
-    /// True when green clearly dominates red in the line color. Used to tell
-    /// the Yokohama Municipal Green Line (#4BA672) apart from Tokyo Metro Ginza
-    /// (orange), which share the "G" station-code prefix — the line color is
-    /// the only discriminator available in both the app and the Live Activity.
+    /// True when green dominates red — distinguishes Yokohama Green from Ginza, which share the "G" prefix.
     var isGreenDominant: Bool {
         #if canImport(UIKit)
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
@@ -21,28 +18,6 @@ extension Color {
 }
 
 // MARK: - Line Symbol Badge
-/// Renders line symbol badges matching each operator's official signage:
-/// - JR East (J..): rounded square, thick color frame, sharp-cornered white core,
-///   black Helvetica-style letters (signage uses Frutiger; Hind is the bundled substitute)
-/// - Tokyo Metro / Toei subway: circle with color ring (~16% of diameter),
-///   near-black letter (signage uses Futura)
-/// - Keisei (KS): circle with thinner blue ring, line-color letters in
-///   regular Helvetica (not bold)
-/// - Tobu (TS/TI/TN/TD/TJ): rounded square, rounder corners than JR,
-///   color stroke with rounded white core
-/// - Odakyu (OH/OE/OT): very-round squircle, line-color ring and letters
-/// - Nippori-Toneri Liner (NT): rounded square with pink outer + green inner border
-/// - Tokyu (TY/DT/MG/…): FILLED rounded square in the line color with white
-///   letters
-/// - Minatomirai (MM): FILLED rounded square, white Helvetica letters
-/// - Keikyu (KK): white circle with a thin light-blue ring and BLUE letters
-///   (signage is blue regardless of the red line color)
-/// - Keio (KO/IN): white circle with a thick line-color ring and line-color
-///   letters (the official KO logo)
-/// - Seibu (SI/SS/…): the official train-front logo — line-color train body
-///   with a white face bearing the letters, two white lights, splayed legs
-/// - Sotetsu (SO): filled navy rounded square, white letters over an orange rule
-/// (Shapes verified against station signage photos, 2026-07)
 
 struct LineSymbolBadge: View {
     let symbol: String
@@ -121,8 +96,6 @@ struct LineSymbolBadge: View {
         case "B":
             yokohamaBadge
         case "G" where color.isGreenDominant:
-            // Yokohama Municipal Green Line shares "G" with Tokyo Metro Ginza;
-            // the green line color is what tells them apart (Ginza is orange).
             yokohamaBadge
         case _ where Self.keioSymbols.contains(symbol):
             keioBadge
@@ -174,9 +147,6 @@ struct LineSymbolBadge: View {
 
     // MARK: - Rinkai: filled navy circle inside a light blue outer ring
 
-    /// Matches TWR Rinkai signage (user photo 2026-07-10): white letter on a
-    /// filled navy circle, a thin white separator ring, and a pale blue outer
-    /// ring (~11% of the diameter).
     private var rinkaiBadge: some View {
         symbolText(.custom("Helvetica-Bold", fixedSize: 13 * f), color: .white, inset: 5.5 * f)
             .frame(width: dimension, height: dimension)
@@ -196,8 +166,6 @@ struct LineSymbolBadge: View {
 
     // MARK: - Tama Monorail: JR-style rounded square in green
 
-    /// Same rounded-square shape as JR East but rendered in the Tama Monorail
-    /// green (its route line is orange, but the station numbering is green).
     private var tamaBadge: some View {
         symbolText(.custom("Hind-Bold", fixedSize: (symbol.count > 1 ? 18.5 : 20) * f),
                    color: Self.tamaGreen, inset: 4 * f,
@@ -224,17 +192,12 @@ struct LineSymbolBadge: View {
 
     // MARK: - Keisei: blue ring, line-color bold condensed letters
 
-    /// The LINE badge's KS is bold and condensed (user 2026-07-10) — unlike
-    /// the STATION number badge, which keeps regular Helvetica. Both are
-    /// circles. SF's .fontWidth(.condensed) approximates the narrow face.
     private var keiseiBadge: some View {
         symbolText(.system(size: 17 * f, weight: .bold).width(.condensed),
                    color: color, inset: 4.5 * f)
             .frame(width: dimension, height: dimension)
             .background(Color.white, in: Circle())
             .overlay(
-                // Thicker than before, but deliberately lighter than the
-                // Metro ring (6.2 * f)
                 Circle()
                     .strokeBorder(color, lineWidth: 4.2 * f)
             )

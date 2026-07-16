@@ -4,9 +4,6 @@ import Backbone
 
 // MARK: - Tube LCD View
 
-/// Simulation of the London Underground in-car dot-matrix indicator: a
-/// single amber line on black, alternating between the next station and the
-/// destination, flipping between English and Japanese.
 struct TubeLCDView: View {
     let journey: Journey
     let state: TrainPositionState
@@ -144,7 +141,6 @@ struct TubeLCDView: View {
             pages.append(TubePage(text: "This train is delayed by approx. \(state.delayMinutes) min"))
             pages.append(TubePage(text: "この電車は約\(state.delayMinutes)分遅れています"))
         }
-        // A page wider than the panel can't hold statically; scroll it.
         return pages.map { page in
             page.raster.width > Self.gridColumns
                 ? TubePage(text: page.text, scrolls: true)
@@ -181,7 +177,6 @@ private struct TubePage {
 
 // MARK: - Mono LED Raster
 
-/// Single-color variant of the LED raster, each pixel quantized to on/off.
 private struct MonoLEDRaster {
     static let rows = 16
 
@@ -193,13 +188,11 @@ private struct MonoLEDRaster {
     }
 
     init(text: String) {
-        // Same faces as LEDMatrixView: gothic for Japanese, serif for Latin, 15pt.
         let jaFont = UIFont(name: "MPLUS1p-Regular", size: 15)
             ?? UIFont.systemFont(ofSize: 14, weight: .regular)
         let latinFont = UIFont(name: "TimesNewRomanPSMT", size: 15)
             ?? UIFont.systemFont(ofSize: 14, weight: .regular)
 
-        // Split into ASCII / non-ASCII runs so each script gets its face.
         let attributed = NSMutableAttributedString()
         var run = ""
         var runIsASCII: Bool?

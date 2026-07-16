@@ -2,8 +2,6 @@ import Backbone
 
 // MARK: - Operator Sections
 
-/// Display order, short titles, and grouping for operator sections shared by
-/// the line browser and the avoid-lines sheet.
 enum OperatorSections {
     static let order = [
         "Operator:JR-East",
@@ -60,8 +58,6 @@ enum OperatorSections {
         }
     }
 
-    /// Ordered sections for `lines`. Operators missing from `order` still get
-    /// a section at the end instead of silently disappearing.
     static func sections(
         for lines: [TrainLine]
     ) -> [(operatorId: String, title: String, lines: [TrainLine])] {

@@ -98,7 +98,6 @@ struct FindLCDView: View {
                 let blinkOn = Int(context.date.timeIntervalSinceReferenceDate * 2) % 2 == 0
                 let lineY = size.height - 58
                 let mirrored = orientation == .left
-                // Headroom on the terminus side so the last name stays in the panel.
                 let leadInset: CGFloat = mirrored ? 30 : 13
                 let trailInset: CGFloat = mirrored ? 13 : 30
 
@@ -114,26 +113,22 @@ struct FindLCDView: View {
                     let slot = mirrored ? stops.count - 1 - index : index
                     let x = leadInset + CGFloat(slot) * step
 
-                    // LED dot; the next stop blinks.
                     let isNext = index == 0
                     let lit = !isNext || blinkOn
                     let dotRect = CGRect(x: x - 3.75, y: lineY - 3.75, width: 7.5, height: 7.5)
                     ctx.fill(Path(ellipseIn: dotRect), with: .color(lit ? Self.ledGreen : Self.ledDim))
                     if lit {
-                        // A soft glow, like a real LED.
                         ctx.fill(
                             Path(ellipseIn: dotRect.insetBy(dx: -2, dy: -2)),
                             with: .color(Self.ledGreen.opacity(0.25))
                         )
                     }
 
-                    // Station name angled up from its dot.
                     let name = ctx.resolve(
                         Text(stop.nameEn)
                             .font(.custom("HelveticaNeue-Medium", size: 7.5))
                             .foregroundColor(.white)
                     )
-                    // Mirrored travel leans names the other way.
                     ctx.drawLayer { layer in
                         layer.translateBy(x: mirrored ? x - 1 : x + 1, y: lineY - 9)
                         layer.rotate(by: .degrees(mirrored ? 42 : -42))
@@ -141,7 +136,6 @@ struct FindLCDView: View {
                     }
                 }
 
-                // Terminus arrow along the direction of travel.
                 let arrowText = mirrored
                     ? "◀ \(destinationStation?.nameEn.uppercased() ?? "")"
                     : "\(destinationStation?.nameEn.uppercased() ?? "") ▶"

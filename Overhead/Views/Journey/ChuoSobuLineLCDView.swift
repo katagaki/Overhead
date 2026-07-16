@@ -147,8 +147,6 @@ struct ChuoSobuLineLCDView: View {
     private func progression(now: Date) -> some View {
         let (columns, markerSlot) = stops(now: now)
         let colWidth = (Self.designWidth - 20) / CGFloat(max(columns.count, 1))
-        // Marker rides the band absolutely: centered on the dwelling column, or
-        // on the boundary between two columns while moving.
         let markerCenter = markerSlot * colWidth
 
         return VStack(spacing: 0) {
@@ -172,7 +170,6 @@ struct ChuoSobuLineLCDView: View {
             }
 
             ZStack(alignment: .leading) {
-                // Runs past the content padding to the display's tail edge.
                 YamanoteArrowBandShape(tipOnTrailing: orientation == .right)
                     .fill(displayColor)
                     .frame(height: 17)
@@ -180,8 +177,6 @@ struct ChuoSobuLineLCDView: View {
                 HStack(spacing: 0) {
                     ForEach(columns) { col in
                         Group {
-                            // The dwelling column stays clear so the marker
-                            // overlay shows through.
                             if col.isCurrent {
                                 Color.clear
                             } else {
@@ -288,10 +283,6 @@ struct ChuoSobuLineLCDView: View {
     }
 
     /// Columns and the marker slot (in column-widths from the leading edge).
-    /// Dwelling at a station gives it its own column with the marker centered on
-    /// it (ただいま); while moving, the departed station trails as a dimmed passed
-    /// column and the marker rides the boundary toward the next stop (つぎは).
-    /// Remaining slots backfill with passed stations to stay full-width.
     private func stops(now: Date) -> ([LCDStop], CGFloat) {
         let stations = journey.journeyStations
         guard !stations.isEmpty else { return ([], 0) }
@@ -306,7 +297,6 @@ struct ChuoSobuLineLCDView: View {
 
         let upcoming = stations[(ref + 1)...]
             .compactMap { station -> LCDStop? in
-                // No entry = express passes; entry without times is still a stop.
                 guard let entry = entries[station.id] else { return nil }
                 let arr = entry.arrivalSeconds() ?? entry.departureSeconds()
                 return LCDStop(
@@ -331,8 +321,6 @@ struct ChuoSobuLineLCDView: View {
         }
         let markerSlot = CGFloat(upcomingCount) + (dwellIndex != nil ? 0.5 : 0)
 
-        // Fill the remaining slots with passed stations, nearest first; while
-        // moving that includes ref (express-skipped stops excluded).
         let passedUpper = dwellIndex != nil ? ref : ref + 1
         let deficit = Self.maxUpcomingStops + 1 - columns.count
         if deficit > 0 {
@@ -358,7 +346,6 @@ struct ChuoSobuLineLCDView: View {
 
     /// Other lines serving the same station, excluding the ridden line(s).
     private func transfers(at station: Station) -> [TrainLine] {
-        // Custom lines never interchange with built-in lines (see TrainLCDView).
         guard !journey.line.isCustom else { return [] }
         let ridden = Set(journey.line.id.split(separator: "+").map(String.init))
         return Array(

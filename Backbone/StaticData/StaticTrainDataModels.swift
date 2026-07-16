@@ -46,30 +46,12 @@ public struct HeadwayBand: Codable, Hashable {
 
 // MARK: - Exact Run
 
-/// One real train run departing a known origin at an exact time. Unlike the
-/// headway-band approximation this can also express early termination
-/// (`terminusStationId`, e.g. 松戸行き on a line that continues to 取手) and
-/// whether the train truly starts its run here (`startsHere` = 当駅始発; false
-/// for through-runs entering from a connecting line, e.g. 千代田線 trains
-/// entering the 常磐線各駅停車 at 綾瀬).
 public struct ExactRun: Codable, Hashable {
     public let departure: String          // "HH:mm" at the run's origin, may exceed 24:00
     public let terminusStationId: String? // nil = runs to the direction's terminus
     public let startsHere: Bool           // 当駅始発 at the run's origin
-    // The run continues past its last in-line station onto another line
-    // (直通), e.g. 青梅行き leaving the 中央線快速 at 立川. Ignored by the
-    // plain-line generator; composite through-lines use it to tell which runs
-    // actually traverse a mid-line junction.
     public let continuesBeyond: Bool
-    // The run's train type when it differs from its ServicePattern's default
-    // (e.g. an 急行 sharing a list with 各停). nil = inherit the pattern type.
-    // Skip-stop types resolve their stops via the line's `stopPatterns`.
     public let trainType: TrainService.TrainType?
-    // Explicit stop stations (indices into the line's `stations`) for this one
-    // run, used when a type's stop pattern is NOT uniform across trains (e.g.
-    // Tobu 急行, where different trains of the same type stop differently).
-    // Takes precedence over the line's per-type `stopPatterns`; nil falls back
-    // to that pattern, then to all-stops. Origin/terminus are always stops.
     public let stopIndices: [Int]?
 
     public init(_ departure: String, terminusStationId: String? = nil,
@@ -92,9 +74,6 @@ public struct ServicePattern: Codable, Hashable {
     public let lastDeparture: String   // "HH:mm", may exceed 24:00
     public let bands: [HeadwayBand]    // ordered by time
     public let trainType: TrainService.TrainType
-    // When set, the generator uses these real runs verbatim and ignores the
-    // band approximation entirely. An empty array means no full-line service
-    // for this calendar (e.g. the 取手 end of the 常磐線各駅停車 on holidays).
     public let exactRuns: [ExactRun]?
 
     init(first: String, last: String, bands: [HeadwayBand],
@@ -109,17 +88,10 @@ public struct ServicePattern: Codable, Hashable {
 
 // MARK: - Intermediate Origin (当駅始発)
 
-/// A mid-line station where some trains begin their run (当駅始発). Modeled as
-/// short-turn services running from here to the direction's destination
-/// terminus. `weekdayDepartures`/`saturdayHolidayDepartures` are the actual
-/// origin departure times ("HH:mm", may exceed 24:00) of the trains that
-/// start here — exact data, not a headway approximation.
 public struct IntermediateOrigin: Codable, Hashable {
     public let stationId: String
     public let weekdayDepartures: [String]
     public let saturdayHolidayDepartures: [String]
-    // Optional richer form: exact runs with per-train termini. Preferred by
-    // the generator over the plain departure strings when set.
     public let weekdayRuns: [ExactRun]?
     public let saturdayHolidayRuns: [ExactRun]?
 
@@ -157,15 +129,7 @@ public struct StaticLineDirection: Codable, Hashable {
     public let isAscending: Bool // true: trains run through `stations` in array order; false: reversed
     public let weekday: ServicePattern
     public let saturdayHoliday: ServicePattern
-    // Mid-line stations that also originate trains (当駅始発), beyond the
-    // origin terminus at index 0. Empty for most lines.
     public let intermediateOrigins: [IntermediateOrigin]
-    // Express/skip-stop runs that ORIGINATE at the direction's terminus
-    // (index 0), layered ON TOP of the base pattern's local service. Each run
-    // carries its own trainType + per-run stopIndices, so a band-modeled local
-    // line can gain real 急行/準急 trains without discarding its locals.
-    // Non-origin express runs go through `intermediateOrigins` (whose ExactRuns
-    // now also carry type + stops).
     public let expressWeekdayRuns: [ExactRun]
     public let expressSaturdayHolidayRuns: [ExactRun]
 
@@ -228,9 +192,6 @@ public struct ThroughService: Codable, Hashable {
 
 // MARK: - Timetable Run
 
-/// One real train from the source timetable. `stops` are minutes-since-midnight
-/// at each station in travel order starting at `startIndex` (abs index into
-/// `line.stations`); a negative value means the train passes that station.
 public struct TimetableRun: Hashable, Sendable, Codable {
     public let calendar: ScheduleCalendar
     public let ascending: Bool
@@ -238,8 +199,6 @@ public struct TimetableRun: Hashable, Sendable, Codable {
     public let stops: [Int]
     public let startsHere: Bool
     public let type: TrainService.TrainType
-    // Whether the last stop is a real terminus (no onward departure). False for a
-    // loop train continuing through the seam, whose last listed stop still departs.
     public let terminates: Bool
     public init(_ calendar: ScheduleCalendar, _ ascending: Bool, _ startIndex: Int,
                 _ startsHere: Bool, _ type: TrainService.TrainType, _ stops: [Int],
@@ -260,37 +219,13 @@ public struct StaticTrainLine: Codable, Hashable {
     public let colorHex: String
     public let stations: [Station]
     public let hopTimesMinutes: [Double] // count == stations.count - 1
-    // Optional per-direction override for the descending (up) direction, in the
-    // same ascending-station orientation as hopTimesMinutes. Set only when up
-    // and down running times differ enough to matter (dwell asymmetry).
     public var upHopTimesMinutes: [Double]? = nil
-    // Exact per-station times for individual runs, so station timetables match
-    // the source 1:1 instead of projecting from the origin via hop times. Key:
-    // "<calendar.rawValue>|<startStationId>|<HH:mm origin departure>"; value:
-    // consecutive minutes-since-midnight at each station from the run's start to
-    // its terminus (travel order); a negative value means the run passes that
-    // station (skip-stop). A run whose (calendar, start, departure) is absent
-    // falls back to hop projection. Only lines with per-run dwell that a
-    // median-hop model can't reproduce need this (e.g. Joban Rapid).
     public var exactStationTimes: [String: [Int]]? = nil
-    // Full real timetable: one entry per actual train (from the source grid), so
-    // station timetables and same-line journeys are 1:1 without any band/origin
-    // modeling. When set, `services(for:calendar:)` builds services DIRECTLY from
-    // these and ignores `directions`' patterns for enumeration (directions are
-    // still used for names/ascending and 直通 composites read them unchanged, so
-    // this is composite-safe). Use for lines that were headway-band approximated.
     public var timetableRuns: [TimetableRun]? = nil
-    // Loop line (Yamanote): station indices wrap mod stations.count in
-    // timetableServices so trains crossing the last→first seam are contiguous.
     public var isLoop: Bool = false
     public let directions: [StaticLineDirection]
     public let delayInfo: DelayCheckInfo
     public var throughServices: [ThroughService] = [] // 直通運転
-    // Stop patterns for skip-stop train types (急行/準急/快速 etc.): the set of
-    // station indices (into `stations`) where a train of that type stops. A
-    // type absent from this map (and .local) stops everywhere. The generator
-    // emits timetable entries only at these stops, so skips flow through to
-    // stationStops, the journey view, and the Live Activity automatically.
     public var stopPatterns: [TrainService.TrainType: Set<Int>] = [:]
 
     public var trainLine: TrainLine {
@@ -380,11 +315,6 @@ public enum StaticTrainData {
         public let connectingAscending: Bool
     }
 
-    /// Through-service destination groups for a line, limited to services that
-    /// continue onto lines bundled in the app. Includes two-junction chains
-    /// (e.g. 常磐線各停 → 千代田線 → 小田急線). When `boardingStationId` is
-    /// given, only junctions reachable from that station (without reversing)
-    /// are returned.
     public static func throughDestinations(
         fromLineId lineId: String,
         boardingStationId: String? = nil
@@ -408,14 +338,10 @@ public enum StaticTrainData {
         return groups
     }
 
-    /// Second-hop groups for through trains continuing past another junction
-    /// onto a third line, presented as a single combined through service.
     private static func chainedGroups(after group: ThroughDestinationGroup) -> [ThroughDestinationGroup] {
         let line2 = group.connectingLine
         var result: [ThroughDestinationGroup] = []
         for onward in line2.throughServices {
-            // Must continue in the direction the through train already travels,
-            // via a junction the train actually passes
             guard (onward.end == .ascending) == group.connectingAscending,
                   group.stations.contains(where: { $0.id == onward.junctionStationId }),
                   let g2 = destinationGroup(for: onward, on: line2)
@@ -449,9 +375,6 @@ public enum StaticTrainData {
               let jIdx = target.stations.firstIndex(where: { $0.name == junction.name })
         else { return nil }
 
-        // Travel direction on the connecting line: prefer the reciprocal through
-        // service at the same junction (incoming trains run opposite to it);
-        // otherwise a junction at either end of the line fixes the direction.
         let ascending: Bool
         if let reciprocal = target.throughServices.first(where: { ts in
             target.stations.first(where: { $0.id == ts.junctionStationId })?.name == junction.name
@@ -477,8 +400,6 @@ public enum StaticTrainData {
 
     // MARK: Direct Route Search
 
-    /// A rideable single-train route between two physical stations, possibly
-    /// continuing past a through-service (直通) junction onto a connecting line.
     public struct DirectRouteOption: Identifiable {
         /// Line to generate services from (composite when the route runs through a junction).
         public let staticLine: StaticTrainLine
@@ -491,17 +412,12 @@ public enum StaticTrainData {
         public var id: String { "\(staticLine.id)|\(fromStation.id)|\(toStation.id)" }
     }
 
-    /// All single-train routes between two stations identified by their
-    /// Japanese names (station IDs differ between lines at the same physical
-    /// station, so names are the cross-line join key).
     public static func directRoutes(
         fromStationName: String,
         toStationName: String,
         avoidingLineIds: Set<String> = []
     ) -> [DirectRouteOption] {
         guard fromStationName != toStationName else { return [] }
-        // Composite (直通) line IDs are "origin+connecting" — avoiding either
-        // component avoids the composite.
         func isAvoided(_ lineId: String) -> Bool {
             guard !avoidingLineIds.isEmpty else { return false }
             return lineId.split(separator: "+").contains { avoidingLineIds.contains(String($0)) }
@@ -547,8 +463,6 @@ public enum StaticTrainData {
 
     // MARK: Transfer Route Planning (乗り換え)
 
-    /// One ride of a multi-leg route: board `staticLine` at `fromStation` and
-    /// alight at `toStation`, then change trains for the next leg.
     public struct TransferLeg {
         public let staticLine: StaticTrainLine
         public let fromStation: Station
@@ -558,9 +472,6 @@ public enum StaticTrainData {
     /// Time assumed for walking between platforms when changing trains.
     public static let transferBufferMinutes: Double = 5
 
-    /// Station path and hop-time estimate of the ride between two stations on
-    /// `line`, independent of any timetable. On a loop line the shorter way
-    /// around wins, wrapping at the seam.
     public static func estimatedRide(
         on line: StaticTrainLine,
         fromStationId: String,
@@ -583,8 +494,6 @@ public enum StaticTrainData {
             return (directPath, directMinutes)
         }
 
-        // The seam hop (last→first) has no entry in hopTimesMinutes — assume
-        // an average hop.
         let total = hops.reduce(0, +)
         let seamHop = total / Double(hops.count)
         let wrapMinutes = total + seamHop - directMinutes
@@ -601,9 +510,6 @@ public enum StaticTrainData {
         return (path, wrapMinutes)
     }
 
-    /// Plans a route visiting every station name in `names` in order,
-    /// concatenating per-pair plans. Legs continuing on the same line in the
-    /// same direction merge, so an on-path midpoint adds no fake transfer.
     public static func planTransferRoute(
         throughStationNames names: [String],
         maxTransfers: Int = 2,
@@ -639,8 +545,6 @@ public enum StaticTrainData {
         return plan.isEmpty ? nil : plan
     }
 
-    /// Whether `second` keeps riding the same line the same way `first` was
-    /// going — i.e. the two legs are one continuous ride, not a switchback.
     private static func continuesSameDirection(_ first: TransferLeg, _ second: TransferLeg) -> Bool {
         let stations = first.staticLine.stations
         guard let aFrom = stations.firstIndex(where: { $0.id == first.fromStation.id }),
@@ -651,12 +555,6 @@ public enum StaticTrainData {
         return (aTo > aFrom) == (bTo > bFrom)
     }
 
-    /// Plans a route between two physical stations (identified by Japanese
-    /// name), changing trains at same-name stations when no single ride
-    /// exists. Returns ordered legs, or nil when unreachable within
-    /// `maxTransfers` changes. Shortest ride-time route via Dijkstra, with a
-    /// penalty per transfer (scaled by walking speed) so direct rides win
-    /// when comparable.
     public static func planTransferRoute(
         fromStationName: String,
         toStationName: String,
@@ -779,17 +677,12 @@ public enum StaticTrainData {
         return legs.isEmpty ? nil : legs
     }
 
-    /// A journey line resolved from a boarding and alighting station, spanning
-    /// a through-service junction onto a second line when necessary.
     public struct ResolvedJourneyLine {
         public let staticLine: StaticTrainLine
         public let isThrough: Bool
         public let throughService: ThroughService?
     }
 
-    /// Resolves the line to ride from `fromStationId` (on the line `lineId`)
-    /// to `toStationId`, which may sit past one or two 直通 junctions on
-    /// connecting lines (e.g. 常磐線各停 → 千代田線 → 小田急線).
     public static func resolveJourneyLine(
         lineId: String,
         fromStationId: String,
@@ -804,8 +697,6 @@ public enum StaticTrainData {
         }
 
         for service in line.throughServices {
-            // The junction must be reachable from the boarding station
-            // without reversing
             guard let jIdx = line.stations.firstIndex(where: { $0.id == service.junctionStationId })
             else { continue }
             switch service.end {
@@ -829,8 +720,6 @@ public enum StaticTrainData {
                       let first = compositeLine(origin: line, group: group)
                 else { continue }
 
-                // The first composite runs in travel order, so the second
-                // junction is always exited "ascending" relative to it.
                 let onwardForComposite = ThroughService(
                     junctionStationId: onward.junctionStationId,
                     end: .ascending,
@@ -853,8 +742,6 @@ public enum StaticTrainData {
         return nil
     }
 
-    /// Builds a single linear line covering the origin line up to the junction
-    /// plus the connecting line beyond it, in through-travel order.
     private static func compositeLine(
         origin: StaticTrainLine,
         group: ThroughDestinationGroup
@@ -892,16 +779,6 @@ public enum StaticTrainData {
         let basis = origin.directions.first(where: { $0.isAscending == originAscending })
             ?? origin.directions[0]
 
-        // Trains past the junction are the connecting direction's runs, so when
-        // that direction has exact data entering at the junction — its full
-        // pattern originating there (常磐線各停 down runs at 綾瀬) or an
-        // IntermediateOrigin at the junction (中央線快速 up runs at 立川,
-        // thru = 青梅線から直通) — those runs, with their true per-train
-        // termini, are the through trains. Shift them back by the ride time
-        // to the junction. Otherwise approximate with the origin line's own
-        // pattern, keeping its 当駅始発 origins; when the junction is mid-line
-        // (立川), origin-side exact runs only traverse it if they are marked
-        // continuesBeyond with the junction as terminus (青梅行き).
         let junctionOffset = originHops.reduce(0, +)
         let junctionTargetId = target.stations[tIdx].id
         let connectingDirection = target.directions.first {
@@ -910,14 +787,10 @@ public enum StaticTrainData {
         let connectingOriginatesAtJunction = group.connectingAscending
             ? tIdx == 0
             : tIdx == target.stations.count - 1
-        // Junction at the origin direction's terminus (綾瀬 on the 常磐線各停):
-        // every run reaching the terminus is assumed to continue through.
         let junctionIsOriginTerminus = originAscending
             ? jIdx == origin.stations.count - 1
             : jIdx == 0
 
-        // Origin-side runs rebased onto the composite past a mid-line
-        // junction: only 直通 runs leaving the line there actually continue.
         func rebasedRuns(_ runs: [ExactRun]) -> [ExactRun] {
             runs.compactMap { run in
                 guard run.continuesBeyond, run.terminusStationId == service.junctionStationId
@@ -996,11 +869,6 @@ public enum StaticTrainData {
         )
     }
 
-    /// Rebases exact runs entering a connecting line at a junction onto a
-    /// composite line: keeps only the through runs (`startsHere == false` —
-    /// 当駅始発 runs never came from the origin line), shifted earlier by the
-    /// origin-side ride time so their departure is at the composite's origin.
-    /// nil when there is no exact-run data (headway bands can't be rebased).
     private static func junctionRunPattern(
         runs: [ExactRun]?,
         trainType: TrainService.TrainType,
@@ -1043,14 +911,8 @@ public enum StaticTimetableGenerator {
         return line.directions.flatMap { services(for: line, direction: $0, calendar: calendar) }
     }
 
-    /// Builds one service per real train from `line.timetableRuns` (1:1 with the
-    /// source). Bypasses band/exact/IO enumeration; 直通 composites are unaffected
-    /// because they read `line.directions` patterns, not these services.
     private static func timetableServices(line: StaticTrainLine, runs: [TimetableRun]) -> [TrainService] {
         let n = line.stations.count
-        // Absolute station index for travel-order position k: step +1 ascending,
-        // -1 descending, straight from `startIndex`. On a loop line it wraps mod n
-        // (Yamanote trains cross the 有楽町→東京 seam); otherwise out-of-range = nil.
         func absIndex(_ start: Int, _ k: Int, ascending: Bool) -> Int? {
             let raw = start + (ascending ? k : -k)
             if line.isLoop { return ((raw % n) + n) % n }
@@ -1096,9 +958,6 @@ public enum StaticTimetableGenerator {
         let offsets = cumulativeMinutes(hopTimes: hopTimes, ascending: direction.isAscending)
         guard stations.count == offsets.count, let destination = stations.last else { return [] }
 
-        // Full-line services from the origin terminus (real exact runs when
-        // available, else the headway pattern), plus short-turn services
-        // originating at each 当駅始発 station (exact times).
         let pattern = direction.pattern(for: calendar)
         var result: [TrainService]
         if let exact = pattern.exactRuns {
@@ -1138,9 +997,6 @@ public enum StaticTimetableGenerator {
                 )
             }
         }
-        // Express/skip-stop runs originating at the direction terminus, layered
-        // on top of the base local service. Each run supplies its own type +
-        // stopIndices, so `trainType` here is only a fallback.
         let expressRuns = direction.expressRuns(for: calendar)
         if !expressRuns.isEmpty {
             result += exactRunServices(
@@ -1153,8 +1009,6 @@ public enum StaticTimetableGenerator {
         return result
     }
 
-    /// Generates one service per real run, honoring per-run early termination
-    /// (松戸行き etc.) and the 当駅始発 flag of the run's origin.
     private static func exactRunServices(
         line: StaticTrainLine,
         direction: StaticLineDirection,
@@ -1169,10 +1023,6 @@ public enum StaticTimetableGenerator {
         let baseOffset = offsets[startIndex]
         return runs.compactMap { run in
             guard let origin = parseMinutes(run.departure) else { return nil }
-            // Real per-station times for this run (1:1 with the source), keyed by
-            // (calendar, start station, origin departure). When present they are
-            // emitted verbatim and drive the terminus; otherwise fall back to the
-            // hop-time projection below.
             let exactKey = "\(calendar.rawValue)|\(direction.isAscending ? "A" : "D")|\(stations[startIndex].id)|\(run.departure)"
             let exactTimes = line.exactStationTimes?[exactKey]
             let endIndex: Int
@@ -1185,13 +1035,8 @@ public enum StaticTimetableGenerator {
             } else {
                 endIndex = stations.count - 1
             }
-            // A run may override the pattern's type (e.g. an 急行 sharing a
-            // list with 各停); skip-stop types stop only at their pattern's
-            // stations (origin and terminus always included). A run's own
-            // `stopIndices` wins over the line's per-type pattern.
-            // stopIndices / stopPatterns are ABSOLUTE indices into
-            // `line.stations` (ascending order); `stations`/`i` here are
-            // direction-ordered, so map i -> absolute before testing.
+            // stopIndices / stopPatterns are ABSOLUTE indices into line.stations;
+            // stations/i here are direction-ordered, so map to absolute before testing.
             let effectiveType = run.trainType ?? trainType
             let stopSet = run.stopIndices.map(Set.init) ?? line.stopPatterns[effectiveType]
             let n = stations.count
@@ -1199,8 +1044,6 @@ public enum StaticTimetableGenerator {
             let entries = (startIndex...endIndex).compactMap { i -> TimetableEntry? in
                 let absI = direction.isAscending ? i : (n - 1 - i)
                 if let exactTimes {
-                    // Skip-stop runs mark passed stations with a negative sentinel;
-                    // all-stops runs have a real minute at every position.
                     let m = exactTimes[i - startIndex]
                     guard m >= 0 else { return nil }
                     let time = timeString(m)
@@ -1234,9 +1077,6 @@ public enum StaticTimetableGenerator {
         }
     }
 
-    /// Generates services departing `startIndex` at each of `originMinutes` and
-    /// running to the destination terminus. `startIndex == 0` are the full-line
-    /// trains; a positive index yields short-turn 当駅始発 services.
     private static func runServices(
         line: StaticTrainLine,
         direction: StaticLineDirection,
@@ -1285,9 +1125,6 @@ public enum StaticTimetableGenerator {
                   let destination = stations.last
             else { return nil }
 
-            // Merge every service passing through this station (full-line and
-            // 当駅始発 short-turns), deduped by minute preferring an originating
-            // train so 始発 is not hidden by a coincident through train.
             struct Row { let time: String; let type: TrainService.TrainType; let originatesHere: Bool; let dest: Station }
             let stationsById = Dictionary(uniqueKeysWithValues: stations.map { ($0.id, $0) })
             var byMinute: [Int: Row] = [:]

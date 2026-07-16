@@ -6,7 +6,6 @@ import Backbone
 struct StationTimetableView: View {
     let station: Station
     let line: TrainLine
-    /// Direction the user was browsing; the initial scroll prefers its next departure.
     var preferredDirectionId: String? = nil
     @ObservedObject var viewModel: JourneyViewModel
 
@@ -74,8 +73,6 @@ struct StationTimetableView: View {
 
     // MARK: - Through Services
 
-    // Through services onto a line bundled in the app are navigable rows;
-    // ones onto external operators are informational footer text.
     @ViewBuilder
     private func connectingThroughServiceRows(for timetable: StationTimetableData) -> some View {
         ForEach(throughServices(for: timetable), id: \.self) { through in
@@ -199,9 +196,7 @@ struct StationTimetableView: View {
 
     // MARK: - Helpers
 
-    /// Current time in rail minutes (Asia/Tokyo). Before 03:00 the clock is
-    /// treated as 24+ so post-midnight departures in 0-notation-free data
-    /// (24:52 etc.) compare correctly and the morning trains stay "past".
+    /// Before 03:00 the clock reads as 24+ so post-midnight departures compare correctly.
     private func railNowMinutes(at date: Date) -> Int {
         let tz = TimeZone(identifier: "Asia/Tokyo")!
         var cal = Calendar(identifier: .gregorian)
@@ -223,8 +218,6 @@ struct StationTimetableView: View {
         "\(timetable.railDirection)#\(departure.id)"
     }
 
-    /// Jumps (without animation) to the next upcoming departure, preferring
-    /// the browsed direction, so the list opens at "the next train".
     private func scrollToNextDeparture(proxy: ScrollViewProxy) {
         let nowMinutes = railNowMinutes(at: Date())
         let ordered = orderedTimetablesByPreferredDirection()
@@ -249,8 +242,7 @@ struct StationTimetableView: View {
         return [preferred] + viewModel.stationTimetable.filter { $0.railDirection != preferred.railDirection }
     }
 
-    /// The picker merges same-travel-direction directions onto one option, so
-    /// match on the shared `isAscending` axis rather than the exact direction id.
+    /// Matches on the shared `isAscending` axis since the picker merges same-direction options.
     private func matchesPreferredDirection(
         _ timetable: StationTimetableData,
         preferredDirectionId: String

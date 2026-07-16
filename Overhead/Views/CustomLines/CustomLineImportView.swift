@@ -2,9 +2,6 @@ import SwiftUI
 import Backbone
 
 // MARK: - Import Preview
-//
-// Shows what an opened `.ohl` contains before committing, and warns about lines
-// whose id already exists (import replaces them).
 
 struct CustomLineImportView: View {
     let package: CustomLinePackage

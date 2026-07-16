@@ -14,8 +14,6 @@ struct StationSearchRow: View {
                     stationName: hit.station.name
                 )
             } else if !hit.line.lineSymbol.isEmpty {
-                // Stations without a number (beyond the numbered section)
-                // still get the line's symbol so rows stay aligned
                 LineSymbolBadge(
                     symbol: hit.line.lineSymbol,
                     color: hit.line.color

@@ -1,7 +1,6 @@
 import SwiftUI
 import Backbone
 
-/// Wraps the journey view for sheet presentation.
 struct JourneySheetView: View {
     @ObservedObject var viewModel: JourneyViewModel
     @Environment(\.dismiss) private var dismiss
@@ -95,7 +94,6 @@ struct JourneySheetView: View {
 
     // MARK: - LCD snapshot
 
-    /// Renders the current LCD to a @3x image for sharing.
     @MainActor
     private func renderLCDImage() -> UIImage? {
         guard let journey = viewModel.activeJourney,

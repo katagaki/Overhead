@@ -17,10 +17,9 @@ struct TrainJourneyAttributes: ActivityAttributes {
         var estimatedArrivalTimestamp: Double
         var statusRaw: String
         var trackingModeRaw: String          // "GPS", "Timetable", "Blended"
-        var lastRefreshTimestamp: Double      // When delay data was last fetched
+        var lastRefreshTimestamp: Double
         // Delay-adjusted; drives timer-based views while the app is suspended.
         var departureTimestamp: Double
-        // Delay-adjusted segment window; drives the self-advancing next-station countdown.
         var segmentStartTimestamp: Double
         var nextStationArrivalTimestamp: Double
 
@@ -60,7 +59,6 @@ struct TrainJourneyAttributes: ActivityAttributes {
         }
     }
 
-    /// The line ridden from `stationIndex` onward; each transfer adds an entry.
     struct LegLine: Codable, Hashable {
         let stationIndex: Int
         let lineSymbol: String
@@ -81,20 +79,16 @@ struct TrainJourneyAttributes: ActivityAttributes {
     let stationNames: [String]
     let stationNamesEn: [String]
     let stationCount: Int
-    // Whether the train stops at each station (false = express skip)
-    let stationStops: [Bool]
-    // Scheduled time per station (epoch seconds, no delay); skipped stations carry the previous stop's time.
+    let stationStops: [Bool]  // false = express skip
+    // Epoch seconds, no delay; skipped stations carry the previous stop's time.
     let stationTimes: [Double]
-    // Empty string where a station has no code.
-    let stationCodes: [String]
-    // Per-station line color (hex); through-service stops keep their own line's color.
-    let stationColors: [String]
+    let stationCodes: [String]  // empty where a station has no code
+    let stationColors: [String]  // through-service stops keep their own line's color
     let legLines: [LegLine]
     let refreshURLString: String
 
     var destinationCode: String { stationCodes.last ?? "" }
 
-    /// The next station's own line color, for its station-number badge.
     func stationColorHex(at index: Int?) -> String {
         guard let idx = index, stationColors.indices.contains(idx) else {
             return lineColorHex
@@ -104,14 +98,12 @@ struct TrainJourneyAttributes: ActivityAttributes {
 
     var destinationColorHex: String { stationColors.last ?? lineColorHex }
 
-    /// Still the arriving leg at the transfer station; the new leg takes over on departure.
     func currentLeg(nextIndex: Int?) -> LegLine? {
         guard !legLines.isEmpty else { return nil }
         let next = max(nextIndex ?? stationCount, 1)
         return legLines.last { $0.stationIndex < next } ?? legLines.first
     }
 
-    /// Nil for the rest of a straight (one-seat) ride.
     func upcomingTransfer(nextIndex: Int?) -> LegLine? {
         guard let next = nextIndex else { return nil }
         return legLines.first { $0.stationIndex > 0 && $0.stationIndex >= max(next, 1) }

@@ -2,9 +2,7 @@ import Foundation
 import Combine
 import CoreLocation
 
-/// Fetches a single current-location fix on demand — used by the custom-station
-/// editor's "record current location" action. Separate from LocationTracker,
-/// which drives continuous journey tracking.
+/// One-shot location fix for the custom-station editor; separate from LocationTracker.
 @MainActor
 final class OneShotLocation: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var isRequesting = false

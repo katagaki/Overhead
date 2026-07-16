@@ -3,9 +3,6 @@ import Backbone
 
 // MARK: - Favorites Section (場所)
 
-/// Home-screen section for saved places: any number of labelled routes
-/// (自宅・職場・学校・カスタム), each startable with one tap. Rendered as a
-/// custom card so it sits inline in the home scroll view.
 struct FavoritesSection: View {
     @ObservedObject var viewModel: JourneyViewModel
     @State private var places: [SavedPlace] = []
@@ -199,8 +196,6 @@ struct FavoritesSection: View {
         return String(localized: String.LocalizationValue(place.kind.localizationKey))
     }
 
-    /// Resolves a place's stations. The alighting station may live on a
-    /// connecting line reached via a through service (直通) past a junction.
     private func resolve(_ place: SavedPlace) -> (line: TrainLine, from: Station, to: Station, isThrough: Bool)? {
         guard let line = viewModel.availableLines.first(where: { $0.id == place.lineId }),
               let from = line.stations.first(where: { $0.id == place.fromStationId })

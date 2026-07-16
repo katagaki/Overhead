@@ -11,12 +11,10 @@ struct LEDMatrixView: View {
     let state: TrainPositionState
     let lineColor: Color
 
-    // Fixed design canvas, scaled to the available width.
     private static let designWidth: CGFloat = 360
     private static let gridColumns = 120
     private static let lineRows = LEDRaster.rows
-    // Real panels are a single matrix carrying two lines — no housing gap.
-    private static let lineGap = 0
+    private static let lineGap = 0  // single matrix carries both lines, no housing gap
     private static let gridRows = lineRows * 2 + lineGap
     private static let dotPitch: CGFloat = 2.8
     private static let bezelX: CGFloat = (designWidth - CGFloat(gridColumns) * dotPitch) / 2
@@ -25,7 +23,6 @@ struct LEDMatrixView: View {
     private static let staticPageSeconds: Double = 3.8
     private static let scrollDotsPerSecond: Double = 42
 
-    /// Cached rasterized pages, keyed by everything the panel says.
     @MainActor private static var pageCache: [String: LEDPanelPages] = [:]
 
     var body: some View {
@@ -46,7 +43,6 @@ struct LEDMatrixView: View {
         .glassEffect(.regular.tint(Color(red: 0.2, green: 0.26, blue: 0.33).opacity(0.4)), in: RoundedRectangle(cornerRadius: 12))
     }
 
-    /// Unlit LEDs, drawn once.
     private var offDots: some View {
         Canvas { ctx, _ in
             for row in 0..<Self.gridRows where !Self.isGapRow(row) {
@@ -100,7 +96,6 @@ struct LEDMatrixView: View {
 
     // MARK: - Page Cycle
 
-    /// The page on screen at `date` and its scroll offset in source columns.
     private func frame(at date: Date, pages: [LEDPage]) -> (LEDPage, Int) {
         let cycle = pages.reduce(0) { $0 + duration(of: $1) }
         var t = date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: cycle)
@@ -126,7 +121,6 @@ struct LEDMatrixView: View {
 
     // MARK: - Messages
 
-    /// Inputs that change what the panel says; rebuild rasters only then.
     private var pageKey: String {
         let stations = journey.journeyStations
         let ref = state.currentStationIndex ?? state.segmentTo
@@ -150,7 +144,6 @@ struct LEDMatrixView: View {
         let type = typeNameJa
         let lineJa = strippedLineName
 
-        // Top line: the next station held statically, flipping JA / EN.
         var top: [LEDPage] = []
         top.append(LEDPage(segments: [
             .init(text: dwelling ? "ただいま " : "つぎは ", color: .green),
@@ -161,14 +154,12 @@ struct LEDMatrixView: View {
             : [.init(text: "Next ", color: .green),
                .init(text: station.nameEn, color: .orange)],
             scrolls: false))
-        // A page wider than the panel can't hold statically; scroll it.
         top = top.map { page in
             page.raster.width > Self.gridColumns
                 ? LEDPage(segments: page.segments, scrolls: true)
                 : page
         }
 
-        // Bottom line: scrolling full-sentence JA / EN pages.
         var bottom: [LEDPage] = []
         bottom.append(LEDPage(segments: [
             .init(text: "この電車は、\(lineJa) ", color: .green),
@@ -348,8 +339,7 @@ private struct LEDRaster {
             for row in 0..<min(height, cg.height) {
                 for col in 0..<min(width, cg.width) {
                     let p = row * bytesPerRow + col * bytesPerPixel
-                    // Byte order varies (RGBA/BGRA); green is index 1 in both,
-                    // blue negligible, so max(first, third) is red.
+                    // Byte order varies (RGBA/BGRA); green is index 1 in both.
                     let r = max(Int(bytes[p]), Int(bytes[p + 2]))
                     let g = Int(bytes[p + 1])
                     guard r + g > 130 else { continue }  // dark pixel: LED off

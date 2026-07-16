@@ -4,8 +4,6 @@ import Backbone
 // MARK: - Service Status Section (運行情報)
 
 /// Where and how to check the operator's live service status for a line.
-/// Shown as a Liquid Glass container pinned in the top safe-area inset of
-/// the line detail view, floating above the scrolling content.
 struct ServiceStatusSection: View {
     let delayInfo: DelayCheckInfo
 

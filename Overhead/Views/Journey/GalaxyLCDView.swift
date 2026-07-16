@@ -144,7 +144,6 @@ struct GalaxyLCDView: View {
                 let p = orbitPoint(CGFloat(t))
 
                 if stop.isCurrent {
-                    // The ringed planet.
                     ctx.fill(
                         Path(ellipseIn: CGRect(x: p.x - 4.5, y: p.y - 4.5, width: 9, height: 9)),
                         with: .color(Self.gold)

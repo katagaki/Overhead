@@ -3,15 +3,11 @@ import Backbone
 
 // MARK: - Station Search Selection
 
-/// Searchable list of every bundled station; calls `onSelect` and dismisses.
-/// Shows the nearest stations on top when location access is granted.
 struct StationSearchSelectionView: View {
     let lines: [TrainLine]
-    /// Whether to show a close button (for sheet presentation). When pushed
-    /// onto an existing navigation stack, the back button suffices.
+    /// For sheet presentation; a pushed nav stack uses the back button instead.
     var showsCloseButton: Bool = false
-    /// Shows the same physical station as a single row with every line's
-    /// badge. Use only when the caller doesn't need a specific boarding line.
+    /// Merges same-named stations into one row with every line's badge.
     var mergesStations: Bool = false
     let onSelect: (StationSearchHit) -> Void
 
@@ -24,7 +20,6 @@ struct StationSearchSelectionView: View {
         searchText.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    /// Every hit for each Japanese station name, across all lines.
     private var hitsByName: [String: [StationSearchHit]] {
         var result: [String: [StationSearchHit]] = [:]
         for line in lines {
@@ -52,7 +47,6 @@ struct StationSearchSelectionView: View {
             if showsCloseButton {
                 ToolbarItem(placement: .topBarTrailing) {
                     if #available(iOS 26.0, *) {
-                        // System close role: standard neutral glyph, ignores tint
                         Button(role: .close) {
                             dismiss()
                         }
@@ -126,7 +120,6 @@ struct StationSearchSelectionView: View {
         }
     }
 
-    /// Groups ranked search results by station name, preserving rank order.
     private func mergeByStationName(
         _ results: [StationSearchHit]
     ) -> [(primary: StationSearchHit, hits: [StationSearchHit])] {

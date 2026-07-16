@@ -3,9 +3,7 @@ import Backbone
 
 // MARK: - Shinkansen Ticker View
 
-/// Simulation of the Tokaido Shinkansen in-deck full-color ticker: a white
-/// bezel with the body's blue stripe over a black window where one long
-/// sentence scrolls smoothly — white text with key information in orange.
+/// Simulation of the Tokaido Shinkansen in-deck full-color ticker.
 struct ShinkansenTickerView: View {
     let journey: Journey
     let state: TrainPositionState

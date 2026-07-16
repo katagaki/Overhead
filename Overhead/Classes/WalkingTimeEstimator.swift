@@ -6,8 +6,6 @@ import Backbone
 
 // MARK: - Walking Time Estimator
 
-/// One-shot estimate of the walking time from the user's current location to
-/// a station, used to exclude departures the user cannot reach in time.
 final class WalkingTimeEstimator: NSObject, ObservableObject, CLLocationManagerDelegate {
 
     private let locationManager = CLLocationManager()
@@ -19,10 +17,6 @@ final class WalkingTimeEstimator: NSObject, ObservableObject, CLLocationManagerD
         locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
     }
 
-    /// Walking seconds to `station` at the given pace, including the fixed
-    /// entrance-to-platform overhead. Nil when walking is disabled or location
-    /// or coordinates are unavailable. Falls back to a straight-line estimate
-    /// when the MapKit ETA request fails (e.g. offline).
     func walkingSeconds(to station: Station, speed: WalkingSpeed) async -> TimeInterval? {
         guard let pace = speed.paceMetersPerMinute,
               let lat = station.latitude, let lon = station.longitude,

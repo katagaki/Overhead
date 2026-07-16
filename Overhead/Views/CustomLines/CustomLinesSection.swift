@@ -4,8 +4,6 @@ import Backbone
 
 // MARK: - Navigation route for the custom-line editor
 
-/// Registered on the root NavigationStack so rows anywhere in the home surface
-/// can push the editor by value.
 enum CustomLineRoute: Hashable {
     case new
     case edit(String)   // line id
@@ -13,11 +11,6 @@ enum CustomLineRoute: Hashable {
 
 // MARK: - マイ路線 Section (home)
 
-/// Home-screen section for user-created lines: each line rides with one tap or
-/// opens for editing; below them, create a new line or import an `.ohl` file.
-///
-/// Strings here are verbatim Japanese, matching the app's LCD-label convention
-/// for railway-specific UI rather than the string catalog.
 struct CustomLinesSection: View {
     @ObservedObject var viewModel: JourneyViewModel
     @ObservedObject private var store = CustomLineStore.shared

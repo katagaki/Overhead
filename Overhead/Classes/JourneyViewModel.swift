@@ -8,7 +8,6 @@ import Backbone
 @MainActor
 final class JourneyViewModel: ObservableObject {
 
-    // Published state
     @Published var availableLines: [TrainLine] = []
     @Published var selectedLine: TrainLine?
     @Published var activeJourney: Journey?
@@ -24,18 +23,13 @@ final class JourneyViewModel: ObservableObject {
     @Published var isLoadingTimetable = false
     @Published var railDirections: [String: (ja: String, en: String)] = [:]
 
-    // Services
     private let locationTracker = LocationTracker()
     private var cancellables = Set<AnyCancellable>()
     private var timetableCache: [String: [TrainService]] = [:]
     private var linesLoaded = false
 
-    // A journey selected while another is active waits here until the user
-    // confirms overwriting the one in progress.
     private var pendingStart: (() -> Void)?
 
-    // A Live Activity held back because the location permission prompt is
-    // still up — it starts the moment the user grants access.
     private var pendingActivityStart: (() -> Void)?
 
     init(previewMode: Bool = false) {
@@ -45,7 +39,6 @@ final class JourneyViewModel: ObservableObject {
         }
     }
 
-    /// Subscribe to LocationTracker's published position state
     private func bindLocationTracker() {
         locationTracker.$positionState
             .receive(on: DispatchQueue.main)
@@ -118,8 +111,6 @@ final class JourneyViewModel: ObservableObject {
     ) async {
         isStartingJourney = true
 
-        // Resolve the line to ride — this may span a through-service (直通)
-        // junction onto a connecting line when the alighting station is past it.
         guard let resolved = StaticTrainData.resolveJourneyLine(
             lineId: line.id,
             fromStationId: boardingStation.id,
@@ -145,7 +136,6 @@ final class JourneyViewModel: ObservableObject {
             return
         }
 
-        // Find the best matching service
         let service = findBestService(
             services: services,
             from: boardingStation.id,
@@ -179,7 +169,6 @@ final class JourneyViewModel: ObservableObject {
             journey: journey, delay: nil
         )
 
-        // Start Live Activity
         if let state = positionState {
             startLiveActivity(
                 journey: journey,
@@ -191,10 +180,6 @@ final class JourneyViewModel: ObservableObject {
         isStartingJourney = false
     }
 
-    /// Starts the Live Activity only once location is authorized — without
-    /// location keeping the app alive in the background, the activity would
-    /// freeze at its last state. While the permission prompt is undecided,
-    /// the start waits for the grant; a denial drops it.
     private func startLiveActivity(
         journey: Journey,
         positionState: TrainPositionState,
@@ -223,10 +208,6 @@ final class JourneyViewModel: ObservableObject {
 
     // MARK: - Departure Search (乗換案内-style)
 
-    /// All boardable itineraries visiting `stationNames` in order (from, any
-    /// midpoints, to — matched by Japanese name across lines), departing at
-    /// or after `departure`. `transferMinutes` is the platform-walk time
-    /// assumed at each transfer, from the user's walking speed.
     func searchTrainCandidates(
         stationNames: [String],
         departure: Date,
@@ -244,8 +225,6 @@ final class JourneyViewModel: ObservableObject {
         jstCal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
         let comps = jstCal.dateComponents([.hour, .minute], from: departure)
         let target = (comps.hour ?? 0) * 3600 + (comps.minute ?? 0) * 60
-        // Just after midnight, trains published as 24:00+ on the previous
-        // service day are the ones to show.
         let targetSec = target < 4 * 3600 ? target + 24 * 3600 : target
 
         // Without midpoints, single-train routes (including 直通) win outright.
@@ -271,8 +250,6 @@ final class JourneyViewModel: ObservableObject {
         )
     }
 
-    /// Whether a route (direct or with transfers) exists between each
-    /// consecutive pair of station names.
     func routeExists(through stationNames: [String], avoidingLineIds: Set<String> = []) -> Bool {
         guard stationNames.count >= 2 else { return false }
         return zip(stationNames, stationNames.dropFirst()).allSatisfy { from, to in
@@ -330,9 +307,6 @@ final class JourneyViewModel: ObservableObject {
 
     // MARK: - Timetable-less Route Search (時刻表無視)
 
-    /// Route alternatives with no times attached: every direct line option,
-    /// plus transfer plans (the best one, then variations that avoid the
-    /// lines already suggested). Durations are hop-time estimates.
     func searchRouteOptions(
         stationNames: [String],
         transferMinutes: Double,
@@ -379,8 +353,6 @@ final class JourneyViewModel: ObservableObject {
         return results.sorted { $0.durationMinutes < $1.durationMinutes }
     }
 
-    /// Synthetic no-times service riding `staticLine` between two of its
-    /// stations, with the covered stations in travel order (loop-aware).
     private func untimedRide(
         on staticLine: StaticTrainLine,
         from: Station,
@@ -596,8 +568,6 @@ final class JourneyViewModel: ObservableObject {
             candidates.append(candidate)
         }
 
-        // Connections can converge on the same onward train — keep the
-        // latest-departing first leg for each distinct arrival.
         var seen = Set<String>()
         var unique: [TrainCandidate] = []
         for candidate in candidates.sorted(by: { $0.departureSeconds > $1.departureSeconds }) {
@@ -643,8 +613,6 @@ final class JourneyViewModel: ObservableObject {
         return Array(result.sorted { $0.1 < $1.1 }.prefix(limit))
     }
 
-    /// Merges connecting legs into one linear line + service so that position
-    /// tracking and the Live Activity treat the itinerary as a single journey.
     private func compositeCandidate(legs: [CandidateLeg]) -> TrainCandidate? {
         guard let first = legs.first, let last = legs.last else { return nil }
 
@@ -668,8 +636,6 @@ final class JourneyViewModel: ObservableObject {
             for (i, station) in slice.enumerated() {
                 let isTransferIn = legIndex > 0 && i == 0
                 if isTransferIn {
-                    // The transfer station is already in `stations` under the
-                    // previous leg's ID — merge this leg's departure into it.
                     guard let prev = entries.popLast() else { return nil }
                     let depTime = entryByStationId[station.id]?.departureTime
                         ?? entryByStationId[station.id]?.arrivalTime
@@ -757,8 +723,6 @@ final class JourneyViewModel: ObservableObject {
             ? TrainPositionEngine.computePosition(journey: journey, delay: nil)
             : locationTracker.positionState
 
-        // The boarded line at station 0, plus each connecting line at its
-        // transfer station.
         let journeyStations = journey.journeyStations
         var legLines: [TrainJourneyAttributes.LegLine] = []
         for (index, leg) in candidate.legs.enumerated() {
@@ -787,9 +751,6 @@ final class JourneyViewModel: ObservableObject {
 
     // MARK: - Custom (DIY) Line Journeys
 
-    /// Rides a user-created line from `fromId` to `toId`. Custom lines never
-    /// enter StaticTrainData, so this bypasses route resolution entirely and
-    /// builds the service directly — they can't transfer to built-in lines.
     func startCustomJourney(line: CustomLine, fromId: String, toId: String) {
         if activeJourney != nil {
             pendingStart = { [weak self] in self?.performStartCustomJourney(line: line, fromId: fromId, toId: toId) }
@@ -873,8 +834,6 @@ final class JourneyViewModel: ObservableObject {
 
     // MARK: - Force Refresh (from Live Activity button)
 
-    /// Triggered by the Live Activity refresh deep link.
-    /// Recomputes the position and re-pushes to Live Activity.
     func forceRefresh() {
         guard activeJourney != nil else { return }
         locationTracker.forceRefresh()
@@ -887,7 +846,6 @@ final class JourneyViewModel: ObservableObject {
         isLoadingTimetable = true
         stationTimetable = []
 
-        // Generate from bundled data whenever the station is covered
         if let staticLine = StaticTrainData.line(containingStationId: stationId) {
             stationTimetable = StaticTimetableGenerator.stationTimetables(
                 for: staticLine,
@@ -908,8 +866,6 @@ final class JourneyViewModel: ObservableObject {
 
     // MARK: - Delay Check Sources
 
-    /// Where and how to check for delays on a line (from bundled data).
-    /// Composite through-journey line IDs ("A+B") fall back to the origin line.
     func delayCheckInfo(for lineId: String) -> DelayCheckInfo? {
         if let info = StaticTrainData.delayCheckInfo(forLineId: lineId) {
             return info
@@ -918,7 +874,6 @@ final class JourneyViewModel: ObservableObject {
         return StaticTrainData.delayCheckInfo(forLineId: String(originId))
     }
 
-    /// Returns a localized direction name for a rail direction ID
     func directionName(for directionId: String) -> String {
         guard let names = railDirections[directionId] else {
             return directionId

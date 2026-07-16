@@ -120,12 +120,10 @@ struct ExpandedIslandBottomView: View {
         return attributes.stationCodes[idx]
     }
 
-    /// The next station's own line color (not the boarding line's).
     private var nextStationColor: Color {
         Color(hex: attributes.stationColorHex(at: state.nextStationIndex))
     }
 
-    /// Fixed so the station name stays optically centered between the columns.
     private static let sideColumnWidth: CGFloat = 92
 
     var body: some View {
@@ -228,7 +226,6 @@ struct ExpandedIslandBottomView: View {
 
 // MARK: - Island Ride-Ahead Badge
 
-/// The next line to transfer to, or the station to get off at on a straight ride.
 struct IslandRideAheadBadge: View {
     let attributes: TrainJourneyAttributes
     let state: TrainJourneyAttributes.ContentState
@@ -296,26 +293,21 @@ struct LockScreenLiveActivityView: View {
         return attributes.stationCodes[idx]
     }
 
-    /// The next station's own line color (untinted by the boarding line).
     private var nextStationColor: Color {
         Color(hex: attributes.stationColorHex(at: state.nextStationIndex))
     }
 
-    /// The leg boundaries (transfer/change stations) along the journey.
     private var transferIndices: [Int] {
         attributes.legLines.dropFirst().map(\.stationIndex)
     }
 
-    /// The transfer at the immediate next stop, if it is a change point.
     private var transferAtNextStop: TrainJourneyAttributes.LegLine? {
         guard let next = state.nextStationIndex else { return nil }
         return attributes.legLines.first { $0.stationIndex == next && $0.stationIndex > 0 }
     }
 
-    /// Fixed so the station name stays optically centered between the columns.
     private static let topSideColumnWidth: CGFloat = 96
 
-    /// Fixed ink for the opaque white band (can't follow the color scheme).
     private static let darkInk = Color.black.opacity(0.9)
     private static let darkInkSecondary = Color.black.opacity(0.65)
 
@@ -392,7 +384,6 @@ struct LockScreenLiveActivityView: View {
             )
 
             HStack(alignment: .firstTextBaseline, spacing: 5) {
-                // Transfer cue at a change point, else the pre-departure countdown.
                 if let transfer = transferAtNextStop {
                     transferCue(transfer)
                 } else if state.status == .notStarted {
@@ -494,16 +485,11 @@ struct LCDLineView: View {
     let currentStationIndex: Int?
     let lineColor: Color
     var stationStops: [Bool] = []
-    // When set, the progress fill is timer-driven and advances while suspended.
     var journeyInterval: ClosedRange<Date>? = nil
-    // Valid mid-segment, unlike the dwell-only currentStationIndex.
     var nextStationIndexOverride: Int? = nil
-    // Flips the ink for the lock screen's white band.
     var onLightBackground: Bool = false
-    // Leg-boundary stations, labeled above the line; others render as dots.
     var transferIndices: [Int] = []
 
-    // Solid greys so dots don't double-darken where they overlap the track.
     private var trackColor: Color {
         onLightBackground ? Color(white: 0.65) : Color(white: 0.3)
     }
@@ -519,7 +505,6 @@ struct LCDLineView: View {
         return Color(white: isPast ? 0.35 : 0.2)
     }
 
-    /// Next station index: explicit when provided, else derived from current
     private var nextStationIndex: Int? {
         if let next = nextStationIndexOverride, next < stationCount { return next }
         guard let current = currentStationIndex, current + 1 < stationCount else { return nil }
@@ -531,7 +516,6 @@ struct LCDLineView: View {
         return stationStops[index]
     }
 
-    /// Tall enough for labels above the track and the next-station label below.
     private static let height: CGFloat = 46
 
     var body: some View {
@@ -543,7 +527,7 @@ struct LCDLineView: View {
             let padding: CGFloat = emphasisRadius + 3
             let lineWidth = w - padding * 2
             let trackHeight: CGFloat = 2
-            let centerY: CGFloat = 20 // room for labels above AND below
+            let centerY: CGFloat = 20
 
             ZStack(alignment: .topLeading) {
                 RoundedRectangle(cornerRadius: 1)
@@ -551,7 +535,6 @@ struct LCDLineView: View {
                     .frame(width: lineWidth, height: trackHeight)
                     .offset(x: padding, y: centerY - trackHeight / 2)
 
-                // Timer-driven fill; clipped so the linear style's own 4pt track hides.
                 if let interval = journeyInterval {
                     ProgressView(timerInterval: interval, countsDown: false) {
                     } currentValueLabel: {
@@ -568,7 +551,6 @@ struct LCDLineView: View {
                         .offset(x: padding, y: centerY - trackHeight / 2)
                 }
 
-                // Draws only start, transfers, end, and the next stop; current omitted.
                 ForEach(0..<stationCount, id: \.self) { i in
                     let frac = stationCount > 1 ? Double(i) / Double(stationCount - 1) : 0
                     let x = padding + lineWidth * frac
@@ -580,7 +562,6 @@ struct LCDLineView: View {
                     let r = emphasisRadius
 
                     if !isKey {
-                        // Ordinary stop: a dot; skipped stops are smaller and dimmer.
                         let stops = stopsAt(i)
                         let dotR = stops ? baseRadius : skippedRadius
                         Circle()
@@ -611,7 +592,6 @@ struct LCDLineView: View {
                         }
                         .position(x: x, y: centerY)
 
-                        // Terminal/transfer labels above the track (unless it's the next stop).
                         if (isTerminal || isTransfer) && !isNext {
                             Text(truncatedName(stationNames[i]))
                                 .font(.system(size: 8, weight: isTransfer ? .bold : .regular))
@@ -621,7 +601,6 @@ struct LCDLineView: View {
                                 .position(x: x, y: centerY - r - 9)
                         }
 
-                        // Next station labeled below the track
                         if isNext {
                             Text(truncatedName(stationNames[i]))
                                 .font(.system(size: 9, weight: .bold))
@@ -653,7 +632,6 @@ struct ExpandedIslandLineView: View {
 
     private var lineColor: Color { Color(hex: attributes.lineColorHex) }
 
-    /// Next station index: from the content state when valid, else derived
     private var nextStationIndex: Int? {
         if let next = state.nextStationIndex,
            next < attributes.stationCount { return next }
@@ -662,7 +640,6 @@ struct ExpandedIslandLineView: View {
         return current + 1
     }
 
-    /// Leg boundaries (transfer/change stations) along the journey.
     private var transferIndices: [Int] {
         attributes.legLines.dropFirst().map(\.stationIndex)
     }
@@ -681,7 +658,6 @@ struct ExpandedIslandLineView: View {
                     .frame(width: w - pad * 2, height: trackHeight)
                     .offset(x: pad)
 
-                // Clipped so the linear style's own 4pt track doesn't show.
                 ProgressView(timerInterval: state.journeyInterval, countsDown: false) {
                 } currentValueLabel: {
                 }
@@ -691,7 +667,6 @@ struct ExpandedIslandLineView: View {
                 .clipped()
                 .position(x: pad + (w - pad * 2) / 2, y: 6)
 
-                // Marks only start, transfers, end, and the next stop; current omitted.
                 ForEach(0..<count, id: \.self) { i in
                     let frac = count > 1 ? Double(i) / Double(count - 1) : 0
                     let x = pad + (w - pad * 2) * frac

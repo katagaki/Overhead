@@ -13,9 +13,6 @@ enum TrackingMode: String, Codable {
 }
 
 // MARK: - Location-Based Train Tracker
-/// Dual-mode tracker: GPS when above ground and accurate, timetable+delay
-/// when underground or GPS is unreliable. Designed for Tokyo's mix of
-/// above-ground JR lines and underground Metro/Toei lines.
 
 final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelegate {
 
@@ -45,10 +42,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
     // Meters moved before recalculating
     private let distanceFilter: CLLocationDistance = 20
 
-    // Coarse profile for timetable mode: the session isn't a position source
-    // there — it only keeps the app running in the background so the
-    // timetable tick can keep updating the Live Activity. Cell-tower-level
-    // accuracy costs next to nothing in battery.
+    // Timetable mode: coarse keep-alive only, not a position source.
     private let keepAliveAccuracy = kCLLocationAccuracyThreeKilometers
     private let keepAliveDistanceFilter: CLLocationDistance = 1000
 
@@ -60,10 +54,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
     // Snap distance thresholds (meters from rail line)
     private let closeSnapDistance: Double = 150      // Clearly on the line
     private let farSnapDistance: Double = 500         // Probably underground or drifting
-    // An ACCURATE fix beyond this distance from the line means the user has
-    // genuinely strayed off the journey's route (e.g. standing in 東京 while
-    // the journey runs 新宿→秋葉原) — not GPS noise. Snapping would produce a
-    // confidently wrong position, so the timetable takes over instead.
+    // Accurate fix far from the line means off-route, not noise — timetable takes over.
     private let offRouteDistance: Double = 500
 
     // How long since last good GPS fix before falling back (seconds)
@@ -115,7 +106,6 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
 
         isTracking = true
 
-        // Compute initial position immediately from timetable
         tickTimetable()
     }
 
@@ -144,10 +134,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         }
     }
 
-    /// Matches the location session to the journey mode preference — called
-    /// on every tick so mid-journey changes take effect. The session never
-    /// stops in timetable mode: it drops to the coarse keep-alive profile,
-    /// which keeps the app (and thus the tick) alive in the background.
+    /// Syncs the location session to the journey mode; never stops in timetable mode, only drops to the keep-alive profile.
     private func syncGPSToJourneyMode() {
         guard gpsStarted else {
             requestGPSIfAuthorized()
@@ -227,8 +214,6 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
 
     // MARK: - Schedule-less Journeys (時刻表無視)
 
-    /// Tick for a journey with no schedule: GPS drives when fresh, otherwise
-    /// the manually flipped station is the position.
     private func tickScheduleless(_ journey: Journey) {
         switch journeyMode {
         case .timetable:
@@ -244,7 +229,6 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         updateLiveActivity()
     }
 
-    /// Moves the manual position by `delta` stations and republishes.
     func stepManualStation(_ delta: Int) {
         guard let journey else { return }
         let count = journey.journeyStations.count
@@ -384,9 +368,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
             return
         }
 
-        // Off-route check: the GPS fix is trustworthy AND clearly far from
-        // the line — the user isn't on this train. Don't blend the snapped
-        // position (it would be confidently wrong); fall back to timetable.
+        // Off-route: accurate fix far from the line — fall back to timetable instead of blending.
         if location.horizontalAccuracy <= acceptableAccuracy,
            snapResult.distance > offRouteDistance {
             trackingMode = .timetable
@@ -766,8 +748,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         locationError = nil
     }
 
-    /// Precise fixes when GPS drives the position; coarse fixes in timetable
-    /// mode, where the session is only a background keep-alive.
+    /// Precise fixes when GPS drives; coarse fixes in timetable (keep-alive) mode.
     private func applyAccuracyProfile() {
         if journeyMode == .timetable {
             locationManager.desiredAccuracy = keepAliveAccuracy

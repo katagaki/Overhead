@@ -3,28 +3,18 @@ import Backbone
 
 // MARK: - Millennium LCD View
 
-/// Simulation of a monorail-style wide in-car LCD: navy panel with the train
-/// type and terminus at the left, the next station's number badge and name in
-/// the middle, a weather widget at the right, and a white route strip below —
-/// vertical station names over a blue band of numbered circles, with the next
-/// station's column highlighted in yellow.
 struct MillenniumLCDView: View {
     let journey: Journey
     let state: TrainPositionState
     let lineColor: Color
     let orientation: TrainLCDOrientation
 
-    // Fixed design canvas, scaled to the available width so every metric
-    // (fonts, badges, strokes) stays proportional on any device.
     private static let designWidth: CGFloat = 360
     private static let designHeight: CGFloat = 116
     private static let headerHeight: CGFloat = 34
     private static let stripInset: CGFloat = 8
     private static let nodeAreaHeight: CGFloat = 20
-    // Strip height (designHeight − header − bottom inset) minus the node area.
     private static let namesAreaHeight: CGFloat = 54
-    // Thin line's center in the node area — high enough that the badges
-    // riding it clear the strip's bottom edge.
     private static let lineY: CGFloat = 11.5
     private static let badgeDiameter: CGFloat = 12
     private static let maxColumns = 9
@@ -95,7 +85,6 @@ struct MillenniumLCDView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    /// Light blue slanted plate: train type over the terminus, both in navy.
     private var typePlate: some View {
         VStack(spacing: 0) {
             Text(typeName)
@@ -110,10 +99,7 @@ struct MillenniumLCDView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
         }
-        // Inset past the skew depth so the text stays within the
-        // parallelogram's straight region.
         .padding(.horizontal, 30)
-        // Edge to edge vertically: panel top down to the white strip's top.
         .frame(maxHeight: .infinity)
         .frame(minWidth: 104)
         .background(SlantedPlateShape().fill(Self.plateBlue))
@@ -126,17 +112,13 @@ struct MillenniumLCDView: View {
     // MARK: - Route Strip (white)
 
     private var strip: some View {
-        // Built left to right; facing left mirrors the columns and marker.
         let (builtCols, builtSlot) = columns()
-        // While dwelling, the arrow sits mid-column over the current station —
-        // hide that badge so the arrow takes its place.
         let dwelling = state.currentStationIndex != nil
         let mirrored = orientation == .left
         let cols = mirrored ? Array(builtCols.reversed()) : builtCols
         let markerSlot = mirrored ? CGFloat(builtCols.count) - builtSlot : builtSlot
         let colWidth = (Self.designWidth - Self.stripInset * 2) / CGFloat(max(cols.count, 1))
         let markerX = markerSlot * colWidth
-        // 70% of the station badge, in the Tokyo Metro notched-arrow shape.
         let arrowWidth = Self.badgeDiameter * 0.7
 
         return VStack(spacing: 0) {
@@ -157,10 +139,8 @@ struct MillenniumLCDView: View {
                             .frame(width: colWidth)
                     }
                 }
-                // Overlap the names row's highlight so no seam shows.
                 .padding(.top, -1)
 
-                // Thin line: gray behind the train, blue ahead.
                 HStack(spacing: 0) {
                     Rectangle()
                         .fill(mirrored ? Self.bandBlue : Self.passedGray)
@@ -180,14 +160,11 @@ struct MillenniumLCDView: View {
                                 stationBadge(for: col.station, dimension: Self.badgeDiameter, dimmed: col.isPassed)
                             }
                         }
-                        // The clear slot must match the badge height or it
-                        // inflates the row and sinks every badge off the line.
                         .frame(width: colWidth, height: Self.badgeDiameter)
                     }
                 }
                 .offset(y: Self.lineY - Self.badgeDiameter / 2)
 
-                // Vertically centered on the line, straddling it.
                 MillenniumArrowShape(pointsLeading: mirrored)
                     .fill(Self.arrowRed)
                     .frame(width: arrowWidth, height: arrowWidth * 0.9)
@@ -201,8 +178,6 @@ struct MillenniumLCDView: View {
         .background(alignment: .leading) {
             ZStack(alignment: .leading) {
                 Color.white
-                // Faint watermark parallelogram, same slant as the plate,
-                // with the same flanking stripes.
                 SlantedPlateShape(skew: 56)
                     .fill(Self.plateBlue.opacity(0.22))
                     .overlay(
@@ -216,9 +191,6 @@ struct MillenniumLCDView: View {
         .clipShape(RoundedRectangle(cornerRadius: 4))
     }
 
-    /// Characters justified top-to-bottom in a fixed height so the first and
-    /// last characters align across columns; names too long to fit are
-    /// condensed vertically instead (same treatment as the Metro LCD).
     private func verticalName(_ name: String, passed: Bool) -> some View {
         VerticalStationName(name: name, fontSize: 9, charBox: 9.5,
                             availableHeight: Self.namesAreaHeight - 8,
@@ -228,7 +200,6 @@ struct MillenniumLCDView: View {
             .frame(height: Self.namesAreaHeight, alignment: .top)
     }
 
-    /// The station's real numbering badge; a plain dot when it has no code.
     @ViewBuilder
     private func stationBadge(for station: Station, dimension: CGFloat, dimmed: Bool = false) -> some View {
         if station.stationCode.isEmpty {
@@ -266,11 +237,6 @@ struct MillenniumLCDView: View {
         let isHighlighted: Bool
     }
 
-    /// Columns left to right in travel direction: up to 5 already-passed
-    /// stations trail behind, and the headline (next or dwelling) station's
-    /// column is highlighted. `markerSlot` positions the red arrow in column
-    /// widths from the strip's leading edge — on the boundary while moving,
-    /// mid-column while dwelling.
     private func columns() -> ([MillenniumColumn], CGFloat) {
         let stations = journey.journeyStations
         guard !stations.isEmpty else { return ([], 0) }
@@ -283,7 +249,6 @@ struct MillenniumLCDView: View {
         let highlightIndex = dwellIndex
             ?? max(0, min(state.segmentTo, stations.count - 1))
 
-        // Express-passed stations (no timetable entry) never get a column.
         let stops = stations.indices.filter { entries[stations[$0].id] != nil }
         let passed = stops.filter { $0 < ref }.suffix(5)
         let remaining = stops.filter { $0 >= ref }
@@ -320,8 +285,6 @@ struct MillenniumLCDView: View {
         journey.service.trainType == .local ? "各駅停車" : journey.service.trainType.displayNameJa
     }
 
-    /// No car data exists — derive a stable 1...10 from the journey ID so the
-    /// display stays constant for the ride.
     private var carNumber: Int {
         Int(journey.id.uuid.0 % 10) + 1
     }
@@ -329,8 +292,6 @@ struct MillenniumLCDView: View {
 
 // MARK: - Arrow Shape
 
-/// Right-pointing arrow with a chevron-notched tail (the red position marker
-/// above the line); points left when `pointsLeading`.
 private struct MillenniumArrowShape: Shape {
     var pointsLeading = false
 
@@ -350,7 +311,6 @@ private struct MillenniumArrowShape: Shape {
 
 // MARK: - Slanted Plate Shape
 
-/// Thin decorative lines flanking the plate, parallel to its slanted edges.
 private struct PlateEdgeStripes: Shape {
     var skew: CGFloat = 26
     var gap: CGFloat = 4
@@ -365,7 +325,6 @@ private struct PlateEdgeStripes: Shape {
     }
 }
 
-/// Parallelogram leaning left (the type plate and strip watermark).
 private struct SlantedPlateShape: Shape {
     var skew: CGFloat = 26
 

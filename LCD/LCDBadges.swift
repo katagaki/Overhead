@@ -4,10 +4,8 @@ import UIKit
 #endif
 
 extension Color {
-    /// True when green clearly dominates red — distinguishes the Yokohama
-    /// Municipal Green Line (#4BA672) from Tokyo Metro Ginza (orange), which
-    /// share the "G" prefix. Mirrors the app target's Color.isGreenDominant
-    /// (the LCD target is self-contained and can't import it).
+    /// True when green dominates red — distinguishes Yokohama Green from Ginza, which share the "G" prefix.
+    /// Mirrors the app target's Color.isGreenDominant (LCD target is self-contained, can't import it).
     var isGreenDominant: Bool {
         #if canImport(UIKit)
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
@@ -21,8 +19,7 @@ extension Color {
 
 // MARK: - LCD Line Symbol Badge
 
-/// Compact line symbol badge for Live Activity (self-contained, no dependency on main app target).
-/// Mirrors the operator styles of the app's LineSymbolBadge at 24pt.
+/// Compact line symbol badge for Live Activity, self-contained; mirrors LineSymbolBadge at 24pt.
 struct LCDLineSymbolBadge: View {
     let symbol: String
     let color: Color
@@ -48,10 +45,8 @@ struct LCDLineSymbolBadge: View {
         case "TT":
             tamaBadge
         case "B":
-            // Yokohama Municipal: filled line-color circle, white letter
             filledBadge(in: AnyShape(Circle()))
         case "G" where color.isGreenDominant:
-            // Green Line shares "G" with Ginza; its green color routes here
             filledBadge(in: AnyShape(Circle()))
         case "KS":
             keiseiBadge
@@ -63,27 +58,22 @@ struct LCDLineSymbolBadge: View {
         case "MM":
             minatomiraiBadge
         case _ where Self.keioSymbols.contains(symbol):
-            // Keio KO logo: white circle, thick ring, line-color letters
             circleBadge(ringWidth: 3.0, textColor: color, hind: true)
         case _ where Self.tokyuStyleSymbols.contains(symbol):
             filledBadge(in: AnyShape(RoundedRectangle(cornerRadius: 6)))
         case _ where Self.seibuSymbols.contains(symbol):
             seibuTrainBadge
         case _ where Self.odakyuSymbols.contains(symbol):
-            // Odakyu: very round squircle, line-color ring and letters
             squircleBadge(cornerRadius: 10, borderWidth: 2.6, textColor: color)
         case _ where Self.tobuSymbols.contains(symbol):
             squareBadge(cornerRadius: 5.5, borderWidth: 2.6)
         case _ where symbol.hasPrefix("J"):
             squareBadge(cornerRadius: 3, borderWidth: 2.6)
         default:
-            // Metro/Toei symbols use Futura like the real signage
             circleBadge(ringWidth: 4.7, textColor: .black, hind: false)
         }
     }
 
-    /// Rinkai: white letter on a filled navy circle, thin white separator
-    /// ring, pale blue outer ring (mirrors LineSymbolBadge.rinkaiBadge at 24pt)
     private var rinkaiBadge: some View {
         Text(symbol)
             .font(.custom("Helvetica-Bold", fixedSize: 10))
@@ -108,8 +98,7 @@ struct LCDLineSymbolBadge: View {
     private func circleBadge(ringWidth: CGFloat, textColor: Color, hind: Bool,
                              ringColor: Color? = nil) -> some View {
         symbolText(color: textColor, inset: ringWidth + 1, hind: hind)
-            // Futura-Bold's "M" sits low in its line box; lift it so it stays
-            // optically centered inside the thick ring
+            // Futura-Bold's "M" sits low; lift it to stay optically centered
             .offset(y: !hind && symbol == "M" ? -0.6 : 0)
             .frame(width: 24, height: 24)
             .background(Color.white, in: Circle())
@@ -130,7 +119,6 @@ struct LCDLineSymbolBadge: View {
             )
     }
 
-    /// Tama Monorail: JR-style square rendered in green (route line is orange)
     private var tamaBadge: some View {
         symbolText(color: Self.tamaGreen, inset: 3.6, hind: true)
             .frame(width: 24, height: 24)
@@ -152,8 +140,6 @@ struct LCDLineSymbolBadge: View {
             )
     }
 
-    /// Seibu: the train-front logo — color body, white face with the letters,
-    /// two lights, splayed legs (mirrors LineSymbolBadge.seibuBadge at 24pt)
     private var seibuTrainBadge: some View {
         ZStack {
             LCDSeibuTrainLegs()
@@ -192,7 +178,6 @@ struct LCDLineSymbolBadge: View {
         .frame(width: 24, height: 24)
     }
 
-    /// Nippori-Toneri Liner: pink outer + green inner border
     private var nipporiToneriBadge: some View {
         symbolText(color: .black, inset: 6, hind: true)
             .frame(width: 24, height: 24)
@@ -208,8 +193,6 @@ struct LCDLineSymbolBadge: View {
             )
     }
 
-    /// Keisei: white circle, color ring, line-color bold condensed letters
-    /// (mirrors LineSymbolBadge.keiseiBadge at 24pt)
     private var keiseiBadge: some View {
         Text(symbol)
             .font(.system(size: symbol.count > 1 ? 11 : 13.5, weight: .bold).width(.condensed))
@@ -226,14 +209,12 @@ struct LCDLineSymbolBadge: View {
             )
     }
 
-    /// Tokyu: line-color fill, white letters
     private func filledBadge(in shape: AnyShape) -> some View {
         symbolText(color: .white, inset: 3, hind: true)
             .frame(width: 24, height: 24)
             .background(color, in: shape)
     }
 
-    /// Minatomirai: line-color fill, white Helvetica letters
     private var minatomiraiBadge: some View {
         Text(symbol)
             .font(.custom("Helvetica-Bold", fixedSize: 10.5))
@@ -245,8 +226,6 @@ struct LCDLineSymbolBadge: View {
             .background(color, in: RoundedRectangle(cornerRadius: 4))
     }
 
-    /// Sotetsu: navy fill, flat wide white letters over an orange rule
-    /// (signage face approximated by expanded-width SF)
     private var sotetsuBadge: some View {
         VStack(spacing: 1.5) {
             Text(symbol)
@@ -264,7 +243,6 @@ struct LCDLineSymbolBadge: View {
     }
 
     private func symbolText(color: Color, inset: CGFloat, hind: Bool) -> some View {
-        // LineSymbolBadge's fill ratio scaled to this badge's 24pt frame.
         let size: CGFloat = symbol.count > 1 ? 13.875 : 15
         return Text(symbol)
             .font(hind

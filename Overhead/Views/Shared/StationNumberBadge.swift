@@ -2,35 +2,13 @@ import SwiftUI
 import Backbone
 
 // MARK: - Station Number Badge
-/// Renders station number badges matching the real signage of each operator:
-/// - JR East / Tobu: rounded square with a line-color frame, white inner,
-///   prefix stacked over number in black (e.g. JY01, TS01)
-/// - Tokyo Metro / Toei: circle with a line-color ring, white inner,
-///   prefix stacked over number in black Futura (e.g. G01, A01)
-/// - Keisei / Hokuso: circle with a thinner line-color ring, white inner,
-///   code in the LINE COLOR in regular Helvetica (e.g. KS55, HS05)
-/// - Odakyu: very-round squircle with a line-color ring, white core, and
-///   the code in the LINE COLOR split by a horizontal rule (e.g. OH14)
-/// - Tokyu: FILLED rounded square in the line color with white stacked code
-///   (e.g. TY01)
-/// - Minatomirai: two-tone filled square — dark navy top band with white MM,
-///   line-color bottom with white number, Helvetica (e.g. MM04)
-/// - Keikyu: white circle, thin light-blue ring, BLUE stacked code (KK01)
-/// - Keio: split circle — line-color top with white prefix, white bottom with
-///   black number, line-color ring (KO01)
-/// - Seibu: split rounded square — line-color top band with white prefix,
-///   white bottom with dark navy number, line-color border (SI01)
-/// - Nippori-Toneri Liner: rounded square with pink outer + green inner
-///   border, black stacked code — matches the line badge (NT01)
-/// - Sotetsu: filled navy rounded square, white code split by an orange rule
-/// (Shapes verified against station signage photos, 2026-07)
 
+/// Renders station number badges matching each operator's real signage.
 struct StationNumberBadge: View {
     let code: String
     let color: Color
     var opacity: Double = 1.0
     var size: BadgeSize = .regular
-    /// Japanese station name (currently unused; kept for future variants).
     var stationName: String? = nil
     /// Forces a shape for user-created lines, whose codes match no operator.
     var styleOverride: BadgeStyle? = nil
@@ -67,8 +45,7 @@ struct StationNumberBadge: View {
     private static let sotetsuOrange = Color(hex: "#EE7B01")
     private static let minatomiraiNavy = Color(hex: "#1F2A54")
     private static let rinkaiLightBlue = Color(hex: "#96C7C1")
-    // Tama Monorail numbering is green even though its route line is orange.
-    private static let tamaGreen = Color(hex: "#3C605F")
+    private static let tamaGreen = Color(hex: "#3C605F")  // green even though the route line is orange
 
     private var parsed: (prefix: String, number: String) {
         let letters = code.prefix(while: \.isLetter)
@@ -97,8 +74,7 @@ struct StationNumberBadge: View {
         }
     }
 
-    /// True when the badge for `code` renders as a circle. Mirrors `body`'s
-    /// dispatch; `color` disambiguates the shared "G" prefix.
+    /// Mirrors `body`'s dispatch; `color` disambiguates the shared "G" prefix.
     static func rendersAsCircle(code: String, color: Color, styleOverride: BadgeStyle? = nil) -> Bool {
         if let styleOverride { return styleOverride == .ring }
         let prefix = String(code.prefix(while: \.isLetter))
@@ -127,7 +103,6 @@ struct StationNumberBadge: View {
 
     @ViewBuilder
     private func operatorBadge(prefix: String, number: String) -> some View {
-        // JR station codes start with "J" (JC, JY, JK, JB, etc.)
         if prefix.hasPrefix("J") || Self.squarePrefixes.contains(prefix) {
             squareBadge(prefix: prefix, number: number)
         } else if Self.seibuPrefixes.contains(prefix) {
@@ -153,8 +128,7 @@ struct StationNumberBadge: View {
         } else if prefix == "TT" {
             tamaBadge(prefix: prefix, number: number)
         } else if prefix == "B" || (prefix == "G" && color.isGreenDominant) {
-            // "G" is shared with Tokyo Metro Ginza (orange); only the Yokohama
-            // Municipal Green Line's green color routes here.
+            // "G" is shared with Tokyo Metro Ginza (orange); color disambiguates.
             yokohamaBadge(prefix: prefix, number: number)
         } else {
             circleBadge(prefix: prefix, number: number)
@@ -223,15 +197,10 @@ struct StationNumberBadge: View {
     @ViewBuilder
     private func squareBadge(prefix: String, number: String, textColor: Color = .black) -> some View {
         let d = badgeDimension
-        // Sized so the letters and digits fill the white core like the real
-        // JR East signage (Hind's cap height is only 0.678em, hence the
-        // generous point sizes relative to the badge).
+        // Generous sizes: Hind's cap height is only 0.678em.
         let prefixSize = d * 0.58
         let numberSize = d * 0.79
 
-        // Hind's line box is ~1.6x the point size (Devanagari metrics), so cap
-        // each line to a tight frame and shift glyphs down to optical center
-        // (caps sit 0.085em above the box center).
         VStack(spacing: 1) {
             Text(prefix)
                 .font(.custom("Hind-Bold", size: prefixSize))
@@ -410,8 +379,7 @@ struct StationNumberBadge: View {
     private func sotetsuBadge(prefix: String, number: String) -> some View {
         let d = badgeDimension
 
-        // Sotetsu signage uses a flat, wide face; expanded-width SF is the
-        // closest system substitute.
+        // Expanded-width SF is the closest system substitute for the flat, wide face.
         VStack(spacing: d * 0.07) {
             Text(prefix)
                 .font(.system(size: d * 0.50, weight: .semibold))
@@ -435,8 +403,6 @@ struct StationNumberBadge: View {
 
     // MARK: - Metro / Toei / Keisei: Circle Ring
 
-    /// Matches the official Tokyo Metro station numbering: colored ring
-    /// (~13% of diameter), white core, Futura letter over number in black.
     @ViewBuilder
     private func circleBadge(prefix: String, number: String) -> some View {
         let d = badgeDimension
@@ -466,9 +432,6 @@ struct StationNumberBadge: View {
 
     // MARK: - Rinkai: Filled Navy Circle, Light Blue Outer Ring
 
-    /// Matches TWR Rinkai signage (user photo 2026-07-10): white stacked code
-    /// on a filled navy circle, a thin white separator ring, and a pale blue
-    /// outer ring (~11% of the diameter).
     @ViewBuilder
     private func rinkaiBadge(prefix: String, number: String) -> some View {
         let d = badgeDimension
@@ -503,8 +466,7 @@ struct StationNumberBadge: View {
 
     // MARK: - Nippori-Toneri Liner: Pink Outer + Green Inner Border
 
-    /// Mirrors the line badge's double border (proportions match
-    /// LineSymbolBadge.nipporiToneriBadge at 32pt).
+    /// Mirrors LineSymbolBadge.nipporiToneriBadge's double border proportions at 32pt.
     @ViewBuilder
     private func nipporiToneriBadge(prefix: String, number: String) -> some View {
         let d = badgeDimension
@@ -545,8 +507,6 @@ struct StationNumberBadge: View {
         let d = badgeDimension
 
         VStack(spacing: 0) {
-            // The KS/HS letters are bold condensed, matching the line symbol
-            // badge (user 2026-07-10); the number stays regular Helvetica.
             Text(prefix)
                 .font(.system(size: d * 0.30, weight: .bold).width(.condensed))
                 .frame(height: d * 0.34)
@@ -633,22 +593,22 @@ struct StationNumberBadge: View {
 
 #Preview(traits: .sizeThatFitsLayout) {
     let badges: [(code: String, color: Color, station: String)] = [
-        ("Z02", .indigo, "表参道"),      // Tokyo Metro circle
-        ("JL19", .gray, "綾瀬"),         // JR square
-        ("TS01", .blue, "浅草"),         // Tobu square
-        ("SI01", .orange, "池袋"),       // Seibu split square
-        ("MG01", .blue, "目黒"),         // Tokyu filled square
-        ("MM04", .blue, "みなとみらい"), // Minatomirai two-tone
-        ("KK01", .red, "泉岳寺"),        // Keikyu blue-ring circle
-        ("KO01", .pink, "新宿"),         // Keio split circle
-        ("SO01", .blue, "横浜"),         // Sotetsu orange rule
-        ("OH05", .teal, "代々木上原"),   // Odakyu squircle with rule
-        ("KS55", .blue, "千葉中央"),     // Keisei Helvetica circle
-        ("NT01", .pink, "日暮里"),       // Nippori-Toneri double border
-        ("R04", Color(hex: "#222D65"), "東京テレポート"), // Rinkai navy circle
-        ("TT12", Color(hex: "#F08300"), "立川北"),    // Tama Monorail green square
-        ("B25", Color(hex: "#3577BC"), "新横浜"),     // Yokohama Blue filled circle
-        ("G05", Color(hex: "#4BA672"), "センター北"), // Yokohama Green filled circle
+        ("Z02", .indigo, "表参道"),
+        ("JL19", .gray, "綾瀬"),
+        ("TS01", .blue, "浅草"),
+        ("SI01", .orange, "池袋"),
+        ("MG01", .blue, "目黒"),
+        ("MM04", .blue, "みなとみらい"),
+        ("KK01", .red, "泉岳寺"),
+        ("KO01", .pink, "新宿"),
+        ("SO01", .blue, "横浜"),
+        ("OH05", .teal, "代々木上原"),
+        ("KS55", .blue, "千葉中央"),
+        ("NT01", .pink, "日暮里"),
+        ("R04", Color(hex: "#222D65"), "東京テレポート"),
+        ("TT12", Color(hex: "#F08300"), "立川北"),
+        ("B25", Color(hex: "#3577BC"), "新横浜"),
+        ("G05", Color(hex: "#4BA672"), "センター北"),
     ]
 
     LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 16) {

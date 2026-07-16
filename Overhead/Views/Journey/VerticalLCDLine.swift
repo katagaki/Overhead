@@ -26,9 +26,7 @@ struct VerticalLCDLine: View {
     private let terminalRadius: CGFloat = 12
     private let currentRadius: CGFloat = 12
 
-    /// Color of the line each station actually belongs to. Composite journeys
-    /// keep per-leg station ids, so stations after a 乗り換え resolve to the
-    /// connecting line's color instead of the whole journey's (first-leg) color.
+    /// Color of the line each station actually belongs to (composite journeys resolve per-leg after a 乗り換え).
     private func stationColor(_ station: Station) -> Color {
         StaticTrainData.line(containingStationId: station.id)?.trainLine.color ?? lineColor
     }
@@ -54,8 +52,7 @@ struct VerticalLCDLine: View {
                     : nil
                 let segFrac = segmentFillFraction(stationIndex: index, totalStations: stations.count)
                 let rowColor = stationColor(station)
-                // The track below a row runs toward the NEXT station, so it
-                // takes that station's line color (matters right after 乗換).
+                // Track below a row runs toward the NEXT station, so it takes that station's color.
                 let segColor = index < stations.count - 1 ? stationColor(stations[index + 1]) : rowColor
 
                 HStack(alignment: .top, spacing: 0) {
@@ -85,12 +82,7 @@ struct VerticalLCDLine: View {
 
                     Spacer()
                 }
-                // Rows grow when the label stack is tall (transfer/next badges)
-                // instead of overflowing into the next station.
                 .frame(minHeight: isLast ? 0 : stationSpacing, alignment: .top)
-                // The connecting track lives in the background so it always
-                // spans the actual row height, whatever the label needed.
-                // Walking to the connecting platform is drawn dashed.
                 .background(alignment: .topLeading) {
                     if !isLast {
                         trackSegment(filled: isPast, fillFraction: target == nil ? segFrac : min(1, segFrac * 2),
@@ -195,9 +187,7 @@ struct VerticalLCDLine: View {
 
     // MARK: - Transfer Boarding Row
 
-    /// The boarding point on the connecting line, rendered as its own stop:
-    /// departure time in the time column, dot on the track, and the next
-    /// line's station badge and name.
+    /// The boarding point on the connecting line, rendered as its own stop.
     @ViewBuilder
     private func transferBoardingRow(
         station: Station,

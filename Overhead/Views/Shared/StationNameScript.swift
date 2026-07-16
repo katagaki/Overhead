@@ -49,9 +49,6 @@ enum StationNameScript {
             segments.append(current)
             kinds.append(currentKind)
         }
-        // Only break into columns for a clean two-part name whose katakana half
-        // is a real word (> 3 chars). A three-part name (新御茶ノ水) or a short
-        // affix stays a single column.
         guard segments.count == 2,
               let katakana = zip(segments, kinds).first(where: { $0.1 == .katakana })?.0,
               katakana.count > 3 else {

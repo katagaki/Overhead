@@ -3,8 +3,7 @@ import Backbone
 
 // MARK: - Merged Station Row
 
-/// One row per physical station: name on the left edge, the badge of every
-/// line serving it on the right edge.
+/// One row per physical station: name on the left edge, every line's badge on the right.
 struct MergedStationRow: View {
     let primary: StationSearchHit
     let hits: [StationSearchHit]

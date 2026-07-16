@@ -2,16 +2,9 @@ import Foundation
 import Backbone
 
 // MARK: - Custom Journey Builder
-//
-// Turns a CustomLine ride (boarding → alighting) into a Backbone `TrainService`
-// so the existing JourneyView / position engine / Live Activity can run it
-// unchanged. Scheduled lines generate clock times from their headway pattern;
-// scheduleless lines produce a timeless service (GPS or manual position).
 
 enum CustomJourneyBuilder {
 
-    /// The stations from `fromId` to `toId` in travel order, plus the hop
-    /// minutes between each consecutive pair, or nil if the ids aren't on the line.
     private static func travelPlan(
         line: CustomLine, fromId: String, toId: String
     ) -> (stations: [Station], hops: [Double])? {
@@ -26,14 +19,11 @@ enum CustomJourneyBuilder {
             return (slice, hops)
         } else {
             let slice = Array(stations[toIdx...fromIdx].reversed())
-            // Descending: traverse the same gaps in reverse order.
             let hops = Array(line.hopMinutes[toIdx..<fromIdx].reversed())
             return (slice, hops)
         }
     }
 
-    /// A ride with clock times, boarding at the next headway departure ≥ now.
-    /// Returns nil when the line has no schedule for the current calendar.
     static func scheduledService(
         line: CustomLine, fromId: String, toId: String, at date: Date = Date()
     ) -> TrainService? {
@@ -55,7 +45,6 @@ enum CustomJourneyBuilder {
             departure = min(first + steps * pattern.headwayMinutes, last)
         }
 
-        // Cumulative offsets (minutes) from the boarding station.
         var offsets: [Int] = [0]
         var running = 0.0
         for hop in plan.hops {
@@ -85,8 +74,6 @@ enum CustomJourneyBuilder {
         )
     }
 
-    /// A timeless ride (no clock times) — position comes from GPS or manual
-    /// station flipping.
     static func untimedService(line: CustomLine, fromId: String, toId: String) -> TrainService? {
         guard let plan = travelPlan(line: line, fromId: fromId, toId: toId) else { return nil }
         let serviceId = "custom.untimed.\(line.id).\(fromId).\(toId)"

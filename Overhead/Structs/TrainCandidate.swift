@@ -3,10 +3,8 @@ import Backbone
 
 // MARK: - Candidate Leg
 
-/// One ride within a candidate: a concrete service between two stations.
 struct CandidateLeg {
     let service: TrainService
-    /// The line the passenger rides on this leg — used for badge color and name.
     let line: TrainLine
     let fromStation: Station
     let toStation: Station
@@ -23,17 +21,12 @@ struct CandidateLeg {
 
 // MARK: - Train Candidate
 
-/// One boardable itinerary in the departure search results: one or more
-/// connecting rides (乗り換え), plus the composite line/service to track it.
 struct TrainCandidate: Identifiable {
     let id: String
     let legs: [CandidateLeg]
     let isThrough: Bool
-    /// Line spanning the whole itinerary (composite when legs > 1 or 直通).
     let journeyLine: TrainLine
-    /// Service spanning the whole itinerary (synthetic when legs > 1).
     let journeyService: TrainService
-    /// Boarding/alighting stations, with IDs valid on `journeyLine`.
     let fromStation: Station
     let toStation: Station
     /// False for timetable-ignoring searches: leg seconds are hop-time
@@ -42,8 +35,7 @@ struct TrainCandidate: Identifiable {
 
     var transferCount: Int { legs.count - 1 }
 
-    /// Stations where the passenger changes trains. IDs are valid on
-    /// `journeyLine` (the transfer station keeps the arriving leg's ID).
+    /// IDs are valid on `journeyLine` (the transfer station keeps the arriving leg's ID).
     var transferStationIds: [String] {
         legs.dropLast().map { $0.toStation.id }
     }
@@ -56,7 +48,6 @@ struct TrainCandidate: Identifiable {
         max(0, (arrivalSeconds - departureSeconds) / 60)
     }
 
-    /// Departure as an absolute date on the service day of `reference`.
     func departureDate(reference: Date = Date()) -> Date {
         Self.dateFromRailSeconds(departureSeconds, reference: reference)
     }

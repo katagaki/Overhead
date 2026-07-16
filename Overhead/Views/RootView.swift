@@ -39,8 +39,7 @@ struct RootView: View {
                     moreMenu
                 }
             }
-            // Safe-area inset, not a .bottomBar item: a late-inserted bottom-bar
-            // item never shows with a navigationDestination on the stack (iOS 26).
+            // Safe-area inset, not .bottomBar: late-inserted bottom-bar items don't show with a navigationDestination on the stack (iOS 26).
             .safeAreaInset(edge: .bottom) {
                 if viewModel.activeJourney != nil {
                     JourneyToolbarAccessory(viewModel: viewModel) {
@@ -66,7 +65,6 @@ struct RootView: View {
                 await viewModel.loadLines()
             }
         }
-        // Keep the app's purple accent globally; line colors stay line-specific.
         .sheet(isPresented: $showJourneySheet) {
             JourneySheetView(viewModel: viewModel)
                 .navigationTransition(.zoom(sourceID: Self.journeyTransitionID, in: journeyZoom))
@@ -76,7 +74,6 @@ struct RootView: View {
         }
         .onChange(of: viewModel.activeJourney != nil) { _, hasJourney in
             guard hasJourney else { showJourneySheet = false; return }
-            // Present next runloop so the zoom source is laid out first.
             DispatchQueue.main.async { showJourneySheet = true }
         }
         // Overwriting keeps activeJourney non-nil, so onChange won't fire — open here.

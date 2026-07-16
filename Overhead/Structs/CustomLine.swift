@@ -5,11 +5,6 @@ import UniformTypeIdentifiers
 import Backbone
 
 // MARK: - Custom (DIY) Line Models
-//
-// A user-authored line and its stations. Timetable and coordinates are both
-// optional. Custom lines live only in CustomLineStore and never enter
-// StaticTrainData, so the route planner and transfer graph can't reach them —
-// they can't 乗り換え with built-in lines by construction.
 
 struct CustomStation: Identifiable, Codable, Hashable {
     var id: String
@@ -133,9 +128,6 @@ enum CustomLinePalette {
 
 // MARK: - .ohl package
 
-/// The on-disk shape of an exported `.ohl` file: a plain JSON document holding
-/// one or more custom lines. (Single-file form; a zip container can layer on
-/// later without changing this schema.)
 struct CustomLinePackage: Codable {
     var formatVersion = 1
     var author: String?
@@ -150,15 +142,11 @@ extension UTType {
 
 // MARK: - Persistence
 
-/// Custom lines, stored as JSON in UserDefaults (the SavedPlaceStore pattern).
-/// Observable so the home section refreshes when lines are added or edited.
 @MainActor
 final class CustomLineStore: ObservableObject {
     static let shared = CustomLineStore()
 
     @Published private(set) var lines: [CustomLine]
-    /// A package opened from an external `.ohl` file, awaiting the import
-    /// preview. Presented by RootView.
     @Published var incomingPackage: CustomLinePackage?
 
     private static let storageKey = "customLines"
@@ -216,8 +204,6 @@ final class CustomLineStore: ObservableObject {
         CustomLinePackage(author: author, lines: lines)
     }
 
-    /// Decodes an `.ohl` file opened from Files/AirDrop and queues its import
-    /// preview. Returns false if the file isn't a valid package.
     @discardableResult
     func receiveFile(at url: URL) -> Bool {
         let scoped = url.startAccessingSecurityScopedResource()

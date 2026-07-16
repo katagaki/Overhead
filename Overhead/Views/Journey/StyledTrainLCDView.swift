@@ -1,9 +1,7 @@
 import SwiftUI
 import Backbone
 
-/// One LCD simulation in the given style — the single switch over
-/// `TrainLCDStyle`, shared by the journey view, the image renderer, and the
-/// custom-line editor preview.
+/// The single switch over `TrainLCDStyle`, shared by every LCD consumer.
 struct StyledTrainLCDView: View {
     let style: TrainLCDStyle
     let journey: Journey

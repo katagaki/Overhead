@@ -1,7 +1,5 @@
 import SwiftUI
 
-/// Where the active journey's position comes from: GPS alone, GPS blended
-/// with the timetable, or the timetable alone.
 enum JourneyMode: String, CaseIterable, Identifiable {
     case gps
     case hybrid

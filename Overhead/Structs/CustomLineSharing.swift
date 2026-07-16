@@ -27,9 +27,7 @@ struct ShareableImage: Identifiable {
     let image: UIImage
 }
 
-/// Presents the system share sheet for arbitrary items (used for the rendered
-/// LCD image, whose "Save Image" covers saving to Photos without an extra
-/// permission prompt).
+/// Presents the system share sheet for arbitrary items (rendered LCD image's "Save Image" avoids an extra permission prompt).
 struct ActivityView: UIViewControllerRepresentable {
     let items: [Any]
 

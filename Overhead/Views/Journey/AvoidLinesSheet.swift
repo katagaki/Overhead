@@ -1,8 +1,7 @@
 import SwiftUI
 import Backbone
 
-/// Sheet for the 路線を避ける customization: tick the lines the route search
-/// must not use, grouped by operator with per-operator select-all and search.
+/// Sheet for the 路線を避ける customization: tick the lines the route search must not use.
 struct AvoidLinesSheet: View {
     let lines: [TrainLine]
     @Binding var avoidedLineIds: Set<String>

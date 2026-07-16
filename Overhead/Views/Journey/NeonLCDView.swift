@@ -3,8 +3,7 @@ import Backbone
 
 // MARK: - Neon LCD View
 
-/// Original cyberpunk HUD panel (no real-world counterpart): chromatic-aberration
-/// station name, terminal route stack, scrolling ticker. The lineup's only dark panel.
+/// Original cyberpunk HUD panel (no real-world counterpart), the lineup's only dark panel.
 struct NeonLCDView: View {
     let journey: Journey
     let state: TrainPositionState
@@ -62,7 +61,6 @@ struct NeonLCDView: View {
                 center: UnitPoint(x: 0.75, y: 0),
                 startRadius: 0, endRadius: 380
             )
-            // Faint wireframe grid, fading toward the bottom.
             Canvas { ctx, size in
                 var lines = Path()
                 var x: CGFloat = 0
@@ -212,7 +210,6 @@ struct NeonLCDView: View {
         .frame(maxWidth: 240, alignment: .leading)
     }
 
-    /// The station name with cyan/magenta ghost copies that jitter in glitch bursts.
     private var glitchName: some View {
         TimelineView(.animation(minimumInterval: 1.0 / 15.0)) { context in
             let t = context.date.timeIntervalSinceReferenceDate
@@ -329,7 +326,6 @@ struct NeonLCDView: View {
                 : LinearGradient(colors: [.clear], startPoint: .leading, endPoint: .trailing)
         )
         .overlay(alignment: .leading) {
-            // Rail and diamond node.
             ZStack {
                 Rectangle()
                     .fill(Self.cyan.opacity(0.3))
@@ -380,7 +376,6 @@ struct NeonLCDView: View {
                     let cycle = max(total, size.width) + 40
                     let t = context.date.timeIntervalSinceReferenceDate
                     let offset = (t * 22).truncatingRemainder(dividingBy: cycle)
-                    // Two copies so the loop reads seamless.
                     for base in [size.width - offset, size.width - offset + cycle] {
                         var x = base
                         for (text, width) in zip(resolved, widths) {
@@ -440,12 +435,10 @@ struct NeonLCDView: View {
                 overflow: (start + offset == end - 1 && remaining > 0) ? remaining : nil
             )
         }
-        // The stack reads top-to-bottom by default; facing right flips it.
         if orientation == .right { rows.reverse() }
         return rows
     }
 
-    /// Minutes until arrival at the next stop, from the journey timetable.
     private var minutesToNext: Int? {
         let stations = journey.journeyStations
         guard state.currentStationIndex == nil,
@@ -517,7 +510,6 @@ struct NeonLCDView: View {
 
 // MARK: - Chamfer Shape
 
-/// Rectangle with the top-leading and bottom-trailing corners cut.
 private struct ChamferShape: Shape {
     let cut: CGFloat
 

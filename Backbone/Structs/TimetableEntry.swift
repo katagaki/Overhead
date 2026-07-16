@@ -23,8 +23,7 @@ public struct TimetableEntry: Identifiable, Codable {
         return Self.parseRailTime(t)
     }
 
-    /// Parses "HH:mm" where HH can exceed 23 (Japanese rail convention).
-    /// Returns seconds since midnight of the service day.
+    /// HH can exceed 23 (Japanese rail convention).
     public static func parseRailTime(_ timeStr: String) -> Int? {
         let parts = timeStr.split(separator: ":")
         guard parts.count == 2,

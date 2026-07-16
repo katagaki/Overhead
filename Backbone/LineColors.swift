@@ -16,9 +16,7 @@ public enum LineColors {
     public static let toeiAsakusa    = "#E85298"
     public static let toeiOedo       = "#B6007A"
 
-    /// LCD-display-only line colors. Badges and everything else keep the data
-    /// color (the Joban Local's wayfinding gray); the in-car LCD uses the
-    /// train's emerald identity.
+    /// LCD-display-only overrides; badges elsewhere keep the data color.
     public static let lcdOverrides: [String: String] = [
         "Railway:JR-East.JobanLocal": "#33A385",
     ]

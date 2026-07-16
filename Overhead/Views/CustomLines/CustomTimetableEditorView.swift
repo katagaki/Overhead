@@ -2,9 +2,6 @@ import SwiftUI
 import Backbone
 
 // MARK: - Custom Timetable Editor
-//
-// Optional headway schedule: first/last departure + interval per calendar.
-// Turning it off clears the timetable, and the line rides in manual/GPS mode.
 
 struct CustomTimetableEditorView: View {
     @Binding var line: CustomLine

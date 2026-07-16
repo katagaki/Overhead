@@ -7,11 +7,9 @@ public struct Journey: Identifiable, Codable {
     public let boardingStationId: String
     public let alightingStationId: String
     public let startedAt: Date
-    /// Stations where the passenger changes trains (乗り換え) on a multi-leg
-    /// itinerary. Empty for single-ride and through (直通) journeys.
+    /// Transfer (乗り換え) stations on a multi-leg itinerary.
     public let transferStationIds: [String]
-    /// False for journeys planned while ignoring the timetable — the service's
-    /// entries carry no times, so position comes from GPS or manual flipping.
+    /// False when the timetable was ignored — position comes from GPS/manual flipping.
     public let hasSchedule: Bool
 
     public init(id: UUID, service: TrainService, line: TrainLine, boardingStationId: String, alightingStationId: String, startedAt: Date, transferStationIds: [String] = [], hasSchedule: Bool = true) {
@@ -31,10 +29,6 @@ public struct Journey: Identifiable, Codable {
             return []
         }
 
-        // Follow the service's travel direction — on a loop line the plain
-        // array slice can chart the wrong way around (東京→品川 via 神田
-        // while the train runs via 有楽町), so walk from the boarding
-        // station toward the service's next stop, wrapping at the ends.
         let stops = service.timetable
         if let svcFrom = stops.firstIndex(where: { $0.stationId == boardingStationId }),
            svcFrom + 1 < stops.count,
@@ -62,9 +56,6 @@ public struct Journey: Identifiable, Codable {
 
     public var journeyTimetable: [TimetableEntry] {
         let stationIds = Set(journeyStations.map(\.id))
-        // Slice the run between boarding and alighting so a loop service
-        // that visited a path station before boarding can't leak that
-        // earlier entry.
         if let from = service.timetable.firstIndex(where: { $0.stationId == boardingStationId }),
            let to = service.timetable[from...].firstIndex(where: { $0.stationId == alightingStationId }) {
             return Array(service.timetable[from...to].filter { stationIds.contains($0.stationId) })

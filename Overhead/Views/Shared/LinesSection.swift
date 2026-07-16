@@ -3,8 +3,7 @@ import Backbone
 
 // MARK: - Lines Section (browse all lines)
 
-/// Home-screen section listing every train line grouped by operator, drawn as
-/// a grid of tappable line badges. Tapping a line opens its station map.
+/// Home-screen section listing every train line grouped by operator.
 struct LinesSection: View {
     @ObservedObject var viewModel: JourneyViewModel
     @State private var collapsedOperators: Set<String> = []

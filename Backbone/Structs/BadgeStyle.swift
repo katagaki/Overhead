@@ -1,8 +1,6 @@
 import Foundation
 
-/// Badge shape for a user-created line's station numbers. Built-in lines infer
-/// their shape from the station-code prefix; custom codes have no operator to
-/// match, so they carry the choice explicitly.
+/// Badge shape for a user-created line's station numbers (custom codes have no operator to infer it from).
 public enum BadgeStyle: String, Codable, CaseIterable, Sendable, Hashable, Identifiable {
     case rounded   // JR-style: color frame, white core, black code
     case ring      // Metro-style: color ring, white core
