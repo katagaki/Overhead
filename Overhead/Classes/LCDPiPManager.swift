@@ -49,6 +49,7 @@ final class LCDPiPManager: NSObject, ObservableObject {
             pip.delegate = self
             pip.requiresLinearPlayback = true
             pip.canStartPictureInPictureAutomaticallyFromInline = true
+            pip.setValue(1, forKey: "controlsStyle")
             controller = pip
         }
         enqueueFrame()
