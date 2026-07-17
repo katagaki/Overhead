@@ -14,10 +14,11 @@ build/
 # Secrets
 
 # Claude Code
-.claude/settings.local.json
+.claude/
 CLAUDE.md
+
+# Xcode Cloud
+**/xcshareddata/xcodecloud/
 
 # Secrets (ODPT key etc.) — never commit
 .env
-
-.claude/worktrees/
