@@ -281,7 +281,7 @@ extension JourneyViewModel {
             ? AnyView(lcd.padding(12).background(Color(.systemBackground)))
             : AnyView(
                 lcd
-                    .environment(\.lcdScreenCornerRadius, isPhone ? 18 : 12)
+                    .environment(\.lcdScreenCornerRadius, isPhone ? 22 : 12)
                     .environment(\.lcdBezelCornerRadius, 0)
             )
         let renderer = ImageRenderer(content: content)
