@@ -1,6 +1,42 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "Bundle display name",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overtrain"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オーバートレイン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overtrain"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overtrain"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overtrain"
+          }
+        }
+      }
+    },
     "CFBundleName" : {
       "comment" : "Bundle name",
       "extractionState" : "extracted_with_value",
@@ -13,26 +49,26 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Overhead"
+            "state" : "needs_review",
+            "value" : "オーバートレイン"
           }
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Overhead"
+            "state" : "needs_review",
+            "value" : "Overtrain"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Overhead"
+            "state" : "needs_review",
+            "value" : "Overtrain"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Overhead"
+            "state" : "needs_review",
+            "value" : "Overtrain"
           }
         }
       }
@@ -44,31 +80,31 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Overhead uses your location in the background to keep the Live Activity updated with your current position even when the app is not open."
+            "value" : "Overtrain uses your location in the background to keep the Live Activity updated with your current position even when the app is not open."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Overheadはアプリを開いていないときでもライブアクティビティを最新の位置情報で更新するため、バックグラウンドで位置情報を使用します。"
+            "value" : "Overtrainはアプリを開いていないときでもライブアクティビティを最新の位置情報で更新するため、バックグラウンドで位置情報を使用します。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Overhead는 앱이 열려 있지 않을 때에도 라이브 활동을 현재 위치로 업데이트하기 위해 백그라운드에서 위치 정보를 사용합니다."
+            "value" : "Overtrain는 앱이 열려 있지 않을 때에도 라이브 활동을 현재 위치로 업데이트하기 위해 백그라운드에서 위치 정보를 사용합니다."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Overhead在后台使用您的位置信息，即使应用未打开也能保持实时活动显示您的当前位置。"
+            "value" : "Overtrain在后台使用您的位置信息，即使应用未打开也能保持实时活动显示您的当前位置。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Overhead在背景中使用您的位置資訊，即使應用程式未開啟也能保持即時動態顯示您的目前位置。"
+            "value" : "Overtrain在背景中使用您的位置資訊，即使應用程式未開啟也能保持即時動態顯示您的目前位置。"
           }
         }
       }
@@ -80,31 +116,31 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Overhead uses your location to track your position along the train line and show it on the Live Activity."
+            "value" : "Overtrain uses your location to track your position along the train line and show it on the Live Activity."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Overheadは路線上の現在位置を追跡し、ライブアクティビティに表示するために位置情報を使用します。"
+            "value" : "Overtrainは路線上の現在位置を追跡し、ライブアクティビティに表示するために位置情報を使用します。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Overhead는 열차 노선을 따라 현재 위치를 추적하고 라이브 활동에 표시하기 위해 위치 정보를 사용합니다."
+            "value" : "Overtrain는 열차 노선을 따라 현재 위치를 추적하고 라이브 활동에 표시하기 위해 위치 정보를 사용합니다."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Overhead使用您的位置信息沿铁路线追踪您的位置并显示在实时活动上。"
+            "value" : "Overtrain使用您的位置信息沿铁路线追踪您的位置并显示在实时活动上。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Overhead使用您的位置資訊沿鐵路路線追蹤您的位置並顯示在即時動態上。"
+            "value" : "Overtrain使用您的位置資訊沿鐵路路線追蹤您的位置並顯示在即時動態上。"
           }
         }
       }

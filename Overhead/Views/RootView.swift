@@ -7,12 +7,15 @@ struct RootView: View {
     @ObservedObject private var customStore = CustomLineStore.shared
 
     @AppStorage(JourneyMode.storageKey) private var journeyMode = JourneyMode.hybrid
+    @AppStorage("hasDismissedStartupNotice") private var hasDismissedStartupNotice = false
     @State private var showJourneySheet = false
     @State private var showTimetableModeNotice = false
+    @State private var showStartupNotice = false
     @State private var navigationPath = NavigationPath()
     @Namespace private var journeyZoom
 
     private static let journeyTransitionID = "activeJourney"
+    private static let feedbackURL = URL(string: "https://forms.gle/U91cFDFTufF12PeF7")!
 
     // Pushed screens reachable from the root.
     private enum Destination: Hashable {
@@ -32,7 +35,7 @@ struct RootView: View {
                 .padding(.vertical, 12)
             }
             .background(Color(.systemGroupedBackground))
-            .navigationTitle(Text(verbatim: "Overhead"))
+            .navigationTitle(Text("App.Name"))
             .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -129,6 +132,23 @@ struct RootView: View {
         ) {} message: {
             Text("JourneyMode.TimetableNotice.Message")
         }
+        // Solo-developer disclaimer, shown until the user opts out.
+        .alert(
+            "StartupNotice.Title",
+            isPresented: $showStartupNotice
+        ) {
+            Button("Button.OK", role: .cancel) {}
+            Button("Button.DontShowAgain") {
+                hasDismissedStartupNotice = true
+            }
+        } message: {
+            Text("StartupNotice.Message")
+        }
+        .onAppear {
+            if !hasDismissedStartupNotice {
+                showStartupNotice = true
+            }
+        }
     }
 
     // MARK: - More Menu
@@ -156,6 +176,9 @@ struct RootView: View {
             }
 
             Section {
+                Link(destination: Self.feedbackURL) {
+                    Label("More.SendFeedback", systemImage: "exclamationmark.bubble")
+                }
                 Link(destination: URL(string: "https://github.com/katagaki/Overhead")!) {
                     Label("More.GitHub", systemImage: "chevron.left.forwardslash.chevron.right")
                 }

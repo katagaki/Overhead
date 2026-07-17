@@ -18,9 +18,9 @@
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Overhead uses your location in the background to keep the Live Activity updated with your current position even when the app is not open.</string>
+	<string>Overtrain uses your location in the background to keep the Live Activity updated with your current position even when the app is not open.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Overhead uses your location to track your position along the train line and show it on the Live Activity.</string>
+	<string>Overtrain uses your location to track your position along the train line and show it on the Live Activity.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>UTExportedTypeDeclarations</key>
