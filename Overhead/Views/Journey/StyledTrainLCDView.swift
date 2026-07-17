@@ -1,6 +1,27 @@
 import SwiftUI
 import Backbone
 
+private struct LCDScreenCornerRadiusKey: EnvironmentKey {
+    static let defaultValue: CGFloat = 6
+}
+
+extension EnvironmentValues {
+    /// Corner rounding of the LCD screen inside the bezel; PiP bumps it up.
+    var lcdScreenCornerRadius: CGFloat {
+        get { self[LCDScreenCornerRadiusKey.self] }
+        set { self[LCDScreenCornerRadiusKey.self] = newValue }
+    }
+}
+
+/// The screen clip every LCD style applies inside its bezel.
+struct LCDScreenClip: ViewModifier {
+    @Environment(\.lcdScreenCornerRadius) private var radius
+
+    func body(content: Content) -> some View {
+        content.clipShape(RoundedRectangle(cornerRadius: radius))
+    }
+}
+
 /// The single switch over `TrainLCDStyle`, shared by every LCD consumer.
 struct StyledTrainLCDView: View {
     let style: TrainLCDStyle
@@ -13,8 +34,8 @@ struct StyledTrainLCDView: View {
         switch style {
         case .joban:
             TrainLCDView(journey: journey, state: state, lineColor: lineColor, orientation: orientation)
-        case .chuoSobu:
-            ChuoSobuLineLCDView(journey: journey, state: state, lineColor: lineColor, orientation: orientation)
+        case .keihinTohoku:
+            KeihinTohokuLineLCDView(journey: journey, state: state, lineColor: lineColor, orientation: orientation)
         case .yamanote:
             LoopLCDView(journey: journey, state: state, lineColor: lineColor, orientation: orientation)
         case .tokyoMetro:

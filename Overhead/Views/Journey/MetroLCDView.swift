@@ -31,17 +31,21 @@ struct MetroLCDView: View {
     private static let maxColumns = 8
     private static let markerBlue = Color(hex: "#1D2088")
     private static let passedGray = Color(hex: "#8E9196")
+    private static let languageFlipSeconds = 4.0
 
     private static let allLines = StaticTrainData.trainLines()
 
     var body: some View {
-        TimelineView(.everyMinute) { context in
+        TimelineView(.periodic(from: .now, by: 1.0)) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
+                let english = Int(
+                    context.date.timeIntervalSinceReferenceDate / Self.languageFlipSeconds
+                ) % 2 == 1
                 VStack(spacing: 0) {
-                    destinationStrip
+                    destinationStrip(english: english)
                         .frame(height: Self.destStripHeight)
-                    headlineBand
+                    headlineBand(english: english)
                         .frame(height: Self.headlineHeight)
                     progression(now: context.date)
                         .frame(maxHeight: .infinity)
@@ -50,7 +54,7 @@ struct MetroLCDView: View {
                 .scaleEffect(scale, anchor: .topLeading)
             }
             .aspectRatio(16.0 / 9.0, contentMode: .fit)
-            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .modifier(LCDScreenClip())
             .padding(6)
             .glassEffect(.regular.tint(Color(red: 0.2, green: 0.26, blue: 0.33).opacity(0.4)), in: RoundedRectangle(cornerRadius: 12))
         }
@@ -58,31 +62,40 @@ struct MetroLCDView: View {
 
     // MARK: - Destination Strip (top, white)
 
-    private var destinationStrip: some View {
+    private func destinationStrip(english: Bool) -> some View {
         HStack(spacing: 8) {
-            typeBox
+            typeBox(english: english)
             HStack(alignment: .lastTextBaseline, spacing: 4) {
-                Text(destinationStation?.name ?? "")
-                    .font(.system(size: 15, weight: .heavy))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.5)
-                Text(verbatim: "ゆき")
-                    .font(.system(size: 15, weight: .heavy))
+                if english {
+                    Text(verbatim: "for")
+                        .font(.system(size: 11, weight: .heavy))
+                    Text(destinationStation?.nameEn ?? "")
+                        .font(.system(size: 15, weight: .heavy))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                } else {
+                    Text(destinationStation?.name ?? "")
+                        .font(.system(size: 15, weight: .heavy))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                    Text(verbatim: "ゆき")
+                        .font(.system(size: 15, weight: .heavy))
+                }
             }
             .foregroundColor(.black)
             Spacer()
         }
         .padding(.leading, 6)
         .overlay(alignment: .trailing) {
-            carBox
+            carBox(english: english)
                 .padding(.trailing, 8)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .metalBandGradient(.white)
     }
 
-    private var typeBox: some View {
-        Text(typeName)
+    private func typeBox(english: Bool) -> some View {
+        Text(english ? typeNameEn : typeName)
             .font(.system(size: 13, weight: .heavy))
             .foregroundColor(.white)
             .lineLimit(1)
@@ -93,7 +106,7 @@ struct MetroLCDView: View {
             .clipShape(RoundedRectangle(cornerRadius: 2))
     }
 
-    private var carBox: some View {
+    private func carBox(english: Bool) -> some View {
         HStack(spacing: 3) {
             Text(verbatim: "\(carNumber)")
                 .font(.system(size: 13, weight: .heavy))
@@ -103,20 +116,25 @@ struct MetroLCDView: View {
                     Color(hue: 0, saturation: 0, brightness: 0.12),
                     in: RoundedRectangle(cornerRadius: 3)
                 )
-            Text(verbatim: "号車")
+            Text(verbatim: english ? "Car No." : "号車")
                 .font(.system(size: 8, weight: .bold))
                 .foregroundColor(.black)
+                .fixedSize()
         }
     }
 
     // MARK: - Headline Band (silver gradient)
 
-    private var headlineBand: some View {
+    private func headlineBand(english: Bool) -> some View {
         HStack(spacing: 9) {
-            Text(headlineLabel)
-                .font(.system(size: 13, weight: .bold))
+            // Fixed label zone, trailing-aligned: longer EN text grows leftward
+            // and the badge never shifts on flip.
+            Text(headlineLabel(english: english))
+                .font(.system(size: english ? 10 : 13, weight: .bold))
                 .foregroundColor(.black)
-                .padding(.leading, 52)
+                .lineLimit(1)
+                .fixedSize()
+                .frame(width: 104, alignment: .trailing)
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .padding(.bottom, 5)
             if let station = headlineStation {
@@ -132,7 +150,7 @@ struct MetroLCDView: View {
                     }
                 }
                 HorizontallySquashed {
-                    Text(station.name)
+                    Text(english ? station.nameEn : station.name)
                         .font(.system(size: 32, weight: .heavy))
                         .foregroundColor(.black)
                         .lineLimit(1)
@@ -387,8 +405,11 @@ struct MetroLCDView: View {
         return "\(letters)-\(digits)"
     }
 
-    private var headlineLabel: String {
-        state.currentStationIndex != nil ? "ただいま" : "つぎは"
+    private func headlineLabel(english: Bool) -> String {
+        if english {
+            return state.currentStationIndex != nil ? "Now stopping at" : "Next"
+        }
+        return state.currentStationIndex != nil ? "ただいま" : "つぎは"
     }
 
     private var headlineStation: Station? {
@@ -405,6 +426,14 @@ struct MetroLCDView: View {
 
     private var typeName: String {
         journey.service.trainType == .local ? "各駅停車" : journey.service.trainType.displayNameJa
+    }
+
+    /// Raw type names are camel-cased ("CommuterRapid") — space them out.
+    private var typeNameEn: String {
+        journey.service.trainType.rawValue.reduce(into: "") { result, char in
+            if char.isUppercase && !result.isEmpty { result.append(" ") }
+            result.append(char)
+        }
     }
 
     private var carNumber: Int {

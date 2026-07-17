@@ -108,7 +108,7 @@ struct CustomLineEditorView: View {
         .safeAreaInset(edge: .top) {
             CustomLinePreview(
                 line: draft,
-                style: TrainLCDStyle(rawValue: lcdStyleRaw) ?? .joban,
+                style: TrainLCDStyle(stored: lcdStyleRaw),
                 orientation: TrainLCDOrientation(rawValue: lcdOrientationRaw) ?? .left
             )
             .padding(.horizontal, 12)

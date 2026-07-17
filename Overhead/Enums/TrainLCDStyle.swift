@@ -3,7 +3,7 @@ import SwiftUI
 /// Which in-car LCD simulation tops the journey sheet.
 enum TrainLCDStyle: String, CaseIterable, Identifiable {
     case joban
-    case chuoSobu
+    case keihinTohoku
     case yamanote
     case tokyoMetro
     case ledMatrix
@@ -17,13 +17,28 @@ enum TrainLCDStyle: String, CaseIterable, Identifiable {
 
     static let storageKey = "journey.lcdStyle"
 
+    /// Stored preference, mapping the pre-rename "chuoSobu" value.
+    init(stored: String) {
+        self = TrainLCDStyle(rawValue: stored)
+            ?? (stored == "chuoSobu" ? .keihinTohoku : .joban)
+    }
+
     var id: String { rawValue }
+
+    /// PiP frame cadence: marquee/starfield styles need video-rate frames.
+    var pipFrameInterval: TimeInterval {
+        switch self {
+        case .ledMatrix, .shinkansen, .tube, .neon: return 1.0 / 24.0
+        case .galaxy: return 1.0 / 8.0
+        default: return 1.0
+        }
+    }
 
     /// Japanese aesthetic label, shown verbatim.
     var label: String {
         switch self {
         case .joban: return "常磐線風"
-        case .chuoSobu: return "中央総武線（旧）風"
+        case .keihinTohoku: return "京浜東北線風"
         case .yamanote: return "山手線風"
         case .tokyoMetro: return "東京メトロ風"
         case .ledMatrix: return "3色LED風"
@@ -57,7 +72,7 @@ enum TrainLCDStyleCategory: String, CaseIterable, Identifiable {
 
     var styles: [TrainLCDStyle] {
         switch self {
-        case .standard: return [.joban, .yamanote, .chuoSobu, .tokyoMetro, .hankyu, .find]
+        case .standard: return [.joban, .yamanote, .keihinTohoku, .tokyoMetro, .hankyu, .find]
         case .strips: return [.ledMatrix, .shinkansen, .tube]
         case .fictional: return [.kivotos, .neon, .galaxy]
         }

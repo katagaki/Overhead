@@ -1,10 +1,10 @@
 import SwiftUI
 import Backbone
 
-// MARK: - Chuo-Sobu Line LCD View
+// MARK: - Keihin-Tohoku Line LCD View
 
 /// Simulation of the E235-series in-car LCD (16:9), Joban-style stop progression.
-struct ChuoSobuLineLCDView: View {
+struct KeihinTohokuLineLCDView: View {
     let journey: Journey
     let state: TrainPositionState
     let lineColor: Color
@@ -42,7 +42,7 @@ struct ChuoSobuLineLCDView: View {
                 .scaleEffect(scale, anchor: .topLeading)
             }
             .aspectRatio(16.0 / 9.0, contentMode: .fit)
-            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .modifier(LCDScreenClip())
             .padding(6)
             .glassEffect(.regular.tint(Color(red: 0.2, green: 0.26, blue: 0.33).opacity(0.4)), in: RoundedRectangle(cornerRadius: 12))
         }
@@ -233,14 +233,14 @@ struct ChuoSobuLineLCDView: View {
         ZStack {
             Rectangle()
                 .fill(Color.white)
-                .frame(width: 21, height: 21 * 10 / 16)
+                .frame(width: 16, height: 13)
             if let minutes = col.minutes {
                 Text(verbatim: "\(minutes)")
                     .font(.system(size: 10.5, weight: .bold))
                     .foregroundColor(.black)
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
-                    .frame(width: 19)
+                    .frame(width: 14.5)
             }
         }
     }

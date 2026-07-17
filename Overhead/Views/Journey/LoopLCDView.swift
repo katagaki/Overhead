@@ -65,7 +65,7 @@ struct LoopLCDView: View {
                 .scaleEffect(scale, anchor: .topLeading)
             }
             .aspectRatio(16.0 / 9.0, contentMode: .fit)
-            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .modifier(LCDScreenClip())
             .padding(6)
             .glassEffect(.regular.tint(Color(red: 0.2, green: 0.26, blue: 0.33).opacity(0.4)), in: RoundedRectangle(cornerRadius: 12))
         }
@@ -303,6 +303,9 @@ struct LoopLCDView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.white)
+        // The arc bezier overshoots the top edge; on screen the Canvas clips
+        // it, but ImageRenderer (share/PiP frames) does not — clip explicitly.
+        .clipped()
         .overlay(alignment: .bottomTrailing) {
             Text(verbatim: "のりかえ、待合せ時間は含まれません。電車により多少時間が異なります。")
                 .font(.system(size: 5.5))

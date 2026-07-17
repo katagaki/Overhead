@@ -62,7 +62,20 @@ struct RootView: View {
                 CustomLineEditorView(route: route)
             }
             .task {
+                // TEMP: headless LCD verification hooks — remove before commit.
+                let args = ProcessInfo.processInfo.arguments
+                if let idx = args.firstIndex(of: "-autoLCDStyle"), idx + 1 < args.count {
+                    UserDefaults.standard.set(args[idx + 1], forKey: TrainLCDStyle.storageKey)
+                }
                 await viewModel.loadLines()
+                if args.contains("-autoJourney") {
+                    let lines = StaticTrainData.trainLines()
+                    if let line = lines.first(where: { $0.id == "Railway:JR-East.JobanLocal" }),
+                       let from = line.stations.first(where: { $0.name == "綾瀬" }),
+                       let to = line.stations.first(where: { $0.name == "我孫子" }) {
+                        await viewModel.startJourney(line: line, from: from, to: to)
+                    }
+                }
             }
         }
         .sheet(isPresented: $showJourneySheet) {
@@ -72,8 +85,20 @@ struct RootView: View {
         .sheet(item: $customStore.incomingPackage) { package in
             CustomLineImportView(package: package)
         }
+        // Keeps the PiP sample-buffer layer in the hierarchy at all times.
+        .background {
+            LCDPiPLayerHost()
+                .frame(width: 1, height: 1)
+        }
         .onChange(of: viewModel.activeJourney != nil) { _, hasJourney in
-            guard hasJourney else { showJourneySheet = false; return }
+            guard hasJourney else {
+                showJourneySheet = false
+                LCDPiPManager.shared.teardown()
+                return
+            }
+            LCDPiPManager.shared.prepare { [weak viewModel] in
+                viewModel?.renderLCDImage(scale: 2, padded: false)
+            }
             DispatchQueue.main.async { showJourneySheet = true }
         }
         // Overwriting keeps activeJourney non-nil, so onChange won't fire — open here.
