@@ -108,13 +108,16 @@ final class LCDPiPManager: NSObject, ObservableObject {
         let height = cgImage.height
 
         var pixelBuffer: CVPixelBuffer?
+        // BGRA + IOSurface: the device's video compositor renders anything
+        // else as black.
         let attrs: [CFString: Any] = [
             kCVPixelBufferCGImageCompatibilityKey: true,
-            kCVPixelBufferCGBitmapContextCompatibilityKey: true
+            kCVPixelBufferCGBitmapContextCompatibilityKey: true,
+            kCVPixelBufferIOSurfacePropertiesKey: [:] as CFDictionary
         ]
         guard CVPixelBufferCreate(
             kCFAllocatorDefault, width, height,
-            kCVPixelFormatType_32ARGB, attrs as CFDictionary, &pixelBuffer
+            kCVPixelFormatType_32BGRA, attrs as CFDictionary, &pixelBuffer
         ) == kCVReturnSuccess, let pixelBuffer else { return nil }
 
         CVPixelBufferLockBaseAddress(pixelBuffer, [])
@@ -125,7 +128,7 @@ final class LCDPiPManager: NSObject, ObservableObject {
             bitsPerComponent: 8,
             bytesPerRow: CVPixelBufferGetBytesPerRow(pixelBuffer),
             space: CGColorSpaceCreateDeviceRGB(),
-            bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue
+            bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
         ) else { return nil }
         // Black under the LCD bezel's rounded corners, matching the PiP window.
         context.setFillColor(CGColor(gray: 0, alpha: 1))
@@ -151,7 +154,20 @@ final class LCDPiPManager: NSObject, ObservableObject {
             formatDescription: format,
             sampleTiming: &timing,
             sampleBufferOut: &sample
-        ) == noErr else { return nil }
+        ) == noErr, let sample else { return nil }
+
+        // Without a control timebase the layer would otherwise hold frames.
+        if let attachments = CMSampleBufferGetSampleAttachmentsArray(sample, createIfNecessary: true),
+           CFArrayGetCount(attachments) > 0 {
+            let attachment = unsafeBitCast(
+                CFArrayGetValueAtIndex(attachments, 0), to: CFMutableDictionary.self
+            )
+            CFDictionarySetValue(
+                attachment,
+                Unmanaged.passUnretained(kCMSampleAttachmentKey_DisplayImmediately).toOpaque(),
+                Unmanaged.passUnretained(kCFBooleanTrue).toOpaque()
+            )
+        }
         return sample
     }
 }
