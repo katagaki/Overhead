@@ -101,6 +101,9 @@ struct RootView: View {
             }
             DispatchQueue.main.async { showJourneySheet = true }
         }
+        .onChange(of: viewModel.positionState?.status) { _, status in
+            LCDPiPManager.shared.setAutoStartAllowed(status != .arrived)
+        }
         // Overwriting keeps activeJourney non-nil, so onChange won't fire — open here.
         .alert(
             "Journey.Overwrite.ConfirmTitle",

@@ -48,12 +48,18 @@ final class LCDPiPManager: NSObject, ObservableObject {
             let pip = AVPictureInPictureController(contentSource: source)
             pip.delegate = self
             pip.requiresLinearPlayback = true
-            pip.canStartPictureInPictureAutomaticallyFromInline = true
             pip.setValue(1, forKey: "controlsStyle")
             controller = pip
         }
+        controller?.canStartPictureInPictureAutomaticallyFromInline = true
         enqueueFrame()
         scheduleNextFrame()
+    }
+
+    /// Blocks auto-start once the journey has arrived; an already-visible
+    /// PiP window is left alone.
+    func setAutoStartAllowed(_ allowed: Bool) {
+        controller?.canStartPictureInPictureAutomaticallyFromInline = allowed
     }
 
     /// Disarms PiP (journey ended).
@@ -267,11 +273,17 @@ extension JourneyViewModel {
         )
         .frame(width: 360)
 
-        // Unpadded (PiP) frames get a rounder screen — radius 6 reads too
-        // square at PiP-window size.
+        // Unpadded (PiP) frames square off the bezel to fill the window and
+        // get a rounder screen — radius 6 reads too square at PiP-window
+        // size, and the iPhone's smaller window needs more still.
+        let isPhone = UIDevice.current.userInterfaceIdiom == .phone
         let content = padded
             ? AnyView(lcd.padding(12).background(Color(.systemBackground)))
-            : AnyView(lcd.environment(\.lcdScreenCornerRadius, 12))
+            : AnyView(
+                lcd
+                    .environment(\.lcdScreenCornerRadius, isPhone ? 18 : 12)
+                    .environment(\.lcdBezelCornerRadius, 0)
+            )
         let renderer = ImageRenderer(content: content)
         renderer.scale = scale
         return renderer.uiImage

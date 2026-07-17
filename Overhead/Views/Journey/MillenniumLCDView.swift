@@ -43,7 +43,7 @@ struct MillenniumLCDView: View {
         .aspectRatio(Self.designWidth / Self.designHeight, contentMode: .fit)
         .modifier(LCDScreenClip())
         .padding(6)
-        .glassEffect(.regular.tint(Color(red: 0.2, green: 0.26, blue: 0.33).opacity(0.4)), in: RoundedRectangle(cornerRadius: 12))
+        .modifier(LCDBezel())
     }
 
     // MARK: - Header (navy)
