@@ -43,57 +43,13 @@ struct SavedPlace: Identifiable, Codable, Equatable {
 
 enum SavedPlaceStore {
     private static let storageKey = "savedPlaces"
-    private static let legacyStorageKey = "savedQuickRoutes"
-
-    /// The pre-場所 model: one fixed route per home/work/school slot.
-    private struct LegacyQuickRoute: Codable {
-        let id: UUID
-        let label: String
-        let lineId: String
-        let fromStationId: String
-        let toStationId: String
-    }
-
-    /// Line/station ids saved before the "odpt." prefix was dropped are
-    /// rewritten to the current scheme (e.g. "odpt.Railway:X" → "Railway:X").
-    private static func migratingIds(_ places: [SavedPlace]) -> [SavedPlace] {
-        places.map { place in
-            var place = place
-            place.lineId = place.lineId.replacingOccurrences(of: "odpt.", with: "")
-            place.fromStationId = place.fromStationId.replacingOccurrences(of: "odpt.", with: "")
-            place.toStationId = place.toStationId.replacingOccurrences(of: "odpt.", with: "")
-            return place
-        }
-    }
 
     static func load() -> [SavedPlace] {
-        let defaults = UserDefaults.standard
-        if let data = defaults.data(forKey: storageKey),
-           let decoded = try? JSONDecoder().decode([SavedPlace].self, from: data) {
-            let migrated = migratingIds(decoded)
-            if migrated != decoded {
-                save(migrated)
-            }
-            return migrated
+        guard let data = UserDefaults.standard.data(forKey: storageKey),
+              let decoded = try? JSONDecoder().decode([SavedPlace].self, from: data) else {
+            return []
         }
-
-        // One-time migration from the old fixed-slot quick routes
-        if let data = defaults.data(forKey: legacyStorageKey),
-           let legacy = try? JSONDecoder().decode([LegacyQuickRoute].self, from: data) {
-            let migrated = migratingIds(legacy.map { route in
-                SavedPlace(
-                    id: route.id,
-                    kind: SavedPlace.Kind(rawValue: route.label) ?? .custom,
-                    lineId: route.lineId,
-                    fromStationId: route.fromStationId,
-                    toStationId: route.toStationId
-                )
-            })
-            save(migrated)
-            defaults.removeObject(forKey: legacyStorageKey)
-            return migrated
-        }
-        return []
+        return decoded
     }
 
     static func save(_ places: [SavedPlace]) {
