@@ -833,6 +833,7 @@ struct JourneyPlannerSection: View {
         else { return }
         fromSelection = StationSearchHit(line: line, station: from)
         toSelection = StationSearchHit(line: line, station: to)
+        viaSelections = []
         switch command {
         case .search:
             search()

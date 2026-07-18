@@ -244,6 +244,8 @@ struct RootView: View {
             viewModel.stopJourney()
             debugTimetableTarget = nil
             navigationPath = NavigationPath()
+            UserDefaults.standard.removeObject(forKey: "journey.setup.stations")
+            UserDefaults.standard.removeObject(forKey: "journey.avoidedLines")
         }
     }
 #endif

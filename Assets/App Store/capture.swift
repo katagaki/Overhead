@@ -93,9 +93,10 @@ if CommandLine.arguments.count > 1 {
     }
 }
 
-// Seeding pass: favorites and the sample custom line persist across launches,
-// but the home screen only shows them from the next launch on.
-launchApp(urls: ["overtrain://seed/favorites", "overtrain://seed/custom-line"])
+// Seeding pass: reset clears leftover planner state (vias, avoided lines);
+// favorites and the sample custom line persist across launches, but the
+// home screen only shows them from the next launch on.
+launchApp(urls: ["overtrain://reset", "overtrain://seed/favorites", "overtrain://seed/custom-line"])
 
 // Extra arguments past the app path and language select a subset of shots.
 let onlyNames = Set(CommandLine.arguments.dropFirst(3))

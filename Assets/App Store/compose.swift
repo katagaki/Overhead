@@ -1,7 +1,8 @@
 #!/usr/bin/env swift
 // Composes App Store screenshots (iPhone 6.5", 1242 x 2688) from raw
-// simulator captures in Raw/<lang>/: gradient background, header + caption,
-// and the capture wrapped in a device frame. Output goes to <lang>/.
+// simulator captures in Raw/<lang>/: gradient background, one-line header
+// and caption in Hind, and the capture masked with Display@2x.png over the
+// Hardware@2x.png device frame. Output goes to <lang>/.
 // Usage: swift compose.swift
 
 import AppKit
@@ -41,11 +42,11 @@ let screenshots: [Screenshot] = [
         copy: [
             "ja": Copy(
                 header: "オフラインで動く時刻表",
-                caption: "東京から取手まで、内蔵の時刻表からすぐ検索。\n地下でも圏外でも使えます。"
+                caption: "東京から取手まで、内蔵の時刻表ですぐ検索"
             ),
             "en": Copy(
                 header: "Plan trips offline",
-                caption: "From Tokyo to Toride with bundled\ntimetables. No signal needed."
+                caption: "Tokyo to Toride from bundled timetables, no signal"
             ),
         ],
         gradientTop: color(0x2A1C5E), gradientBottom: color(0x0E0A1F)
@@ -56,11 +57,11 @@ let screenshots: [Screenshot] = [
         copy: [
             "ja": Copy(
                 header: "いま、どこを走ってる？",
-                caption: "乗車中の位置を駅ごとに追いかけて、\nつぎの停車駅までの分数もひと目で。"
+                caption: "いまの位置と、つぎの駅までの分数をひと目で"
             ),
             "en": Copy(
                 header: "Know where you are",
-                caption: "Follow your ride station by station,\nwith minutes to every stop."
+                caption: "Follow your ride with minutes to every stop"
             ),
         ],
         gradientTop: color(0x0C3B26), gradientBottom: color(0x05130C)
@@ -71,11 +72,11 @@ let screenshots: [Screenshot] = [
         copy: [
             "ja": Copy(
                 header: "車内ディスプレイを再現",
-                caption: "山手線風をはじめ、12種類のLCDスタイルを収録。\n気分に合わせて切り替えられます。"
+                caption: "山手線風など、12種類のLCDスタイルを収録"
             ),
             "en": Copy(
                 header: "The in-train display",
-                caption: "Twelve LCD styles to ride with,\nincluding this Yamanote look."
+                caption: "Twelve LCD styles, including this Yamanote look"
             ),
         ],
         gradientTop: color(0x3A4409), gradientBottom: color(0x121504)
@@ -86,11 +87,11 @@ let screenshots: [Screenshot] = [
         copy: [
             "ja": Copy(
                 header: "地下鉄でも、そのまま",
-                caption: "東京メトロ風の表示で、停車駅と\n残り時間をチェック。"
+                caption: "東京メトロ風の表示で停車駅と残り時間を確認"
             ),
             "en": Copy(
                 header: "Underground, on track",
-                caption: "A Tokyo Metro style board with stops\nand minutes remaining."
+                caption: "A Tokyo Metro style board with minutes left"
             ),
         ],
         gradientTop: color(0x093A52), gradientBottom: color(0x04131B)
@@ -101,11 +102,11 @@ let screenshots: [Screenshot] = [
         copy: [
             "ja": Copy(
                 header: "駅の時刻表も内蔵",
-                caption: "始発から終電まで、全駅の発車時刻。\n方面ごとにさっと確認できます。"
+                caption: "始発から終電まで、全駅の発車時刻を方面別に"
             ),
             "en": Copy(
                 header: "Timetables built in",
-                caption: "First train to last at every station,\nsorted by direction."
+                caption: "First train to last at every station, by direction"
             ),
         ],
         gradientTop: color(0x333A45), gradientBottom: color(0x101318)
@@ -116,11 +117,11 @@ let screenshots: [Screenshot] = [
         copy: [
             "ja": Copy(
                 header: "苦手な路線は避ける",
-                caption: "路線の除外や歩く速さなど、\n検索条件を自分好みに調整。"
+                caption: "路線の除外や歩く速さで検索を自分好みに"
             ),
             "en": Copy(
                 header: "Route it your way",
-                caption: "Exclude lines you would rather skip\nand match your walking pace."
+                caption: "Skip certain lines and match your walking pace"
             ),
         ],
         gradientTop: color(0x2A1C5E), gradientBottom: color(0x0E0A1F)
@@ -131,11 +132,11 @@ let screenshots: [Screenshot] = [
         copy: [
             "ja": Copy(
                 header: "マイ路線を作ろう",
-                caption: "駅も時刻表もバッジも自由に設定。\n作った路線はファイルで共有できます。"
+                caption: "駅も時刻表も自由に設定、ファイルで共有も"
             ),
             "en": Copy(
                 header: "Build your own line",
-                caption: "Stations, timetables, and badges, all yours.\nShare finished lines as files."
+                caption: "Stations, timetables, and badges, all yours to share"
             ),
         ],
         gradientTop: color(0x0B2C63), gradientBottom: color(0x040F22)
@@ -146,16 +147,111 @@ let screenshots: [Screenshot] = [
         copy: [
             "ja": Copy(
                 header: "お気に入りからワンタップ",
-                caption: "よく使うルートを保存して、\nいつもの旅をすぐにスタート。"
+                caption: "よく使うルートを保存して、ワンタップで出発"
             ),
             "en": Copy(
                 header: "One tap to ride",
-                caption: "Save your usual routes\nand start riding right away."
+                caption: "Save your usual routes and start right away"
             ),
         ],
         gradientTop: color(0x2A1C5E), gradientBottom: color(0x0E0A1F)
     ),
 ]
+
+// MARK: - Fonts
+
+// Hind covers Latin only; Japanese falls back to the system cascade.
+func registerHindFonts() {
+    let fontsDir = scriptDir
+        .deletingLastPathComponent()
+        .deletingLastPathComponent()
+        .appendingPathComponent("Overhead/Fonts")
+    for file in ["Hind-Bold.ttf", "Hind-SemiBold.ttf", "Hind-Medium.ttf", "Hind-Regular.ttf"] {
+        CTFontManagerRegisterFontsForURL(
+            fontsDir.appendingPathComponent(file) as CFURL, .process, nil
+        )
+    }
+}
+
+func font(_ name: String, _ size: CGFloat, fallbackWeight: NSFont.Weight) -> NSFont {
+    NSFont(name: name, size: size) ?? NSFont.systemFont(ofSize: size, weight: fallbackWeight)
+}
+
+/// Draws one line centered at `top`, shrinking until it fits `maxWidth`.
+/// Returns the drawn height.
+@discardableResult
+func drawLine(
+    _ text: String,
+    fontName: String,
+    size: CGFloat,
+    fallbackWeight: NSFont.Weight,
+    color: NSColor,
+    top: CGFloat,
+    maxWidth: CGFloat
+) -> CGFloat {
+    var fontSize = size
+    var attrs: [NSAttributedString.Key: Any] = [:]
+    var lineSize = NSSize.zero
+    while fontSize > 10 {
+        attrs = [
+            .font: font(fontName, fontSize, fallbackWeight: fallbackWeight),
+            .foregroundColor: color,
+        ]
+        lineSize = (text as NSString).size(withAttributes: attrs)
+        if lineSize.width <= maxWidth { break }
+        fontSize -= 2
+    }
+    (text as NSString).draw(
+        at: NSPoint(x: (canvasSize.width - lineSize.width) / 2, y: top - lineSize.height),
+        withAttributes: attrs
+    )
+    return lineSize.height
+}
+
+// MARK: - Device frame
+
+let hardwareImage = NSImage(contentsOf: scriptDir.appendingPathComponent("Hardware@2x.png"))!
+let displayImage = NSImage(contentsOf: scriptDir.appendingPathComponent("Display@2x.png"))!
+
+func cgImage(of image: NSImage) -> CGImage {
+    image.cgImage(forProposedRect: nil, context: nil, hints: nil)!
+}
+
+let hardwareCG = cgImage(of: hardwareImage)
+let displayCG = cgImage(of: displayImage)
+let hardwarePixel = NSSize(width: hardwareCG.width, height: hardwareCG.height)
+let displayPixel = NSSize(width: displayCG.width, height: displayCG.height)
+// The display mask sits centered within the hardware frame.
+let displayOrigin = NSPoint(
+    x: (hardwarePixel.width - displayPixel.width) / 2,
+    y: (hardwarePixel.height - displayPixel.height) / 2
+)
+
+/// The raw capture clipped by the display mask, on a hardware-sized canvas.
+func maskedScreen(raw: NSImage) -> NSImage {
+    let rawCG = cgImage(of: raw)
+    let image = NSImage(size: hardwarePixel)
+    image.lockFocus()
+    let ctx = NSGraphicsContext.current!.cgContext
+    let displayRect = CGRect(origin: displayOrigin, size: displayPixel)
+    ctx.clip(to: displayRect, mask: displayCG)
+
+    // Aspect-fill the display area.
+    let rawSize = CGSize(width: rawCG.width, height: rawCG.height)
+    let scale = max(displayPixel.width / rawSize.width, displayPixel.height / rawSize.height)
+    let drawSize = CGSize(width: rawSize.width * scale, height: rawSize.height * scale)
+    let drawRect = CGRect(
+        x: displayRect.midX - drawSize.width / 2,
+        y: displayRect.midY - drawSize.height / 2,
+        width: drawSize.width,
+        height: drawSize.height
+    )
+    ctx.draw(rawCG, in: drawRect)
+    image.unlockFocus()
+    return image
+}
+
+// MARK: - Composition
 
 func compose(_ shot: Screenshot, language: String) -> Bool {
     guard let copy = shot.copy[language] else { return false }
@@ -167,8 +263,6 @@ func compose(_ shot: Screenshot, language: String) -> Bool {
         print("missing raw capture: \(rawURL.path)")
         return false
     }
-    guard let rawRep = raw.representations.first else { return false }
-    let rawPixelSize = NSSize(width: rawRep.pixelsWide, height: rawRep.pixelsHigh)
 
     let image = NSImage(size: canvasSize)
     image.lockFocus()
@@ -177,93 +271,47 @@ func compose(_ shot: Screenshot, language: String) -> Bool {
     NSGradient(starting: shot.gradientTop, ending: shot.gradientBottom)?
         .draw(in: NSRect(origin: .zero, size: canvasSize), angle: -90)
 
-    // Text block. AppKit's origin is bottom-left, so lay out from the top edge.
-    let headerFont = NSFont.systemFont(ofSize: 74, weight: .bold)
-    let captionFont = NSFont.systemFont(ofSize: 39, weight: .medium)
-
-    let paragraph = NSMutableParagraphStyle()
-    paragraph.alignment = .center
-    paragraph.lineSpacing = 12
-
-    let headerAttrs: [NSAttributedString.Key: Any] = [
-        .font: headerFont,
-        .foregroundColor: NSColor.white,
-        .paragraphStyle: paragraph,
-    ]
-    let captionAttrs: [NSAttributedString.Key: Any] = [
-        .font: captionFont,
-        .foregroundColor: NSColor.white.withAlphaComponent(0.72),
-        .paragraphStyle: paragraph,
-    ]
-
-    let textWidth: CGFloat = canvasSize.width - 120
-    let headerString = NSAttributedString(string: copy.header, attributes: headerAttrs)
-    let captionString = NSAttributedString(string: copy.caption, attributes: captionAttrs)
-    let headerHeight = headerString.boundingRect(
-        with: NSSize(width: textWidth, height: 400), options: .usesLineFragmentOrigin
-    ).height.rounded(.up)
-    let captionHeight = captionString.boundingRect(
-        with: NSSize(width: textWidth, height: 400), options: .usesLineFragmentOrigin
-    ).height.rounded(.up)
-
-    let topPadding: CGFloat = 132
-    let headerTop = canvasSize.height - topPadding
-    headerString.draw(
-        with: NSRect(x: 60, y: headerTop - headerHeight, width: textWidth, height: headerHeight),
-        options: .usesLineFragmentOrigin
+    // One-line header and caption. AppKit's origin is bottom-left.
+    let textWidth = canvasSize.width - 96
+    let headerTop = canvasSize.height - 84
+    let headerHeight = drawLine(
+        copy.header, fontName: "Hind-Bold", size: 88, fallbackWeight: .bold,
+        color: .white, top: headerTop, maxWidth: textWidth
     )
-    let captionTop = headerTop - headerHeight - 36
-    captionString.draw(
-        with: NSRect(x: 60, y: captionTop - captionHeight, width: textWidth, height: captionHeight),
-        options: .usesLineFragmentOrigin
+    let captionTop = headerTop - headerHeight - 6
+    let captionHeight = drawLine(
+        copy.caption, fontName: "Hind-Medium", size: 46, fallbackWeight: .medium,
+        color: .white, top: captionTop, maxWidth: textWidth
     )
 
-    // Device frame: fill the space under the caption, bottom-anchored.
-    let bezel: CGFloat = 32
+    // Device: hardware frame below, display-masked capture above.
     let textBottom = captionTop - captionHeight
-    let deviceTopMargin: CGFloat = 72
-    let deviceBottomMargin: CGFloat = 96
+    let deviceTopMargin: CGFloat = 64
+    let deviceBottomMargin: CGFloat = 88
     let availableHeight = textBottom - deviceTopMargin - deviceBottomMargin
-    let screenHeight = availableHeight - bezel * 2
-    let screenWidth = (screenHeight * rawPixelSize.width / rawPixelSize.height).rounded()
-    let screenRect = NSRect(
-        x: ((canvasSize.width - screenWidth) / 2).rounded(),
-        y: deviceBottomMargin + bezel,
-        width: screenWidth,
-        height: screenHeight
+    let aspect = hardwarePixel.width / hardwarePixel.height
+    var deviceSize = NSSize(width: availableHeight * aspect, height: availableHeight)
+    if deviceSize.width > canvasSize.width - 120 {
+        deviceSize.width = canvasSize.width - 120
+        deviceSize.height = deviceSize.width / aspect
+    }
+    let deviceRect = NSRect(
+        x: ((canvasSize.width - deviceSize.width) / 2).rounded(),
+        y: deviceBottomMargin,
+        width: deviceSize.width,
+        height: deviceSize.height
     )
-    let deviceRect = screenRect.insetBy(dx: -bezel, dy: -bezel)
 
-    // Same corner curvature as the hardware: display radius scaled from capture.
-    let screenRadius = 190 * screenWidth / rawPixelSize.width
-    let deviceRadius = screenRadius + bezel
-
-    // Soft drop shadow behind the device.
     NSGraphicsContext.current?.saveGraphicsState()
     let shadow = NSShadow()
     shadow.shadowColor = NSColor.black.withAlphaComponent(0.55)
     shadow.shadowBlurRadius = 60
     shadow.shadowOffset = NSSize(width: 0, height: -24)
     shadow.set()
-    let devicePath = NSBezierPath(roundedRect: deviceRect, xRadius: deviceRadius, yRadius: deviceRadius)
-    NSColor(srgbRed: 0.09, green: 0.09, blue: 0.10, alpha: 1).setFill()
-    devicePath.fill()
+    hardwareImage.draw(in: deviceRect)
     NSGraphicsContext.current?.restoreGraphicsState()
 
-    // Screen content clipped to the display corners.
-    NSGraphicsContext.current?.saveGraphicsState()
-    NSBezierPath(roundedRect: screenRect, xRadius: screenRadius, yRadius: screenRadius).addClip()
-    raw.draw(in: screenRect, from: .zero, operation: .sourceOver, fraction: 1)
-    NSGraphicsContext.current?.restoreGraphicsState()
-
-    // Bezel edge highlight.
-    let edgePath = NSBezierPath(
-        roundedRect: deviceRect.insetBy(dx: 1.5, dy: 1.5),
-        xRadius: deviceRadius - 1.5, yRadius: deviceRadius - 1.5
-    )
-    edgePath.lineWidth = 3
-    NSColor.white.withAlphaComponent(0.16).setStroke()
-    edgePath.stroke()
+    maskedScreen(raw: raw).draw(in: deviceRect)
 
     image.unlockFocus()
 
@@ -294,6 +342,7 @@ func compose(_ shot: Screenshot, language: String) -> Bool {
     }
 }
 
+registerHindFonts()
 var allOK = true
 for language in languages {
     for shot in screenshots {
