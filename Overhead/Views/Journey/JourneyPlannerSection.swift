@@ -18,6 +18,7 @@ struct JourneyPlannerSection: View {
     @AppStorage("journey.ignoreTimetable") private var ignoreTimetable = false
     @AppStorage("journey.setup.stations") private var storedStationsJSON = ""
     @State private var showAvoidLinesSheet = false
+    @State private var showDepartureTimeSheet = false
 
     @State private var candidates: [TrainCandidate] = []
     @State private var hasSearched = false
@@ -92,8 +93,6 @@ struct JourneyPlannerSection: View {
     var body: some View {
         VStack(spacing: 20) {
             stationCard
-
-            departureTimeSection
 
             customizationSection
 
@@ -293,46 +292,6 @@ struct JourneyPlannerSection: View {
         .frame(height: 10)
     }
 
-    // MARK: - Departure Time Section
-
-    private var departureTimeSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Setup.DepartureTime")
-                .font(.body.weight(.semibold))
-                .foregroundColor(.secondary)
-                .padding(.leading, 4)
-
-            VStack(spacing: 10) {
-                Picker("Setup.DepartureTime", selection: $departureMode) {
-                    Text("Setup.DepartNow").tag(DepartureMode.now)
-                    Text("Setup.DepartAt").tag(DepartureMode.scheduled)
-                }
-                .pickerStyle(.segmented)
-                .onChange(of: departureMode) { _, _ in
-                    invalidateResults()
-                }
-
-                if departureMode == .scheduled {
-                    DatePicker(
-                        "Setup.DepartureTime",
-                        selection: $departureDate,
-                        in: Date().addingTimeInterval(-7 * 86400)...Date().addingTimeInterval(7 * 86400),
-                        displayedComponents: [.date, .hourAndMinute]
-                    )
-                    .datePickerStyle(.compact)
-                    .environment(\.timeZone, TimeZone(identifier: "Asia/Tokyo")!)
-                    .font(.system(size: 14))
-                    .onChange(of: departureDate) { _, _ in
-                        invalidateResults()
-                    }
-                }
-            }
-            .padding(14)
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
-        }
-    }
-
     // MARK: - Customization Section
 
     private var customizationSection: some View {
@@ -344,6 +303,7 @@ struct JourneyPlannerSection: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(alignment: .top, spacing: 4) {
+                    departureTimeItem
                     walkingSpeedItem
                     avoidLinesItem
                     ignoreTimetableItem
@@ -359,6 +319,12 @@ struct JourneyPlannerSection: View {
             .onChange(of: ignoreTimetable) { _, _ in
                 invalidateResults()
             }
+            .onChange(of: departureMode) { _, _ in
+                invalidateResults()
+            }
+            .onChange(of: departureDate) { _, _ in
+                invalidateResults()
+            }
         }
         .sheet(isPresented: $showAvoidLinesSheet) {
             AvoidLinesSheet(
@@ -366,6 +332,25 @@ struct JourneyPlannerSection: View {
                 avoidedLineIds: avoidedLineIdsBinding
             )
         }
+        .sheet(isPresented: $showDepartureTimeSheet) {
+            DepartureTimeSheet(
+                departureMode: $departureMode,
+                departureDate: $departureDate
+            )
+        }
+    }
+
+    private var departureTimeItem: some View {
+        Button {
+            showDepartureTimeSheet = true
+        } label: {
+            customizationItem(
+                icon: "clock",
+                label: "Setup.DepartureTime",
+                active: departureMode == .scheduled
+            )
+        }
+        .buttonStyle(.plain)
     }
 
     private var walkingSpeedItem: some View {
@@ -393,7 +378,7 @@ struct JourneyPlannerSection: View {
             showAvoidLinesSheet = true
         } label: {
             customizationItem(
-                icon: "train.side.front.car.slash",
+                icon: "train.slash",
                 label: "Setup.AvoidLines",
                 active: !avoidedLineIds.isEmpty,
                 iconSource: .asset
@@ -407,9 +392,10 @@ struct JourneyPlannerSection: View {
             ignoreTimetable.toggle()
         } label: {
             customizationItem(
-                icon: "clock.badge.xmark",
+                icon: "timetable.slash",
                 label: "Setup.IgnoreTimetable",
-                active: ignoreTimetable
+                active: ignoreTimetable,
+                iconSource: .asset
             )
         }
         .buttonStyle(.plain)
