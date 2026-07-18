@@ -248,7 +248,7 @@ struct CustomLinePreview: View {
         HStack {
             Spacer()
             VStack(spacing: 6) {
-                Image(systemName: "tram.fill")
+                Image(systemName: "train.side.front.car")
                     .font(.system(size: 26))
                     .foregroundStyle(.tertiary)
                 Text(verbatim: "駅を2つ以上追加するとプレビューが表示されます")

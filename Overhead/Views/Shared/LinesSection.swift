@@ -35,7 +35,7 @@ struct LinesSection: View {
                     .foregroundColor(.secondary)
                 Spacer(minLength: 0)
             } else {
-                Image(systemName: "tram")
+                Image(systemName: "train.side.front.car")
                     .font(.system(size: 24))
                     .foregroundColor(.secondary)
                 Text("Error.NoLinesAvailable")

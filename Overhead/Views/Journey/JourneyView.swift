@@ -249,7 +249,7 @@ struct JourneyView: View {
 
     private var emptyState: some View {
         VStack(spacing: 16) {
-            Image(systemName: "tram.fill")
+            Image(systemName: "train.side.front.car")
                 .font(.system(size: 48))
                 .foregroundColor(.secondary)
             Text("Status.NoJourneySelected")

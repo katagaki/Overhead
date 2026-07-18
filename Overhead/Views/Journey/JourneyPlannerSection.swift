@@ -389,10 +389,10 @@ struct JourneyPlannerSection: View {
             showAvoidLinesSheet = true
         } label: {
             customizationItem(
-                icon: "tram.fill",
+                icon: "train.side.front.car.slash",
                 label: "Setup.AvoidLines",
                 active: !avoidedLineIds.isEmpty,
-                slashed: true
+                iconSource: .asset
             )
         }
         .buttonStyle(.plain)
@@ -411,23 +411,29 @@ struct JourneyPlannerSection: View {
         .buttonStyle(.plain)
     }
 
+    enum IconSource {
+        case system
+        case asset
+    }
+
     @ViewBuilder
     private func customizationItem(
         icon: String,
         label: LocalizedStringKey,
         active: Bool,
-        slashed: Bool = false
+        iconSource: IconSource = .system
     ) -> some View {
         VStack(spacing: 6) {
             ZStack {
                 Circle()
                     .fill(active ? Color.accentColor : Color(.tertiarySystemFill))
-                Image(systemName: icon)
-                    .font(.system(size: 20, weight: .semibold))
-                if slashed {
-                    Image(systemName: "line.diagonal")
-                        .font(.system(size: 34, weight: .regular))
-                        .rotationEffect(.degrees(90))
+                switch iconSource {
+                case .system:
+                    Image(systemName: icon)
+                        .font(.system(size: 20, weight: .semibold))
+                case .asset:
+                    Image(icon)
+                        .font(.system(size: 20, weight: .semibold))
                 }
             }
             .foregroundColor(active ? .white : .primary)
