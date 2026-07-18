@@ -1478,6 +1478,7 @@
       }
     },
     "Label.CurrentLocation" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1614,6 +1615,7 @@
       }
     },
     "Label.NextStop" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

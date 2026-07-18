@@ -84,10 +84,24 @@ struct JourneyView: View {
                     .fill(lineColor)
                     .frame(width: 6, height: 32)
 
-                Text(lineDisplayName(for: journey))
+                if let origin = journey.journeyStations.first,
+                   let destination = journey.journeyStations.last {
+                    HStack(spacing: 6) {
+                        Text(origin.localizedName)
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(.secondary)
+                        Text(destination.localizedName)
+                    }
                     .font(.system(size: 20, weight: .bold))
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
+                } else {
+                    Text(lineDisplayName(for: journey))
+                        .font(.system(size: 20, weight: .bold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
 
                 Spacer()
             }

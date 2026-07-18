@@ -22,6 +22,9 @@ struct VerticalLCDLine: View {
 
     private let stationSpacing: CGFloat = 72
     private let trackWidth: CGFloat = 3
+    private let timeColumnWidth: CGFloat = 44
+    // Station number badges are 28pt tall; circles/track center on this so badge and dot line up.
+    private let markerHeight: CGFloat = 28
     private let circleRadius: CGFloat = 9
     private let terminalRadius: CGFloat = 12
     private let currentRadius: CGFloat = 12
@@ -58,7 +61,7 @@ struct VerticalLCDLine: View {
                 HStack(alignment: .top, spacing: 0) {
                     timeColumn(for: station, timetable: timetable, isPast: isPast, isCurrent: isCurrent,
                                preferArrival: isTransfer)
-                        .frame(width: 56)
+                        .frame(width: timeColumnWidth)
 
                     stationCircle(
                         isPast: isPast,
@@ -67,7 +70,7 @@ struct VerticalLCDLine: View {
                         isNext: isNext,
                         color: rowColor
                     )
-                    .frame(width: 40)
+                    .frame(width: 40, height: markerHeight, alignment: .center)
 
                     stationLabel(
                         station: station,
@@ -85,11 +88,23 @@ struct VerticalLCDLine: View {
                 .frame(minHeight: isLast ? 0 : stationSpacing, alignment: .top)
                 .background(alignment: .topLeading) {
                     if !isLast {
-                        trackSegment(filled: isPast, fillFraction: target == nil ? segFrac : min(1, segFrac * 2),
+                        trackSegment(filled: isPast,
+                                     fillFraction: target == nil ? segFrac : (isCurrent ? 1 : min(1, segFrac * 2)),
                                      dashed: isTransfer, color: segColor)
-                            .frame(width: trackWidth)
-                            .padding(.top, stationDotRadius(isTerminal: isTerminal, isCurrent: isCurrent))
-                            .padding(.leading, 56 + 20 - trackWidth / 2)
+                            .frame(width: trackWidth, height: stationSpacing)
+                            .padding(.top, markerHeight / 2)
+                            .padding(.leading, timeColumnWidth + 20 - trackWidth / 2)
+                    }
+                }
+                .overlay(alignment: .topLeading) {
+                    if target != nil {
+                        // Centered in the left gutter, vertically midway between this dot and the next.
+                        Image(systemName: "figure.walk")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.secondary)
+                            .opacity(isPast ? 0.5 : 1.0)
+                            .frame(width: timeColumnWidth, height: markerHeight, alignment: .center)
+                            .padding(.top, stationSpacing / 2)
                     }
                 }
                 .id("station_\(index)")
@@ -101,17 +116,12 @@ struct VerticalLCDLine: View {
                         target: target,
                         timetable: timetable,
                         isPast: isPast,
+                        isCurrent: isCurrent,
                         fillFraction: max(0, segFrac * 2 - 1)
                     )
                 }
             }
         }
-    }
-
-    private func stationDotRadius(isTerminal: Bool, isCurrent: Bool) -> CGFloat {
-        if isCurrent { return currentRadius }
-        if isTerminal { return terminalRadius }
-        return circleRadius
     }
 
     // MARK: - Time Column
@@ -194,6 +204,7 @@ struct VerticalLCDLine: View {
         target: (station: Station, line: TrainLine),
         timetable: [TimetableEntry],
         isPast: Bool,
+        isCurrent: Bool,
         fillFraction: Double
     ) -> some View {
         HStack(alignment: .top, spacing: 0) {
@@ -207,32 +218,45 @@ struct VerticalLCDLine: View {
                     Color.clear
                 }
             }
-            .frame(width: 56)
+            .frame(width: timeColumnWidth)
 
-            ZStack {
-                Circle()
-                    .fill(Color(.systemBackground))
-                    .frame(width: circleRadius * 2, height: circleRadius * 2)
-                Circle()
-                    .strokeBorder(target.line.color.opacity(isPast ? 1.0 : 0.5), lineWidth: 3)
-                    .frame(width: circleRadius * 2, height: circleRadius * 2)
+            Group {
+                if isCurrent {
+                    // Transfer-to shares the current-station highlight when the transfer is current.
+                    stationCircle(isPast: isPast, isCurrent: true, isTerminal: false,
+                                  isNext: false, color: target.line.color)
+                } else if isPast {
+                    // Once passed, fill the dot like any other passed stop.
+                    Circle()
+                        .fill(target.line.color)
+                        .frame(width: circleRadius * 2, height: circleRadius * 2)
+                } else {
+                    ZStack {
+                        Circle()
+                            .fill(Color(.systemBackground))
+                            .frame(width: circleRadius * 2, height: circleRadius * 2)
+                        Circle()
+                            .strokeBorder(target.line.color.opacity(0.5), lineWidth: 3)
+                            .frame(width: circleRadius * 2, height: circleRadius * 2)
+                    }
+                }
             }
-            .frame(width: 40)
+            .frame(width: 40, height: markerHeight, alignment: .center)
 
             HStack(spacing: 6) {
                 if !target.station.stationCode.isEmpty {
                     StationNumberBadge(
                         code: target.station.stationCode,
                         color: target.line.color,
-                        opacity: isPast ? 0.6 : 1.0,
+                        opacity: isPast && !isCurrent ? 0.6 : 1.0,
                         size: .regular,
                         stationName: target.station.name,
                         styleOverride: journey.line.badgeStyle
                     )
                 }
                 Text(target.station.localizedName)
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(isPast ? .secondary : .primary)
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(isPast && !isCurrent ? .secondary : .primary)
                     .lineLimit(1)
             }
             .padding(.leading, 8)
@@ -243,9 +267,9 @@ struct VerticalLCDLine: View {
         .frame(minHeight: stationSpacing * 0.8, alignment: .top)
         .background(alignment: .topLeading) {
             trackSegment(filled: isPast, fillFraction: fillFraction, color: target.line.color)
-                .frame(width: trackWidth)
-                .padding(.top, circleRadius)
-                .padding(.leading, 56 + 20 - trackWidth / 2)
+                .frame(width: trackWidth, height: stationSpacing * 0.8)
+                .padding(.top, markerHeight / 2)
+                .padding(.leading, timeColumnWidth + 20 - trackWidth / 2)
         }
     }
 
@@ -304,62 +328,22 @@ struct VerticalLCDLine: View {
     @ViewBuilder
     private func stationLabel(station: Station, isPast: Bool, isCurrent: Bool, isNext: Bool, isTerminal: Bool, isTransfer: Bool = false, color: Color? = nil) -> some View {
         let accent = color ?? lineColor
-        VStack(alignment: .leading, spacing: 2) {
-            HStack(spacing: 6) {
-                if !station.stationCode.isEmpty {
-                    StationNumberBadge(
-                        code: station.stationCode,
-                        color: accent,
-                        opacity: isPast && !isCurrent ? 0.4 : 1.0,
-                        size: .regular,
-                        stationName: station.name,
-                        styleOverride: journey.line.badgeStyle
-                    )
-                }
-
-                Text(station.localizedName)
-                    .font(.system(size: isCurrent || isTerminal || isTransfer ? 18 : 15,
-                                  weight: isCurrent || isTerminal || isTransfer ? .bold : .medium))
-                    .foregroundColor(isPast && !isCurrent ? .secondary : .primary)
+        HStack(spacing: 6) {
+            if !station.stationCode.isEmpty {
+                StationNumberBadge(
+                    code: station.stationCode,
+                    color: accent,
+                    opacity: isPast && !isCurrent ? 0.4 : 1.0,
+                    size: .regular,
+                    stationName: station.name,
+                    styleOverride: journey.line.badgeStyle
+                )
             }
 
-            if isTransfer {
-                HStack(spacing: 3) {
-                    Image(systemName: "arrow.triangle.2.circlepath")
-                        .font(.system(size: 9, weight: .bold))
-                    Text("Label.Transfer")
-                        .font(.system(size: 10, weight: .bold))
-                }
-                .foregroundColor(.orange)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 3)
-                .background(Color.orange.opacity(isPast && !isCurrent ? 0.08 : 0.15))
-                .clipShape(Capsule())
-                .padding(.top, 2)
-                .opacity(isPast && !isCurrent ? 0.5 : 1.0)
-            }
-
-            if isCurrent {
-                Text("Label.CurrentLocation")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(accent)
-                    .clipShape(Capsule())
-                    .padding(.top, 2)
-            }
-
-            if isNext && !isCurrent {
-                Text("Label.NextStop")
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundColor(accent)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(accent.opacity(0.1))
-                    .clipShape(Capsule())
-                    .padding(.top, 2)
-            }
+            Text(station.localizedName)
+                .font(.system(size: isCurrent || isTerminal || isTransfer ? 18 : 15,
+                              weight: isCurrent || isTerminal || isTransfer ? .bold : .medium))
+                .foregroundColor(isPast && !isCurrent ? .secondary : .primary)
         }
         .padding(.leading, 8)
     }

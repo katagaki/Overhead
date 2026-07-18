@@ -302,9 +302,6 @@ struct JourneyPlannerSection: View {
                 }
                 .pickerStyle(.segmented)
                 .onChange(of: departureMode) { _, _ in
-                    if departureMode == .scheduled {
-                        departureDate = max(departureDate, Date())
-                    }
                     invalidateResults()
                 }
 
@@ -312,7 +309,7 @@ struct JourneyPlannerSection: View {
                     DatePicker(
                         "Setup.DepartureTime",
                         selection: $departureDate,
-                        in: Date()...Date().addingTimeInterval(7 * 86400),
+                        in: Date().addingTimeInterval(-7 * 86400)...Date().addingTimeInterval(7 * 86400),
                         displayedComponents: [.date, .hourAndMinute]
                     )
                     .datePickerStyle(.compact)
@@ -714,16 +711,6 @@ struct JourneyPlannerSection: View {
                             .font(.system(size: 12, weight: .semibold, design: .rounded))
                             .foregroundColor(.secondary)
                             .fixedSize()
-                    }
-
-                    if index < candidate.legs.count - 1 {
-                        Text("Candidate.TransferBadge")
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(.orange)
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 1)
-                            .background(Color.orange.opacity(0.15))
-                            .clipShape(Capsule())
                     }
 
                     Spacer(minLength: 0)
