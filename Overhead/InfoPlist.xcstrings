@@ -14,7 +14,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "オーバートレイン"
+            "value" : "OVトレイン"
           }
         },
         "ko" : {
@@ -39,35 +39,35 @@
     },
     "CFBundleName" : {
       "comment" : "Bundle name",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Overhead"
+            "state" : "translated",
+            "value" : "Overtrain"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "オーバートレイン"
+            "state" : "translated",
+            "value" : "OVトレイン"
           }
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Overtrain"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Overtrain"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Overtrain"
           }
         }
@@ -146,7 +146,38 @@
       }
     },
     "Overhead Line Package" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overtrain Line"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オーバートレインマイ路線"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overtrain 기차 노선"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overtrain电车线"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overtrain電車線"
+          }
+        }
+      }
     }
   },
   "version" : "1.2"
