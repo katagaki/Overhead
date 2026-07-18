@@ -92,9 +92,7 @@ struct JourneyPlannerSection: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            stationCard
-
-            customizationSection
+            plannerCard
 
             searchButton
 
@@ -148,9 +146,33 @@ struct JourneyPlannerSection: View {
         }
     }
 
-    // MARK: - Station Card
+    // MARK: - Planner Card
 
-    private var stationCard: some View {
+    private var plannerCard: some View {
+        VStack(spacing: 0) {
+            stationRows
+
+            Divider()
+
+            customizationRow
+        }
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .sheet(isPresented: $showAvoidLinesSheet) {
+            AvoidLinesSheet(
+                lines: viewModel.availableLines,
+                avoidedLineIds: avoidedLineIdsBinding
+            )
+        }
+        .sheet(isPresented: $showDepartureTimeSheet) {
+            DepartureTimeSheet(
+                departureMode: $departureMode,
+                departureDate: $departureDate
+            )
+        }
+    }
+
+    private var stationRows: some View {
         HStack(spacing: 12) {
             VStack(spacing: 0) {
                 stationField(label: "Setup.From", selection: fromSelection) {
@@ -198,8 +220,6 @@ struct JourneyPlannerSection: View {
             }
         }
         .padding(14)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
     }
 
     @ViewBuilder
@@ -292,51 +312,30 @@ struct JourneyPlannerSection: View {
         .frame(height: 10)
     }
 
-    // MARK: - Customization Section
+    // MARK: - Customization Row
 
-    private var customizationSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Setup.Customize")
-                .font(.body.weight(.semibold))
-                .foregroundColor(.secondary)
-                .padding(.leading, 4)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(alignment: .top, spacing: 4) {
-                    departureTimeItem
-                    walkingSpeedItem
-                    avoidLinesItem
-                    ignoreTimetableItem
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 14)
+    private var customizationRow: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(alignment: .top, spacing: 4) {
+                departureTimeItem
+                walkingSpeedItem
+                avoidLinesItem
+                ignoreTimetableItem
             }
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
-            .onChange(of: walkingSpeedRaw) { _, _ in
-                invalidateResults()
-            }
-            .onChange(of: ignoreTimetable) { _, _ in
-                invalidateResults()
-            }
-            .onChange(of: departureMode) { _, _ in
-                invalidateResults()
-            }
-            .onChange(of: departureDate) { _, _ in
-                invalidateResults()
-            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 14)
         }
-        .sheet(isPresented: $showAvoidLinesSheet) {
-            AvoidLinesSheet(
-                lines: viewModel.availableLines,
-                avoidedLineIds: avoidedLineIdsBinding
-            )
+        .onChange(of: walkingSpeedRaw) { _, _ in
+            invalidateResults()
         }
-        .sheet(isPresented: $showDepartureTimeSheet) {
-            DepartureTimeSheet(
-                departureMode: $departureMode,
-                departureDate: $departureDate
-            )
+        .onChange(of: ignoreTimetable) { _, _ in
+            invalidateResults()
+        }
+        .onChange(of: departureMode) { _, _ in
+            invalidateResults()
+        }
+        .onChange(of: departureDate) { _, _ in
+            invalidateResults()
         }
     }
 
@@ -844,6 +843,10 @@ struct JourneyPlannerSection: View {
             ]
             try? await Task.sleep(for: .seconds(1))
             showAvoidLinesSheet = true
+        case .departure:
+            departureMode = .scheduled
+            try? await Task.sleep(for: .seconds(1))
+            showDepartureTimeSheet = true
         }
     }
 #endif

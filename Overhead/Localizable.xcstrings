@@ -5208,6 +5208,41 @@
         }
       }
     },
+    "Setup.DepartNowHint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trains are searched using the current time."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在時刻で列車を検索します"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "현재 시각으로 열차를 검색합니다"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将按当前时间搜索列车"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "將依目前時間搜尋列車"
+          }
+        }
+      }
+    },
     "Setup.DepartureTime" : {
       "extractionState" : "manual",
       "localizations" : {

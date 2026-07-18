@@ -8,14 +8,16 @@ struct DepartureTimeSheet: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Picker("Setup.DepartureTime", selection: $departureMode) {
+            VStack(spacing: 0) {
+                Picker("Setup.DepartureTime", selection: $departureMode.animation()) {
                     Text("Setup.DepartNow").tag(JourneyPlannerSection.DepartureMode.now)
                     Text("Setup.DepartAt").tag(JourneyPlannerSection.DepartureMode.scheduled)
                 }
                 .pickerStyle(.segmented)
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets())
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
+
+                Spacer(minLength: 0)
 
                 if departureMode == .scheduled {
                     DatePicker(
@@ -24,9 +26,25 @@ struct DepartureTimeSheet: View {
                         in: Date().addingTimeInterval(-7 * 86400)...Date().addingTimeInterval(7 * 86400),
                         displayedComponents: [.date, .hourAndMinute]
                     )
-                    .datePickerStyle(.compact)
+                    .datePickerStyle(.wheel)
+                    .labelsHidden()
                     .environment(\.timeZone, TimeZone(identifier: "Asia/Tokyo")!)
+                    .frame(maxWidth: .infinity)
+                    .clipped()
+                } else {
+                    VStack(spacing: 10) {
+                        Image(systemName: "clock.badge.checkmark")
+                            .font(.system(size: 36))
+                            .foregroundStyle(.secondary)
+                        Text("Setup.DepartNowHint")
+                            .font(.system(size: 14))
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(.horizontal, 32)
                 }
+
+                Spacer(minLength: 0)
             }
             .navigationTitle("Setup.DepartureTime")
             .navigationBarTitleDisplayMode(.inline)

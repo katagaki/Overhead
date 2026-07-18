@@ -24,6 +24,7 @@ enum ScreenshotCommand {
     case journey(lineId: String, fromId: String, toId: String, minutesAgo: Double)
     case plannerSearch
     case plannerAvoid
+    case plannerDeparture
     case timetable(ScreenshotTimetableTarget, hidePast: Bool)
     case customLineEditor
     case reset
@@ -52,7 +53,11 @@ enum ScreenshotCommand {
                 minutesAgo: params["minutesAgo"].flatMap(Double.init) ?? 45
             )
         case "planner":
-            self = params["action"] == "avoid" ? .plannerAvoid : .plannerSearch
+            switch params["action"] {
+            case "avoid": self = .plannerAvoid
+            case "departure": self = .plannerDeparture
+            default: self = .plannerSearch
+            }
         case "timetable":
             self = .timetable(
                 ScreenshotTimetableTarget(
@@ -90,6 +95,7 @@ final class ScreenshotStaging: ObservableObject {
     enum PlannerCommand {
         case search
         case avoid
+        case departure
     }
 }
 
