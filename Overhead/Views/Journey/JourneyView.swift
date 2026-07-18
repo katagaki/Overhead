@@ -45,6 +45,13 @@ struct JourneyView: View {
                             lineColor: lineColor,
                             orientation: TrainLCDOrientation(rawValue: lcdOrientationRaw) ?? .left
                         )
+                        // PiP docks here so returning to the app animates
+                        // the PiP window into the LCD.
+                        .overlay {
+                            LCDPiPLayerHost()
+                                .frame(width: 1, height: 1)
+                                .allowsHitTesting(false)
+                        }
                         .padding(.horizontal, 12)
                         .padding(.bottom, 8)
                     }

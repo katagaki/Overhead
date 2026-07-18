@@ -43,7 +43,6 @@ struct KeihinTohokuLineLCDView: View {
             }
             .aspectRatio(16.0 / 9.0, contentMode: .fit)
             .modifier(LCDScreenClip())
-            .padding(6)
             .modifier(LCDBezel())
         }
     }

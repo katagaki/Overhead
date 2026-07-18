@@ -43,7 +43,6 @@ struct ShinkansenTickerView: View {
         }
         .aspectRatio(Self.designWidth / Self.designHeight, contentMode: .fit)
         .modifier(LCDScreenClip())
-        .padding(6)
         .modifier(LCDBezel())
     }
 

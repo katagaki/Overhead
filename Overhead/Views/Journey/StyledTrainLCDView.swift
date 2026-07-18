@@ -18,10 +18,22 @@ private struct LCDBezelCornerRadiusKey: EnvironmentKey {
 }
 
 extension EnvironmentValues {
-    /// Corner rounding of the glass bezel around the LCD; PiP squares it off.
+    /// Corner rounding of the glass bezel around the LCD.
     var lcdBezelCornerRadius: CGFloat {
         get { self[LCDBezelCornerRadiusKey.self] }
         set { self[LCDBezelCornerRadiusKey.self] = newValue }
+    }
+}
+
+private struct LCDBezelHiddenKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    /// PiP drops the bezel so the screen fills the window.
+    var lcdBezelHidden: Bool {
+        get { self[LCDBezelHiddenKey.self] }
+        set { self[LCDBezelHiddenKey.self] = newValue }
     }
 }
 
@@ -37,12 +49,20 @@ struct LCDScreenClip: ViewModifier {
 /// The glass bezel every LCD style wraps itself in.
 struct LCDBezel: ViewModifier {
     @Environment(\.lcdBezelCornerRadius) private var radius
+    @Environment(\.lcdBezelHidden) private var hidden
 
+    @ViewBuilder
     func body(content: Content) -> some View {
-        content.glassEffect(
-            .regular.tint(Color(red: 0.2, green: 0.26, blue: 0.33).opacity(0.4)),
-            in: RoundedRectangle(cornerRadius: radius)
-        )
+        if hidden {
+            content
+        } else {
+            content
+                .padding(6)
+                .glassEffect(
+                    .regular.tint(Color(red: 0.2, green: 0.26, blue: 0.33).opacity(0.4)),
+                    in: RoundedRectangle(cornerRadius: radius)
+                )
+        }
     }
 }
 

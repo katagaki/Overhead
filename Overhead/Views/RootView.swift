@@ -111,10 +111,14 @@ struct RootView: View {
             }
         }
 #endif
-        // Keeps the PiP sample-buffer layer in the hierarchy at all times.
+        // Keeps the PiP sample-buffer layer in the hierarchy while the
+        // journey sheet is closed; the sheet's LCD hosts it otherwise so the
+        // PiP restore animation lands on the LCD.
         .background {
-            LCDPiPLayerHost()
-                .frame(width: 1, height: 1)
+            if !showJourneySheet {
+                LCDPiPLayerHost()
+                    .frame(width: 1, height: 1)
+            }
         }
         .onChange(of: viewModel.activeJourney != nil) { _, hasJourney in
             guard hasJourney else {

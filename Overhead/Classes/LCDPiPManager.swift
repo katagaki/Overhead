@@ -27,6 +27,9 @@ final class LCDPiPManager: NSObject, ObservableObject {
     private override init() {
         super.init()
         displayLayer.videoGravity = .resizeAspect
+        // The host now sits over the in-app LCD; clip so the layer's live
+        // frames never paint on top of it.
+        hostView.clipsToBounds = true
         hostView.layer.addSublayer(displayLayer)
     }
 
@@ -106,7 +109,12 @@ final class LCDPiPManager: NSObject, ObservableObject {
         let renderer = displayLayer.sampleBufferRenderer
         if renderer.status == .failed { renderer.flush() }
         renderer.enqueue(buffer)
-        displayLayer.frame = CGRect(origin: .zero, size: image.size)
+        // Centered on the (1pt, LCD-centered) host so the PiP restore
+        // animation converges onto the in-app LCD.
+        displayLayer.frame = CGRect(
+            x: -image.size.width / 2, y: -image.size.height / 2,
+            width: image.size.width, height: image.size.height
+        )
     }
 
     private static func sampleBuffer(from image: UIImage) -> CMSampleBuffer? {
@@ -137,7 +145,7 @@ final class LCDPiPManager: NSObject, ObservableObject {
             space: CGColorSpaceCreateDeviceRGB(),
             bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
         ) else { return nil }
-        // Black under the LCD bezel's rounded corners, matching the PiP window.
+        // Black under the LCD screen's rounded corners, matching the PiP window.
         context.setFillColor(CGColor(gray: 0, alpha: 1))
         context.fill(CGRect(x: 0, y: 0, width: width, height: height))
         context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
@@ -273,16 +281,16 @@ extension JourneyViewModel {
         )
         .frame(width: 360)
 
-        // Unpadded (PiP) frames square off the bezel to fill the window and
-        // get a rounder screen — radius 6 reads too square at PiP-window
-        // size, and the iPhone's smaller window needs more still.
+        // Unpadded (PiP) frames drop the bezel so the screen fills the
+        // window, and get a rounder screen — radius 6 reads too square at
+        // PiP-window size, and the iPhone's smaller window needs more still.
         let isPhone = UIDevice.current.userInterfaceIdiom == .phone
         let content = padded
             ? AnyView(lcd.padding(12).background(Color(.systemBackground)))
             : AnyView(
                 lcd
                     .environment(\.lcdScreenCornerRadius, isPhone ? 22 : 12)
-                    .environment(\.lcdBezelCornerRadius, 0)
+                    .environment(\.lcdBezelHidden, true)
             )
         let renderer = ImageRenderer(content: content)
         renderer.scale = scale
