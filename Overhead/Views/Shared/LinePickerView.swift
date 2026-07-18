@@ -55,21 +55,11 @@ struct StationPickerView: View {
     let line: TrainLine
     @ObservedObject var viewModel: JourneyViewModel
     @State private var selectedDirectionIndex = 0
-    @State private var showServiceStatus = false
-    @StateObject private var serviceStatusWeb: ServiceStatusWebController
+    @Environment(\.serviceStatusPresenter) private var serviceStatusPresenter
 
-    private let delayInfo: DelayCheckInfo?
     private let trackWidth: CGFloat = 4
     private let dotColumnWidth: CGFloat = 24
     private let cardPadding: CGFloat = 16
-
-    init(line: TrainLine, viewModel: JourneyViewModel) {
-        self.line = line
-        self.viewModel = viewModel
-        let info = viewModel.delayCheckInfo(for: line.id)
-        self.delayInfo = info
-        _serviceStatusWeb = StateObject(wrappedValue: ServiceStatusWebController(delayInfo: info))
-    }
 
     private var staticLine: StaticTrainLine? {
         StaticTrainData.line(withId: line.id)
@@ -132,16 +122,14 @@ struct StationPickerView: View {
                     .padding(.bottom, 8)
             }
         }
-        .sheet(isPresented: $showServiceStatus) {
-            if let delayInfo {
-                ServiceStatusSheet(delayInfo: delayInfo, web: serviceStatusWeb)
-            }
-        }
         .onAppear {
-            showServiceStatus = delayInfo != nil
+            serviceStatusPresenter?.activate(
+                lineId: line.id,
+                delayInfo: viewModel.delayCheckInfo(for: line.id)
+            )
         }
         .onDisappear {
-            showServiceStatus = false
+            serviceStatusPresenter?.deactivate(lineId: line.id)
         }
         .navigationTitle(line.localizedName)
         .navigationBarTitleDisplayMode(.inline)

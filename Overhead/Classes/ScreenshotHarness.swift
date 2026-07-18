@@ -92,7 +92,7 @@ struct ScreenshotTimetableTarget: Identifiable {
     var id: String { stationId }
 }
 
-struct ScreenshotLineTarget: Identifiable {
+struct ScreenshotLineTarget: Identifiable, Hashable {
     let lineId: String
     let expandStatus: Bool
     let showX: Bool

@@ -10,6 +10,7 @@ import Backbone
 struct ServiceStatusSheet: View {
     static let peekHeight: CGFloat = 72
 
+    let lineId: String
     let delayInfo: DelayCheckInfo
     @ObservedObject var web: ServiceStatusWebController
     @State private var source: ServiceStatusSource = .official
@@ -95,12 +96,19 @@ struct ServiceStatusSheet: View {
         .presentationContentInteraction(.scrolls)
         .presentationDragIndicator(.visible)
         .interactiveDismissDisabled()
+        // The sheet stays up while pushing between line pages; start each line at peek.
+        .onChange(of: lineId) {
+            detent = .height(Self.peekHeight)
+            source = .official
+        }
 #if DEBUG
         .onAppear {
             if ScreenshotStaging.shared.expandServiceStatus {
+                ScreenshotStaging.shared.expandServiceStatus = false
                 detent = .large
             }
             if ScreenshotStaging.shared.serviceStatusShowsX {
+                ScreenshotStaging.shared.serviceStatusShowsX = false
                 source = .x
             }
         }
@@ -119,6 +127,88 @@ struct ServiceStatusSheet: View {
 enum ServiceStatusSource {
     case official
     case x
+}
+
+// MARK: - Presenter
+
+/// Single owner of the 運行情報 sheet across line pages. Pushing from one line
+/// to another swaps the sheet's content in place instead of racing the old
+/// page's dismissal against the new page's presentation.
+@MainActor
+final class ServiceStatusPresenter: ObservableObject {
+    struct Context {
+        let lineId: String
+        let delayInfo: DelayCheckInfo
+        let web: ServiceStatusWebController
+    }
+
+    @Published private(set) var context: Context?
+
+    func activate(lineId: String, delayInfo: DelayCheckInfo?) {
+        guard let delayInfo else {
+            deactivate(lineId: lineId)
+            return
+        }
+        guard context?.lineId != lineId else { return }
+        context = Context(
+            lineId: lineId,
+            delayInfo: delayInfo,
+            web: ServiceStatusWebController(delayInfo: delayInfo)
+        )
+    }
+
+    /// A push fires the incoming page's onAppear before the outgoing page's
+    /// onDisappear, so only the current owner may clear the sheet.
+    func deactivate(lineId: String) {
+        if context?.lineId == lineId {
+            context = nil
+        }
+    }
+
+    func dismiss() {
+        context = nil
+    }
+}
+
+private struct ServiceStatusPresenterKey: EnvironmentKey {
+    static let defaultValue: ServiceStatusPresenter? = nil
+}
+
+extension EnvironmentValues {
+    var serviceStatusPresenter: ServiceStatusPresenter? {
+        get { self[ServiceStatusPresenterKey.self] }
+        set { self[ServiceStatusPresenterKey.self] = newValue }
+    }
+}
+
+// MARK: - Host
+
+private struct ServiceStatusHost: ViewModifier {
+    @ObservedObject var presenter: ServiceStatusPresenter
+
+    func body(content: Content) -> some View {
+        content
+            .environment(\.serviceStatusPresenter, presenter)
+            .sheet(isPresented: Binding(
+                get: { presenter.context != nil },
+                set: { if !$0 { presenter.dismiss() } }
+            )) {
+                if let context = presenter.context {
+                    ServiceStatusSheet(
+                        lineId: context.lineId,
+                        delayInfo: context.delayInfo,
+                        web: context.web
+                    )
+                }
+            }
+    }
+}
+
+extension View {
+    /// Hosts the 運行情報 sheet for any line page pushed inside this hierarchy.
+    func serviceStatusHost(_ presenter: ServiceStatusPresenter) -> some View {
+        modifier(ServiceStatusHost(presenter: presenter))
+    }
 }
 
 // MARK: - Web Controller
