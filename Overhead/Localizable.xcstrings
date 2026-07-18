@@ -584,7 +584,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Refresh delay info"
+            "value" : "Refresh Delay Info"
           }
         },
         "ja" : {
@@ -1618,7 +1618,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Next stop"
+            "value" : "Next Stop"
           }
         },
         "ja" : {
@@ -2762,7 +2762,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Avoid lines"
+            "value" : "Avoid Lines"
           }
         },
         "ja" : {
@@ -2797,7 +2797,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Clear all"
+            "value" : "Clear All"
           }
         },
         "ja" : {
@@ -2832,7 +2832,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Select all"
+            "value" : "Select All"
           }
         },
         "ja" : {
@@ -2867,7 +2867,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Choose a train"
+            "value" : "Choose a Train"
           }
         },
         "ja" : {
@@ -2937,7 +2937,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Depart at"
+            "value" : "Depart At"
           }
         },
         "ja" : {
@@ -2972,7 +2972,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Leave now"
+            "value" : "Leave Now"
           }
         },
         "ja" : {
@@ -3007,7 +3007,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Departure time"
+            "value" : "Departure Time"
           }
         },
         "ja" : {
@@ -3077,7 +3077,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ignore timetable"
+            "value" : "Ignore Timetable"
           }
         },
         "ja" : {
@@ -3217,7 +3217,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Choose a route"
+            "value" : "Choose a Route"
           }
         },
         "ja" : {
@@ -3252,7 +3252,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Search again"
+            "value" : "Search Again"
           }
         },
         "ja" : {
@@ -3322,7 +3322,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Select a station"
+            "value" : "Select a Station"
           }
         },
         "ja" : {
@@ -3496,7 +3496,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Walking speed"
+            "value" : "Walking Speed"
           }
         },
         "ja" : {
@@ -3911,7 +3911,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Open official status page"
+            "value" : "Open Official Status Page"
           }
         },
         "ja" : {
