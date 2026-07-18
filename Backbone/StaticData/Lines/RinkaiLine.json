@@ -4,8 +4,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the Tokyo Waterfront Area Rapid Transit (Rinkai Line) service information page. Delays and suspensions are posted as they occur.",
             "checkMethodJa": "東京臨海高速鉄道（りんかい線）の運行情報ページで確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.twr.co.jp/",
-            "statusPageURLEn": "https://www.twr.co.jp/en/"
+            "statusPageURL": "https://service.twr.co.jp/rinkai/public/information?lang=ja",
+            "statusPageURLEn": "https://service.twr.co.jp/rinkai/public/information?lang=en",
+            "xAccount": "@twr_official"
         },
         "directions": [
             {

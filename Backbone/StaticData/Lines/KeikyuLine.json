@@ -5,7 +5,8 @@
             "checkMethodEn": "Check the Keikyu train operation information page or the Keikyu app. Delays and suspensions are posted as they occur.",
             "checkMethodJa": "京急電鉄「運行情報」ページまたは京急線アプリで確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
             "statusPageURL": "https://unkou.keikyu.co.jp/",
-            "statusPageURLEn": "https://www.keikyu.co.jp/visit/"
+            "statusPageURLEn": "https://unkou.keikyu.co.jp/",
+            "xAccount": "@keikyu_official"
         },
         "directions": [
             {
@@ -5626,7 +5627,8 @@
             "checkMethodEn": "Check the Keikyu train operation information page or the Keikyu app. Delays and suspensions are posted as they occur.",
             "checkMethodJa": "京急電鉄「運行情報」ページまたは京急線アプリで確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
             "statusPageURL": "https://unkou.keikyu.co.jp/",
-            "statusPageURLEn": "https://www.keikyu.co.jp/visit/"
+            "statusPageURLEn": "https://unkou.keikyu.co.jp/",
+            "xAccount": "@keikyu_official"
         },
         "directions": [
             {
@@ -9905,7 +9907,8 @@
             "checkMethodEn": "Check the Keikyu train operation information page or the Keikyu app. Delays and suspensions are posted as they occur.",
             "checkMethodJa": "京急電鉄「運行情報」ページまたは京急線アプリで確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
             "statusPageURL": "https://unkou.keikyu.co.jp/",
-            "statusPageURLEn": "https://www.keikyu.co.jp/visit/"
+            "statusPageURLEn": "https://unkou.keikyu.co.jp/",
+            "xAccount": "@keikyu_official"
         },
         "directions": [
             {
@@ -12689,7 +12692,8 @@
             "checkMethodEn": "Check the Keikyu train operation information page or the Keikyu app. Delays and suspensions are posted as they occur.",
             "checkMethodJa": "京急電鉄「運行情報」ページまたは京急線アプリで確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
             "statusPageURL": "https://unkou.keikyu.co.jp/",
-            "statusPageURLEn": "https://www.keikyu.co.jp/visit/"
+            "statusPageURLEn": "https://unkou.keikyu.co.jp/",
+            "xAccount": "@keikyu_official"
         },
         "directions": [
             {

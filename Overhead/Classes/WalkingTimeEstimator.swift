@@ -26,10 +26,11 @@ final class WalkingTimeEstimator: NSObject, ObservableObject, CLLocationManagerD
         let accessSeconds = speed.stationAccessMinutes * 60
 
         let request = MKDirections.Request()
-        request.source = MKMapItem(placemark: MKPlacemark(coordinate: origin.coordinate))
-        request.destination = MKMapItem(placemark: MKPlacemark(
-            coordinate: CLLocationCoordinate2D(latitude: lat, longitude: lon)
-        ))
+        request.source = MKMapItem(location: origin, address: nil)
+        request.destination = MKMapItem(
+            location: CLLocation(latitude: lat, longitude: lon),
+            address: nil
+        )
         request.transportType = .walking
 
         if let eta = try? await MKDirections(request: request).calculateETA() {

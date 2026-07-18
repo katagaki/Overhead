@@ -4,8 +4,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the Yokohama City Transportation Bureau website for service information. Delays and suspensions are posted as they occur.",
             "checkMethodJa": "横浜市交通局の公式サイトで運行情報を確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.city.yokohama.lg.jp/kotsu/",
-            "statusPageURLEn": "https://www.city.yokohama.lg.jp/lang/residents/en/"
+            "statusPageURL": "https://status.hamabus.city.yokohama.lg.jp/operation/list",
+            "statusPageURLEn": "https://status.hamabus.city.yokohama.lg.jp/operation/list",
+            "xAccount": "@yokohama_koutuu"
         },
         "directions": [
             {

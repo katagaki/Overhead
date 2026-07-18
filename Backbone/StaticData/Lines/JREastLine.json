@@ -4,8 +4,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the JR East Train Operation Information page or the JR East app. In the Tokyo area, delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "JR東日本「列車運行情報」ページまたはJR東日本アプリで確認できます。首都圏エリアでは15分以上の遅れ・運休が発生または見込まれる場合に掲載されます。",
-            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/kanto.aspx",
-            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx"
+            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/line.aspx?gid=1&lineid=yamanoteline",
+            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx",
+            "xAccount": "@JRE_F_Tokaido"
         },
         "directions": [
             {
@@ -9824,8 +9825,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the JR East Train Operation Information page or the JR East app. In the Tokyo area, delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "JR東日本「列車運行情報」ページまたはJR東日本アプリで確認できます。首都圏エリアでは15分以上の遅れ・運休が発生または見込まれる場合に掲載されます。",
-            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/kanto.aspx",
-            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx"
+            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/line.aspx?gid=1&lineid=chuoline_rapidservice",
+            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx",
+            "xAccount": "@JRE_F_Chuo"
         },
         "directions": [
             {
@@ -15562,8 +15564,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the JR East Train Operation Information page or the JR East app. In the Tokyo area, delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "JR東日本「列車運行情報」ページまたはJR東日本アプリで確認できます。首都圏エリアでは15分以上の遅れ・運休が発生または見込まれる場合に掲載されます。",
-            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/kanto.aspx",
-            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx"
+            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/line.aspx?gid=1&lineid=chuo_sobuline_local",
+            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx",
+            "xAccount": "@JRE_F_Chuo"
         },
         "directions": [
             {
@@ -23830,8 +23833,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the JR East Train Operation Information page or the JR East app. In the Tokyo area, delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "JR東日本「列車運行情報」ページまたはJR東日本アプリで確認できます。首都圏エリアでは15分以上の遅れ・運休が発生または見込まれる場合に掲載されます。",
-            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/kanto.aspx",
-            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx"
+            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/line.aspx?gid=1&lineid=keihin-tohokuline",
+            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx",
+            "xAccount": "@JRE_F_Tokaido"
         },
         "directions": [
             {
@@ -32827,8 +32831,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the JR East Train Operation Information page or the JR East app. In the Tokyo area, delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "JR東日本「列車運行情報」ページまたはJR東日本アプリで確認できます。首都圏エリアでは15分以上の遅れ・運休が発生または見込まれる場合に掲載されます。",
-            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/kanto.aspx",
-            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx"
+            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/line.aspx?gid=1&lineid=saikyoline",
+            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx",
+            "xAccount": "@JRE_F_Toho_Taka"
         },
         "directions": [
             {
@@ -41797,8 +41802,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the JR East Train Operation Information page or the JR East app. In the Tokyo area, delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "JR東日本「列車運行情報」ページまたはJR東日本アプリで確認できます。首都圏エリアでは15分以上の遅れ・運休が発生または見込まれる場合に掲載されます。",
-            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/kanto.aspx",
-            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx"
+            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/line.aspx?gid=1&lineid=keiyoline",
+            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx",
+            "xAccount": "@JRE_F_Sobu"
         },
         "directions": [
             {
@@ -49578,8 +49584,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the JR East Train Operation Information page or the JR East app. In the Tokyo area, delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "JR東日本「列車運行情報」ページまたはJR東日本アプリで確認できます。首都圏エリアでは15分以上の遅れ・運休が発生または見込まれる場合に掲載されます。",
-            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/kanto.aspx",
-            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx"
+            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/line.aspx?gid=1&lineid=jobanline_rapidservice",
+            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx",
+            "xAccount": "@JRE_F_Joban"
         },
         "directions": [
             {
@@ -53320,8 +53327,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the JR East Train Operation Information page or the JR East app. In the Tokyo area, delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "JR東日本「列車運行情報」ページまたはJR東日本アプリで確認できます。首都圏エリアでは15分以上の遅れ・運休が発生または見込まれる場合に掲載されます。",
-            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/kanto.aspx",
-            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx"
+            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/line.aspx?gid=1&lineid=jobanline_local",
+            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx",
+            "xAccount": "@JRE_F_Joban"
         },
         "directions": [
             {
@@ -57249,8 +57257,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the JR East Train Operation Information page or the JR East app. In the Tokyo area, delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "JR東日本「列車運行情報」ページまたはJR東日本アプリで確認できます。首都圏エリアでは15分以上の遅れ・運休が発生または見込まれる場合に掲載されます。",
-            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/kanto.aspx",
-            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx"
+            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/line.aspx?gid=1&lineid=yokosukaline",
+            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx",
+            "xAccount": "@JRE_F_Tokaido"
         },
         "directions": [
             {
@@ -64339,8 +64348,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the JR East Train Operation Information page or the JR East app. In the Tokyo area, delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "JR東日本「列車運行情報」ページまたはJR東日本アプリで確認できます。首都圏エリアでは15分以上の遅れ・運休が発生または見込まれる場合に掲載されます。",
-            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/kanto.aspx",
-            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx"
+            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/line.aspx?gid=1&lineid=tokaidoline",
+            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx",
+            "xAccount": "@JRE_F_Tokaido"
         },
         "directions": [
             {
@@ -71455,8 +71465,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the JR East Train Operation Information page or the JR East app. In the Tokyo area, delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "JR東日本「列車運行情報」ページまたはJR東日本アプリで確認できます。首都圏エリアでは15分以上の遅れ・運休が発生または見込まれる場合に掲載されます。",
-            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/kanto.aspx",
-            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx"
+            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/line.aspx?gid=1&lineid=shonan-shinjukuline",
+            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx",
+            "xAccount": "@JRE_F_Toho_Taka"
         },
         "directions": [
             {
@@ -74175,8 +74186,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the JR East Train Operation Information page or the JR East app. In the Tokyo area, delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "JR東日本「列車運行情報」ページまたはJR東日本アプリで確認できます。首都圏エリアでは15分以上の遅れ・運休が発生または見込まれる場合に掲載されます。",
-            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/kanto.aspx",
-            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx"
+            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/line.aspx?gid=1&lineid=utsunomiyaline",
+            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx",
+            "xAccount": "@JRE_F_Toho_Taka"
         },
         "directions": [
             {
@@ -78425,8 +78437,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the JR East Train Operation Information page or the JR East app. In the Tokyo area, delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "JR東日本「列車運行情報」ページまたはJR東日本アプリで確認できます。首都圏エリアでは15分以上の遅れ・運休が発生または見込まれる場合に掲載されます。",
-            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/kanto.aspx",
-            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx"
+            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/line.aspx?gid=1&lineid=takasakiline",
+            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx",
+            "xAccount": "@JRE_F_Toho_Taka"
         },
         "directions": [
             {
@@ -82729,8 +82742,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the JR East Train Operation Information page or the JR East app. In the Tokyo area, delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "JR東日本「列車運行情報」ページまたはJR東日本アプリで確認できます。首都圏エリアでは15分以上の遅れ・運休が発生または見込まれる場合に掲載されます。",
-            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/kanto.aspx",
-            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx"
+            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/line.aspx?gid=1&lineid=yokohamaline",
+            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx",
+            "xAccount": "@JRE_F_Tokaido"
         },
         "directions": [
             {
@@ -88698,8 +88712,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the JR East Train Operation Information page or the JR East app. In the Tokyo area, delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "JR東日本「列車運行情報」ページまたはJR東日本アプリで確認できます。首都圏エリアでは15分以上の遅れ・運休が発生または見込まれる場合に掲載されます。",
-            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/kanto.aspx",
-            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx"
+            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/line.aspx?gid=1&lineid=nambuline",
+            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx",
+            "xAccount": "@JRE_F_Tokaido"
         },
         "directions": [
             {
@@ -95730,8 +95745,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the JR East Train Operation Information page or the JR East app. In the Tokyo area, delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "JR東日本「列車運行情報」ページまたはJR東日本アプリで確認できます。首都圏エリアでは15分以上の遅れ・運休が発生または見込まれる場合に掲載されます。",
-            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/kanto.aspx",
-            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx"
+            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/line.aspx?gid=1&lineid=musashinoline",
+            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx",
+            "xAccount": "@JRE_F_Chuo"
         },
         "directions": [
             {
@@ -101134,8 +101150,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the JR East Train Operation Information page or the JR East app. In the Tokyo area, delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "JR東日本「列車運行情報」ページまたはJR東日本アプリで確認できます。首都圏エリアでは15分以上の遅れ・運休が発生または見込まれる場合に掲載されます。",
-            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/kanto.aspx",
-            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx"
+            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/line.aspx?gid=1&lineid=keiyoline",
+            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx",
+            "xAccount": "@JRE_F_Sobu"
         },
         "directions": [
             {
@@ -101282,8 +101299,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the JR East Train Operation Information page or the JR East app. In the Tokyo area, delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "JR東日本「列車運行情報」ページまたはJR東日本アプリで確認できます。首都圏エリアでは15分以上の遅れ・運休が発生または見込まれる場合に掲載されます。",
-            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/kanto.aspx",
-            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx"
+            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/line.aspx?gid=1&lineid=omeline",
+            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx",
+            "xAccount": "@JRE_F_Chuo"
         },
         "directions": [
             {
@@ -106169,8 +106187,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the JR East Train Operation Information page or the JR East app. In the Tokyo area, delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "JR東日本「列車運行情報」ページまたはJR東日本アプリで確認できます。首都圏エリアでは15分以上の遅れ・運休が発生または見込まれる場合に掲載されます。",
-            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/kanto.aspx",
-            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx"
+            "statusPageURL": "https://traininfo.jreast.co.jp/train_info/line.aspx?gid=1&lineid=itsukaichiline",
+            "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx",
+            "xAccount": "@JRE_F_Chuo"
         },
         "directions": [
             {

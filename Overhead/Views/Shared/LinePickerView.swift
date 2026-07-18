@@ -55,10 +55,21 @@ struct StationPickerView: View {
     let line: TrainLine
     @ObservedObject var viewModel: JourneyViewModel
     @State private var selectedDirectionIndex = 0
+    @State private var showServiceStatus = false
+    @StateObject private var serviceStatusWeb: ServiceStatusWebController
 
+    private let delayInfo: DelayCheckInfo?
     private let trackWidth: CGFloat = 4
     private let dotColumnWidth: CGFloat = 24
     private let cardPadding: CGFloat = 16
+
+    init(line: TrainLine, viewModel: JourneyViewModel) {
+        self.line = line
+        self.viewModel = viewModel
+        let info = viewModel.delayCheckInfo(for: line.id)
+        self.delayInfo = info
+        _serviceStatusWeb = StateObject(wrappedValue: ServiceStatusWebController(delayInfo: info))
+    }
 
     private var staticLine: StaticTrainLine? {
         StaticTrainData.line(withId: line.id)
@@ -103,11 +114,6 @@ struct StationPickerView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 8) {
-                if directionOptions.count > 1 {
-                    directionPicker
-                        .padding(.bottom, 6)
-                }
-
                 stationsHeader
 
                 stationsCard
@@ -115,13 +121,27 @@ struct StationPickerView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
         }
+        .contentMargins(.bottom, ServiceStatusSheet.peekHeight + 12, for: .scrollContent)
         .background(Color(.systemGroupedBackground))
         .safeAreaInset(edge: .top) {
-            if let delayInfo = viewModel.delayCheckInfo(for: line.id) {
-                ServiceStatusSection(delayInfo: delayInfo)
+            if directionOptions.count > 1 {
+                directionPicker
+                    .padding(12)
+                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
                     .padding(.horizontal, 16)
                     .padding(.bottom, 8)
             }
+        }
+        .sheet(isPresented: $showServiceStatus) {
+            if let delayInfo {
+                ServiceStatusSheet(delayInfo: delayInfo, web: serviceStatusWeb)
+            }
+        }
+        .onAppear {
+            showServiceStatus = delayInfo != nil
+        }
+        .onDisappear {
+            showServiceStatus = false
         }
         .navigationTitle(line.localizedName)
         .navigationBarTitleDisplayMode(.inline)

@@ -15,6 +15,7 @@ struct RootView: View {
 #if DEBUG
     // Screenshot harness (overtrain:// deep links, see ScreenshotHarness.swift).
     @State private var debugTimetableTarget: ScreenshotTimetableTarget?
+    @State private var debugLineTarget: ScreenshotLineTarget?
 #endif
     @Namespace private var journeyZoom
 
@@ -98,6 +99,13 @@ struct RootView: View {
                let station = line.stations.first(where: { $0.id == target.stationId }) {
                 NavigationStack {
                     StationTimetableView(station: station, line: line, viewModel: viewModel)
+                }
+            }
+        }
+        .sheet(item: $debugLineTarget) { target in
+            if let line = viewModel.availableLines.first(where: { $0.id == target.lineId }) {
+                NavigationStack {
+                    StationPickerView(line: line, viewModel: viewModel)
                 }
             }
         }
@@ -236,6 +244,10 @@ struct RootView: View {
             viewModel.loadStationTimetable(stationId: target.stationId)
             try? await Task.sleep(for: .seconds(1))
             debugTimetableTarget = target
+        case .linePage(let target):
+            ScreenshotStaging.shared.expandServiceStatus = target.expandStatus
+            ScreenshotStaging.shared.serviceStatusShowsX = target.showX
+            debugLineTarget = target
         case .customLineEditor:
             ScreenshotSeeder.seedCustomLine()
             try? await Task.sleep(for: .seconds(0.5))
@@ -243,6 +255,7 @@ struct RootView: View {
         case .reset:
             viewModel.stopJourney()
             debugTimetableTarget = nil
+            debugLineTarget = nil
             navigationPath = NavigationPath()
             UserDefaults.standard.removeObject(forKey: "journey.setup.stations")
             UserDefaults.standard.removeObject(forKey: "journey.avoidedLines")

@@ -4,8 +4,8 @@
         "delayInfo": {
             "checkMethodEn": "Check the Odakyu train information page, the Odakyu app, or X (@odakyuline_info). Delays and suspensions are posted as they occur.",
             "checkMethodJa": "小田急電鉄「運行情報」ページ、小田急アプリ、またはX（@odakyuline_info）で確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.odakyu.jp/train/unkou/",
-            "statusPageURLEn": "https://www.odakyu.jp/english/",
+            "statusPageURL": "https://traininfo.odakyu-rt.jp/train_status",
+            "statusPageURLEn": "https://traininfo.odakyu-rt.jp/train_status",
             "xAccount": "@odakyuline_info"
         },
         "directions": [
@@ -5299,8 +5299,8 @@
         "delayInfo": {
             "checkMethodEn": "Check the Odakyu train information page, the Odakyu app, or X (@odakyuline_info). Delays and suspensions are posted as they occur.",
             "checkMethodJa": "小田急電鉄「運行情報」ページ、小田急アプリ、またはX（@odakyuline_info）で確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.odakyu.jp/train/unkou/",
-            "statusPageURLEn": "https://www.odakyu.jp/english/",
+            "statusPageURL": "https://traininfo.odakyu-rt.jp/train_status",
+            "statusPageURLEn": "https://traininfo.odakyu-rt.jp/train_status",
             "xAccount": "@odakyuline_info"
         },
         "directions": [
@@ -7054,8 +7054,8 @@
         "delayInfo": {
             "checkMethodEn": "Check the Odakyu train information page, the Odakyu app, or X (@odakyuline_info). Delays and suspensions are posted as they occur.",
             "checkMethodJa": "小田急電鉄「運行情報」ページ、小田急アプリ、またはX（@odakyuline_info）で確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.odakyu.jp/train/unkou/",
-            "statusPageURLEn": "https://www.odakyu.jp/english/",
+            "statusPageURL": "https://traininfo.odakyu-rt.jp/train_status",
+            "statusPageURLEn": "https://traininfo.odakyu-rt.jp/train_status",
             "xAccount": "@odakyuline_info"
         },
         "directions": [

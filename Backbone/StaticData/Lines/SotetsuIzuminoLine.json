@@ -5,7 +5,8 @@
             "checkMethodEn": "Check the Sotetsu train status page or the Sotetsu Line app. Delays and suspensions are posted as they occur.",
             "checkMethodJa": "相模鉄道「運行状況」ページまたは相鉄線アプリで確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
             "statusPageURL": "https://www.sotetsu.co.jp/train/status/",
-            "statusPageURLEn": "https://www.sotetsu.co.jp/en/"
+            "statusPageURLEn": "https://www.sotetsu.co.jp/train/status/",
+            "xAccount": "@sotetsu_pr"
         },
         "directions": [
             {

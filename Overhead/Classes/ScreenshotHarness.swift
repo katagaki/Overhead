@@ -15,6 +15,7 @@ import Backbone
 /// - overtrain://journey?minutesAgo=45[&line=…&from=…&to=…]
 /// - overtrain://planner?action=search|avoid
 /// - overtrain://timetable[?line=…&station=…&hidePast=0]
+/// - overtrain://line[?line=…&status=expanded&source=x]
 /// - overtrain://custom-line (seeds the sample line and opens its editor)
 /// - overtrain://reset
 enum ScreenshotCommand {
@@ -26,6 +27,7 @@ enum ScreenshotCommand {
     case plannerAvoid
     case plannerDeparture
     case timetable(ScreenshotTimetableTarget, hidePast: Bool)
+    case linePage(ScreenshotLineTarget)
     case customLineEditor
     case reset
 
@@ -66,6 +68,14 @@ enum ScreenshotCommand {
                 ),
                 hidePast: params["hidePast"] != "0"
             )
+        case "line":
+            self = .linePage(
+                ScreenshotLineTarget(
+                    lineId: params["line"] ?? "Railway:JR-East.JobanRapid",
+                    expandStatus: params["status"] == "expanded",
+                    showX: params["source"] == "x"
+                )
+            )
         case "custom-line":
             self = .customLineEditor
         case "reset":
@@ -82,6 +92,13 @@ struct ScreenshotTimetableTarget: Identifiable {
     var id: String { stationId }
 }
 
+struct ScreenshotLineTarget: Identifiable {
+    let lineId: String
+    let expandStatus: Bool
+    let showX: Bool
+    var id: String { lineId }
+}
+
 /// Cross-view staging state: RootView receives the URL, other views react.
 @MainActor
 final class ScreenshotStaging: ObservableObject {
@@ -91,6 +108,10 @@ final class ScreenshotStaging: ObservableObject {
     @Published var plannerCommand: PlannerCommand?
     /// Station timetables hide departed rows while staging.
     @Published var hidePastDepartures = false
+    /// Line pages open with the service status sheet expanded.
+    @Published var expandServiceStatus = false
+    /// The expanded service status sheet starts on the X tab.
+    @Published var serviceStatusShowsX = false
 
     enum PlannerCommand {
         case search

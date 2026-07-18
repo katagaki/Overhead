@@ -4860,6 +4860,76 @@
         }
       }
     },
+    "ServiceStatus.OpenInSafari" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open in Safari"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Safariで開く"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Safari에서 열기"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 Safari 中打开"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 Safari 中開啟"
+          }
+        }
+      }
+    },
+    "ServiceStatus.Tab.Official" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Official"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公式サイト"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공식 사이트"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "官方网站"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "官方網站"
+          }
+        }
+      }
+    },
     "Settings.Section.CurrentJourney" : {
       "localizations" : {
         "en" : {
@@ -5773,31 +5843,31 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Overtrain is developed by a single developer, and the data it shows may not always be accurate. If you find any problems, you can report them using the ••• → Send Feedback option."
+            "value" : "Overtrain is developed by a single developer, and the data it shows may not always be accurate. Please check the displays at the station or the official apps to confirm the latest information. If you find any problems, you can report them using the ••• → Send Feedback option."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "オーバートレインは個人の開発者によって開発されており、表示されるデータが正確でない場合があります。問題を見つけた場合は、••• →「フィードバックを送信」からご報告いただけます。"
+            "value" : "オーバートレインは個人の開発者によって開発されており、表示されるデータが正確でない場合があります。最新の情報は、駅の案内表示や公式アプリでご確認ください。問題を見つけた場合は、••• →「フィードバックを送信」からご報告いただけます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Overtrain은 1인 개발자가 개발했으며, 표시되는 데이터가 정확하지 않을 수 있습니다. 문제를 발견하면 ••• → 피드백 보내기를 통해 알려주실 수 있습니다."
+            "value" : "Overtrain은 1인 개발자가 개발했으며, 표시되는 데이터가 정확하지 않을 수 있습니다. 최신 정보는 역의 안내 표시나 공식 앱에서 확인해 주세요. 문제를 발견하면 ••• → 피드백 보내기를 통해 알려주실 수 있습니다."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Overtrain由一位开发者独立开发，显示的数据可能并不总是准确。如果发现任何问题，您可以通过 ••• → 发送反馈 进行报告。"
+            "value" : "Overtrain由一位开发者独立开发，显示的数据可能并不总是准确。请以车站的显示屏或官方应用确认最新信息。如果发现任何问题，您可以通过 ••• → 发送反馈 进行报告。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Overtrain由一位開發者獨立開發，顯示的資料可能並不總是準確。如果發現任何問題，您可以透過 ••• → 傳送意見回饋 進行回報。"
+            "value" : "Overtrain由一位開發者獨立開發，顯示的資料可能並不總是準確。請以車站的顯示螢幕或官方應用程式確認最新資訊。如果發現任何問題，您可以透過 ••• → 傳送意見回饋 進行回報。"
           }
         }
       }
@@ -6143,76 +6213,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "運行資訊"
-          }
-        }
-      }
-    },
-    "StationTimetable.ServiceStatus.Open" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open Official Status Page"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "公式運行情報ページを開く"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "공식 운행 정보 페이지 열기"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "打开官方运行信息页面"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "開啟官方運行資訊頁面"
-          }
-        }
-      }
-    },
-    "StationTimetable.ServiceStatus.OpenX %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open %@"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@を開く"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ 열기"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "打开%@"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "開啟%@"
           }
         }
       }

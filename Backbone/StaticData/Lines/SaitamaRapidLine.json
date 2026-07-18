@@ -4,8 +4,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the Saitama Railway website. Delays and suspensions are posted as they occur.",
             "checkMethodJa": "埼玉高速鉄道の公式サイトで確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.s-rail.co.jp/",
-            "statusPageURLEn": "https://www.s-rail.co.jp/"
+            "statusPageURL": "https://www.s-rail.co.jp/ticket/train/",
+            "statusPageURLEn": "https://www.s-rail.co.jp/ticket/train/",
+            "xAccount": "@srail_info"
         },
         "directions": [
             {

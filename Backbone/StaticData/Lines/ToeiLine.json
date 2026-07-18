@@ -4,8 +4,8 @@
         "delayInfo": {
             "checkMethodEn": "Check the Toei Transportation service information page, the Toei app, or X (@toeikotsu). Delays and suspensions are posted as they occur.",
             "checkMethodJa": "都営交通「運行情報」ページ、都営交通アプリ、またはX（@toeikotsu）で確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.kotsu.metro.tokyo.jp/subway/unkou/unkou_all.html",
-            "statusPageURLEn": "https://www.kotsu.metro.tokyo.jp/eng/",
+            "statusPageURL": "https://www.kotsu.metro.tokyo.jp/subway/schedule/asakusa.html",
+            "statusPageURLEn": "https://www.kotsu.metro.tokyo.jp/eng/operation_status/",
             "xAccount": "@toeikotsu"
         },
         "directions": [
@@ -898,8 +898,8 @@
         "delayInfo": {
             "checkMethodEn": "Check the Toei Transportation service information page, the Toei app, or X (@toeikotsu). Delays and suspensions are posted as they occur.",
             "checkMethodJa": "都営交通「運行情報」ページ、都営交通アプリ、またはX（@toeikotsu）で確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.kotsu.metro.tokyo.jp/subway/unkou/unkou_all.html",
-            "statusPageURLEn": "https://www.kotsu.metro.tokyo.jp/eng/",
+            "statusPageURL": "https://www.kotsu.metro.tokyo.jp/subway/schedule/mita.html",
+            "statusPageURLEn": "https://www.kotsu.metro.tokyo.jp/eng/operation_status/",
             "xAccount": "@toeikotsu"
         },
         "directions": [
@@ -1567,8 +1567,8 @@
         "delayInfo": {
             "checkMethodEn": "Check the Toei Transportation service information page, the Toei app, or X (@toeikotsu). Delays and suspensions are posted as they occur.",
             "checkMethodJa": "都営交通「運行情報」ページ、都営交通アプリ、またはX（@toeikotsu）で確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.kotsu.metro.tokyo.jp/subway/unkou/unkou_all.html",
-            "statusPageURLEn": "https://www.kotsu.metro.tokyo.jp/eng/",
+            "statusPageURL": "https://www.kotsu.metro.tokyo.jp/subway/schedule/shinjuku.html",
+            "statusPageURLEn": "https://www.kotsu.metro.tokyo.jp/eng/operation_status/",
             "xAccount": "@toeikotsu"
         },
         "directions": [
@@ -2009,8 +2009,8 @@
         "delayInfo": {
             "checkMethodEn": "Check the Toei Transportation service information page, the Toei app, or X (@toeikotsu). Delays and suspensions are posted as they occur.",
             "checkMethodJa": "都営交通「運行情報」ページ、都営交通アプリ、またはX（@toeikotsu）で確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.kotsu.metro.tokyo.jp/subway/unkou/unkou_all.html",
-            "statusPageURLEn": "https://www.kotsu.metro.tokyo.jp/eng/",
+            "statusPageURL": "https://www.kotsu.metro.tokyo.jp/subway/schedule/oedo.html",
+            "statusPageURLEn": "https://www.kotsu.metro.tokyo.jp/eng/operation_status/",
             "xAccount": "@toeikotsu"
         },
         "directions": [
@@ -3065,8 +3065,8 @@
         "delayInfo": {
             "checkMethodEn": "Check the Toei Transportation service information page, the Toei app, or X (@toeikotsu). Delays and suspensions are posted as they occur.",
             "checkMethodJa": "都営交通「運行情報」ページ、都営交通アプリ、またはX（@toeikotsu）で確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.kotsu.metro.tokyo.jp/subway/unkou/unkou_all.html",
-            "statusPageURLEn": "https://www.kotsu.metro.tokyo.jp/eng/",
+            "statusPageURL": "https://www.kotsu.metro.tokyo.jp/nippori_toneri/schedule/",
+            "statusPageURLEn": "https://www.kotsu.metro.tokyo.jp/eng/operation_status/",
             "xAccount": "@toeikotsu"
         },
         "directions": [
@@ -3374,8 +3374,8 @@
         "delayInfo": {
             "checkMethodEn": "Check the Toei Transportation service information page, the Toei app, or X (@toeikotsu). Delays and suspensions are posted as they occur.",
             "checkMethodJa": "都営交通「運行情報」ページ、都営交通アプリ、またはX（@toeikotsu）で確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.kotsu.metro.tokyo.jp/subway/unkou/unkou_all.html",
-            "statusPageURLEn": "https://www.kotsu.metro.tokyo.jp/eng/",
+            "statusPageURL": "https://www.kotsu.metro.tokyo.jp/toden/schedule/",
+            "statusPageURLEn": "https://www.kotsu.metro.tokyo.jp/eng/operation_status/",
             "xAccount": "@toeikotsu"
         },
         "directions": [

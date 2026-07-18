@@ -4,9 +4,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the Tokyo Metro Service Information page, the official app, or X (@tokyometro_info). Delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "東京メトロ「運行情報」ページ、公式アプリ、またはX（@tokyometro_info）で確認できます。15分以上の遅れ・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.tokyometro.jp/unkou/",
-            "statusPageURLEn": "https://www.tokyometro.jp/lang_en/unkou/index.html",
-            "xAccount": "@tokyometro_info"
+            "statusPageURL": "https://www.tokyometro.jp/unkou/history/ginza.html",
+            "statusPageURLEn": "https://www.tokyometro.jp/lang_en/unkou/history/ginza.html",
+            "xAccount": "@G_line_info"
         },
         "directions": [
             {
@@ -437,9 +437,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the Tokyo Metro Service Information page, the official app, or X (@tokyometro_info). Delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "東京メトロ「運行情報」ページ、公式アプリ、またはX（@tokyometro_info）で確認できます。15分以上の遅れ・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.tokyometro.jp/unkou/",
-            "statusPageURLEn": "https://www.tokyometro.jp/lang_en/unkou/index.html",
-            "xAccount": "@tokyometro_info"
+            "statusPageURL": "https://www.tokyometro.jp/unkou/history/marunouchi.html",
+            "statusPageURLEn": "https://www.tokyometro.jp/lang_en/unkou/history/marunouchi.html",
+            "xAccount": "@M_line_info"
         },
         "directions": [
             {
@@ -1079,9 +1079,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the Tokyo Metro Service Information page, the official app, or X (@tokyometro_info). Delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "東京メトロ「運行情報」ページ、公式アプリ、またはX（@tokyometro_info）で確認できます。15分以上の遅れ・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.tokyometro.jp/unkou/",
-            "statusPageURLEn": "https://www.tokyometro.jp/lang_en/unkou/index.html",
-            "xAccount": "@tokyometro_info"
+            "statusPageURL": "https://www.tokyometro.jp/unkou/history/marunouchi.html",
+            "statusPageURLEn": "https://www.tokyometro.jp/lang_en/unkou/history/marunouchi.html",
+            "xAccount": "@M_line_info"
         },
         "directions": [
             {
@@ -1290,9 +1290,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the Tokyo Metro Service Information page, the official app, or X (@tokyometro_info). Delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "東京メトロ「運行情報」ページ、公式アプリ、またはX（@tokyometro_info）で確認できます。15分以上の遅れ・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.tokyometro.jp/unkou/",
-            "statusPageURLEn": "https://www.tokyometro.jp/lang_en/unkou/index.html",
-            "xAccount": "@tokyometro_info"
+            "statusPageURL": "https://www.tokyometro.jp/unkou/history/hibiya.html",
+            "statusPageURLEn": "https://www.tokyometro.jp/lang_en/unkou/history/hibiya.html",
+            "xAccount": "@H_line_info"
         },
         "directions": [
             {
@@ -1788,9 +1788,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the Tokyo Metro Service Information page, the official app, or X (@tokyometro_info). Delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "東京メトロ「運行情報」ページ、公式アプリ、またはX（@tokyometro_info）で確認できます。15分以上の遅れ・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.tokyometro.jp/unkou/",
-            "statusPageURLEn": "https://www.tokyometro.jp/lang_en/unkou/index.html",
-            "xAccount": "@tokyometro_info"
+            "statusPageURL": "https://www.tokyometro.jp/unkou/history/touzai.html",
+            "statusPageURLEn": "https://www.tokyometro.jp/lang_en/unkou/history/touzai.html",
+            "xAccount": "@T_line_info"
         },
         "directions": [
             {
@@ -4111,9 +4111,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the Tokyo Metro Service Information page, the official app, or X (@tokyometro_info). Delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "東京メトロ「運行情報」ページ、公式アプリ、またはX（@tokyometro_info）で確認できます。15分以上の遅れ・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.tokyometro.jp/unkou/",
-            "statusPageURLEn": "https://www.tokyometro.jp/lang_en/unkou/index.html",
-            "xAccount": "@tokyometro_info"
+            "statusPageURL": "https://www.tokyometro.jp/unkou/history/chiyoda.html",
+            "statusPageURLEn": "https://www.tokyometro.jp/lang_en/unkou/history/chiyoda.html",
+            "xAccount": "@C_line_info"
         },
         "directions": [
             {
@@ -5049,9 +5049,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the Tokyo Metro Service Information page, the official app, or X (@tokyometro_info). Delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "東京メトロ「運行情報」ページ、公式アプリ、またはX（@tokyometro_info）で確認できます。15分以上の遅れ・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.tokyometro.jp/unkou/",
-            "statusPageURLEn": "https://www.tokyometro.jp/lang_en/unkou/index.html",
-            "xAccount": "@tokyometro_info"
+            "statusPageURL": "https://www.tokyometro.jp/unkou/history/yurakucho.html",
+            "statusPageURLEn": "https://www.tokyometro.jp/lang_en/unkou/history/yurakucho.html",
+            "xAccount": "@Y_line_info"
         },
         "directions": [
             {
@@ -5671,9 +5671,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the Tokyo Metro Service Information page, the official app, or X (@tokyometro_info). Delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "東京メトロ「運行情報」ページ、公式アプリ、またはX（@tokyometro_info）で確認できます。15分以上の遅れ・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.tokyometro.jp/unkou/",
-            "statusPageURLEn": "https://www.tokyometro.jp/lang_en/unkou/index.html",
-            "xAccount": "@tokyometro_info"
+            "statusPageURL": "https://www.tokyometro.jp/unkou/history/hanzoumon.html",
+            "statusPageURLEn": "https://www.tokyometro.jp/lang_en/unkou/history/hanzoumon.html",
+            "xAccount": "@Z_line_info"
         },
         "directions": [
             {
@@ -6061,9 +6061,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the Tokyo Metro Service Information page, the official app, or X (@tokyometro_info). Delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "東京メトロ「運行情報」ページ、公式アプリ、またはX（@tokyometro_info）で確認できます。15分以上の遅れ・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.tokyometro.jp/unkou/",
-            "statusPageURLEn": "https://www.tokyometro.jp/lang_en/unkou/index.html",
-            "xAccount": "@tokyometro_info"
+            "statusPageURL": "https://www.tokyometro.jp/unkou/history/nanboku.html",
+            "statusPageURLEn": "https://www.tokyometro.jp/lang_en/unkou/history/nanboku.html",
+            "xAccount": "@N_line_info"
         },
         "directions": [
             {
@@ -6649,9 +6649,9 @@
         "delayInfo": {
             "checkMethodEn": "Check the Tokyo Metro Service Information page, the official app, or X (@tokyometro_info). Delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "東京メトロ「運行情報」ページ、公式アプリ、またはX（@tokyometro_info）で確認できます。15分以上の遅れ・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.tokyometro.jp/unkou/",
-            "statusPageURLEn": "https://www.tokyometro.jp/lang_en/unkou/index.html",
-            "xAccount": "@tokyometro_info"
+            "statusPageURL": "https://www.tokyometro.jp/unkou/history/fukutoshin.html",
+            "statusPageURLEn": "https://www.tokyometro.jp/lang_en/unkou/history/fukutoshin.html",
+            "xAccount": "@F_line_info"
         },
         "directions": [
             {
