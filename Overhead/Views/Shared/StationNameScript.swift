@@ -189,6 +189,9 @@ struct VerticalStationName: View {
     var justifiedSingle: Bool = false
     var columnSpacing: CGFloat = 1
 
+    /// Glyphs that rotate 90° in vertical writing (chōonpu, wave/long dashes).
+    private static let rotatedGlyphs: Set<Character> = ["ー", "ｰ", "〜", "～", "−", "－", "-"]
+
     var body: some View {
         let segments = name.scriptSegments
         let maxCount = segments.map(\.count).max() ?? 1
@@ -213,6 +216,7 @@ struct VerticalStationName: View {
                         if justify && j > 0 { Spacer(minLength: 0) }
                         Text(String(chars[j]))
                             .font(.system(size: fontSize, weight: weight))
+                            .rotationEffect(Self.rotatedGlyphs.contains(chars[j]) ? .degrees(90) : .zero)
                             .frame(height: charBox)
                     }
                 }

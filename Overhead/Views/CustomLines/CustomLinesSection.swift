@@ -20,7 +20,7 @@ struct CustomLinesSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(verbatim: "マイ路線")
+            Text("CustomLine.Section")
                 .font(.body.weight(.semibold))
                 .foregroundColor(.secondary)
                 .padding(.leading, 4)
@@ -35,7 +35,7 @@ struct CustomLinesSection: View {
                 }
 
                 NavigationLink(value: CustomLineRoute.new) {
-                    actionRow(title: "新しい路線を作成", systemImage: "plus")
+                    actionRow(title: "CustomLine.Create", systemImage: "plus")
                 }
                 .buttonStyle(.plain)
                 Divider().padding(.leading, 60)
@@ -43,7 +43,7 @@ struct CustomLinesSection: View {
                 Button {
                     showImporter = true
                 } label: {
-                    actionRow(title: ".ohlファイルを取り込む", systemImage: "square.and.arrow.down")
+                    actionRow(title: "CustomLine.ImportFile", systemImage: "square.and.arrow.down")
                 }
                 .buttonStyle(.plain)
             }
@@ -60,8 +60,8 @@ struct CustomLinesSection: View {
         .sheet(item: $pendingImport) { package in
             CustomLineImportView(package: package)
         }
-        .alert(Text(verbatim: "取り込みに失敗しました"), isPresented: .constant(importError != nil)) {
-            Button(role: .cancel) { importError = nil } label: { Text(verbatim: "OK") }
+        .alert(Text("CustomLine.ImportFailed"), isPresented: .constant(importError != nil)) {
+            Button(role: .cancel) { importError = nil } label: { Text("Button.OK") }
         } message: {
             Text(verbatim: importError ?? "")
         }
@@ -75,7 +75,7 @@ struct CustomLinesSection: View {
                             dimension: 36, styleOverride: line.badgeStyle)
 
             VStack(alignment: .leading, spacing: 1) {
-                Text(verbatim: line.localizedName.isEmpty ? "無名の路線" : line.localizedName)
+                (line.localizedName.isEmpty ? Text("CustomLine.Unnamed") : Text(verbatim: line.localizedName))
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(.primary)
                     .lineLimit(1)
@@ -108,14 +108,14 @@ struct CustomLinesSection: View {
         .contentShape(Rectangle())
     }
 
-    private func actionRow(title: String, systemImage: String) -> some View {
+    private func actionRow(title: LocalizedStringKey, systemImage: String) -> some View {
         HStack(spacing: 12) {
             Image(systemName: systemImage)
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundColor(.accentColor)
                 .frame(width: 30, height: 30)
                 .background(Color.accentColor.opacity(0.14), in: Circle())
-            Text(verbatim: title)
+            Text(title)
                 .font(.system(size: 16, weight: .medium))
                 .foregroundColor(.accentColor)
             Spacer(minLength: 0)
@@ -126,9 +126,11 @@ struct CustomLinesSection: View {
     }
 
     private func subtitle(for line: CustomLine) -> String {
-        var parts = ["\(line.stations.count)駅"]
-        parts.append(line.hasSchedule ? "時刻表あり" : "時刻表なし")
-        if line.hasAllCoordinates { parts.append("GPSあり") }
+        var parts = [String(localized: "CustomLine.StationCount \(line.stations.count)")]
+        parts.append(line.hasSchedule
+                     ? String(localized: "CustomLine.WithTimetable")
+                     : String(localized: "CustomLine.WithoutTimetable"))
+        if line.hasAllCoordinates { parts.append(String(localized: "CustomLine.WithGPS")) }
         return parts.joined(separator: " · ")
     }
 

@@ -18,41 +18,41 @@ struct CustomTimetableEditorView: View {
         Form {
             Section {
                 Toggle(isOn: isEnabled) {
-                    Text(verbatim: "時刻表を使う")
+                    Text("CustomLine.UseTimetable")
                 }
             } footer: {
-                Text(verbatim: "時刻表なしでも走行できます（手動で駅を進めるモード）。")
+                Text("CustomLine.UseTimetable.Footer")
             }
 
             if line.timetable != nil {
                 Section {
                     Picker(selection: $calendar) {
-                        Text(verbatim: "平日").tag(ScheduleCalendar.weekday)
-                        Text(verbatim: "土休日").tag(ScheduleCalendar.saturdayHoliday)
+                        Text("CustomLine.Weekday").tag(ScheduleCalendar.weekday)
+                        Text("CustomLine.SaturdayHoliday").tag(ScheduleCalendar.saturdayHoliday)
                     } label: {
-                        Text(verbatim: "カレンダー")
+                        Text("CustomLine.Calendar")
                     }
                     .pickerStyle(.segmented)
                     .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
 
-                    railTimeRow(label: "始発", value: patternBinding(\.firstDeparture))
-                    railTimeRow(label: "終電", value: patternBinding(\.lastDeparture))
+                    railTimeRow(label: "CustomLine.FirstDeparture", value: patternBinding(\.firstDeparture))
+                    railTimeRow(label: "CustomLine.LastDeparture", value: patternBinding(\.lastDeparture))
 
                     Stepper(value: headwayBinding, in: 1...60) {
                         LabeledContent {
-                            Text(verbatim: "\(pattern.headwayMinutes)分")
+                            Text("CustomLine.Minutes \(pattern.headwayMinutes)")
                         } label: {
-                            Text(verbatim: "運転間隔")
+                            Text("CustomLine.Headway")
                         }
                     }
                 } header: {
-                    Text(verbatim: "運転パターン")
+                    Text("CustomLine.Pattern")
                 } footer: {
-                    Text(verbatim: "24時以降は「24:10」のように入力できます。")
+                    Text("CustomLine.RailTime.Footer")
                 }
             }
         }
-        .navigationTitle(Text(verbatim: "時刻表"))
+        .navigationTitle(Text("CustomLine.Timetable"))
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -84,7 +84,7 @@ struct CustomTimetableEditorView: View {
         )
     }
 
-    private func railTimeRow(label: String, value: Binding<String>) -> some View {
+    private func railTimeRow(label: LocalizedStringKey, value: Binding<String>) -> some View {
         LabeledContent {
             TextField("", text: value, prompt: Text(verbatim: "05:00"))
                 .multilineTextAlignment(.trailing)
@@ -92,7 +92,7 @@ struct CustomTimetableEditorView: View {
                 .autocorrectionDisabled()
                 .font(.system(.body, design: .rounded))
         } label: {
-            Text(verbatim: label)
+            Text(label)
         }
     }
 }

@@ -111,6 +111,13 @@ struct JourneyPlannerSection: View {
             await viewModel.loadLines()
             restoreSelections()
         }
+#if DEBUG
+        .onReceive(ScreenshotStaging.shared.$plannerCommand) { command in
+            guard let command else { return }
+            ScreenshotStaging.shared.plannerCommand = nil
+            Task { await stage(command) }
+        }
+#endif
         .sheet(item: $pickerTarget) { target in
             stationPickerSheet { hit in
                 switch target {
@@ -829,6 +836,31 @@ struct JourneyPlannerSection: View {
             }
         }
     }
+
+#if DEBUG
+    // MARK: - Screenshot Harness
+
+    private func stage(_ command: ScreenshotStaging.PlannerCommand) async {
+        await viewModel.loadLines()
+        guard let line = viewModel.availableLines.first(where: { $0.id == "Railway:JR-East.JobanRapid" }),
+              let from = line.stations.first(where: { $0.id == "Station:JR-East.JobanRapid.Tokyo" }),
+              let to = line.stations.first(where: { $0.id == "Station:JR-East.JobanRapid.Toride" })
+        else { return }
+        fromSelection = StationSearchHit(line: line, station: from)
+        toSelection = StationSearchHit(line: line, station: to)
+        switch command {
+        case .search:
+            search()
+        case .avoid:
+            avoidedLineIdsBinding.wrappedValue = [
+                "Railway:JR-East.JobanLocal",
+                "Railway:TokyoMetro.Chiyoda"
+            ]
+            try? await Task.sleep(for: .seconds(1))
+            showAvoidLinesSheet = true
+        }
+    }
+#endif
 
     // MARK: - Selection Persistence
 

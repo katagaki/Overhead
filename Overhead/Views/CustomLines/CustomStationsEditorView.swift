@@ -31,9 +31,13 @@ struct CustomStationsEditorView: View {
                     line.normalizeHopMinutes()
                 }
             } header: {
-                Text(verbatim: line.stations.isEmpty ? "駅" : "\(line.stations.count)駅 · 上から下り方向")
+                if line.stations.isEmpty {
+                    Text("CustomLine.Stations")
+                } else {
+                    Text("CustomLine.Stations.Header \(line.stations.count)")
+                }
             } footer: {
-                Text(verbatim: "全駅に座標を設定すると、GPSモードで走行できます。未設定の駅は前後から補間されます。")
+                Text("CustomLine.Stations.Footer")
             }
 
             if line.stations.count >= 2 {
@@ -41,7 +45,7 @@ struct CustomStationsEditorView: View {
                     ForEach(0..<(line.stations.count - 1), id: \.self) { gap in
                         Stepper(value: hopBinding(gap), in: 1...30) {
                             LabeledContent {
-                                Text(verbatim: "\(Int(line.hopMinutes[safe: gap] ?? 2))分")
+                                Text("CustomLine.Minutes \(Int(line.hopMinutes[safe: gap] ?? 2))")
                             } label: {
                                 Text(verbatim: "\(stationName(gap)) → \(stationName(gap + 1))")
                                     .lineLimit(1)
@@ -49,11 +53,11 @@ struct CustomStationsEditorView: View {
                         }
                     }
                 } header: {
-                    Text(verbatim: "駅間の所要時間")
+                    Text("CustomLine.HopTimes")
                 }
             }
         }
-        .navigationTitle(Text(verbatim: "駅"))
+        .navigationTitle(Text("CustomLine.Stations"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) { EditButton() }
@@ -64,15 +68,15 @@ struct CustomStationsEditorView: View {
                 } label: {
                     Image(systemName: "plus")
                 }
-                .accessibilityLabel(Text(verbatim: "駅を追加"))
+                .accessibilityLabel(Text("CustomLine.AddStation"))
             }
         }
         .overlay {
             if line.stations.isEmpty {
                 ContentUnavailableView {
-                    Label { Text(verbatim: "駅がありません") } icon: { Image(systemName: "tram") }
+                    Label { Text("CustomLine.NoStations") } icon: { Image(systemName: "mappin.and.ellipse") }
                 } description: {
-                    Text(verbatim: "右上の＋から駅を追加してください")
+                    Text("CustomLine.NoStations.Hint")
                 }
             }
         }
@@ -88,7 +92,7 @@ struct CustomStationsEditorView: View {
                 styleOverride: line.badgeStyle
             )
             VStack(alignment: .leading, spacing: 1) {
-                Text(verbatim: station.name.isEmpty ? "（駅名未設定）" : station.name)
+                (station.name.isEmpty ? Text("CustomLine.Station.Unnamed") : Text(verbatim: station.name))
                     .foregroundColor(station.name.isEmpty ? .secondary : .primary)
                 if !station.nameEn.isEmpty {
                     Text(verbatim: station.nameEn)
@@ -107,7 +111,7 @@ struct CustomStationsEditorView: View {
 
     private func stationName(_ index: Int) -> String {
         let name = line.stations[safe: index]?.name ?? ""
-        return name.isEmpty ? "駅\(index + 1)" : name
+        return name.isEmpty ? String(localized: "CustomLine.StationN \(index + 1)") : name
     }
 
     private func hopBinding(_ gap: Int) -> Binding<Double> {
@@ -135,17 +139,17 @@ struct CustomStationDetailView: View {
         Form {
             Section {
                 LabeledContent {
-                    TextField("", text: $station.name, prompt: Text(verbatim: "例：杉戸口"))
+                    TextField("", text: $station.name, prompt: Text("CustomLine.StationName.Prompt"))
                         .multilineTextAlignment(.trailing)
                 } label: {
-                    Text(verbatim: "駅名")
+                    Text("CustomLine.StationName")
                 }
                 LabeledContent {
                     TextField("", text: $station.nameEn, prompt: Text(verbatim: "Sugitoguchi"))
                         .multilineTextAlignment(.trailing)
                         .autocorrectionDisabled()
                 } label: {
-                    Text(verbatim: "駅名（英語）")
+                    Text("CustomLine.StationNameEn")
                 }
             } header: {
                 HStack(spacing: 8) {
@@ -165,7 +169,7 @@ struct CustomStationDetailView: View {
                 } label: {
                     HStack {
                         Label {
-                            Text(verbatim: "現在地を記録")
+                            Text("CustomLine.RecordLocation")
                         } icon: {
                             Image(systemName: "location.fill")
                         }
@@ -180,24 +184,24 @@ struct CustomStationDetailView: View {
                             .font(.system(.body, design: .rounded))
                             .foregroundColor(.secondary)
                     } label: {
-                        Text(verbatim: "座標")
+                        Text("CustomLine.Coordinates")
                     }
                     Button(role: .destructive) {
                         station.latitude = nil
                         station.longitude = nil
                     } label: {
-                        Text(verbatim: "位置情報を削除")
+                        Text("CustomLine.DeleteLocation")
                     }
                 }
             } header: {
-                Text(verbatim: "位置情報（オプション）")
+                Text("CustomLine.LocationSection")
             } footer: {
                 if let error = location.lastError {
                     Text(verbatim: error).foregroundColor(.red)
                 }
             }
         }
-        .navigationTitle(Text(verbatim: station.name.isEmpty ? "駅" : station.name))
+        .navigationTitle(station.name.isEmpty ? Text("CustomLine.Stations") : Text(verbatim: station.name))
         .navigationBarTitleDisplayMode(.inline)
     }
 }

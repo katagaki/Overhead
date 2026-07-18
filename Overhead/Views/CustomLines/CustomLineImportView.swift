@@ -23,7 +23,7 @@ struct CustomLineImportView: View {
                                             color: line.color, dimension: 36,
                                             styleOverride: line.badgeStyle)
                             VStack(alignment: .leading, spacing: 1) {
-                                Text(verbatim: line.localizedName.isEmpty ? "無名の路線" : line.localizedName)
+                                (line.localizedName.isEmpty ? Text("CustomLine.Unnamed") : Text(verbatim: line.localizedName))
                                     .font(.system(size: 16, weight: .medium))
                                 Text(verbatim: contentSummary(line))
                                     .font(.system(size: 12.5))
@@ -35,19 +35,21 @@ struct CustomLineImportView: View {
                         }
                     }
                 } header: {
-                    Text(verbatim: "取り込む内容")
+                    Text("CustomLine.Import.Contents")
                 } footer: {
                     if let author = package.author, !author.isEmpty {
-                        Text(verbatim: "作者：\(author)")
+                        Text("CustomLine.Import.Author \(author)")
                     }
                 }
 
                 if !conflicts.isEmpty {
                     Section {
                         Label {
-                            Text(verbatim: conflicts.count == 1
-                                 ? "「\(conflicts[0])」は既にあります。取り込むと置き換えられます。"
-                                 : "\(conflicts.count)件の路線が既にあり、置き換えられます。")
+                            if conflicts.count == 1 {
+                                Text("CustomLine.Import.ConflictOne \(conflicts[0])")
+                            } else {
+                                Text("CustomLine.Import.ConflictMany \(conflicts.count)")
+                            }
                         } icon: {
                             Image(systemName: "exclamationmark.triangle.fill")
                                 .foregroundStyle(.orange)
@@ -56,11 +58,11 @@ struct CustomLineImportView: View {
                     }
                 }
             }
-            .navigationTitle(Text(verbatim: "路線を取り込む"))
+            .navigationTitle(Text("CustomLine.Import.Title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button { dismiss() } label: { Text(verbatim: "キャンセル") }
+                    Button { dismiss() } label: { Text("Button.Cancel") }
                 }
             }
             .safeAreaInset(edge: .bottom) {
@@ -68,7 +70,9 @@ struct CustomLineImportView: View {
                     store.importLines(package.lines)
                     dismiss()
                 } label: {
-                    Text(verbatim: package.lines.count == 1 ? "1路線を追加" : "\(package.lines.count)路線を追加")
+                    (package.lines.count == 1
+                     ? Text("CustomLine.Import.AddOne")
+                     : Text("CustomLine.Import.AddMany \(package.lines.count)"))
                         .font(.system(size: 17, weight: .semibold))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 4)
@@ -84,8 +88,8 @@ struct CustomLineImportView: View {
     }
 
     private func contentSummary(_ line: CustomLine) -> String {
-        var parts = ["\(line.stations.count)駅"]
-        if line.hasSchedule { parts.append("時刻表") }
+        var parts = [String(localized: "CustomLine.StationCount \(line.stations.count)")]
+        if line.hasSchedule { parts.append(String(localized: "CustomLine.Timetable")) }
         if line.hasAllCoordinates { parts.append("GPS") }
         return parts.joined(separator: " · ")
     }

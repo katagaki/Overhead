@@ -3,7 +3,7 @@ import Backbone
 
 // MARK: - Saved Place
 
-/// A saved place on the 場所 tab: a labelled route to somewhere the user goes often.
+/// A saved journey on the 旅程 tab: a labelled route the user rides often.
 struct SavedPlace: Identifiable, Codable, Equatable {
     var id: UUID
     var kind: Kind

@@ -223,17 +223,16 @@ struct LoopLCDView: View {
                     }
                     let clearance = Self.arcWidth(t) / 2 + 7
                     if index == stops.count - 1 {
+                        // On the arc's centerline just past the last bubble, so it
+                        // follows the band instead of drifting off its lower edge.
                         ctx.draw(
                             ctx.resolve(
                                 Text(verbatim: "(分)")
                                     .font(.system(size: 5.5, weight: .bold))
                                     .foregroundColor(.black)
                             ),
-                            at: CGPoint(
-                                x: p.x + (mirrored ? -clearance : clearance),
-                                y: p.y
-                            ),
-                            anchor: mirrored ? .trailing : .leading
+                            at: x(arcPoint(t + 0.05)),
+                            anchor: .center
                         )
                     }
 

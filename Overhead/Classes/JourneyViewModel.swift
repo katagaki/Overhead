@@ -807,6 +807,48 @@ final class JourneyViewModel: ObservableObject {
         locationTracker.stepManualStation(delta)
     }
 
+#if DEBUG
+    /// Screenshot harness: starts a journey as if boarded minutes ago,
+    /// without location tracking or a Live Activity.
+    func debugStartJourney(lineId: String, fromId: String, toId: String, minutesAgo: Double) async {
+        guard let resolved = StaticTrainData.resolveJourneyLine(
+            lineId: lineId, fromStationId: fromId, toStationId: toId
+        ) else { return }
+        let staticLine = resolved.staticLine
+        if timetableCache[staticLine.id] == nil {
+            timetableCache[staticLine.id] = StaticTimetableGenerator.services(
+                for: staticLine, calendar: .current()
+            )
+        }
+        guard let services = timetableCache[staticLine.id] else { return }
+        // Try progressively closer boarding times and keep the ride whose
+        // progress is closest to the middle of the journey.
+        var best: (journey: Journey, state: TrainPositionState, score: Double)?
+        for offset in stride(from: minutesAgo, through: 5, by: -2.5) {
+            let boarded = Date().addingTimeInterval(-offset * 60)
+            guard let service = findBestService(services: services, from: fromId, to: toId, at: boarded)
+            else { continue }
+            let journey = Journey(
+                id: UUID(),
+                service: service,
+                line: staticLine.trainLine,
+                boardingStationId: fromId,
+                alightingStationId: toId,
+                startedAt: boarded
+            )
+            let state = TrainPositionEngine.computePosition(journey: journey, delay: nil)
+            let score = abs(state.progress - 0.55)
+            if state.status != .arrived, score < (best?.score ?? .infinity) {
+                best = (journey, state, score)
+            }
+        }
+        guard let best else { return }
+        activeJourney = best.journey
+        selectedLine = staticLine.trainLine
+        positionState = best.state
+    }
+#endif
+
     // MARK: - Overwrite Confirmation
 
     /// Proceeds with a journey that was held back because another was active.

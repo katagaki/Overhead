@@ -29,10 +29,10 @@ struct CustomLineEditorView: View {
         Form {
             Section {
                 LabeledContent {
-                    TextField("", text: $draft.name, prompt: Text(verbatim: "例：山彦電鉄本線"))
+                    TextField("", text: $draft.name, prompt: Text("CustomLine.Name.Prompt"))
                         .multilineTextAlignment(.trailing)
                 } label: {
-                    Text(verbatim: "路線名")
+                    Text("CustomLine.Name")
                 }
                 LabeledContent {
                     TextField("", text: $draft.symbol, prompt: Text(verbatim: "YH"))
@@ -44,33 +44,33 @@ struct CustomLineEditorView: View {
                             if cleaned != draft.symbol { draft.symbol = cleaned }
                         }
                 } label: {
-                    Text(verbatim: "路線記号")
+                    Text("CustomLine.Symbol")
                 }
                 Toggle(isOn: $draft.isLoop) {
-                    Text(verbatim: "環状運転")
+                    Text("CustomLine.Loop")
                 }
             } header: {
-                Text(verbatim: "基本情報")
+                Text("CustomLine.BasicInfo")
             }
 
             Section {
                 colorSwatches
             } header: {
-                Text(verbatim: "ラインカラー")
+                Text("CustomLine.Color")
             }
 
             Section {
                 Picker(selection: $draft.badgeStyle) {
                     ForEach(BadgeStyle.allCases) { style in
-                        Text(verbatim: style.labelJa).tag(style)
+                        Text(badgeStyleLabel(style)).tag(style)
                     }
                 } label: {
-                    Text(verbatim: "スタイル")
+                    Text("CustomLine.Badge.Style")
                 }
                 .pickerStyle(.segmented)
                 .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
             } header: {
-                Text(verbatim: "駅番号バッジ")
+                Text("CustomLine.Badge")
             }
 
             Section {
@@ -78,18 +78,18 @@ struct CustomLineEditorView: View {
                     CustomStationsEditorView(line: $draft)
                 } label: {
                     LabeledContent {
-                        Text(verbatim: "\(draft.stations.count)駅")
+                        Text("CustomLine.StationCount \(draft.stations.count)")
                     } label: {
-                        Text(verbatim: "駅")
+                        Text("CustomLine.Stations")
                     }
                 }
                 NavigationLink {
                     CustomTimetableEditorView(line: $draft)
                 } label: {
                     LabeledContent {
-                        Text(verbatim: draft.hasSchedule ? "あり" : "なし")
+                        (draft.hasSchedule ? Text("CustomLine.Yes") : Text("CustomLine.No"))
                     } label: {
-                        Text(verbatim: "時刻表")
+                        Text("CustomLine.Timetable")
                     }
                 }
             }
@@ -98,12 +98,12 @@ struct CustomLineEditorView: View {
                 Button(role: .destructive) {
                     showDeleteConfirm = true
                 } label: {
-                    Text(verbatim: "路線を削除")
+                    Text("CustomLine.Delete")
                         .frame(maxWidth: .infinity)
                 }
             }
         }
-        .navigationTitle(Text(verbatim: isNew ? "新しい路線" : "路線を編集"))
+        .navigationTitle(isNew ? Text("CustomLine.New") : Text("CustomLine.Edit"))
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .top) {
             CustomLinePreview(
@@ -122,7 +122,9 @@ struct CustomLineEditorView: View {
                         package: CustomLinePackage(lines: [normalizedDraft]),
                         suggestedName: draft.name.isEmpty ? "MyLine" : draft.name
                     ),
-                    preview: SharePreview(draft.name.isEmpty ? "路線" : draft.name)
+                    preview: SharePreview(
+                        draft.name.isEmpty ? String(localized: "CustomLine.Share.Fallback") : draft.name
+                    )
                 ) {
                     Image(systemName: "square.and.arrow.up")
                 }
@@ -158,7 +160,7 @@ struct CustomLineEditorView: View {
             isNew = false
         }
         .confirmationDialog(
-            Text(verbatim: "この路線を削除しますか？"),
+            Text("CustomLine.Delete.Confirm"),
             isPresented: $showDeleteConfirm,
             titleVisibility: .visible
         ) {
@@ -166,9 +168,18 @@ struct CustomLineEditorView: View {
                 store.delete(id: draft.id)
                 dismiss()
             } label: {
-                Text(verbatim: "削除")
+                Text("CustomLine.Delete.Action")
             }
-            Button(role: .cancel) {} label: { Text(verbatim: "キャンセル") }
+            Button(role: .cancel) {} label: { Text("Button.Cancel") }
+        }
+    }
+
+    private func badgeStyleLabel(_ style: BadgeStyle) -> LocalizedStringKey {
+        switch style {
+        case .rounded: return "CustomLine.Badge.Rounded"
+        case .ring: return "CustomLine.Badge.Ring"
+        case .filled: return "CustomLine.Badge.Filled"
+        case .square: return "CustomLine.Badge.Square"
         }
     }
 
@@ -251,7 +262,7 @@ struct CustomLinePreview: View {
                 Image(systemName: "train.side.front.car")
                     .font(.system(size: 26))
                     .foregroundStyle(.tertiary)
-                Text(verbatim: "駅を2つ以上追加するとプレビューが表示されます")
+                Text("CustomLine.Preview.Placeholder")
                     .font(.system(size: 12))
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)

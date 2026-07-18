@@ -40,7 +40,15 @@ struct StationTimetableView: View {
                                     .foregroundColor(.secondary)
                                     .font(.system(size: 14))
                             } else {
-                                ForEach(timetable.departures) { departure in
+#if DEBUG
+                                // Screenshot harness: staged shots hide departed trains.
+                                let visible = ScreenshotStaging.shared.hidePastDepartures
+                                    ? timetable.departures.filter { !isPast($0, nowMinutes: nowMinutes) }
+                                    : timetable.departures
+#else
+                                let visible = timetable.departures
+#endif
+                                ForEach(visible) { departure in
                                     departureRow(
                                         departure: departure,
                                         isPast: isPast(departure, nowMinutes: nowMinutes)

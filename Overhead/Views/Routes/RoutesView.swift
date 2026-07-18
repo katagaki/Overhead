@@ -1,7 +1,7 @@
 import SwiftUI
 import Backbone
 
-// MARK: - Favorites Section (場所)
+// MARK: - Favorites Section (旅程)
 
 struct FavoritesSection: View {
     @ObservedObject var viewModel: JourneyViewModel

@@ -12,6 +12,10 @@ struct RootView: View {
     @State private var showTimetableModeNotice = false
     @State private var showStartupNotice = false
     @State private var navigationPath = NavigationPath()
+#if DEBUG
+    // Screenshot harness (overtrain:// deep links, see ScreenshotHarness.swift).
+    @State private var debugTimetableTarget: ScreenshotTimetableTarget?
+#endif
     @Namespace private var journeyZoom
 
     private static let journeyTransitionID = "activeJourney"
@@ -65,20 +69,17 @@ struct RootView: View {
                 CustomLineEditorView(route: route)
             }
             .task {
-                // TEMP: headless LCD verification hooks — remove before commit.
-                let args = ProcessInfo.processInfo.arguments
-                if let idx = args.firstIndex(of: "-autoLCDStyle"), idx + 1 < args.count {
-                    UserDefaults.standard.set(args[idx + 1], forKey: TrainLCDStyle.storageKey)
-                }
                 await viewModel.loadLines()
-                if args.contains("-autoJourney") {
-                    let lines = StaticTrainData.trainLines()
-                    if let line = lines.first(where: { $0.id == "Railway:JR-East.JobanLocal" }),
-                       let from = line.stations.first(where: { $0.name == "綾瀬" }),
-                       let to = line.stations.first(where: { $0.name == "我孫子" }) {
-                        await viewModel.startJourney(line: line, from: from, to: to)
+#if DEBUG
+                // Headless capture passes overtrain:// URLs as launch arguments,
+                // since simctl openurl trips the system open-app confirmation.
+                for argument in ProcessInfo.processInfo.arguments.dropFirst()
+                where argument.hasPrefix("overtrain://") {
+                    if let url = URL(string: argument) {
+                        await handleScreenshotURL(url)
                     }
                 }
+#endif
             }
         }
         .sheet(isPresented: $showJourneySheet) {
@@ -88,6 +89,19 @@ struct RootView: View {
         .sheet(item: $customStore.incomingPackage) { package in
             CustomLineImportView(package: package)
         }
+#if DEBUG
+        .onOpenURL { url in
+            Task { await handleScreenshotURL(url) }
+        }
+        .sheet(item: $debugTimetableTarget) { target in
+            if let line = viewModel.availableLines.first(where: { $0.id == target.lineId }),
+               let station = line.stations.first(where: { $0.id == target.stationId }) {
+                NavigationStack {
+                    StationTimetableView(station: station, line: line, viewModel: viewModel)
+                }
+            }
+        }
+#endif
         // Keeps the PiP sample-buffer layer in the hierarchy at all times.
         .background {
             LCDPiPLayerHost()
@@ -193,4 +207,42 @@ struct RootView: View {
         }
         .accessibilityLabel("ViewTitle.More")
     }
+
+#if DEBUG
+    // MARK: - Screenshot Harness (overtrain://)
+
+    private func handleScreenshotURL(_ url: URL) async {
+        guard let command = ScreenshotCommand(url: url) else { return }
+        await viewModel.loadLines()
+        switch command {
+        case .seedFavorites:
+            ScreenshotSeeder.seedFavorites()
+        case .seedCustomLine:
+            ScreenshotSeeder.seedCustomLine()
+        case .lcdStyle(let style):
+            UserDefaults.standard.set(style, forKey: TrainLCDStyle.storageKey)
+        case .journey(let lineId, let fromId, let toId, let minutesAgo):
+            await viewModel.debugStartJourney(
+                lineId: lineId, fromId: fromId, toId: toId, minutesAgo: minutesAgo
+            )
+        case .plannerSearch:
+            ScreenshotStaging.shared.plannerCommand = .search
+        case .plannerAvoid:
+            ScreenshotStaging.shared.plannerCommand = .avoid
+        case .timetable(let target, let hidePast):
+            ScreenshotStaging.shared.hidePastDepartures = hidePast
+            viewModel.loadStationTimetable(stationId: target.stationId)
+            try? await Task.sleep(for: .seconds(1))
+            debugTimetableTarget = target
+        case .customLineEditor:
+            ScreenshotSeeder.seedCustomLine()
+            try? await Task.sleep(for: .seconds(0.5))
+            navigationPath.append(CustomLineRoute.edit(ScreenshotSeeder.customLineId))
+        case .reset:
+            viewModel.stopJourney()
+            debugTimetableTarget = nil
+            navigationPath = NavigationPath()
+        }
+    }
+#endif
 }
