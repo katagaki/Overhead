@@ -53368,13 +53368,13 @@
                         {
                             "continuesBeyond": false,
                             "departure": "04:58",
-                            "startsHere": false,
+                            "startsHere": true,
                             "terminusStationId": "Station:JR-East.JobanLocal.Abiko"
                         },
                         {
                             "continuesBeyond": false,
                             "departure": "05:19",
-                            "startsHere": false,
+                            "startsHere": true,
                             "terminusStationId": "Station:JR-East.JobanLocal.Abiko"
                         },
                         {
@@ -54082,7 +54082,7 @@
                         {
                             "continuesBeyond": false,
                             "departure": "24:52",
-                            "startsHere": false,
+                            "startsHere": true,
                             "terminusStationId": "Station:JR-East.JobanLocal.Matsudo"
                         }
                     ],
@@ -54096,13 +54096,13 @@
                         {
                             "continuesBeyond": false,
                             "departure": "04:58",
-                            "startsHere": false,
+                            "startsHere": true,
                             "terminusStationId": "Station:JR-East.JobanLocal.Abiko"
                         },
                         {
                             "continuesBeyond": false,
                             "departure": "05:19",
-                            "startsHere": false,
+                            "startsHere": true,
                             "terminusStationId": "Station:JR-East.JobanLocal.Abiko"
                         },
                         {
@@ -55038,7 +55038,7 @@
                         {
                             "continuesBeyond": false,
                             "departure": "24:52",
-                            "startsHere": false,
+                            "startsHere": true,
                             "terminusStationId": "Station:JR-East.JobanLocal.Matsudo"
                         }
                     ],

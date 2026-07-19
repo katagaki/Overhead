@@ -200,12 +200,16 @@ public struct TimetableRun: Hashable, Sendable, Codable {
     public let startsHere: Bool
     public let type: TrainService.TrainType
     public let terminates: Bool
+    // Off-line terminus for through-runs (行き先 as riders see it, e.g. 我孫子).
+    public var throughDestJa: String? = nil
+    public var throughDestEn: String? = nil
     public init(_ calendar: ScheduleCalendar, _ ascending: Bool, _ startIndex: Int,
                 _ startsHere: Bool, _ type: TrainService.TrainType, _ stops: [Int],
-                terminates: Bool = true) {
+                terminates: Bool = true, throughDestJa: String? = nil, throughDestEn: String? = nil) {
         self.calendar = calendar; self.ascending = ascending; self.startIndex = startIndex
         self.startsHere = startsHere; self.type = type; self.stops = stops
         self.terminates = terminates
+        self.throughDestJa = throughDestJa; self.throughDestEn = throughDestEn
     }
 }
 
@@ -757,8 +761,9 @@ public enum StaticTrainData {
             originStations = Array(origin.stations[...jIdx])
             originHops = Array(origin.hopTimesMinutes[..<jIdx])
         } else {
+            let hops = origin.upHopTimesMinutes ?? origin.hopTimesMinutes
             originStations = Array(origin.stations[jIdx...].reversed())
-            originHops = Array(origin.hopTimesMinutes[jIdx...].reversed())
+            originHops = Array(hops[jIdx...].reversed())
         }
 
         let target = group.connectingLine
@@ -770,7 +775,7 @@ public enum StaticTrainData {
 
         let targetHops: [Double] = bIdx > tIdx
             ? Array(target.hopTimesMinutes[tIdx...])
-            : Array(target.hopTimesMinutes[..<tIdx].reversed())
+            : Array((target.upHopTimesMinutes ?? target.hopTimesMinutes)[..<tIdx].reversed())
 
         let stations = originStations + group.stations
         let hops = originHops + targetHops
@@ -943,7 +948,9 @@ public enum StaticTimetableGenerator {
                 direction: run.ascending ? .outbound : .inbound,
                 timetable: entries,
                 destinationStationId: line.stations[destAbs].id,
-                originatesAtStart: run.startsHere
+                originatesAtStart: run.startsHere,
+                throughDestinationName: run.throughDestJa,
+                throughDestinationNameEn: run.throughDestEn
             )
         }
     }
@@ -1125,10 +1132,13 @@ public enum StaticTimetableGenerator {
                   let destination = stations.last
             else { return nil }
 
-            struct Row { let time: String; let type: TrainService.TrainType; let originatesHere: Bool; let dest: Station }
+            struct Row { let time: String; let type: TrainService.TrainType; let originatesHere: Bool; let destJa: String; let destEn: String }
             let stationsById = Dictionary(uniqueKeysWithValues: stations.map { ($0.id, $0) })
+            let directionServices = line.timetableRuns != nil
+                ? services(for: line, calendar: calendar).filter { ($0.direction == .outbound) == direction.isAscending }
+                : services(for: line, direction: direction, calendar: calendar)
             var byMinute: [Int: Row] = [:]
-            for service in services(for: line, direction: direction, calendar: calendar) {
+            for service in directionServices {
                 guard let idx = service.timetable.firstIndex(where: { $0.stationId == stationId }),
                       let time = service.timetable[idx].departureTime,
                       let secs = TimetableEntry.parseRailTime(time)
@@ -1137,7 +1147,11 @@ public enum StaticTimetableGenerator {
                 let originatesHere = idx == 0 && service.originatesAtStart
                 if let existing = byMinute[minute], existing.originatesHere || !originatesHere { continue }
                 let dest = stationsById[service.destinationStationId] ?? destination
-                byMinute[minute] = Row(time: time, type: service.trainType, originatesHere: originatesHere, dest: dest)
+                byMinute[minute] = Row(
+                    time: time, type: service.trainType, originatesHere: originatesHere,
+                    destJa: service.throughDestinationName ?? dest.name,
+                    destEn: service.throughDestinationNameEn ?? dest.nameEn
+                )
             }
             guard let lastMinute = byMinute.keys.max() else { return nil }
 
@@ -1147,8 +1161,8 @@ public enum StaticTimetableGenerator {
                     id: "\(line.id).\(direction.id).\(stationId)_\(i)",
                     departureTime: row.time,
                     trainType: row.type,
-                    destinationName: row.dest.name,
-                    destinationNameEn: row.dest.nameEn,
+                    destinationName: row.destJa,
+                    destinationNameEn: row.destEn,
                     trainNumber: "",
                     isFirst: row.originatesHere,  // 当駅始発
                     isLast: minute == lastMinute

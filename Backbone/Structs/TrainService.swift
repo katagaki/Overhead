@@ -9,8 +9,21 @@ public struct TrainService: Identifiable, Codable {
     public let destinationStationId: String
     // 当駅始発; false for through-runs entering from a connecting line.
     public let originatesAtStart: Bool
+    // Off-line terminus for through-runs continuing past the line's end.
+    public var throughDestinationName: String? = nil
+    public var throughDestinationNameEn: String? = nil
 
-    public init(id: String, lineId: String, trainType: TrainType, direction: Direction, timetable: [TimetableEntry], destinationStationId: String, originatesAtStart: Bool = true) {
+    public init(
+        id: String,
+        lineId: String,
+        trainType: TrainType,
+        direction: Direction,
+        timetable: [TimetableEntry],
+        destinationStationId: String,
+        originatesAtStart: Bool = true,
+        throughDestinationName: String? = nil,
+        throughDestinationNameEn: String? = nil
+    ) {
         self.id = id
         self.lineId = lineId
         self.trainType = trainType
@@ -18,6 +31,8 @@ public struct TrainService: Identifiable, Codable {
         self.timetable = timetable
         self.destinationStationId = destinationStationId
         self.originatesAtStart = originatesAtStart
+        self.throughDestinationName = throughDestinationName
+        self.throughDestinationNameEn = throughDestinationNameEn
     }
 
     public enum TrainType: String, Codable, Sendable {
