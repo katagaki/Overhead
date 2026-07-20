@@ -63,6 +63,7 @@
 		7B5E01E02F76257300861ADF /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		E417077F30044A1B003E53FF /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
 		E4561B88300A1AB30083C0BD /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
+		E45672C3300E72960083C0BD /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
 		E474F82B300845CD005860C8 /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
 		E49DCE832FFCFB2B005BA3DF /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
 		E49DCEF12FFD1371005BA3DF /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
@@ -195,6 +196,11 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		E45672C4300E72960083C0BD /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
 		E474F82C300845CD005860C8 /* Products */ = {
 			isa = PBXGroup;
 			name = Products;
@@ -215,6 +221,7 @@
 				E4EC3AED300384AC00C9FF2A /* Overhead.xcodeproj */,
 				E417077F30044A1B003E53FF /* Overhead.xcodeproj */,
 				E474F82B300845CD005860C8 /* Overhead.xcodeproj */,
+				E4561B88300A1AB30083C0BD /* Overhead.xcodeproj */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -359,12 +366,20 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = E4561B89300A1AB30083C0BD /* Products */;
-					ProjectRef = E4561B88300A1AB30083C0BD /* Overhead.xcodeproj */;
-				},
-				{
 					ProductGroup = E417078030044A1B003E53FF /* Products */;
 					ProjectRef = E417077F30044A1B003E53FF /* Overhead.xcodeproj */;
+				},
+				{
+					ProductGroup = E49DCE842FFCFB2B005BA3DF /* Products */;
+					ProjectRef = E49DCE832FFCFB2B005BA3DF /* Overhead.xcodeproj */;
+				},
+				{
+					ProductGroup = E474F82C300845CD005860C8 /* Products */;
+					ProjectRef = E474F82B300845CD005860C8 /* Overhead.xcodeproj */;
+				},
+				{
+					ProductGroup = E4561B89300A1AB30083C0BD /* Products */;
+					ProjectRef = E4561B88300A1AB30083C0BD /* Overhead.xcodeproj */;
 				},
 				{
 					ProductGroup = E4EC35E0300126A300C9FF2A /* Products */;
@@ -379,16 +394,12 @@
 					ProjectRef = E49DCEF12FFD1371005BA3DF /* Overhead.xcodeproj */;
 				},
 				{
-					ProductGroup = E49DCE842FFCFB2B005BA3DF /* Products */;
-					ProjectRef = E49DCE832FFCFB2B005BA3DF /* Overhead.xcodeproj */;
-				},
-				{
 					ProductGroup = E49DD02A3000C7F8005BA3DF /* Products */;
 					ProjectRef = E49DD0293000C7F8005BA3DF /* Overhead.xcodeproj */;
 				},
 				{
-					ProductGroup = E474F82C300845CD005860C8 /* Products */;
-					ProjectRef = E474F82B300845CD005860C8 /* Overhead.xcodeproj */;
+					ProductGroup = E45672C4300E72960083C0BD /* Products */;
+					ProjectRef = E45672C3300E72960083C0BD /* Overhead.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -601,7 +612,13 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Overhead/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Overtrain;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.navigation";
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Overtrain uses your location in the background to keep the Live Activity updated with your current position even when the app is not open.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Overtrain uses your location to track your position along the train line and show it on the Live Activity.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Overtrain saves images to your photo library so you can keep and share them.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -641,7 +658,13 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Overhead/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Overtrain;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.navigation";
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Overtrain uses your location in the background to keep the Live Activity updated with your current position even when the app is not open.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Overtrain uses your location to track your position along the train line and show it on the Live Activity.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Overtrain saves images to your photo library so you can keep and share them.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
