@@ -61,7 +61,8 @@ struct VerticalLCDLine: View {
                 HStack(alignment: .top, spacing: 0) {
                     timeColumn(for: station, timetable: timetable, isPast: isPast, isCurrent: isCurrent,
                                preferArrival: isTransfer)
-                        .frame(width: timeColumnWidth)
+                        // Same height as the marker so the time centers on the dot.
+                        .frame(width: timeColumnWidth, height: markerHeight)
 
                     stationCircle(
                         isPast: isPast,
@@ -218,7 +219,7 @@ struct VerticalLCDLine: View {
                     Color.clear
                 }
             }
-            .frame(width: timeColumnWidth)
+            .frame(width: timeColumnWidth, height: markerHeight)
 
             Group {
                 if isCurrent {
