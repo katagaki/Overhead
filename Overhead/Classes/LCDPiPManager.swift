@@ -65,11 +65,17 @@ final class LCDPiPManager: NSObject, ObservableObject {
         controller?.canStartPictureInPictureAutomaticallyFromInline = allowed
     }
 
-    /// Disarms PiP (journey ended).
+    /// Disarms PiP (journey ended). The controller must be disarmed AND
+    /// released — a live controller with a retained frame auto-starts PiP
+    /// on the next backgrounding even with no journey.
     func teardown() {
         if isActive { controller?.stopPictureInPicture() }
+        controller?.canStartPictureInPictureAutomaticallyFromInline = false
+        controller = nil
+        isActive = false
         stopTimer()
         frameProvider = nil
+        displayLayer.sampleBufferRenderer.flush(removingDisplayedImage: true, completionHandler: nil)
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }
 
