@@ -7,7 +7,7 @@ import ActivityKit
 struct TrainJourneyLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: TrainJourneyAttributes.self) { context in
-            LockScreenLiveActivityView(attributes: context.attributes, state: context.state)
+            LiveActivityContentView(attributes: context.attributes, state: context.state)
                 .containerBackground(.clear, for: .widget)
 
         } dynamicIsland: { context in
@@ -97,6 +97,151 @@ struct TrainJourneyLiveActivity: Widget {
         }
         // Lets the lock screen's two bands run to the container's edges.
         .contentMarginsDisabled()
+        // Watch Smart Stack rendering (without this, watchOS shows a
+        // bare system template).
+        .supplementalActivityFamilies([.small])
+    }
+}
+
+// MARK: - Family Switch
+
+/// `.small` is the Watch Smart Stack; `.medium` the phone lock screen.
+struct LiveActivityContentView: View {
+    @Environment(\.activityFamily) private var family
+
+    let attributes: TrainJourneyAttributes
+    let state: TrainJourneyAttributes.ContentState
+
+    var body: some View {
+        switch family {
+        case .small:
+            WatchLiveActivityView(attributes: attributes, state: state)
+        default:
+            LockScreenLiveActivityView(attributes: attributes, state: state)
+        }
+    }
+}
+
+// MARK: - Watch Smart Stack View
+
+/// The phone lock screen's two-tone layout, condensed: black band with the
+/// headline station, white band with the upcoming transfer and the ETA.
+struct WatchLiveActivityView: View {
+    let attributes: TrainJourneyAttributes
+    let state: TrainJourneyAttributes.ContentState
+
+    private static let darkInk = Color.black.opacity(0.9)
+    private static let darkInkSecondary = Color.black.opacity(0.65)
+
+    /// Dwelling at a station; the headline shows it (ただいま) instead of
+    /// the segment target (つぎは).
+    private var dwellingIndex: Int? {
+        guard let idx = state.currentStationIndex,
+              attributes.stationNames.indices.contains(idx) else { return nil }
+        return idx
+    }
+
+    private var headlineIndex: Int? { dwellingIndex ?? state.nextStationIndex }
+
+    private var headlineName: String {
+        dwellingIndex.map { attributes.stationNames[$0] } ?? state.nextStationName
+    }
+
+    private var headlineCode: String {
+        guard let idx = headlineIndex,
+              attributes.stationCodes.indices.contains(idx) else { return "" }
+        return attributes.stationCodes[idx]
+    }
+
+    private var headlineColor: Color {
+        Color(hex: attributes.stationColorHex(at: headlineIndex))
+    }
+
+    private var transfer: TrainJourneyAttributes.LegLine? {
+        attributes.upcomingTransfer(nextIndex: state.nextStationIndex)
+    }
+
+    private var transferStationName: String {
+        guard let transfer,
+              attributes.stationNames.indices.contains(transfer.stationIndex) else { return "" }
+        return attributes.stationNames[transfer.stationIndex]
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            topBand
+            bottomBand
+        }
+    }
+
+    private var topBand: some View {
+        HStack(spacing: 6) {
+            if !headlineCode.isEmpty {
+                LCDStationNumberBadge(code: headlineCode, color: headlineColor, dimension: 26)
+            }
+            VStack(alignment: .leading, spacing: 0) {
+                Text(dwellingIndex != nil ? "Label.NowAt" : "Label.Next")
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundColor(.white.opacity(0.65))
+                Text(headlineName)
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+            }
+            Spacer(minLength: 0)
+            if state.isDelayed {
+                Text("LiveActivity.Delay.Minutes \(state.delayMinutes)")
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .foregroundColor(.red)
+            } else if let leg = attributes.currentLeg(nextIndex: state.nextStationIndex),
+                      !leg.lineSymbol.isEmpty {
+                LCDLineSymbolBadge(symbol: leg.lineSymbol,
+                                   color: Color(hex: leg.lineColorHex))
+                    .sized(20)
+            }
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.black)
+    }
+
+    private var bottomBand: some View {
+        HStack(spacing: 4) {
+            if let transfer, !transferStationName.isEmpty {
+                Text("Label.Transfer")
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundColor(.orange)
+                if !transfer.lineSymbol.isEmpty {
+                    LCDLineSymbolBadge(symbol: transfer.lineSymbol,
+                                       color: Color(hex: transfer.lineColorHex))
+                        .sized(14)
+                }
+                Text(transferStationName)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(Self.darkInk)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+            } else {
+                Text(attributes.destinationName)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(Self.darkInk)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                Text("Label.GetOffAt")
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundColor(Self.darkInkSecondary)
+            }
+            Spacer(minLength: 4)
+            Text(ExpandedIslandBottomView.formatTime(state.estimatedArrival))
+                .font(.system(size: 15, weight: .bold, design: .rounded))
+                .foregroundColor(Self.darkInk)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
+        .frame(maxWidth: .infinity)
+        .background(Color.white)
     }
 }
 
