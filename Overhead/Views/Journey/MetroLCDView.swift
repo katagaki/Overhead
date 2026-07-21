@@ -30,24 +30,26 @@ struct MetroLCDView: View {
     private static let columnsTrailing: CGFloat = 26
     private static let maxColumns = 8
     private static let markerBlue = Color(hex: "#1D2088")
+    private static let markerRed = Color(hex: "#D7000F")
     private static let passedGray = Color(hex: "#8E9196")
     private static let languageFlipSeconds = 4.0
 
     private static let allLines = StaticTrainData.trainLines()
 
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 1.0)) { context in
+        TimelineView(.periodic(from: .now, by: 0.5)) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
                 let english = Int(
                     context.date.timeIntervalSinceReferenceDate / Self.languageFlipSeconds
                 ) % 2 == 1
+                let phase = LCDPhase.of(journey: journey, state: state, now: context.date)
                 VStack(spacing: 0) {
                     destinationStrip(english: english)
                         .frame(height: Self.destStripHeight)
-                    headlineBand(english: english)
+                    headlineBand(english: english, phase: phase)
                         .frame(height: Self.headlineHeight)
-                    progression(now: context.date)
+                    progression(now: context.date, english: english)
                         .frame(maxHeight: .infinity)
                 }
                 .frame(width: Self.designWidth, height: Self.designHeight)
@@ -74,11 +76,11 @@ struct MetroLCDView: View {
                         .minimumScaleFactor(0.5)
                 } else {
                     Text(destinationStation?.name ?? "")
-                        .font(.system(size: 15, weight: .heavy))
+                        .font(LCDFont.gothic(size: 15, weight: .heavy))
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
                     Text(verbatim: "ゆき")
-                        .font(.system(size: 15, weight: .heavy))
+                        .font(LCDFont.gothic(size: 15, weight: .heavy))
                 }
             }
             .foregroundColor(.black)
@@ -95,7 +97,8 @@ struct MetroLCDView: View {
 
     private func typeBox(english: Bool) -> some View {
         Text(english ? typeNameEn : typeName)
-            .font(.system(size: 13, weight: .heavy))
+            .font(english ? .system(size: 13, weight: .heavy)
+                          : LCDFont.gothic(size: 13, weight: .heavy))
             .foregroundColor(.white)
             .lineLimit(1)
             .minimumScaleFactor(0.5)
@@ -116,7 +119,8 @@ struct MetroLCDView: View {
                     in: RoundedRectangle(cornerRadius: 3)
                 )
             Text(verbatim: english ? "Car No." : "号車")
-                .font(.system(size: 8, weight: .bold))
+                .font(english ? .system(size: 8, weight: .bold)
+                              : LCDFont.gothic(size: 8, weight: .bold))
                 .foregroundColor(.black)
                 .fixedSize()
         }
@@ -124,12 +128,13 @@ struct MetroLCDView: View {
 
     // MARK: - Headline Band (silver gradient)
 
-    private func headlineBand(english: Bool) -> some View {
+    private func headlineBand(english: Bool, phase: LCDPhase) -> some View {
         HStack(spacing: 9) {
             // Fixed label zone, trailing-aligned: longer EN text grows leftward
             // and the badge never shifts on flip.
-            Text(headlineLabel(english: english))
-                .font(.system(size: english ? 10 : 13, weight: .bold))
+            Text(headlineLabel(english: english, phase: phase))
+                .font(english ? .system(size: 10, weight: .bold)
+                              : LCDFont.gothic(size: 13, weight: .bold))
                 .foregroundColor(.black)
                 .lineLimit(1)
                 .fixedSize()
@@ -150,7 +155,8 @@ struct MetroLCDView: View {
                 }
                 HorizontallySquashed {
                     Text(english ? station.nameEn : station.name)
-                        .font(.system(size: 32, weight: .heavy))
+                        .font(english ? .system(size: 32, weight: .heavy)
+                                      : LCDFont.gothic(size: 32, weight: .heavy))
                         .foregroundColor(.black)
                         .lineLimit(1)
                 }
@@ -181,8 +187,9 @@ struct MetroLCDView: View {
 
     // MARK: - Progression (white area)
 
-    private func progression(now: Date) -> some View {
+    private func progression(now: Date, english: Bool) -> some View {
         let (builtCols, builtSlot) = columns(now: now)
+        let blinkRed = Int(now.timeIntervalSinceReferenceDate * 2) % 2 == 0
         let mirrored = orientation == .left
         let cols = mirrored ? Array(builtCols.reversed()) : builtCols
         let markerSlot = mirrored ? CGFloat(builtCols.count) - builtSlot : builtSlot
@@ -220,7 +227,7 @@ struct MetroLCDView: View {
                 .padding(.leading, leadInset)
 
                 DirectionMarker(pointsLeading: mirrored)
-                    .fill(Self.markerBlue)
+                    .fill(blinkRed ? Self.markerRed : Self.markerBlue)
                     .overlay(DirectionMarker(pointsLeading: mirrored).stroke(Color.white, lineWidth: 1.2))
                     .frame(width: 17, height: Self.bandHeight)
                     .offset(x: max(0, markerCenter - 8.5))
@@ -232,7 +239,7 @@ struct MetroLCDView: View {
             .shadow(color: .black.opacity(0.4), radius: 0.8, x: 0, y: 1)
             .overlay(alignment: mirrored ? .bottomLeading : .bottomTrailing) {
                 Text(verbatim: "分")
-                    .font(.system(size: 8, weight: .bold))
+                    .font(LCDFont.gothic(size: 8, weight: .bold))
                     .foregroundColor(.white)
                     .shadow(color: .black.opacity(0.6), radius: 0.5, x: 0, y: 0.8)
                     .padding(mirrored ? .leading : .trailing, 9)
@@ -257,7 +264,8 @@ struct MetroLCDView: View {
 
             HStack(spacing: 0) {
                 ForEach(cols) { col in
-                    verticalName(col.station.name, passed: col.isPassed)
+                    columnName(col.station, passed: col.isPassed,
+                               english: english, colWidth: colWidth)
                         .frame(width: colWidth)
                 }
             }
@@ -272,7 +280,7 @@ struct MetroLCDView: View {
         .background(Color.white)
         .overlay(alignment: .bottomTrailing) {
             Text(verbatim: "運転状況により、多少時間は異なります。")
-                .font(.system(size: 6.5, weight: .bold))
+                .font(LCDFont.gothic(size: 6.5, weight: .bold))
                 .foregroundColor(.black)
                 .padding(.trailing, 6)
                 .padding(.bottom, 2)
@@ -301,7 +309,7 @@ struct MetroLCDView: View {
                 HStack(alignment: .top, spacing: 1.5) {
                     LineSymbolBadge(symbol: line.lineSymbol, color: line.color, dimension: 7)
                     Text(line.name)
-                        .font(.system(size: 6.5, weight: .bold))
+                        .font(LCDFont.gothic(size: 6.5, weight: .bold))
                         .kerning(-0.3)
                         .foregroundColor(.black)
                         .lineLimit(2)
@@ -312,13 +320,24 @@ struct MetroLCDView: View {
         .padding(.horizontal, 1)
     }
 
-    private func verticalName(_ name: String, passed: Bool) -> some View {
-        VerticalStationName(name: name, fontSize: 11.5, charBox: 12,
-                            availableHeight: Self.namesHeight - 8,
-                            color: passed ? Self.passedGray : .black,
-                            columnAnchor: .top, justifiedSingle: true)
-            .padding(.top, 4)
-            .frame(height: Self.namesHeight, alignment: .top)
+    @ViewBuilder
+    private func columnName(_ station: Station, passed: Bool, english: Bool,
+                            colWidth: CGFloat) -> some View {
+        if english {
+            RotatedEnglishStationName(name: station.nameEn, fontSize: 10.5,
+                                      width: colWidth, height: Self.namesHeight - 8,
+                                      color: passed ? Self.passedGray : .black,
+                                      textAnchor: .leading)
+                .padding(.top, 4)
+                .frame(height: Self.namesHeight, alignment: .top)
+        } else {
+            VerticalStationName(name: station.name, fontSize: 11.5, charBox: 12,
+                                availableHeight: Self.namesHeight - 8,
+                                color: passed ? Self.passedGray : .black,
+                                columnAnchor: .top, justifiedSingle: true, gothic: true)
+                .padding(.top, 4)
+                .frame(height: Self.namesHeight, alignment: .top)
+        }
     }
 
     // MARK: - Data
@@ -404,11 +423,12 @@ struct MetroLCDView: View {
         return "\(letters)-\(digits)"
     }
 
-    private func headlineLabel(english: Bool) -> String {
-        if english {
-            return state.currentStationIndex != nil ? "Now stopping at" : "Next"
+    private func headlineLabel(english: Bool, phase: LCDPhase) -> String {
+        switch phase {
+        case .next: return english ? "Next" : "つぎは"
+        case .approaching: return english ? "Arriving at" : "まもなく"
+        case .dwelling: return english ? "Now stopping at" : "ただいま"
         }
-        return state.currentStationIndex != nil ? "ただいま" : "つぎは"
     }
 
     private var headlineStation: Station? {

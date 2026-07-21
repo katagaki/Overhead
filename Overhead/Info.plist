@@ -37,6 +37,11 @@
 		<string>Hind-SemiBold.ttf</string>
 		<string>Hind-Bold.ttf</string>
 		<string>MPLUS1p-Regular.ttf</string>
+		<string>ZenKakuGothicNew-Regular.ttf</string>
+		<string>ZenKakuGothicNew-Medium.ttf</string>
+		<string>ZenKakuGothicNew-Bold.ttf</string>
+		<string>ZenKakuGothicNew-Black.ttf</string>
+		<string>DotGothic16-Regular.ttf</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>

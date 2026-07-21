@@ -126,6 +126,8 @@ struct SpreadSquashName: View {
     let size: CGFloat
     var weight: Font.Weight = .heavy
     var color: Color = .black
+    /// The JR/Metro LCDs set their Japanese text in the bundled gothic.
+    var gothic: Bool = false
     @State private var packedWidth: CGFloat = 0
 
     var body: some View {
@@ -153,7 +155,8 @@ struct SpreadSquashName: View {
             ForEach(chars.indices, id: \.self) { i in
                 if spread && i > 0 { Spacer(minLength: 0) }
                 Text(String(chars[i]))
-                    .font(.system(size: size, weight: weight))
+                    .font(gothic ? LCDFont.gothic(size: size, weight: weight)
+                                 : .system(size: size, weight: weight))
                     .foregroundColor(color)
                     .fixedSize()
             }
@@ -188,6 +191,8 @@ struct VerticalStationName: View {
     /// justifies first/last chars; the Joban family packs them).
     var justifiedSingle: Bool = false
     var columnSpacing: CGFloat = 1
+    /// The JR/Metro LCDs set their Japanese text in the bundled gothic.
+    var gothic: Bool = false
 
     /// Glyphs that rotate 90° in vertical writing (chōonpu, wave/long dashes).
     private static let rotatedGlyphs: Set<Character> = ["ー", "ｰ", "〜", "～", "−", "－", "-"]
@@ -215,7 +220,8 @@ struct VerticalStationName: View {
                     ForEach(chars.indices, id: \.self) { j in
                         if justify && j > 0 { Spacer(minLength: 0) }
                         Text(String(chars[j]))
-                            .font(.system(size: fontSize, weight: weight))
+                            .font(gothic ? LCDFont.gothic(size: fontSize, weight: weight)
+                                         : .system(size: fontSize, weight: weight))
                             .rotationEffect(Self.rotatedGlyphs.contains(chars[j]) ? .degrees(90) : .zero)
                             .frame(height: charBox)
                     }

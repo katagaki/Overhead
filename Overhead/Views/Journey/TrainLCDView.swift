@@ -21,6 +21,7 @@ struct TrainLCDView: View {
     private static let headerHeight: CGFloat = designHeight * 0.33
     private static let maxUpcomingStops = 7
     private static let lcdRed = Color(hex: "#D7000F")
+    private static let markerBlue = Color(hex: "#1D2088")
     private static let passedOpacity: CGFloat = 0.4
     private static let passedBandGray = Color(hex: "#8E9196")
     private static let languageFlipSeconds = 4.0
@@ -34,16 +35,17 @@ struct TrainLCDView: View {
     }()
 
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 1.0)) { context in
+        TimelineView(.periodic(from: .now, by: 0.5)) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
                 let english = Int(
                     context.date.timeIntervalSinceReferenceDate / Self.languageFlipSeconds
                 ) % 2 == 1
+                let phase = LCDPhase.of(journey: journey, state: state, now: context.date)
                 VStack(spacing: 0) {
-                    header(now: context.date, english: english)
+                    header(now: context.date, english: english, phase: phase)
                         .frame(height: Self.headerHeight)
-                    progression(now: context.date)
+                    progression(now: context.date, english: english)
                         .frame(maxHeight: .infinity)
                 }
                 .frame(width: Self.designWidth, height: Self.designHeight)
@@ -57,17 +59,19 @@ struct TrainLCDView: View {
 
     // MARK: - Header (black area)
 
-    private func header(now: Date, english: Bool) -> some View {
+    private func header(now: Date, english: Bool, phase: LCDPhase) -> some View {
         HStack(alignment: .top, spacing: 10) {
             destinationPlate(english: english)
 
             VStack(spacing: 0) {
                 HStack(alignment: .top, spacing: 3) {
-                    Text(headlineLabel(english: english))
-                        .font(.system(size: english ? 10 : 12, weight: .bold))
+                    Text(headlineLabel(english: english, phase: phase))
+                        .font(english ? .system(size: 10, weight: .bold)
+                                      : LCDFont.gothic(size: 12, weight: .bold))
                     Spacer()
                     Text(verbatim: english ? "Time" : "現在時刻")
-                        .font(.system(size: 8, weight: .medium))
+                        .font(english ? .system(size: 8, weight: .medium)
+                                      : LCDFont.gothic(size: 8, weight: .medium))
                         .opacity(0.85)
                     Text(Self.clockFormatter.string(from: now))
                         .font(.system(size: 13, weight: .bold))
@@ -89,7 +93,8 @@ struct TrainLCDView: View {
                         }
                         HorizontallySquashed {
                             Text(english ? station.nameEn : station.name)
-                                .font(.system(size: 34, weight: .bold))
+                                .font(english ? .system(size: 34, weight: .bold)
+                                              : LCDFont.gothic(size: 34, weight: .bold))
                                 .foregroundColor(.white)
                                 .kerning(english ? 0 : 5.0)
                                 .lineLimit(1)
@@ -113,7 +118,8 @@ struct TrainLCDView: View {
     private func destinationPlate(english: Bool) -> some View {
         VStack(spacing: 2) {
             Text(english ? typeNameEn : typeName)
-                .font(.system(size: 15, weight: .black))
+                .font(english ? .system(size: 15, weight: .black)
+                              : LCDFont.gothic(size: 15, weight: .black))
                 .kerning(english ? 0 : typeKerning)
                 .padding(.leading, english ? 0 : typeKerning)
                 .foregroundColor(displayColor)
@@ -142,7 +148,7 @@ struct TrainLCDView: View {
                 .frame(maxWidth: .infinity)
             } else {
                 Text(destinationStation?.name ?? "")
-                    .font(.system(size: 16, weight: .heavy))
+                    .font(LCDFont.gothic(size: 16, weight: .heavy))
                     .lineLimit(1)
                     .kerning(3.0)
                     .minimumScaleFactor(0.5)
@@ -152,7 +158,7 @@ struct TrainLCDView: View {
             }
 
             Text(verbatim: "ゆき")
-                .font(.system(size: 8, weight: .bold))
+                .font(LCDFont.gothic(size: 8, weight: .bold))
                 .foregroundColor(.white)
                 .opacity(english ? 0 : 1)
                 .frame(maxWidth: .infinity, alignment: .trailing)
@@ -186,7 +192,7 @@ struct TrainLCDView: View {
                 VStack(alignment: .trailing, spacing: 2) {
                     numberBox
                     Text(verbatim: "号車")
-                        .font(.system(size: 8, weight: .bold))
+                        .font(LCDFont.gothic(size: 8, weight: .bold))
                         .foregroundColor(.white)
                 }
             }
@@ -196,15 +202,16 @@ struct TrainLCDView: View {
 
     // MARK: - Progression (white area)
 
-    private func progression(now: Date) -> some View {
+    private func progression(now: Date, english: Bool) -> some View {
         let (columns, markerSlot) = stops(now: now)
         let colWidth = (Self.designWidth - 20) / CGFloat(max(columns.count, 1))
         let markerCenter = markerSlot * colWidth
+        let blinkRed = Int(now.timeIntervalSinceReferenceDate * 2) % 2 == 0
 
         return VStack(spacing: 0) {
             HStack(spacing: 0) {
                 ForEach(columns) { col in
-                    verticalName(col.station.name)
+                    columnName(col.station, english: english, colWidth: colWidth)
                         .frame(width: colWidth, height: 52, alignment: .bottom)
                         .opacity(col.isPassed ? Self.passedOpacity : 1)
                 }
@@ -248,10 +255,10 @@ struct TrainLCDView: View {
                 }
                 Group {
                     if state.currentStationIndex != nil {
-                        currentMarker
+                        currentMarker(red: blinkRed)
                             .offset(x: markerCenter - 27 / 2)
                     } else {
-                        movingMarker
+                        movingMarker(red: blinkRed)
                             .offset(x: markerCenter - 11 / 2)
                     }
                 }
@@ -285,16 +292,23 @@ struct TrainLCDView: View {
         .background(Color.white)
         .overlay(alignment: .bottomTrailing) {
             Text(verbatim: "時刻は目安であり、実際とは異なる場合があります。")
-                .font(.system(size: 6))
+                .font(LCDFont.gothic(size: 6))
                 .foregroundColor(.black.opacity(0.55))
                 .padding(.trailing, 5)
                 .padding(.bottom, 2)
         }
     }
 
-    private func verticalName(_ name: String) -> some View {
-        VerticalStationName(name: name, fontSize: 11, charBox: 12,
-                            availableHeight: 52, color: .black, columnAnchor: .bottom)
+    @ViewBuilder
+    private func columnName(_ station: Station, english: Bool, colWidth: CGFloat) -> some View {
+        if english {
+            RotatedEnglishStationName(name: station.nameEn, fontSize: 10.5,
+                                      width: colWidth, height: 52)
+        } else {
+            VerticalStationName(name: station.name, fontSize: 11, charBox: 12,
+                                availableHeight: 52, color: .black,
+                                columnAnchor: .bottom, gothic: true)
+        }
     }
 
     private func minuteCircle(_ col: LCDStop, showsUnit: Bool) -> some View {
@@ -311,7 +325,7 @@ struct TrainLCDView: View {
                     .frame(width: 12)
                 if showsUnit {
                     Text(verbatim: "(分)")
-                        .font(.system(size: 6, weight: .bold))
+                        .font(LCDFont.gothic(size: 6, weight: .bold))
                         .foregroundColor(.white)
                         .offset(x: orientation == .right ? -13 : 13)
                 }
@@ -319,11 +333,11 @@ struct TrainLCDView: View {
         }
     }
 
-    private var currentMarker: some View {
+    private func currentMarker(red: Bool) -> some View {
         let flipped = orientation == .right
         return ZStack {
             ArrowBandShape(tipOnTrailing: flipped)
-                .fill(Self.lcdRed)
+                .fill(red ? Self.lcdRed : Self.markerBlue)
                 .overlay(ArrowBandShape(tipOnTrailing: flipped).stroke(Color.white, lineWidth: 1.5))
                 .frame(width: 27, height: 21)
             Circle()
@@ -334,10 +348,10 @@ struct TrainLCDView: View {
     }
 
     /// The in-transit marker: a solid chevron pointing the direction of travel.
-    private var movingMarker: some View {
+    private func movingMarker(red: Bool) -> some View {
         let flipped = orientation == .right
         return TravelChevronShape(pointsTrailing: flipped)
-            .fill(Self.lcdRed)
+            .fill(red ? Self.lcdRed : Self.markerBlue)
             .overlay(TravelChevronShape(pointsTrailing: flipped).stroke(Color.white, lineWidth: 1.5))
             .frame(width: 11, height: 20)
     }
@@ -348,7 +362,7 @@ struct TrainLCDView: View {
                 HStack(alignment: .top, spacing: 1.5) {
                     LineSymbolBadge(symbol: line.lineSymbol, color: line.color, dimension: 7)
                     Text(line.name)
-                        .font(.system(size: 6.5, weight: .bold))
+                        .font(LCDFont.gothic(size: 6.5, weight: .bold))
                         .foregroundColor(.black)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
@@ -448,11 +462,12 @@ struct TrainLCDView: View {
         )
     }
 
-    private func headlineLabel(english: Bool) -> String {
-        if english {
-            return state.currentStationIndex != nil ? "Now stopping at" : "Next"
+    private func headlineLabel(english: Bool, phase: LCDPhase) -> String {
+        switch phase {
+        case .next: return english ? "Next" : "つぎは"
+        case .approaching: return english ? "Soon" : "まもなく"
+        case .dwelling: return english ? "Now stopping at" : "ただいま"
         }
-        return state.currentStationIndex != nil ? "ただいま" : "つぎは"
     }
 
     private var headlineStation: Station? {

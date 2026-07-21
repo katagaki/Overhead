@@ -7,6 +7,8 @@ import Backbone
 struct CustomStationsEditorView: View {
     @Binding var line: CustomLine
 
+    @State private var showNewStation = false
+
     var body: some View {
         List {
             Section {
@@ -65,10 +67,21 @@ struct CustomStationsEditorView: View {
                 Button {
                     line.stations.append(.new())
                     line.normalizeHopMinutes()
+                    showNewStation = true
                 } label: {
                     Image(systemName: "plus")
                 }
                 .accessibilityLabel(Text("CustomLine.AddStation"))
+            }
+        }
+        .navigationDestination(isPresented: $showNewStation) {
+            if let last = line.stations.indices.last {
+                CustomStationDetailView(
+                    station: $line.stations[last],
+                    code: line.stationCode(at: last),
+                    style: line.badgeStyle,
+                    color: line.color
+                )
             }
         }
         .overlay {
@@ -151,11 +164,8 @@ struct CustomStationDetailView: View {
                 } label: {
                     Text("CustomLine.StationNameEn")
                 }
-            } header: {
-                HStack(spacing: 8) {
-                    StationNumberBadge(code: code, color: color, size: .compact, styleOverride: style)
-                    Text(verbatim: code)
-                }
+            } footer: {
+                Text("CustomLine.StationNameEn.Footer")
             }
 
             Section {
@@ -200,6 +210,19 @@ struct CustomStationDetailView: View {
                     Text(verbatim: error).foregroundColor(.red)
                 }
             }
+        }
+        .safeAreaInset(edge: .top, spacing: 0) {
+            StationNumberBadge(
+                code: code,
+                color: color,
+                size: .regular,
+                stationName: station.name,
+                styleOverride: style
+            )
+            .scaleEffect(2)
+            .frame(maxWidth: .infinity)
+            .frame(height: 88)
+            .background(Color(.systemGroupedBackground))
         }
         .navigationTitle(station.name.isEmpty ? Text("CustomLine.Stations") : Text(verbatim: station.name))
         .navigationBarTitleDisplayMode(.inline)

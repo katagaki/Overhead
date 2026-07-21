@@ -278,41 +278,20 @@ private struct LEDRaster {
     }
 
     init(segments: [LEDPage.Segment]) {
-        // Flat-terminal gothic for Japanese, serif for Latin runs.
-        let jaFont = UIFont(name: "MPLUS1p-Regular", size: 15)
-            ?? UIFont.systemFont(ofSize: 14, weight: .regular)
-        let latinFont = UIFont(name: "TimesNewRomanPSMT", size: 15)
+        // 16-dot bitmap gothic (covers kana/kanji/Latin); at 15pt its dots
+        // land on the pixel grid, so the raster reads as a true LED matrix.
+        let font = UIFont(name: "DotGothic16-Regular", size: 15)
             ?? UIFont.systemFont(ofSize: 14, weight: .regular)
 
         let attributed = NSMutableAttributedString()
         for segment in segments {
-            // Split into ASCII / non-ASCII runs so each script gets its face.
-            var run = ""
-            var runIsASCII: Bool?
-            func flush() {
-                guard !run.isEmpty else { return }
-                attributed.append(NSAttributedString(
-                    string: run,
-                    attributes: [
-                        .font: runIsASCII == true ? latinFont : jaFont,
-                        .foregroundColor: segment.color.uiColor,
-                    ]
-                ))
-                run = ""
-            }
-            for char in segment.text {
-                let ascii = char.isASCII
-                if ascii != runIsASCII {
-                    flush()
-                    runIsASCII = ascii
-                }
-                run.append(char)
-            }
-            flush()
+            attributed.append(NSAttributedString(string: segment.text, attributes: [
+                .font: font,
+                .foregroundColor: segment.color.uiColor,
+            ]))
         }
 
-        let textSize = attributed.size()
-        let width = max(1, Int(ceil(textSize.width)))
+        let width = max(1, Int(ceil(attributed.size().width)))
         let height = Self.rows
 
         let format = UIGraphicsImageRendererFormat()
@@ -326,7 +305,8 @@ private struct LEDRaster {
             // Aliased text — one pixel per dot; antialiasing would fatten strokes.
             ctx.cgContext.setShouldAntialias(false)
             ctx.cgContext.setShouldSmoothFonts(false)
-            attributed.draw(at: CGPoint(x: 0, y: (CGFloat(height) - textSize.height) / 2))
+            // Baseline pinned to an integer row so the dot grid stays aligned.
+            attributed.draw(at: CGPoint(x: 0, y: 14 - font.ascender))
         }
 
         var dots = [UInt8](repeating: 0, count: width * height)

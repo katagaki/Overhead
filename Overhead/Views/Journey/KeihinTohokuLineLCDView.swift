@@ -25,17 +25,23 @@ struct KeihinTohokuLineLCDView: View {
     private static let maxUpcomingStops = 7
     private static let barGray = Color(hex: "#B3B6BB")
     private static let passedOpacity: CGFloat = 0.4
+    private static let markerRed = Color(hex: "#D7000F")
+    private static let markerBlue = Color(hex: "#1D2088")
+    private static let languageFlipSeconds = 4.0
 
     private static let allLines = StaticTrainData.trainLines()
 
     var body: some View {
-        TimelineView(.everyMinute) { context in
+        TimelineView(.periodic(from: .now, by: 0.5)) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
+                let english = Int(
+                    context.date.timeIntervalSinceReferenceDate / Self.languageFlipSeconds
+                ) % 2 == 1
                 VStack(spacing: 0) {
-                    header
+                    header(english: english)
                         .frame(height: Self.headerHeight)
-                    progression(now: context.date)
+                    progression(now: context.date, english: english)
                         .frame(maxHeight: .infinity)
                 }
                 .frame(width: Self.designWidth, height: Self.designHeight)
@@ -49,9 +55,9 @@ struct KeihinTohokuLineLCDView: View {
 
     // MARK: - Header (gray bar)
 
-    private var header: some View {
+    private func header(english: Bool) -> some View {
         ZStack {
-            stationBox
+            stationBox(english: english)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .overlay(alignment: .topLeading) {
@@ -82,12 +88,12 @@ struct KeihinTohokuLineLCDView: View {
             ForEach(0..<8, id: \.self) { i in
                 let angle = CGFloat(i) * .pi / 4
                 Text(text)
-                    .font(.system(size: size, weight: .heavy))
+                    .font(LCDFont.gothic(size: size, weight: .heavy))
                     .foregroundColor(.white)
                     .offset(x: cos(angle) * 1.1, y: sin(angle) * 1.1)
             }
             Text(text)
-                .font(.system(size: size, weight: .heavy))
+                .font(LCDFont.gothic(size: size, weight: .heavy))
                 .foregroundColor(displayColor)
         }
     }
@@ -95,16 +101,27 @@ struct KeihinTohokuLineLCDView: View {
     private static let boxHeight: CGFloat = 44
 
     /// White box: badge docked left, name spread across the rest.
-    private var stationBox: some View {
+    private func stationBox(english: Bool) -> some View {
         HStack(spacing: 0) {
             if let station = headlineStation {
                 if !station.stationCode.isEmpty {
                     scaledStationBadge(station, dimension: Self.boxHeight - 9)
                         .padding(4.5)
                 }
-                spreadName(station.name)
-                    .padding(.horizontal, 20)
+                if english {
+                    HorizontallySquashed {
+                        Text(station.nameEn)
+                            .font(.system(size: 20, weight: .heavy))
+                            .foregroundColor(.black)
+                            .lineLimit(1)
+                    }
+                    .padding(.horizontal, 8)
                     .frame(maxWidth: .infinity)
+                } else {
+                    spreadName(station.name)
+                        .padding(.horizontal, 20)
+                        .frame(maxWidth: .infinity)
+                }
             }
         }
         .frame(width: 190, height: Self.boxHeight)
@@ -125,7 +142,7 @@ struct KeihinTohokuLineLCDView: View {
     private func spreadName(_ name: String) -> some View {
         let chars = Array(name)
         let size: CGFloat = chars.count <= 4 ? 27 : 18
-        return SpreadSquashName(chars: chars, size: size)
+        return SpreadSquashName(chars: chars, size: size, gothic: true)
     }
 
     private var carColumn: some View {
@@ -136,22 +153,23 @@ struct KeihinTohokuLineLCDView: View {
                 .frame(width: 26, height: 20)
                 .background(Color.white, in: RoundedRectangle(cornerRadius: 2))
             Text(verbatim: "号車")
-                .font(.system(size: 8, weight: .bold))
+                .font(LCDFont.gothic(size: 8, weight: .bold))
                 .foregroundColor(.black)
         }
     }
 
     // MARK: - Progression (white area, Joban-style)
 
-    private func progression(now: Date) -> some View {
+    private func progression(now: Date, english: Bool) -> some View {
         let (columns, markerSlot) = stops(now: now)
         let colWidth = (Self.designWidth - 20) / CGFloat(max(columns.count, 1))
         let markerCenter = markerSlot * colWidth
+        let blinkRed = Int(now.timeIntervalSinceReferenceDate * 2) % 2 == 0
 
         return VStack(spacing: 0) {
             HStack(spacing: 0) {
                 ForEach(columns) { col in
-                    verticalName(col.station.name)
+                    columnName(col.station, english: english, colWidth: colWidth)
                         .frame(width: colWidth, height: 52, alignment: .bottom)
                         .opacity(col.isPassed ? Self.passedOpacity : 1)
                 }
@@ -186,13 +204,13 @@ struct KeihinTohokuLineLCDView: View {
                         .opacity(col.isPassed ? Self.passedOpacity : 1)
                     }
                 }
-                currentMarker
+                currentMarker(red: blinkRed)
                     .offset(x: markerCenter - 27 / 2)
             }
             .frame(height: 21)
             .overlay(alignment: orientation == .right ? .leading : .trailing) {
                 Text(verbatim: "（分）")
-                    .font(.system(size: 6.5, weight: .bold))
+                    .font(LCDFont.gothic(size: 6.5, weight: .bold))
                     .foregroundColor(.white)
                     .offset(x: orientation == .right ? -9 : 9)
             }
@@ -213,7 +231,7 @@ struct KeihinTohokuLineLCDView: View {
         .background(Color.white)
         .overlay(alignment: .bottomTrailing) {
             Text(verbatim: "時刻は目安であり、実際とは異なる場合があります。")
-                .font(.system(size: 6))
+                .font(LCDFont.gothic(size: 6))
                 .foregroundColor(.black.opacity(0.55))
                 .padding(.trailing, 5)
                 .padding(.bottom, 2)
@@ -222,9 +240,16 @@ struct KeihinTohokuLineLCDView: View {
 
     // Long names squash vertically; mixed kanji/katakana names split into
     // parallel columns with the shorter part spaced out, like the real display.
-    private func verticalName(_ name: String) -> some View {
-        VerticalStationName(name: name, fontSize: 11, charBox: 12,
-                            availableHeight: 52, color: .black, columnAnchor: .bottom)
+    @ViewBuilder
+    private func columnName(_ station: Station, english: Bool, colWidth: CGFloat) -> some View {
+        if english {
+            RotatedEnglishStationName(name: station.nameEn, fontSize: 10.5,
+                                      width: colWidth, height: 52)
+        } else {
+            VerticalStationName(name: station.name, fontSize: 11, charBox: 12,
+                                availableHeight: 52, color: .black,
+                                columnAnchor: .bottom, gothic: true)
+        }
     }
 
     /// Minute-count box (E235 uses boxes, not the E233's circles).
@@ -244,11 +269,11 @@ struct KeihinTohokuLineLCDView: View {
         }
     }
 
-    /// Line-colored arrow marker — no center circle, unlike the Joban one.
-    private var currentMarker: some View {
+    /// Position marker — no center circle, unlike the Joban one.
+    private func currentMarker(red: Bool) -> some View {
         let flipped = orientation == .right
         return YamanoteArrowBandShape(tipOnTrailing: flipped)
-            .fill(displayColor)
+            .fill(red ? Self.markerRed : Self.markerBlue)
             .overlay(YamanoteArrowBandShape(tipOnTrailing: flipped).stroke(Color.white, lineWidth: 1.5))
             .frame(width: 27, height: 21)
     }
@@ -259,7 +284,7 @@ struct KeihinTohokuLineLCDView: View {
                 HStack(alignment: .top, spacing: 1.5) {
                     LineSymbolBadge(symbol: line.lineSymbol, color: line.color, dimension: 7)
                     Text(line.name)
-                        .font(.system(size: 6.5, weight: .bold))
+                        .font(LCDFont.gothic(size: 6.5, weight: .bold))
                         .foregroundColor(.black)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)

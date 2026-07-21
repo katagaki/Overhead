@@ -25,11 +25,13 @@ enum TrainLCDStyle: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    /// PiP frame cadence: marquee/starfield styles need video-rate frames.
+    /// PiP frame cadence: marquee/starfield styles need video-rate frames;
+    /// the blinking-marker styles need the 2 Hz blink.
     var pipFrameInterval: TimeInterval {
         switch self {
         case .ledMatrix, .shinkansen, .tube, .neon: return 1.0 / 24.0
         case .galaxy: return 1.0 / 8.0
+        case .joban, .keihinTohoku, .tokyoMetro: return 0.5
         default: return 1.0
         }
     }

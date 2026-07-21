@@ -34,28 +34,31 @@ struct HankyuLCDView: View {
     }
 
     var body: some View {
-        GeometryReader { geo in
-            let scale = geo.size.width / Self.designWidth
-            VStack(spacing: 0) {
-                header
-                    .frame(height: Self.headerHeight)
-                Rectangle()
-                    .fill(Color(hex: "#8F9296"))
-                    .frame(height: 1)
-                map
-                    .frame(maxHeight: .infinity)
+        TimelineView(.periodic(from: .now, by: 1.0)) { context in
+            GeometryReader { geo in
+                let scale = geo.size.width / Self.designWidth
+                let phase = LCDPhase.of(journey: journey, state: state, now: context.date)
+                VStack(spacing: 0) {
+                    header(phase: phase)
+                        .frame(height: Self.headerHeight)
+                    Rectangle()
+                        .fill(Color(hex: "#8F9296"))
+                        .frame(height: 1)
+                    map
+                        .frame(maxHeight: .infinity)
+                }
+                .frame(width: Self.designWidth, height: Self.designHeight)
+                .scaleEffect(scale, anchor: .topLeading)
             }
-            .frame(width: Self.designWidth, height: Self.designHeight)
-            .scaleEffect(scale, anchor: .topLeading)
+            .aspectRatio(Self.designWidth / Self.designHeight, contentMode: .fit)
+            .modifier(LCDScreenClip())
+            .modifier(LCDBezel())
         }
-        .aspectRatio(Self.designWidth / Self.designHeight, contentMode: .fit)
-        .modifier(LCDScreenClip())
-        .modifier(LCDBezel())
     }
 
     // MARK: - Header
 
-    private var header: some View {
+    private func header(phase: LCDPhase) -> some View {
         HStack(spacing: 7) {
             typeTab
 
@@ -71,7 +74,7 @@ struct HankyuLCDView: View {
             Spacer(minLength: 4)
 
             HStack(alignment: .center, spacing: 4) {
-                Text(headlineLabel)
+                Text(headlineLabel(phase: phase))
                     .font(.system(size: 8, weight: .medium))
                     .foregroundColor(.white)
                 HStack(spacing: 3) {
@@ -369,8 +372,12 @@ struct HankyuLCDView: View {
         )
     }
 
-    private var headlineLabel: String {
-        state.currentStationIndex != nil ? "ただいま" : "つぎは"
+    private func headlineLabel(phase: LCDPhase) -> String {
+        switch phase {
+        case .next: return "つぎは"
+        case .approaching: return "まもなく"
+        case .dwelling: return "ただいま"
+        }
     }
 
     private var headlineIndex: Int {

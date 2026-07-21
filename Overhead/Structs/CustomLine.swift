@@ -73,12 +73,13 @@ struct CustomLine: Identifiable, Codable, Hashable {
     }
 
     /// Station in travel-order-agnostic array order, as a Backbone `Station`.
+    /// A blank English name falls back to the Japanese one (single-language lines).
     func backboneStations() -> [Station] {
         stations.enumerated().map { index, station in
             Station(
                 id: station.id,
                 name: station.name,
-                nameEn: station.nameEn,
+                nameEn: station.nameEn.isEmpty ? station.name : station.nameEn,
                 stationCode: stationCode(at: index),
                 latitude: station.latitude,
                 longitude: station.longitude
@@ -90,7 +91,7 @@ struct CustomLine: Identifiable, Codable, Hashable {
         TrainLine(
             id: id,
             name: name,
-            nameEn: nameEn,
+            nameEn: nameEn.isEmpty ? name : nameEn,
             operatorId: "Operator:Custom",
             stations: backboneStations(),
             colorHex: colorHex,

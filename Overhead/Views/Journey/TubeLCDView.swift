@@ -126,19 +126,13 @@ struct TubeLCDView: View {
         guard let station = headlineStation else { return [] }
         let dwelling = state.currentStationIndex != nil
         let destEn = destinationStation?.nameEn ?? ""
-        let destJa = destinationStation?.name ?? ""
         var pages: [TubePage] = []
         pages.append(TubePage(text: dwelling
             ? "This station is \(station.nameEn)"
             : "Next station: \(station.nameEn)"))
-        pages.append(TubePage(text: dwelling
-            ? "ただいま \(station.name)"
-            : "次は \(station.name)"))
         pages.append(TubePage(text: "This train is for \(destEn)"))
-        pages.append(TubePage(text: "この電車は \(destJa) ゆきです"))
         if state.delayMinutes > 0 {
             pages.append(TubePage(text: "This train is delayed by approx. \(state.delayMinutes) min"))
-            pages.append(TubePage(text: "この電車は約\(state.delayMinutes)分遅れています"))
         }
         return pages.map { page in
             page.raster.width > Self.gridColumns
@@ -187,31 +181,16 @@ private struct MonoLEDRaster {
     }
 
     init(text: String) {
-        let jaFont = UIFont(name: "MPLUS1p-Regular", size: 15)
-            ?? UIFont.systemFont(ofSize: 14, weight: .regular)
-        let latinFont = UIFont(name: "TimesNewRomanPSMT", size: 15)
+        // 16-dot bitmap gothic; at 15pt its dots land on the pixel grid.
+        let font = UIFont(name: "DotGothic16-Regular", size: 15)
             ?? UIFont.systemFont(ofSize: 14, weight: .regular)
 
-        let attributed = NSMutableAttributedString()
-        var run = ""
-        var runIsASCII: Bool?
-        func flush() {
-            guard !run.isEmpty else { return }
-            attributed.append(NSAttributedString(string: run, attributes: [
-                .font: runIsASCII == true ? latinFont : jaFont,
-                .foregroundColor: UIColor.white,
-            ]))
-            run = ""
-        }
-        for char in text {
-            let ascii = char.isASCII
-            if ascii != runIsASCII { flush(); runIsASCII = ascii }
-            run.append(char)
-        }
-        flush()
+        let attributed = NSAttributedString(string: text, attributes: [
+            .font: font,
+            .foregroundColor: UIColor.white,
+        ])
 
-        let textSize = attributed.size()
-        let width = max(1, Int(ceil(textSize.width)))
+        let width = max(1, Int(ceil(attributed.size().width)))
         let height = Self.rows
 
         let format = UIGraphicsImageRendererFormat()
@@ -224,7 +203,8 @@ private struct MonoLEDRaster {
             ctx.fill(CGRect(x: 0, y: 0, width: width, height: height))
             ctx.cgContext.setShouldAntialias(false)
             ctx.cgContext.setShouldSmoothFonts(false)
-            attributed.draw(at: CGPoint(x: 0, y: (CGFloat(height) - textSize.height) / 2))
+            // Baseline pinned to an integer row so the dot grid stays aligned.
+            attributed.draw(at: CGPoint(x: 0, y: 14 - font.ascender))
         }
 
         var dots = [Bool](repeating: false, count: width * height)

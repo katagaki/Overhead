@@ -86,11 +86,17 @@ struct ShinkansenTickerView: View {
         guard let station = headlineStation else { return [] }
         let destination = destinationStation
         let dwelling = state.currentStationIndex != nil
+        let stops = intermediateStops
         var segments: [Segment] = [
             Segment(text: "この電車は、\(strippedLineName)　", color: .white),
             Segment(text: "\(typeNameJa)　\(destination?.name ?? "")ゆき", color: Self.orange),
             Segment(text: "です。", color: .white),
         ]
+        if !stops.isEmpty {
+            segments.append(Segment(text: "途中の停車駅は、", color: .white))
+            segments.append(Segment(text: stops.map(\.name).joined(separator: "・"), color: Self.orange))
+            segments.append(Segment(text: "です。", color: .white))
+        }
         if dwelling {
             segments.append(Segment(text: "ただいま、", color: .white))
             segments.append(Segment(text: station.name, color: Self.orange))
@@ -115,8 +121,31 @@ struct ShinkansenTickerView: View {
             color: .white
         ))
         segments.append(Segment(text: station.nameEn, color: Self.orange))
-        segments.append(Segment(text: ".　　　", color: .white))
+        segments.append(Segment(text: ".", color: .white))
+        if !stops.isEmpty {
+            let names = stops.map(\.nameEn)
+            let list = names.count == 1 ? names[0]
+                : names.dropLast().joined(separator: ", ") + " and " + names.last!
+            segments.append(Segment(text: " We will be stopping at ", color: .white))
+            segments.append(Segment(text: list, color: Self.orange))
+            segments.append(Segment(
+                text: " before arriving at \(destination?.nameEn ?? "").",
+                color: .white
+            ))
+        }
+        segments.append(Segment(text: "　　　", color: .white))
         return segments
+    }
+
+    /// Upcoming stops excluding the final one — the 途中の停車駅.
+    private var intermediateStops: [Station] {
+        let stations = journey.journeyStations
+        guard stations.count > 1 else { return [] }
+        let served = Set(journey.journeyTimetable.map(\.stationId))
+        let ref = max(0, min(state.currentStationIndex ?? state.segmentFrom, stations.count - 1))
+        return stations[min(ref + 1, stations.count)...]
+            .dropLast()
+            .filter { served.contains($0.id) }
     }
 
     private var headlineStation: Station? {

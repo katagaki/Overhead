@@ -55,10 +55,11 @@ struct LoopLCDView: View {
                 let english = Int(
                     context.date.timeIntervalSinceReferenceDate / Self.languageFlipSeconds
                 ) % 2 == 1
+                let phase = LCDPhase.of(journey: journey, state: state, now: context.date)
                 VStack(spacing: 0) {
-                    header(english: english)
+                    header(english: english, phase: phase)
                         .frame(height: Self.headerHeight)
-                    arcBody(now: context.date)
+                    arcBody(now: context.date, english: english)
                         .frame(maxHeight: .infinity)
                 }
                 .frame(width: Self.designWidth, height: Self.designHeight)
@@ -72,15 +73,15 @@ struct LoopLCDView: View {
 
     // MARK: - Header
 
-    private func header(english: Bool) -> some View {
+    private func header(english: Bool, phase: LCDPhase) -> some View {
         HStack(spacing: 0) {
             VStack(alignment: .trailing, spacing: -1) {
                 Text(destinationStation?.name ?? "")
-                    .font(.system(size: 12.5, weight: .heavy))
+                    .font(LCDFont.gothic(size: 12.5, weight: .heavy))
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
                 Text(verbatim: "方面")
-                    .font(.system(size: 6.5, weight: .bold))
+                    .font(LCDFont.gothic(size: 6.5, weight: .bold))
             }
             .foregroundColor(.white)
             .frame(width: 54, alignment: .trailing)
@@ -94,8 +95,9 @@ struct LoopLCDView: View {
                 .padding(.bottom, 3)
                 .padding(.leading, 7)
 
-            Text(english ? "Next" : headlineLabel)
-                .font(.system(size: 10, weight: .bold))
+            Text(headlineLabel(english: english, phase: phase))
+                .font(english ? .system(size: 10, weight: .bold)
+                              : LCDFont.gothic(size: 10, weight: .bold))
                 .foregroundColor(.white)
                 .frame(maxHeight: .infinity, alignment: .top)
                 .padding(.top, 3)
@@ -138,7 +140,7 @@ struct LoopLCDView: View {
                     HStack(spacing: 90 / CGFloat(max(chars.count, 2))) {
                         ForEach(chars.indices, id: \.self) { i in
                             Text(String(chars[i]))
-                                .font(.system(size: 46, weight: .heavy))
+                                .font(LCDFont.gothic(size: 46, weight: .heavy))
                                 .foregroundColor(.white)
                         }
                     }
@@ -149,7 +151,7 @@ struct LoopLCDView: View {
 
     // MARK: - Arc Body
 
-    private func arcBody(now: Date) -> some View {
+    private func arcBody(now: Date, english: Bool) -> some View {
         let stops = arcStops(now: now)
         let mirrored = orientation == .right
 
@@ -227,7 +229,7 @@ struct LoopLCDView: View {
                         ctx.draw(
                             ctx.resolve(
                                 Text(verbatim: "(分)")
-                                    .font(.system(size: 5.5, weight: .bold))
+                                    .font(LCDFont.gothic(size: 5.5, weight: .bold))
                                     .foregroundColor(.black)
                             ),
                             at: x(arcPoint(t + 0.05)),
@@ -237,13 +239,15 @@ struct LoopLCDView: View {
 
                     let labelDX = Self.labelDX[min(index, Self.labelDX.count - 1)]
                     let labelDY = Self.labelDY[min(index, Self.labelDY.count - 1)]
+                    let labelSize = Self.labelSize[min(index, Self.labelSize.count - 1)]
                     let name = ctx.resolve(
-                        Text(stop.station.name)
-                            .font(.system(
-                                size: Self.labelSize[min(index, Self.labelSize.count - 1)],
-                                weight: .bold
-                            ))
-                            .foregroundColor(.black)
+                        english
+                            ? Text(stop.station.nameEn)
+                                .font(.system(size: labelSize * 0.8, weight: .bold))
+                                .foregroundColor(.black)
+                            : Text(stop.station.name)
+                                .font(LCDFont.gothic(size: labelSize, weight: .bold))
+                                .foregroundColor(.black)
                     )
                     let labelPoint = CGPoint(
                         x: p.x + (mirrored ? clearance - labelDX : -clearance + labelDX),
@@ -306,7 +310,7 @@ struct LoopLCDView: View {
         .clipped()
         .overlay(alignment: .bottomTrailing) {
             Text(verbatim: "のりかえ、待合せ時間は含まれません。電車により多少時間が異なります。")
-                .font(.system(size: 5.5))
+                .font(LCDFont.gothic(size: 5.5))
                 .foregroundColor(.black.opacity(0.55))
                 .padding(.trailing, 5)
                 .padding(.bottom, 2)
@@ -364,9 +368,9 @@ struct LoopLCDView: View {
                 VStack(alignment: .trailing, spacing: 2.5) {
                     VStack(alignment: .trailing, spacing: 0) {
                         Text(verbatim: "\(station.name)駅")
-                            .font(.system(size: 9, weight: .heavy))
+                            .font(LCDFont.gothic(size: 9, weight: .heavy))
                         Text(verbatim: "乗換えのご案内")
-                            .font(.system(size: 7.5, weight: .regular))
+                            .font(LCDFont.gothic(size: 7.5, weight: .regular))
                     }
                     .padding(.bottom, 3)
 
@@ -374,7 +378,7 @@ struct LoopLCDView: View {
                         HStack(spacing: 4) {
                             LineSymbolBadge(symbol: line.lineSymbol, color: line.color, dimension: 9)
                             Text(line.name)
-                                .font(.system(size: 7, weight: .bold))
+                                .font(LCDFont.gothic(size: 7, weight: .bold))
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.7)
                         }
@@ -427,8 +431,12 @@ struct LoopLCDView: View {
         return Array(result.prefix(Self.maxStops))
     }
 
-    private var headlineLabel: String {
-        state.currentStationIndex != nil ? "ただいま" : "次は"
+    private func headlineLabel(english: Bool, phase: LCDPhase) -> String {
+        switch phase {
+        case .next: return english ? "Next" : "次は"
+        case .approaching: return english ? "Soon" : "まもなく"
+        case .dwelling: return english ? "Now at" : "ただいま"
+        }
     }
 
     private var headlineStation: Station? {
