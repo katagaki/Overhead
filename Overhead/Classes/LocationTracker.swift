@@ -54,6 +54,9 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
     // Snap distance thresholds (meters from rail line)
     private let closeSnapDistance: Double = 150      // Clearly on the line
     private let farSnapDistance: Double = 500         // Probably underground or drifting
+    // Dwelling radius: generous because a long train can put the user ~200m
+    // from the station's point coordinate while stopped at the platform.
+    private let dwellDistance: Double = 200
     // Accurate fix far from the line means off-route, not noise — timetable takes over.
     private let offRouteDistance: Double = 500
 
@@ -511,7 +514,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         let currentStationIdx = detectDwelling(
             location: location,
             stations: stationCoordinates,
-            threshold: 80
+            threshold: dwellDistance
         )
 
         let nextIdx: Int
@@ -641,14 +644,16 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         threshold: Double
     ) -> Int? {
         let userLoc = CLLocation(latitude: location.latitude, longitude: location.longitude)
+        var best: (index: Int, distance: Double)?
         for (i, entry) in stations.enumerated() {
             let stationLoc = CLLocation(latitude: entry.coordinate.latitude,
                                         longitude: entry.coordinate.longitude)
-            if userLoc.distance(from: stationLoc) < threshold {
-                return i
+            let distance = userLoc.distance(from: stationLoc)
+            if distance < threshold, distance < (best?.distance ?? .infinity) {
+                best = (i, distance)
             }
         }
-        return nil
+        return best?.index
     }
 
     // MARK: - ETA Estimation
