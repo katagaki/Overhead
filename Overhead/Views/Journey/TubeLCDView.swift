@@ -181,30 +181,30 @@ private struct MonoLEDRaster {
     }
 
     init(text: String) {
-        // Aliased Helvetica — the classic DMI grotesque; smaller sizes smear.
-        let font = UIFont(name: "Helvetica", size: 15)
-            ?? UIFont.systemFont(ofSize: 15, weight: .regular)
+        // The HelveticaNeue-Medium 13 look, rendered 2× WITH antialiasing and
+        // downsampled by coverage — direct aliased rasterization makes each
+        // stem a 1-or-2 dot lottery depending on its subpixel phase.
+        let font = UIFont(name: "HelveticaNeue-Medium", size: 26)
+            ?? UIFont.systemFont(ofSize: 26, weight: .medium)
 
         let attributed = NSAttributedString(string: text, attributes: [
             .font: font,
             .foregroundColor: UIColor.white,
         ])
 
-        let width = max(1, Int(ceil(attributed.size().width)))
+        let width = max(1, Int(ceil(attributed.size().width / 2)))
         let height = Self.rows
 
         let format = UIGraphicsImageRendererFormat()
         format.scale = 1
         format.opaque = true
         let image = UIGraphicsImageRenderer(
-            size: CGSize(width: width, height: height), format: format
+            size: CGSize(width: width * 2, height: height * 2), format: format
         ).image { ctx in
             UIColor.black.setFill()
-            ctx.fill(CGRect(x: 0, y: 0, width: width, height: height))
-            ctx.cgContext.setShouldAntialias(false)
-            ctx.cgContext.setShouldSmoothFonts(false)
-            // Baseline pinned to an integer row so the dot grid stays aligned.
-            attributed.draw(at: CGPoint(x: 0, y: 14 - font.ascender))
+            ctx.fill(CGRect(x: 0, y: 0, width: width * 2, height: height * 2))
+            // Baseline pinned to (2×) row 28 = dot row 14.
+            attributed.draw(at: CGPoint(x: 0, y: 28 - font.ascender))
         }
 
         var dots = [Bool](repeating: false, count: width * height)
@@ -213,12 +213,19 @@ private struct MonoLEDRaster {
            let bytes = CFDataGetBytePtr(data) {
             let bytesPerRow = cg.bytesPerRow
             let bytesPerPixel = cg.bitsPerPixel / 8
-            for row in 0..<min(height, cg.height) {
-                for col in 0..<min(width, cg.width) {
-                    let p = row * bytesPerRow + col * bytesPerPixel
-                    let r = max(Int(bytes[p]), Int(bytes[p + 2]))
-                    let g = Int(bytes[p + 1])
-                    if r + g > 130 { dots[row * width + col] = true }
+            for row in 0..<height {
+                for col in 0..<width {
+                    var sum = 0
+                    for dy in 0..<2 {
+                        for dx in 0..<2 {
+                            let y = row * 2 + dy, x = col * 2 + dx
+                            guard y < cg.height, x < cg.width else { continue }
+                            let p = y * bytesPerRow + x * bytesPerPixel
+                            sum += max(Int(bytes[p]), Int(bytes[p + 2])) + Int(bytes[p + 1])
+                        }
+                    }
+                    // 4 subpixels × 510 max; a dot lights at ~45% coverage.
+                    if sum > 900 { dots[row * width + col] = true }
                 }
             }
         }
