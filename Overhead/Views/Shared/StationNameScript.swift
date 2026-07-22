@@ -125,24 +125,37 @@ struct HorizontallySquashed<Content: View>: View {
     }
 }
 
-/// Transfer-line name in the LCD stop columns: a clean kanji/katakana pair
+/// Transfer-line row in the LCD stop columns: a clean kanji/katakana pair
 /// splits into two lines (existing `scriptSegments` detection); each line
-/// squashes horizontally when too long instead of wrapping mid-word.
+/// squashes horizontally when too long instead of wrapping mid-word. The
+/// line-symbol badge centers on the first line; rows sit tight (the gothic's
+/// tall line box would otherwise space them apart).
 struct LCDTransferLineName: View {
     let name: String
     let fontSize: CGFloat
+    var symbol: String = ""
+    var badgeColor: Color = .clear
     var kerning: CGFloat = 0
     var color: Color = .black
 
+    private var rowHeight: CGFloat { fontSize + 1.5 }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            ForEach(Array(name.scriptSegments.enumerated()), id: \.offset) { _, segment in
-                HorizontallySquashed(alignment: .leading) {
-                    Text(segment)
-                        .font(LCDFont.gothic(size: fontSize, weight: .bold))
-                        .kerning(kerning)
-                        .foregroundColor(color)
-                        .lineLimit(1)
+        HStack(alignment: .top, spacing: 1.5) {
+            if !symbol.isEmpty {
+                LineSymbolBadge(symbol: symbol, color: badgeColor, dimension: 7)
+                    .frame(height: rowHeight)
+            }
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(name.scriptSegments.enumerated()), id: \.offset) { _, segment in
+                    HorizontallySquashed(alignment: .leading) {
+                        Text(segment)
+                            .font(LCDFont.gothic(size: fontSize, weight: .bold))
+                            .kerning(kerning)
+                            .foregroundColor(color)
+                            .lineLimit(1)
+                    }
+                    .frame(height: rowHeight)
                 }
             }
         }

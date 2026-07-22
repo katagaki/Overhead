@@ -359,10 +359,8 @@ struct TrainLCDView: View {
     private func transferList(_ lines: [TrainLine]) -> some View {
         VStack(alignment: .leading, spacing: 1) {
             ForEach(lines) { line in
-                HStack(alignment: .top, spacing: 1.5) {
-                    LineSymbolBadge(symbol: line.lineSymbol, color: line.color, dimension: 7)
-                    LCDTransferLineName(name: line.name, fontSize: 6.5)
-                }
+                LCDTransferLineName(name: line.name, fontSize: 6.5,
+                                    symbol: line.lineSymbol, badgeColor: line.color)
             }
         }
         .padding(.horizontal, 1)
