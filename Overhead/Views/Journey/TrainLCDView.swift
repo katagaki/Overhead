@@ -66,11 +66,11 @@ struct TrainLCDView: View {
             VStack(spacing: 0) {
                 HStack(alignment: .top, spacing: 3) {
                     Text(headlineLabel(english: english, phase: phase))
-                        .font(english ? LCDFont.latin(size: 10, weight: .bold)
+                        .font(english ? LCDFont.latin(size: 12, weight: .bold)
                                       : LCDFont.gothic(size: 12, weight: .bold))
                     Spacer()
                     Text(verbatim: english ? "Time" : "現在時刻")
-                        .font(english ? LCDFont.latin(size: 8, weight: .medium)
+                        .font(english ? LCDFont.latin(size: 9, weight: .medium)
                                       : LCDFont.gothic(size: 8, weight: .medium))
                         .opacity(0.85)
                     Text(Self.clockFormatter.string(from: now))
@@ -91,15 +91,27 @@ struct TrainLCDView: View {
                                         .padding(-1.5)
                                 )
                         }
-                        HorizontallySquashed {
-                            Text(english ? station.nameEn : station.name)
-                                .font(english ? LCDFont.latin(size: 34, weight: .bold)
-                                              : LCDFont.gothic(size: 34, weight: .bold))
-                                .foregroundColor(.white)
-                                .kerning(english ? 0 : 5.0)
-                                .lineLimit(1)
+                        Group {
+                            if english {
+                                // Offset, not padding: the badge must not move.
+                                FillingLatinName(name: station.nameEn, baseSize: 34,
+                                                 weight: .semibold)
+                                    .offset(y: 3)
+                            } else {
+                                HorizontallySquashed {
+                                    Text(station.name)
+                                        .font(LCDFont.gothic(size: 34, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .kerning(5.0)
+                                        // Kerning also trails the last glyph;
+                                        // balance it or the name reads left-shifted.
+                                        .padding(.leading, 5.0)
+                                        .lineLimit(1)
+                                }
+                            }
                         }
                         .frame(maxWidth: .infinity)
+                        .frame(height: 44)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
@@ -118,7 +130,7 @@ struct TrainLCDView: View {
     private func destinationPlate(english: Bool) -> some View {
         VStack(spacing: 2) {
             Text(english ? typeNameEn : typeName)
-                .font(english ? LCDFont.latin(size: 15, weight: .black)
+                .font(english ? LCDFont.latin(size: 17, weight: .black)
                               : LCDFont.gothic(size: 15, weight: .black))
                 .kerning(english ? 0 : typeKerning)
                 .padding(.leading, english ? 0 : typeKerning)
@@ -135,11 +147,11 @@ struct TrainLCDView: View {
             if english {
                 HStack(alignment: .bottom, spacing: 3) {
                     Text(verbatim: "for")
-                        .font(LCDFont.latin(size: 8, weight: .bold))
+                        .font(LCDFont.latin(size: 9, weight: .bold))
                         .padding(.bottom, 2)
                     HorizontallySquashed(maxWidth: 60) {
                         Text(verbatim: destinationStation?.nameEn ?? "")
-                            .font(LCDFont.latin(size: 13, weight: .heavy))
+                            .font(LCDFont.latin(size: 15, weight: .semibold))
                             .lineLimit(1)
                             .shadow(color: .black.opacity(0.85), radius: 1, x: 0, y: 0)
                     }
@@ -182,7 +194,7 @@ struct TrainLCDView: View {
             if english {
                 HStack(alignment: .top, spacing: 3) {
                     Text(verbatim: "Car No.")
-                        .font(LCDFont.latin(size: 8, weight: .bold))
+                        .font(LCDFont.latin(size: 9, weight: .bold))
                         .foregroundColor(.white)
                         .lineLimit(1)
                         .fixedSize()
@@ -211,7 +223,7 @@ struct TrainLCDView: View {
         return VStack(spacing: 0) {
             HStack(spacing: 0) {
                 ForEach(columns) { col in
-                    columnName(col.station, english: english, colWidth: colWidth)
+                    columnName(col.station)
                         .frame(width: colWidth, height: 52, alignment: .bottom)
                         .opacity(col.isPassed ? Self.passedOpacity : 1)
                 }
@@ -299,16 +311,11 @@ struct TrainLCDView: View {
         }
     }
 
-    @ViewBuilder
-    private func columnName(_ station: Station, english: Bool, colWidth: CGFloat) -> some View {
-        if english {
-            RotatedEnglishStationName(name: station.nameEn, fontSize: 10.5,
-                                      width: colWidth, height: 52)
-        } else {
-            VerticalStationName(name: station.name, fontSize: 11, charBox: 12,
-                                availableHeight: 52, color: .black,
-                                columnAnchor: .bottom, gothic: true)
-        }
+    /// The strip stays Japanese through the English phase, like the real car.
+    private func columnName(_ station: Station) -> some View {
+        VerticalStationName(name: station.name, fontSize: 11, charBox: 12,
+                            availableHeight: 52, color: .black,
+                            columnAnchor: .bottom, gothic: true)
     }
 
     private func minuteCircle(_ col: LCDStop, showsUnit: Bool) -> some View {

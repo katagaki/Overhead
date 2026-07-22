@@ -25,8 +25,8 @@ struct KeihinTohokuLineLCDView: View {
     private static let maxUpcomingStops = 7
     private static let barGray = Color(hex: "#B3B6BB")
     private static let passedOpacity: CGFloat = 0.4
-    private static let markerRed = Color(hex: "#D7000F")
-    private static let markerBlue = Color(hex: "#1D2088")
+    private static let markerGreenLight = Color(hex: "#58CB42")
+    private static let markerGreenDark = Color(hex: "#1D981A")
     private static let languageFlipSeconds = 4.0
 
     private static let allLines = StaticTrainData.trainLines()
@@ -56,10 +56,18 @@ struct KeihinTohokuLineLCDView: View {
     // MARK: - Header (gray bar)
 
     private func header(english: Bool) -> some View {
-        ZStack {
+        VStack(spacing: 1) {
+            Text(destinationLabel(english: english))
+                .font(english ? LCDFont.latin(size: 11, weight: .bold)
+                              : LCDFont.gothic(size: 11, weight: .bold))
+                .foregroundColor(.black)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .frame(width: Self.boxWidth, height: 12, alignment: .leading)
             stationBox(english: english)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+        .padding(.bottom, 2)
         .overlay(alignment: .topLeading) {
             outlinedType
                 .padding(.top, 4)
@@ -99,6 +107,7 @@ struct KeihinTohokuLineLCDView: View {
     }
 
     private static let boxHeight: CGFloat = 44
+    private static let boxWidth: CGFloat = 190
 
     /// White box: badge docked left, name spread across the rest.
     private func stationBox(english: Bool) -> some View {
@@ -111,10 +120,13 @@ struct KeihinTohokuLineLCDView: View {
                 if english {
                     HorizontallySquashed {
                         Text(station.nameEn)
-                            .font(LCDFont.latin(size: 20, weight: .heavy))
+                            .font(LCDFont.latin(size: 25, weight: .heavy))
                             .foregroundColor(.black)
                             .lineLimit(1)
                     }
+                    // The Latin line box hangs a descender's worth of space below
+                    // the caps, so centering the box leaves the name riding high.
+                    .offset(y: 2)
                     .padding(.horizontal, 8)
                     .frame(maxWidth: .infinity)
                 } else {
@@ -124,7 +136,7 @@ struct KeihinTohokuLineLCDView: View {
                 }
             }
         }
-        .frame(width: 190, height: Self.boxHeight)
+        .frame(width: Self.boxWidth, height: Self.boxHeight)
         .background(Color.white)
         .overlay(
             Rectangle().strokeBorder(
@@ -164,7 +176,6 @@ struct KeihinTohokuLineLCDView: View {
         let (columns, markerSlot) = stops(now: now)
         let colWidth = (Self.designWidth - 20) / CGFloat(max(columns.count, 1))
         let markerCenter = markerSlot * colWidth
-        let blinkRed = Int(now.timeIntervalSinceReferenceDate * 2) % 2 == 0
 
         return VStack(spacing: 0) {
             HStack(spacing: 0) {
@@ -204,7 +215,7 @@ struct KeihinTohokuLineLCDView: View {
                         .opacity(col.isPassed ? Self.passedOpacity : 1)
                     }
                 }
-                currentMarker(red: blinkRed)
+                currentMarker
                     .offset(x: markerCenter - 27 / 2)
             }
             .frame(height: 21)
@@ -243,8 +254,9 @@ struct KeihinTohokuLineLCDView: View {
     @ViewBuilder
     private func columnName(_ station: Station, english: Bool, colWidth: CGFloat) -> some View {
         if english {
-            RotatedEnglishStationName(name: station.nameEn, fontSize: 10.5,
-                                      width: colWidth, height: 52)
+            AngledEnglishStationName(name: station.nameEn, fontSize: 9,
+                                     width: colWidth, height: 52,
+                                     mirrored: orientation == .right)
         } else {
             VerticalStationName(name: station.name, fontSize: 11, charBox: 12,
                                 availableHeight: 52, color: .black,
@@ -269,13 +281,35 @@ struct KeihinTohokuLineLCDView: View {
         }
     }
 
-    /// Position marker — no center circle, unlike the Joban one.
-    private func currentMarker(red: Bool) -> some View {
+    /// Position marker — steady green with the real display's top/bottom
+    /// gradient and a black outline; no center circle, no blink.
+    private var currentMarker: some View {
         let flipped = orientation == .right
         return YamanoteArrowBandShape(tipOnTrailing: flipped)
-            .fill(red ? Self.markerRed : Self.markerBlue)
-            .overlay(YamanoteArrowBandShape(tipOnTrailing: flipped).stroke(Color.white, lineWidth: 1.5))
-            .frame(width: 27, height: 21)
+            .fill(
+                LinearGradient(
+                    stops: [
+                        .init(color: Self.markerGreenLight, location: 0),
+                        .init(color: Self.markerGreenLight, location: 0.5),
+                        .init(color: Self.markerGreenDark, location: 0.72),
+                        .init(color: Self.markerGreenDark, location: 1)
+                    ],
+                    startPoint: .top, endPoint: .bottom
+                )
+            )
+            .overlay(YamanoteArrowBandShape(tipOnTrailing: flipped).stroke(Color.black, lineWidth: 1.5))
+            .frame(width: 24, height: 18)
+    }
+
+    /// Service destination shown above the station box.
+    private func destinationLabel(english: Bool) -> String {
+        guard let station = destinationStation else { return "" }
+        return english ? "for \(station.nameEn)" : "\(station.name)　行"
+    }
+
+    private var destinationStation: Station? {
+        journey.line.stations.first { $0.id == journey.service.destinationStationId }
+            ?? journey.journeyStations.last
     }
 
     private func transferList(_ lines: [TrainLine]) -> some View {

@@ -204,6 +204,55 @@ struct SpreadSquashName: View {
     }
 }
 
+// MARK: - Latin headline that fills its slot
+
+/// Romaji headline that grows to fill the space it is given and squashes
+/// horizontally once the name outruns the width. The height budget is inflated
+/// by `lineBoxSlack` because the Latin line box runs well past the glyphs.
+struct FillingLatinName: View {
+    let name: String
+    let baseSize: CGFloat
+    var weight: Font.Weight = .bold
+    var color: Color = .white
+    /// Ceiling on the grow factor, so short names stay sane.
+    var maxGrowth: CGFloat = 1.3
+
+    private static let lineBoxSlack: CGFloat = 1.32
+
+    @State private var natural: CGSize = .zero
+
+    private var text: some View {
+        Text(name)
+            .font(LCDFont.latin(size: baseSize, weight: weight))
+            .foregroundColor(color)
+            .lineLimit(1)
+    }
+
+    var body: some View {
+        GeometryReader { geo in
+            let sy = natural.height > 0
+                ? min(geo.size.height * Self.lineBoxSlack / natural.height, maxGrowth)
+                : 1
+            let sx = natural.width > 0
+                ? min(geo.size.width / natural.width, sy)
+                : sy
+            text
+                .fixedSize()
+                .scaleEffect(x: sx, y: sy, anchor: .center)
+                .frame(width: geo.size.width, height: geo.size.height)
+        }
+        .background(
+            text
+                .fixedSize()
+                .hidden()
+                .background(GeometryReader { proxy in
+                    Color.clear.preference(key: SquashedSizeKey.self, value: proxy.size)
+                })
+        )
+        .onPreferenceChange(SquashedSizeKey.self) { natural = $0 }
+    }
+}
+
 private struct SquashedSizeKey: PreferenceKey {
     static var defaultValue: CGSize = .zero
     static func reduce(value: inout CGSize, nextValue: () -> CGSize) {

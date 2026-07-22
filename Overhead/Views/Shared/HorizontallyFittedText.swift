@@ -39,24 +39,17 @@ struct HorizontallyFittedText: View {
                 }
             }
             .background {
-                // Off-screen copy measures the natural width.
+                // Off-screen copy measures the natural width. onGeometryChange,
+                // not a PreferenceKey: preferences propagate to the enclosing
+                // ScrollView and thrash its layout as lazy cells scroll in.
                 Text(text)
                     .font(font)
                     .lineLimit(1)
                     .fixedSize()
                     .hidden()
-                    .background(GeometryReader { proxy in
-                        Color.clear.preference(key: FittedTextWidthKey.self,
-                                               value: proxy.size.width)
-                    })
+                    .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width in
+                        if width != naturalWidth { naturalWidth = width }
+                    }
             }
-            .onPreferenceChange(FittedTextWidthKey.self) { naturalWidth = $0 }
-    }
-}
-
-private struct FittedTextWidthKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = max(value, nextValue())
     }
 }

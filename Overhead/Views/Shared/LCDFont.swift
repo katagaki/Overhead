@@ -2,9 +2,9 @@ import SwiftUI
 
 // MARK: - LCD Fonts
 
-/// Faces for the JR / Tokyo Metro LCD simulations. The real displays pair
-/// 新ゴ with Frutiger; the closest open stand-ins are BIZ UDPGothic
-/// (Morisawa's own free UD gothic) and Hind (Frutiger-adjacent humanist).
+/// Faces for the JR / Tokyo Metro LCD simulations. The real displays set
+/// Japanese in 新ゴ — BIZ UDPGothic is Morisawa's own free UD stand-in — and
+/// romaji in Helvetica.
 enum LCDFont {
     static func gothic(size: CGFloat, weight: Font.Weight = .regular) -> Font {
         .custom(gothicName(for: weight), fixedSize: size)
@@ -23,11 +23,9 @@ enum LCDFont {
 
     static func latinName(for weight: Font.Weight) -> String {
         switch weight {
-        case .bold, .heavy, .black: return "Hind-Bold"
-        case .semibold: return "Hind-SemiBold"
-        case .medium: return "Hind-Medium"
-        case .light, .thin, .ultraLight: return "Hind-Light"
-        default: return "Hind-Regular"
+        case .medium, .semibold, .bold, .heavy, .black: return "Helvetica-Bold"
+        case .light, .thin, .ultraLight: return "Helvetica-Light"
+        default: return "Helvetica"
         }
     }
 }
@@ -55,5 +53,46 @@ struct RotatedEnglishStationName: View {
             .frame(width: height, alignment: textAnchor)
             .rotationEffect(.degrees(90))
             .frame(width: width, height: height)
+    }
+}
+
+// MARK: - Angled English Station Name
+
+/// English station name climbing to the right at a shallow angle, the way the
+/// E235 strip sets romaji: the name starts at its column's band edge and runs
+/// up across its neighbours.
+struct AngledEnglishStationName: View {
+    let name: String
+    let fontSize: CGFloat
+    let width: CGFloat
+    let height: CGFloat
+    var color: Color = .black
+    /// Travel direction; the climb mirrors with it.
+    var mirrored = false
+
+    private static let degrees: CGFloat = 58
+
+    var body: some View {
+        // Longest run that still fits the slot's height once rotated.
+        let run = (height - 3) / sin(Self.degrees * .pi / 180)
+        Text(name)
+            .font(LCDFont.latin(size: fontSize, weight: .medium))
+            .foregroundColor(color)
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
+            .frame(width: run, alignment: mirrored ? .trailing : .leading)
+            .rotationEffect(
+                .degrees(mirrored ? Self.degrees : -Self.degrees),
+                anchor: mirrored ? .bottomTrailing : .bottomLeading
+            )
+            .frame(width: width, height: height,
+                   alignment: mirrored ? .bottomTrailing : .bottomLeading)
+            // The column's own edge is half a slot off from the code centered
+            // under it; start the climb just left of that code instead.
+            .offset(x: mirrored ? -startInset : startInset)
+    }
+
+    private var startInset: CGFloat {
+        max(0, width / 2 - 4)
     }
 }
