@@ -12,6 +12,14 @@ struct SavedPlace: Identifiable, Codable, Equatable {
     var lineId: String
     var fromStationId: String
     var toStationId: String
+    var viaStationIds: [String] = []
+    var walkingSpeedRaw: String = WalkingSpeed.normal.rawValue
+    var avoidedLineIds: [String] = []
+    var ignoreTimetable: Bool = false
+
+    var walkingSpeed: WalkingSpeed {
+        WalkingSpeed(rawValue: walkingSpeedRaw) ?? .normal
+    }
 
     enum Kind: String, Codable, CaseIterable {
         case home
@@ -36,6 +44,29 @@ struct SavedPlace: Identifiable, Codable, Equatable {
             case .custom: return "Place.Custom"
             }
         }
+    }
+}
+
+// Custom decoding keeps favorites saved before the search settings existed.
+extension SavedPlace {
+    private enum CodingKeys: String, CodingKey {
+        case id, kind, customName, lineId, fromStationId, toStationId
+        case viaStationIds, walkingSpeedRaw, avoidedLineIds, ignoreTimetable
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        kind = try container.decode(Kind.self, forKey: .kind)
+        customName = try container.decodeIfPresent(String.self, forKey: .customName) ?? ""
+        lineId = try container.decode(String.self, forKey: .lineId)
+        fromStationId = try container.decode(String.self, forKey: .fromStationId)
+        toStationId = try container.decode(String.self, forKey: .toStationId)
+        viaStationIds = try container.decodeIfPresent([String].self, forKey: .viaStationIds) ?? []
+        walkingSpeedRaw = try container.decodeIfPresent(String.self, forKey: .walkingSpeedRaw)
+            ?? WalkingSpeed.normal.rawValue
+        avoidedLineIds = try container.decodeIfPresent([String].self, forKey: .avoidedLineIds) ?? []
+        ignoreTimetable = try container.decodeIfPresent(Bool.self, forKey: .ignoreTimetable) ?? false
     }
 }
 

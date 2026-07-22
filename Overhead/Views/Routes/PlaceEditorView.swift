@@ -10,23 +10,68 @@ struct PlaceEditorView: View {
 
     @State private var kind: SavedPlace.Kind = .home
     @State private var customName: String = ""
-    @State private var line: TrainLine?
-    @State private var fromStation: Station?
-    @State private var toStation: Station?
+    @State private var fromSelection: StationSearchHit?
+    @State private var viaSelections: [StationSearchHit] = []
+    @State private var toSelection: StationSearchHit?
+    @State private var walkingSpeedRaw = WalkingSpeed.normal.rawValue
+    @State private var avoidedLineIds: Set<String> = []
+    @State private var ignoreTimetable = false
     @Environment(\.dismiss) private var dismiss
 
-    // Through-service (直通) destinations reachable from the boarding station.
-    private var throughGroups: [StaticTrainData.ThroughDestinationGroup] {
-        guard let line else { return [] }
-        return StaticTrainData.throughDestinations(
-            fromLineId: line.id,
-            boardingStationId: fromStation?.id
-        )
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                kindCard
+
+                RouteSetupCard(
+                    lines: availableLines,
+                    fromSelection: $fromSelection,
+                    viaSelections: $viaSelections,
+                    toSelection: $toSelection,
+                    walkingSpeedRaw: $walkingSpeedRaw,
+                    avoidedLineIds: $avoidedLineIds,
+                    ignoreTimetable: $ignoreTimetable
+                )
+
+                if fromSelection != nil, toSelection != nil, !routeAvailable {
+                    noRouteNotice
+                }
+
+                saveButton
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle(existingPlace == nil ? "Place.NewTitle" : "Place.EditTitle")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                if #available(iOS 26.0, *) {
+                    Button(role: .close) {
+                        dismiss()
+                    }
+                } else {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
+                    .tint(.secondary)
+                    .accessibilityLabel("Button.Close")
+                }
+            }
+        }
+        .onAppear(perform: restore)
     }
 
-    var body: some View {
-        Form {
-            Section("Place.Kind") {
+    // MARK: - Cards
+
+    private var kindCard: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text("Place.Kind")
+                Spacer()
                 Picker("Place.Kind", selection: $kind) {
                     ForEach(SavedPlace.Kind.allCases, id: \.self) { kind in
                         Label(
@@ -38,134 +83,146 @@ struct PlaceEditorView: View {
                 .pickerStyle(.menu)
                 // Keep the menu's symbols monochrome instead of line-color tinted
                 .tint(.primary)
-
-                TextField("Place.NamePlaceholder", text: $customName)
+                .labelsHidden()
             }
+            .padding(.leading, 16)
+            .padding(.trailing, 8)
+            .padding(.vertical, 6)
 
-            Section("Section.BoardingStation") {
-                NavigationLink {
-                    StationSearchSelectionView(lines: availableLines) { hit in
-                        if hit.line.id != line?.id {
-                            toStation = nil
-                        }
-                        line = hit.line
-                        fromStation = hit.station
-                    }
-                } label: {
-                    HStack(spacing: 10) {
-                        Image(systemName: "arrow.up.circle.fill")
-                            .foregroundColor(line?.color ?? .secondary)
-                        if let from = fromStation, let line {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(from.localizedName)
-                                Text(line.localizedName)
-                                    .font(.system(size: 12))
-                                    .foregroundColor(line.color)
-                            }
-                        } else {
-                            Text("StationSearch.Prompt")
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                }
-            }
+            Divider()
+                .padding(.leading, 16)
 
-            if let line, fromStation != nil {
-                Section("Section.AlightingStation") {
-                    Picker(selection: $toStation) {
-                        Text("Picker.SelectStation").tag(nil as Station?)
-                        Section(line.localizedName) {
-                            ForEach(line.stations) { station in
-                                stationPickerLabel(station: station).tag(station as Station?)
-                            }
-                        }
-                        ForEach(throughGroups, id: \.service) { group in
-                            Section {
-                                ForEach(group.stations) { station in
-                                    stationPickerLabel(station: station).tag(station as Station?)
-                                }
-                            } header: {
-                                Text("Picker.ThroughSection \(group.service.localizedLineName)")
-                            }
-                        }
-                    } label: {
-                        HStack {
-                            Image(systemName: "arrow.down.circle.fill")
-                                .foregroundColor(line.color)
-                            Text("Section.AlightingStation")
-                        }
-                    }
-                }
-            }
-
-            if canSave {
-                Section {
-                    Button {
-                        save()
-                    } label: {
-                        HStack {
-                            Spacer()
-                            Text("Button.SavePlace")
-                                .font(.system(size: 16, weight: .semibold))
-                            Spacer()
-                        }
-                    }
-                    .foregroundColor(.white)
-                    .listRowBackground(line?.color ?? Color.accentColor)
-                }
-            }
+            TextField("Place.NamePlaceholder", text: $customName)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
         }
-        .navigationTitle(existingPlace == nil ? "Place.NewTitle" : "Place.EditTitle")
-        .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            guard line == nil, let existing = existingPlace else { return }
-            kind = existing.kind
-            customName = existing.customName
-            let savedLine = availableLines.first(where: { $0.id == existing.lineId })
-            line = savedLine
-            fromStation = savedLine?.stations.first(where: { $0.id == existing.fromStationId })
-            toStation = savedLine?.stations.first(where: { $0.id == existing.toStationId })
-                ?? throughStation(withId: existing.toStationId)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+    }
+
+    private var noRouteNotice: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "exclamationmark.circle")
+            Text("Setup.NoRoute")
+            Spacer(minLength: 0)
+        }
+        .font(.system(size: 14))
+        .foregroundColor(.secondary)
+        .padding(.horizontal, 4)
+    }
+
+    @ViewBuilder
+    private var saveButton: some View {
+        let label = Text("Button.SavePlace")
+            .font(.system(size: 16, weight: .bold))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+
+        if #available(iOS 26.0, *) {
+            Button {
+                save()
+            } label: {
+                label
+            }
+            .buttonStyle(.glassProminent)
+            .buttonBorderShape(.capsule)
+            .disabled(!canSave)
+        } else {
+            Button {
+                save()
+            } label: {
+                label
+            }
+            .buttonStyle(.borderedProminent)
+            .buttonBorderShape(.capsule)
+            .disabled(!canSave)
+        }
+    }
+
+    // MARK: - Validation
+
+    private var waypointNames: [String]? {
+        guard let from = fromSelection, let to = toSelection else { return nil }
+        return [from.station.name] + viaSelections.map(\.station.name) + [to.station.name]
+    }
+
+    /// True when every hop is rideable: one train, 直通, or via transfers.
+    private var routeAvailable: Bool {
+        guard let names = waypointNames else { return false }
+        return zip(names, names.dropFirst()).allSatisfy { from, to in
+            from != to
+                && (!StaticTrainData.directRoutes(fromStationName: from, toStationName: to,
+                                                  avoidingLineIds: avoidedLineIds).isEmpty
+                    || StaticTrainData.planTransferRoute(fromStationName: from, toStationName: to,
+                                                         avoidingLineIds: avoidedLineIds) != nil)
         }
     }
 
     private var canSave: Bool {
-        guard let from = fromStation, let to = toStation, line != nil else { return false }
         if kind == .custom && customName.trimmingCharacters(in: .whitespaces).isEmpty {
             return false
         }
-        return from.id != to.id
+        return routeAvailable
     }
 
-    private func save() {
-        guard let line, let from = fromStation, let to = toStation else { return }
-        let place = SavedPlace(
-            id: existingPlace?.id ?? UUID(),
-            kind: kind,
-            customName: customName.trimmingCharacters(in: .whitespaces),
-            lineId: line.id,
-            fromStationId: from.id,
-            toStationId: to.id
-        )
-        onSave(place)
-        dismiss()
+    // MARK: - State
+
+    private func restore() {
+        guard fromSelection == nil, let existing = existingPlace else { return }
+        kind = existing.kind
+        customName = existing.customName
+        walkingSpeedRaw = existing.walkingSpeedRaw
+        avoidedLineIds = Set(existing.avoidedLineIds)
+        ignoreTimetable = existing.ignoreTimetable
+
+        let savedLine = availableLines.first(where: { $0.id == existing.lineId })
+        if let savedLine,
+           let from = savedLine.stations.first(where: { $0.id == existing.fromStationId }) {
+            fromSelection = StationSearchHit(line: savedLine, station: from)
+        }
+        viaSelections = existing.viaStationIds.compactMap(hit(forStationId:))
+        toSelection = hit(forStationId: existing.toStationId)
+            ?? throughHit(forStationId: existing.toStationId, line: savedLine)
     }
 
-    private func throughStation(withId id: String) -> Station? {
-        for group in throughGroups {
-            if let station = group.stations.first(where: { $0.id == id }) {
-                return station
+    private func hit(forStationId id: String) -> StationSearchHit? {
+        for line in availableLines {
+            if let station = line.stations.first(where: { $0.id == id }) {
+                return StationSearchHit(line: line, station: station)
             }
         }
         return nil
     }
 
-    @ViewBuilder
-    private func stationPickerLabel(station: Station) -> some View {
-        if station.stationCode.isEmpty {
-            Text(station.localizedName)
-        } else {
-            Text("\(station.stationCode) \(station.localizedName)")
+    /// 直通 destinations aren't on any listed line; borrow the boarding line.
+    private func throughHit(forStationId id: String, line: TrainLine?) -> StationSearchHit? {
+        guard let line else { return nil }
+        for group in StaticTrainData.throughDestinations(
+            fromLineId: line.id,
+            boardingStationId: fromSelection?.station.id
+        ) {
+            if let station = group.stations.first(where: { $0.id == id }) {
+                return StationSearchHit(line: line, station: station)
+            }
         }
+        return nil
+    }
+
+    private func save() {
+        guard let from = fromSelection, let to = toSelection else { return }
+        let place = SavedPlace(
+            id: existingPlace?.id ?? UUID(),
+            kind: kind,
+            customName: customName.trimmingCharacters(in: .whitespaces),
+            lineId: from.line.id,
+            fromStationId: from.station.id,
+            toStationId: to.station.id,
+            viaStationIds: viaSelections.map(\.station.id),
+            walkingSpeedRaw: walkingSpeedRaw,
+            avoidedLineIds: avoidedLineIds.sorted(),
+            ignoreTimetable: ignoreTimetable
+        )
+        onSave(place)
+        dismiss()
     }
 }
