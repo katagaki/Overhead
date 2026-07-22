@@ -167,6 +167,10 @@ struct MetroLCDView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // Pin to the design height: the gothic name's tall line box would
+        // otherwise inflate the band, pushing the bottom rule under the
+        // progression's white background.
+        .frame(height: Self.headlineHeight)
         .background(
             LinearGradient(
                 stops: [
