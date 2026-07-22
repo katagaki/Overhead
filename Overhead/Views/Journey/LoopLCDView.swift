@@ -96,7 +96,7 @@ struct LoopLCDView: View {
                 .padding(.leading, 7)
 
             Text(headlineLabel(english: english, phase: phase))
-                .font(english ? .system(size: 10, weight: .bold)
+                .font(english ? LCDFont.latin(size: 10, weight: .bold)
                               : LCDFont.gothic(size: 10, weight: .bold))
                 .foregroundColor(.white)
                 .frame(maxHeight: .infinity, alignment: .top)
@@ -138,7 +138,7 @@ struct LoopLCDView: View {
         if let station = headlineStation {
             if english {
                 Text(station.nameEn)
-                    .font(.system(size: 40, weight: .heavy))
+                    .font(LCDFont.latin(size: 40, weight: .heavy))
                     .foregroundColor(.white)
                     .lineLimit(1)
                     .minimumScaleFactor(0.4)
@@ -251,7 +251,7 @@ struct LoopLCDView: View {
                     let name = ctx.resolve(
                         english
                             ? Text(stop.station.nameEn)
-                                .font(.system(size: labelSize * 0.8, weight: .bold))
+                                .font(LCDFont.latin(size: labelSize * 0.8, weight: .bold))
                                 .foregroundColor(.black)
                             : Text(stop.station.name)
                                 .font(LCDFont.gothic(size: labelSize, weight: .bold))

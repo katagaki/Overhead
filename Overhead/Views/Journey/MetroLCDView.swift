@@ -69,9 +69,9 @@ struct MetroLCDView: View {
             HStack(alignment: .lastTextBaseline, spacing: 4) {
                 if english {
                     Text(verbatim: "for")
-                        .font(.system(size: 11, weight: .heavy))
+                        .font(LCDFont.latin(size: 11, weight: .heavy))
                     Text(destinationStation?.nameEn ?? "")
-                        .font(.system(size: 15, weight: .heavy))
+                        .font(LCDFont.latin(size: 15, weight: .heavy))
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
                 } else {
@@ -97,7 +97,7 @@ struct MetroLCDView: View {
 
     private func typeBox(english: Bool) -> some View {
         Text(english ? typeNameEn : typeName)
-            .font(english ? .system(size: 13, weight: .heavy)
+            .font(english ? LCDFont.latin(size: 13, weight: .heavy)
                           : LCDFont.gothic(size: 13, weight: .heavy))
             .foregroundColor(.white)
             .lineLimit(1)
@@ -119,7 +119,7 @@ struct MetroLCDView: View {
                     in: RoundedRectangle(cornerRadius: 3)
                 )
             Text(verbatim: english ? "Car No." : "号車")
-                .font(english ? .system(size: 8, weight: .bold)
+                .font(english ? LCDFont.latin(size: 8, weight: .bold)
                               : LCDFont.gothic(size: 8, weight: .bold))
                 .foregroundColor(.black)
                 .fixedSize()
@@ -133,7 +133,7 @@ struct MetroLCDView: View {
             // Fixed label zone, trailing-aligned: longer EN text grows leftward
             // and the badge never shifts on flip.
             Text(headlineLabel(english: english, phase: phase))
-                .font(english ? .system(size: 10, weight: .bold)
+                .font(english ? LCDFont.latin(size: 10, weight: .bold)
                               : LCDFont.gothic(size: 13, weight: .bold))
                 .foregroundColor(.black)
                 .lineLimit(1)
@@ -155,7 +155,7 @@ struct MetroLCDView: View {
                 }
                 HorizontallySquashed {
                     Text(english ? station.nameEn : station.name)
-                        .font(english ? .system(size: 32, weight: .heavy)
+                        .font(english ? LCDFont.latin(size: 32, weight: .heavy)
                                       : LCDFont.gothic(size: 32, weight: .heavy))
                         .foregroundColor(.black)
                         .lineLimit(1)

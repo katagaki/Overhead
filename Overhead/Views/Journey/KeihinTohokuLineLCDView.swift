@@ -111,7 +111,7 @@ struct KeihinTohokuLineLCDView: View {
                 if english {
                     HorizontallySquashed {
                         Text(station.nameEn)
-                            .font(.system(size: 20, weight: .heavy))
+                            .font(LCDFont.latin(size: 20, weight: .heavy))
                             .foregroundColor(.black)
                             .lineLimit(1)
                     }

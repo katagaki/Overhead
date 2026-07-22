@@ -278,11 +278,12 @@ private struct LEDRaster {
     }
 
     init(segments: [LEDPage.Segment]) {
-        // 16-dot bitmap gothic for Japanese; aliased grotesque for Latin runs
-        // (clean 1px strokes on the grid — bitmap Latin faces read scraggly).
+        // 16-dot bitmap gothic for Japanese; Ark Pixel 12 for Latin runs
+        // (subset + renamed "Overtrain Pixel 12" per its OFL reserved name) —
+        // outline fonts land stems on fractional pixels and go blobby.
         let jaFont = UIFont(name: "DotGothic16-Regular", size: 15)
             ?? UIFont.systemFont(ofSize: 14, weight: .regular)
-        let latinFont = UIFont(name: "HelveticaNeue-Medium", size: 13) ?? jaFont
+        let latinFont = UIFont(name: "OvertrainPixel12-Regular", size: 12) ?? jaFont
 
         let attributed = NSMutableAttributedString()
         var usedAscender: CGFloat = 0

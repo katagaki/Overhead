@@ -1,8 +1,10 @@
 import SwiftUI
 
-// MARK: - LCD Gothic Font
+// MARK: - LCD Fonts
 
-/// Gothic face for the JR / Tokyo Metro LCD simulations' Japanese text.
+/// Faces for the JR / Tokyo Metro LCD simulations. The real displays pair
+/// 新ゴ with Frutiger; the closest open stand-ins are BIZ UDPGothic
+/// (Morisawa's own free UD gothic) and Hind (Frutiger-adjacent humanist).
 enum LCDFont {
     static func gothic(size: CGFloat, weight: Font.Weight = .regular) -> Font {
         .custom(gothicName(for: weight), fixedSize: size)
@@ -10,10 +12,22 @@ enum LCDFont {
 
     static func gothicName(for weight: Font.Weight) -> String {
         switch weight {
-        case .black, .heavy: return "ZenKakuGothicNew-Black"
-        case .bold, .semibold: return "ZenKakuGothicNew-Bold"
-        case .medium: return "ZenKakuGothicNew-Medium"
-        default: return "ZenKakuGothicNew-Regular"
+        case .medium, .semibold, .bold, .heavy, .black: return "BIZUDPGothic-Bold"
+        default: return "BIZUDPGothic-Regular"
+        }
+    }
+
+    static func latin(size: CGFloat, weight: Font.Weight = .regular) -> Font {
+        .custom(latinName(for: weight), fixedSize: size)
+    }
+
+    static func latinName(for weight: Font.Weight) -> String {
+        switch weight {
+        case .bold, .heavy, .black: return "Hind-Bold"
+        case .semibold: return "Hind-SemiBold"
+        case .medium: return "Hind-Medium"
+        case .light, .thin, .ultraLight: return "Hind-Light"
+        default: return "Hind-Regular"
         }
     }
 }
@@ -34,7 +48,7 @@ struct RotatedEnglishStationName: View {
 
     var body: some View {
         Text(name)
-            .font(.system(size: fontSize, weight: .bold))
+            .font(LCDFont.latin(size: fontSize, weight: .bold))
             .foregroundColor(color)
             .lineLimit(1)
             .minimumScaleFactor(0.5)
