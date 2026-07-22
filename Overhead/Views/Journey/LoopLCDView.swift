@@ -105,6 +105,10 @@ struct LoopLCDView: View {
 
             spreadName(english: english)
                 .frame(maxWidth: .infinity)
+                // Cap at the slot height: the gothic name's tall line box
+                // would otherwise inflate the row, displacing the flexible
+                // and edge-anchored siblings (color bar gap, 次は, 号車).
+                .frame(height: Self.headerHeight)
                 .padding(.horizontal, 22)
                 .offset(y: 3)
 
@@ -122,6 +126,10 @@ struct LoopLCDView: View {
             .padding(.trailing, 3)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // Pin to the design height: the gothic name's tall line box would
+        // otherwise inflate the header, sinking bottom-anchored items under
+        // the arc body and pushing the top row off screen.
+        .frame(height: Self.headerHeight)
         .background(Color(hue: 0, saturation: 0, brightness: 0.08))
     }
 

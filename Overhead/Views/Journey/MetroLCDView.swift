@@ -161,6 +161,9 @@ struct MetroLCDView: View {
                         .lineLimit(1)
                 }
                 .frame(maxWidth: .infinity)
+                // Cap at the slot height so the gothic line box doesn't
+                // inflate the row and sink the bottom-anchored label.
+                .frame(height: Self.headlineHeight)
                 .padding(.trailing, 28)
             } else {
                 Spacer(minLength: 8)
