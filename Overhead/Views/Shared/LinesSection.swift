@@ -6,7 +6,7 @@ import Backbone
 /// Home-screen section listing every train line grouped by operator.
 struct LinesSection: View {
     @ObservedObject var viewModel: JourneyViewModel
-    @State private var collapsedOperators: Set<String> = []
+    @State private var expandedOperators: Set<String> = ["Operator:JR-East", "Operator:TokyoMetro"]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -58,15 +58,15 @@ struct LinesSection: View {
 
         return LazyVStack(alignment: .leading, spacing: 20) {
             ForEach(OperatorSections.sections(for: viewModel.availableLines), id: \.operatorId) { section in
-                let isCollapsed = collapsedOperators.contains(section.operatorId)
+                let isCollapsed = !expandedOperators.contains(section.operatorId)
 
                 VStack(alignment: .leading, spacing: 8) {
                     Button {
                         withAnimation(.smooth.speed(2.0)) {
                             if isCollapsed {
-                                collapsedOperators.remove(section.operatorId)
+                                expandedOperators.insert(section.operatorId)
                             } else {
-                                collapsedOperators.insert(section.operatorId)
+                                expandedOperators.remove(section.operatorId)
                             }
                         }
                     } label: {
