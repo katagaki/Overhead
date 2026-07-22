@@ -17,6 +17,8 @@ import Backbone
 /// - overtrain://timetable[?line=…&station=…&hidePast=0]
 /// - overtrain://line[?line=…&status=expanded&source=x]
 /// - overtrain://custom-line (seeds the sample line and opens its editor)
+/// - overtrain://home?scroll=lines
+/// - overtrain://place-editor[?edit=first]
 /// - overtrain://reset
 enum ScreenshotCommand {
     case seedFavorites
@@ -29,6 +31,8 @@ enum ScreenshotCommand {
     case timetable(ScreenshotTimetableTarget, hidePast: Bool)
     case linePage(ScreenshotLineTarget)
     case customLineEditor
+    case homeScroll(String)
+    case placeEditor(editFirst: Bool)
     case reset
 
     init?(url: URL) {
@@ -78,6 +82,11 @@ enum ScreenshotCommand {
             )
         case "custom-line":
             self = .customLineEditor
+        case "home":
+            guard let anchor = params["scroll"] else { return nil }
+            self = .homeScroll(anchor)
+        case "place-editor":
+            self = .placeEditor(editFirst: params["edit"] == "first")
         case "reset":
             self = .reset
         default:
@@ -112,11 +121,20 @@ final class ScreenshotStaging: ObservableObject {
     @Published var expandServiceStatus = false
     /// The expanded service status sheet starts on the X tab.
     @Published var serviceStatusShowsX = false
+    /// Anchor id for RootView's ScrollViewReader.
+    @Published var homeScrollTarget: String?
+    /// Favorite editor sheet command for FavoritesSection.
+    @Published var placeEditorCommand: PlaceEditorCommand?
 
     enum PlannerCommand {
         case search
         case avoid
         case departure
+    }
+
+    enum PlaceEditorCommand {
+        case new
+        case editFirst
     }
 }
 

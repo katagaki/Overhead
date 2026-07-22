@@ -29,15 +29,26 @@ struct RootView: View {
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
-            ScrollView {
-                VStack(spacing: 24) {
-                    JourneyPlannerSection(viewModel: viewModel)
-                    FavoritesSection(viewModel: viewModel)
-                    LinesSection(viewModel: viewModel)
-                    CustomLinesSection(viewModel: viewModel)
+            ScrollViewReader { scrollProxy in
+                ScrollView {
+                    VStack(spacing: 24) {
+                        JourneyPlannerSection(viewModel: viewModel)
+                        FavoritesSection(viewModel: viewModel)
+                        LinesSection(viewModel: viewModel)
+                            .id("lines")
+                        CustomLinesSection(viewModel: viewModel)
+                            .id("custom")
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
+#if DEBUG
+                .onReceive(ScreenshotStaging.shared.$homeScrollTarget) { target in
+                    guard let target else { return }
+                    ScreenshotStaging.shared.homeScrollTarget = nil
+                    scrollProxy.scrollTo(target, anchor: .top)
+                }
+#endif
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle(Text("App.Name"))
@@ -257,6 +268,12 @@ struct RootView: View {
             ScreenshotSeeder.seedCustomLine()
             try? await Task.sleep(for: .seconds(0.5))
             navigationPath.append(CustomLineRoute.edit(ScreenshotSeeder.customLineId))
+        case .homeScroll(let anchor):
+            try? await Task.sleep(for: .seconds(1))
+            ScreenshotStaging.shared.homeScrollTarget = anchor
+        case .placeEditor(let editFirst):
+            try? await Task.sleep(for: .seconds(0.5))
+            ScreenshotStaging.shared.placeEditorCommand = editFirst ? .editFirst : .new
         case .reset:
             viewModel.stopJourney()
             debugTimetableTarget = nil
