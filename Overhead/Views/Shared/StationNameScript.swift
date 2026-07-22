@@ -75,13 +75,18 @@ extension String {
 /// content-sized, centered header next to a badge.
 struct HorizontallySquashed<Content: View>: View {
     var maxWidth: CGFloat?
+    var alignment: Alignment
     @ViewBuilder var content: () -> Content
     @State private var naturalSize: CGSize = .zero
 
-    init(maxWidth: CGFloat? = nil, @ViewBuilder content: @escaping () -> Content) {
+    init(maxWidth: CGFloat? = nil, alignment: Alignment = .center,
+         @ViewBuilder content: @escaping () -> Content) {
         self.maxWidth = maxWidth
+        self.alignment = alignment
         self.content = content
     }
+
+    private var anchor: UnitPoint { alignment == .leading ? .leading : .center }
 
     var body: some View {
         core
@@ -103,18 +108,43 @@ struct HorizontallySquashed<Content: View>: View {
             let footprint = naturalSize.width == 0 ? maxWidth : min(naturalSize.width, maxWidth)
             content()
                 .fixedSize()
-                .scaleEffect(x: scale, y: 1, anchor: .center)
-                .frame(width: footprint, height: naturalSize.height == 0 ? nil : naturalSize.height)
+                .scaleEffect(x: scale, y: 1, anchor: anchor)
+                .frame(width: footprint, height: naturalSize.height == 0 ? nil : naturalSize.height,
+                       alignment: alignment)
         } else {
             GeometryReader { geo in
                 let scale = naturalSize.width > geo.size.width && naturalSize.width > 0
                     ? geo.size.width / naturalSize.width : 1
                 content()
                     .fixedSize()
-                    .scaleEffect(x: scale, y: 1, anchor: .center)
-                    .frame(width: geo.size.width, height: geo.size.height, alignment: .center)
+                    .scaleEffect(x: scale, y: 1, anchor: anchor)
+                    .frame(width: geo.size.width, height: geo.size.height, alignment: alignment)
             }
             .frame(height: naturalSize.height)
+        }
+    }
+}
+
+/// Transfer-line name in the LCD stop columns: a clean kanji/katakana pair
+/// splits into two lines (existing `scriptSegments` detection); each line
+/// squashes horizontally when too long instead of wrapping mid-word.
+struct LCDTransferLineName: View {
+    let name: String
+    let fontSize: CGFloat
+    var kerning: CGFloat = 0
+    var color: Color = .black
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(Array(name.scriptSegments.enumerated()), id: \.offset) { _, segment in
+                HorizontallySquashed(alignment: .leading) {
+                    Text(segment)
+                        .font(LCDFont.gothic(size: fontSize, weight: .bold))
+                        .kerning(kerning)
+                        .foregroundColor(color)
+                        .lineLimit(1)
+                }
+            }
         }
     }
 }

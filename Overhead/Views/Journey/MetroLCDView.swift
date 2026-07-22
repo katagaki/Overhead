@@ -308,12 +308,7 @@ struct MetroLCDView: View {
             ForEach(lines) { line in
                 HStack(alignment: .top, spacing: 1.5) {
                     LineSymbolBadge(symbol: line.lineSymbol, color: line.color, dimension: 7)
-                    Text(line.name)
-                        .font(LCDFont.gothic(size: 6.5, weight: .bold))
-                        .kerning(-0.3)
-                        .foregroundColor(.black)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
+                    LCDTransferLineName(name: line.name, fontSize: 6.5, kerning: -0.3)
                 }
             }
         }
