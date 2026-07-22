@@ -136,8 +136,8 @@ struct FindLCDView: View {
                 }
 
                 let arrowText = mirrored
-                    ? "◀ \(destinationStation?.nameEn.uppercased() ?? "")"
-                    : "\(destinationStation?.nameEn.uppercased() ?? "") ▶"
+                    ? "◄ \(destinationStation?.nameEn.uppercased() ?? "")"
+                    : "\(destinationStation?.nameEn.uppercased() ?? "") ►"
                 ctx.draw(
                     Text(verbatim: arrowText)
                         .font(.custom("HelveticaNeue-Bold", size: 8))
