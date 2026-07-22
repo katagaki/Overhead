@@ -181,9 +181,9 @@ private struct MonoLEDRaster {
     }
 
     init(text: String) {
-        // 16-dot bitmap gothic; at 15pt its dots land on the pixel grid.
-        let font = UIFont(name: "DotGothic16-Regular", size: 15)
-            ?? UIFont.systemFont(ofSize: 14, weight: .regular)
+        // Aliased Helvetica — the classic DMI grotesque; smaller sizes smear.
+        let font = UIFont(name: "Helvetica", size: 15)
+            ?? UIFont.systemFont(ofSize: 15, weight: .regular)
 
         let attributed = NSAttributedString(string: text, attributes: [
             .font: font,

@@ -278,17 +278,34 @@ private struct LEDRaster {
     }
 
     init(segments: [LEDPage.Segment]) {
-        // 16-dot bitmap gothic (covers kana/kanji/Latin); at 15pt its dots
-        // land on the pixel grid, so the raster reads as a true LED matrix.
-        let font = UIFont(name: "DotGothic16-Regular", size: 15)
+        // 16-dot bitmap gothic for Japanese; aliased grotesque for Latin runs
+        // (clean 1px strokes on the grid — bitmap Latin faces read scraggly).
+        let jaFont = UIFont(name: "DotGothic16-Regular", size: 15)
             ?? UIFont.systemFont(ofSize: 14, weight: .regular)
+        let latinFont = UIFont(name: "HelveticaNeue-Medium", size: 13) ?? jaFont
 
         let attributed = NSMutableAttributedString()
+        var usedAscender: CGFloat = 0
         for segment in segments {
-            attributed.append(NSAttributedString(string: segment.text, attributes: [
-                .font: font,
-                .foregroundColor: segment.color.uiColor,
-            ]))
+            // Split into ASCII / non-ASCII runs so each script gets its face.
+            var run = ""
+            var runIsASCII: Bool?
+            func flush() {
+                guard !run.isEmpty else { return }
+                let font = runIsASCII == true ? latinFont : jaFont
+                usedAscender = max(usedAscender, font.ascender)
+                attributed.append(NSAttributedString(string: run, attributes: [
+                    .font: font,
+                    .foregroundColor: segment.color.uiColor,
+                ]))
+                run = ""
+            }
+            for char in segment.text {
+                let ascii = char.isASCII
+                if ascii != runIsASCII { flush(); runIsASCII = ascii }
+                run.append(char)
+            }
+            flush()
         }
 
         let width = max(1, Int(ceil(attributed.size().width)))
@@ -305,8 +322,9 @@ private struct LEDRaster {
             // Aliased text — one pixel per dot; antialiasing would fatten strokes.
             ctx.cgContext.setShouldAntialias(false)
             ctx.cgContext.setShouldSmoothFonts(false)
-            // Baseline pinned to an integer row so the dot grid stays aligned.
-            attributed.draw(at: CGPoint(x: 0, y: 14 - font.ascender))
+            // Baseline pinned to an integer row so the dot grid stays aligned;
+            // the line's ascent is the tallest ascender actually used.
+            attributed.draw(at: CGPoint(x: 0, y: 14 - usedAscender))
         }
 
         var dots = [UInt8](repeating: 0, count: width * height)
