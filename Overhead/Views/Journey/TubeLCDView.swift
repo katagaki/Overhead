@@ -181,9 +181,8 @@ private struct MonoLEDRaster {
     }
 
     init(text: String) {
-        // The HelveticaNeue-Medium 13 look, rendered 2× WITH antialiasing and
-        // downsampled by coverage — direct aliased rasterization makes each
-        // stem a 1-or-2 dot lottery depending on its subpixel phase.
+        // Rendered 2× with antialiasing, then downsampled by coverage —
+        // aliasing directly makes each stem a 1-or-2 dot lottery.
         let font = UIFont(name: "HelveticaNeue-Medium", size: 26)
             ?? UIFont.systemFont(ofSize: 26, weight: .medium)
 

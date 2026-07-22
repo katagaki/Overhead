@@ -125,11 +125,8 @@ struct HorizontallySquashed<Content: View>: View {
     }
 }
 
-/// Transfer-line row in the LCD stop columns: a clean kanji/katakana pair
-/// splits into two lines (existing `scriptSegments` detection); each line
-/// squashes horizontally when too long instead of wrapping mid-word. The
-/// line-symbol badge centers on the first line; rows sit tight (the gothic's
-/// tall line box would otherwise space them apart).
+/// Transfer-line row in the LCD stop columns: kanji/katakana pairs split
+/// into two squashed lines, badge centered on the first.
 struct LCDTransferLineName: View {
     let name: String
     let fontSize: CGFloat
