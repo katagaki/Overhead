@@ -4256,41 +4256,6 @@
         }
       }
     },
-    "Picker.SelectStation" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Select Station"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "駅を選択"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "역 선택"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "选择车站"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "選擇車站"
-          }
-        }
-      }
-    },
     "Picker.ThroughJourneyNote" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4653,7 +4618,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "自宅"
+            "value" : "帰宅"
           }
         },
         "ko" : {
@@ -4688,7 +4653,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "学校"
+            "value" : "通学"
           }
         },
         "ko" : {
@@ -4723,7 +4688,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "職場"
+            "value" : "通勤"
           }
         },
         "ko" : {
@@ -4742,76 +4707,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "公司"
-          }
-        }
-      }
-    },
-    "Section.AlightingStation" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alighting Station"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "降車駅"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "하차역"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下车站"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下車站"
-          }
-        }
-      }
-    },
-    "Section.BoardingStation" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Boarding Station"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "乗車駅"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "승차역"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "上车站"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "上車站"
           }
         }
       }

@@ -172,26 +172,15 @@ struct JourneyPlannerSection: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
-
-        if #available(iOS 26.0, *) {
-            Button {
-                search()
-            } label: {
-                label
-            }
-            .buttonStyle(.glassProminent)
-            .buttonBorderShape(.capsule)
-            .disabled(!canSearch || isSearching)
-        } else {
-            Button {
-                search()
-            } label: {
-                label
-            }
-            .buttonStyle(.borderedProminent)
-            .buttonBorderShape(.capsule)
-            .disabled(!canSearch || isSearching)
+        
+        Button {
+            search()
+        } label: {
+            label
         }
+        .buttonStyle(.glassProminent)
+        .buttonBorderShape(.capsule)
+        .disabled(!canSearch || isSearching)
     }
 
     private var waypointNames: [String]? {

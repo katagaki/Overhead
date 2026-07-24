@@ -39,25 +39,18 @@ struct StationSearchSelectionView: View {
             }
         }
         .listStyle(.grouped)
-        .searchable(text: $searchText, prompt: Text("StationSearch.Prompt"))
-        .searchFocused($searchFocused)
+        .scrollDismissesKeyboard(.interactively)
+        .scrollEdgeEffectStyle(.soft, for: .bottom)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            searchBar
+        }
         .navigationTitle("ViewTitle.Stations")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if showsCloseButton {
                 ToolbarItem(placement: .topBarTrailing) {
-                    if #available(iOS 26.0, *) {
-                        Button(role: .close) {
-                            dismiss()
-                        }
-                    } else {
-                        Button {
-                            dismiss()
-                        } label: {
-                            Image(systemName: "xmark")
-                        }
-                        .tint(.secondary)
-                        .accessibilityLabel("Button.Close")
+                    Button(role: .close) {
+                        dismiss()
                     }
                 }
             }
@@ -66,6 +59,42 @@ struct StationSearchSelectionView: View {
             nearbyProvider.refresh(lines: lines)
             searchFocused = true
         }
+    }
+
+    // MARK: - Search Bar
+    @ViewBuilder
+    private var searchBar: some View {
+        GlassEffectContainer {
+            searchField
+                .glassEffect(.regular.interactive(), in: .capsule)
+        }
+        .padding(10)
+    }
+
+    private var searchField: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.primary)
+
+            TextField("StationSearch.Prompt", text: $searchText)
+                .focused($searchFocused)
+                .autocorrectionDisabled()
+                .submitLabel(.search)
+
+            if !searchText.isEmpty {
+                Button {
+                    searchText = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(Color(.tertiaryLabel))
+                }
+                .accessibilityLabel("Button.Close")
+            }
+        }
+        .font(.system(size: 17))
+        .padding(.horizontal, 16)
+        .frame(height: 48)
+        .allowsHitTesting(true)
     }
 
     // MARK: - List Content

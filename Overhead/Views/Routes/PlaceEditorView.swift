@@ -47,18 +47,8 @@ struct PlaceEditorView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                if #available(iOS 26.0, *) {
-                    Button(role: .close) {
-                        dismiss()
-                    }
-                } else {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                    }
-                    .tint(.secondary)
-                    .accessibilityLabel("Button.Close")
+                Button(role: .close) {
+                    dismiss()
                 }
             }
         }
@@ -117,26 +107,15 @@ struct PlaceEditorView: View {
             .font(.system(size: 16, weight: .bold))
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
-
-        if #available(iOS 26.0, *) {
-            Button {
-                save()
-            } label: {
-                label
-            }
-            .buttonStyle(.glassProminent)
-            .buttonBorderShape(.capsule)
-            .disabled(!canSave)
-        } else {
-            Button {
-                save()
-            } label: {
-                label
-            }
-            .buttonStyle(.borderedProminent)
-            .buttonBorderShape(.capsule)
-            .disabled(!canSave)
+        
+        Button {
+            save()
+        } label: {
+            label
         }
+        .buttonStyle(.glassProminent)
+        .buttonBorderShape(.capsule)
+        .disabled(!canSave)
     }
 
     // MARK: - Validation

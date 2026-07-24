@@ -128,12 +128,14 @@ struct FavoritesSection: View {
 
                         HStack(spacing: 5) {
                             Text(resolved.from.localizedName)
-                            Image(systemName: resolved.mode == .through ? "arrow.triangle.branch" : "arrow.right")
-                                .font(.system(size: 10, weight: .semibold))
-                                .foregroundStyle(.tertiary)
+                            ForEach(resolved.vias, id: \.id) { via in
+                                routeArrow(mode: .transfer)
+                                Text(via.localizedName)
+                            }
+                            routeArrow(mode: resolved.mode)
                             Text(resolved.to.localizedName)
 
-                            if resolved.mode == .transfer {
+                            if resolved.mode == .transfer && resolved.vias.isEmpty {
                                 Text("Label.Transfer")
                                     .font(.system(size: 10, weight: .semibold))
                                     .padding(.horizontal, 5)
@@ -175,6 +177,12 @@ struct FavoritesSection: View {
         .contextMenu {
             deleteButton(for: place)
         }
+    }
+
+    private func routeArrow(mode: RouteMode) -> some View {
+        Image(systemName: mode == .through ? "arrow.triangle.branch" : "arrow.right")
+            .font(.system(size: 10, weight: .semibold))
+            .foregroundStyle(.tertiary)
     }
 
     @ViewBuilder

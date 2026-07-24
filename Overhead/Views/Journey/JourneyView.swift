@@ -166,18 +166,8 @@ struct JourneyView: View {
         Button {
             viewModel.forceRefresh()
         } label: {
-            if #available(iOS 26.0, *) {
-                content
-                    .glassEffect(.regular.tint(modeColor(mode).opacity(0.2)).interactive())
-            } else {
-                content
-                    .background {
-                        ZStack {
-                            Capsule().fill(.ultraThinMaterial)
-                            Capsule().fill(modeColor(mode).opacity(0.12))
-                        }
-                    }
-            }
+            content
+                .glassEffect(.regular.tint(modeColor(mode).opacity(0.2)).interactive())
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Button.Refresh")
@@ -254,16 +244,9 @@ struct JourneyView: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
-
-        if #available(iOS 26.0, *) {
-            content
-                .glassEffect(.regular.interactive())
-        } else {
-            content
-                .background {
-                    Capsule().fill(.ultraThinMaterial)
-                }
-        }
+        
+        content
+            .glassEffect(.regular.interactive())
     }
 
     // MARK: - Empty State
