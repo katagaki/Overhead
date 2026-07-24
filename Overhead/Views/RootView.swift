@@ -220,10 +220,8 @@ struct RootView: View {
                 Link(destination: URL(string: "https://github.com/katagaki/Overhead")!) {
                     Label("More.GitHub", systemImage: "chevron.left.forwardslash.chevron.right")
                 }
-                Button {
+                Button("More.Attributions") {
                     navigationPath.append(Destination.attributions)
-                } label: {
-                    Label("More.Attributions", systemImage: "info.circle")
                 }
             }
         } label: {
