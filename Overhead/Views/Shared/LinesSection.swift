@@ -54,9 +54,9 @@ struct LinesSection: View {
     }
 
     private var browseByLineGrid: some View {
-        let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 2)
-
-        return LazyVStack(alignment: .leading, spacing: 20) {
+        // Eager on purpose: lazy containers mis-estimate the collapsed
+        // sections' heights and make the scroll offset jitter.
+        VStack(alignment: .leading, spacing: 20) {
             ForEach(OperatorSections.sections(for: viewModel.availableLines), id: \.operatorId) { section in
                 let isCollapsed = !expandedOperators.contains(section.operatorId)
 
@@ -86,28 +86,44 @@ struct LinesSection: View {
                     .buttonStyle(.plain)
 
                     if !isCollapsed {
-                        LazyVGrid(columns: columns, spacing: 10) {
-                            ForEach(section.lines) { line in
-                                NavigationLink {
-                                    StationPickerView(
-                                        line: line,
-                                        viewModel: viewModel
-                                    )
-                                } label: {
-                                    lineCell(line: line)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                        .transition(
-                            .scale(0.96, anchor: .top)
-                                .combined(with: .opacity)
-                                .combined(with: .blurReplace)
-                        )
+                        lineGrid(section.lines)
+                            .transition(
+                                .scale(0.96, anchor: .top)
+                                    .combined(with: .opacity)
+                                    .combined(with: .blurReplace)
+                            )
                     }
                 }
             }
         }
+    }
+
+    private func lineGrid(_ lines: [TrainLine]) -> some View {
+        VStack(spacing: 10) {
+            ForEach(Array(stride(from: 0, to: lines.count, by: 2)), id: \.self) { start in
+                HStack(alignment: .top, spacing: 10) {
+                    lineCellLink(line: lines[start])
+                    if start + 1 < lines.count {
+                        lineCellLink(line: lines[start + 1])
+                    } else {
+                        Color.clear
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+            }
+        }
+    }
+
+    private func lineCellLink(line: TrainLine) -> some View {
+        NavigationLink {
+            StationPickerView(
+                line: line,
+                viewModel: viewModel
+            )
+        } label: {
+            lineCell(line: line)
+        }
+        .buttonStyle(.plain)
     }
 
     private func lineCell(line: TrainLine) -> some View {
