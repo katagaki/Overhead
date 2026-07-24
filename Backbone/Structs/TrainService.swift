@@ -35,7 +35,7 @@ public struct TrainService: Identifiable, Codable {
         self.throughDestinationNameEn = throughDestinationNameEn
     }
 
-    public enum TrainType: String, Codable, Sendable {
+    public enum TrainType: String, Codable, Sendable, CaseIterable {
         case local = "Local"
         case semiExpress = "SemiExpress"
         case sectionSemiExpress = "SectionSemiExpress"

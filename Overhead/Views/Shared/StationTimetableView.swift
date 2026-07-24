@@ -9,6 +9,10 @@ struct StationTimetableView: View {
     var preferredDirectionId: String? = nil
     @ObservedObject var viewModel: JourneyViewModel
 
+    @State private var selectedTrainTypes: Set<TrainService.TrainType> = []
+    @State private var firstTrainsOnly = false
+    @State private var selectedDestinations: Set<String> = []
+
     var body: some View {
         Group {
             if viewModel.isLoadingTimetable {
@@ -21,6 +25,15 @@ struct StationTimetableView: View {
         }
         .navigationTitle(station.localizedName)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            // Unconditional item: conditional bottomBar items never appear
+            // once the stack has a navigationDestination (iOS 26).
+            ToolbarSpacer(.flexible, placement: .bottomBar)
+            ToolbarItem(placement: .bottomBar) {
+                filterMenu
+                    .disabled(viewModel.stationTimetable.isEmpty)
+            }
+        }
         .onAppear {
             viewModel.loadStationTimetable(stationId: station.id)
         }
@@ -33,7 +46,7 @@ struct StationTimetableView: View {
             let nowMinutes = railNowMinutes(at: context.date)
             ScrollViewReader { proxy in
                 List {
-                    ForEach(viewModel.stationTimetable, id: \.railDirection) { timetable in
+                    ForEach(displayedTimetables, id: \.railDirection) { timetable in
                         Section {
                             if timetable.departures.isEmpty {
                                 Text("StationTimetable.NoMoreTrains")
@@ -42,12 +55,18 @@ struct StationTimetableView: View {
                             } else {
 #if DEBUG
                                 // Screenshot harness: staged shots hide departed trains.
-                                let visible = ScreenshotStaging.shared.hidePastDepartures
+                                let staged = ScreenshotStaging.shared.hidePastDepartures
                                     ? timetable.departures.filter { !isPast($0, nowMinutes: nowMinutes) }
                                     : timetable.departures
 #else
-                                let visible = timetable.departures
+                                let staged = timetable.departures
 #endif
+                                let visible = staged.filter(matchesFilter)
+                                if visible.isEmpty {
+                                    Text("StationTimetable.Filter.NoMatches")
+                                        .foregroundColor(.secondary)
+                                        .font(.system(size: 14))
+                                }
                                 ForEach(visible) { departure in
                                     departureRow(
                                         departure: departure,
@@ -77,6 +96,78 @@ struct StationTimetableView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Filter
+
+    private var filterMenu: some View {
+        Menu {
+            if availableTrainTypes.count > 1 {
+                Section("StationTimetable.Filter.TrainType") {
+                    ForEach(availableTrainTypes, id: \.self) { type in
+                        Toggle(type.displayNameJa, isOn: setBinding($selectedTrainTypes, type))
+                    }
+                }
+            }
+            if hasFirstTrains {
+                Toggle("StationTimetable.Filter.FirstTrainOnly", isOn: $firstTrainsOnly)
+            }
+            if availableDestinations.count > 1 {
+                Section("StationTimetable.Filter.Destination") {
+                    ForEach(availableDestinations, id: \.self) { destination in
+                        Toggle(destination, isOn: setBinding($selectedDestinations, destination))
+                    }
+                }
+            }
+            if isFiltering {
+                Button("StationTimetable.Filter.Clear", systemImage: "xmark.circle") {
+                    selectedTrainTypes = []
+                    firstTrainsOnly = false
+                    selectedDestinations = []
+                }
+            }
+        } label: {
+            Label("StationTimetable.Filter", systemImage: "line.3.horizontal.decrease")
+        }
+    }
+
+    private var allDepartures: [StationDeparture] {
+        displayedTimetables.flatMap(\.departures)
+    }
+
+    private var availableTrainTypes: [TrainService.TrainType] {
+        let present = Set(allDepartures.map(\.trainType))
+        return TrainService.TrainType.allCases.filter(present.contains)
+    }
+
+    private var availableDestinations: [String] {
+        var seen: Set<String> = []
+        return allDepartures.map(\.localizedDestination).filter {
+            !$0.isEmpty && seen.insert($0).inserted
+        }
+    }
+
+    private var hasFirstTrains: Bool {
+        allDepartures.contains(where: \.isFirst)
+    }
+
+    private var isFiltering: Bool {
+        !selectedTrainTypes.isEmpty || firstTrainsOnly || !selectedDestinations.isEmpty
+    }
+
+    private func matchesFilter(_ departure: StationDeparture) -> Bool {
+        (selectedTrainTypes.isEmpty || selectedTrainTypes.contains(departure.trainType))
+            && (!firstTrainsOnly || departure.isFirst)
+            && (selectedDestinations.isEmpty || selectedDestinations.contains(departure.localizedDestination))
+    }
+
+    private func setBinding<T: Hashable>(_ set: Binding<Set<T>>, _ value: T) -> Binding<Bool> {
+        Binding(
+            get: { set.wrappedValue.contains(value) },
+            set: {
+                if $0 { set.wrappedValue.insert(value) } else { set.wrappedValue.remove(value) }
+            }
+        )
     }
 
     // MARK: - Through Services
@@ -228,9 +319,8 @@ struct StationTimetableView: View {
 
     private func scrollToNextDeparture(proxy: ScrollViewProxy) {
         let nowMinutes = railNowMinutes(at: Date())
-        let ordered = orderedTimetablesByPreferredDirection()
-        for timetable in ordered {
-            if let next = timetable.departures.first(where: { !isPast($0, nowMinutes: nowMinutes) }) {
+        for timetable in displayedTimetables {
+            if let next = timetable.departures.first(where: { !isPast($0, nowMinutes: nowMinutes) && matchesFilter($0) }) {
                 let target = rowId(timetable, next)
                 DispatchQueue.main.async {
                     proxy.scrollTo(target, anchor: .top)
@@ -240,14 +330,13 @@ struct StationTimetableView: View {
         }
     }
 
-    private func orderedTimetablesByPreferredDirection() -> [StationTimetableData] {
+    /// Falls back to every direction if none matches the preferred one.
+    private var displayedTimetables: [StationTimetableData] {
         guard let preferredDirectionId else { return viewModel.stationTimetable }
-        guard let preferred = viewModel.stationTimetable.first(where: {
+        let matching = viewModel.stationTimetable.filter {
             matchesPreferredDirection($0, preferredDirectionId: preferredDirectionId)
-        }) else {
-            return viewModel.stationTimetable
         }
-        return [preferred] + viewModel.stationTimetable.filter { $0.railDirection != preferred.railDirection }
+        return matching.isEmpty ? viewModel.stationTimetable : matching
     }
 
     /// Matches on the shared `isAscending` axis since the picker merges same-direction options.
