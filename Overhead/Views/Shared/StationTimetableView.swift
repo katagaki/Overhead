@@ -157,14 +157,6 @@ struct StationTimetableView: View {
                 .background(line.color)
                 .clipShape(Capsule())
 
-            Spacer()
-
-            if !departure.localizedDestination.isEmpty {
-                Text(departure.localizedDestination)
-                    .font(.system(size: 14))
-                    .foregroundColor(.secondary)
-            }
-
             if departure.isFirst {
                 Text("StationTimetable.FirstTrain")
                     .font(.system(size: 10, weight: .bold))
@@ -183,6 +175,14 @@ struct StationTimetableView: View {
                     .padding(.vertical, 2)
                     .background(Color.red)
                     .clipShape(Capsule())
+            }
+
+            Spacer()
+
+            if !departure.localizedDestination.isEmpty {
+                Text(departure.localizedDestination)
+                    .font(.system(size: 14))
+                    .foregroundColor(.secondary)
             }
         }
         .padding(.vertical, 2)
