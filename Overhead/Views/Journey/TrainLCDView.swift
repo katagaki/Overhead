@@ -21,7 +21,7 @@ struct TrainLCDView: View {
     private static let headerHeight: CGFloat = designHeight * 0.33
     private static let maxUpcomingStops = 7
     private static let lcdRed = Color(hex: "#D7000F")
-    private static let markerBlue = Color(hex: "#1D2088")
+    private static let movingMarkerWidth: CGFloat = 16
     private static let passedOpacity: CGFloat = 0.4
     private static let passedBandGray = Color(hex: "#8E9196")
     private static let languageFlipSeconds = 4.0
@@ -218,7 +218,6 @@ struct TrainLCDView: View {
         let (columns, markerSlot) = stops(now: now)
         let colWidth = (Self.designWidth - 20) / CGFloat(max(columns.count, 1))
         let markerCenter = markerSlot * colWidth
-        let blinkRed = Int(now.timeIntervalSinceReferenceDate * 2) % 2 == 0
 
         return VStack(spacing: 0) {
             HStack(spacing: 0) {
@@ -267,11 +266,11 @@ struct TrainLCDView: View {
                 }
                 Group {
                     if state.currentStationIndex != nil {
-                        currentMarker(red: blinkRed)
+                        currentMarker()
                             .offset(x: markerCenter - 27 / 2)
                     } else {
-                        movingMarker(red: blinkRed)
-                            .offset(x: markerCenter - 11 / 2)
+                        movingMarker()
+                            .offset(x: markerCenter - Self.movingMarkerWidth / 2)
                     }
                 }
             }
@@ -340,11 +339,11 @@ struct TrainLCDView: View {
         }
     }
 
-    private func currentMarker(red: Bool) -> some View {
+    private func currentMarker() -> some View {
         let flipped = orientation == .right
         return ZStack {
             ArrowBandShape(tipOnTrailing: flipped)
-                .fill(red ? Self.lcdRed : Self.markerBlue)
+                .fill(Self.lcdRed)
                 .overlay(ArrowBandShape(tipOnTrailing: flipped).stroke(Color.white, lineWidth: 1.5))
                 .frame(width: 27, height: 21)
             Circle()
@@ -355,12 +354,12 @@ struct TrainLCDView: View {
     }
 
     /// The in-transit marker: a solid chevron pointing the direction of travel.
-    private func movingMarker(red: Bool) -> some View {
+    private func movingMarker() -> some View {
         let flipped = orientation == .right
         return TravelChevronShape(pointsTrailing: flipped)
-            .fill(red ? Self.lcdRed : Self.markerBlue)
+            .fill(Self.lcdRed)
             .overlay(TravelChevronShape(pointsTrailing: flipped).stroke(Color.white, lineWidth: 1.5))
-            .frame(width: 11, height: 20)
+            .frame(width: Self.movingMarkerWidth, height: 20)
     }
 
     private func transferList(_ lines: [TrainLine]) -> some View {
