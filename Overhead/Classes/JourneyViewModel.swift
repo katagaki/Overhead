@@ -667,8 +667,11 @@ final class JourneyViewModel: ObservableObject {
                     ))
                     continue
                 }
-                guard let entry = entryByStationId[station.id] else { return nil }
                 stations.append(station)
+                // An express run has no entry at the stops it skips. Keep the
+                // station on the composite line but contribute no timetable
+                // entry, exactly as a skip-stop service does on its own line.
+                guard let entry = entryByStationId[station.id] else { continue }
                 entries.append(TimetableEntry(
                     id: "composite_\(compositeId)_\(entries.count)",
                     stationId: station.id,
@@ -796,11 +799,13 @@ final class JourneyViewModel: ObservableObject {
     /// slack than a planned transfer, which assumes a concourse walk.
     static let sameStationBufferMinutes: Double = 1
 
-    /// Stops the rider can still alight at, starting from the next one.
+    /// Stops the rider can still alight at and carry on from, starting with the
+    /// next one. The final destination is excluded — there is nothing to board
+    /// there and nothing further to shorten.
     ///
-    /// Stops after an upcoming 乗り換え are excluded: past that point the ride in
-    /// progress is no longer a single leg, and the transfer itself is the useful
-    /// anchor for changing the second half.
+    /// Stops after an upcoming 乗り換え are excluded too: past that point the ride
+    /// in progress is no longer a single leg, and the transfer itself is the
+    /// useful anchor for changing the second half.
     var replanAnchors: [ReplanAnchor] {
         guard let journey = activeJourney, journey.hasSchedule,
               let state = positionState, state.status != .arrived
@@ -815,7 +820,7 @@ final class JourneyViewModel: ObservableObject {
         let transferIds = Set(journey.transferStationIds)
 
         var anchors: [ReplanAnchor] = []
-        for index in first..<stations.count {
+        for index in first..<(stations.count - 1) {
             anchors.append(ReplanAnchor(
                 stationIndex: index,
                 station: stations[index],
@@ -1056,55 +1061,6 @@ final class JourneyViewModel: ObservableObject {
         activeJourney = best.journey
         selectedLine = staticLine.trainLine
         positionState = best.state
-    }
-
-    // TEMP: mid-journey replanning verification. Remove before committing.
-    func replanSelfCheck() {
-        func out(_ message: String) { NSLog("[REPLAN] %@", message) }
-
-        guard let journey = activeJourney, let state = positionState else {
-            out("no active journey"); return
-        }
-        let stations = journey.journeyStations
-        out("\(stations.first?.name ?? "?") → \(stations.last?.name ?? "?")"
-            + " stations=\(stations.count) segTo=\(state.segmentTo)"
-            + " cur=\(state.currentStationIndex.map(String.init) ?? "-")"
-            + " progress=\(String(format: "%.2f", state.progress)) eta=\(Self.hhmm(state.estimatedArrival))")
-
-        let anchors = replanAnchors
-        out("anchors: " + anchors.map { "\($0.stationIndex):\($0.station.name)@\(Self.hhmm($0.time))" }
-            .joined(separator: ", "))
-        guard let destination = stations.last?.name else { return }
-
-        for anchor in anchors.prefix(3) {
-            let candidates = replanCandidates(from: anchor, to: destination, limit: 4)
-            out("\(anchor.station.name) → \(destination): \(candidates.count) candidates")
-            for candidate in candidates {
-                let type = candidate.legs.first?.service.trainType.rawValue ?? "?"
-                out("  \(type) \(candidate.departureTime)→\(candidate.arrivalTime) legs=\(candidate.legs.count)")
-                guard let stitchedCandidate = stitched(from: anchor, to: candidate) else {
-                    out("    stitch=NIL"); continue
-                }
-                let names = stitchedCandidate.journeyLine.stations.map(\.name)
-                out("    stitch \(names.first ?? "?") → \(names.last ?? "?")"
-                    + " stations=\(names.count) transfers=\(stitchedCandidate.transferStationIds.count)"
-                    + " \(stitchedCandidate.departureTime)→\(stitchedCandidate.arrivalTime)")
-            }
-        }
-
-        // Mutating, so last: shorten the trip to the final reachable stop.
-        if let anchor = anchors.first, let stop = onwardStops(from: anchor).last {
-            changeDestination(to: stop)
-            let now = activeJourney?.journeyStations ?? []
-            out("truncate to \(stop.station.name): \(now.first?.name ?? "?") → \(now.last?.name ?? "?") stations=\(now.count)")
-        }
-    }
-
-    private static func hhmm(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        formatter.timeZone = TimeZone(identifier: "Asia/Tokyo")
-        return formatter.string(from: date)
     }
 #endif
 

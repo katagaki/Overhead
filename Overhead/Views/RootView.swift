@@ -278,7 +278,6 @@ struct RootView: View {
             await viewModel.debugStartJourney(
                 lineId: lineId, fromId: fromId, toId: toId, minutesAgo: minutesAgo
             )
-            viewModel.replanSelfCheck() // TEMP: remove before committing
         case .plannerSearch:
             ScreenshotStaging.shared.plannerCommand = .search
         case .plannerAvoid:
