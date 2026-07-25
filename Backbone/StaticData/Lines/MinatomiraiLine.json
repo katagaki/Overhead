@@ -156,8 +156,8 @@
             },
             {
                 "id": "Station:Minatomirai.Minatomirai.Shintakashima",
-                "latitude": 35.4627,
-                "longitude": 139.6297,
+                "latitude": 35.461939,
+                "longitude": 139.626641,
                 "name": "新高島",
                 "nameEn": "Shin-takashima",
                 "nameKo": "",
@@ -167,8 +167,8 @@
             },
             {
                 "id": "Station:Minatomirai.Minatomirai.Minatomirai",
-                "latitude": 35.4577,
-                "longitude": 139.6377,
+                "latitude": 35.457233,
+                "longitude": 139.632845,
                 "name": "みなとみらい",
                 "nameEn": "Minatomirai",
                 "nameKo": "",
@@ -189,8 +189,8 @@
             },
             {
                 "id": "Station:Minatomirai.Minatomirai.NihonOdori",
-                "latitude": 35.4477,
-                "longitude": 139.6407,
+                "latitude": 35.446735,
+                "longitude": 139.642672,
                 "name": "日本大通り",
                 "nameEn": "Nihon-odori",
                 "nameKo": "",
@@ -200,8 +200,8 @@
             },
             {
                 "id": "Station:Minatomirai.Minatomirai.MotomachiChukagai",
-                "latitude": 35.4437,
-                "longitude": 139.6507,
+                "latitude": 35.442116,
+                "longitude": 139.650913,
                 "name": "元町・中華街",
                 "nameEn": "Motomachi-Chukagai",
                 "nameKo": "",

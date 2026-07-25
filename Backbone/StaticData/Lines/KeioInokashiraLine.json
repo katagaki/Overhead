@@ -3751,8 +3751,8 @@
         "stations": [
             {
                 "id": "Station:Keio.Inokashira.Shibuya",
-                "latitude": 35.658,
-                "longitude": 139.7008,
+                "latitude": 35.658537,
+                "longitude": 139.69916,
                 "name": "渋谷",
                 "nameEn": "Shibuya",
                 "nameKo": "",
