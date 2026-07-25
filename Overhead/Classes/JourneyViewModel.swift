@@ -32,6 +32,22 @@ final class JourneyViewModel: ObservableObject {
 
     private var pendingActivityStart: (() -> Void)?
 
+    /// Transfer station ID → the line boarded there; kept so alerts can be rescheduled.
+    private var transferLines: [String: TrainLine] = [:]
+
+    /// Live Activity leg markers for the active journey; kept so a mid-journey
+    /// destination change can reuse them instead of rebuilding from the line data.
+    private var journeyLegLines: [TrainJourneyAttributes.LegLine] = []
+
+    /// LCD colour per leg, `lcdOverrides` already applied. Held app-side so the
+    /// widget's `LegLine` doesn't have to carry a line ID just for the override.
+    private var journeyLegColors: [LegColor] = []
+
+    struct LegColor {
+        let stationIndex: Int
+        let color: Color
+    }
+
     init(previewMode: Bool = false) {
         bindLocationTracker()
         if previewMode {
@@ -160,6 +176,9 @@ final class JourneyViewModel: ObservableObject {
 
         activeJourney = journey
         selectedLine = journeyLine
+        transferLines = [:]
+        journeyLegLines = []
+        journeyLegColors = []
 
         // Start location-based tracking — this drives everything
         locationTracker.startTracking(journey: journey, delay: nil)
@@ -176,6 +195,7 @@ final class JourneyViewModel: ObservableObject {
                 lineColorHex: line.colorHex
             )
         }
+        JourneyNotificationManager.shared.schedule(journey: journey)
 
         isStartingJourney = false
     }
@@ -725,11 +745,16 @@ final class JourneyViewModel: ObservableObject {
 
         let journeyStations = journey.journeyStations
         var legLines: [TrainJourneyAttributes.LegLine] = []
+        var legColors: [LegColor] = []
+        transferLines = [:]
         for (index, leg) in candidate.legs.enumerated() {
             let stationIndex = index == 0
                 ? 0
                 : journeyStations.firstIndex { $0.id == candidate.legs[index - 1].toStation.id }
             guard let stationIndex else { continue }
+            // Keyed by the previous leg's arrival station — the ID `transferStationIds`
+            // carries. A shared station has a different ID on each operator's line.
+            if index > 0 { transferLines[candidate.legs[index - 1].toStation.id] = leg.line }
             legLines.append(.init(
                 stationIndex: stationIndex,
                 lineSymbol: leg.line.lineSymbol,
@@ -737,7 +762,11 @@ final class JourneyViewModel: ObservableObject {
                 lineName: leg.line.name,
                 lineNameEn: leg.line.nameEn
             ))
+            legColors.append(LegColor(stationIndex: stationIndex, color: Self.lcdColor(leg.line)))
         }
+
+        journeyLegLines = legLines
+        journeyLegColors = legColors
 
         if let state = positionState {
             startLiveActivity(
@@ -747,6 +776,183 @@ final class JourneyViewModel: ObservableObject {
                 legLines: legLines
             )
         }
+        JourneyNotificationManager.shared.schedule(journey: journey, transferLines: transferLines)
+    }
+
+    // MARK: - Mid-Journey Replanning
+
+    /// A stop the rider can still get off at, with its delay-adjusted scheduled
+    /// time — a departure when used as a boarding point, an arrival when used
+    /// as a destination.
+    struct ReplanAnchor: Identifiable, Equatable {
+        let stationIndex: Int
+        let station: Station
+        let time: Date
+
+        var id: Int { stationIndex }
+    }
+
+    /// A train leaving a platform you're already standing on needs far less
+    /// slack than a planned transfer, which assumes a concourse walk.
+    static let sameStationBufferMinutes: Double = 1
+
+    /// Stops the rider can still alight at, starting from the next one.
+    ///
+    /// Stops after an upcoming 乗り換え are excluded: past that point the ride in
+    /// progress is no longer a single leg, and the transfer itself is the useful
+    /// anchor for changing the second half.
+    var replanAnchors: [ReplanAnchor] {
+        guard let journey = activeJourney, journey.hasSchedule,
+              let state = positionState, state.status != .arrived
+        else { return [] }
+
+        let stations = journey.journeyStations
+        let times = journey.scheduledStationTimes
+        guard stations.count > 1, stations.count == times.count else { return [] }
+
+        let first = min(state.currentStationIndex ?? state.segmentTo, stations.count - 1)
+        let delay = TimeInterval(state.delayMinutes * 60)
+        let transferIds = Set(journey.transferStationIds)
+
+        var anchors: [ReplanAnchor] = []
+        for index in first..<stations.count {
+            anchors.append(ReplanAnchor(
+                stationIndex: index,
+                station: stations[index],
+                time: times[index].addingTimeInterval(delay)
+            ))
+            if transferIds.contains(stations[index].id) { break }
+        }
+        return anchors
+    }
+
+    /// Stops already on the itinerary past `anchor`. Picking one only moves the
+    /// alighting station, so it needs no search.
+    func onwardStops(from anchor: ReplanAnchor) -> [ReplanAnchor] {
+        replanAnchors.filter { $0.stationIndex > anchor.stationIndex }
+    }
+
+    /// Alternative itineraries from `anchor` onward, soonest first.
+    func replanCandidates(
+        from anchor: ReplanAnchor,
+        to destinationName: String,
+        transferMinutes: Double = StaticTrainData.transferBufferMinutes,
+        avoidingLineIds: Set<String> = [],
+        limit: Int = 8
+    ) -> [TrainCandidate] {
+        guard anchor.station.name != destinationName else { return [] }
+        return searchTrainCandidates(
+            stationNames: [anchor.station.name, destinationName],
+            departure: anchor.time.addingTimeInterval(Self.sameStationBufferMinutes * 60),
+            transferMinutes: transferMinutes,
+            avoidingLineIds: avoidingLineIds,
+            limit: limit
+        )
+    }
+
+    /// Moves the alighting station to another stop already on this itinerary.
+    /// Same train, so the boarding station and start time carry over.
+    func changeDestination(to anchor: ReplanAnchor) {
+        guard let journey = activeJourney else { return }
+        let stations = journey.journeyStations
+        guard anchor.stationIndex > 0, anchor.stationIndex < stations.count else { return }
+
+        let kept = Set(stations.prefix(anchor.stationIndex + 1).map(\.id))
+        let revised = Journey(
+            id: UUID(),
+            service: journey.service,
+            line: journey.line,
+            boardingStationId: journey.boardingStationId,
+            alightingStationId: stations[anchor.stationIndex].id,
+            startedAt: journey.startedAt,
+            transferStationIds: journey.transferStationIds.filter { kept.contains($0) },
+            hasSchedule: journey.hasSchedule
+        )
+
+        install(
+            journey: revised,
+            line: journey.line,
+            legLines: journeyLegLines.filter { $0.stationIndex <= anchor.stationIndex },
+            legColors: journeyLegColors.filter { $0.stationIndex <= anchor.stationIndex },
+            transferLines: transferLines.filter { kept.contains($0.key) }
+        )
+    }
+
+    /// Swaps the rest of the itinerary for `onward`, boarded at `anchor`.
+    ///
+    /// The ride in progress is stitched on as a first leg so the journey keeps
+    /// its original boarding station and the change reads as a 乗り換え at the
+    /// anchor. Deliberate, so it skips the planner's overwrite confirmation.
+    func replan(from anchor: ReplanAnchor, to onward: TrainCandidate) {
+        performStartJourney(candidate: stitched(from: anchor, to: onward) ?? onward)
+    }
+
+    /// `onward` with the ride in progress prepended as a first leg. Nil when the
+    /// two can't be joined — the caller then boards `onward` on its own.
+    func stitched(from anchor: ReplanAnchor, to onward: TrainCandidate) -> TrainCandidate? {
+        guard let head = rideInProgressLeg(upTo: anchor) else { return nil }
+        return compositeCandidate(legs: [head] + onward.legs)
+    }
+
+    /// The portion of the active journey from its boarding station to `anchor`,
+    /// as a single leg on the journey's (possibly composite) line.
+    /// Nil when the rider hasn't left the boarding station yet.
+    private func rideInProgressLeg(upTo anchor: ReplanAnchor) -> CandidateLeg? {
+        guard let journey = activeJourney,
+              let boarding = journey.journeyStations.first,
+              boarding.id != anchor.station.id
+        else { return nil }
+
+        let timetable = journey.journeyTimetable
+        guard let depEntry = timetable.first(where: { $0.stationId == boarding.id }),
+              let arrEntry = timetable.first(where: { $0.stationId == anchor.station.id }),
+              let dep = depEntry.departureSeconds() ?? depEntry.arrivalSeconds(),
+              let arr = arrEntry.arrivalSeconds() ?? arrEntry.departureSeconds()
+        else { return nil }
+
+        return CandidateLeg(
+            service: journey.service,
+            line: journey.line,
+            fromStation: boarding,
+            toStation: anchor.station,
+            departureSeconds: dep,
+            arrivalSeconds: arr
+        )
+    }
+
+    /// Replaces the active journey and every side effect hanging off it.
+    /// The station list lives in the Live Activity's immutable attributes, so a
+    /// changed route means ending and restarting it rather than an update.
+    private func install(
+        journey: Journey,
+        line: TrainLine,
+        legLines: [TrainJourneyAttributes.LegLine],
+        legColors: [LegColor],
+        transferLines: [String: TrainLine]
+    ) {
+        LiveActivityManager.shared.endActivity()
+
+        activeJourney = journey
+        selectedLine = line
+        errorMessage = nil
+        self.transferLines = transferLines
+        journeyLegLines = legLines
+        journeyLegColors = legColors
+
+        locationTracker.startTracking(journey: journey, delay: nil)
+        positionState = journey.hasSchedule
+            ? TrainPositionEngine.computePosition(journey: journey, delay: nil)
+            : locationTracker.positionState
+
+        if let state = positionState {
+            startLiveActivity(
+                journey: journey,
+                positionState: state,
+                lineColorHex: line.colorHex,
+                legLines: legLines
+            )
+        }
+        JourneyNotificationManager.shared.schedule(journey: journey, transferLines: transferLines)
     }
 
     // MARK: - Custom (DIY) Line Journeys
@@ -786,6 +992,9 @@ final class JourneyViewModel: ObservableObject {
         activeJourney = journey
         selectedLine = journeyLine
         errorMessage = nil
+        transferLines = [:]
+        journeyLegLines = []
+        journeyLegColors = []
 
         locationTracker.startTracking(journey: journey, delay: nil)
         positionState = hasSchedule
@@ -799,6 +1008,7 @@ final class JourneyViewModel: ObservableObject {
                 lineColorHex: journeyLine.colorHex
             )
         }
+        JourneyNotificationManager.shared.schedule(journey: journey)
     }
 
     // MARK: - Manual Station Flipping (schedule-less journeys)
@@ -847,6 +1057,55 @@ final class JourneyViewModel: ObservableObject {
         selectedLine = staticLine.trainLine
         positionState = best.state
     }
+
+    // TEMP: mid-journey replanning verification. Remove before committing.
+    func replanSelfCheck() {
+        func out(_ message: String) { NSLog("[REPLAN] %@", message) }
+
+        guard let journey = activeJourney, let state = positionState else {
+            out("no active journey"); return
+        }
+        let stations = journey.journeyStations
+        out("\(stations.first?.name ?? "?") → \(stations.last?.name ?? "?")"
+            + " stations=\(stations.count) segTo=\(state.segmentTo)"
+            + " cur=\(state.currentStationIndex.map(String.init) ?? "-")"
+            + " progress=\(String(format: "%.2f", state.progress)) eta=\(Self.hhmm(state.estimatedArrival))")
+
+        let anchors = replanAnchors
+        out("anchors: " + anchors.map { "\($0.stationIndex):\($0.station.name)@\(Self.hhmm($0.time))" }
+            .joined(separator: ", "))
+        guard let destination = stations.last?.name else { return }
+
+        for anchor in anchors.prefix(3) {
+            let candidates = replanCandidates(from: anchor, to: destination, limit: 4)
+            out("\(anchor.station.name) → \(destination): \(candidates.count) candidates")
+            for candidate in candidates {
+                let type = candidate.legs.first?.service.trainType.rawValue ?? "?"
+                out("  \(type) \(candidate.departureTime)→\(candidate.arrivalTime) legs=\(candidate.legs.count)")
+                guard let stitchedCandidate = stitched(from: anchor, to: candidate) else {
+                    out("    stitch=NIL"); continue
+                }
+                let names = stitchedCandidate.journeyLine.stations.map(\.name)
+                out("    stitch \(names.first ?? "?") → \(names.last ?? "?")"
+                    + " stations=\(names.count) transfers=\(stitchedCandidate.transferStationIds.count)"
+                    + " \(stitchedCandidate.departureTime)→\(stitchedCandidate.arrivalTime)")
+            }
+        }
+
+        // Mutating, so last: shorten the trip to the final reachable stop.
+        if let anchor = anchors.first, let stop = onwardStops(from: anchor).last {
+            changeDestination(to: stop)
+            let now = activeJourney?.journeyStations ?? []
+            out("truncate to \(stop.station.name): \(now.first?.name ?? "?") → \(now.last?.name ?? "?") stations=\(now.count)")
+        }
+    }
+
+    private static func hhmm(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        formatter.timeZone = TimeZone(identifier: "Asia/Tokyo")
+        return formatter.string(from: date)
+    }
 #endif
 
     // MARK: - Overwrite Confirmation
@@ -868,10 +1127,45 @@ final class JourneyViewModel: ObservableObject {
     func stopJourney() {
         locationTracker.stopTracking()
         LiveActivityManager.shared.endActivity()
+        JourneyNotificationManager.shared.cancelAll()
         pendingActivityStart = nil
+        transferLines = [:]
+        journeyLegLines = []
+        journeyLegColors = []
         activeJourney = nil
         positionState = nil
         currentDelay = nil
+    }
+
+    // MARK: - Journey Notifications
+
+    /// Re-applies the alert settings to the journey in progress.
+    func rescheduleNotifications() {
+        guard let journey = activeJourney else {
+            JourneyNotificationManager.shared.cancelAll()
+            return
+        }
+        JourneyNotificationManager.shared.schedule(journey: journey, transferLines: transferLines)
+    }
+
+    // MARK: - LCD Colour
+
+    /// The colour every LCD shows right now. Riders are still on the arriving
+    /// leg at a transfer station, so the new leg takes over once the train
+    /// departs it — the same rule the Live Activity follows.
+    var currentLineColor: Color {
+        let fallback = selectedLine.map(Self.lcdColor) ?? .gray
+        guard !journeyLegColors.isEmpty else { return fallback }
+        let next = max(positionState?.status == .arrived ? Int.max : positionState?.segmentTo ?? Int.max, 1)
+        let leg = journeyLegColors.last { $0.stationIndex < next } ?? journeyLegColors.first
+        return leg?.color ?? fallback
+    }
+
+    /// LCD-only line colour; a through-service takes its first component's.
+    static func lcdColor(_ line: TrainLine) -> Color {
+        let baseId = line.id.split(separator: "+").first.map(String.init) ?? line.id
+        guard let hex = LineColors.lcdOverrides[baseId] else { return line.color }
+        return Color(hex: hex)
     }
 
     // MARK: - Force Refresh (from Live Activity button)

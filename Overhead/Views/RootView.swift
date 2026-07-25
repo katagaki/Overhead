@@ -8,6 +8,9 @@ struct RootView: View {
 
     @AppStorage(JourneyMode.storageKey) private var journeyMode = JourneyMode.hybrid
     @AppStorage("hasDismissedStartupNotice") private var hasDismissedStartupNotice = false
+    @AppStorage(JourneyNotificationManager.enabledKey) private var notificationsEnabled = true
+    @AppStorage(JourneyNotificationManager.leadMinutesKey)
+    private var notificationLeadMinutes = JourneyNotificationManager.defaultLeadMinutes
     @State private var showJourneySheet = false
     @State private var showTimetableModeNotice = false
     @State private var showStartupNotice = false
@@ -98,6 +101,16 @@ struct RootView: View {
                         await handleScreenshotURL(url)
                     }
                 }
+                // TEMP notification verification
+                if ProcessInfo.processInfo.arguments.contains("-notifTest") {
+                    let names = ["東京", "自由が丘"]
+                    let found = viewModel.searchTrainCandidates(stationNames: names, departure: Date())
+                    print("[NOTIF] candidates=\(found.count)")
+                    if let pick = found.first(where: { $0.transferCount > 0 }) ?? found.first {
+                        print("[NOTIF] legs=\(pick.legs.map { "\($0.line.name):\($0.fromStation.name)→\($0.toStation.name) \($0.departureTime)-\($0.arrivalTime)" })")
+                        viewModel.startJourney(candidate: pick)
+                    }
+                }
 #endif
             }
         }
@@ -160,6 +173,12 @@ struct RootView: View {
         } message: {
             Text("Journey.Overwrite.ConfirmMessage")
         }
+        .onChange(of: notificationsEnabled) { _, _ in
+            viewModel.rescheduleNotifications()
+        }
+        .onChange(of: notificationLeadMinutes) { _, _ in
+            viewModel.rescheduleNotifications()
+        }
         // Timetable mode keeps a low-power location session so the app isn't suspended.
         .onChange(of: journeyMode) { _, newMode in
             if newMode == .timetable { showTimetableModeNotice = true }
@@ -202,6 +221,18 @@ struct RootView: View {
                 .pickerStyle(.inline)
             }
             .labelsVisibility(.visible)
+
+            Section("Settings.Section.Notifications") {
+                Toggle(isOn: $notificationsEnabled) {
+                    Label("Settings.Notifications.Enabled", systemImage: "bell.badge")
+                }
+                Picker("Settings.Notifications.LeadTime", selection: $notificationLeadMinutes) {
+                    ForEach(JourneyNotificationManager.leadMinuteOptions, id: \.self) { minutes in
+                        Text("Settings.Notifications.LeadTime \(minutes)").tag(minutes)
+                    }
+                }
+                .disabled(!notificationsEnabled)
+            }
 
             if viewModel.activeJourney != nil {
                 Section("Settings.Section.CurrentJourney") {
@@ -247,6 +278,7 @@ struct RootView: View {
             await viewModel.debugStartJourney(
                 lineId: lineId, fromId: fromId, toId: toId, minutesAgo: minutesAgo
             )
+            viewModel.replanSelfCheck() // TEMP: remove before committing
         case .plannerSearch:
             ScreenshotStaging.shared.plannerCommand = .search
         case .plannerAvoid:

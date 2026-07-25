@@ -12,13 +12,6 @@ struct LoopLCDView: View {
     let lineColor: Color
     let orientation: TrainLCDOrientation
 
-    private var displayColor: Color {
-        let firstLegId = journey.line.id.split(separator: "+").first.map(String.init)
-            ?? journey.line.id
-        guard let hex = LineColors.lcdOverrides[firstLegId] else { return lineColor }
-        return Color(hex: hex)
-    }
-
     private static let designWidth: CGFloat = 360
     private static let designHeight: CGFloat = designWidth * 9 / 16
     private static let headerHeight: CGFloat = 58
@@ -92,7 +85,7 @@ struct LoopLCDView: View {
             .padding(.bottom, 3)
 
             Rectangle()
-                .fill(displayColor)
+                .fill(lineColor)
                 .frame(width: 13)
                 .padding(.bottom, 3)
                 .padding(.leading, 7)
@@ -199,7 +192,7 @@ struct LoopLCDView: View {
                 for p in upperEdge.dropFirst() { band.addLine(to: p) }
                 for p in lowerEdge.reversed() { band.addLine(to: p) }
                 band.closeSubpath()
-                ctx.fill(band, with: .color(displayColor))
+                ctx.fill(band, with: .color(lineColor))
 
                 var shadow = Path()
                 for (i, t) in (0...samples).map({ (CGFloat($0) / CGFloat(samples)) }).enumerated() {
@@ -352,10 +345,10 @@ struct LoopLCDView: View {
     }
 
     private var arcShadowColor: Color {
-        let ui = UIColor(displayColor)
+        let ui = UIColor(lineColor)
         var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
         guard ui.getHue(&h, saturation: &s, brightness: &b, alpha: &a) else {
-            return displayColor
+            return lineColor
         }
         return Color(hue: h, saturation: s, brightness: b * 0.55, opacity: a)
     }

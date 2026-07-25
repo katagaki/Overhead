@@ -9,13 +9,6 @@ struct TrainLCDView: View {
     let lineColor: Color
     let orientation: TrainLCDOrientation
 
-    private var displayColor: Color {
-        let firstLegId = journey.line.id.split(separator: "+").first.map(String.init)
-            ?? journey.line.id
-        guard let hex = LineColors.lcdOverrides[firstLegId] else { return lineColor }
-        return Color(hex: hex)
-    }
-
     private static let designWidth: CGFloat = 360
     private static let designHeight: CGFloat = designWidth * 9 / 16
     private static let headerHeight: CGFloat = designHeight * 0.33
@@ -134,7 +127,7 @@ struct TrainLCDView: View {
                               : LCDFont.gothic(size: 15, weight: .black))
                 .kerning(english ? 0 : typeKerning)
                 .padding(.leading, english ? 0 : typeKerning)
-                .foregroundColor(displayColor)
+                .foregroundColor(lineColor)
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
                 .modifier(ItalicSkew())
@@ -178,7 +171,7 @@ struct TrainLCDView: View {
         .padding(EdgeInsets(top: 4, leading: 5, bottom: 3, trailing: 16))
         .frame(width: 102)
         .frame(maxHeight: .infinity)
-        .background(PlateShape().fill(displayColor))
+        .background(PlateShape().fill(lineColor))
     }
 
     @ViewBuilder
@@ -187,7 +180,7 @@ struct TrainLCDView: View {
             .font(.system(size: 16, weight: .heavy))
             .lineLimit(1)
             .minimumScaleFactor(0.7)
-            .foregroundColor(displayColor)
+            .foregroundColor(lineColor)
             .frame(width: 18, height: 18)
             .background(Color.white, in: RoundedRectangle(cornerRadius: 2))
         Group {
@@ -233,7 +226,7 @@ struct TrainLCDView: View {
                 let tailPad = max(0, colWidth / 2 - 6)
                 let totalWidth = colWidth * CGFloat(max(columns.count, 1))
                 ArrowBandShape(tipOnTrailing: orientation == .right)
-                    .fill(displayColor)
+                    .fill(lineColor)
                     .frame(height: 17)
                     .padding(orientation == .right ? .leading : .trailing, tailPad)
                 // The stretch behind the train turns gray, marker to tail edge.

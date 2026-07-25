@@ -281,7 +281,7 @@ extension JourneyViewModel {
             style: TrainLCDStyle(stored: defaults.string(forKey: TrainLCDStyle.storageKey) ?? ""),
             journey: journey,
             state: state,
-            lineColor: selectedLine?.color ?? .gray,
+            lineColor: currentLineColor,
             orientation: defaults.string(forKey: TrainLCDOrientation.storageKey)
                 .flatMap(TrainLCDOrientation.init) ?? .left
         )

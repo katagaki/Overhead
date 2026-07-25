@@ -10,13 +10,6 @@ struct FindLCDView: View {
     let lineColor: Color
     let orientation: TrainLCDOrientation
 
-    private var displayColor: Color {
-        let firstLegId = journey.line.id.split(separator: "+").first.map(String.init)
-            ?? journey.line.id
-        guard let hex = LineColors.lcdOverrides[firstLegId] else { return lineColor }
-        return Color(hex: hex)
-    }
-
     private static let designWidth: CGFloat = 360
     private static let designHeight: CGFloat = designWidth * 9 / 16
     private static let leftWidth: CGFloat = 104
@@ -85,7 +78,7 @@ struct FindLCDView: View {
     }
 
     private var bullet: some View {
-        LineSymbolBadge(symbol: journey.line.lineSymbol, color: displayColor, dimension: 26)
+        LineSymbolBadge(symbol: journey.line.lineSymbol, color: lineColor, dimension: 26)
     }
 
     // MARK: - Strip Map

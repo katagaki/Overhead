@@ -11,13 +11,6 @@ struct KeihinTohokuLineLCDView: View {
     let orientation: TrainLCDOrientation
 
     /// LCD chrome color (type text, band, car box); badges keep `lineColor`.
-    private var displayColor: Color {
-        let firstLegId = journey.line.id.split(separator: "+").first.map(String.init)
-            ?? journey.line.id
-        guard let hex = LineColors.lcdOverrides[firstLegId] else { return lineColor }
-        return Color(hex: hex)
-    }
-
     // Fixed design canvas, scaled to available width.
     private static let designWidth: CGFloat = 360
     private static let designHeight: CGFloat = designWidth * 9 / 16
@@ -102,7 +95,7 @@ struct KeihinTohokuLineLCDView: View {
             }
             Text(text)
                 .font(LCDFont.gothic(size: size, weight: .heavy))
-                .foregroundColor(displayColor)
+                .foregroundColor(lineColor)
         }
     }
 
@@ -161,7 +154,7 @@ struct KeihinTohokuLineLCDView: View {
         VStack(spacing: 2) {
             Text(verbatim: "\(carNumber)")
                 .font(.system(size: 15, weight: .heavy))
-                .foregroundColor(displayColor)
+                .foregroundColor(lineColor)
                 .frame(width: 26, height: 20)
                 .background(Color.white, in: RoundedRectangle(cornerRadius: 2))
             Text(verbatim: "号車")
@@ -199,7 +192,7 @@ struct KeihinTohokuLineLCDView: View {
 
             ZStack(alignment: .leading) {
                 YamanoteArrowBandShape(tipOnTrailing: orientation == .right)
-                    .fill(displayColor)
+                    .fill(lineColor)
                     .frame(height: 17)
                     .padding(orientation == .right ? .leading : .trailing, -10)
                 HStack(spacing: 0) {

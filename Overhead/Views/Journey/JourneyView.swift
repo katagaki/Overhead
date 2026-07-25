@@ -8,8 +8,10 @@ struct JourneyView: View {
     @AppStorage(TrainLCDStyle.storageKey) private var lcdStyleRaw = TrainLCDStyle.joban.rawValue
     @AppStorage(TrainLCDOrientation.storageKey) private var lcdOrientationRaw = TrainLCDOrientation.left.rawValue
 
+    @State private var showingReplan = false
+
     private var lineColor: Color {
-        viewModel.selectedLine?.color ?? .gray
+        viewModel.currentLineColor
     }
 
     var body: some View {
@@ -56,11 +58,15 @@ struct JourneyView: View {
                         .padding(.bottom, 8)
                     }
                     .safeAreaInset(edge: .bottom) {
-                        Group {
+                        HStack(spacing: 10) {
                             if viewModel.trackingMode == .manual {
                                 manualStationControl(journey: journey, state: state)
                             } else {
                                 trackingModeCapsule
+                            }
+
+                            if !viewModel.replanAnchors.isEmpty {
+                                replanButton
                             }
                         }
                         .padding(.vertical, 8)
@@ -78,6 +84,9 @@ struct JourneyView: View {
             } else {
                 emptyState
             }
+        }
+        .sheet(isPresented: $showingReplan) {
+            ReplanSheet(viewModel: viewModel)
         }
     }
 
@@ -133,6 +142,28 @@ struct JourneyView: View {
                 .padding(.horizontal, 24)
             }
         }
+    }
+
+    // MARK: - Replan Button (bottom safe area)
+
+    /// Opens the mid-journey course-change sheet.
+    @ViewBuilder
+    private var replanButton: some View {
+        Button {
+            showingReplan = true
+        } label: {
+            HStack(spacing: 7) {
+                Image(systemName: "arrow.triangle.branch")
+                    .font(.system(size: 12, weight: .semibold))
+                Text("Replan.Button")
+                    .font(.system(size: 13, weight: .bold))
+            }
+            .foregroundColor(.primary)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .glassEffect(.regular.interactive())
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Tracking Mode Capsule (bottom safe area)

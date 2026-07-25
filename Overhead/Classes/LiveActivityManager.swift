@@ -160,8 +160,8 @@ final class LiveActivityManager {
             : legLines
 
         lastDelayFetchTime = Date()
-        (scheduledDeparture, scheduledArrival) = Self.scheduledTimes(for: journey)
-        stationTimes = Self.stationTimes(for: journey)
+        (scheduledDeparture, scheduledArrival) = journey.scheduledTimes
+        stationTimes = journey.scheduledStationTimes
 
         let attributes = TrainJourneyAttributes(
             lineName: journey.line.name,
@@ -275,42 +275,4 @@ final class LiveActivityManager {
         )
     }
 
-    /// Scheduled time per station (arrival else departure); skipped stations carry the previous time.
-    private static func stationTimes(for journey: Journey) -> [Date] {
-        let timetable = journey.journeyTimetable
-        var times: [Date] = []
-        var last: Date?
-        for station in journey.journeyStations {
-            if let entry = timetable.first(where: { $0.stationId == station.id }),
-               let secs = entry.arrivalSeconds() ?? entry.departureSeconds() {
-                last = dateFromRailSeconds(secs)
-            }
-            times.append(last ?? Date())
-        }
-        return times
-    }
-
-    /// Scheduled departure and arrival dates from the journey's timetable.
-    private static func scheduledTimes(for journey: Journey) -> (departure: Date?, arrival: Date?) {
-        let timetable = journey.journeyTimetable
-        let depSec = timetable.first.flatMap { $0.departureSeconds() ?? $0.arrivalSeconds() }
-        let arrSec = timetable.last.flatMap { $0.arrivalSeconds() ?? $0.departureSeconds() }
-        return (depSec.map(dateFromRailSeconds), arrSec.map(dateFromRailSeconds))
-    }
-
-    private static func dateFromRailSeconds(_ seconds: Int) -> Date {
-        var cal = Calendar(identifier: .gregorian)
-        cal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
-        var comps = cal.dateComponents([.year, .month, .day], from: Date())
-        comps.hour = seconds / 3600
-        comps.minute = (seconds % 3600) / 60
-        comps.second = seconds % 60
-        if comps.hour! >= 24 {
-            comps.hour! -= 24
-            if let d = cal.date(from: comps) {
-                return cal.date(byAdding: .day, value: 1, to: d) ?? d
-            }
-        }
-        return cal.date(from: comps) ?? Date()
-    }
 }

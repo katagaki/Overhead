@@ -10,15 +10,6 @@ struct HankyuLCDView: View {
     let lineColor: Color
     let orientation: TrainLCDOrientation
 
-    private var displayColor: Color {
-        guard let hex = LineColors.lcdOverrides[firstLegId] else { return lineColor }
-        return Color(hex: hex)
-    }
-
-    private var firstLegId: String {
-        journey.line.id.split(separator: "+").first.map(String.init) ?? journey.line.id
-    }
-
     private static let designWidth: CGFloat = 360
     private static let designHeight: CGFloat = 110
     private static let headerHeight: CGFloat = 22
@@ -30,7 +21,7 @@ struct HankyuLCDView: View {
     private static let markerRed = Color(hex: "#E60012")
 
     private var mapBackground: some View {
-        Color.white.overlay(displayColor.opacity(0.14))
+        Color.white.overlay(lineColor.opacity(0.14))
     }
 
     var body: some View {
@@ -132,11 +123,11 @@ struct HankyuLCDView: View {
 
     private var headerBackground: some View {
         ZStack {
-            displayColor
+            lineColor
             DiagonalSplitShape(topFraction: 0.516, bottomFraction: 0.566)
-                .fill(displayColor.hsbScaled(saturation: 1, brightness: 0.72))
+                .fill(lineColor.hsbScaled(saturation: 1, brightness: 0.72))
             DiagonalSplitShape(topFraction: 0.52, bottomFraction: 0.57)
-                .fill(displayColor.hsbScaled(saturation: 0.45, brightness: 1.08))
+                .fill(lineColor.hsbScaled(saturation: 0.45, brightness: 1.08))
             LinearGradient(
                 stops: [
                     .init(color: .white.opacity(0.30), location: 0),
@@ -214,7 +205,7 @@ struct HankyuLCDView: View {
 
                 ZStack {
                     Rectangle()
-                        .fill(lineGradient(displayColor))
+                        .fill(lineGradient(lineColor))
                         .frame(width: x1 - x0, height: Self.lineHeight)
                         .position(x: (x0 + x1) / 2, y: y)
                     if let trainPos = model.trainPos {
@@ -255,7 +246,7 @@ struct HankyuLCDView: View {
             .fill(col.isNext ? Self.nextYellow : Color.white)
             .overlay(
                 Circle().stroke(
-                    col.isPassed ? Self.passedGray : displayColor,
+                    col.isPassed ? Self.passedGray : lineColor,
                     lineWidth: 1
                 )
             )

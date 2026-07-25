@@ -12,13 +12,6 @@ struct MetroLCDView: View {
     let lineColor: Color
     let orientation: TrainLCDOrientation
 
-    private var displayColor: Color {
-        let firstLegId = journey.line.id.split(separator: "+").first.map(String.init)
-            ?? journey.line.id
-        guard let hex = LineColors.lcdOverrides[firstLegId] else { return lineColor }
-        return Color(hex: hex)
-    }
-
     private static let designWidth: CGFloat = 360
     private static let designHeight: CGFloat = designWidth * 9 / 16
     private static let destStripHeight: CGFloat = 25
@@ -104,7 +97,7 @@ struct MetroLCDView: View {
             .minimumScaleFactor(0.5)
             .modifier(MetroSkewEffect(shear: 0.22))
             .frame(width: 66, height: 19)
-            .metalBandGradient(displayColor)
+            .metalBandGradient(lineColor)
             .clipShape(RoundedRectangle(cornerRadius: 2))
     }
 
@@ -187,7 +180,7 @@ struct MetroLCDView: View {
         .clipped()
         .overlay(alignment: .bottom) {
             Rectangle()
-                .fill(displayColor)
+                .fill(lineColor)
                 .frame(height: 2.5)
         }
     }
@@ -241,7 +234,7 @@ struct MetroLCDView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .frame(height: Self.bandHeight)
-            .metalBandGradient(displayColor)
+            .metalBandGradient(lineColor)
             .compositingGroup()
             .shadow(color: .black.opacity(0.4), radius: 0.8, x: 0, y: 1)
             .overlay(alignment: mirrored ? .bottomLeading : .bottomTrailing) {
