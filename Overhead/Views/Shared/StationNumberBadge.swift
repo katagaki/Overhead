@@ -74,6 +74,23 @@ struct StationNumberBadge: View {
         }
     }
 
+    /// Plate corner radius as a fraction of the badge side, per style.
+    private static let roundedRatio: CGFloat = 6 / 28
+    private static let sharpRatio: CGFloat = 2 / 28
+    private static let filledRatio: CGFloat = 0.25
+
+    /// For callers drawing their own ring around the plate — an outline at the
+    /// wrong radius reads as a second, mismatched badge.
+    static func cornerRadiusRatio(code: String, color: Color, styleOverride: BadgeStyle? = nil) -> CGFloat {
+        if rendersAsCircle(code: code, color: color, styleOverride: styleOverride) { return 0.5 }
+        switch styleOverride {
+        case .rounded: return roundedRatio
+        case .square: return sharpRatio
+        case .filled: return filledRatio
+        default: return roundedRatio
+        }
+    }
+
     /// Mirrors `body`'s dispatch; `color` disambiguates the shared "G" prefix.
     static func rendersAsCircle(code: String, color: Color, styleOverride: BadgeStyle? = nil) -> Bool {
         if let styleOverride { return styleOverride == .ring }

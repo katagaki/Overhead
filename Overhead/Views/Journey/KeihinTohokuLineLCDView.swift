@@ -309,7 +309,8 @@ struct KeihinTohokuLineLCDView: View {
         VStack(alignment: .leading, spacing: 1) {
             ForEach(lines) { line in
                 LCDTransferLineName(name: line.name, fontSize: 6.5,
-                                    symbol: line.lineSymbol, badgeColor: line.color)
+                                    symbol: line.lineSymbol, badgeColor: line.color,
+                                    badgeStyle: line.badgeStyle)
             }
         }
         .padding(.horizontal, 1)

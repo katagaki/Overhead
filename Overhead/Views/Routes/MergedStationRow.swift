@@ -62,12 +62,14 @@ struct MergedStationRow: View {
                 code: hit.station.stationCode,
                 color: hit.line.color,
                 size: .compact,
-                stationName: hit.station.name
+                stationName: hit.station.name,
+                styleOverride: hit.line.badgeStyle
             )
         } else if !hit.line.lineSymbol.isEmpty {
             LineSymbolBadge(
                 symbol: hit.line.lineSymbol,
-                color: hit.line.color
+                color: hit.line.color,
+                styleOverride: hit.line.badgeStyle
             )
         } else {
             RoundedRectangle(cornerRadius: 3)

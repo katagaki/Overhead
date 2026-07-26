@@ -132,7 +132,8 @@ struct LinesSection: View {
                 LineSymbolBadge(
                     symbol: line.lineSymbol,
                     color: line.color,
-                    dimension: 44
+                    dimension: 44,
+                    styleOverride: line.badgeStyle
                 )
             } else {
                 RoundedRectangle(cornerRadius: 7)

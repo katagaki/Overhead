@@ -79,9 +79,14 @@ struct TrainLCDView: View {
                 if let station = headlineStation {
                     HStack(spacing: 8) {
                         if !station.stationCode.isEmpty {
+                            let ratio = StationNumberBadge.cornerRadiusRatio(
+                                code: station.stationCode,
+                                color: stationColor(station),
+                                styleOverride: journey.line.badgeStyle
+                            )
                             scaledStationBadge(station, dimension: 26)
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 26 * 0.21 + 1.5)
+                                    RoundedRectangle(cornerRadius: 26 * ratio + 1.5)
                                         .strokeBorder(Color.black, lineWidth: 1.5)
                                         .padding(-1.5)
                                 )
@@ -366,7 +371,8 @@ struct TrainLCDView: View {
         VStack(alignment: .leading, spacing: 1) {
             ForEach(lines) { line in
                 LCDTransferLineName(name: line.name, fontSize: 6.5,
-                                    symbol: line.lineSymbol, badgeColor: line.color)
+                                    symbol: line.lineSymbol, badgeColor: line.color,
+                                    badgeStyle: line.badgeStyle)
             }
         }
         .padding(.horizontal, 1)

@@ -230,12 +230,14 @@ struct StationPickerView: View {
                     code: station.stationCode,
                     color: line.color,
                     size: .compact,
-                    stationName: station.name
+                    stationName: station.name,
+                    styleOverride: line.badgeStyle
                 )
             } else if !line.lineSymbol.isEmpty {
                 LineSymbolBadge(
                     symbol: line.lineSymbol,
-                    color: line.color
+                    color: line.color,
+                    styleOverride: line.badgeStyle
                 )
             }
 

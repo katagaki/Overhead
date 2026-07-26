@@ -154,7 +154,8 @@ struct ReplanSheet: View {
                                     code: candidate.station.stationCode,
                                     color: viewModel.currentLineColor,
                                     size: .regular,
-                                    stationName: candidate.station.name
+                                    stationName: candidate.station.name,
+                                    styleOverride: viewModel.activeJourney?.line.badgeStyle
                                 )
                             }
                             VStack(alignment: .leading, spacing: 1) {

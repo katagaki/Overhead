@@ -393,7 +393,8 @@ struct LoopLCDView: View {
 
                     ForEach(lines) { line in
                         HStack(spacing: 4) {
-                            LineSymbolBadge(symbol: line.lineSymbol, color: line.color, dimension: 9)
+                            LineSymbolBadge(symbol: line.lineSymbol, color: line.color, dimension: 9,
+                                            styleOverride: line.badgeStyle)
                             Text(line.name)
                                 .font(LCDFont.gothic(size: 7, weight: .bold))
                                 .lineLimit(1)

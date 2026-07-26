@@ -165,9 +165,11 @@ struct FavoritesSection: View {
                     await start(place, resolved: resolved)
                 }
             } label: {
-                Image(systemName: "play.circle.fill")
-                    .font(.system(size: 30))
-                    .foregroundColor(resolved.line.color)
+                Image(systemName: "play.fill")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(width: 30, height: 30)
+                    .background(resolved.line.color, in: Circle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Button.StartJourney")
