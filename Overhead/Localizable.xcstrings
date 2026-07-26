@@ -4862,31 +4862,31 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Where will you get off?"
+            "value" : "Alighting Station"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "どの駅で降りますか"
+            "value" : "降車駅"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "어느 역에서 내리시나요?"
+            "value" : "하차역"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在哪一站下车？"
+            "value" : "下车站"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在哪一站下車？"
+            "value" : "下車站"
           }
         }
       }
@@ -5037,31 +5037,31 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Destination"
+            "value" : "Change Destination"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "行き先"
+            "value" : "行き先を変更"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "목적지"
+            "value" : "목적지 변경"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "目的地"
+            "value" : "更改目的地"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "目的地"
+            "value" : "更改目的地"
           }
         }
       }
@@ -5072,31 +5072,31 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Another Train"
+            "value" : "Board Next Train"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "別の電車"
+            "value" : "次の電車に乗車"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "다른 열차"
+            "value" : "다음 열차 탑승"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "其他列车"
+            "value" : "乘坐下一班列车"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "其他列車"
+            "value" : "搭乘下一班列車"
           }
         }
       }
