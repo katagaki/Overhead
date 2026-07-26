@@ -18,6 +18,8 @@ struct TrainLCDView: View {
     private static let passedOpacity: CGFloat = 0.4
     private static let passedBandGray = Color(hex: "#8E9196")
     private static let languageFlipSeconds = 4.0
+    /// Header HStack spacing plus the car column's slack left of its white box.
+    private static let nameOverhang: CGFloat = 10 + (56 - 18) - 4
 
     private static let allLines = StaticTrainData.trainLines()
     private static let clockFormatter: DateFormatter = {
@@ -86,19 +88,21 @@ struct TrainLCDView: View {
                         }
                         Group {
                             if english {
-                                // Offset, not padding: the badge must not move.
+                                // Descenders otherwise sit on the panel edge.
                                 FillingLatinName(name: station.nameEn, baseSize: 34,
                                                  weight: .semibold)
-                                    .offset(y: 3)
+                                    .padding(.bottom, 6)
+                                    .offset(y: 1)
                             } else {
+                                let kerning = Self.nameKerning(station.name)
                                 HorizontallySquashed {
                                     Text(station.name)
                                         .font(LCDFont.gothic(size: 34, weight: .bold))
                                         .foregroundColor(.white)
-                                        .kerning(5.0)
+                                        .kerning(kerning)
                                         // Kerning also trails the last glyph;
                                         // balance it or the name reads left-shifted.
-                                        .padding(.leading, 5.0)
+                                        .padding(.leading, kerning)
                                         .lineLimit(1)
                                 }
                             }
@@ -107,6 +111,9 @@ struct TrainLCDView: View {
                         .frame(height: 44)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    // Reach under the car column, stopping short of the 号車 box.
+                    // Shared by both scripts so the name doesn't shift on flip.
+                    .padding(.trailing, -Self.nameOverhang)
                 }
             }
             .padding(.top, 2)
@@ -485,6 +492,11 @@ struct TrainLCDView: View {
             if char.isUppercase && !result.isEmpty { result.append(" ") }
             result.append(char)
         }
+    }
+
+    /// Two-glyph names read cramped at headline size; spread them out.
+    private static func nameKerning(_ name: String) -> CGFloat {
+        name.count == 2 ? 14 : 5
     }
 
     private var typeKerning: CGFloat {
