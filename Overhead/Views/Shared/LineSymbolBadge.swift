@@ -71,7 +71,7 @@ struct LineSymbolBadge: View {
                 .background(Color.white, in: RoundedRectangle(cornerRadius: 2 * f))
                 .overlay(
                     RoundedRectangle(cornerRadius: 2 * f)
-                        .strokeBorder(color, lineWidth: 2 * f)
+                        .strokeBorder(color, lineWidth: 3.5 * f)
                 )
         }
     }

@@ -148,36 +148,44 @@ struct ReplanSheet: View {
                     Button {
                         anchorIndex = candidate.stationIndex
                     } label: {
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(candidate.station.localizedName)
-                                .font(.system(size: 15, weight: .bold))
-                                .lineLimit(1)
-                            Group {
-                                if candidate.stationIndex == anchors.first?.stationIndex {
-                                    Text("Replan.NextStop")
-                                } else {
-                                    Text(verbatim: timeString(candidate.time))
-                                }
+                        HStack(spacing: 8) {
+                            if !candidate.station.stationCode.isEmpty {
+                                StationNumberBadge(
+                                    code: candidate.station.stationCode,
+                                    color: viewModel.currentLineColor,
+                                    size: .regular,
+                                    stationName: candidate.station.name
+                                )
                             }
-                            .font(.system(size: 11, weight: .semibold))
-                            .foregroundStyle(isSelected ? .primary : .secondary)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(candidate.station.localizedName)
+                                    .font(.system(size: 15, weight: .bold))
+                                    .lineLimit(1)
+                                Group {
+                                    if candidate.stationIndex == anchors.first?.stationIndex {
+                                        Text("Replan.NextStop")
+                                    } else {
+                                        Text(verbatim: timeString(candidate.time))
+                                    }
+                                }
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(isSelected ? .white.opacity(0.8) : .secondary)
+                            }
                         }
+                        .foregroundStyle(isSelected ? Color.white : Color.primary)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
-                        .background(isSelected ? Color.accentColor.opacity(0.18) : Color(.tertiarySystemFill))
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 10)
-                                .strokeBorder(isSelected ? Color.accentColor : .clear, lineWidth: 1.5)
-                        }
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .background(isSelected ? Color.accentColor : Color(.tertiarySystemFill))
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                 }
             }
-            .padding(.vertical, 2)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
         }
-        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+        .listRowInsets(EdgeInsets())
     }
 
     // MARK: - Alternative Trains

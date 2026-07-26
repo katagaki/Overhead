@@ -192,6 +192,42 @@ struct StationNumberBadge: View {
         .background(color.opacity(opacity), in: Circle())
     }
 
+    // MARK: - Code stack
+
+    /// Prefix over number. A blank prefix (custom lines with no symbol) collapses
+    /// to one centered number — the empty row otherwise sinks it and fills the plate.
+    @ViewBuilder
+    private func codeStack(
+        prefix: String, number: String, font: String,
+        prefixSize: CGFloat, numberSize: CGFloat, soloSize: CGFloat,
+        prefixHeight: CGFloat, numberHeight: CGFloat,
+        prefixOffset: CGFloat = 0, numberOffset: CGFloat = 0,
+        spacing: CGFloat = 0
+    ) -> some View {
+        if prefix.isEmpty {
+            Text(number)
+                .font(.custom(font, size: soloSize))
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+        } else {
+            VStack(spacing: spacing) {
+                Text(prefix)
+                    .font(.custom(font, size: prefixSize))
+                    .offset(y: prefixOffset)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: prefixHeight)
+
+                Text(number)
+                    .font(.custom(font, size: numberSize))
+                    .offset(y: numberOffset)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: numberHeight)
+            }
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
+        }
+    }
+
     // MARK: - JR East / Tobu: Rounded Square Frame
 
     @ViewBuilder
@@ -201,21 +237,11 @@ struct StationNumberBadge: View {
         let prefixSize = d * 0.58
         let numberSize = d * 0.79
 
-        VStack(spacing: 1) {
-            Text(prefix)
-                .font(.custom("Hind-Bold", size: prefixSize))
-                .offset(y: prefixSize * 0.24)
-                .frame(maxWidth: .infinity)
-                .frame(height: prefixSize * 0.75)
-
-            Text(number)
-                .font(.custom("Hind-Bold", size: numberSize))
-                .offset(y: numberSize * -0.06)
-                .frame(maxWidth: .infinity)
-                .frame(height: numberSize * 0.75)
-        }
-        .lineLimit(1)
-        .minimumScaleFactor(0.6)
+        codeStack(prefix: prefix, number: number, font: "Hind-Bold",
+                  prefixSize: prefixSize, numberSize: numberSize, soloSize: d * 0.72,
+                  prefixHeight: prefixSize * 0.75, numberHeight: numberSize * 0.75,
+                  prefixOffset: prefixSize * 0.24, numberOffset: numberSize * -0.06,
+                  spacing: 1)
         .foregroundColor(textColor.opacity(opacity))
         .frame(width: d, height: d)
         .background(Color.white)
@@ -234,28 +260,20 @@ struct StationNumberBadge: View {
         let prefixSize = d * 0.58
         let numberSize = d * 0.79
 
-        VStack(spacing: 1) {
-            Text(prefix)
-                .font(.custom("Hind-Bold", size: prefixSize))
-                .offset(y: prefixSize * 0.24)
-                .frame(maxWidth: .infinity)
-                .frame(height: prefixSize * 0.75)
-
-            Text(number)
-                .font(.custom("Hind-Bold", size: numberSize))
-                .offset(y: numberSize * -0.06)
-                .frame(maxWidth: .infinity)
-                .frame(height: numberSize * 0.75)
-        }
-        .lineLimit(1)
-        .minimumScaleFactor(0.6)
+        codeStack(prefix: prefix, number: number, font: "Hind-Bold",
+                  prefixSize: prefixSize, numberSize: numberSize, soloSize: d * 0.72,
+                  prefixHeight: prefixSize * 0.75, numberHeight: numberSize * 0.75,
+                  prefixOffset: prefixSize * 0.24, numberOffset: numberSize * -0.06,
+                  spacing: 1)
         .foregroundColor(Color.black.opacity(opacity))
         .frame(width: d, height: d)
         .background(Color.white)
+        // Sharp corners leave more white than the rounded style, so the frame
+        // runs slightly heavier to keep the core the same visual size.
         .clipShape(RoundedRectangle(cornerRadius: 2))
         .overlay(
             RoundedRectangle(cornerRadius: 2)
-                .strokeBorder(color.opacity(opacity), lineWidth: 2)
+                .strokeBorder(color.opacity(opacity), lineWidth: 3.5)
         )
     }
 
@@ -267,21 +285,11 @@ struct StationNumberBadge: View {
         let prefixSize = d * 0.64
         let numberSize = d * 0.76
 
-        VStack(spacing: 1) {
-            Text(prefix)
-                .font(.custom("Hind-Bold", size: prefixSize))
-                .offset(y: prefixSize * 0.24)
-                .frame(maxWidth: .infinity)
-                .frame(height: prefixSize * 0.65)
-
-            Text(number)
-                .font(.custom("Hind-Bold", size: numberSize))
-                .offset(y: numberSize * -0.02)
-                .frame(maxWidth: .infinity)
-                .frame(height: numberSize * 0.75)
-        }
-        .lineLimit(1)
-        .minimumScaleFactor(0.6)
+        codeStack(prefix: prefix, number: number, font: "Hind-Bold",
+                  prefixSize: prefixSize, numberSize: numberSize, soloSize: d * 0.70,
+                  prefixHeight: prefixSize * 0.65, numberHeight: numberSize * 0.75,
+                  prefixOffset: prefixSize * 0.24, numberOffset: numberSize * -0.02,
+                  spacing: 1)
         .foregroundColor(Color.white.opacity(opacity))
         .frame(width: d, height: d)
         .background(color.opacity(opacity), in: RoundedRectangle(cornerRadius: d * 0.25))
@@ -407,19 +415,10 @@ struct StationNumberBadge: View {
     private func circleBadge(prefix: String, number: String) -> some View {
         let d = badgeDimension
 
-        VStack(spacing: 0) {
-            Text(prefix)
-                .font(.custom("Futura-Bold", size: d * 0.38))
-                .frame(height: d * 0.42)
-                .offset(y: 1.10)
-
-            Text(number)
-                .font(.custom("Futura-Bold", size: d * 0.38))
-                .frame(height: d * 0.42)
-                .offset(y: -1.90)
-        }
-        .lineLimit(1)
-        .minimumScaleFactor(0.6)
+        codeStack(prefix: prefix, number: number, font: "Futura-Bold",
+                  prefixSize: d * 0.38, numberSize: d * 0.38, soloSize: d * 0.50,
+                  prefixHeight: d * 0.42, numberHeight: d * 0.42,
+                  prefixOffset: 1.10, numberOffset: -1.90)
         .foregroundColor(Color.black.opacity(opacity))
         .frame(width: d, height: d)
         .background(Color.white)
