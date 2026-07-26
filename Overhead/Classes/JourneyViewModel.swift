@@ -668,9 +668,7 @@ final class JourneyViewModel: ObservableObject {
                     continue
                 }
                 stations.append(station)
-                // An express run has no entry at the stops it skips. Keep the
-                // station on the composite line but contribute no timetable
-                // entry, exactly as a skip-stop service does on its own line.
+                // An express contributes no entry at the stops it skips.
                 guard let entry = entryByStationId[station.id] else { continue }
                 entries.append(TimetableEntry(
                     id: "composite_\(compositeId)_\(entries.count)",
@@ -784,9 +782,7 @@ final class JourneyViewModel: ObservableObject {
 
     // MARK: - Mid-Journey Replanning
 
-    /// A stop the rider can still get off at, with its delay-adjusted scheduled
-    /// time — a departure when used as a boarding point, an arrival when used
-    /// as a destination.
+    /// A stop the rider can still get off at, with its delay-adjusted time.
     struct ReplanAnchor: Identifiable, Equatable {
         let stationIndex: Int
         let station: Station
@@ -795,17 +791,11 @@ final class JourneyViewModel: ObservableObject {
         var id: Int { stationIndex }
     }
 
-    /// A train leaving a platform you're already standing on needs far less
-    /// slack than a planned transfer, which assumes a concourse walk.
+    /// Less slack than a planned transfer — no concourse walk.
     static let sameStationBufferMinutes: Double = 1
 
-    /// Stops the rider can still alight at and carry on from, starting with the
-    /// next one. The final destination is excluded — there is nothing to board
-    /// there and nothing further to shorten.
-    ///
-    /// Stops after an upcoming 乗り換え are excluded too: past that point the ride
-    /// in progress is no longer a single leg, and the transfer itself is the
-    /// useful anchor for changing the second half.
+    /// Stops from the next one up to the next 乗り換え, destination excluded.
+    /// Past a transfer the ride in progress is no longer a single leg.
     var replanAnchors: [ReplanAnchor] {
         guard let journey = activeJourney, journey.hasSchedule,
               let state = positionState, state.status != .arrived
@@ -831,8 +821,7 @@ final class JourneyViewModel: ObservableObject {
         return anchors
     }
 
-    /// Stops already on the itinerary past `anchor`. Picking one only moves the
-    /// alighting station, so it needs no search.
+    /// Stops past `anchor`; picking one only moves the alighting station.
     func onwardStops(from anchor: ReplanAnchor) -> [ReplanAnchor] {
         replanAnchors.filter { $0.stationIndex > anchor.stationIndex }
     }
@@ -855,8 +844,7 @@ final class JourneyViewModel: ObservableObject {
         )
     }
 
-    /// Moves the alighting station to another stop already on this itinerary.
-    /// Same train, so the boarding station and start time carry over.
+    /// Same train, shorter trip — boarding station and start time carry over.
     func changeDestination(to anchor: ReplanAnchor) {
         guard let journey = activeJourney else { return }
         let stations = journey.journeyStations
@@ -884,24 +872,18 @@ final class JourneyViewModel: ObservableObject {
     }
 
     /// Swaps the rest of the itinerary for `onward`, boarded at `anchor`.
-    ///
-    /// The ride in progress is stitched on as a first leg so the journey keeps
-    /// its original boarding station and the change reads as a 乗り換え at the
-    /// anchor. Deliberate, so it skips the planner's overwrite confirmation.
+    /// Skips the overwrite confirmation — the change is deliberate.
     func replan(from anchor: ReplanAnchor, to onward: TrainCandidate) {
         performStartJourney(candidate: stitched(from: anchor, to: onward) ?? onward)
     }
 
-    /// `onward` with the ride in progress prepended as a first leg. Nil when the
-    /// two can't be joined — the caller then boards `onward` on its own.
+    /// `onward` with the ride in progress prepended as a leg; nil if they can't join.
     func stitched(from anchor: ReplanAnchor, to onward: TrainCandidate) -> TrainCandidate? {
         guard let head = rideInProgressLeg(upTo: anchor) else { return nil }
         return compositeCandidate(legs: [head] + onward.legs)
     }
 
-    /// The portion of the active journey from its boarding station to `anchor`,
-    /// as a single leg on the journey's (possibly composite) line.
-    /// Nil when the rider hasn't left the boarding station yet.
+    /// Boarding station → `anchor` as one leg; nil at the boarding station.
     private func rideInProgressLeg(upTo anchor: ReplanAnchor) -> CandidateLeg? {
         guard let journey = activeJourney,
               let boarding = journey.journeyStations.first,
@@ -925,9 +907,8 @@ final class JourneyViewModel: ObservableObject {
         )
     }
 
-    /// Replaces the active journey and every side effect hanging off it.
-    /// The station list lives in the Live Activity's immutable attributes, so a
-    /// changed route means ending and restarting it rather than an update.
+    /// Replaces the active journey and everything hanging off it. The Live
+    /// Activity's station list is immutable, so it restarts rather than updates.
     private func install(
         journey: Journey,
         line: TrainLine,
@@ -1062,6 +1043,7 @@ final class JourneyViewModel: ObservableObject {
         selectedLine = staticLine.trainLine
         positionState = best.state
     }
+
 #endif
 
     // MARK: - Overwrite Confirmation

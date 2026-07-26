@@ -3,12 +3,12 @@ import Backbone
 
 // MARK: - Replan Sheet
 
-/// Mid-journey course change: pick a stop you can still get off at, then either
-/// board a different train toward the same destination or alight somewhere else.
+/// Mid-journey course change: pick a stop you can still get off at, then take a
+/// different train or a different destination from there.
 struct ReplanSheet: View {
     @ObservedObject var viewModel: JourneyViewModel
-    /// Preselected when opened from a station row rather than the toolbar.
-    var initialAnchor: JourneyViewModel.ReplanAnchor?
+    /// Stop the rider tapped on the route strip; falls back to the next one.
+    var initialAnchorIndex: Int?
     var initialMode: Mode = .train
 
     @AppStorage("journey.walkingSpeed") private var walkingSpeedRaw = WalkingSpeed.normal.rawValue
@@ -21,7 +21,7 @@ struct ReplanSheet: View {
     @State private var selection: Selection?
     @State private var searchingStation = false
     /// Set when the destination tab searched for a station off the current route.
-    @State private var offRouteDestination: String?
+    @State private var offRouteDestination: Station?
 
     enum Mode: Hashable {
         case train
@@ -44,9 +44,12 @@ struct ReplanSheet: View {
         WalkingSpeed(rawValue: walkingSpeedRaw) ?? .normal
     }
 
-    private var destinationName: String? {
-        viewModel.activeJourney?.journeyStations.last?.name
+    private var destination: Station? {
+        viewModel.activeJourney?.journeyStations.last
     }
+
+    /// Searches match on the Japanese name; only the label is localized.
+    private var destinationName: String? { destination?.name }
 
     /// The arrival the change is measured against.
     private var currentArrival: Date? {
@@ -77,7 +80,7 @@ struct ReplanSheet: View {
                     mergesStations: true
                 ) { hit in
                     searchingStation = false
-                    offRouteDestination = hit.station.name
+                    offRouteDestination = hit.station
                     selection = nil
                     search(destination: hit.station.name)
                 }
@@ -86,7 +89,7 @@ struct ReplanSheet: View {
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
         .onAppear {
-            anchorIndex = initialAnchor?.stationIndex ?? anchors.first?.stationIndex
+            anchorIndex = initialAnchorIndex ?? anchors.first?.stationIndex
             mode = initialMode
             searchIfNeeded()
         }
@@ -119,8 +122,8 @@ struct ReplanSheet: View {
         }
         .listStyle(.insetGrouped)
         .safeAreaInset(edge: .bottom) {
-            if let summary = confirmSummary {
-                confirmBar(summary)
+            if let applyAction {
+                confirmBar(applyAction)
             }
         }
         .onChange(of: mode) { _, _ in
@@ -199,8 +202,8 @@ struct ReplanSheet: View {
                 }
             }
         } header: {
-            if let anchor, let destinationName {
-                Text("Replan.Trains.Header \(anchor.station.localizedName) \(destinationName)")
+            if let anchor, let destination {
+                Text("Replan.Trains.Header \(anchor.station.localizedName) \(destination.localizedName)")
             }
         }
     }
@@ -212,35 +215,39 @@ struct ReplanSheet: View {
             selection = .candidate(candidate.id)
         } label: {
             HStack(spacing: 10) {
-                if let leg = candidate.legs.first {
-                    Text(leg.service.trainType.displayNameJa)
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 3)
-                        .background(leg.line.color)
-                        .clipShape(RoundedRectangle(cornerRadius: 4))
-                }
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("\(displayTime(candidate.departureTime)) → \(displayTime(candidate.arrivalTime))")
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                    HStack(spacing: 6) {
-                        Text("Candidate.Duration \(candidate.durationMinutes)")
-                        if candidate.transferCount > 0 {
-                            Text("Candidate.Transfers \(candidate.transferCount)")
-                        }
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 8) {
+                        Text("\(displayTime(candidate.departureTime)) → \(displayTime(candidate.arrivalTime))")
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                        deltaPill(for: candidate.arrivalDate())
                     }
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
+
+                    HStack(spacing: 6) {
+                        if let leg = candidate.legs.first {
+                            Text(leg.service.trainType.displayNameJa)
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(leg.line.color)
+                                .clipShape(RoundedRectangle(cornerRadius: 4))
+                        }
+                        Group {
+                            Text("Candidate.Duration \(candidate.durationMinutes)")
+                            if candidate.transferCount > 0 {
+                                Text("Candidate.Transfers \(candidate.transferCount)")
+                            }
+                        }
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                    }
                 }
 
                 Spacer(minLength: 4)
 
-                deltaLabel(for: candidate.arrivalDate())
-
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 24))
                         .foregroundStyle(Color.accentColor)
                 }
             }
@@ -284,7 +291,7 @@ struct ReplanSheet: View {
                                 .foregroundStyle(.secondary)
                         }
                     } else if candidates.isEmpty {
-                        Text("Replan.NoRoute \(offRouteDestination)")
+                        Text("Replan.NoRoute \(offRouteDestination.localizedName)")
                             .font(.system(size: 13))
                             .foregroundStyle(.secondary)
                     } else {
@@ -295,7 +302,7 @@ struct ReplanSheet: View {
                 }
             } header: {
                 if let offRouteDestination {
-                    Text(verbatim: offRouteDestination)
+                    Text(verbatim: offRouteDestination.localizedName)
                 }
             }
         }
@@ -308,9 +315,12 @@ struct ReplanSheet: View {
             selection = .stop(stop.stationIndex)
         } label: {
             HStack(spacing: 10) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(stop.station.localizedName)
-                        .font(.system(size: 16, weight: .semibold))
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 8) {
+                        Text(stop.station.localizedName)
+                            .font(.system(size: 16, weight: .semibold))
+                        deltaPill(for: stop.time)
+                    }
                     Text(verbatim: timeString(stop.time))
                         .font(.system(size: 11, design: .rounded))
                         .foregroundStyle(.secondary)
@@ -318,10 +328,9 @@ struct ReplanSheet: View {
 
                 Spacer(minLength: 4)
 
-                deltaLabel(for: stop.time)
-
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 24))
                         .foregroundStyle(Color.accentColor)
                 }
             }
@@ -332,71 +341,35 @@ struct ReplanSheet: View {
 
     // MARK: - Confirm Bar
 
-    private struct ConfirmSummary {
-        let newArrival: Date
-        let deltaMinutes: Int
-        let apply: () -> Void
-    }
-
-    private var confirmSummary: ConfirmSummary? {
+    /// Nil until something is picked; the row already shows its time and delta.
+    private var applyAction: (() -> Void)? {
         guard let anchor, let selection else { return nil }
         switch selection {
         case .candidate(let id):
             guard let candidate = candidates.first(where: { $0.id == id }) else { return nil }
-            let arrival = candidate.arrivalDate()
-            return ConfirmSummary(
-                newArrival: arrival,
-                deltaMinutes: deltaMinutes(to: arrival)
-            ) {
-                viewModel.replan(from: anchor, to: candidate)
-            }
+            return { viewModel.replan(from: anchor, to: candidate) }
         case .stop(let index):
             guard let stop = viewModel.onwardStops(from: anchor).first(where: { $0.stationIndex == index })
             else { return nil }
-            return ConfirmSummary(
-                newArrival: stop.time,
-                deltaMinutes: deltaMinutes(to: stop.time)
-            ) {
-                viewModel.changeDestination(to: stop)
-            }
+            return { viewModel.changeDestination(to: stop) }
         }
     }
 
     @ViewBuilder
-    private func confirmBar(_ summary: ConfirmSummary) -> some View {
-        VStack(spacing: 10) {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                if let currentArrival {
-                    Text(verbatim: timeString(currentArrival))
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundStyle(.secondary)
-                        .strikethrough()
-                }
-                Text(verbatim: timeString(summary.newArrival))
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-
-                Spacer()
-
-                Text(deltaText(summary.deltaMinutes))
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(deltaColor(summary.deltaMinutes))
-            }
-
-            Button {
-                summary.apply()
-                dismiss()
-            } label: {
-                Text("Replan.Apply")
-                    .font(.system(size: 16, weight: .bold))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 4)
-            }
-            .buttonStyle(.borderedProminent)
+    private func confirmBar(_ apply: @escaping () -> Void) -> some View {
+        Button {
+            apply()
+            dismiss()
+        } label: {
+            Text("Replan.Apply")
+                .font(.system(size: 16, weight: .bold))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
         }
+        .buttonStyle(.glassProminent)
+        .buttonBorderShape(.capsule)
         .padding(.horizontal, 20)
-        .padding(.top, 12)
         .padding(.bottom, 8)
-        .background(.bar)
     }
 
     // MARK: - Empty State
@@ -419,7 +392,7 @@ struct ReplanSheet: View {
             search(destination: destinationName)
         case .destination:
             if let offRouteDestination {
-                search(destination: offRouteDestination)
+                search(destination: offRouteDestination.name)
             } else {
                 candidates = []
             }
@@ -429,8 +402,7 @@ struct ReplanSheet: View {
     private func search(destination: String) {
         guard let anchor else { return }
         isSearching = true
-        // The search is synchronous and main-actor bound; yielding first lets the
-        // spinner land before it blocks.
+        // Sync and main-actor bound; yield so the spinner lands first.
         Task {
             await Task.yield()
             candidates = viewModel.replanCandidates(
@@ -450,15 +422,22 @@ struct ReplanSheet: View {
     }
 
     @ViewBuilder
-    private func deltaLabel(for arrival: Date) -> some View {
+    private func deltaPill(for arrival: Date) -> some View {
         let delta = deltaMinutes(to: arrival)
-        Text(deltaText(delta))
-            .font(.system(size: 14, weight: .bold, design: .rounded))
-            .foregroundStyle(deltaColor(delta))
-    }
-
-    private func deltaText(_ minutes: Int) -> String {
-        minutes == 0 ? "±0" : (minutes > 0 ? "+\(minutes)" : "\(minutes)")
+        Group {
+            if delta > 0 {
+                Text("Replan.Delta.Later \(delta)")
+            } else if delta < 0 {
+                Text("Replan.Delta.Earlier \(-delta)")
+            } else {
+                Text("Replan.Delta.Same")
+            }
+        }
+        .font(.system(size: 11, weight: .bold, design: .rounded))
+        .foregroundStyle(deltaColor(delta))
+        .padding(.horizontal, 7)
+        .padding(.vertical, 2)
+        .background(deltaColor(delta).opacity(0.15), in: Capsule())
     }
 
     private func deltaColor(_ minutes: Int) -> Color {

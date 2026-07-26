@@ -4885,7 +4885,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "変更する"
+            "value": "変更"
           }
         },
         "en": {
@@ -4914,37 +4914,107 @@
         }
       }
     },
-    "Replan.Button": {
+    "Replan.Delta.Earlier %lld": {
       "extractionState": "manual",
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "経路変更"
+            "value": "−%lld分"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Change"
+            "value": "−%lld min"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "경로 변경"
+            "value": "−%lld분"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "更改路线"
+            "value": "−%lld分钟"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "更改路線"
+            "value": "−%lld分鐘"
+          }
+        }
+      }
+    },
+    "Replan.Delta.Later %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld分"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld min"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld분"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld分钟"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld分鐘"
+          }
+        }
+      }
+    },
+    "Replan.Delta.Same": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "±0分"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "±0 min"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "±0분"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "±0分钟"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "±0分鐘"
           }
         }
       }
@@ -5260,6 +5330,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "搜尋中…"
+          }
+        }
+      }
+    },
+    "Replan.Station.Hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この駅から別の電車を選ぶ"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose another train from this station"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 역에서 다른 열차 선택"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从该站选择其他列车"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "從該站選擇其他列車"
           }
         }
       }

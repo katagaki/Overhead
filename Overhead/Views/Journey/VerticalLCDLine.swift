@@ -19,6 +19,9 @@ struct VerticalLCDLine: View {
     let journey: Journey
     let state: TrainPositionState
     let lineColor: Color
+    /// Stops the rider can still act on; these rows become tappable.
+    var selectableIndices: Set<Int> = []
+    var onSelectStation: ((Int) -> Void)?
 
     private let stationSpacing: CGFloat = 72
     private let trackWidth: CGFloat = 3
@@ -57,8 +60,9 @@ struct VerticalLCDLine: View {
                 let rowColor = stationColor(station)
                 // Track below a row runs toward the NEXT station, so it takes that station's color.
                 let segColor = index < stations.count - 1 ? stationColor(stations[index + 1]) : rowColor
+                let isSelectable = selectableIndices.contains(index)
 
-                HStack(alignment: .top, spacing: 0) {
+                let row = HStack(alignment: .top, spacing: 0) {
                     timeColumn(for: station, timetable: timetable, isPast: isPast, isCurrent: isCurrent,
                                preferArrival: isTransfer)
                         // Same height as the marker so the time centers on the dot.
@@ -85,6 +89,13 @@ struct VerticalLCDLine: View {
                     .padding(.bottom, isLast ? 0 : 14)
 
                     Spacer()
+
+                    if isSelectable {
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(.tertiary)
+                            .frame(height: markerHeight)
+                    }
                 }
                 .frame(minHeight: isLast ? 0 : stationSpacing, alignment: .top)
                 .background(alignment: .topLeading) {
@@ -108,7 +119,20 @@ struct VerticalLCDLine: View {
                             .padding(.top, stationSpacing / 2)
                     }
                 }
-                .id("station_\(index)")
+
+                if isSelectable {
+                    Button {
+                        onSelectStation?(index)
+                    } label: {
+                        row.contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityHint("Replan.Station.Hint")
+                    .id("station_\(index)")
+                } else {
+                    row
+                        .id("station_\(index)")
+                }
 
                 // Boarding point after the transfer: own dot and departure time
                 if let target {

@@ -37,28 +37,39 @@ final class JourneyNotificationManager: NSObject, UNUserNotificationCenterDelega
     /// Replaces any pending alerts with ones for this journey.
     /// `transferLines` maps a transfer station's ID to the line boarded there.
     func schedule(journey: Journey, transferLines: [String: TrainLine] = [:]) {
-        cancelAll()
-        guard isEnabled, journey.hasSchedule else { return }
-
-        let stations = journey.journeyStations
-        let times = journey.scheduledStationTimes
-        guard stations.count > 1, stations.count == times.count else { return }
-
-        let planned = requests(stations: stations, times: times, journey: journey, transferLines: transferLines)
+        let planned = plannedRequests(journey: journey, transferLines: transferLines)
+        // Ordered: identifiers are reused, so a late cancel would drop the new alerts.
         Task {
-            guard await requestAuthorization() else { return }
+            await cancelPending()
+            guard !planned.isEmpty, await requestAuthorization() else { return }
             for request in planned {
                 try? await center.add(request)
             }
         }
     }
 
+    /// Empty when alerts are off or the journey has no usable schedule.
+    private func plannedRequests(
+        journey: Journey,
+        transferLines: [String: TrainLine]
+    ) -> [UNNotificationRequest] {
+        guard isEnabled, journey.hasSchedule else { return [] }
+        let stations = journey.journeyStations
+        let times = journey.scheduledStationTimes
+        guard stations.count > 1, stations.count == times.count else { return [] }
+        return requests(stations: stations, times: times, journey: journey, transferLines: transferLines)
+    }
+
+    /// Awaits the pending list so the removal can't act on a stale snapshot.
+    private func cancelPending() async {
+        let pending = await center.pendingNotificationRequests()
+        let ids = pending.map(\.identifier).filter { $0.hasPrefix(Self.identifierPrefix) }
+        guard !ids.isEmpty else { return }
+        center.removePendingNotificationRequests(withIdentifiers: ids)
+    }
+
     func cancelAll() {
-        center.getPendingNotificationRequests { requests in
-            let ids = requests.map(\.identifier).filter { $0.hasPrefix(Self.identifierPrefix) }
-            guard !ids.isEmpty else { return }
-            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ids)
-        }
+        Task { await cancelPending() }
     }
 
     private func requests(

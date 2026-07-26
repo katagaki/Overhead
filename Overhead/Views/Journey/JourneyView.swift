@@ -8,7 +8,13 @@ struct JourneyView: View {
     @AppStorage(TrainLCDStyle.storageKey) private var lcdStyleRaw = TrainLCDStyle.joban.rawValue
     @AppStorage(TrainLCDOrientation.storageKey) private var lcdOrientationRaw = TrainLCDOrientation.left.rawValue
 
-    @State private var showingReplan = false
+    /// Carried with the presentation; `isPresented` would read a stale index.
+    @State private var replanTarget: ReplanTarget?
+
+    private struct ReplanTarget: Identifiable {
+        let stationIndex: Int
+        var id: Int { stationIndex }
+    }
 
     private var lineColor: Color {
         viewModel.currentLineColor
@@ -32,7 +38,11 @@ struct JourneyView: View {
                             VerticalLCDLine(
                                 journey: journey,
                                 state: state,
-                                lineColor: lineColor
+                                lineColor: lineColor,
+                                selectableIndices: Set(viewModel.replanAnchors.map(\.stationIndex)),
+                                onSelectStation: { index in
+                                    replanTarget = ReplanTarget(stationIndex: index)
+                                }
                             )
                             .padding(.horizontal, 24)
 
@@ -58,15 +68,11 @@ struct JourneyView: View {
                         .padding(.bottom, 8)
                     }
                     .safeAreaInset(edge: .bottom) {
-                        HStack(spacing: 10) {
+                        Group {
                             if viewModel.trackingMode == .manual {
                                 manualStationControl(journey: journey, state: state)
                             } else {
                                 trackingModeCapsule
-                            }
-
-                            if !viewModel.replanAnchors.isEmpty {
-                                replanButton
                             }
                         }
                         .padding(.vertical, 8)
@@ -85,8 +91,8 @@ struct JourneyView: View {
                 emptyState
             }
         }
-        .sheet(isPresented: $showingReplan) {
-            ReplanSheet(viewModel: viewModel)
+        .sheet(item: $replanTarget) { target in
+            ReplanSheet(viewModel: viewModel, initialAnchorIndex: target.stationIndex)
         }
     }
 
@@ -142,28 +148,6 @@ struct JourneyView: View {
                 .padding(.horizontal, 24)
             }
         }
-    }
-
-    // MARK: - Replan Button (bottom safe area)
-
-    /// Opens the mid-journey course-change sheet.
-    @ViewBuilder
-    private var replanButton: some View {
-        Button {
-            showingReplan = true
-        } label: {
-            HStack(spacing: 7) {
-                Image(systemName: "arrow.triangle.branch")
-                    .font(.system(size: 12, weight: .semibold))
-                Text("Replan.Button")
-                    .font(.system(size: 13, weight: .bold))
-            }
-            .foregroundColor(.primary)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .glassEffect(.regular.interactive())
-        }
-        .buttonStyle(.plain)
     }
 
     // MARK: - Tracking Mode Capsule (bottom safe area)
