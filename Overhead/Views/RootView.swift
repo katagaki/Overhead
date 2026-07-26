@@ -101,16 +101,6 @@ struct RootView: View {
                         await handleScreenshotURL(url)
                     }
                 }
-                // TEMP notification verification
-                if ProcessInfo.processInfo.arguments.contains("-notifTest") {
-                    let names = ["東京", "自由が丘"]
-                    let found = viewModel.searchTrainCandidates(stationNames: names, departure: Date())
-                    print("[NOTIF] candidates=\(found.count)")
-                    if let pick = found.first(where: { $0.transferCount > 0 }) ?? found.first {
-                        print("[NOTIF] legs=\(pick.legs.map { "\($0.line.name):\($0.fromStation.name)→\($0.toStation.name) \($0.departureTime)-\($0.arrivalTime)" })")
-                        viewModel.startJourney(candidate: pick)
-                    }
-                }
 #endif
             }
         }

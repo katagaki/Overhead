@@ -45,12 +45,6 @@ final class JourneyNotificationManager: NSObject, UNUserNotificationCenterDelega
         guard stations.count > 1, stations.count == times.count else { return }
 
         let planned = requests(stations: stations, times: times, journey: journey, transferLines: transferLines)
-#if DEBUG
-        for p in planned {
-            let secs = (p.trigger as? UNTimeIntervalNotificationTrigger)?.timeInterval ?? -1
-            print("[NOTIF] \(p.identifier) in \(Int(secs))s — \(p.content.title): \(p.content.body)")
-        }
-#endif
         Task {
             guard await requestAuthorization() else { return }
             for request in planned {
