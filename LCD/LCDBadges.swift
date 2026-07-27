@@ -28,6 +28,8 @@ struct LCDLineSymbolBadge: View {
     private static let odakyuSymbols: Set<String> = ["OH", "OE", "OT"]
     // Tsukuba Express (TX) signage uses the same filled-square style as Tokyu.
     private static let tokyuStyleSymbols: Set<String> = ["TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD", "SH", "TX"]
+    // Setagaya's yellow plate carries dark grey letters, not white.
+    private static let tokyuLetterColors: [String: Color] = ["SG": Color(hex: "#595757")]
     private static let seibuSymbols: Set<String> = ["SI", "SS", "SK", "ST", "SW", "SY"]
     private static let keioSymbols: Set<String> = ["KO", "IN"]
     private static let keikyuRingBlue = Color(hex: "#00A7E1")
@@ -60,7 +62,8 @@ struct LCDLineSymbolBadge: View {
         case _ where Self.keioSymbols.contains(symbol):
             circleBadge(ringWidth: 3.0, textColor: color, hind: true)
         case _ where Self.tokyuStyleSymbols.contains(symbol):
-            filledBadge(in: AnyShape(RoundedRectangle(cornerRadius: 6)))
+            filledBadge(in: AnyShape(RoundedRectangle(cornerRadius: 6)),
+                        textColor: Self.tokyuLetterColors[symbol] ?? .white)
         case _ where Self.seibuSymbols.contains(symbol):
             seibuTrainBadge
         case _ where Self.odakyuSymbols.contains(symbol):
@@ -209,8 +212,8 @@ struct LCDLineSymbolBadge: View {
             )
     }
 
-    private func filledBadge(in shape: AnyShape) -> some View {
-        symbolText(color: .white, inset: 3, hind: true)
+    private func filledBadge(in shape: AnyShape, textColor: Color = .white) -> some View {
+        symbolText(color: textColor, inset: 3, hind: true)
             .frame(width: 24, height: 24)
             .background(color, in: shape)
     }
@@ -297,6 +300,8 @@ struct LCDStationNumberBadge: View {
     private static let seibuPrefixes: Set<String> = [
         "SI", "SS", "SK", "ST", "SW", "SY",
     ]
+    // Setagaya's yellow plate carries a dark grey code, not white.
+    private static let filledLetterColors: [String: Color] = ["SG": Color(hex: "#595757")]
     private static let keioPrefixes: Set<String> = ["KO", "IN"]
     private static let keiseiStylePrefixes: Set<String> = ["KS", "HS"]
 
@@ -464,7 +469,7 @@ struct LCDStationNumberBadge: View {
         }
         .lineLimit(1)
         .minimumScaleFactor(0.6)
-        .foregroundColor(.white)
+        .foregroundColor(Self.filledLetterColors[prefix] ?? .white)
         .frame(width: d, height: d)
         .background(color, in: RoundedRectangle(cornerRadius: d * 0.25))
     }

@@ -35,6 +35,8 @@ struct StationNumberBadge: View {
     private static let seibuPrefixes: Set<String> = [
         "SI", "SS", "SK", "ST", "SW", "SY",
     ]
+    // Setagaya's yellow plate carries dark grey code, not white.
+    private static let filledLetterColors: [String: Color] = ["SG": Color(hex: "#595757")]
     private static let keioPrefixes: Set<String> = ["KO", "IN"]
     private static let keiseiStylePrefixes: Set<String> = ["KS", "HS"]
 
@@ -307,7 +309,7 @@ struct StationNumberBadge: View {
                   prefixHeight: prefixSize * 0.65, numberHeight: numberSize * 0.75,
                   prefixOffset: prefixSize * 0.24, numberOffset: numberSize * -0.02,
                   spacing: 1)
-        .foregroundColor(Color.white.opacity(opacity))
+        .foregroundColor((Self.filledLetterColors[prefix] ?? .white).opacity(opacity))
         .frame(width: d, height: d)
         .background(color.opacity(opacity), in: RoundedRectangle(cornerRadius: d * 0.25))
     }

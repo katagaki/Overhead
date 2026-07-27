@@ -31,6 +31,8 @@ struct LineSymbolBadge: View {
     private static let odakyuSymbols: Set<String> = ["OH", "OE", "OT"]
     // Tsukuba Express (TX) signage uses the same filled-square style as Tokyu.
     private static let tokyuStyleSymbols: Set<String> = ["TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD", "SH", "TX"]
+    // Setagaya's yellow plate carries dark grey letters, not white.
+    private static let tokyuLetterColors: [String: Color] = ["SG": Color(hex: "#595757")]
     private static let seibuSymbols: Set<String> = ["SI", "SS", "SK", "ST", "SW", "SY"]
     private static let keioSymbols: Set<String> = ["KO", "IN"]
     private static let metroLetterColor = Color(hex: "#232021")
@@ -224,7 +226,8 @@ struct LineSymbolBadge: View {
     // MARK: - Tokyu / Minatomirai: filled rounded square, white letters
 
     private var tokyuBadge: some View {
-        symbolText(.custom("Hind-Bold", fixedSize: 18.5 * f), color: .white, inset: 4.5 * f,
+        symbolText(.custom("Hind-Bold", fixedSize: 18.5 * f),
+                   color: Self.tokyuLetterColors[symbol] ?? .white, inset: 4.5 * f,
                    nudge: 15 * f * 0.085)
             .frame(width: dimension, height: dimension)
             .background(color, in: RoundedRectangle(cornerRadius: 8 * f))
