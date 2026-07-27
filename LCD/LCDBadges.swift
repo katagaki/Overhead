@@ -27,7 +27,7 @@ struct LCDLineSymbolBadge: View {
     private static let tobuSymbols: Set<String> = ["TS", "TI", "TN", "TD", "TJ"]
     private static let odakyuSymbols: Set<String> = ["OH", "OE", "OT"]
     // Tsukuba Express (TX) signage uses the same filled-square style as Tokyu.
-    private static let tokyuStyleSymbols: Set<String> = ["TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD", "TX"]
+    private static let tokyuStyleSymbols: Set<String> = ["TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD", "SH", "TX"]
     private static let seibuSymbols: Set<String> = ["SI", "SS", "SK", "ST", "SW", "SY"]
     private static let keioSymbols: Set<String> = ["KO", "IN"]
     private static let keikyuRingBlue = Color(hex: "#00A7E1")
@@ -290,7 +290,7 @@ struct LCDStationNumberBadge: View {
     ]
     private static let filledSquarePrefixes: Set<String> = [
         // Tokyu
-        "TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD",
+        "TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD", "SH",
         // Tsukuba Express (same filled-square style as Tokyu)
         "TX",
     ]

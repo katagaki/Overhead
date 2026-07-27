@@ -251,7 +251,9 @@ public enum StaticTrainData {
     // One JSON resource per operator; see LineStore and StaticData/Lines/.
     private static let lineResources = [
         "JREastLine", "TokyoMetroLine", "ToeiLine", "KeiseiLine", "TobuLine",
-        "OdakyuLine", "TokyuLine", "KeikyuLine", "KeioLine", "KeioInokashiraLine",
+        "OdakyuLine", "TokyuLine", "TokyuOimachiLine", "TokyuIkegamiLine",
+        "TokyuTamagawaLine", "TokyuSetagayaLine", "TokyuShinYokohamaLine",
+        "KodomonokuniLine", "KeikyuLine", "KeioLine", "KeioInokashiraLine",
         "SeibuLine", "SotetsuLine", "SotetsuIzuminoLine", "SotetsuShinYokohamaLine",
         "MinatomiraiLine", "SaitamaRapidLine", "RinkaiLine", "TsukubaExpressLine",
         "TamaMonorailLine", "YokohamaBlueLine", "YokohamaGreenLine",

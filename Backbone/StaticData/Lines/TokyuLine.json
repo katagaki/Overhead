@@ -1,6 +1,6 @@
 [
     {
-        "colorHex": "#DA0442",
+        "colorHex": "#DB0042",
         "delayInfo": {
             "checkMethodEn": "Check the Tokyu train operation information page, the Tokyu Lines app, or X (@tokyu_official). Delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "東急電鉄「運行情報」ページ、東急線アプリ、またはX（@tokyu_official）で確認できます。15分以上の遅れ・運転見合わせが発生または見込まれる場合に掲載されます。",
@@ -3818,7 +3818,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        "hopTimesMinutes": [2, 1.5, 2, 2, 2, 2, 5, 1, 2, 2, 2, 2, 2, 2, 2, 5.5, 2, 1.5, 2, 2],
         "id": "Railway:Tokyu.Toyoko",
         "isLoop": false,
         "nameEn": "Tokyu Toyoko Line",
@@ -4083,11 +4083,21 @@
                 "lineNameJa": "みなとみらい線",
                 "towardEn": "for Motomachi-Chukagai",
                 "towardJa": "元町・中華街方面"
+            },
+            {
+                "connectingLineId": "Railway:Tokyu.TokyuShinYokohama",
+                "end": "ascending",
+                "junctionStationId": "Station:Tokyu.Toyoko.Hiyoshi",
+                "lineNameEn": "Tokyu Shin-Yokohama Line",
+                "lineNameJa": "東急新横浜線",
+                "towardEn": "for Shin-Yokohama & the Sotetsu Line",
+                "towardJa": "新横浜・相鉄線方面"
             }
-        ]
+        ],
+        "upHopTimesMinutes": [3, 2, 3, 2, 2, 5, 2, 2, 2, 1, 2, 2, 2.5, 2, 5, 2.5, 2, 2, 2, 1]
     },
     {
-        "colorHex": "#20A288",
+        "colorHex": "#00AA8E",
         "delayInfo": {
             "checkMethodEn": "Check the Tokyu train operation information page, the Tokyu Lines app, or X (@tokyu_official). Delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "東急電鉄「運行情報」ページ、東急線アプリ、またはX（@tokyu_official）で確認できます。15分以上の遅れ・運転見合わせが発生または見込まれる場合に掲載されます。",
@@ -6567,7 +6577,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        "hopTimesMinutes": [2.5, 2, 2, 3, 2, 3, 2, 1, 2, 2, 2, 2, 2.5, 3.5, 2, 2, 2, 2, 2, 2, 3, 3.5, 2, 2, 2, 3],
         "id": "Railway:Tokyu.DenEnToshi",
         "isLoop": false,
         "nameEn": "Tokyu Den-en-toshi Line",
@@ -6887,11 +6897,21 @@
                 "lineNameJa": "東京メトロ半蔵門線",
                 "towardEn": "for Otemachi & Oshiage",
                 "towardJa": "大手町・押上方面"
+            },
+            {
+                "connectingLineId": "Railway:Tokyu.Oimachi",
+                "end": "descending",
+                "junctionStationId": "Station:Tokyu.DenEnToshi.Mizonokuchi",
+                "lineNameEn": "Tokyu Oimachi Line",
+                "lineNameJa": "東急大井町線",
+                "towardEn": "for Jiyugaoka & Oimachi",
+                "towardJa": "自由が丘・大井町方面"
             }
-        ]
+        ],
+        "upHopTimesMinutes": [4, 2, 2, 3, 2, 3, 2, 1, 2, 4, 3, 2, 2, 2.5, 2, 2.5, 2, 2, 2, 2, 3.5, 2.5, 2, 2, 2, 2]
     },
     {
-        "colorHex": "#009CD2",
+        "colorHex": "#009CD3",
         "delayInfo": {
             "checkMethodEn": "Check the Tokyu train operation information page, the Tokyu Lines app, or X (@tokyu_official). Delays or suspensions of 15 minutes or more are posted.",
             "checkMethodJa": "東急電鉄「運行情報」ページ、東急線アプリ、またはX（@tokyu_official）で確認できます。15分以上の遅れ・運転見合わせが発生または見込まれる場合に掲載されます。",
@@ -8534,7 +8554,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        "hopTimesMinutes": [2, 2, 2.5, 2, 2, 2, 2, 1, 2, 2, 2, 3],
         "id": "Railway:Tokyu.Meguro",
         "isLoop": false,
         "nameEn": "Tokyu Meguro Line",
@@ -8709,6 +8729,7 @@
                 "towardJa": "大手町・西高島平方面"
             },
             {
+                "connectingLineId": "Railway:Tokyu.TokyuShinYokohama",
                 "end": "ascending",
                 "junctionStationId": "Station:Tokyu.Meguro.Hiyoshi",
                 "lineNameEn": "Tokyu Shin-Yokohama Line",
@@ -8716,6 +8737,7 @@
                 "towardEn": "for Shin-Yokohama & the Sotetsu Line",
                 "towardJa": "新横浜・相鉄線方面"
             }
-        ]
+        ],
+        "upHopTimesMinutes": [2, 2, 2, 1.5, 2, 2, 2.5, 2, 2, 2, 2, 2]
     }
 ]

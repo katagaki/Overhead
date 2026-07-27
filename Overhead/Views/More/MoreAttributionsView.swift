@@ -23,6 +23,17 @@ struct MoreAttributionsView: View {
             }
             Section {
                 Text(verbatim: """
+                    Some station coordinates are derived from OpenStreetMap data, \
+                    © OpenStreetMap contributors, available under the Open Database \
+                    License (ODbL).
+
+                    https://www.openstreetmap.org/copyright
+                    """)
+            } header: {
+                Text(verbatim: "OpenStreetMap")
+            }
+            Section {
+                Text(verbatim: """
                     Copyright (c) 2014, Indian Type Foundry (info@indiantypefoundry.com).
 
                     This Font Software is licensed under the SIL Open Font License, Version 1.1.

@@ -28,7 +28,7 @@ struct StationNumberBadge: View {
     ]
     private static let filledSquarePrefixes: Set<String> = [
         // Tokyu
-        "TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD",
+        "TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD", "SH",
         // Tsukuba Express (same filled-square style as Tokyu)
         "TX",
     ]

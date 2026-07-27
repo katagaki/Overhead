@@ -30,7 +30,7 @@ struct LineSymbolBadge: View {
     private static let tobuSymbols: Set<String> = ["TS", "TI", "TN", "TD", "TJ"]
     private static let odakyuSymbols: Set<String> = ["OH", "OE", "OT"]
     // Tsukuba Express (TX) signage uses the same filled-square style as Tokyu.
-    private static let tokyuStyleSymbols: Set<String> = ["TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD", "TX"]
+    private static let tokyuStyleSymbols: Set<String> = ["TY", "DT", "MG", "OM", "IK", "SG", "TM", "KD", "SH", "TX"]
     private static let seibuSymbols: Set<String> = ["SI", "SS", "SK", "ST", "SW", "SY"]
     private static let keioSymbols: Set<String> = ["KO", "IN"]
     private static let metroLetterColor = Color(hex: "#232021")

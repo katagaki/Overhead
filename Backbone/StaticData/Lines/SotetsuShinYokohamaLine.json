@@ -1369,6 +1369,7 @@
                 "towardJa": "武蔵小杉・新宿方面"
             },
             {
+                "connectingLineId": "Railway:Tokyu.TokyuShinYokohama",
                 "end": "ascending",
                 "junctionStationId": "Station:Sotetsu.SotetsuShinYokohama.ShinYokohama",
                 "lineNameEn": "Tokyu Shin-Yokohama Line",
