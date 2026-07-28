@@ -244,6 +244,20 @@ public struct StaticTrainLine: Codable, Hashable {
     }
 }
 
+// MARK: - Resolved Run Times
+
+/// One run's per-station times, in travel order from `startIndex`.
+/// Unifies the two schedule representations (`timetableRuns` and `exactStationTimes`).
+struct RunTimes {
+    let startIndex: Int   // direction-ordered index into the line
+    let departure: String // "HH:mm" at startIndex
+    let times: [Int]      // minutes since midnight; -1 = train passes the station
+    let startsHere: Bool
+    let type: TrainService.TrainType
+    /// Whether the run ends at its last timed stop; nil when the data doesn't say.
+    let terminates: Bool?
+}
+
 // MARK: - Static Train Data Store
 
 public enum StaticTrainData {
@@ -826,7 +840,70 @@ public enum StaticTrainData {
         let weekday: ServicePattern
         let saturdayHoliday: ServicePattern
         let intermediateOrigins: [IntermediateOrigin]
-        if let connecting = connectingDirection, connectingOriginatesAtJunction,
+        var exactStationTimes: [String: [Int]]? = nil
+
+        // Preferred: carry each side's real timetable across the junction, so neither
+        // half of a through journey falls back to averaged hop times.
+        let stitchedWeekday = stitchedRuns(
+            origin: origin, originAscending: originAscending,
+            junctionIndex: originStations.count - 1,
+            target: target, targetAscending: group.connectingAscending, targetJunctionIndex: tIdx,
+            compositeHops: hops, calendar: .weekday
+        )
+        let stitchedHoliday = stitchedRuns(
+            origin: origin, originAscending: originAscending,
+            junctionIndex: originStations.count - 1,
+            target: target, targetAscending: group.connectingAscending, targetJunctionIndex: tIdx,
+            compositeHops: hops, calendar: .saturdayHoliday
+        )
+
+        if !stitchedWeekday.isEmpty, !stitchedHoliday.isEmpty {
+            var times: [String: [Int]] = [:]
+            var fullRuns: [ScheduleCalendar: [ExactRun]] = [:]
+            var originRuns: [String: (weekday: [ExactRun], holiday: [ExactRun])] = [:]
+            var originOrder: [String] = []
+
+            for (calendar, runs) in [(ScheduleCalendar.weekday, stitchedWeekday),
+                                     (.saturdayHoliday, stitchedHoliday)] {
+                for run in runs {
+                    guard run.startIndex < stations.count - 1 else { continue }
+                    let station = stations[run.startIndex]
+                    times["\(calendar.rawValue)|A|\(station.id)|\(run.departure)"] = run.times
+                    let exact = ExactRun(
+                        run.departure, startsHere: run.startsHere, trainType: run.type
+                    )
+                    if run.startIndex == 0 {
+                        fullRuns[calendar, default: []].append(exact)
+                    } else {
+                        if originRuns[station.id] == nil { originOrder.append(station.id) }
+                        if calendar == .weekday {
+                            originRuns[station.id, default: ([], [])].weekday.append(exact)
+                        } else {
+                            originRuns[station.id, default: ([], [])].holiday.append(exact)
+                        }
+                    }
+                }
+            }
+
+            func pattern(_ calendar: ScheduleCalendar) -> ServicePattern {
+                let runs = (fullRuns[calendar] ?? []).sorted { $0.departure < $1.departure }
+                return ServicePattern(
+                    first: runs.first?.departure ?? "", last: runs.last?.departure ?? "",
+                    bands: [], trainType: basis.pattern(for: calendar).trainType, exactRuns: runs
+                )
+            }
+            weekday = pattern(.weekday)
+            saturdayHoliday = pattern(.saturdayHoliday)
+            intermediateOrigins = originOrder.compactMap { id in
+                guard let entry = originRuns[id] else { return nil }
+                return IntermediateOrigin(
+                    stationId: id,
+                    weekdayRuns: entry.weekday.sorted { $0.departure < $1.departure },
+                    saturdayHolidayRuns: entry.holiday.sorted { $0.departure < $1.departure }
+                )
+            }
+            exactStationTimes = times
+        } else if let connecting = connectingDirection, connectingOriginatesAtJunction,
            let throughWeekday = junctionRunPattern(
                runs: connecting.weekday.exactRuns,
                trainType: connecting.weekday.trainType, minusMinutes: junctionOffset),
@@ -863,7 +940,7 @@ public enum StaticTrainData {
             intermediateOrigins: intermediateOrigins
         )
 
-        return StaticTrainLine(
+        var composite = StaticTrainLine(
             id: "\(origin.id)+\(target.id)",
             nameJa: "\(origin.nameJa)〜\(target.nameJa)",
             nameEn: "\(origin.nameEn) – \(target.nameEn)",
@@ -874,6 +951,83 @@ public enum StaticTrainData {
             directions: [direction],
             delayInfo: origin.delayInfo
         )
+        composite.exactStationTimes = exactStationTimes
+        return composite
+    }
+
+    /// Joins each origin-side run to the target-side run it becomes at the junction,
+    /// producing composite-indexed times. Empty when neither side has exact runs.
+    private static func stitchedRuns(
+        origin: StaticTrainLine,
+        originAscending: Bool,
+        junctionIndex: Int,
+        target: StaticTrainLine,
+        targetAscending: Bool,
+        targetJunctionIndex: Int,
+        compositeHops: [Double],
+        calendar: ScheduleCalendar
+    ) -> [RunTimes] {
+        let originRuns = StaticTimetableGenerator.directionRuns(
+            line: origin, ascending: originAscending, calendar: calendar
+        )
+        guard !originRuns.isEmpty else { return [] }
+
+        let targetJunction = targetAscending
+            ? targetJunctionIndex
+            : target.stations.count - 1 - targetJunctionIndex
+        // Target runs that call at the junction and continue past it, keyed by junction minute.
+        var continuations: [Int: [Int]] = [:]
+        let targetRuns = StaticTimetableGenerator.directionRuns(
+            line: target, ascending: targetAscending, calendar: calendar
+        )
+        for (i, run) in targetRuns.enumerated() {
+            let offset = targetJunction - run.startIndex
+            guard offset >= 0, offset < run.times.count - 1, run.times[offset] >= 0 else { continue }
+            continuations[run.times[offset], default: []].append(i)
+        }
+
+        var cumulative: [Double] = [0]
+        for hop in compositeHops { cumulative.append((cumulative.last ?? 0) + hop) }
+
+        return originRuns.compactMap { run in
+            let offset = junctionIndex - run.startIndex
+            guard offset > 0 else { return nil }             // boards at or past the junction
+            guard offset < run.times.count else { return run } // terminates before the junction
+            var times = Array(run.times[...offset])
+            guard let junctionMinute = times.last, junctionMinute >= 0 else { return run }
+
+            // Only trains whose last stop is the junction, and that aren't booked to
+            // terminate there, run through. Others stay truncated at the junction.
+            guard offset == run.times.count - 1, run.terminates != true else {
+                return RunTimes(
+                    startIndex: run.startIndex, departure: run.departure,
+                    times: times, startsHere: run.startsHere, type: run.type,
+                    terminates: true
+                )
+            }
+
+            // Through trains are timed to the minute at the junction, but a run whose
+            // arrival and departure straddle a minute boundary can be off by one.
+            let match = [0, 1, -1].lazy
+                .compactMap { continuations[junctionMinute + $0] }
+                .first
+            if let match {
+                let pick = match.first { !targetRuns[$0].startsHere } ?? match[0]
+                let onward = targetRuns[pick]
+                times += onward.times[(targetJunction - onward.startIndex + 1)...]
+            } else {
+                // No through run at this minute: extrapolate with hop times, as before.
+                let base = cumulative[junctionIndex]
+                times += ((junctionIndex + 1)..<cumulative.count).map {
+                    junctionMinute + Int((cumulative[$0] - base).rounded())
+                }
+            }
+            return RunTimes(
+                startIndex: run.startIndex, departure: run.departure,
+                times: times, startsHere: run.startsHere, type: run.type,
+                terminates: run.terminates
+            )
+        }
     }
 
     private static func junctionRunPattern(
@@ -1183,11 +1337,11 @@ public enum StaticTimetableGenerator {
 
     // MARK: Helpers
 
-    private static func orderedStations(line: StaticTrainLine, direction: StaticLineDirection) -> [Station] {
+    static func orderedStations(line: StaticTrainLine, direction: StaticLineDirection) -> [Station] {
         direction.isAscending ? line.stations : Array(line.stations.reversed())
     }
 
-    private static func cumulativeMinutes(hopTimes: [Double], ascending: Bool) -> [Double] {
+    static func cumulativeMinutes(hopTimes: [Double], ascending: Bool) -> [Double] {
         let hops = ascending ? hopTimes : Array(hopTimes.reversed())
         var result: [Double] = [0]
         result.reserveCapacity(hops.count + 1)
@@ -1232,13 +1386,94 @@ public enum StaticTimetableGenerator {
     }
 
     /// Parses "HH:mm" (hours may exceed 24) into minutes since midnight.
-    private static func parseMinutes(_ time: String) -> Int? {
+    static func parseMinutes(_ time: String) -> Int? {
         guard let seconds = TimetableEntry.parseRailTime(time) else { return nil }
         return seconds / 60
     }
 
     /// Formats minutes since midnight as "HH:mm" (Japanese rail convention, may exceed 24:00).
-    private static func timeString(_ minutes: Int) -> String {
+    static func timeString(_ minutes: Int) -> String {
         String(format: "%02d:%02d", minutes / 60, minutes % 60)
+    }
+
+    // MARK: Unified Run Times
+
+    /// Every run travelling `ascending` on `line`, with per-station times in travel order.
+    /// Reads whichever schedule representation the line carries; falls back to hop times.
+    static func directionRuns(
+        line: StaticTrainLine,
+        ascending: Bool,
+        calendar: ScheduleCalendar
+    ) -> [RunTimes] {
+        if let runs = line.timetableRuns {
+            let n = line.stations.count
+            return runs.compactMap { run in
+                guard run.calendar == calendar, run.ascending == ascending,
+                      let first = run.stops.first, first >= 0
+                else { return nil }
+                return RunTimes(
+                    startIndex: ascending ? run.startIndex : n - 1 - run.startIndex,
+                    departure: timeString(first),
+                    times: run.stops,
+                    startsHere: run.startsHere,
+                    type: run.type,
+                    terminates: run.terminates
+                )
+            }
+        }
+
+        guard let direction = line.directions.first(where: { $0.isAscending == ascending })
+        else { return [] }
+        let stations = orderedStations(line: line, direction: direction)
+        let hopTimes = (ascending ? nil : line.upHopTimesMinutes) ?? line.hopTimesMinutes
+        let offsets = cumulativeMinutes(hopTimes: hopTimes, ascending: ascending)
+        guard offsets.count == stations.count else { return [] }
+        let pattern = direction.pattern(for: calendar)
+
+        var result: [RunTimes] = []
+        func collect(_ runs: [ExactRun], from startIndex: Int) {
+            for run in runs {
+                guard let origin = parseMinutes(run.departure) else { continue }
+                let type = run.trainType ?? pattern.trainType
+                let key = "\(calendar.rawValue)|\(ascending ? "A" : "D")"
+                    + "|\(stations[startIndex].id)|\(run.departure)"
+                let times: [Int]
+                if let exact = line.exactStationTimes?[key] {
+                    times = Array(exact.prefix(stations.count - startIndex))
+                } else {
+                    let endIndex: Int
+                    if let terminusId = run.terminusStationId,
+                       let idx = stations.firstIndex(where: { $0.id == terminusId }), idx > startIndex {
+                        endIndex = idx
+                    } else {
+                        endIndex = stations.count - 1
+                    }
+                    let stopSet = run.stopIndices.map(Set.init) ?? line.stopPatterns[type]
+                    times = (startIndex...endIndex).map { i in
+                        let absI = ascending ? i : (stations.count - 1 - i)
+                        if let stopSet, i != startIndex, i != endIndex, !stopSet.contains(absI) {
+                            return -1
+                        }
+                        return origin + Int((offsets[i] - offsets[startIndex]).rounded())
+                    }
+                }
+                guard times.count > 1 else { continue }
+                result.append(RunTimes(
+                    startIndex: startIndex, departure: run.departure, times: times,
+                    startsHere: run.startsHere, type: type, terminates: nil
+                ))
+            }
+        }
+
+        collect(pattern.exactRuns ?? [], from: 0)
+        collect(direction.expressRuns(for: calendar), from: 0)
+        for io in direction.intermediateOrigins {
+            guard let idx = stations.firstIndex(where: { $0.id == io.stationId }),
+                  idx > 0, idx < stations.count - 1,
+                  let runs = io.runs(for: calendar)
+            else { continue }
+            collect(runs, from: idx)
+        }
+        return result
     }
 }
