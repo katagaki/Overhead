@@ -350,7 +350,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TS-30"
+                "stationCode": "TI01"
             },
             {
                 "id": "Station:Tobu.Isesaki.Wado",
@@ -361,7 +361,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-01"
+                "stationCode": "TI01"
             },
             {
                 "id": "Station:Tobu.Isesaki.Kuki",
@@ -372,7 +372,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-02"
+                "stationCode": "TI02"
             },
             {
                 "id": "Station:Tobu.Isesaki.Washinomiya",
@@ -383,7 +383,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-03"
+                "stationCode": "TI03"
             },
             {
                 "id": "Station:Tobu.Isesaki.Hanasaki",
@@ -394,7 +394,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-04"
+                "stationCode": "TI04"
             },
             {
                 "id": "Station:Tobu.Isesaki.Kazo",
@@ -405,7 +405,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-05"
+                "stationCode": "TI05"
             },
             {
                 "id": "Station:Tobu.Isesaki.MinamiHanyu",
@@ -416,7 +416,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-06"
+                "stationCode": "TI06"
             },
             {
                 "id": "Station:Tobu.Isesaki.Hanyu",
@@ -427,7 +427,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-07"
+                "stationCode": "TI07"
             },
             {
                 "id": "Station:Tobu.Isesaki.Kawamata",
@@ -438,7 +438,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-08"
+                "stationCode": "TI08"
             },
             {
                 "id": "Station:Tobu.Isesaki.Morinjimae",
@@ -449,7 +449,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-09"
+                "stationCode": "TI09"
             },
             {
                 "id": "Station:Tobu.Isesaki.Tatebayashi",
@@ -460,7 +460,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-10"
+                "stationCode": "TI10"
             },
             {
                 "id": "Station:Tobu.Isesaki.Tatara",
@@ -471,7 +471,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-11"
+                "stationCode": "TI11"
             },
             {
                 "id": "Station:Tobu.Isesaki.Agata",
@@ -482,7 +482,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-12"
+                "stationCode": "TI12"
             },
             {
                 "id": "Station:Tobu.Isesaki.Fukui",
@@ -493,7 +493,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-13"
+                "stationCode": "TI13"
             },
             {
                 "id": "Station:Tobu.Isesaki.TobuIzumi",
@@ -504,7 +504,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-14"
+                "stationCode": "TI14"
             },
             {
                 "id": "Station:Tobu.Isesaki.Ashikagashi",
@@ -515,7 +515,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-15"
+                "stationCode": "TI15"
             },
             {
                 "id": "Station:Tobu.Isesaki.YashuYamabe",
@@ -526,7 +526,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-16"
+                "stationCode": "TI16"
             },
             {
                 "id": "Station:Tobu.Isesaki.Niragawa",
@@ -537,7 +537,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-17"
+                "stationCode": "TI17"
             },
             {
                 "id": "Station:Tobu.Isesaki.Ota",
@@ -548,7 +548,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-18"
+                "stationCode": "TI18"
             },
             {
                 "id": "Station:Tobu.Isesaki.Hosoya",
@@ -559,7 +559,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-19"
+                "stationCode": "TI19"
             },
             {
                 "id": "Station:Tobu.Isesaki.Kizaki",
@@ -570,7 +570,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-20"
+                "stationCode": "TI20"
             },
             {
                 "id": "Station:Tobu.Isesaki.Serada",
@@ -581,7 +581,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-21"
+                "stationCode": "TI21"
             },
             {
                 "id": "Station:Tobu.Isesaki.Sakaimachi",
@@ -592,7 +592,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-22"
+                "stationCode": "TI22"
             },
             {
                 "id": "Station:Tobu.Isesaki.Goshi",
@@ -603,7 +603,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-23"
+                "stationCode": "TI23"
             },
             {
                 "id": "Station:Tobu.Isesaki.ShinIsesaki",
@@ -614,7 +614,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-24"
+                "stationCode": "TI24"
             },
             {
                 "id": "Station:Tobu.Isesaki.Isesaki",
@@ -625,7 +625,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-25"
+                "stationCode": "TI25"
             }
         ],
         "stopPatterns": [],

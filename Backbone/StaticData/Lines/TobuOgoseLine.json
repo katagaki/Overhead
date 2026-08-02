@@ -252,7 +252,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TJ-26"
+                "stationCode": "TJ26"
             },
             {
                 "id": "Station:Tobu.Ogose.Ippommatsu",
@@ -263,7 +263,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TJ-41"
+                "stationCode": "TJ41"
             },
             {
                 "id": "Station:Tobu.Ogose.NishiOya",
@@ -274,7 +274,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TJ-42"
+                "stationCode": "TJ42"
             },
             {
                 "id": "Station:Tobu.Ogose.Kawakado",
@@ -285,7 +285,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TJ-43"
+                "stationCode": "TJ43"
             },
             {
                 "id": "Station:Tobu.Ogose.BushuNagase",
@@ -296,7 +296,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TJ-44"
+                "stationCode": "TJ44"
             },
             {
                 "id": "Station:Tobu.Ogose.HigashiMoro",
@@ -307,7 +307,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TJ-45"
+                "stationCode": "TJ45"
             },
             {
                 "id": "Station:Tobu.Ogose.BushuKarasawa",
@@ -318,7 +318,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TJ-46"
+                "stationCode": "TJ46"
             },
             {
                 "id": "Station:Tobu.Ogose.Ogose",
@@ -329,7 +329,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TJ-47"
+                "stationCode": "TJ47"
             }
         ],
         "stopPatterns": [],

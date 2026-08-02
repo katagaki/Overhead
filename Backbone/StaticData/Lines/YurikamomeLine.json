@@ -244,7 +244,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "U1"
+                "stationCode": "U01"
             },
             {
                 "id": "Station:Yurikamome.Yurikamome.Shiodome",
@@ -255,7 +255,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "U2"
+                "stationCode": "U02"
             },
             {
                 "id": "Station:Yurikamome.Yurikamome.Takeshiba",
@@ -266,7 +266,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "U3"
+                "stationCode": "U03"
             },
             {
                 "id": "Station:Yurikamome.Yurikamome.Hinode",
@@ -277,7 +277,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "U4"
+                "stationCode": "U04"
             },
             {
                 "id": "Station:Yurikamome.Yurikamome.ShibauraFuto",
@@ -288,7 +288,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "U5"
+                "stationCode": "U05"
             },
             {
                 "id": "Station:Yurikamome.Yurikamome.OdaibaKaihinkoen",
@@ -299,7 +299,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "U6"
+                "stationCode": "U06"
             },
             {
                 "id": "Station:Yurikamome.Yurikamome.Daiba",
@@ -310,7 +310,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "U7"
+                "stationCode": "U07"
             },
             {
                 "id": "Station:Yurikamome.Yurikamome.TokyoInternationalCruiseTerminal",
@@ -321,7 +321,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "U8"
+                "stationCode": "U08"
             },
             {
                 "id": "Station:Yurikamome.Yurikamome.TelecomCenter",
@@ -332,7 +332,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "U9"
+                "stationCode": "U09"
             },
             {
                 "id": "Station:Yurikamome.Yurikamome.Aomi",

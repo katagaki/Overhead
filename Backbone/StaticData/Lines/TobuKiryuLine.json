@@ -328,7 +328,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-18"
+                "stationCode": "TI18"
             },
             {
                 "id": "Station:Tobu.Kiryu.Sammaibashi",
@@ -339,7 +339,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-51"
+                "stationCode": "TI51"
             },
             {
                 "id": "Station:Tobu.Kiryu.Jiroembashi",
@@ -350,7 +350,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-52"
+                "stationCode": "TI52"
             },
             {
                 "id": "Station:Tobu.Kiryu.Yabuzuka",
@@ -361,7 +361,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-53"
+                "stationCode": "TI53"
             },
             {
                 "id": "Station:Tobu.Kiryu.Azami",
@@ -372,7 +372,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-54"
+                "stationCode": "TI54"
             },
             {
                 "id": "Station:Tobu.Kiryu.ShinKiryu",
@@ -383,7 +383,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-55"
+                "stationCode": "TI55"
             },
             {
                 "id": "Station:Tobu.Kiryu.Aioi",
@@ -394,7 +394,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-56"
+                "stationCode": "TI56"
             },
             {
                 "id": "Station:Tobu.Kiryu.Akagi",
@@ -405,7 +405,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-57"
+                "stationCode": "TI57"
             }
         ],
         "stopPatterns": [],

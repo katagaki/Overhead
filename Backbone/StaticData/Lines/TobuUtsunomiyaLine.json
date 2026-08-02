@@ -339,7 +339,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TN-12"
+                "stationCode": "TN12"
             },
             {
                 "id": "Station:Tobu.Utsunomiya.YashuHirakawa",
@@ -350,7 +350,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TN-31"
+                "stationCode": "TN31"
             },
             {
                 "id": "Station:Tobu.Utsunomiya.YashuOtsuka",
@@ -361,7 +361,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TN-32"
+                "stationCode": "TN32"
             },
             {
                 "id": "Station:Tobu.Utsunomiya.Mibu",
@@ -372,7 +372,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TN-33"
+                "stationCode": "TN33"
             },
             {
                 "id": "Station:Tobu.Utsunomiya.Kuniya",
@@ -383,7 +383,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TN-34"
+                "stationCode": "TN34"
             },
             {
                 "id": "Station:Tobu.Utsunomiya.Omochanomachi",
@@ -394,7 +394,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TN-35"
+                "stationCode": "TN35"
             },
             {
                 "id": "Station:Tobu.Utsunomiya.Yasuzuka",
@@ -405,7 +405,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TN-36"
+                "stationCode": "TN36"
             },
             {
                 "id": "Station:Tobu.Utsunomiya.Nishikawada",
@@ -416,7 +416,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TN-37"
+                "stationCode": "TN37"
             },
             {
                 "id": "Station:Tobu.Utsunomiya.Esojima",
@@ -427,7 +427,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TN-38"
+                "stationCode": "TN38"
             },
             {
                 "id": "Station:Tobu.Utsunomiya.MinamiUtsunomiya",
@@ -438,7 +438,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TN-39"
+                "stationCode": "TN39"
             },
             {
                 "id": "Station:Tobu.Utsunomiya.TobuUtsunomiya",
@@ -449,7 +449,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TN-40"
+                "stationCode": "TN40"
             }
         ],
         "stopPatterns": [],

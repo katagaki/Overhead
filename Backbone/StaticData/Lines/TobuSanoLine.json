@@ -306,7 +306,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-10"
+                "stationCode": "TI10"
             },
             {
                 "id": "Station:Tobu.Sano.Watarase",
@@ -317,7 +317,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-31"
+                "stationCode": "TI31"
             },
             {
                 "id": "Station:Tobu.Sano.Tajima",
@@ -328,7 +328,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-32"
+                "stationCode": "TI32"
             },
             {
                 "id": "Station:Tobu.Sano.Sanoshi",
@@ -339,7 +339,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-33"
+                "stationCode": "TI33"
             },
             {
                 "id": "Station:Tobu.Sano.Sano",
@@ -350,7 +350,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-34"
+                "stationCode": "TI34"
             },
             {
                 "id": "Station:Tobu.Sano.Horigome",
@@ -361,7 +361,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-35"
+                "stationCode": "TI35"
             },
             {
                 "id": "Station:Tobu.Sano.Yoshimizu",
@@ -372,7 +372,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-36"
+                "stationCode": "TI36"
             },
             {
                 "id": "Station:Tobu.Sano.Tanuma",
@@ -383,7 +383,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-37"
+                "stationCode": "TI37"
             },
             {
                 "id": "Station:Tobu.Sano.Tada",
@@ -394,7 +394,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-38"
+                "stationCode": "TI38"
             },
             {
                 "id": "Station:Tobu.Sano.Kuzu",
@@ -405,7 +405,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-39"
+                "stationCode": "TI39"
             }
         ],
         "stopPatterns": [],

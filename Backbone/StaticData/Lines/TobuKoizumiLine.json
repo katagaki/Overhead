@@ -335,7 +335,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-10"
+                "stationCode": "TI10"
             },
             {
                 "id": "Station:Tobu.Koizumi.Narushima",
@@ -346,7 +346,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-41"
+                "stationCode": "TI41"
             },
             {
                 "id": "Station:Tobu.Koizumi.HonNakano",
@@ -357,7 +357,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-42"
+                "stationCode": "TI42"
             },
             {
                 "id": "Station:Tobu.Koizumi.Shinozuka",
@@ -368,7 +368,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-43"
+                "stationCode": "TI43"
             },
             {
                 "id": "Station:Tobu.Koizumi.HigashiKoizumi",
@@ -379,7 +379,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-44"
+                "stationCode": "TI44"
             },
             {
                 "id": "Station:Tobu.Koizumi.Koizumimachi",
@@ -390,7 +390,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-45"
+                "stationCode": "TI45"
             },
             {
                 "id": "Station:Tobu.Koizumi.NishiKoizumi",
@@ -401,7 +401,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-46"
+                "stationCode": "TI46"
             }
         ],
         "stopPatterns": [],

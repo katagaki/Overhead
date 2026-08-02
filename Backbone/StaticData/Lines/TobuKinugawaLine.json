@@ -345,7 +345,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TN-23"
+                "stationCode": "TN23"
             },
             {
                 "id": "Station:Tobu.Kinugawa.Daiyamuko",
@@ -356,7 +356,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TN-51"
+                "stationCode": "TN51"
             },
             {
                 "id": "Station:Tobu.Kinugawa.Okuwa",
@@ -367,7 +367,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TN-52"
+                "stationCode": "TN52"
             },
             {
                 "id": "Station:Tobu.Kinugawa.ShinTakatoku",
@@ -378,7 +378,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TN-53"
+                "stationCode": "TN53"
             },
             {
                 "id": "Station:Tobu.Kinugawa.Kosagoe",
@@ -389,7 +389,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TN-54"
+                "stationCode": "TN54"
             },
             {
                 "id": "Station:Tobu.Kinugawa.TobuWorldSquare",
@@ -400,7 +400,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TN-55"
+                "stationCode": "TN55"
             },
             {
                 "id": "Station:Tobu.Kinugawa.KinugawaOnsen",
@@ -411,7 +411,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TN-56"
+                "stationCode": "TN56"
             },
             {
                 "id": "Station:Tobu.Kinugawa.KinugawaKoen",
@@ -422,7 +422,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TN-57"
+                "stationCode": "TN57"
             },
             {
                 "id": "Station:Tobu.Kinugawa.ShinFujiwara",
@@ -433,7 +433,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TN-58"
+                "stationCode": "TN58"
             }
         ],
         "stopPatterns": [],

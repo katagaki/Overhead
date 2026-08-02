@@ -37,11 +37,14 @@ public struct TrainLine: Identifiable, Codable, Hashable {
     }
 
     public var lineSymbol: String {
+        // An explicit mapping wins: a line whose first station is a junction shared with
+        // another operator would otherwise inherit that operator's letters (北総線 → KS).
+        if let symbol = Self.symbolForRailwayId[id] { return symbol }
         if let station = stations.first(where: { !$0.stationCode.isEmpty }) {
             let letters = station.stationCode.prefix(while: \.isLetter)
             if !letters.isEmpty { return String(letters) }
         }
-        return Self.symbolForRailwayId[id] ?? ""
+        return ""
     }
 
     /// Whether this line uses JR-style badges (rounded rectangle)
@@ -92,6 +95,9 @@ public struct TrainLine: Identifiable, Codable, Hashable {
         "Railway:Toei.Oedo": "E",
         "Railway:Toei.NipporiToneri": "NT",
         "Railway:Toei.Toden": "SA",
+        // Lines starting at a junction owned by another line
+        "Railway:Hokuso.Hokuso": "HS",        // starts at 京成高砂 (KS10)
+        "Railway:Tobu.Isesaki": "TI",         // starts at 東武動物公園 (TS30 / TI01)
     ]
 
     public var localizedName: String {

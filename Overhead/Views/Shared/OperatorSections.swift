@@ -19,8 +19,14 @@ enum OperatorSections {
         "Operator:SaitamaRailway",
         "Operator:TWR",
         "Operator:MIR",
+        "Operator:TokyoMonorail",
+        "Operator:Yurikamome",
+        "Operator:ToyoRapid",
+        "Operator:Hokuso",
+        "Operator:SaitamaTransit",
         "Operator:TamaMonorail",
-        "Operator:YokohamaMunicipal"
+        "Operator:YokohamaMunicipal",
+        "Operator:YokohamaSeaside"
     ]
 
     static let titles: [String: String] = [
@@ -39,8 +45,14 @@ enum OperatorSections {
         "Operator:SaitamaRailway": "埼玉高速鉄道",
         "Operator:TWR": "りんかい線",
         "Operator:MIR": "つくばエクスプレス",
+        "Operator:TokyoMonorail": "東京モノレール",
+        "Operator:Yurikamome": "ゆりかもめ",
+        "Operator:ToyoRapid": "東葉高速鉄道",
+        "Operator:Hokuso": "北総鉄道",
+        "Operator:SaitamaTransit": "埼玉新都市交通",
         "Operator:TamaMonorail": "多摩都市モノレール",
-        "Operator:YokohamaMunicipal": "横浜市営地下鉄"
+        "Operator:YokohamaMunicipal": "横浜市営地下鉄",
+        "Operator:YokohamaSeaside": "横浜シーサイドライン"
     ]
 
     /// Symbol order (JA, JB, JC… / A, C, E…); symbol-less lines last.

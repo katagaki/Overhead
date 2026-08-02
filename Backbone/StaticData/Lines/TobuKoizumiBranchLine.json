@@ -315,7 +315,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-44"
+                "stationCode": "TI44"
             },
             {
                 "id": "Station:Tobu.KoizumiBranch.Ryumai",
@@ -326,7 +326,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-47"
+                "stationCode": "TI47"
             },
             {
                 "id": "Station:Tobu.KoizumiBranch.Ota",
@@ -337,7 +337,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "TI-18"
+                "stationCode": "TI18"
             }
         ],
         "stopPatterns": [],
