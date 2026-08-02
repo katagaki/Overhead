@@ -10,14 +10,14 @@ struct JourneyPlannerSection: View {
     @State private var toSelection: StationSearchHit?
     @State private var viaSelections: [StationSearchHit] = []
 
-    @State private var departureMode: DepartureMode = .now
-    @State private var departureDate = Date()
+    @State private var timeMode: TimeMode = .now
+    @State private var pinnedDate = Date()
     @AppStorage("journey.walkingSpeed") private var walkingSpeedRaw = WalkingSpeed.normal.rawValue
     @AppStorage("journey.avoidedLines") private var avoidedLinesJSON = ""
     @AppStorage(JourneyMode.storageKey) private var journeyMode = JourneyMode.hybrid
     @AppStorage("journey.setup.stations") private var storedStationsJSON = ""
     @State private var showAvoidLinesSheet = false
-    @State private var showDepartureTimeSheet = false
+    @State private var showTimeSettingsSheet = false
 
     @State private var candidates: [TrainCandidate] = []
     @State private var hasSearched = false
@@ -37,9 +37,10 @@ struct JourneyPlannerSection: View {
         var to: StoredStation?
     }
 
-    enum DepartureMode: Hashable {
+    enum TimeMode: Hashable {
         case now
-        case scheduled
+        case departAt
+        case arriveBy
     }
 
     private var walkingSpeed: WalkingSpeed {
@@ -67,8 +68,12 @@ struct JourneyPlannerSection: View {
         )
     }
 
-    private var effectiveDeparture: Date {
-        departureMode == .now ? Date() : departureDate
+    private var anchorDate: Date {
+        timeMode == .now ? Date() : pinnedDate
+    }
+
+    private var searchAnchor: JourneyViewModel.TimeAnchor {
+        timeMode == .arriveBy ? .arrival(anchorDate) : .departure(anchorDate)
     }
 
     // MARK: - Content
@@ -116,10 +121,10 @@ struct JourneyPlannerSection: View {
             },
             leadingItems: AnyView(departureTimeItem)
         )
-        .sheet(isPresented: $showDepartureTimeSheet) {
-            DepartureTimeSheet(
-                departureMode: $departureMode,
-                departureDate: $departureDate
+        .sheet(isPresented: $showTimeSettingsSheet) {
+            TimeSettingsSheet(
+                timeMode: $timeMode,
+                pinnedDate: $pinnedDate
             )
         }
         // Staging-only surface: the interactive item lives in RouteSetupCard.
@@ -135,22 +140,22 @@ struct JourneyPlannerSection: View {
         .onChange(of: journeyMode) { _, _ in
             invalidateResults()
         }
-        .onChange(of: departureMode) { _, _ in
+        .onChange(of: timeMode) { _, _ in
             invalidateResults()
         }
-        .onChange(of: departureDate) { _, _ in
+        .onChange(of: pinnedDate) { _, _ in
             invalidateResults()
         }
     }
 
     private var departureTimeItem: some View {
         Button {
-            showDepartureTimeSheet = true
+            showTimeSettingsSheet = true
         } label: {
             CustomizationItem(
                 icon: "clock",
-                label: "Setup.DepartureTime",
-                active: departureMode == .scheduled
+                label: "Setup.TimeSettings",
+                active: timeMode != .now
             )
         }
         .buttonStyle(.plain)
@@ -431,7 +436,7 @@ struct JourneyPlannerSection: View {
     }
 
     private func minutesUntilDeparture(_ candidate: TrainCandidate) -> Int? {
-        let interval = candidate.departureDate(reference: effectiveDeparture).timeIntervalSinceNow
+        let interval = candidate.departureDate(reference: anchorDate).timeIntervalSinceNow
         guard interval > -60 else { return nil }
         let minutes = Int(interval / 60)
         guard minutes < 100 else { return nil }
@@ -493,20 +498,20 @@ struct JourneyPlannerSection: View {
                 return
             }
 
-            var departure = effectiveDeparture
+            var anchor = searchAnchor
             var walkMinutes: Int?
-            if departureMode == .now,
+            if timeMode == .now,
                let station = fromSelection?.station,
                let walkSeconds = await walkingEstimator.walkingSeconds(to: station, speed: walkingSpeed),
                walkSeconds <= 120 * 60 {
-                departure = departure.addingTimeInterval(walkSeconds)
+                anchor = .departure(anchorDate.addingTimeInterval(walkSeconds))
                 walkMinutes = max(1, Int((walkSeconds / 60).rounded(.up)))
             }
             searchWalkMinutes = walkMinutes
 
             candidates = viewModel.searchTrainCandidates(
                 stationNames: names,
-                departure: departure,
+                anchor: anchor,
                 transferMinutes: walkingSpeed.transferMinutes,
                 avoidingLineIds: avoided
             )
@@ -543,9 +548,14 @@ struct JourneyPlannerSection: View {
             try? await Task.sleep(for: .seconds(1))
             showAvoidLinesSheet = true
         case .departure:
-            departureMode = .scheduled
+            timeMode = .departAt
             try? await Task.sleep(for: .seconds(1))
-            showDepartureTimeSheet = true
+            showTimeSettingsSheet = true
+        case .arrival:
+            timeMode = .arriveBy
+            pinnedDate = Calendar.current.date(bySettingHour: 18, minute: 0, second: 0, of: Date()) ?? Date()
+            try? await Task.sleep(for: .seconds(1))
+            search()
         }
     }
 #endif

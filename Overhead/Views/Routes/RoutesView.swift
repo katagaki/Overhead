@@ -307,7 +307,7 @@ struct FavoritesSection: View {
 
         startCandidate(viewModel.searchTrainCandidates(
             stationNames: names,
-            departure: Date(),
+            anchor: .departure(Date()),
             transferMinutes: transferMinutes,
             avoidingLineIds: avoided
         ).first ?? viewModel.searchRouteOptions(

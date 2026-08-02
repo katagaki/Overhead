@@ -13,7 +13,7 @@ import Backbone
 /// - overtrain://seed/custom-line
 /// - overtrain://lcd?style=<TrainLCDStyle raw value>
 /// - overtrain://journey?minutesAgo=45[&line=…&from=…&to=…]
-/// - overtrain://planner?action=search|avoid
+/// - overtrain://planner?action=search|avoid|departure|arrival
 /// - overtrain://timetable[?line=…&station=…&hidePast=0]
 /// - overtrain://line[?line=…&status=expanded&source=x]
 /// - overtrain://custom-line (seeds the sample line and opens its editor)
@@ -28,6 +28,7 @@ enum ScreenshotCommand {
     case plannerSearch
     case plannerAvoid
     case plannerDeparture
+    case plannerArrival
     case timetable(ScreenshotTimetableTarget, hidePast: Bool)
     case linePage(ScreenshotLineTarget)
     case customLineEditor
@@ -62,6 +63,7 @@ enum ScreenshotCommand {
             switch params["action"] {
             case "avoid": self = .plannerAvoid
             case "departure": self = .plannerDeparture
+            case "arrival": self = .plannerArrival
             default: self = .plannerSearch
             }
         case "timetable":
@@ -130,6 +132,7 @@ final class ScreenshotStaging: ObservableObject {
         case search
         case avoid
         case departure
+        case arrival
     }
 
     enum PlaceEditorCommand {

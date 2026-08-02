@@ -228,9 +228,37 @@ final class JourneyViewModel: ObservableObject {
 
     // MARK: - Departure Search (乗換案内-style)
 
+    /// Which end of the itinerary the user pinned to a clock time.
+    enum TimeAnchor {
+        case departure(Date)
+        case arrival(Date)
+
+        var date: Date {
+            switch self {
+            case .departure(let date), .arrival(let date): return date
+            }
+        }
+
+        var isArrival: Bool {
+            if case .arrival = self { return true }
+            return false
+        }
+    }
+
+    /// A ride constraint in rail seconds, in whichever direction the search runs.
+    fileprivate enum RideAnchor {
+        case departAtOrAfter(Int)
+        case arriveAtOrBefore(Int)
+
+        var isArrival: Bool {
+            if case .arriveAtOrBefore = self { return true }
+            return false
+        }
+    }
+
     func searchTrainCandidates(
         stationNames: [String],
-        departure: Date,
+        anchor: TimeAnchor,
         transferMinutes: Double = StaticTrainData.transferBufferMinutes,
         avoidingLineIds: Set<String> = [],
         limit: Int = 12
@@ -240,18 +268,21 @@ final class JourneyViewModel: ObservableObject {
               let toName = stationNames.last
         else { return [] }
 
-        let calendar = ScheduleCalendar.current(at: departure)
+        let calendar = ScheduleCalendar.current(at: anchor.date)
         var jstCal = Calendar(identifier: .gregorian)
         jstCal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
-        let comps = jstCal.dateComponents([.hour, .minute], from: departure)
+        let comps = jstCal.dateComponents([.hour, .minute], from: anchor.date)
         let target = (comps.hour ?? 0) * 3600 + (comps.minute ?? 0) * 60
         let targetSec = target < 4 * 3600 ? target + 24 * 3600 : target
+        let rideAnchor: RideAnchor = anchor.isArrival
+            ? .arriveAtOrBefore(targetSec)
+            : .departAtOrAfter(targetSec)
 
         // Without midpoints, single-train routes (including 直通) win outright.
         if stationNames.count == 2 {
             let direct = directCandidates(
                 fromName: fromName, toName: toName,
-                targetSec: targetSec, calendar: calendar,
+                anchor: rideAnchor, calendar: calendar,
                 avoidingLineIds: avoidingLineIds, limit: limit
             )
             if !direct.isEmpty { return direct }
@@ -265,7 +296,7 @@ final class JourneyViewModel: ObservableObject {
 
         return candidates(
             forPlan: plan,
-            targetSec: targetSec, calendar: calendar,
+            anchor: rideAnchor, calendar: calendar,
             transferMinutes: transferMinutes, limit: 8
         )
     }
@@ -284,7 +315,7 @@ final class JourneyViewModel: ObservableObject {
     private func directCandidates(
         fromName: String,
         toName: String,
-        targetSec: Int,
+        anchor: RideAnchor,
         calendar: ScheduleCalendar,
         avoidingLineIds: Set<String>,
         limit: Int
@@ -299,7 +330,7 @@ final class JourneyViewModel: ObservableObject {
         for route in routes {
             for ride in rides(on: route.staticLine,
                               fromId: route.fromStation.id, toId: route.toStation.id,
-                              departingAtOrAfter: targetSec, calendar: calendar,
+                              anchor: anchor, calendar: calendar,
                               limit: limit) {
                 let line = route.staticLine.trainLine
                 let leg = CandidateLeg(
@@ -322,7 +353,21 @@ final class JourneyViewModel: ObservableObject {
             }
         }
 
-        return Array(candidates.sorted { $0.departureSeconds < $1.departureSeconds }.prefix(limit))
+        return Array(sorted(candidates, anchor: anchor).prefix(limit))
+    }
+
+    /// 到着時刻 searches lead with the latest itinerary that still makes it.
+    private func sorted(_ candidates: [TrainCandidate], anchor: RideAnchor) -> [TrainCandidate] {
+        switch anchor {
+        case .departAtOrAfter:
+            return candidates.sorted { $0.departureSeconds < $1.departureSeconds }
+        case .arriveAtOrBefore:
+            return candidates.sorted {
+                $0.arrivalSeconds == $1.arrivalSeconds
+                    ? $0.departureSeconds > $1.departureSeconds
+                    : $0.arrivalSeconds > $1.arrivalSeconds
+            }
+        }
     }
 
     // MARK: - Timetable-less Route Search (時刻表無視)
@@ -518,85 +563,95 @@ final class JourneyViewModel: ObservableObject {
     /// Builds boardable itineraries along a planned route (one or more legs).
     private func candidates(
         forPlan plan: [StaticTrainData.TransferLeg],
-        targetSec: Int,
+        anchor: RideAnchor,
         calendar: ScheduleCalendar,
         transferMinutes: Double,
         limit: Int
     ) -> [TrainCandidate] {
-        guard let firstLeg = plan.first else { return [] }
+        // The anchored end is searched first, then the rest of the plan is
+        // chained away from it: forwards for 出発時刻, backwards for 到着時刻.
+        let anchoredLeg = anchor.isArrival ? plan.last : plan.first
+        guard let anchoredLeg else { return [] }
 
         let bufferSec = Int(transferMinutes * 60)
-        let firstRides = rides(on: firstLeg.staticLine,
-                               fromId: firstLeg.fromStation.id, toId: firstLeg.toStation.id,
-                               departingAtOrAfter: targetSec, calendar: calendar,
-                               limit: limit)
+        let anchoredRides = rides(on: anchoredLeg.staticLine,
+                                  fromId: anchoredLeg.fromStation.id, toId: anchoredLeg.toStation.id,
+                                  anchor: anchor, calendar: calendar,
+                                  limit: limit)
+
+        func leg(_ planLeg: StaticTrainData.TransferLeg,
+                 _ ride: (service: TrainService, departure: Int, arrival: Int)) -> CandidateLeg {
+            CandidateLeg(
+                service: ride.service,
+                line: planLeg.staticLine.trainLine,
+                fromStation: planLeg.fromStation,
+                toStation: planLeg.toStation,
+                departureSeconds: ride.departure,
+                arrivalSeconds: ride.arrival
+            )
+        }
 
         // A plan that stayed on one line is plain direct rides — no composite.
         if plan.count == 1 {
-            return firstRides.map { ride in
-                let line = firstLeg.staticLine.trainLine
-                let leg = CandidateLeg(
-                    service: ride.service,
-                    line: line,
-                    fromStation: firstLeg.fromStation,
-                    toStation: firstLeg.toStation,
-                    departureSeconds: ride.departure,
-                    arrivalSeconds: ride.arrival
-                )
-                return TrainCandidate(
-                    id: "\(ride.service.id)|\(firstLeg.staticLine.id)|\(firstLeg.fromStation.id)|\(firstLeg.toStation.id)",
-                    legs: [leg],
+            return anchoredRides.map { ride in
+                TrainCandidate(
+                    id: "\(ride.service.id)|\(anchoredLeg.staticLine.id)|\(anchoredLeg.fromStation.id)|\(anchoredLeg.toStation.id)",
+                    legs: [leg(anchoredLeg, ride)],
                     isThrough: false,
-                    journeyLine: line,
+                    journeyLine: anchoredLeg.staticLine.trainLine,
                     journeyService: ride.service,
-                    fromStation: firstLeg.fromStation,
-                    toStation: firstLeg.toStation
+                    fromStation: anchoredLeg.fromStation,
+                    toStation: anchoredLeg.toStation
                 )
             }
         }
 
         var candidates: [TrainCandidate] = []
-        for firstRide in firstRides {
-            var legs: [CandidateLeg] = [CandidateLeg(
-                service: firstRide.service,
-                line: firstLeg.staticLine.trainLine,
-                fromStation: firstLeg.fromStation,
-                toStation: firstLeg.toStation,
-                departureSeconds: firstRide.departure,
-                arrivalSeconds: firstRide.arrival
-            )]
-
-            var cursor = firstRide.arrival + bufferSec
+        for anchoredRide in anchoredRides {
+            var legs: [CandidateLeg] = [leg(anchoredLeg, anchoredRide)]
+            let remaining = anchor.isArrival
+                ? Array(plan.dropLast().reversed())
+                : Array(plan.dropFirst())
+            var cursor = anchor.isArrival
+                ? anchoredRide.departure - bufferSec
+                : anchoredRide.arrival + bufferSec
             var complete = true
-            for planLeg in plan.dropFirst() {
+
+            for planLeg in remaining {
+                let legAnchor: RideAnchor = anchor.isArrival
+                    ? .arriveAtOrBefore(cursor)
+                    : .departAtOrAfter(cursor)
                 guard let ride = rides(on: planLeg.staticLine,
                                        fromId: planLeg.fromStation.id, toId: planLeg.toStation.id,
-                                       departingAtOrAfter: cursor, calendar: calendar,
+                                       anchor: legAnchor, calendar: calendar,
                                        limit: 1).first
                 else { complete = false; break }
-                legs.append(CandidateLeg(
-                    service: ride.service,
-                    line: planLeg.staticLine.trainLine,
-                    fromStation: planLeg.fromStation,
-                    toStation: planLeg.toStation,
-                    departureSeconds: ride.departure,
-                    arrivalSeconds: ride.arrival
-                ))
-                cursor = ride.arrival + bufferSec
+                if anchor.isArrival {
+                    legs.insert(leg(planLeg, ride), at: 0)
+                    cursor = ride.departure - bufferSec
+                } else {
+                    legs.append(leg(planLeg, ride))
+                    cursor = ride.arrival + bufferSec
+                }
             }
             guard complete, let candidate = compositeCandidate(legs: legs) else { continue }
             candidates.append(candidate)
         }
 
+        // Keep the tightest connection per distinct set of chained trains.
         var seen = Set<String>()
         var unique: [TrainCandidate] = []
-        for candidate in candidates.sorted(by: { $0.departureSeconds > $1.departureSeconds }) {
-            let key = candidate.legs.dropFirst().map { $0.service.id }.joined(separator: "|")
+        let ordered = anchor.isArrival
+            ? candidates.sorted { $0.arrivalSeconds < $1.arrivalSeconds }
+            : candidates.sorted { $0.departureSeconds > $1.departureSeconds }
+        for candidate in ordered {
+            let chained = anchor.isArrival ? candidate.legs.dropLast() : candidate.legs.dropFirst()
+            let key = chained.map { $0.service.id }.joined(separator: "|")
             if seen.insert(key).inserted {
                 unique.append(candidate)
             }
         }
-        return unique.sorted { $0.departureSeconds < $1.departureSeconds }
+        return sorted(unique, anchor: anchor)
     }
 
     /// Concrete services on a line between two of its stations.
@@ -604,7 +659,7 @@ final class JourneyViewModel: ObservableObject {
         on staticLine: StaticTrainLine,
         fromId: String,
         toId: String,
-        departingAtOrAfter targetSec: Int,
+        anchor: RideAnchor,
         calendar: ScheduleCalendar,
         limit: Int
     ) -> [(service: TrainService, departure: Int, arrival: Int)] {
@@ -625,12 +680,20 @@ final class JourneyViewModel: ObservableObject {
                   let depSec = service.timetable[fromIdx].departureSeconds()
                       ?? service.timetable[fromIdx].arrivalSeconds(),
                   let arrSec = service.timetable[toIdx].arrivalSeconds()
-                      ?? service.timetable[toIdx].departureSeconds(),
-                  depSec >= targetSec
+                      ?? service.timetable[toIdx].departureSeconds()
             else { continue }
+            switch anchor {
+            case .departAtOrAfter(let targetSec):
+                guard depSec >= targetSec else { continue }
+            case .arriveAtOrBefore(let targetSec):
+                guard arrSec <= targetSec else { continue }
+            }
             result.append((service, depSec, arrSec))
         }
-        return Array(result.sorted { $0.1 < $1.1 }.prefix(limit))
+        // Nearest to the anchor first, so the limit keeps the relevant rides.
+        return anchor.isArrival
+            ? Array(result.sorted { $0.2 > $1.2 }.prefix(limit))
+            : Array(result.sorted { $0.1 < $1.1 }.prefix(limit))
     }
 
     private func compositeCandidate(legs: [CandidateLeg]) -> TrainCandidate? {
@@ -837,7 +900,7 @@ final class JourneyViewModel: ObservableObject {
         guard anchor.station.name != destinationName else { return [] }
         return searchTrainCandidates(
             stationNames: [anchor.station.name, destinationName],
-            departure: anchor.time.addingTimeInterval(Self.sameStationBufferMinutes * 60),
+            anchor: .departure(anchor.time.addingTimeInterval(Self.sameStationBufferMinutes * 60)),
             transferMinutes: transferMinutes,
             avoidingLineIds: avoidingLineIds,
             limit: limit

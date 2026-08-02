@@ -252,6 +252,8 @@ struct RootView: View {
             ScreenshotStaging.shared.plannerCommand = .avoid
         case .plannerDeparture:
             ScreenshotStaging.shared.plannerCommand = .departure
+        case .plannerArrival:
+            ScreenshotStaging.shared.plannerCommand = .arrival
         case .timetable(let target, let hidePast):
             ScreenshotStaging.shared.hidePastDepartures = hidePast
             viewModel.loadStationTimetable(stationId: target.stationId)
