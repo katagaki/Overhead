@@ -5834,6 +5834,7 @@
                 "towardJa": "中目黒方面"
             },
             {
+                "connectingLineId": "Railway:Tobu.Isesaki",
                 "end": "ascending",
                 "junctionStationId": "Station:Tobu.TobuSkytree.TobuDobutsuKoen",
                 "lineNameEn": "Tobu Isesaki Line",
@@ -16956,6 +16957,7 @@
                 "towardJa": "北千住・浅草方面"
             },
             {
+                "connectingLineId": "Railway:Tobu.Kinugawa",
                 "end": "ascending",
                 "junctionStationId": "Station:Tobu.Nikko.ShimoImaichi",
                 "lineNameEn": "Tobu Kinugawa Line",
