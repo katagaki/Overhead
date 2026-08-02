@@ -5113,6 +5113,7 @@
                 "towardJa": "三鷹方面"
             },
             {
+                "connectingLineId": "Railway:ToyoRapid.ToyoRapid",
                 "end": "ascending",
                 "junctionStationId": "Station:TokyoMetro.Tozai.NishiFunabashi",
                 "lineNameEn": "Toyo Rapid Line",

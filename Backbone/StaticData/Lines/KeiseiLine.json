@@ -1279,6 +1279,7 @@
                 "towardJa": "京成上野方面"
             },
             {
+                "connectingLineId": "Railway:Keisei.Matsudo",
                 "end": "descending",
                 "junctionStationId": "Station:Keisei.Chiba.KeiseiTsudanuma",
                 "lineNameEn": "Keisei Matsudo Line",

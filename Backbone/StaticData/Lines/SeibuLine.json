@@ -7500,6 +7500,7 @@
         ],
         "throughServices": [
             {
+                "connectingLineId": "Railway:Seibu.Haijima",
                 "end": "ascending",
                 "junctionStationId": "Station:Seibu.Shinjuku.Kodaira",
                 "lineNameEn": "Seibu Haijima Line",

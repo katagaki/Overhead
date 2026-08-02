@@ -338,7 +338,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "R1"
+                "stationCode": "R01"
             },
             {
                 "id": "Station:TWR.Rinkai.Shinonome",
@@ -349,7 +349,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "R2"
+                "stationCode": "R02"
             },
             {
                 "id": "Station:TWR.Rinkai.KokusaiTenjijo",
@@ -360,7 +360,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "R3"
+                "stationCode": "R03"
             },
             {
                 "id": "Station:TWR.Rinkai.TokyoTeleport",
@@ -371,7 +371,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "R4"
+                "stationCode": "R04"
             },
             {
                 "id": "Station:TWR.Rinkai.TennozuIsle",
@@ -382,7 +382,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "R5"
+                "stationCode": "R05"
             },
             {
                 "id": "Station:TWR.Rinkai.ShinagawaSeaside",
@@ -393,7 +393,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "R6"
+                "stationCode": "R06"
             },
             {
                 "id": "Station:TWR.Rinkai.Oimachi",
@@ -404,7 +404,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "R7"
+                "stationCode": "R07"
             },
             {
                 "id": "Station:TWR.Rinkai.Osaki",
@@ -415,7 +415,7 @@
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
-                "stationCode": "R8"
+                "stationCode": "R08"
             }
         ],
         "stopPatterns": [],
