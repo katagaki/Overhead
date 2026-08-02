@@ -29,9 +29,9 @@ enum JourneyMode: String, CaseIterable, Identifiable {
     var iconName: String {
         switch self {
         case .manual: return "hand.tap"
-        case .hybrid: return "a.circle"
+        case .hybrid: return "bolt.badge.automatic"
         case .gps: return "location.fill"
-        case .timetable: return "list.bullet.rectangle"
+        case .timetable: return "calendar.badge.clock"
         }
     }
 
