@@ -3621,31 +3621,31 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "GPS"
+            "value" : "GPS Only"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "GPS"
+            "value" : "GPSのみ"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "GPS"
+            "value" : "GPS만"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "GPS"
+            "value" : "仅GPS"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "GPS"
+            "value" : "僅GPS"
           }
         }
       }
@@ -3655,31 +3655,66 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "GPS + Timetable"
+            "value" : "Automatic"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "GPS + 時刻表"
+            "value" : "自動"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "GPS + 시간표"
+            "value" : "자동"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "GPS + 时刻表"
+            "value" : "自动"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "GPS + 時刻表"
+            "value" : "自動"
+          }
+        }
+      }
+    },
+    "JourneyMode.Manual" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manual"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手動"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "수동"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手动"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手動"
           }
         }
       }
@@ -6350,41 +6385,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "出發"
-          }
-        }
-      }
-    },
-    "Setup.IgnoreTimetable" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ignore Timetable"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "時刻表を無視"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "시간표 무시"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "忽略时刻表"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "忽略時刻表"
           }
         }
       }

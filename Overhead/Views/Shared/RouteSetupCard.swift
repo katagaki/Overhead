@@ -5,7 +5,7 @@ import Backbone
 
 /// Planner-style route card shared by the journey planner and the favorite
 /// editor: 出発/経由/到着 rows, swap/add-via controls, and the customization
-/// icon row (walking speed, avoided lines, ignore timetable).
+/// icon row (walking speed, avoided lines, journey mode).
 struct RouteSetupCard: View {
     let lines: [TrainLine]
     @Binding var fromSelection: StationSearchHit?
@@ -13,12 +13,13 @@ struct RouteSetupCard: View {
     @Binding var toSelection: StationSearchHit?
     @Binding var walkingSpeedRaw: String
     @Binding var avoidedLineIds: Set<String>
-    @Binding var ignoreTimetable: Bool
     /// Runs after any station row changes (the planner persists + invalidates).
     var onStationsChanged: () -> Void = {}
     /// Extra leading customization items (the planner's departure time).
     var leadingItems: AnyView?
 
+    // Global preference — the same setting the tracker reads live.
+    @AppStorage(JourneyMode.storageKey) private var journeyMode = JourneyMode.hybrid
     @State private var pickerTarget: PickerTarget?
     @State private var showAvoidLinesSheet = false
 
@@ -238,7 +239,7 @@ struct RouteSetupCard: View {
                 }
                 walkingSpeedItem
                 avoidLinesItem
-                ignoreTimetableItem
+                journeyModeItem
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 14)
@@ -279,15 +280,18 @@ struct RouteSetupCard: View {
         .buttonStyle(.plain)
     }
 
-    private var ignoreTimetableItem: some View {
-        Button {
-            ignoreTimetable.toggle()
+    private var journeyModeItem: some View {
+        Menu {
+            Picker("Settings.Section.JourneyMode", selection: $journeyMode) {
+                ForEach(JourneyMode.allCases) { mode in
+                    Label(mode.label, systemImage: mode.iconName).tag(mode)
+                }
+            }
         } label: {
             CustomizationItem(
-                icon: "timetable.slash",
-                label: "Setup.IgnoreTimetable",
-                active: ignoreTimetable,
-                iconSource: .asset
+                icon: journeyMode.iconName,
+                label: "Settings.Section.JourneyMode",
+                active: journeyMode != .hybrid
             )
         }
         .buttonStyle(.plain)

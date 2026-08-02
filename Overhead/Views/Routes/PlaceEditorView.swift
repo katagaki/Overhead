@@ -15,7 +15,6 @@ struct PlaceEditorView: View {
     @State private var toSelection: StationSearchHit?
     @State private var walkingSpeedRaw = WalkingSpeed.normal.rawValue
     @State private var avoidedLineIds: Set<String> = []
-    @State private var ignoreTimetable = false
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -29,8 +28,7 @@ struct PlaceEditorView: View {
                     viaSelections: $viaSelections,
                     toSelection: $toSelection,
                     walkingSpeedRaw: $walkingSpeedRaw,
-                    avoidedLineIds: $avoidedLineIds,
-                    ignoreTimetable: $ignoreTimetable
+                    avoidedLineIds: $avoidedLineIds
                 )
 
                 if fromSelection != nil, toSelection != nil, !routeAvailable {
@@ -152,7 +150,6 @@ struct PlaceEditorView: View {
         customName = existing.customName
         walkingSpeedRaw = existing.walkingSpeedRaw
         avoidedLineIds = Set(existing.avoidedLineIds)
-        ignoreTimetable = existing.ignoreTimetable
 
         let savedLine = availableLines.first(where: { $0.id == existing.lineId })
         if let savedLine,
@@ -199,7 +196,7 @@ struct PlaceEditorView: View {
             viaStationIds: viaSelections.map(\.station.id),
             walkingSpeedRaw: walkingSpeedRaw,
             avoidedLineIds: avoidedLineIds.sorted(),
-            ignoreTimetable: ignoreTimetable
+            ignoreTimetable: existingPlace?.ignoreTimetable ?? false
         )
         onSave(place)
         dismiss()

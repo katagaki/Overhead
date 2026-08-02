@@ -14,7 +14,7 @@ struct JourneyPlannerSection: View {
     @State private var departureDate = Date()
     @AppStorage("journey.walkingSpeed") private var walkingSpeedRaw = WalkingSpeed.normal.rawValue
     @AppStorage("journey.avoidedLines") private var avoidedLinesJSON = ""
-    @AppStorage("journey.ignoreTimetable") private var ignoreTimetable = false
+    @AppStorage(JourneyMode.storageKey) private var journeyMode = JourneyMode.hybrid
     @AppStorage("journey.setup.stations") private var storedStationsJSON = ""
     @State private var showAvoidLinesSheet = false
     @State private var showDepartureTimeSheet = false
@@ -45,6 +45,8 @@ struct JourneyPlannerSection: View {
     private var walkingSpeed: WalkingSpeed {
         WalkingSpeed(rawValue: walkingSpeedRaw) ?? .normal
     }
+
+    private var ignoreTimetable: Bool { journeyMode.ignoresTimetable }
 
     private var avoidedLineIds: Set<String> {
         guard let data = avoidedLinesJSON.data(using: .utf8),
@@ -108,7 +110,6 @@ struct JourneyPlannerSection: View {
             toSelection: $toSelection,
             walkingSpeedRaw: $walkingSpeedRaw,
             avoidedLineIds: avoidedLineIdsBinding,
-            ignoreTimetable: $ignoreTimetable,
             onStationsChanged: {
                 persistSelections()
                 invalidateResults()
@@ -131,7 +132,7 @@ struct JourneyPlannerSection: View {
         .onChange(of: walkingSpeedRaw) { _, _ in
             invalidateResults()
         }
-        .onChange(of: ignoreTimetable) { _, _ in
+        .onChange(of: journeyMode) { _, _ in
             invalidateResults()
         }
         .onChange(of: departureMode) { _, _ in

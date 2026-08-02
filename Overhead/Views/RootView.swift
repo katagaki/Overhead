@@ -202,16 +202,6 @@ struct RootView: View {
 
     private var moreMenu: some View {
         Menu {
-            Section("Settings.Section.JourneyMode") {
-                Picker("Settings.Section.JourneyMode", selection: $journeyMode) {
-                    ForEach(JourneyMode.allCases) { mode in
-                        Text(mode.label).tag(mode)
-                    }
-                }
-                .pickerStyle(.inline)
-            }
-            .labelsVisibility(.visible)
-
             Section("Settings.Section.Notifications") {
                 Toggle(isOn: $notificationsEnabled) {
                     Label("Settings.Notifications.Enabled", systemImage: "bell.badge")

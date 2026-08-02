@@ -287,7 +287,7 @@ struct FavoritesSection: View {
         let avoided = Set(place.avoidedLineIds)
         let transferMinutes = place.walkingSpeed.transferMinutes
 
-        if place.ignoreTimetable {
+        if place.ignoreTimetable || JourneyMode.current.ignoresTimetable {
             startCandidate(viewModel.searchRouteOptions(
                 stationNames: names,
                 transferMinutes: transferMinutes,

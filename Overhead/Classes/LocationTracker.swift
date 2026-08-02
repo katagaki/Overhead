@@ -29,7 +29,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
 
     // MARK: - Config
 
-    // User preference: GPS only, GPS + timetable, or timetable only.
+    // User preference: manual, automatic, GPS only, or timetable only.
     // Read live so switching modes mid-journey takes effect on the next tick.
     private var journeyMode: JourneyMode { .current }
     private var gpsStarted = false
@@ -201,7 +201,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
                 updateLiveActivity()
             }
 
-        case .hybrid:
+        case .hybrid, .manual:
             // If GPS is stale, the timetable becomes the source of truth
             let gpsFresh = isGPSFresh()
             if !gpsFresh || trackingMode == .timetable {
@@ -222,7 +222,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         case .timetable:
             trackingMode = .manual
             positionState = manualPositionState(journey: journey)
-        case .gps, .hybrid:
+        case .gps, .hybrid, .manual:
             if !isGPSFresh() {
                 trackingMode = .manual
                 positionState = manualPositionState(journey: journey)
