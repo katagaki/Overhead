@@ -6634,6 +6634,41 @@
         }
       }
     },
+    "Setup.NoTrainsByArrival" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No trains arrive by this time"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この時刻までに到着できる列車が見つかりませんでした"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 시각까지 도착하는 열차를 찾을 수 없습니다"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未找到能在该时间前到达的列车"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "找不到能在該時間前抵達的列車"
+          }
+        }
+      }
+    },
     "Setup.RemoveVia" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -256,11 +256,19 @@ final class JourneyViewModel: ObservableObject {
         }
     }
 
+    /// Where a wall-clock date falls relative to another date's service day.
+    private enum ServiceDayPosition {
+        case earlier
+        case same(Int)
+        case later
+    }
+
     func searchTrainCandidates(
         stationNames: [String],
         anchor: TimeAnchor,
         transferMinutes: Double = StaticTrainData.transferBufferMinutes,
         avoidingLineIds: Set<String> = [],
+        notDepartingBefore earliest: Date? = nil,
         limit: Int = 12
     ) -> [TrainCandidate] {
         guard stationNames.count >= 2,
@@ -269,20 +277,26 @@ final class JourneyViewModel: ObservableObject {
         else { return [] }
 
         let calendar = ScheduleCalendar.current(at: anchor.date)
-        var jstCal = Calendar(identifier: .gregorian)
-        jstCal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
-        let comps = jstCal.dateComponents([.hour, .minute], from: anchor.date)
-        let target = (comps.hour ?? 0) * 3600 + (comps.minute ?? 0) * 60
-        let targetSec = target < 4 * 3600 ? target + 24 * 3600 : target
+        let targetSec = railSeconds(of: anchor.date)
         let rideAnchor: RideAnchor = anchor.isArrival
             ? .arriveAtOrBefore(targetSec)
             : .departAtOrAfter(targetSec)
+
+        // Trains that have already left — or that you couldn't walk to in time.
+        var floorSec: Int?
+        if let earliest {
+            switch position(of: earliest, onServiceDayOf: anchor.date) {
+            case .same(let sec): floorSec = sec
+            case .earlier: break
+            case .later: return []
+            }
+        }
 
         // Without midpoints, single-train routes (including 直通) win outright.
         if stationNames.count == 2 {
             let direct = directCandidates(
                 fromName: fromName, toName: toName,
-                anchor: rideAnchor, calendar: calendar,
+                anchor: rideAnchor, floorSec: floorSec, calendar: calendar,
                 avoidingLineIds: avoidingLineIds, limit: limit
             )
             if !direct.isEmpty { return direct }
@@ -296,9 +310,35 @@ final class JourneyViewModel: ObservableObject {
 
         return candidates(
             forPlan: plan,
-            anchor: rideAnchor, calendar: calendar,
+            anchor: rideAnchor, floorSec: floorSec, calendar: calendar,
             transferMinutes: transferMinutes, limit: 8
         )
+    }
+
+    /// Seconds since the service day's midnight; hours past 24 for post-midnight trains.
+    private func railSeconds(of date: Date) -> Int {
+        var jstCal = Calendar(identifier: .gregorian)
+        jstCal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
+        let comps = jstCal.dateComponents([.hour, .minute], from: date)
+        let sec = (comps.hour ?? 0) * 3600 + (comps.minute ?? 0) * 60
+        return sec < 4 * 3600 ? sec + 24 * 3600 : sec
+    }
+
+    private func position(of date: Date, onServiceDayOf reference: Date) -> ServiceDayPosition {
+        var jstCal = Calendar(identifier: .gregorian)
+        jstCal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
+
+        // The service day rolls over at 04:00, so early hours belong to the day before.
+        func serviceDay(_ date: Date) -> Date {
+            let day = jstCal.startOfDay(for: date)
+            guard railSeconds(of: date) >= 24 * 3600 else { return day }
+            return jstCal.date(byAdding: .day, value: -1, to: day) ?? day
+        }
+
+        let day = serviceDay(date)
+        let referenceDay = serviceDay(reference)
+        if day == referenceDay { return .same(railSeconds(of: date)) }
+        return day < referenceDay ? .earlier : .later
     }
 
     func routeExists(through stationNames: [String], avoidingLineIds: Set<String> = []) -> Bool {
@@ -316,6 +356,7 @@ final class JourneyViewModel: ObservableObject {
         fromName: String,
         toName: String,
         anchor: RideAnchor,
+        floorSec: Int?,
         calendar: ScheduleCalendar,
         avoidingLineIds: Set<String>,
         limit: Int
@@ -330,7 +371,7 @@ final class JourneyViewModel: ObservableObject {
         for route in routes {
             for ride in rides(on: route.staticLine,
                               fromId: route.fromStation.id, toId: route.toStation.id,
-                              anchor: anchor, calendar: calendar,
+                              anchor: anchor, notDepartingBefore: floorSec, calendar: calendar,
                               limit: limit) {
                 let line = route.staticLine.trainLine
                 let leg = CandidateLeg(
@@ -564,6 +605,7 @@ final class JourneyViewModel: ObservableObject {
     private func candidates(
         forPlan plan: [StaticTrainData.TransferLeg],
         anchor: RideAnchor,
+        floorSec: Int?,
         calendar: ScheduleCalendar,
         transferMinutes: Double,
         limit: Int
@@ -574,9 +616,14 @@ final class JourneyViewModel: ObservableObject {
         guard let anchoredLeg else { return [] }
 
         let bufferSec = Int(transferMinutes * 60)
+        // The floor only binds the leg you board first — the anchored one going
+        // forwards, the last one resolved going backwards.
+        let anchorIsOrigin = !anchor.isArrival || plan.count == 1
         let anchoredRides = rides(on: anchoredLeg.staticLine,
                                   fromId: anchoredLeg.fromStation.id, toId: anchoredLeg.toStation.id,
-                                  anchor: anchor, calendar: calendar,
+                                  anchor: anchor,
+                                  notDepartingBefore: anchorIsOrigin ? floorSec : nil,
+                                  calendar: calendar,
                                   limit: limit)
 
         func leg(_ planLeg: StaticTrainData.TransferLeg,
@@ -617,13 +664,16 @@ final class JourneyViewModel: ObservableObject {
                 : anchoredRide.arrival + bufferSec
             var complete = true
 
-            for planLeg in remaining {
+            for (index, planLeg) in remaining.enumerated() {
                 let legAnchor: RideAnchor = anchor.isArrival
                     ? .arriveAtOrBefore(cursor)
                     : .departAtOrAfter(cursor)
+                let isOrigin = anchor.isArrival && index == remaining.count - 1
                 guard let ride = rides(on: planLeg.staticLine,
                                        fromId: planLeg.fromStation.id, toId: planLeg.toStation.id,
-                                       anchor: legAnchor, calendar: calendar,
+                                       anchor: legAnchor,
+                                       notDepartingBefore: isOrigin ? floorSec : nil,
+                                       calendar: calendar,
                                        limit: 1).first
                 else { complete = false; break }
                 if anchor.isArrival {
@@ -660,6 +710,7 @@ final class JourneyViewModel: ObservableObject {
         fromId: String,
         toId: String,
         anchor: RideAnchor,
+        notDepartingBefore floorSec: Int? = nil,
         calendar: ScheduleCalendar,
         limit: Int
     ) -> [(service: TrainService, departure: Int, arrival: Int)] {
@@ -688,6 +739,7 @@ final class JourneyViewModel: ObservableObject {
             case .arriveAtOrBefore(let targetSec):
                 guard arrSec <= targetSec else { continue }
             }
+            if let floorSec, depSec < floorSec { continue }
             result.append((service, depSec, arrSec))
         }
         // Nearest to the anchor first, so the limit keeps the relevant rides.

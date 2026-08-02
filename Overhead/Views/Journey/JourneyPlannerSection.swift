@@ -204,7 +204,10 @@ struct JourneyPlannerSection: View {
     @ViewBuilder
     private var candidateList: some View {
         if candidates.isEmpty {
-            noticeRow(icon: "tram", text: "Setup.NoTrains")
+            noticeRow(
+                icon: "exclamationmark.circle",
+                text: timeMode == .arriveBy ? "Setup.NoTrainsByArrival" : "Setup.NoTrains"
+            )
         } else {
             VStack(alignment: .leading, spacing: 8) {
                 Text(ignoreTimetable ? "Setup.Routes" : "Setup.Candidates")
@@ -500,12 +503,18 @@ struct JourneyPlannerSection: View {
 
             var anchor = searchAnchor
             var walkMinutes: Int?
-            if timeMode == .now,
+            // 到着時刻 keeps its anchor, but trains you can't reach are out too.
+            var earliestDeparture: Date? = timeMode == .arriveBy ? Date() : nil
+            if timeMode != .departAt,
                let station = fromSelection?.station,
                let walkSeconds = await walkingEstimator.walkingSeconds(to: station, speed: walkingSpeed),
                walkSeconds <= 120 * 60 {
-                anchor = .departure(anchorDate.addingTimeInterval(walkSeconds))
                 walkMinutes = max(1, Int((walkSeconds / 60).rounded(.up)))
+                if timeMode == .arriveBy {
+                    earliestDeparture = Date().addingTimeInterval(walkSeconds)
+                } else {
+                    anchor = .departure(anchorDate.addingTimeInterval(walkSeconds))
+                }
             }
             searchWalkMinutes = walkMinutes
 
@@ -513,7 +522,8 @@ struct JourneyPlannerSection: View {
                 stationNames: names,
                 anchor: anchor,
                 transferMinutes: walkingSpeed.transferMinutes,
-                avoidingLineIds: avoided
+                avoidingLineIds: avoided,
+                notDepartingBefore: earliestDeparture
             )
             hasSearched = true
             isSearching = false
