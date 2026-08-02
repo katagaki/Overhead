@@ -33,7 +33,7 @@ struct AvoidLinesSheet: View {
                     }
                 }
             }
-            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
+            .searchable(text: $searchText)
             .navigationTitle("Setup.AvoidLines")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -49,6 +49,8 @@ struct AvoidLinesSheet: View {
                         dismiss()
                     }
                 }
+
+                DefaultToolbarItem(kind: .search, placement: .bottomBar)
             }
         }
         .presentationDetents([.medium, .large])
