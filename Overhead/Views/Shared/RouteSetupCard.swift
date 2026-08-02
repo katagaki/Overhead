@@ -18,8 +18,11 @@ struct RouteSetupCard: View {
     /// Extra leading customization items (the planner's departure time).
     var leadingItems: AnyView?
 
-    // Global preference — the same setting the tracker reads live.
+    // Global preferences — the same settings the tracker reads live.
     @AppStorage(JourneyMode.storageKey) private var journeyMode = JourneyMode.hybrid
+    @AppStorage(JourneyNotificationManager.enabledKey) private var notificationsEnabled = true
+    @AppStorage(JourneyNotificationManager.leadMinutesKey)
+    private var notificationLeadMinutes = JourneyNotificationManager.defaultLeadMinutes
     @State private var pickerTarget: PickerTarget?
     @State private var showAvoidLinesSheet = false
 
@@ -240,6 +243,7 @@ struct RouteSetupCard: View {
                 walkingSpeedItem
                 avoidLinesItem
                 journeyModeItem
+                notificationsItem
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 14)
@@ -292,6 +296,35 @@ struct RouteSetupCard: View {
                 icon: journeyMode.iconName,
                 label: "Settings.Section.JourneyMode",
                 active: journeyMode != .hybrid
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    /// 0 stands for オフ; anything else is the lead time in minutes.
+    private var notificationLeadBinding: Binding<Int> {
+        Binding(
+            get: { notificationsEnabled ? notificationLeadMinutes : 0 },
+            set: { minutes in
+                notificationsEnabled = minutes != 0
+                if minutes != 0 { notificationLeadMinutes = minutes }
+            }
+        )
+    }
+
+    private var notificationsItem: some View {
+        Menu {
+            Picker("Settings.Section.Notifications", selection: notificationLeadBinding) {
+                Text("Settings.Notifications.Off").tag(0)
+                ForEach(JourneyNotificationManager.leadMinuteOptions, id: \.self) { minutes in
+                    Text("Settings.Notifications.LeadTime \(minutes)").tag(minutes)
+                }
+            }
+        } label: {
+            CustomizationItem(
+                icon: notificationsEnabled ? "bell.badge" : "bell.slash",
+                label: "Settings.Section.Notifications",
+                active: notificationsEnabled
             )
         }
         .buttonStyle(.plain)

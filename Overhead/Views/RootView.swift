@@ -202,18 +202,6 @@ struct RootView: View {
 
     private var moreMenu: some View {
         Menu {
-            Section("Settings.Section.Notifications") {
-                Toggle(isOn: $notificationsEnabled) {
-                    Label("Settings.Notifications.Enabled", systemImage: "bell.badge")
-                }
-                Picker("Settings.Notifications.LeadTime", selection: $notificationLeadMinutes) {
-                    ForEach(JourneyNotificationManager.leadMinuteOptions, id: \.self) { minutes in
-                        Text("Settings.Notifications.LeadTime \(minutes)").tag(minutes)
-                    }
-                }
-                .disabled(!notificationsEnabled)
-            }
-
             if viewModel.activeJourney != nil {
                 Section("Settings.Section.CurrentJourney") {
                     Button(role: .destructive) {
