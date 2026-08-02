@@ -325,17 +325,7 @@
             }
         ],
         "stopPatterns": [],
-        "throughServices": [
-            {
-                "connectingLineId": "Railway:Seibu.Shinjuku",
-                "end": "descending",
-                "junctionStationId": "Station:Seibu.Haijima.Kodaira",
-                "lineNameEn": "Seibu Shinjuku Line",
-                "lineNameJa": "西武新宿線",
-                "towardEn": "for Seibu-Shinjuku",
-                "towardJa": "西武新宿方面"
-            }
-        ],
+        "throughServices": [],
         "timetableRuns": [
             {
                 "ascending": true,

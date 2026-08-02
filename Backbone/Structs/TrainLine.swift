@@ -74,9 +74,8 @@ public struct TrainLine: Identifiable, Codable, Hashable {
         "Railway:JR-East.Ome": "JC",
         "Railway:JR-East.Itsukaichi": "JC",
         "Railway:JR-East.NaritaExpress": "JO",
-        "Railway:JR-East.Uchibo": "JR",
-        "Railway:JR-East.Sotobo": "JR",
-        "Railway:JR-East.Sagami": "JR",
+        // 内房・外房・相模 and the other rural JR East lines carry no station
+        // numbering, so they get no symbol rather than a made-up "JR" plate.
         // Tokyo Metro
         "Railway:TokyoMetro.Ginza": "G",
         "Railway:TokyoMetro.Marunouchi": "M",

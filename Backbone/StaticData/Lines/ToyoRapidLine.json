@@ -377,17 +377,7 @@
             }
         ],
         "stopPatterns": [],
-        "throughServices": [
-            {
-                "connectingLineId": "Railway:TokyoMetro.Tozai",
-                "end": "descending",
-                "junctionStationId": "Station:ToyoRapid.ToyoRapid.TR01",
-                "lineNameEn": "Tokyo Metro Tozai Line",
-                "lineNameJa": "東京メトロ東西線",
-                "towardEn": "for Nakano",
-                "towardJa": "中野方面"
-            }
-        ],
+        "throughServices": [],
         "timetableRuns": [
             {
                 "ascending": true,
@@ -2430,6 +2420,7 @@
                     441
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Local"
             },
@@ -2492,6 +2483,7 @@
                     464
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Local"
             },
@@ -2575,6 +2567,7 @@
                     489
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Local"
             },
@@ -6629,6 +6622,7 @@
                     313
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Local"
             },
@@ -6691,6 +6685,7 @@
                     356
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Local"
             },
@@ -6711,6 +6706,7 @@
                     363
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Local"
             },
@@ -6731,6 +6727,7 @@
                     379
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Local"
             },
@@ -6751,6 +6748,7 @@
                     392
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "CommuterRapid"
             },
@@ -6897,6 +6895,7 @@
                     431
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "CommuterRapid"
             },
@@ -6938,6 +6937,7 @@
                     443
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Local"
             },
@@ -7063,6 +7063,7 @@
                     473
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Local"
             },
@@ -7125,6 +7126,7 @@
                     489
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "CommuterRapid"
             },
@@ -7166,6 +7168,7 @@
                     502
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Local"
             },
@@ -7228,6 +7231,7 @@
                     522
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "CommuterRapid"
             },
@@ -7332,6 +7336,7 @@
                     558
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Rapid"
             },
@@ -7352,6 +7357,7 @@
                     562
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Local"
             },
@@ -7939,6 +7945,7 @@
                     938
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Rapid"
             },
@@ -7980,6 +7987,7 @@
                     961
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Local"
             },
@@ -8021,6 +8029,7 @@
                     980
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Rapid"
             },
@@ -8062,6 +8071,7 @@
                     997
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Rapid"
             },
@@ -8082,6 +8092,7 @@
                     1003
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Local"
             },
@@ -8186,6 +8197,7 @@
                     1044
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Local"
             },
@@ -8248,6 +8260,7 @@
                     1066
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Rapid"
             },
@@ -8268,6 +8281,7 @@
                     1078
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Rapid"
             },
@@ -8327,6 +8341,7 @@
                     1106
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Rapid"
             },
@@ -8368,6 +8383,7 @@
                     1127
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Local"
             },
@@ -8577,6 +8593,7 @@
                     1188
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Local"
             },
@@ -8639,6 +8656,7 @@
                     1209
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Rapid"
             },
@@ -8680,6 +8698,7 @@
                     1222
                 ],
                 "terminates": false,
+                "throughDestEn": "Mitaka",
                 "throughDestJa": "三鷹",
                 "type": "Rapid"
             },

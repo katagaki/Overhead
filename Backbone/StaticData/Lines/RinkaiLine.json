@@ -424,8 +424,8 @@
                 "connectingLineId": "Railway:JR-East.SaikyoKawagoe",
                 "end": "ascending",
                 "junctionStationId": "Station:TWR.Rinkai.Osaki",
-                "lineNameEn": "JR Saikyo Line",
-                "lineNameJa": "ＪＲ埼京線",
+                "lineNameEn": "JR East Saikyo Line",
+                "lineNameJa": "ＪＲ東埼京線",
                 "towardEn": "for Shinjuku & Omiya",
                 "towardJa": "新宿・大宮方面"
             }

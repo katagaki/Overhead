@@ -30,7 +30,7 @@ enum OperatorSections {
     ]
 
     static let titles: [String: String] = [
-        "Operator:JR-East": "JR",
+        "Operator:JR-East": "JR東",
         "Operator:TokyoMetro": "東京メトロ",
         "Operator:Toei": "都営",
         "Operator:Keisei": "京成",

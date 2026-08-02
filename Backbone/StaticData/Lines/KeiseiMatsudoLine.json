@@ -462,7 +462,7 @@
                 "latitude": 35.721494,
                 "longitude": 140.04204,
                 "name": "北習志野",
-                "nameEn": "Kita-Narashino",
+                "nameEn": "",
                 "nameKo": "",
                 "nameZhHans": "",
                 "nameZhHant": "",
@@ -525,17 +525,7 @@
             }
         ],
         "stopPatterns": [],
-        "throughServices": [
-            {
-                "connectingLineId": "Railway:Keisei.Chiba",
-                "end": "ascending",
-                "junctionStationId": "Station:Keisei.Matsudo.KS26",
-                "lineNameEn": "Keisei Chiba Line",
-                "lineNameJa": "京成千葉線",
-                "towardEn": "for Chiba-Chuo",
-                "towardJa": "千葉中央方面"
-            }
-        ],
+        "throughServices": [],
         "timetableRuns": [
             {
                 "ascending": true,

@@ -215,19 +215,19 @@
                             "headwayMinutes": 17.0
                         },
                         {
+                            "from": "13:00",
+                            "headwayMinutes": 30.0
+                        },
+                        {
                             "from": "14:00",
-                            "headwayMinutes": 16.5
+                            "headwayMinutes": 31.5
                         },
                         {
                             "from": "15:00",
-                            "headwayMinutes": 18.0
+                            "headwayMinutes": 31.0
                         },
                         {
                             "from": "16:00",
-                            "headwayMinutes": 14.0
-                        },
-                        {
-                            "from": "17:00",
                             "headwayMinutes": 24.0
                         },
                         {
@@ -283,19 +283,15 @@
                         },
                         {
                             "from": "13:00",
-                            "headwayMinutes": 23.0
-                        },
-                        {
-                            "from": "14:00",
-                            "headwayMinutes": 26.0
+                            "headwayMinutes": 40.0
                         },
                         {
                             "from": "15:00",
-                            "headwayMinutes": 20.5
+                            "headwayMinutes": 35.0
                         },
                         {
                             "from": "16:00",
-                            "headwayMinutes": 19.0
+                            "headwayMinutes": 32.5
                         },
                         {
                             "from": "17:00",
@@ -1368,20 +1364,6 @@
                 "startIndex": 5,
                 "startsHere": true,
                 "stops": [
-                    804,
-                    808
-                ],
-                "terminates": false,
-                "throughDestEn": "Ikebukuro",
-                "throughDestJa": "池袋",
-                "type": "LimitedExpress"
-            },
-            {
-                "ascending": false,
-                "calendar": "SaturdayHoliday",
-                "startIndex": 5,
-                "startsHere": true,
-                "stops": [
                     819,
                     823,
                     832,
@@ -1418,20 +1400,6 @@
                 "startIndex": 5,
                 "startsHere": true,
                 "stops": [
-                    864,
-                    868
-                ],
-                "terminates": false,
-                "throughDestEn": "Ikebukuro",
-                "throughDestJa": "池袋",
-                "type": "LimitedExpress"
-            },
-            {
-                "ascending": false,
-                "calendar": "SaturdayHoliday",
-                "startIndex": 5,
-                "startsHere": true,
-                "stops": [
                     880,
                     883,
                     889,
@@ -1450,20 +1418,6 @@
                 "startIndex": 5,
                 "startsHere": true,
                 "stops": [
-                    889,
-                    893
-                ],
-                "terminates": false,
-                "throughDestEn": "Ikebukuro",
-                "throughDestJa": "池袋",
-                "type": "LimitedExpress"
-            },
-            {
-                "ascending": false,
-                "calendar": "SaturdayHoliday",
-                "startIndex": 5,
-                "startsHere": true,
-                "stops": [
                     910,
                     914,
                     919,
@@ -1475,20 +1429,6 @@
                 "throughDestEn": "Hanno",
                 "throughDestJa": "飯能",
                 "type": "Local"
-            },
-            {
-                "ascending": false,
-                "calendar": "SaturdayHoliday",
-                "startIndex": 5,
-                "startsHere": true,
-                "stops": [
-                    924,
-                    931
-                ],
-                "terminates": false,
-                "throughDestEn": "Ikebukuro",
-                "throughDestJa": "池袋",
-                "type": "LimitedExpress"
             },
             {
                 "ascending": false,
@@ -1525,20 +1465,6 @@
                 "throughDestEn": "Hanno",
                 "throughDestJa": "飯能",
                 "type": "Local"
-            },
-            {
-                "ascending": false,
-                "calendar": "SaturdayHoliday",
-                "startIndex": 5,
-                "startsHere": true,
-                "stops": [
-                    984,
-                    988
-                ],
-                "terminates": false,
-                "throughDestEn": "Ikebukuro",
-                "throughDestJa": "池袋",
-                "type": "LimitedExpress"
             },
             {
                 "ascending": false,
@@ -2796,20 +2722,6 @@
                 "startIndex": 5,
                 "startsHere": true,
                 "stops": [
-                    804,
-                    808
-                ],
-                "terminates": false,
-                "throughDestEn": "Ikebukuro",
-                "throughDestJa": "池袋",
-                "type": "LimitedExpress"
-            },
-            {
-                "ascending": false,
-                "calendar": "Weekday",
-                "startIndex": 5,
-                "startsHere": true,
-                "stops": [
                     810,
                     813,
                     819,
@@ -2846,20 +2758,6 @@
                 "startIndex": 5,
                 "startsHere": true,
                 "stops": [
-                    864,
-                    868
-                ],
-                "terminates": false,
-                "throughDestEn": "Ikebukuro",
-                "throughDestJa": "池袋",
-                "type": "LimitedExpress"
-            },
-            {
-                "ascending": false,
-                "calendar": "Weekday",
-                "startIndex": 5,
-                "startsHere": true,
-                "stops": [
                     890,
                     893,
                     899,
@@ -2871,20 +2769,6 @@
                 "throughDestEn": "Hanno",
                 "throughDestJa": "飯能",
                 "type": "Local"
-            },
-            {
-                "ascending": false,
-                "calendar": "Weekday",
-                "startIndex": 5,
-                "startsHere": true,
-                "stops": [
-                    924,
-                    928
-                ],
-                "terminates": false,
-                "throughDestEn": "Ikebukuro",
-                "throughDestJa": "池袋",
-                "type": "LimitedExpress"
             },
             {
                 "ascending": false,
@@ -2921,20 +2805,6 @@
                 "throughDestEn": "Hanno",
                 "throughDestJa": "飯能",
                 "type": "Local"
-            },
-            {
-                "ascending": false,
-                "calendar": "Weekday",
-                "startIndex": 5,
-                "startsHere": true,
-                "stops": [
-                    984,
-                    988
-                ],
-                "terminates": false,
-                "throughDestEn": "Ikebukuro",
-                "throughDestJa": "池袋",
-                "type": "LimitedExpress"
             },
             {
                 "ascending": false,

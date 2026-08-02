@@ -61,23 +61,23 @@
                         },
                         {
                             "from": "15:00",
-                            "headwayMinutes": 10.0
+                            "headwayMinutes": 60.0
                         },
                         {
                             "from": "16:00",
-                            "headwayMinutes": 15.0
+                            "headwayMinutes": 40.0
                         },
                         {
                             "from": "17:00",
-                            "headwayMinutes": 10.0
+                            "headwayMinutes": 30.0
                         },
                         {
                             "from": "18:00",
-                            "headwayMinutes": 15.0
+                            "headwayMinutes": 40.0
                         },
                         {
                             "from": "19:00",
-                            "headwayMinutes": 10.0
+                            "headwayMinutes": 14.0
                         },
                         {
                             "from": "20:00",
@@ -253,6 +253,10 @@
                         {
                             "from": "19:00",
                             "headwayMinutes": 10.0
+                        },
+                        {
+                            "from": "20:00",
+                            "headwayMinutes": 27.5
                         },
                         {
                             "from": "21:00",
@@ -1864,58 +1868,6 @@
             {
                 "ascending": true,
                 "calendar": "SaturdayHoliday",
-                "startIndex": 0,
-                "startsHere": false,
-                "stops": [
-                    918,
-                    -1,
-                    -1,
-                    -1,
-                    -1,
-                    925,
-                    -1,
-                    -1,
-                    929,
-                    -1,
-                    -1,
-                    -1,
-                    936,
-                    -1,
-                    943
-                ],
-                "terminates": false,
-                "throughDestEn": "Narita Airport Terminal 1",
-                "throughDestJa": "成田空港",
-                "type": "RapidLimitedExpress"
-            },
-            {
-                "ascending": true,
-                "calendar": "SaturdayHoliday",
-                "startIndex": 0,
-                "startsHere": false,
-                "stops": [
-                    928,
-                    931,
-                    933,
-                    935,
-                    937,
-                    941,
-                    942,
-                    944,
-                    947,
-                    950,
-                    952,
-                    954,
-                    958,
-                    962,
-                    966
-                ],
-                "terminates": true,
-                "type": "Local"
-            },
-            {
-                "ascending": true,
-                "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
                 "stops": [
@@ -1934,58 +1886,6 @@
                 ],
                 "terminates": true,
                 "type": "Local"
-            },
-            {
-                "ascending": true,
-                "calendar": "SaturdayHoliday",
-                "startIndex": 0,
-                "startsHere": false,
-                "stops": [
-                    948,
-                    951,
-                    955,
-                    957,
-                    959,
-                    961,
-                    963,
-                    965,
-                    971,
-                    973,
-                    976,
-                    978,
-                    982,
-                    985,
-                    989
-                ],
-                "terminates": true,
-                "type": "Local"
-            },
-            {
-                "ascending": true,
-                "calendar": "SaturdayHoliday",
-                "startIndex": 0,
-                "startsHere": false,
-                "stops": [
-                    958,
-                    -1,
-                    -1,
-                    -1,
-                    -1,
-                    965,
-                    -1,
-                    -1,
-                    969,
-                    -1,
-                    -1,
-                    -1,
-                    977,
-                    -1,
-                    983
-                ],
-                "terminates": false,
-                "throughDestEn": "Narita Airport Terminal 1",
-                "throughDestJa": "成田空港",
-                "type": "RapidLimitedExpress"
             },
             {
                 "ascending": true,
@@ -2062,83 +1962,6 @@
             {
                 "ascending": true,
                 "calendar": "SaturdayHoliday",
-                "startIndex": 0,
-                "startsHere": false,
-                "stops": [
-                    998,
-                    -1,
-                    -1,
-                    -1,
-                    -1,
-                    1005,
-                    -1,
-                    -1,
-                    1009,
-                    -1,
-                    -1,
-                    -1,
-                    1016,
-                    -1,
-                    1023
-                ],
-                "terminates": false,
-                "throughDestEn": "Narita Airport Terminal 1",
-                "throughDestJa": "成田空港",
-                "type": "RapidLimitedExpress"
-            },
-            {
-                "ascending": true,
-                "calendar": "SaturdayHoliday",
-                "startIndex": 0,
-                "startsHere": false,
-                "stops": [
-                    1008,
-                    1011,
-                    1013,
-                    1015,
-                    1017,
-                    1021,
-                    1022,
-                    1024,
-                    1027,
-                    1030,
-                    1032,
-                    1034,
-                    1038,
-                    1042,
-                    1046
-                ],
-                "terminates": true,
-                "type": "Local"
-            },
-            {
-                "ascending": true,
-                "calendar": "SaturdayHoliday",
-                "startIndex": 0,
-                "startsHere": false,
-                "stops": [
-                    1028,
-                    1031,
-                    1033,
-                    1035,
-                    1037,
-                    1041,
-                    1042,
-                    1044,
-                    1050,
-                    1053,
-                    1055,
-                    1058,
-                    1061,
-                    1065,
-                    1069
-                ],
-                "terminates": true,
-                "type": "Local"
-            },
-            {
-                "ascending": true,
-                "calendar": "SaturdayHoliday",
                 "startIndex": 8,
                 "startsHere": true,
                 "stops": [
@@ -2151,33 +1974,6 @@
                 ],
                 "terminates": true,
                 "type": "Local"
-            },
-            {
-                "ascending": true,
-                "calendar": "SaturdayHoliday",
-                "startIndex": 0,
-                "startsHere": false,
-                "stops": [
-                    1038,
-                    -1,
-                    -1,
-                    -1,
-                    -1,
-                    1045,
-                    -1,
-                    -1,
-                    1049,
-                    -1,
-                    -1,
-                    -1,
-                    1056,
-                    -1,
-                    1063
-                ],
-                "terminates": false,
-                "throughDestEn": "Narita Airport Terminal 1",
-                "throughDestJa": "成田空港",
-                "type": "RapidLimitedExpress"
             },
             {
                 "ascending": true,
@@ -2252,58 +2048,6 @@
                 "startIndex": 0,
                 "startsHere": false,
                 "stops": [
-                    1078,
-                    -1,
-                    -1,
-                    -1,
-                    -1,
-                    1085,
-                    -1,
-                    -1,
-                    1089,
-                    -1,
-                    -1,
-                    -1,
-                    1096,
-                    -1,
-                    1102
-                ],
-                "terminates": false,
-                "throughDestEn": "Narita Airport Terminal 1",
-                "throughDestJa": "成田空港",
-                "type": "RapidLimitedExpress"
-            },
-            {
-                "ascending": true,
-                "calendar": "SaturdayHoliday",
-                "startIndex": 0,
-                "startsHere": false,
-                "stops": [
-                    1088,
-                    1091,
-                    1093,
-                    1095,
-                    1097,
-                    1099,
-                    1101,
-                    1102,
-                    1105,
-                    1108,
-                    1110,
-                    1112,
-                    1116,
-                    1120,
-                    1124
-                ],
-                "terminates": true,
-                "type": "Local"
-            },
-            {
-                "ascending": true,
-                "calendar": "SaturdayHoliday",
-                "startIndex": 0,
-                "startsHere": false,
-                "stops": [
                     1108,
                     1110,
                     1112,
@@ -2336,58 +2080,6 @@
                     1131,
                     1135,
                     1138
-                ],
-                "terminates": true,
-                "type": "Local"
-            },
-            {
-                "ascending": true,
-                "calendar": "SaturdayHoliday",
-                "startIndex": 0,
-                "startsHere": false,
-                "stops": [
-                    1118,
-                    -1,
-                    -1,
-                    -1,
-                    -1,
-                    1125,
-                    -1,
-                    -1,
-                    1129,
-                    -1,
-                    -1,
-                    -1,
-                    1136,
-                    -1,
-                    1142
-                ],
-                "terminates": false,
-                "throughDestEn": "Narita Airport Terminal 1",
-                "throughDestJa": "成田空港",
-                "type": "RapidLimitedExpress"
-            },
-            {
-                "ascending": true,
-                "calendar": "SaturdayHoliday",
-                "startIndex": 0,
-                "startsHere": false,
-                "stops": [
-                    1128,
-                    1131,
-                    1133,
-                    1135,
-                    1137,
-                    1139,
-                    1141,
-                    1142,
-                    1145,
-                    1148,
-                    1150,
-                    1152,
-                    1156,
-                    1160,
-                    1164
                 ],
                 "terminates": true,
                 "type": "Local"
@@ -2433,33 +2125,6 @@
                 ],
                 "terminates": true,
                 "type": "Local"
-            },
-            {
-                "ascending": true,
-                "calendar": "SaturdayHoliday",
-                "startIndex": 0,
-                "startsHere": false,
-                "stops": [
-                    1158,
-                    -1,
-                    -1,
-                    -1,
-                    -1,
-                    1165,
-                    -1,
-                    -1,
-                    1169,
-                    -1,
-                    -1,
-                    -1,
-                    1176,
-                    -1,
-                    1182
-                ],
-                "terminates": false,
-                "throughDestEn": "Narita Airport Terminal 1",
-                "throughDestJa": "成田空港",
-                "type": "RapidLimitedExpress"
             },
             {
                 "ascending": true,
@@ -5101,32 +4766,6 @@
                 "ascending": false,
                 "calendar": "SaturdayHoliday",
                 "startIndex": 14,
-                "startsHere": true,
-                "stops": [
-                    1209,
-                    1215,
-                    1219,
-                    1222,
-                    1224,
-                    1227,
-                    1233,
-                    1236,
-                    1238,
-                    1240,
-                    1241,
-                    1243,
-                    1245,
-                    1248,
-                    1250
-                ],
-                "terminates": false,
-                "throughDestJa": "羽田空港第1・第2ターミナル",
-                "type": "Express"
-            },
-            {
-                "ascending": false,
-                "calendar": "SaturdayHoliday",
-                "startIndex": 14,
                 "startsHere": false,
                 "stops": [
                     1219,
@@ -5155,33 +4794,6 @@
                 "startIndex": 14,
                 "startsHere": true,
                 "stops": [
-                    1229,
-                    1235,
-                    1239,
-                    1243,
-                    1245,
-                    1247,
-                    1250,
-                    1253,
-                    1254,
-                    1256,
-                    1258,
-                    1260,
-                    1262,
-                    1264,
-                    1267
-                ],
-                "terminates": false,
-                "throughDestEn": "Nishi-magome",
-                "throughDestJa": "西馬込",
-                "type": "Local"
-            },
-            {
-                "ascending": false,
-                "calendar": "SaturdayHoliday",
-                "startIndex": 14,
-                "startsHere": true,
-                "stops": [
                     1248,
                     1255,
                     1259,
@@ -5201,33 +4813,6 @@
                 "terminates": false,
                 "throughDestJa": "羽田空港第1・第2ターミナル",
                 "type": "Express"
-            },
-            {
-                "ascending": false,
-                "calendar": "SaturdayHoliday",
-                "startIndex": 14,
-                "startsHere": false,
-                "stops": [
-                    1258,
-                    -1,
-                    1264,
-                    -1,
-                    -1,
-                    -1,
-                    1272,
-                    -1,
-                    -1,
-                    1276,
-                    -1,
-                    -1,
-                    -1,
-                    -1,
-                    1285
-                ],
-                "terminates": false,
-                "throughDestEn": "Nishi-magome",
-                "throughDestJa": "西馬込",
-                "type": "LimitedExpress"
             },
             {
                 "ascending": false,
@@ -11247,6 +10832,7 @@
                     1417
                 ],
                 "terminates": false,
+                "throughDestEn": "Shinagawa",
                 "throughDestJa": "品川",
                 "type": "Local"
             },

@@ -5107,8 +5107,8 @@
                 "connectingLineId": "Railway:JR-East.ChuoSobuLocal",
                 "end": "descending",
                 "junctionStationId": "Station:TokyoMetro.Tozai.Nakano",
-                "lineNameEn": "JR Chuo-Sobu Local Line",
-                "lineNameJa": "JR中央・総武線各駅停車",
+                "lineNameEn": "JR East Chuo-Sobu Local Line",
+                "lineNameJa": "JR東中央・総武線各駅停車",
                 "towardEn": "for Mitaka",
                 "towardJa": "三鷹方面"
             },
@@ -5125,8 +5125,8 @@
                 "connectingLineId": "Railway:JR-East.ChuoSobuLocal",
                 "end": "ascending",
                 "junctionStationId": "Station:TokyoMetro.Tozai.NishiFunabashi",
-                "lineNameEn": "JR Sobu Local Line",
-                "lineNameJa": "JR総武線各駅停車",
+                "lineNameEn": "JR East Sobu Local Line",
+                "lineNameJa": "JR東総武線各駅停車",
                 "towardEn": "for Tsudanuma",
                 "towardJa": "津田沼方面"
             }
@@ -7195,8 +7195,8 @@
                 "connectingLineId": "Railway:JR-East.JobanLocal",
                 "end": "ascending",
                 "junctionStationId": "Station:TokyoMetro.Chiyoda.Ayase",
-                "lineNameEn": "JR Joban Local Line",
-                "lineNameJa": "JR常磐線各駅停車",
+                "lineNameEn": "JR East Joban Local Line",
+                "lineNameJa": "JR東常磐線各駅停車",
                 "towardEn": "for Toride",
                 "towardJa": "取手方面"
             },
