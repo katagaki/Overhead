@@ -236,7 +236,7 @@ struct RouteSetupCard: View {
 
     private var customizationRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(alignment: .top, spacing: 4) {
+            HStack(alignment: .top, spacing: CustomizationItem.spacing) {
                 if let leadingItems {
                     leadingItems
                 }
@@ -245,9 +245,11 @@ struct RouteSetupCard: View {
                 journeyModeItem
                 notificationsItem
             }
-            .padding(.horizontal, 10)
+            .padding(.horizontal, CustomizationItem.rowInset / 2)
             .padding(.vertical, 14)
+            .scrollTargetLayout()
         }
+        .scrollTargetBehavior(.viewAligned(limitBehavior: .never))
     }
 
     private var walkingSpeedItem: some View {
@@ -339,6 +341,11 @@ struct CustomizationItem: View {
     let active: Bool
     var iconSource: IconSource = .system
 
+    static let spacing: CGFloat = 4
+    static let rowInset: CGFloat = 20
+    static let minWidth: CGFloat = 64
+    static let maxWidth: CGFloat = 82
+
     enum IconSource {
         case system
         case asset
@@ -367,7 +374,12 @@ struct CustomizationItem: View {
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
         }
-        .frame(width: 82)
+        // Sized so a 5th item peeks in at the trailing edge when the row
+        // overflows; capped at 82 so wide layouts keep the normal size.
+        .containerRelativeFrame(.horizontal) { length, _ in
+            let usable = length - Self.rowInset - Self.spacing * 4
+            return min(Self.maxWidth, max(Self.minWidth, usable / 4.5))
+        }
         .contentShape(Rectangle())
     }
 }
