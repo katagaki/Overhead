@@ -78,6 +78,8 @@ struct LCDLineSymbolBadge: View {
             squircleBadge(cornerRadius: 10, borderWidth: 2.6, textColor: color)
         case _ where Self.tobuSymbols.contains(symbol):
             squareBadge(cornerRadius: 5.5, borderWidth: 2.6)
+        case "JR":
+            squareBadge(cornerRadius: 3, borderWidth: 2.6, textColor: color)
         case _ where symbol.hasPrefix("J"):
             squareBadge(cornerRadius: 3, borderWidth: 2.6)
         default:

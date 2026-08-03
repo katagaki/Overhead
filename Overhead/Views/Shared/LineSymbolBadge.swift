@@ -120,6 +120,9 @@ struct LineSymbolBadge: View {
             odakyuBadge
         case _ where Self.tobuSymbols.contains(symbol):
             tobuBadge
+        case "JR":
+            // Lines with no station numbering show the JR mark, in the line color.
+            jrWordmarkBadge
         case _ where symbol.hasPrefix("J"):
             jrBadge
         default:
@@ -133,6 +136,23 @@ struct LineSymbolBadge: View {
         symbolText(.custom("Hind-Bold", fixedSize: (symbol.count > 1 ? 18.5 : 20) * f),
                    color: .black, inset: 4 * f,
                    nudge: (symbol.count > 1 ? 16.5 : 20) * f * 0.085)
+            .frame(width: dimension, height: dimension)
+            .background {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 4 * f)
+                        .fill(color)
+                    Rectangle()
+                        .fill(Color.white)
+                        .padding(3.5 * f)
+                }
+            }
+    }
+
+    // MARK: - JR East: the JR mark, for lines with no station numbering
+
+    private var jrWordmarkBadge: some View {
+        symbolText(.custom("Hind-Bold", fixedSize: 17 * f), color: color, inset: 4 * f,
+                   nudge: 15 * f * 0.085)
             .frame(width: dimension, height: dimension)
             .background {
                 ZStack {

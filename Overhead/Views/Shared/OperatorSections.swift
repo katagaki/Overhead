@@ -3,8 +3,22 @@ import Backbone
 // MARK: - Operator Sections
 
 enum OperatorSections {
+    /// Lines whose live train positions JR East publishes through どこトレ rather
+    /// than the main JR East app. Listed apart so the JR東 section stays the
+    /// urban network.
+    static let dokoTrainSectionId = "Section:DokoTrain"
+    static let dokoTrainRailways: Set<String> = [
+        "Railway:JR-East.Uchibo", "Railway:JR-East.Sotobo", "Railway:JR-East.Sobu",
+        "Railway:JR-East.Narita", "Railway:JR-East.NaritaAbikoBranch",
+        "Railway:JR-East.NaritaAirportBranch", "Railway:JR-East.Togane",
+        "Railway:JR-East.Kashima", "Railway:JR-East.Kururi", "Railway:JR-East.Sagami",
+        "Railway:JR-East.Hachiko", "Railway:JR-East.Kawagoe", "Railway:JR-East.Joetsu",
+        "Railway:JR-East.Agatsuma",
+    ]
+
     static let order = [
         "Operator:JR-East",
+        dokoTrainSectionId,
         "Operator:TokyoMetro",
         "Operator:Toei",
         "Operator:Keisei",
@@ -31,6 +45,7 @@ enum OperatorSections {
 
     static let titles: [String: String] = [
         "Operator:JR-East": "JR東",
+        dokoTrainSectionId: "どこトレ",
         "Operator:TokyoMetro": "東京メトロ",
         "Operator:Toei": "都営",
         "Operator:Keisei": "京成",
@@ -73,7 +88,9 @@ enum OperatorSections {
     static func sections(
         for lines: [TrainLine]
     ) -> [(operatorId: String, title: String, lines: [TrainLine])] {
-        let grouped = Dictionary(grouping: lines) { $0.operatorId }
+        let grouped = Dictionary(grouping: lines) {
+            dokoTrainRailways.contains($0.id) ? dokoTrainSectionId : $0.operatorId
+        }
         let sectionOrder = order.filter { grouped[$0] != nil }
             + grouped.keys.filter { !order.contains($0) }.sorted()
         return sectionOrder.compactMap { operatorId in
