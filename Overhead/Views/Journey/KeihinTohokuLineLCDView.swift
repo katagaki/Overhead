@@ -18,7 +18,6 @@ struct KeihinTohokuLineLCDView: View {
     private static let maxUpcomingStops = 7
     private static let barGray = Color(hex: "#B3B6BB")
     private static let passedOpacity: CGFloat = 0.4
-    private static let expressRed = Color(hex: "#E60012")
     private static let markerGreenLight = Color(hex: "#58CB42")
     private static let markerGreenDark = Color(hex: "#1D981A")
     private static let languageFlipSeconds = 4.0
@@ -193,7 +192,7 @@ struct KeihinTohokuLineLCDView: View {
 
             ZStack(alignment: .leading) {
                 YamanoteArrowBandShape(tipOnTrailing: orientation == .right)
-                    .fill(bandColor)
+                    .fill(lineColor)
                     .frame(height: 17)
                     .padding(orientation == .right ? .leading : .trailing, -10)
                 HStack(spacing: 0) {
@@ -273,11 +272,6 @@ struct KeihinTohokuLineLCDView: View {
                     .frame(width: 14.5)
             }
         }
-    }
-
-    /// 急行 runs are banded in red on the real board, whatever the line color is.
-    private var bandColor: Color {
-        journey.service.trainType == .express ? Self.expressRed : lineColor
     }
 
     /// Position marker — steady green with the real display's top/bottom

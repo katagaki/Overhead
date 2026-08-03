@@ -13,6 +13,7 @@ struct TrainLCDView: View {
     private static let designHeight: CGFloat = designWidth * 9 / 16
     private static let headerHeight: CGFloat = designHeight * 0.33
     private static let maxUpcomingStops = 7
+    private static let expressRed = Color(hex: "#E60012")
     private static let lcdRed = Color(hex: "#D7000F")
     private static let movingMarkerWidth: CGFloat = 16
     private static let passedOpacity: CGFloat = 0.4
@@ -183,7 +184,12 @@ struct TrainLCDView: View {
         .padding(EdgeInsets(top: 4, leading: 5, bottom: 3, trailing: 16))
         .frame(width: 102)
         .frame(maxHeight: .infinity)
-        .background(PlateShape().fill(lineColor))
+        .background(PlateShape().fill(plateColor))
+    }
+
+    /// 急行 runs are plated in red on the real board, whatever the line color is.
+    private var plateColor: Color {
+        journey.service.trainType == .express ? Self.expressRed : lineColor
     }
 
     @ViewBuilder
