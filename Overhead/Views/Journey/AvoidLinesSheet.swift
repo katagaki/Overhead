@@ -98,8 +98,9 @@ struct AvoidLinesSheet: View {
                         styleOverride: line.badgeStyle
                     )
                 } else {
-                    RoundedRectangle(cornerRadius: 6)
+                    RoundedRectangle(cornerRadius: 3)
                         .fill(line.color)
+                        .frame(width: 6, height: 22)
                         .frame(width: 30, height: 30)
                 }
 

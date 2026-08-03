@@ -136,8 +136,11 @@ struct LinesSection: View {
                     styleOverride: line.badgeStyle
                 )
             } else {
-                RoundedRectangle(cornerRadius: 7)
+                // No station numbering on this line, so there is no plate to draw:
+                // show the route colour as a stripe, as the station rows do.
+                RoundedRectangle(cornerRadius: 4)
                     .fill(line.color)
+                    .frame(width: 8, height: 32)
                     .frame(width: 44, height: 44)
             }
 
