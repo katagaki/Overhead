@@ -14,6 +14,11 @@ struct TrainLCDView: View {
     private static let headerHeight: CGFloat = designHeight * 0.33
     private static let maxUpcomingStops = 7
     private static let expressRed = Color(hex: "#E60012")
+    /// Usable width inside the destination plate (102 less its 5/16 insets).
+    private static let plateTextWidth: CGFloat = 81
+    private static let destinationKerning: CGFloat = 3
+    /// Nudges the destination name up off the ゆき baseline.
+    private static let destinationLift: CGFloat = -3
     private static let lcdRed = Color(hex: "#D7000F")
     private static let movingMarkerWidth: CGFloat = 16
     private static let passedOpacity: CGFloat = 0.4
@@ -164,15 +169,22 @@ struct TrainLCDView: View {
                 }
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
+                .offset(y: Self.destinationLift)
             } else {
-                Text(destinationStation?.name ?? "")
-                    .font(LCDFont.gothic(size: 16, weight: .heavy))
-                    .lineLimit(1)
-                    .kerning(3.0)
-                    .minimumScaleFactor(0.5)
-                    .shadow(color: .black.opacity(0.85), radius: 1, x: 0, y: 0)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
+                // Long names squash horizontally rather than shrinking, so the cap
+                // height matches short ones and nothing runs into the arrow tip.
+                HorizontallySquashed(maxWidth: Self.plateTextWidth) {
+                    Text(destinationStation?.name ?? "")
+                        .font(LCDFont.gothic(size: 16, weight: .heavy))
+                        .lineLimit(1)
+                        .kerning(Self.destinationKerning)
+                        // kerning trails the last glyph, so pad the head to re-center
+                        .padding(.leading, Self.destinationKerning)
+                        .shadow(color: .black.opacity(0.85), radius: 1, x: 0, y: 0)
+                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .offset(y: Self.destinationLift)
             }
 
             Text(verbatim: "ゆき")
