@@ -50,8 +50,16 @@ struct LCDLineSymbolBadge: View {
             filledBadge(in: AnyShape(Circle()))
         case "G" where color.isGreenDominant:
             filledBadge(in: AnyShape(Circle()))
+        case "NS":
+            newShuttleBadge
         case "KS":
-            keiseiBadge
+            keiseiBadge(condensed: true)
+        case "HS":
+            keiseiBadge(condensed: false)
+        case "MO":
+            squareBadge(cornerRadius: 5.5, borderWidth: 2.6)
+        case "TR":
+            circleBadge(ringWidth: 4.7, textColor: .black, hind: false, condensed: true)
         case "KK":
             circleBadge(ringWidth: 2.0, textColor: Self.keikyuLetterBlue, hind: true,
                         ringColor: Self.keikyuRingBlue)
@@ -99,8 +107,8 @@ struct LCDLineSymbolBadge: View {
     }
 
     private func circleBadge(ringWidth: CGFloat, textColor: Color, hind: Bool,
-                             ringColor: Color? = nil) -> some View {
-        symbolText(color: textColor, inset: ringWidth + 1, hind: hind)
+                             ringColor: Color? = nil, condensed: Bool = false) -> some View {
+        symbolText(color: textColor, inset: ringWidth + 1, hind: hind, condensed: condensed)
             // Futura-Bold's "M" sits low; lift it to stay optically centered
             .offset(y: !hind && symbol == "M" ? -0.6 : 0)
             .frame(width: 24, height: 24)
@@ -196,9 +204,10 @@ struct LCDLineSymbolBadge: View {
             )
     }
 
-    private var keiseiBadge: some View {
+    private func keiseiBadge(condensed: Bool) -> some View {
         Text(symbol)
-            .font(.system(size: symbol.count > 1 ? 11 : 13.5, weight: .bold).width(.condensed))
+            .font(.system(size: symbol.count > 1 ? 11 : 13.5, weight: .bold)
+                .width(condensed ? .condensed : .standard))
             .lineLimit(1)
             .minimumScaleFactor(0.5)
             .foregroundColor(color)
@@ -216,6 +225,17 @@ struct LCDLineSymbolBadge: View {
         symbolText(color: textColor, inset: 3, hind: true)
             .frame(width: 24, height: 24)
             .background(color, in: shape)
+    }
+
+    private var newShuttleBadge: some View {
+        Text(symbol)
+            .font(.system(size: 11, weight: .bold).italic())
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
+            .foregroundColor(.white)
+            .padding(.horizontal, 2)
+            .frame(width: 24, height: 24)
+            .background(color, in: LCDFlatTopHexagon())
     }
 
     private var minatomiraiBadge: some View {
@@ -245,12 +265,15 @@ struct LCDLineSymbolBadge: View {
         .background(color, in: RoundedRectangle(cornerRadius: 5))
     }
 
-    private func symbolText(color: Color, inset: CGFloat, hind: Bool) -> some View {
+    private func symbolText(color: Color, inset: CGFloat, hind: Bool,
+                            condensed: Bool = false) -> some View {
         let size: CGFloat = symbol.count > 1 ? 13.875 : 15
         return Text(symbol)
-            .font(hind
-                  ? .custom("Hind-Bold", fixedSize: size)
-                  : .custom("Futura-Bold", fixedSize: symbol.count > 1 ? 8.25 : 11.25))
+            .font(condensed
+                  ? .system(size: symbol.count > 1 ? 11 : 13.5, weight: .bold).width(.condensed)
+                  : hind
+                    ? .custom("Hind-Bold", fixedSize: size)
+                    : .custom("Futura-Bold", fixedSize: symbol.count > 1 ? 8.25 : 11.25))
             .kerning(symbol.count > 1 ? -0.4 : 0)
             .lineLimit(1)
             .minimumScaleFactor(0.5)
@@ -286,6 +309,8 @@ struct LCDStationNumberBadge: View {
     private static let squarePrefixes: Set<String> = [
         // Tobu
         "TS", "TI", "TN", "TD", "TJ",
+        // Tokyo Monorail's plate is the same rounded square
+        "MO",
     ]
     private static let splitPrefixes: Set<String> = [
         // Odakyu
@@ -342,7 +367,9 @@ struct LCDStationNumberBadge: View {
         } else if Self.splitPrefixes.contains(prefix) {
             squircleBadge(prefix: prefix, number: number)
         } else if Self.keiseiStylePrefixes.contains(prefix) {
-            keiseiBadge(prefix: prefix, number: number)
+            keiseiBadge(prefix: prefix, number: number, condensed: prefix != "HS")
+        } else if prefix == "TR" {
+            condensedCircleBadge(prefix: prefix, number: number)
         } else if prefix == "NT" {
             nipporiToneriBadge(prefix: prefix, number: number)
         } else if prefix == "R" {
@@ -351,6 +378,8 @@ struct LCDStationNumberBadge: View {
             tamaBadge(prefix: prefix, number: number)
         } else if prefix == "B" || (prefix == "G" && color.isGreenDominant) {
             yokohamaBadge(prefix: prefix, number: number)
+        } else if prefix == "NS" {
+            newShuttleBadge(prefix: prefix, number: number)
         } else {
             circleBadge(prefix: prefix, number: number)
         }
@@ -390,6 +419,54 @@ struct LCDStationNumberBadge: View {
     }
 
     // MARK: Yokohama Municipal: filled line-color circle, white stacked code
+
+    @ViewBuilder
+    private func newShuttleBadge(prefix: String, number: String) -> some View {
+        let d = dimension
+
+        return VStack(spacing: 0) {
+            Text(prefix)
+                .font(.system(size: d * 0.30, weight: .bold).italic())
+                .frame(height: d * 0.34)
+                .offset(y: d * 0.05)
+
+            Text(number)
+                .font(.system(size: d * 0.36, weight: .bold).italic())
+                .frame(height: d * 0.40)
+                .offset(y: d * -0.03)
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.6)
+        .foregroundColor(.white)
+        .frame(width: d, height: d)
+        .background(color, in: LCDFlatTopHexagon())
+    }
+
+    private func condensedCircleBadge(prefix: String, number: String) -> some View {
+        let d = dimension
+
+        return VStack(spacing: 0) {
+            Text(prefix)
+                .font(.system(size: d * 0.32, weight: .bold).width(.condensed))
+                .frame(height: d * 0.36)
+                .offset(y: d * 0.04)
+
+            Text(number)
+                .font(.system(size: d * 0.36, weight: .bold).width(.condensed))
+                .frame(height: d * 0.40)
+                .offset(y: d * -0.04)
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.6)
+        .foregroundColor(.black)
+        .frame(width: d, height: d)
+        .background(Color.white)
+        .clipShape(Circle())
+        .overlay(
+            Circle()
+                .strokeBorder(color, lineWidth: d * 0.13)
+        )
+    }
 
     @ViewBuilder
     private func yokohamaBadge(prefix: String, number: String) -> some View {
@@ -687,14 +764,15 @@ struct LCDStationNumberBadge: View {
     // MARK: Keisei / Hokuso: circle ring, line-color code
 
     @ViewBuilder
-    private func keiseiBadge(prefix: String, number: String) -> some View {
+    private func keiseiBadge(prefix: String, number: String, condensed: Bool = true) -> some View {
         let d = dimension
 
         VStack(spacing: 0) {
-            // The KS/HS letters are bold condensed, matching the line symbol
-            // badge; the number stays regular Helvetica.
+            // Keisei's letters are bold condensed, matching the line symbol badge;
+            // Hokuso sets the same plate at normal width. The number stays Helvetica.
             Text(prefix)
-                .font(.system(size: d * 0.30, weight: .bold).width(.condensed))
+                .font(.system(size: d * 0.30, weight: .bold)
+                    .width(condensed ? .condensed : .standard))
                 .frame(height: d * 0.34)
                 .offset(y: d * 0.021)
 
@@ -781,6 +859,23 @@ struct LCDStationNumberBadge: View {
 
 /// The splayed legs under the Seibu train-front logo. Duplicated from the
 /// main app's SeibuTrainLegs because the LCD target is self-contained.
+/// Saitama New Shuttle's plate. Duplicated from the app target, which the widget can't import.
+struct LCDFlatTopHexagon: Shape {
+    func path(in rect: CGRect) -> Path {
+        let w = rect.width, h = rect.height
+        let inset = h * 0.08
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX, y: rect.midY))
+        path.addLine(to: CGPoint(x: rect.minX + w * 0.28, y: rect.minY + inset))
+        path.addLine(to: CGPoint(x: rect.maxX - w * 0.28, y: rect.minY + inset))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
+        path.addLine(to: CGPoint(x: rect.maxX - w * 0.28, y: rect.maxY - inset))
+        path.addLine(to: CGPoint(x: rect.minX + w * 0.28, y: rect.maxY - inset))
+        path.closeSubpath()
+        return path
+    }
+}
+
 struct LCDSeibuTrainLegs: Shape {
     func path(in rect: CGRect) -> Path {
         var p = Path()

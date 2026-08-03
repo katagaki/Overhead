@@ -63,7 +63,7 @@ struct LineSymbolBadge: View {
     private func customBadge(_ style: BadgeStyle) -> some View {
         switch style {
         case .rounded: jrBadge
-        case .ring: metroBadge
+        case .ring: metroBadge()
         case .filled: tokyuBadge
         case .square:
             symbolText(.custom("Hind-Bold", fixedSize: (symbol.count > 1 ? 18.5 : 20) * f),
@@ -84,7 +84,16 @@ struct LineSymbolBadge: View {
         case "NT":
             nipporiToneriBadge
         case "KS":
-            keiseiBadge
+            keiseiBadge(condensed: true)
+        case "HS":
+            // Hokuso shares Keisei's ringed circle but sets its code at normal width.
+            keiseiBadge(condensed: false)
+        case "MO":
+            // Tokyo Monorail's plate is a rounded rectangle, not a circle.
+            tobuBadge
+        case "TR":
+            // Toyo Rapid uses the Metro-style ring with a condensed system face.
+            metroBadge(condensed: true)
         case "KK":
             keikyuBadge
         case "SO":
@@ -99,6 +108,8 @@ struct LineSymbolBadge: View {
             yokohamaBadge
         case "G" where color.isGreenDominant:
             yokohamaBadge
+        case "NS":
+            newShuttleBadge
         case _ where Self.keioSymbols.contains(symbol):
             keioBadge
         case _ where Self.tokyuStyleSymbols.contains(symbol):
@@ -112,7 +123,7 @@ struct LineSymbolBadge: View {
         case _ where symbol.hasPrefix("J"):
             jrBadge
         default:
-            metroBadge
+            metroBadge()
         }
     }
 
@@ -192,10 +203,18 @@ struct LineSymbolBadge: View {
             .background(color, in: Circle())
     }
 
+    // MARK: - New Shuttle: filled line-color hexagon, white italic letters
+
+    private var newShuttleBadge: some View {
+        symbolText(.system(size: 15 * f, weight: .bold).italic(), color: .white, inset: 3 * f)
+            .frame(width: dimension, height: dimension)
+            .background(color, in: FlatTopHexagon())
+    }
+
     // MARK: - Keisei: blue ring, line-color bold condensed letters
 
-    private var keiseiBadge: some View {
-        symbolText(.system(size: 17 * f, weight: .bold).width(.condensed),
+    private func keiseiBadge(condensed: Bool) -> some View {
+        symbolText(.system(size: 17 * f, weight: .bold).width(condensed ? .condensed : .standard),
                    color: color, inset: 4.5 * f)
             .frame(width: dimension, height: dimension)
             .background(Color.white, in: Circle())
@@ -351,8 +370,10 @@ struct LineSymbolBadge: View {
 
     // MARK: - Tokyo Metro / Toei: thick color ring
 
-    private var metroBadge: some View {
-        symbolText(.custom("Futura-Bold", fixedSize: (symbol.count > 1 ? 11 : 15) * f),
+    private func metroBadge(condensed: Bool = false) -> some View {
+        symbolText(condensed
+                     ? .system(size: 15 * f, weight: .bold).width(.condensed)
+                     : .custom("Futura-Bold", fixedSize: (symbol.count > 1 ? 11 : 15) * f),
                    color: Self.metroLetterColor, inset: 7 * f)
             // Futura-Bold's "C" has uneven side bearings — nudge to optical center
             .offset(x: symbol == "C" ? -0.75 * f : 0)
@@ -380,6 +401,25 @@ struct LineSymbolBadge: View {
             .foregroundColor(color)
             .offset(y: nudge)
             .padding(.horizontal, inset)
+    }
+}
+
+// MARK: - Flat-Top Hexagon
+
+/// Saitama New Shuttle's plate: points at the left and right edges, flat top and bottom.
+struct FlatTopHexagon: Shape {
+    func path(in rect: CGRect) -> Path {
+        let w = rect.width, h = rect.height
+        let inset = h * 0.08          // flat edges sit just inside the top and bottom
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX, y: rect.midY))
+        path.addLine(to: CGPoint(x: rect.minX + w * 0.28, y: rect.minY + inset))
+        path.addLine(to: CGPoint(x: rect.maxX - w * 0.28, y: rect.minY + inset))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
+        path.addLine(to: CGPoint(x: rect.maxX - w * 0.28, y: rect.maxY - inset))
+        path.addLine(to: CGPoint(x: rect.minX + w * 0.28, y: rect.maxY - inset))
+        path.closeSubpath()
+        return path
     }
 }
 

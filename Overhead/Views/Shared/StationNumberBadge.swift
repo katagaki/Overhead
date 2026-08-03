@@ -21,6 +21,8 @@ struct StationNumberBadge: View {
     private static let squarePrefixes: Set<String> = [
         // Tobu
         "TS", "TI", "TN", "TD", "TJ",
+        // Tokyo Monorail's plate is the same rounded square
+        "MO",
     ]
     private static let splitPrefixes: Set<String> = [
         // Odakyu
@@ -101,7 +103,7 @@ struct StationNumberBadge: View {
         if seibuPrefixes.contains(prefix) { return false }
         if filledSquarePrefixes.contains(prefix) { return false }
         if splitPrefixes.contains(prefix) { return false }
-        if ["MM", "SO", "NT", "TT"].contains(prefix) { return false }
+        if ["MM", "SO", "NT", "TT", "NS"].contains(prefix) { return false }
         return true
     }
 
@@ -139,7 +141,11 @@ struct StationNumberBadge: View {
         } else if Self.splitPrefixes.contains(prefix) {
             squircleBadge(prefix: prefix, number: number)
         } else if Self.keiseiStylePrefixes.contains(prefix) {
-            keiseiBadge(prefix: prefix, number: number)
+            // Hokuso shares the ringed circle but sets its code at normal width.
+            keiseiBadge(prefix: prefix, number: number, condensed: prefix != "HS")
+        } else if prefix == "TR" {
+            // Toyo Rapid: Metro-style ring, condensed system face.
+            circleBadge(prefix: prefix, number: number, condensed: true)
         } else if prefix == "NT" {
             nipporiToneriBadge(prefix: prefix, number: number)
         } else if prefix == "R" {
@@ -149,6 +155,8 @@ struct StationNumberBadge: View {
         } else if prefix == "B" || (prefix == "G" && color.isGreenDominant) {
             // "G" is shared with Tokyo Metro Ginza (orange); color disambiguates.
             yokohamaBadge(prefix: prefix, number: number)
+        } else if prefix == "NS" {
+            newShuttleBadge(prefix: prefix, number: number)
         } else {
             circleBadge(prefix: prefix, number: number)
         }
@@ -185,6 +193,30 @@ struct StationNumberBadge: View {
             RoundedRectangle(cornerRadius: 6)
                 .strokeBorder(Self.tamaGreen.opacity(opacity), lineWidth: 3)
         )
+    }
+
+    // MARK: - New Shuttle: filled line-color hexagon, white stacked italic code
+
+    @ViewBuilder
+    private func newShuttleBadge(prefix: String, number: String) -> some View {
+        let d = badgeDimension
+
+        VStack(spacing: 0) {
+            Text(prefix)
+                .font(.system(size: d * 0.30, weight: .bold).italic())
+                .frame(height: d * 0.40)
+                .offset(y: d * 0.05)
+
+            Text(number)
+                .font(.system(size: d * 0.36, weight: .bold).italic())
+                .frame(height: d * 0.44)
+                .offset(y: d * -0.03)
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.6)
+        .foregroundColor(Color.white.opacity(opacity))
+        .frame(width: d, height: d)
+        .background(color.opacity(opacity), in: FlatTopHexagon())
     }
 
     // MARK: - Yokohama Municipal: filled line-color circle, white stacked code
@@ -430,14 +462,43 @@ struct StationNumberBadge: View {
 
     // MARK: - Metro / Toei / Keisei: Circle Ring
 
-    @ViewBuilder
-    private func circleBadge(prefix: String, number: String) -> some View {
+    private func circleBadge(prefix: String, number: String, condensed: Bool = false) -> some View {
         let d = badgeDimension
 
-        codeStack(prefix: prefix, number: number, font: "Futura-Bold",
+        if condensed {
+            return AnyView(condensedCircleBadge(prefix: prefix, number: number))
+        }
+        return AnyView(codeStack(prefix: prefix, number: number, font: "Futura-Bold",
                   prefixSize: d * 0.38, numberSize: d * 0.38, soloSize: d * 0.50,
                   prefixHeight: d * 0.42, numberHeight: d * 0.42,
                   prefixOffset: 1.10, numberOffset: -1.90)
+        .foregroundColor(Color.black.opacity(opacity))
+        .frame(width: d, height: d)
+        .background(Color.white)
+        .clipShape(Circle())
+        .overlay(
+            Circle()
+                .strokeBorder(color.opacity(opacity), lineWidth: d * 0.13)
+        ))
+    }
+
+    /// Same ringed circle, set in a condensed system face (Toyo Rapid).
+    private func condensedCircleBadge(prefix: String, number: String) -> some View {
+        let d = badgeDimension
+
+        return VStack(spacing: 0) {
+            Text(prefix)
+                .font(.system(size: d * 0.32, weight: .bold).width(.condensed))
+                .frame(height: d * 0.36)
+                .offset(y: d * 0.04)
+
+            Text(number)
+                .font(.system(size: d * 0.36, weight: .bold).width(.condensed))
+                .frame(height: d * 0.40)
+                .offset(y: d * -0.04)
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.6)
         .foregroundColor(Color.black.opacity(opacity))
         .frame(width: d, height: d)
         .background(Color.white)
@@ -521,12 +582,13 @@ struct StationNumberBadge: View {
     // MARK: - Keisei / Hokuso: Circle Ring, Line-Color Helvetica Code
 
     @ViewBuilder
-    private func keiseiBadge(prefix: String, number: String) -> some View {
+    private func keiseiBadge(prefix: String, number: String, condensed: Bool = true) -> some View {
         let d = badgeDimension
 
         VStack(spacing: 0) {
             Text(prefix)
-                .font(.system(size: d * 0.30, weight: .bold).width(.condensed))
+                .font(.system(size: d * 0.30, weight: .bold)
+                    .width(condensed ? .condensed : .standard))
                 .frame(height: d * 0.34)
                 .offset(y: 0.6)
 
