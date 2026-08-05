@@ -86,8 +86,9 @@ struct LineSymbolBadge: View {
         case "KS":
             keiseiBadge(condensed: true)
         case "HS":
-            // Hokuso shares Keisei's ringed circle but sets its code at normal width.
-            keiseiBadge(condensed: false)
+            // Hokuso shares Keisei's ringed circle but sets its code at normal
+            // width, so it needs a smaller size to clear the ring.
+            keiseiBadge(condensed: false, size: 14.5)
         case "MO":
             // Tokyo Monorail's plate is a rounded rectangle, not a circle.
             tobuBadge
@@ -233,8 +234,8 @@ struct LineSymbolBadge: View {
 
     // MARK: - Keisei: blue ring, line-color bold condensed letters
 
-    private func keiseiBadge(condensed: Bool) -> some View {
-        symbolText(.system(size: 17 * f, weight: .bold).width(condensed ? .condensed : .standard),
+    private func keiseiBadge(condensed: Bool, size: CGFloat = 17) -> some View {
+        symbolText(.system(size: size * f, weight: .bold).width(condensed ? .condensed : .standard),
                    color: color, inset: 4.5 * f)
             .frame(width: dimension, height: dimension)
             .background(Color.white, in: Circle())
