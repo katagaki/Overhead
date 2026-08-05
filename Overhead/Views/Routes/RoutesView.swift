@@ -7,6 +7,12 @@ struct FavoritesSection: View {
     @ObservedObject var viewModel: JourneyViewModel
     @State private var places: [SavedPlace] = []
     @State private var editorTarget: EditorTarget?
+    /// Upcoming departures from each favorite's origin, as rail seconds.
+    @State private var departuresByPlace: [UUID: [Int]] = [:]
+
+    private static let cardWidth: CGFloat = 176
+    private static let cardHeight: CGFloat = 92
+    private static let sectionHeight: CGFloat = 122
 
     private enum EditorTarget: Identifiable {
         case new
@@ -35,28 +41,18 @@ struct FavoritesSection: View {
                 Text("Section.Favorites")
                     .font(.body.weight(.semibold))
                     .foregroundColor(.secondary)
-
                 Spacer()
-
-                Button {
-                    editorTarget = .new
-                } label: {
-                    Image(systemName: "plus")
-                        .font(.system(size: 15, weight: .semibold))
-                }
-                .accessibilityLabel("Button.AddPlace")
             }
-            .padding(.leading, 4)
-            .padding(.trailing, 4)
+            .padding(.horizontal, 4)
 
-            if places.isEmpty {
-                emptyState
-            } else {
-                placesList
-            }
+            rail
         }
+        .frame(height: Self.sectionHeight, alignment: .top)
         .task {
             await viewModel.loadLines()
+        }
+        .task(id: placesSignature) {
+            await recomputeDepartures()
         }
         .onAppear { places = SavedPlaceStore.load() }
 #if DEBUG
@@ -85,128 +81,204 @@ struct FavoritesSection: View {
         }
     }
 
-    // MARK: - List
+    // MARK: - Rail
 
-    private var placesList: some View {
-        VStack(spacing: 0) {
-            ForEach(Array(places.enumerated()), id: \.element.id) { index, place in
-                if let resolved = resolve(place) {
-                    placeRow(place: place, resolved: resolved)
-                } else {
-                    brokenPlaceRow(place: place)
-                }
-                if index < places.count - 1 {
-                    Divider().padding(.leading, 16)
+    private var rail: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            TimelineView(.periodic(from: .now, by: 1)) { context in
+                HStack(alignment: .top, spacing: 10) {
+                    ForEach(places) { place in
+                        if let resolved = resolve(place) {
+                            placeCard(place: place, resolved: resolved, at: context.date)
+                        } else {
+                            brokenPlaceCard(place: place)
+                        }
+                    }
+                    addTile
+                    if places.isEmpty {
+                        emptyHint
+                    }
                 }
             }
         }
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .scrollClipDisabled()
+    }
+
+    private func placeCard(
+        place: SavedPlace,
+        resolved: ResolvedPlace,
+        at date: Date
+    ) -> some View {
+        Button {
+            Task { await start(place, resolved: resolved) }
+        } label: {
+            VStack(alignment: .leading, spacing: 5) {
+                HStack(alignment: .firstTextBaseline, spacing: 7) {
+                    Image(systemName: place.kind.iconName)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 22, height: 22)
+                        .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 7))
+                    Text(displayName(of: place))
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                    Spacer(minLength: 0)
+                }
+
+                routeLine(resolved)
+
+                Spacer(minLength: 0)
+
+                countdownLabel(for: place, at: date)
+            }
+            .padding(EdgeInsets(top: 12, leading: 12, bottom: 11, trailing: 12))
+            .frame(width: Self.cardWidth, height: Self.cardHeight, alignment: .topLeading)
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Button.StartJourney")
+        .contextMenu {
+            editButton(for: place)
+            deleteButton(for: place)
+        }
     }
 
     @ViewBuilder
-    private func placeRow(
-        place: SavedPlace,
-        resolved: ResolvedPlace
-    ) -> some View {
-        HStack(spacing: 12) {
-            Button {
-                editorTarget = .edit(place)
-            } label: {
-                HStack(spacing: 12) {
-                    Image(systemName: place.kind.iconName)
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(width: 36, height: 36)
-                        .background(resolved.line.color)
-                        .clipShape(RoundedRectangle(cornerRadius: 9))
-
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(displayName(of: place))
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.primary)
-
-                        HStack(spacing: 5) {
-                            Text(resolved.from.localizedName)
-                            ForEach(resolved.vias, id: \.id) { via in
-                                routeArrow(mode: .transfer)
-                                Text(via.localizedName)
-                            }
-                            routeArrow(mode: resolved.mode)
-                            Text(resolved.to.localizedName)
-
-                            if resolved.mode == .transfer && resolved.vias.isEmpty {
-                                Text("Label.Transfer")
-                                    .font(.system(size: 10, weight: .semibold))
-                                    .padding(.horizontal, 5)
-                                    .padding(.vertical, 1)
-                                    .background(Color(.tertiarySystemFill))
-                                    .clipShape(Capsule())
-                            }
-                        }
-                        .font(.system(size: 13))
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-
-                        Text(resolved.line.localizedName)
-                            .font(.system(size: 12))
-                            .foregroundColor(resolved.line.color)
-                            .lineLimit(1)
-                    }
-
-                    Spacer(minLength: 8)
+    private func routeLine(_ resolved: ResolvedPlace) -> some View {
+        let names = [resolved.from.localizedName]
+            + resolved.vias.map(\.localizedName)
+            + [resolved.to.localizedName]
+        HStack(spacing: 4) {
+            if names.count > 2 && names.joined().count > 9 {
+                Text(resolved.from.localizedName)
+                routeArrow(mode: resolved.mode)
+                Text(resolved.to.localizedName)
+            } else {
+                Text(resolved.from.localizedName)
+                ForEach(resolved.vias, id: \.id) { via in
+                    routeArrow(mode: .transfer)
+                    Text(via.localizedName)
                 }
-                .contentShape(Rectangle())
+                routeArrow(mode: resolved.mode)
+                Text(resolved.to.localizedName)
             }
-            .buttonStyle(.plain)
-
-            Button {
-                Task {
-                    await start(place, resolved: resolved)
-                }
-            } label: {
-                Image(systemName: "play.fill")
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(.white)
-                    .frame(width: 30, height: 30)
-                    .background(resolved.line.color, in: Circle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Button.StartJourney")
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .contextMenu {
-            deleteButton(for: place)
-        }
+        .font(.system(size: 13))
+        .foregroundStyle(.secondary)
+        .lineLimit(1)
+        .minimumScaleFactor(0.75)
     }
 
     private func routeArrow(mode: RouteMode) -> some View {
         Image(systemName: mode == .through ? "arrow.triangle.branch" : "arrow.right")
-            .font(.system(size: 10, weight: .semibold))
+            .font(.system(size: 9, weight: .semibold))
             .foregroundStyle(.tertiary)
     }
 
+    /// Time to the next departure: m:ss inside 10 minutes, あとX分 beyond it.
     @ViewBuilder
-    private func brokenPlaceRow(place: SavedPlace) -> some View {
-        HStack(spacing: 14) {
-            Image(systemName: place.kind.iconName)
-                .font(.system(size: 20))
-                .foregroundColor(.secondary)
-                .frame(width: 36)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(displayName(of: place))
-                    .font(.system(size: 16, weight: .semibold))
-                Text("Place.Unresolvable")
-                    .font(.system(size: 12))
-                    .foregroundColor(.secondary)
+    private func countdownLabel(for place: SavedPlace, at date: Date) -> some View {
+        let departures = departuresByPlace[place.id]
+        if let departures {
+            let now = Self.railNowSeconds(at: date)
+            if let next = departures.first(where: { $0 >= now }) {
+                let remaining = next - now
+                Group {
+                    if remaining < 10 * 60 {
+                        Text(verbatim: String(format: "%d:%02d", remaining / 60, remaining % 60))
+                    } else {
+                        Text("Candidate.DepartsIn \(remaining / 60)")
+                    }
+                }
+                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .monospacedDigit()
+                .foregroundStyle(remaining <= 3 * 60 ? Color.red : Color.accentColor)
+                .contentTransition(.numericText(countsDown: true))
+                .animation(.default, value: remaining)
+            } else {
+                Text("Favorites.NoMoreTrains")
+                    .font(.system(size: 14.5))
+                    .foregroundStyle(.secondary)
             }
-            Spacer(minLength: 8)
+        } else {
+            Text(verbatim: "--:--")
+                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .foregroundStyle(.tertiary)
+                .monospacedDigit()
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+    }
+
+    private func brokenPlaceCard(place: SavedPlace) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(alignment: .firstTextBaseline, spacing: 7) {
+                Image(systemName: place.kind.iconName)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 22, height: 22)
+                    .background(Color(.systemGray3), in: RoundedRectangle(cornerRadius: 7))
+                Text(displayName(of: place))
+                    .font(.system(size: 17, weight: .bold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                Spacer(minLength: 0)
+            }
+            Text("Place.Unresolvable")
+                .font(.system(size: 13))
+                .foregroundStyle(.secondary)
+                .lineLimit(2)
+            Spacer(minLength: 0)
+        }
+        .padding(EdgeInsets(top: 12, leading: 12, bottom: 11, trailing: 12))
+        .frame(width: Self.cardWidth, height: Self.cardHeight, alignment: .topLeading)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .contextMenu {
             deleteButton(for: place)
+        }
+    }
+
+    private var addTile: some View {
+        Button {
+            editorTarget = .new
+        } label: {
+            Image(systemName: "plus")
+                .font(.system(size: 20, weight: .medium))
+                .foregroundStyle(.secondary)
+                .frame(width: 56, height: Self.cardHeight)
+                .background {
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .strokeBorder(
+                            Color(.systemGray4),
+                            style: StrokeStyle(lineWidth: 1.5, dash: [5, 4])
+                        )
+                }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Button.AddPlace")
+    }
+
+    private var emptyHint: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text("Place.EmptyTitle")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(.secondary)
+            Text("Place.EmptyDescription")
+                .font(.system(size: 11.5))
+                .foregroundStyle(.tertiary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(width: 240, height: Self.cardHeight, alignment: .leading)
+        .padding(.leading, 6)
+    }
+
+    private func editButton(for place: SavedPlace) -> some View {
+        Button {
+            editorTarget = .edit(place)
+        } label: {
+            Label("Button.EditPlace", systemImage: "pencil")
         }
     }
 
@@ -217,27 +289,6 @@ struct FavoritesSection: View {
         } label: {
             Label("Button.DeletePlace", systemImage: "trash")
         }
-    }
-
-    private var emptyState: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "mappin.and.ellipse")
-                .font(.system(size: 24))
-                .foregroundColor(.secondary)
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Place.EmptyTitle")
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.secondary)
-                Text("Place.EmptyDescription")
-                    .font(.system(size: 12))
-                    .foregroundStyle(.tertiary)
-            }
-            Spacer(minLength: 0)
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
     }
 
     // MARK: - Helpers
@@ -323,6 +374,86 @@ struct FavoritesSection: View {
         } else {
             viewModel.errorMessage = String(localized: "Setup.NoRoute")
         }
+    }
+
+    // MARK: - Departure computation
+
+    private var placesSignature: String {
+        places.map { "\($0.id)|\($0.lineId)|\($0.fromStationId)|\($0.toStationId)" }
+            .joined(separator: ",")
+    }
+
+    private func recomputeDepartures() async {
+        // Plain values captured on the main actor before hopping off it.
+        let targets = places.map { place in
+            (id: place.id,
+             lineId: place.lineId,
+             fromId: place.fromStationId,
+             towardId: place.viaStationIds.first ?? place.toStationId)
+        }
+        guard !targets.isEmpty else {
+            departuresByPlace = [:]
+            return
+        }
+        departuresByPlace = await Task.detached(priority: .userInitiated) { () -> [UUID: [Int]] in
+            var result: [UUID: [Int]] = [:]
+            let calendar = ScheduleCalendar.current()
+            for target in targets {
+                guard let line = StaticTrainData.line(withId: target.lineId),
+                      let timetable = Self.timetable(
+                          line: line,
+                          fromId: target.fromId,
+                          towardId: target.towardId,
+                          calendar: calendar
+                      )
+                else { continue }
+                result[target.id] = timetable.departures
+                    .compactMap { TimetableEntry.parseRailTime($0.departureTime) }
+                    .sorted()
+            }
+            return result
+        }.value
+    }
+
+    private static func timetable(
+        line: StaticTrainLine,
+        fromId: String,
+        towardId: String,
+        calendar: ScheduleCalendar
+    ) -> StationTimetableData? {
+        let timetables = StaticTimetableGenerator.stationTimetables(
+            for: line, stationId: fromId, calendar: calendar
+        )
+        guard !timetables.isEmpty else { return nil }
+
+        var ascending: Bool?
+        if let fromIndex = line.stations.firstIndex(where: { $0.id == fromId }) {
+            if let towardIndex = line.stations.firstIndex(where: { $0.id == towardId }) {
+                ascending = towardIndex > fromIndex
+            } else {
+                for group in StaticTrainData.throughDestinations(
+                    fromLineId: line.id, boardingStationId: fromId
+                ) where group.stations.contains(where: { $0.id == towardId }) {
+                    ascending = group.service.end == .ascending
+                    break
+                }
+            }
+        }
+
+        if let ascending,
+           let direction = line.directions.first(where: { $0.isAscending == ascending }) {
+            return timetables.first { $0.railDirection == direction.id }
+        }
+        return timetables.count == 1 ? timetables.first : nil
+    }
+
+    /// Before 03:00 the clock reads as 24+ so post-midnight departures compare correctly.
+    private static func railNowSeconds(at date: Date) -> Int {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Asia/Tokyo")!
+        let parts = calendar.dateComponents([.hour, .minute, .second], from: date)
+        let seconds = (parts.hour ?? 0) * 3600 + (parts.minute ?? 0) * 60 + (parts.second ?? 0)
+        return seconds < 3 * 3600 ? seconds + 24 * 3600 : seconds
     }
 
     private func upsert(_ place: SavedPlace) {
