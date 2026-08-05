@@ -19,22 +19,47 @@ struct NearbyStation: Identifiable {
     }
 }
 
+// MARK: - Nearby Station Group
+
+/// One physical station (deduped by name) with every line that serves it.
+struct NearbyStationGroup: Identifiable {
+    let name: String
+    let distanceMeters: Double
+    /// One hit per line serving this station name, in operator order.
+    let hits: [StationSearchHit]
+
+    var id: String { name }
+    var station: Station { hits[0].station }
+}
+
 // MARK: - Nearby Stations Provider
 
 /// One-shot location lookup that surfaces the closest stations in the
-/// station picker. Requests when-in-use permission on first use.
+/// station picker and the home-screen 付近の駅 rail.
 final class NearbyStationsProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
 
     @Published var nearestStations: [NearbyStation] = []
+    @Published var nearestGroups: [NearbyStationGroup] = []
+    @Published private(set) var authorizationStatus: CLAuthorizationStatus
+    @Published private(set) var isReducedAccuracy = false
+    @Published private(set) var isLocating = false
+    @Published private(set) var lastUpdated: Date?
 
     private let locationManager = CLLocationManager()
     private var lines: [TrainLine] = []
     private let maxResults = 5
+    /// Groups beyond this radius are dropped; the home rail shows 圏外 instead.
+    private let groupRadiusMeters: Double = 2000
+    /// GPS jitter under this granularity must not reorder the rail.
+    private let distanceBucketMeters: Double = 50
+    private let refreshInterval: TimeInterval = 60
 
     override init() {
+        authorizationStatus = locationManager.authorizationStatus
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+        isReducedAccuracy = locationManager.accuracyAuthorization == .reducedAccuracy
     }
 
     /// Requests permission if needed and refreshes the nearest-station list.
@@ -45,18 +70,41 @@ final class NearbyStationsProvider: NSObject, ObservableObject, CLLocationManage
         case .notDetermined:
             locationManager.requestWhenInUseAuthorization()
         case .authorizedWhenInUse, .authorizedAlways:
-            locationManager.requestLocation()
+            requestFix()
         default:
             nearestStations = []
         }
     }
 
+    /// Prompts for permission — call only from an explicit user tap, never on appear.
+    func requestPermission(lines: [TrainLine]) {
+        self.lines = lines
+        locationManager.requestWhenInUseAuthorization()
+    }
+
+    /// Refreshes without ever prompting; throttled unless forced.
+    func refreshIfNeeded(lines: [TrainLine], force: Bool = false) {
+        self.lines = lines
+        guard authorizationStatus == .authorizedWhenInUse || authorizationStatus == .authorizedAlways else { return }
+        if !force, let last = lastUpdated, Date().timeIntervalSince(last) < refreshInterval { return }
+        requestFix()
+    }
+
+    private func requestFix() {
+        isLocating = lastUpdated == nil
+        locationManager.requestLocation()
+    }
+
     // MARK: - CLLocationManagerDelegate
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        authorizationStatus = manager.authorizationStatus
+        isReducedAccuracy = manager.accuracyAuthorization == .reducedAccuracy
         switch manager.authorizationStatus {
         case .authorizedWhenInUse, .authorizedAlways:
-            manager.requestLocation()
+            if !lines.isEmpty {
+                requestFix()
+            }
         default:
             break
         }
@@ -68,7 +116,9 @@ final class NearbyStationsProvider: NSObject, ObservableObject, CLLocationManage
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        // Leave the list empty — the picker simply shows no nearby section.
+        DispatchQueue.main.async {
+            self.isLocating = false
+        }
     }
 
     // MARK: - Computation
@@ -94,8 +144,44 @@ final class NearbyStationsProvider: NSObject, ObservableObject, CLLocationManage
             .sorted { $0.distanceMeters < $1.distanceMeters }
             .prefix(maxResults)
 
+        let groups = groupedStations(nearest: Array(nearest))
+
         DispatchQueue.main.async {
             self.nearestStations = Array(nearest)
+            self.nearestGroups = groups
+            self.isLocating = false
+            self.lastUpdated = Date()
         }
+    }
+
+    private func groupedStations(nearest: [NearbyStation]) -> [NearbyStationGroup] {
+        nearest
+            .filter { $0.distanceMeters <= groupRadiusMeters }
+            .map { entry in
+                // Every line whose stations include this name, in operator order.
+                let serving = lines.compactMap { line -> StationSearchHit? in
+                    guard !line.isCustom,
+                          let station = line.stations.first(where: { $0.name == entry.hit.station.name })
+                    else { return nil }
+                    return StationSearchHit(line: line, station: station)
+                }
+                // Same ordering as the 路線 list: operator sections, then symbol sort.
+                let byLineId = Dictionary(uniqueKeysWithValues: serving.map { ($0.line.id, $0) })
+                let ordered = OperatorSections.sections(for: serving.map(\.line))
+                    .flatMap(\.lines)
+                    .compactMap { byLineId[$0.id] }
+                return NearbyStationGroup(
+                    name: entry.hit.station.name,
+                    distanceMeters: entry.distanceMeters,
+                    hits: ordered.isEmpty ? [entry.hit] : ordered
+                )
+            }
+            // Bucketed sort: jitter within 50m keeps the previous order stable.
+            .sorted { a, b in
+                let ba = Int(a.distanceMeters / distanceBucketMeters)
+                let bb = Int(b.distanceMeters / distanceBucketMeters)
+                if ba != bb { return ba < bb }
+                return a.name < b.name
+            }
     }
 }

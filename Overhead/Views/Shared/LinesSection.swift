@@ -132,7 +132,7 @@ struct LinesSection: View {
                 LineSymbolBadge(
                     symbol: line.lineSymbol,
                     color: line.color,
-                    dimension: 44,
+                    dimension: 38,
                     styleOverride: line.badgeStyle
                 )
             } else {
@@ -140,8 +140,8 @@ struct LinesSection: View {
                 // show the route colour as a stripe, as the station rows do.
                 RoundedRectangle(cornerRadius: 4)
                     .fill(line.color)
-                    .frame(width: 8, height: 32)
-                    .frame(width: 44, height: 44)
+                    .frame(width: 7, height: 28)
+                    .frame(width: 38, height: 38)
             }
 
             HorizontallyFittedText(
@@ -152,7 +152,7 @@ struct LinesSection: View {
             .foregroundColor(.primary)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(.vertical, 12)
+        .padding(.vertical, 10)
         .padding(.horizontal, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(.secondarySystemGroupedBackground))

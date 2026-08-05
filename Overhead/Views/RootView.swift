@@ -37,6 +37,8 @@ struct RootView: View {
                     VStack(spacing: 24) {
                         JourneyPlannerSection(viewModel: viewModel)
                         FavoritesSection(viewModel: viewModel)
+                        NearbyStationsSection(viewModel: viewModel)
+                            .id("nearby")
                         LinesSection(viewModel: viewModel)
                             .id("lines")
                         CustomLinesSection(viewModel: viewModel)

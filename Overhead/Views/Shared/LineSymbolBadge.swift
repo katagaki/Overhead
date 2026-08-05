@@ -122,7 +122,7 @@ struct LineSymbolBadge: View {
         case _ where Self.tobuSymbols.contains(symbol):
             tobuBadge
         case "JR":
-            // Lines with no station numbering show the JR mark, in the line color.
+            // Lines with no station numbering show the JR mark in the line-colored frame.
             jrWordmarkBadge
         case _ where symbol.hasPrefix("J"):
             jrBadge
@@ -152,7 +152,7 @@ struct LineSymbolBadge: View {
     // MARK: - JR East: the JR mark, for lines with no station numbering
 
     private var jrWordmarkBadge: some View {
-        symbolText(.custom("Hind-Bold", fixedSize: 17 * f), color: color, inset: 4 * f,
+        symbolText(.custom("Hind-Bold", fixedSize: 17 * f), color: .black, inset: 4 * f,
                    nudge: 15 * f * 0.085)
             .frame(width: dimension, height: dimension)
             .background {
