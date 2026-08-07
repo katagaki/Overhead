@@ -15,7 +15,7 @@ import Backbone
 /// - overtrain://journey?minutesAgo=45[&line=…&from=…&to=…]
 /// - overtrain://planner?action=search|avoid|departure|arrival
 /// - overtrain://timetable[?line=…&station=…&hidePast=0]
-/// - overtrain://line[?line=…&status=expanded&source=x]
+/// - overtrain://line[?line=…&status=expanded]
 /// - overtrain://custom-line (seeds the sample line and opens its editor)
 /// - overtrain://home?scroll=lines
 /// - overtrain://place-editor[?edit=first]
@@ -78,8 +78,7 @@ enum ScreenshotCommand {
             self = .linePage(
                 ScreenshotLineTarget(
                     lineId: params["line"] ?? "Railway:JR-East.JobanRapid",
-                    expandStatus: params["status"] == "expanded",
-                    showX: params["source"] == "x"
+                    expandStatus: params["status"] == "expanded"
                 )
             )
         case "custom-line":
@@ -106,7 +105,6 @@ struct ScreenshotTimetableTarget: Identifiable {
 struct ScreenshotLineTarget: Identifiable, Hashable {
     let lineId: String
     let expandStatus: Bool
-    let showX: Bool
     var id: String { lineId }
 }
 
@@ -121,8 +119,6 @@ final class ScreenshotStaging: ObservableObject {
     @Published var hidePastDepartures = false
     /// Line pages open with the service status sheet expanded.
     @Published var expandServiceStatus = false
-    /// The expanded service status sheet starts on the X tab.
-    @Published var serviceStatusShowsX = false
     /// Anchor id for RootView's ScrollViewReader.
     @Published var homeScrollTarget: String?
     /// Favorite editor sheet command for FavoritesSection.

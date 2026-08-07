@@ -6,7 +6,7 @@ import Backbone
 // MARK: - Service Status Sheet (運行情報)
 
 /// Sheet content that peeks at the bottom of the line page and expands into a
-/// web panel showing the operator's official status page or their X timeline.
+/// web panel showing the operator's official status page.
 struct ServiceStatusSheet: View {
     static let peekHeight: CGFloat = 72
 
@@ -17,7 +17,6 @@ struct ServiceStatusSheet: View {
     /// swiped away since no page's onDisappear will ever clear them.
     var standalone = false
     @ObservedObject var web: ServiceStatusWebController
-    @State private var source: ServiceStatusSource = .official
     @State private var detent: PresentationDetent = .height(ServiceStatusSheet.peekHeight)
 
     private var isPeeking: Bool {
@@ -36,6 +35,22 @@ struct ServiceStatusSheet: View {
                 Spacer()
 
                 if !isPeeking {
+                    if let xURL = web.xURL {
+                        Button {
+                            UIApplication.shared.open(xURL)
+                        } label: {
+                            // Optically smaller than an SF Symbol at the same size.
+                            Text(verbatim: "𝕏")
+                                .font(.system(size: 27, weight: .medium))
+                                .foregroundStyle(Color.primary)
+                                .frame(width: 44, height: 44)
+                                .contentShape(Circle())
+                        }
+                        .glassEffect(.regular.interactive(), in: Circle())
+                        .accessibilityLabel("ServiceStatus.OpenInX")
+                        .transition(.blurReplace)
+                    }
+
                     Button {
                         openInSafari()
                     } label: {
@@ -71,22 +86,10 @@ struct ServiceStatusSheet: View {
                 detent = isPeeking ? .medium : .height(Self.peekHeight)
             }
 
-            // Kept out of the peek state so the fold doesn't clip them.
+            // Kept out of the peek state so the fold doesn't clip it.
             if !isPeeking {
-                if web.xWebView != nil {
-                    Picker("StationTimetable.ServiceStatus", selection: $source) {
-                        Text("ServiceStatus.Tab.Official").tag(ServiceStatusSource.official)
-                        Text(verbatim: "X").tag(ServiceStatusSource.x)
-                    }
-                    .pickerStyle(.segmented)
-                    .padding(.horizontal, 16)
-                    .transition(.blurReplace)
-                }
-
-                if let webView = web.webView(for: source) {
+                if let webView = web.officialWebView {
                     ServiceStatusWebView(webView: webView)
-                        // Representables never swap their UIView; new identity per source.
-                        .id(source)
                         .ignoresSafeArea(edges: .bottom)
                         .transition(.opacity)
                 }
@@ -108,7 +111,6 @@ struct ServiceStatusSheet: View {
         // The sheet stays up while pushing between line pages; start each line at peek.
         .onChange(of: lineId) {
             detent = .height(Self.peekHeight)
-            source = .official
         }
 #if DEBUG
         .onAppear {
@@ -116,26 +118,15 @@ struct ServiceStatusSheet: View {
                 ScreenshotStaging.shared.expandServiceStatus = false
                 detent = .large
             }
-            if ScreenshotStaging.shared.serviceStatusShowsX {
-                ScreenshotStaging.shared.serviceStatusShowsX = false
-                source = .x
-            }
         }
 #endif
     }
 
     private func openInSafari() {
-        if let url = web.webView(for: source)?.url ?? URL(string: delayInfo.localizedStatusPageURL) {
+        if let url = web.officialWebView?.url ?? URL(string: delayInfo.localizedStatusPageURL) {
             UIApplication.shared.open(url)
         }
     }
-}
-
-// MARK: - Source
-
-enum ServiceStatusSource {
-    case official
-    case x
 }
 
 // MARK: - Presenter
@@ -232,18 +223,19 @@ extension View {
 
 // MARK: - Web Controller
 
-/// Preloads the status page (and X timeline) in cookie-less web views so the
-/// sheet has content by the time it is dragged up. The non-persistent data
-/// store keeps cookies in memory only; they vanish when the app exits.
+/// Preloads the status page in a cookie-less web view so the sheet has content
+/// by the time it is dragged up. Cookies are blocked outright by a content rule
+/// list, and the non-persistent store keeps anything WebKit still writes in
+/// memory only. Every surveyed operator page renders fine without them.
 @MainActor
 final class ServiceStatusWebController: ObservableObject {
     nonisolated let objectWillChange = ObservableObjectPublisher()
 
     let officialWebView: WKWebView?
-    let xWebView: WKWebView?
+    /// The operator's X timeline, opened externally rather than embedded.
+    let xURL: URL?
 
     private let officialDelegate: RestrictedWebDelegate?
-    private let xDelegate: RestrictedWebDelegate?
 
     init(delayInfo: DelayCheckInfo?) {
         if let delayInfo, let statusURL = URL(string: delayInfo.localizedStatusPageURL) {
@@ -257,27 +249,19 @@ final class ServiceStatusWebController: ObservableObject {
             self.officialWebView = nil
         }
 
-        if let account = delayInfo?.xAccount,
-           let xURL = URL(string: "https://x.com/\(account.hasPrefix("@") ? String(account.dropFirst()) : account)") {
-            let delegate = RestrictedWebDelegate(allowedDomains: ["x.com", "twitter.com", "twimg.com"])
-            self.xDelegate = delegate
-            self.xWebView = Self.makeWebView(delegate: delegate, url: xURL)
+        if let account = delayInfo?.xAccount {
+            self.xURL = URL(string: "https://x.com/\(account.hasPrefix("@") ? String(account.dropFirst()) : account)")
         } else {
-            self.xDelegate = nil
-            self.xWebView = nil
+            self.xURL = nil
         }
-    }
-
-    func webView(for source: ServiceStatusSource) -> WKWebView? {
-        source == .x ? (xWebView ?? officialWebView) : officialWebView
     }
 
     private static func makeWebView(delegate: RestrictedWebDelegate, url: URL) -> WKWebView {
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .nonPersistent()
-        // Safari-style UA: x.com sniffs in-app webviews and 302s them to its
-        // Safari-only x-safari-https:// escape scheme, leaving a blank page.
         configuration.applicationNameForUserAgent = "Version/26.0 Mobile/15E148 Safari/604.1"
+        configuration.userContentController.addUserScript(CookieBanners.sealScript)
+        configuration.userContentController.addUserScript(CookieBanners.sweepScript)
         // Non-zero frame so the page lays out at a phone viewport during preload.
         let webView = WKWebView(
             frame: CGRect(x: 0, y: 0, width: 390, height: 700),
@@ -286,7 +270,13 @@ final class ServiceStatusWebController: ObservableObject {
         webView.navigationDelegate = delegate
         webView.uiDelegate = delegate
         webView.allowsBackForwardNavigationGestures = true
-        webView.load(URLRequest(url: url))
+        // Held until the rule list is attached so the first load is cookie-less too.
+        Task {
+            if let rules = await CookieBanners.ruleList() {
+                webView.configuration.userContentController.add(rules)
+            }
+            webView.load(URLRequest(url: url))
+        }
         return webView
     }
 
@@ -299,6 +289,92 @@ final class ServiceStatusWebController: ObservableObject {
         let keep = labels[labels.count - 1] == "jp"
             && secondLevel.contains(labels[labels.count - 2]) ? 3 : 2
         return labels.suffix(keep).joined(separator: ".")
+    }
+}
+
+// MARK: - Cookies & Banners
+
+/// Blocks cookies and hides consent banners. Five of the operator status pages
+/// ship one: 北総 (#cookie-agree), 京成 (#cookiePolicy), 東京メトロ (Cookiebot),
+/// 京王 (OneTrust, injected seconds after load) and JR東日本's *English* pages
+/// (#gdprWrapper — the Japanese ones have none). The fuzzy sweep behind them
+/// catches sites that add one later.
+@MainActor
+enum CookieBanners {
+    /// Hidden outright: each is the consent widget's own root.
+    static let knownSelectors = """
+        #cookie-agree, #cookiePolicy, #CybotCookiebotDialog, #CybotCookiebotDialogBodyUnderlay, \
+        #gdprWrapper, #onetrust-consent-sdk
+        """
+
+    /// Hidden only when they float over the page, so ordinary page furniture
+    /// that merely mentions cookies (京成's footer link) survives.
+    private static let fuzzySelectors = """
+        [id*="ookie"], [class*="ookie"], [id*="onsent"], [class*="onsent"], \
+        [id*="gdpr"], [class*="gdpr"], [id*="onetrust"], [class*="onetrust"]
+        """
+
+    /// `block-cookies` only strips the HTTP Cookie/Set-Cookie headers; page JS
+    /// can still write `document.cookie`. Neutering it too gets the count to a
+    /// measured zero, and all 35 status pages render byte-identically without it.
+    static let sealScript = WKUserScript(
+        source: """
+        (() => {
+          try {
+            Object.defineProperty(document, 'cookie', {
+              get() { return ''; }, set(_value) { return ''; }, configurable: true
+            });
+          } catch (error) {}
+        })();
+        """,
+        injectionTime: .atDocumentStart,
+        forMainFrameOnly: false
+    )
+
+    static let sweepScript = WKUserScript(
+        source: """
+        (() => {
+          const sweep = () => {
+            document.querySelectorAll('\(knownSelectors)').forEach((element) => {
+              element.style.setProperty('display', 'none', 'important');
+            });
+            document.querySelectorAll('\(fuzzySelectors)').forEach((element) => {
+              const position = getComputedStyle(element).position;
+              if (position === 'fixed' || position === 'sticky') {
+                element.style.setProperty('display', 'none', 'important');
+              }
+            });
+          };
+          sweep();
+          new MutationObserver(sweep).observe(document.documentElement, { childList: true, subtree: true });
+        })();
+        """,
+        injectionTime: .atDocumentEnd,
+        forMainFrameOnly: true
+    )
+
+    private static var compiled: WKContentRuleList?
+    private static var compilation: Task<WKContentRuleList?, Never>?
+
+    static func ruleList() async -> WKContentRuleList? {
+        if let compiled { return compiled }
+        if let compilation { return await compilation.value }
+        let task = Task<WKContentRuleList?, Never> {
+            let rules = """
+            [
+              { "trigger": { "url-filter": ".*" }, "action": { "type": "block-cookies" } },
+              { "trigger": { "url-filter": ".*" },
+                "action": { "type": "css-display-none", "selector": "\(knownSelectors)" } }
+            ]
+            """
+            return try? await WKContentRuleListStore.default()?.compileContentRuleList(
+                forIdentifier: "ServiceStatusCookieBlock",
+                encodedContentRuleList: rules
+            )
+        }
+        compilation = task
+        compiled = await task.value
+        return compiled
     }
 }
 
@@ -343,18 +419,8 @@ private final class RestrictedWebDelegate: NSObject, WKNavigationDelegate, WKUID
             decisionHandler(.allow)
             return
         }
-        // Unwrap x.com's Safari-escape scheme back into a normal load.
-        if scheme.hasPrefix("x-safari-"),
-           var comps = URLComponents(url: url, resolvingAgainstBaseURL: false) {
-            comps.scheme = String(scheme.dropFirst("x-safari-".count))
-            if let unwrapped = comps.url, isAllowed(unwrapped) {
-                webView.load(URLRequest(url: unwrapped))
-            }
-            decisionHandler(.cancel)
-            return
-        }
-        // Only a tapped link may leave the app; scripted redirects (X's
-        // app-open attempts fire on page load) are dropped silently.
+        // Only a tapped link may leave the app; scripted redirects are dropped
+        // silently rather than yanking the user out to Safari.
         if isUserInitiated(navigationAction) {
             openExternally(url)
         }

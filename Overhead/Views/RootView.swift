@@ -263,7 +263,6 @@ struct RootView: View {
             debugTimetableTarget = target
         case .linePage(let target):
             ScreenshotStaging.shared.expandServiceStatus = target.expandStatus
-            ScreenshotStaging.shared.serviceStatusShowsX = target.showX
             navigationPath.append(target)
         case .customLineEditor:
             ScreenshotSeeder.seedCustomLine()

@@ -6367,37 +6367,37 @@
         }
       }
     },
-    "ServiceStatus.Tab.Official" : {
+    "ServiceStatus.OpenInX" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Official"
+            "value" : "Open in X"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "公式サイト"
+            "value" : "Xで開く"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "공식 사이트"
+            "value" : "X에서 열기"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "官方网站"
+            "value" : "在 X 中打开"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "官方網站"
+            "value" : "在 X 中開啟"
           }
         }
       }
