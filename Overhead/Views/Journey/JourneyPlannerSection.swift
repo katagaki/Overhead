@@ -210,10 +210,7 @@ struct JourneyPlannerSection: View {
             )
         } else {
             VStack(alignment: .leading, spacing: 8) {
-                Text(ignoreTimetable ? "Setup.Routes" : "Setup.Candidates")
-                    .font(.body.weight(.semibold))
-                    .foregroundColor(.secondary)
-                    .padding(.leading, 4)
+                SectionHeader(title: ignoreTimetable ? "Setup.Routes" : "Setup.Candidates")
 
                 if let walkMinutes = searchWalkMinutes,
                    let fromName = fromSelection?.station.localizedName {

@@ -37,14 +37,7 @@ struct FavoritesSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 8) {
-                Text("Section.Favorites")
-                    .font(.body.weight(.semibold))
-                    .foregroundColor(.secondary)
-                Spacer()
-            }
-            .padding(.horizontal, 4)
-
+            SectionHeader(title: "Section.Favorites")
             rail
         }
         .frame(height: Self.sectionHeight, alignment: .top)

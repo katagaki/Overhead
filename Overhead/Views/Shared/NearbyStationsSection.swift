@@ -80,33 +80,21 @@ struct NearbyStationsSection: View {
     // MARK: - Header
 
     private var header: some View {
-        HStack {
-            Text(provider.isReducedAccuracy ? "Nearby.TitleApprox" : "Nearby.Title")
-                .font(.body.weight(.semibold))
-                .foregroundStyle(.secondary)
-            Spacer()
+        SectionHeader(title: provider.isReducedAccuracy ? "Nearby.TitleApprox" : "Nearby.Title") {
             switch provider.authorizationStatus {
             case .authorizedWhenInUse, .authorizedAlways:
-                if provider.isLocating {
-                    Text("Nearby.Locating")
-                        .font(.system(size: 13))
-                        .foregroundStyle(.secondary)
-                } else if provider.lastUpdated != nil {
-                    Button {
-                        provider.refreshIfNeeded(lines: viewModel.availableLines, force: true)
-                    } label: {
-                        Image(systemName: "arrow.clockwise")
-                            .font(.system(size: 13, weight: .semibold))
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(.tint)
+                // Always present once authorized; dimmed while locating.
+                SectionAction(
+                    icon: "arrow.clockwise",
+                    label: "Button.Refresh",
+                    enabled: !provider.isLocating
+                ) {
+                    provider.refreshIfNeeded(lines: viewModel.availableLines, force: true)
                 }
             default:
                 EmptyView()
             }
         }
-        .padding(.horizontal, 4)
     }
 
     // MARK: - States

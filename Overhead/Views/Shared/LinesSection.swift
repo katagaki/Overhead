@@ -10,10 +10,7 @@ struct LinesSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Tab.Lines")
-                .font(.body.weight(.semibold))
-                .foregroundColor(.secondary)
-                .padding(.leading, 4)
+            SectionHeader(title: "Tab.Lines")
 
             if viewModel.availableLines.isEmpty {
                 emptyState
@@ -61,7 +58,7 @@ struct LinesSection: View {
                 let isCollapsed = !expandedOperators.contains(section.operatorId)
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Button {
+                    SectionHeader(verbatim: section.title, collapsed: isCollapsed) {
                         withAnimation(.smooth.speed(2.0)) {
                             if isCollapsed {
                                 expandedOperators.insert(section.operatorId)
@@ -69,21 +66,7 @@ struct LinesSection: View {
                                 expandedOperators.remove(section.operatorId)
                             }
                         }
-                    } label: {
-                        HStack(spacing: 4) {
-                            Text(section.title)
-                                .font(.body.weight(.semibold))
-                                .foregroundColor(.secondary)
-                            Image(systemName: "chevron.down")
-                                .font(.caption.weight(.semibold))
-                                .foregroundColor(.secondary)
-                                .rotationEffect(.degrees(isCollapsed ? -90 : 0))
-                            Spacer(minLength: 0)
-                        }
-                        .padding(.leading, 4)
-                        .contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
 
                     if !isCollapsed {
                         lineGrid(section.lines)

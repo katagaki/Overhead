@@ -20,10 +20,7 @@ struct CustomLinesSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("CustomLine.Section")
-                .font(.body.weight(.semibold))
-                .foregroundColor(.secondary)
-                .padding(.leading, 4)
+            SectionHeader(title: "CustomLine.Section")
 
             VStack(spacing: 0) {
                 ForEach(store.lines) { line in
