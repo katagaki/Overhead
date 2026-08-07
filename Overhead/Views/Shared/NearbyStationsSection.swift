@@ -50,15 +50,13 @@ struct NearbyStationsSection: View {
         .task(id: provider.nearestGroups.map(\.id).joined(separator: "|")) {
             await recomputeTimetables()
         }
-        .sheet(item: $timetableTarget) { target in
-            NavigationStack {
-                StationTimetableView(
-                    station: target.hit.station,
-                    line: target.hit.line,
-                    preferredDirectionId: target.directionId,
-                    viewModel: viewModel
-                )
-            }
+        .navigationDestination(item: $timetableTarget) { target in
+            StationTimetableView(
+                station: target.hit.station,
+                line: target.hit.line,
+                preferredDirectionId: target.directionId,
+                viewModel: viewModel
+            )
         }
     }
 
@@ -393,10 +391,19 @@ struct NearbyStationsSection: View {
     }
 }
 
-// MARK: - Timetable sheet target
+// MARK: - Timetable push target
 
-private struct NearbyTimetableTarget: Identifiable {
+private struct NearbyTimetableTarget: Identifiable, Hashable {
     let hit: StationSearchHit
     let directionId: String?
     var id: String { hit.id }
+
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.id == rhs.id && lhs.directionId == rhs.directionId
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(directionId)
+    }
 }
