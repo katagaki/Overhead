@@ -252,7 +252,7 @@ struct StationTimetableView: View {
             let rowHasAnnotations = row.departures.contains {
                 $0.isFirst || $0.localizedDestination != primaryDest
             }
-            FlowLayout(spacing: 2) {
+            FlowLayout(spacing: 2, lineSpacing: 8) {
                 ForEach(row.departures) { departure in
                     minuteCell(
                         departure,
@@ -791,6 +791,7 @@ private struct BoardMarquee: View {
 
 private struct FlowLayout: Layout {
     var spacing: CGFloat = 2
+    var lineSpacing: CGFloat = 2
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         let width = proposal.width ?? .infinity
@@ -799,7 +800,7 @@ private struct FlowLayout: Layout {
             let size = view.sizeThatFits(.unspecified)
             if x > 0, x + size.width > width {
                 x = 0
-                y += rowHeight + spacing
+                y += rowHeight + lineSpacing
                 rowHeight = 0
             }
             x += size.width + spacing
@@ -814,7 +815,7 @@ private struct FlowLayout: Layout {
             let size = view.sizeThatFits(.unspecified)
             if x > bounds.minX, x + size.width > bounds.maxX {
                 x = bounds.minX
-                y += rowHeight + spacing
+                y += rowHeight + lineSpacing
                 rowHeight = 0
             }
             view.place(at: CGPoint(x: x, y: y), proposal: .unspecified)
