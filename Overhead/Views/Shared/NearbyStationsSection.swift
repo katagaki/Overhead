@@ -23,10 +23,10 @@ struct NearbyStationsSection: View {
 
     private static let directionChoicesKey = "nearby.directionChoices"
     /// All cards share one height (3 visible rows); longer lists scroll inside it.
-    private static let cardHeight: CGFloat = 178
+    private static let cardHeight: CGFloat = 182
     /// Header (~22) + 8 gap + card, exactly — any slack here reads as
     /// uneven spacing against the root VStack's 24pt section gaps.
-    private static let sectionHeight: CGFloat = 208
+    private static let sectionHeight: CGFloat = 212
 
     var body: some View {
         Group {
@@ -110,20 +110,13 @@ struct NearbyStationsSection: View {
             }
             .scrollClipDisabled()
         } else if provider.isLocating {
-            // Same container as the loaded rail so fixed-width cards
-            // can never widen the root VStack on narrow devices.
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(alignment: .top, spacing: 10) {
-                    skeletonCard
-                    skeletonCard
-                }
-            }
-            .scrollClipDisabled()
-            .scrollDisabled(true)
+            loadingCard
+        } else if provider.fixFailed {
+            fixFailedCard
         } else if provider.lastUpdated != nil {
             outOfAreaCard
         } else {
-            // No fix yet and not locating (e.g. location error): hold the frame quietly.
+            // Fix not attempted yet (lines still loading).
             Color.clear
         }
     }
@@ -168,30 +161,38 @@ struct NearbyStationsSection: View {
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 
-    private var outOfAreaCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Nearby.OutOfArea.Title")
-                .font(.system(size: 14.5, weight: .semibold))
-            Text("Nearby.OutOfArea.Body")
-                .font(.system(size: 12.5))
-                .foregroundStyle(.secondary)
-            Spacer(minLength: 0)
-        }
-        .padding(17)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+    private var loadingCard: some View {
+        // The header's 測位中… gives way to the label here, so it isn't doubled.
+        ProgressView("Nearby.Locating")
+            .controlSize(.large)
+            .font(.system(size: 13))
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 
-    private var skeletonCard: some View {
-        VStack(alignment: .leading, spacing: 11) {
-            RoundedRectangle(cornerRadius: 5).fill(Color(.tertiarySystemFill)).frame(width: 96, height: 17)
-            RoundedRectangle(cornerRadius: 5).fill(Color(.tertiarySystemFill)).frame(maxWidth: .infinity).frame(height: 26)
-            RoundedRectangle(cornerRadius: 5).fill(Color(.tertiarySystemFill)).frame(maxWidth: .infinity).frame(height: 26)
-            Spacer(minLength: 0)
+    private var fixFailedCard: some View {
+        unavailableCard(title: "Nearby.FixFailed.Title", icon: "location.slash")
+    }
+
+    private var outOfAreaCard: some View {
+        unavailableCard(title: "Nearby.OutOfArea.Title", icon: "mappin.slash")
+    }
+
+    /// Compact empty-state card, centered vertically; no inner scrolling.
+    private func unavailableCard(title: LocalizedStringKey, icon: String) -> some View {
+        VStack(spacing: 5) {
+            Image(systemName: icon)
+                .font(.system(size: 26, weight: .medium))
+                .foregroundStyle(.secondary)
+                .padding(.bottom, 5)
+            Text(title)
+                .font(.system(size: 15, weight: .semibold))
         }
-        .padding(13)
-        .frame(width: 196, height: Self.cardHeight)
+        .multilineTextAlignment(.center)
+        .padding(.horizontal, 16)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
     }

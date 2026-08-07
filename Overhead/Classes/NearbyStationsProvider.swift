@@ -44,6 +44,8 @@ final class NearbyStationsProvider: NSObject, ObservableObject, CLLocationManage
     @Published private(set) var isReducedAccuracy = false
     @Published private(set) var isLocating = false
     @Published private(set) var lastUpdated: Date?
+    /// True when the last fix attempt failed and no earlier fix exists.
+    @Published private(set) var fixFailed = false
 
     private let locationManager = CLLocationManager()
     private var lines: [TrainLine] = []
@@ -92,6 +94,7 @@ final class NearbyStationsProvider: NSObject, ObservableObject, CLLocationManage
 
     private func requestFix() {
         isLocating = lastUpdated == nil
+        fixFailed = false
         locationManager.requestLocation()
     }
 
@@ -118,6 +121,7 @@ final class NearbyStationsProvider: NSObject, ObservableObject, CLLocationManage
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         DispatchQueue.main.async {
             self.isLocating = false
+            self.fixFailed = self.lastUpdated == nil
         }
     }
 
