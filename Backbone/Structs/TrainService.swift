@@ -75,6 +75,32 @@ public struct TrainService: Identifiable, Codable {
             }
         }
 
+        public var displayNameEn: String {
+            switch self {
+            case .local: return "Local"
+            case .semiExpress: return "Semi Express"
+            case .sectionSemiExpress: return "Section Semi Exp."
+            case .rapid: return "Rapid"
+            case .sectionRapid: return "Section Rapid"
+            case .commuterRapid: return "Commuter Rapid"
+            case .specialRapid: return "Special Rapid"
+            case .express: return "Express"
+            case .sectionExpress: return "Section Express"
+            case .rapidExpress: return "Rapid Express"
+            case .commuterExpress: return "Commuter Exp."
+            case .commuterSemiExpress: return "Commuter Semi Exp."
+            case .liner: return "Liner"
+            case .rapidLimitedExpress: return "Rapid Ltd. Exp."
+            case .limitedExpress: return "Limited Express"
+            case .commuterLimitedExpress: return "Commuter Ltd. Exp."
+            }
+        }
+
+        public var localizedDisplayName: String {
+            let lang = Locale.current.language.languageCode?.identifier ?? "ja"
+            return lang == "en" ? displayNameEn : displayNameJa
+        }
+
         public var skipsStations: Bool { self != .local }
     }
 

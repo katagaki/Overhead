@@ -10,10 +10,14 @@ struct StationTimetableView: View {
     @ObservedObject var viewModel: JourneyViewModel
 
     @State private var selectedDirection: String?
-    @State private var selectedTrainTypes: Set<TrainService.TrainType> = []
-    @State private var firstTrainsOnly = false
-    @State private var selectedDestinations: Set<String> = []
     @State private var detailDeparture: StationDeparture?
+    @State private var statusOwner = UUID()
+
+    @Environment(\.serviceStatusPresenter) private var serviceStatusPresenter
+
+    private var isEnglish: Bool {
+        Locale.current.language.languageCode?.identifier == "en"
+    }
 
     var body: some View {
         Group {
@@ -27,17 +31,18 @@ struct StationTimetableView: View {
         }
         .navigationTitle(station.localizedName)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            // Unconditional item: conditional bottomBar items never appear
-            // once the stack has a navigationDestination (iOS 26).
-            ToolbarSpacer(.flexible, placement: .bottomBar)
-            ToolbarItem(placement: .bottomBar) {
-                filterMenu
-                    .disabled(viewModel.stationTimetable.isEmpty)
-            }
-        }
         .onAppear {
             viewModel.loadStationTimetable(stationId: station.id)
+            // Takes the sheet over from the line page it was pushed from, or
+            // raises it when arriving from somewhere without one.
+            serviceStatusPresenter?.activate(
+                owner: statusOwner,
+                lineId: line.id,
+                delayInfo: viewModel.delayCheckInfo(for: line.id)
+            )
+        }
+        .onDisappear {
+            serviceStatusPresenter?.deactivate(owner: statusOwner)
         }
     }
 
@@ -67,9 +72,7 @@ struct StationTimetableView: View {
                     if visible.isEmpty {
                         VStack {
                             Spacer()
-                            Text(timetable.departures.isEmpty
-                                 ? "StationTimetable.NoMoreTrains"
-                                 : "StationTimetable.Filter.NoMatches")
+                            Text("StationTimetable.NoMoreTrains")
                                 .foregroundColor(.secondary)
                                 .font(.system(size: 14))
                             Spacer()
@@ -128,13 +131,12 @@ struct StationTimetableView: View {
     private func visibleDepartures(_ timetable: StationTimetableData) -> [StationDeparture] {
 #if DEBUG
         // Screenshot harness: staged shots hide departed trains.
-        let staged = ScreenshotStaging.shared.hidePastDepartures
+        return ScreenshotStaging.shared.hidePastDepartures
             ? timetable.departures.filter { !isPast($0, nowMinutes: railNowMinutes(at: Date())) }
             : timetable.departures
 #else
-        let staged = timetable.departures
+        return timetable.departures
 #endif
-        return staged.filter(matchesFilter)
     }
 
     private func upcomingDepartures(in departures: [StationDeparture], nowMinutes: Int) -> [StationDeparture] {
@@ -213,6 +215,7 @@ struct StationTimetableView: View {
                 .padding(.bottom, 12)
             }
             .scrollEdgeEffectStyle(.soft, for: .top)
+            .contentMargins(.bottom, ServiceStatusSheet.peekHeight + 12, for: .scrollContent)
             .onAppear {
                 scrollToCurrentHour(proxy: proxy, rows: rows, nowMinutes: nowMinutes)
             }
@@ -279,7 +282,7 @@ struct StationTimetableView: View {
     ) -> some View {
         let minute = departure.departureTime.components(separatedBy: ":").last ?? ""
         let annotation = departure.localizedDestination != primaryDest
-            ? String(departure.localizedDestination.prefix(1)) : ""
+            ? String(departure.localizedDestination.prefix(isEnglish ? 2 : 1)) : ""
         return Button {
             detailDeparture = departure
         } label: {
@@ -354,12 +357,12 @@ struct StationTimetableView: View {
                 Text(departure.departureTime)
                     .font(.system(size: 32, weight: .bold))
                     .monospacedDigit()
-                Text("発")
+                Text(isEnglish ? "dep." : "発")
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.secondary)
             }
             HStack(spacing: 8) {
-                Text(departure.trainType.displayNameJa)
+                Text(departure.trainType.localizedDisplayName)
                     .font(.system(size: 13, weight: .bold))
                     .foregroundColor(.white)
                     .padding(.horizontal, 10)
@@ -374,11 +377,13 @@ struct StationTimetableView: View {
             VStack(alignment: .leading, spacing: 6) {
                 departureStatusLabel(departure)
                 if departure.isFirst {
-                    Label("この駅始発の列車です", systemImage: "arrow.up.forward.circle.fill")
+                    Label(isEnglish ? "Starts at this station" : "この駅始発の列車です",
+                          systemImage: "arrow.up.forward.circle.fill")
                         .foregroundStyle(.green)
                 }
                 if departure.isLast {
-                    Label("本日の最終列車です", systemImage: "moon.circle.fill")
+                    Label(isEnglish ? "Last train of the day" : "本日の最終列車です",
+                          systemImage: "moon.circle.fill")
                         .foregroundStyle(.red)
                 }
                 if !departure.trainNumber.isEmpty {
@@ -398,16 +403,20 @@ struct StationTimetableView: View {
             let depMinutes = secs / 60 < 180 ? secs / 60 + 1440 : secs / 60
             let remaining = depMinutes - railNowMinutes(at: Date())
             if remaining < 0 {
-                Label("発車済み", systemImage: "checkmark.circle")
+                Label(isEnglish ? "Departed" : "発車済み", systemImage: "checkmark.circle")
                     .foregroundStyle(.secondary)
             } else if remaining == 0 {
-                Label("まもなく発車します", systemImage: "clock.fill")
+                Label(isEnglish ? "Departing soon" : "まもなく発車します", systemImage: "clock.fill")
                     .foregroundStyle(.orange)
             } else if remaining < 120 {
-                Label("あと\(remaining)分で発車します", systemImage: "clock.fill")
+                Label(isEnglish ? "Departs in \(remaining) min" : "あと\(remaining)分で発車します",
+                      systemImage: "clock.fill")
                     .foregroundStyle(.green)
             } else {
-                Label("あと\(remaining / 60)時間\(remaining % 60)分で発車します", systemImage: "clock")
+                Label(isEnglish
+                      ? "Departs in \(remaining / 60) hr \(remaining % 60) min"
+                      : "あと\(remaining / 60)時間\(remaining % 60)分で発車します",
+                      systemImage: "clock")
                     .foregroundStyle(.secondary)
             }
         }
@@ -423,83 +432,16 @@ struct StationTimetableView: View {
             .clipShape(Capsule())
     }
 
-    // MARK: - Filter
-
-    private var filterMenu: some View {
-        Menu {
-            if availableTrainTypes.count > 1 {
-                Section("StationTimetable.Filter.TrainType") {
-                    ForEach(availableTrainTypes, id: \.self) { type in
-                        Toggle(type.displayNameJa, isOn: setBinding($selectedTrainTypes, type))
-                    }
-                }
-            }
-            if hasFirstTrains {
-                Toggle("StationTimetable.Filter.FirstTrainOnly", isOn: $firstTrainsOnly)
-            }
-            if availableDestinations.count > 1 {
-                Section("StationTimetable.Filter.Destination") {
-                    ForEach(availableDestinations, id: \.self) { destination in
-                        Toggle(destination, isOn: setBinding($selectedDestinations, destination))
-                    }
-                }
-            }
-            if isFiltering {
-                Button("StationTimetable.Filter.Clear", systemImage: "xmark.circle") {
-                    selectedTrainTypes = []
-                    firstTrainsOnly = false
-                    selectedDestinations = []
-                }
-            }
-        } label: {
-            Label("StationTimetable.Filter", systemImage: "line.3.horizontal.decrease")
-        }
-    }
-
-    private var allDepartures: [StationDeparture] {
-        viewModel.stationTimetable.flatMap(\.departures)
-    }
-
-    private var availableTrainTypes: [TrainService.TrainType] {
-        let present = Set(allDepartures.map(\.trainType))
-        return TrainService.TrainType.allCases.filter(present.contains)
-    }
-
-    private var availableDestinations: [String] {
-        var seen: Set<String> = []
-        return allDepartures.map(\.localizedDestination).filter {
-            !$0.isEmpty && seen.insert($0).inserted
-        }
-    }
-
-    private var hasFirstTrains: Bool {
-        allDepartures.contains(where: \.isFirst)
-    }
-
-    private var isFiltering: Bool {
-        !selectedTrainTypes.isEmpty || firstTrainsOnly || !selectedDestinations.isEmpty
-    }
-
-    private func matchesFilter(_ departure: StationDeparture) -> Bool {
-        (selectedTrainTypes.isEmpty || selectedTrainTypes.contains(departure.trainType))
-            && (!firstTrainsOnly || departure.isFirst)
-            && (selectedDestinations.isEmpty || selectedDestinations.contains(departure.localizedDestination))
-    }
-
-    private func setBinding<T: Hashable>(_ set: Binding<Set<T>>, _ value: T) -> Binding<Bool> {
-        Binding(
-            get: { set.wrappedValue.contains(value) },
-            set: {
-                if $0 { set.wrappedValue.insert(value) } else { set.wrappedValue.remove(value) }
-            }
-        )
-    }
-
     // MARK: - Through Services
 
     private func boardNotice(for timetable: StationTimetableData) -> String? {
         let throughs = throughServices(for: timetable)
         guard !throughs.isEmpty else { return nil }
+        if isEnglish {
+            return throughs.map {
+                "Through service beyond \(junctionName(for: $0)) to the \($0.localizedLineName) for \($0.localizedToward)."
+            }.joined(separator: "  ")
+        }
         return throughs.map {
             "\(junctionName(for: $0))から\($0.localizedLineName) \($0.localizedToward)へ直通運転しています。"
         }.joined(separator: "　")
@@ -620,20 +562,24 @@ private struct DepartureBoardView: View {
     private let amber = Color(red: 1.0, green: 0.71, blue: 0.16)
     private let ledGreen = Color(red: 0.22, green: 0.88, blue: 0.43)
 
+    private var isEnglish: Bool {
+        Locale.current.language.languageCode?.identifier == "en"
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             // Rows keep the panel inset; the marquee below runs edge to edge.
             VStack(spacing: 0) {
                 header
                 if departures.isEmpty {
-                    Text("本日の発車はありません")
+                    Text(isEnglish ? "No more departures today" : "本日の発車はありません")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(ledGreen)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
                 } else {
                     ForEach(Array(departures.enumerated()), id: \.element.id) { index, departure in
-                        boardRow(departure, ordinal: index == 0 ? "先発" : "次発")
+                        boardRow(departure, ordinal: ordinalName(index))
                         if index == 0 && departures.count > 1 {
                             Rectangle().fill(Color.white.opacity(0.06)).frame(height: 1)
                         }
@@ -657,13 +603,18 @@ private struct DepartureBoardView: View {
         )
     }
 
+    private func ordinalName(_ index: Int) -> String {
+        if isEnglish { return index == 0 ? "1st" : "2nd" }
+        return index == 0 ? "先発" : "次発"
+    }
+
     private var header: some View {
         HStack(spacing: 6) {
             Text("").frame(width: 36)
-            Text("種別").frame(width: 78, alignment: .leading)
-            Text("発車時刻").frame(width: 56, alignment: .leading)
-            Text("行先").frame(maxWidth: .infinity, alignment: .leading)
-            Text("発車まで").frame(width: 56, alignment: .trailing)
+            Text(isEnglish ? "Train" : "種別").frame(width: 78, alignment: .leading)
+            Text(isEnglish ? "Time" : "発車時刻").frame(width: 56, alignment: .leading)
+            Text(isEnglish ? "Destination" : "行先").frame(maxWidth: .infinity, alignment: .leading)
+            Text(isEnglish ? "Departs" : "発車まで").frame(width: 56, alignment: .trailing)
         }
         .font(.system(size: 10, weight: .semibold))
         .foregroundColor(Color(white: 0.55))
@@ -711,21 +662,23 @@ private struct DepartureBoardView: View {
                 .font(.system(size: 17, weight: .heavy))
                 .foregroundColor(boardBackground)
                 .lineLimit(1)
-                .minimumScaleFactor(0.8)
+                .minimumScaleFactor(0.5)
                 .padding(.vertical, 2)
                 .frame(width: 78)
                 .background(color, in: RoundedRectangle(cornerRadius: 2))
         } else {
-            Text(type.displayNameJa)
+            Text(type.localizedDisplayName)
                 .font(.system(size: 17, weight: .heavy))
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
                 .foregroundColor(color)
         }
     }
 
-    /// Two-character types get the traditional full-width spacing (快　速).
+    /// Japanese two-character types get the traditional full-width spacing (快　速).
     private func spacedTypeName(_ type: TrainService.TrainType) -> String {
-        let name = type.displayNameJa
-        return name.count == 2 ? name.map(String.init).joined(separator: "　") : name
+        let name = type.localizedDisplayName
+        return name.count == 2 && !isEnglish ? name.map(String.init).joined(separator: "　") : name
     }
 
     private func countdownText(_ departure: StationDeparture) -> String {
@@ -733,6 +686,9 @@ private struct DepartureBoardView: View {
         var minutes = secs / 60
         if minutes < 180 { minutes += 1440 }
         let remaining = minutes - nowMinutes
+        if isEnglish {
+            return remaining <= 0 ? "Soon" : "\(remaining) min"
+        }
         return remaining <= 0 ? "まもなく" : "\(remaining)分"
     }
 }

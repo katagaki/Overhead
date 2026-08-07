@@ -309,6 +309,7 @@ struct NearbyStationsSection: View {
             }
             Button {
                 serviceStatusPresenter?.activate(
+                    owner: UUID(),
                     lineId: hit.line.id,
                     delayInfo: viewModel.delayCheckInfo(for: hit.line.id),
                     standalone: true

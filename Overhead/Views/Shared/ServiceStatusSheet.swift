@@ -153,12 +153,17 @@ final class ServiceStatusPresenter: ObservableObject {
     }
 
     @Published private(set) var context: Context?
+    /// Identifies the page currently holding the sheet up. Keyed per page
+    /// instance rather than per line, so pushing a station timetable on top of
+    /// its own line page hands the sheet over instead of dropping it.
+    private var owner: UUID?
 
-    func activate(lineId: String, delayInfo: DelayCheckInfo?, standalone: Bool = false) {
+    func activate(owner: UUID, lineId: String, delayInfo: DelayCheckInfo?, standalone: Bool = false) {
         guard let delayInfo else {
-            deactivate(lineId: lineId)
+            deactivate(owner: owner)
             return
         }
+        self.owner = owner
         guard context?.lineId != lineId else { return }
         context = Context(
             lineId: lineId,
@@ -170,13 +175,15 @@ final class ServiceStatusPresenter: ObservableObject {
 
     /// A push fires the incoming page's onAppear before the outgoing page's
     /// onDisappear, so only the current owner may clear the sheet.
-    func deactivate(lineId: String) {
-        if context?.lineId == lineId {
+    func deactivate(owner: UUID) {
+        if self.owner == owner {
+            self.owner = nil
             context = nil
         }
     }
 
     func dismiss() {
+        owner = nil
         context = nil
     }
 }

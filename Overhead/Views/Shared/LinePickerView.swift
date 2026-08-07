@@ -55,6 +55,7 @@ struct StationPickerView: View {
     let line: TrainLine
     @ObservedObject var viewModel: JourneyViewModel
     @State private var selectedDirectionIndex = 0
+    @State private var statusOwner = UUID()
     @Environment(\.serviceStatusPresenter) private var serviceStatusPresenter
 
     private let trackWidth: CGFloat = 4
@@ -124,12 +125,13 @@ struct StationPickerView: View {
         }
         .onAppear {
             serviceStatusPresenter?.activate(
+                owner: statusOwner,
                 lineId: line.id,
                 delayInfo: viewModel.delayCheckInfo(for: line.id)
             )
         }
         .onDisappear {
-            serviceStatusPresenter?.deactivate(lineId: line.id)
+            serviceStatusPresenter?.deactivate(owner: statusOwner)
         }
         .navigationTitle(line.localizedName)
         .navigationBarTitleDisplayMode(.inline)
