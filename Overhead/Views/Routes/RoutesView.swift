@@ -240,7 +240,7 @@ struct FavoritesSection: View {
             Image(systemName: "plus")
                 .font(.system(size: 20, weight: .medium))
                 .foregroundStyle(.secondary)
-                .frame(width: 56, height: Self.cardHeight)
+                .frame(width: Self.cardWidth, height: Self.cardHeight)
                 .background {
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
                         .strokeBorder(
