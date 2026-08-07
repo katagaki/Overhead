@@ -312,7 +312,8 @@ struct NearbyStationsSection: View {
             Button {
                 serviceStatusPresenter?.activate(
                     lineId: hit.line.id,
-                    delayInfo: viewModel.delayCheckInfo(for: hit.line.id)
+                    delayInfo: viewModel.delayCheckInfo(for: hit.line.id),
+                    standalone: true
                 )
             } label: {
                 Label("StationTimetable.ServiceStatus", systemImage: "info.circle")

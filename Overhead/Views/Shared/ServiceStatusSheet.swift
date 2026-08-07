@@ -12,6 +12,10 @@ struct ServiceStatusSheet: View {
 
     let lineId: String
     let delayInfo: DelayCheckInfo
+    /// True when opened directly (e.g. from a context menu) rather than as a
+    /// line page's accessory; standalone sheets start expanded and can be
+    /// swiped away since no page's onDisappear will ever clear them.
+    var standalone = false
     @ObservedObject var web: ServiceStatusWebController
     @State private var source: ServiceStatusSource = .official
     @State private var detent: PresentationDetent = .height(ServiceStatusSheet.peekHeight)
@@ -95,7 +99,12 @@ struct ServiceStatusSheet: View {
         .presentationBackgroundInteraction(.enabled)
         .presentationContentInteraction(.scrolls)
         .presentationDragIndicator(.visible)
-        .interactiveDismissDisabled()
+        .interactiveDismissDisabled(!standalone)
+        .onAppear {
+            if standalone {
+                detent = .medium
+            }
+        }
         // The sheet stays up while pushing between line pages; start each line at peek.
         .onChange(of: lineId) {
             detent = .height(Self.peekHeight)
@@ -140,11 +149,12 @@ final class ServiceStatusPresenter: ObservableObject {
         let lineId: String
         let delayInfo: DelayCheckInfo
         let web: ServiceStatusWebController
+        let standalone: Bool
     }
 
     @Published private(set) var context: Context?
 
-    func activate(lineId: String, delayInfo: DelayCheckInfo?) {
+    func activate(lineId: String, delayInfo: DelayCheckInfo?, standalone: Bool = false) {
         guard let delayInfo else {
             deactivate(lineId: lineId)
             return
@@ -153,7 +163,8 @@ final class ServiceStatusPresenter: ObservableObject {
         context = Context(
             lineId: lineId,
             delayInfo: delayInfo,
-            web: ServiceStatusWebController(delayInfo: delayInfo)
+            web: ServiceStatusWebController(delayInfo: delayInfo),
+            standalone: standalone
         )
     }
 
@@ -197,6 +208,7 @@ private struct ServiceStatusHost: ViewModifier {
                     ServiceStatusSheet(
                         lineId: context.lineId,
                         delayInfo: context.delayInfo,
+                        standalone: context.standalone,
                         web: context.web
                     )
                 }
