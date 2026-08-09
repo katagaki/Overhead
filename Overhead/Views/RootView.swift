@@ -14,7 +14,12 @@ struct RootView: View {
     @State private var showJourneySheet = false
     @State private var showTimetableModeNotice = false
     @State private var showStartupNotice = false
+    @State private var showDisclaimer = false
     @State private var navigationPath = NavigationPath()
+    /// Measured width; toolbar items can't resolve `maxWidth: .infinity`.
+    @State private var barWidth: CGFloat = 0
+    /// Total inset either side, so the bar doesn't run to the screen edges.
+    private static let journeyBarInset: CGFloat = 48
     @StateObject private var serviceStatusPresenter = ServiceStatusPresenter()
 #if DEBUG
     // Screenshot harness (overtrain:// deep links, see ScreenshotHarness.swift).
@@ -35,8 +40,8 @@ struct RootView: View {
             ScrollViewReader { scrollProxy in
                 ScrollView {
                     VStack(spacing: 24) {
-                        JourneyPlannerSection(viewModel: viewModel)
                         FavoritesSection(viewModel: viewModel)
+                        JourneyPlannerSection(viewModel: viewModel)
                         NearbyStationsSection(viewModel: viewModel)
                             .id("nearby")
                         LinesSection(viewModel: viewModel)
@@ -55,6 +60,7 @@ struct RootView: View {
                 }
 #endif
             }
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { barWidth = $0 }
             .background(Color(.systemGroupedBackground))
             .navigationTitle(Text("App.Name"))
             .toolbarTitleDisplayMode(.inlineLarge)
@@ -63,17 +69,18 @@ struct RootView: View {
                     moreMenu
                 }
             }
-            // Safe-area inset, not .bottomBar: late-inserted bottom-bar items don't show with a navigationDestination on the stack (iOS 26).
-            .safeAreaInset(edge: .bottom) {
+            .toolbar {
                 if viewModel.activeJourney != nil {
-                    JourneyToolbarAccessory(viewModel: viewModel) {
-                        showJourneySheet = true
+                    ToolbarItem(placement: .bottomBar) {
+                        JourneyToolbarAccessory(
+                            viewModel: viewModel,
+                            availableWidth: max(barWidth - Self.journeyBarInset, 200)
+                        ) {
+                            showJourneySheet = true
+                        }
+                        .frame(width: max(barWidth - Self.journeyBarInset, 200))
+                        .matchedTransitionSource(id: Self.journeyTransitionID, in: journeyZoom)
                     }
-                    .padding(.vertical, 12)
-                    .glassEffect(.regular.interactive(), in: .capsule)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 4)
-                    .matchedTransitionSource(id: Self.journeyTransitionID, in: journeyZoom)
                 }
             }
             .navigationDestination(for: Destination.self) { destination in
@@ -95,8 +102,7 @@ struct RootView: View {
             .task {
                 await viewModel.loadLines()
 #if DEBUG
-                // Headless capture passes overtrain:// URLs as launch arguments,
-                // since simctl openurl trips the system open-app confirmation.
+                // Launch arguments, since simctl openurl needs a confirmation.
                 for argument in ProcessInfo.processInfo.arguments.dropFirst()
                 where argument.hasPrefix("overtrain://") {
                     if let url = URL(string: argument) {
@@ -127,9 +133,7 @@ struct RootView: View {
             }
         }
 #endif
-        // Keeps the PiP sample-buffer layer in the hierarchy while the
-        // journey sheet is closed; the sheet's LCD hosts it otherwise so the
-        // PiP restore animation lands on the LCD.
+        // Keeps the PiP layer alive while the journey sheet is closed.
         .background {
             if !showJourneySheet {
                 LCDPiPLayerHost()
@@ -193,6 +197,15 @@ struct RootView: View {
         } message: {
             Text("StartupNotice.Message")
         }
+        // Same text, reachable from the menu after the startup alert is dismissed for good.
+        .alert(
+            "More.Disclaimer",
+            isPresented: $showDisclaimer
+        ) {
+            Button("Button.OK", role: .cancel) {}
+        } message: {
+            Text("StartupNotice.Message")
+        }
         .onAppear {
             if !hasDismissedStartupNotice {
                 showStartupNotice = true
@@ -223,6 +236,9 @@ struct RootView: View {
                 }
                 Button("More.Attributions") {
                     navigationPath.append(Destination.attributions)
+                }
+                Button("More.Disclaimer") {
+                    showDisclaimer = true
                 }
             }
         } label: {

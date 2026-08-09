@@ -544,7 +544,7 @@ public enum StaticTrainData {
 
     public static func planTransferRoute(
         throughStationNames names: [String],
-        maxTransfers: Int = 2,
+        maxTransfers: Int = 3,
         transferMinutes: Double = transferBufferMinutes,
         avoidingLineIds: Set<String> = []
     ) -> [TransferLeg]? {
@@ -590,7 +590,7 @@ public enum StaticTrainData {
     public static func planTransferRoute(
         fromStationName: String,
         toStationName: String,
-        maxTransfers: Int = 2,
+        maxTransfers: Int = 3,
         transferMinutes: Double = transferBufferMinutes,
         avoidingLineIds: Set<String> = []
     ) -> [TransferLeg]? {

@@ -75,14 +75,14 @@ struct PlaceEditorView: View {
             }
             .padding(.leading, 16)
             .padding(.trailing, 8)
-            .padding(.vertical, 6)
+            .frame(minHeight: 48)
 
             Divider()
                 .padding(.leading, 16)
 
             TextField("Place.NamePlaceholder", text: $customName)
                 .padding(.horizontal, 16)
-                .padding(.vertical, 12)
+                .frame(minHeight: 48)
         }
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))

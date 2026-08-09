@@ -18,6 +18,7 @@ struct JourneyPlannerSection: View {
     @AppStorage("journey.setup.stations") private var storedStationsJSON = ""
     @State private var showAvoidLinesSheet = false
     @State private var showTimeSettingsSheet = false
+    @State private var savedPlaces: [SavedPlace] = []
 
     @State private var candidates: [TrainCandidate] = []
     @State private var hasSearched = false
@@ -80,9 +81,15 @@ struct JourneyPlannerSection: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            plannerCard
+            // Card and its buttons read as one control; keep them tight.
+            VStack(spacing: 12) {
+                plannerCard
 
-            searchButton
+                HStack(spacing: 10) {
+                    searchButton
+                    favoriteButton
+                }
+            }
 
             if let searchError {
                 noticeRow(icon: "exclamationmark.circle", text: searchError)
@@ -95,6 +102,10 @@ struct JourneyPlannerSection: View {
         .task {
             await viewModel.loadLines()
             restoreSelections()
+        }
+        .onAppear { savedPlaces = SavedPlaceStore.load() }
+        .onReceive(NotificationCenter.default.publisher(for: SavedPlaceStore.didChangeNotification)) { _ in
+            savedPlaces = SavedPlaceStore.load()
         }
 #if DEBUG
         .onReceive(ScreenshotStaging.shared.$plannerCommand) { command in
@@ -187,6 +198,64 @@ struct JourneyPlannerSection: View {
         .buttonStyle(.glassProminent)
         .buttonBorderShape(.capsule)
         .disabled(!canSearch || isSearching)
+    }
+
+    // MARK: - Favorite Button
+
+    private var favoriteButton: some View {
+        let isSaved = savedPlaceForSetup != nil
+        return Button {
+            toggleFavorite()
+        } label: {
+            Image(systemName: isSaved ? "star.fill" : "star")
+                .font(.system(size: 16, weight: .semibold))
+                .frame(width: 24)
+                .padding(.vertical, 8)
+                .contentTransition(.symbolEffect(.replace))
+        }
+        .buttonStyle(.glass)
+        .buttonBorderShape(.capsule)
+        .disabled(!canSearch)
+        .accessibilityLabel(isSaved ? "Button.RemoveFromFavorites" : "Button.AddToFavorites")
+        .sensoryFeedback(.success, trigger: savedPlaceForSetup?.id)
+    }
+
+    /// The favorite whose route matches what's in the planner right now, if any.
+    private var savedPlaceForSetup: SavedPlace? {
+        guard let from = fromSelection, let to = toSelection else { return nil }
+        let vias = viaSelections.map(\.station.id)
+        return savedPlaces.first {
+            $0.fromStationId == from.station.id
+                && $0.toStationId == to.station.id
+                && $0.viaStationIds == vias
+        }
+    }
+
+    /// Saves the planner's current route as-is, or unsaves it if it's already there.
+    private func toggleFavorite() {
+        guard let from = fromSelection, let to = toSelection else { return }
+        var places = SavedPlaceStore.load()
+
+        if let existing = savedPlaceForSetup {
+            places.removeAll { $0.id == existing.id }
+        } else {
+            places.append(SavedPlace(
+                id: UUID(),
+                kind: .custom,
+                customName: to.station.localizedName,
+                lineId: from.line.id,
+                fromStationId: from.station.id,
+                toStationId: to.station.id,
+                viaStationIds: viaSelections.map(\.station.id),
+                walkingSpeedRaw: walkingSpeedRaw,
+                avoidedLineIds: avoidedLineIds.sorted()
+            ))
+        }
+
+        withAnimation {
+            SavedPlaceStore.save(places)
+            savedPlaces = places
+        }
     }
 
     private var waypointNames: [String]? {

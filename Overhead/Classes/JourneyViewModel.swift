@@ -35,12 +35,35 @@ final class JourneyViewModel: ObservableObject {
     /// Transfer station ID → the line boarded there; kept so alerts can be rescheduled.
     private var transferLines: [String: TrainLine] = [:]
 
-    /// Live Activity leg markers for the active journey; kept so a mid-journey
-    /// destination change can reuse them instead of rebuilding from the line data.
+    typealias UpcomingTransfer = (station: Station, time: Date, line: TrainLine?)
+
+    /// Every 乗り換え still ahead of the train, in order, delay-adjusted.
+    var upcomingTransfers: [UpcomingTransfer] {
+        guard let journey = activeJourney, journey.hasSchedule,
+              let state = positionState, state.status != .arrived,
+              !journey.transferStationIds.isEmpty
+        else { return [] }
+
+        let stations = journey.journeyStations
+        let times = journey.scheduledStationTimes
+        guard stations.count == times.count else { return [] }
+
+        let current = min(state.currentStationIndex ?? state.segmentTo, max(0, stations.count - 1))
+        let transferIds = Set(journey.transferStationIds)
+        let delay = TimeInterval(state.delayMinutes * 60)
+
+        return stations.indices[current...]
+            .filter { transferIds.contains(stations[$0].id) }
+            .map { (stations[$0], times[$0].addingTimeInterval(delay), transferLines[stations[$0].id]) }
+    }
+
+    /// The next 乗り換え ahead of the train, with its delay-adjusted time.
+    var upcomingTransfer: UpcomingTransfer? { upcomingTransfers.first }
+
+    /// Live Activity leg markers, kept so a mid-journey change can reuse them.
     private var journeyLegLines: [TrainJourneyAttributes.LegLine] = []
 
-    /// LCD colour per leg, `lcdOverrides` already applied. Held app-side so the
-    /// widget's `LegLine` doesn't have to carry a line ID just for the override.
+    /// LCD colour per leg, `lcdOverrides` already applied.
     private var journeyLegColors: [LegColor] = []
 
     struct LegColor {
@@ -610,14 +633,12 @@ final class JourneyViewModel: ObservableObject {
         transferMinutes: Double,
         limit: Int
     ) -> [TrainCandidate] {
-        // The anchored end is searched first, then the rest of the plan is
-        // chained away from it: forwards for 出発時刻, backwards for 到着時刻.
+        // Search the anchored end first, then chain away from it.
         let anchoredLeg = anchor.isArrival ? plan.last : plan.first
         guard let anchoredLeg else { return [] }
 
         let bufferSec = Int(transferMinutes * 60)
-        // The floor only binds the leg you board first — the anchored one going
-        // forwards, the last one resolved going backwards.
+        // The floor only binds the leg boarded first.
         let anchorIsOrigin = !anchor.isArrival || plan.count == 1
         let anchoredRides = rides(on: anchoredLeg.staticLine,
                                   fromId: anchoredLeg.fromStation.id, toId: anchoredLeg.toStation.id,
@@ -868,8 +889,7 @@ final class JourneyViewModel: ObservableObject {
                 ? 0
                 : journeyStations.firstIndex { $0.id == candidate.legs[index - 1].toStation.id }
             guard let stationIndex else { continue }
-            // Keyed by the previous leg's arrival station — the ID `transferStationIds`
-            // carries. A shared station has a different ID on each operator's line.
+            // Keyed by the previous leg's arrival station ID, per operator.
             if index > 0 { transferLines[candidate.legs[index - 1].toStation.id] = leg.line }
             legLines.append(.init(
                 stationIndex: stationIndex,
@@ -897,11 +917,13 @@ final class JourneyViewModel: ObservableObject {
 
     // MARK: - Mid-Journey Replanning
 
-    /// A stop the rider can still get off at, with its delay-adjusted time.
+    /// A stop the replan can start from, with its delay-adjusted time.
     struct ReplanAnchor: Identifiable, Equatable {
         let stationIndex: Int
         let station: Station
         let time: Date
+        /// Already behind the train; the rider is doubling back or off-schedule.
+        var isPast: Bool = false
 
         var id: Int { stationIndex }
     }
@@ -909,8 +931,8 @@ final class JourneyViewModel: ObservableObject {
     /// Less slack than a planned transfer — no concourse walk.
     static let sameStationBufferMinutes: Double = 1
 
-    /// Stops from the next one up to the next 乗り換え, destination excluded.
-    /// Past a transfer the ride in progress is no longer a single leg.
+    /// Stops of the leg being ridden, destination excluded; past stops included
+    /// so a rider who overshot can double back.
     var replanAnchors: [ReplanAnchor] {
         guard let journey = activeJourney, journey.hasSchedule,
               let state = positionState, state.status != .arrived
@@ -920,25 +942,32 @@ final class JourneyViewModel: ObservableObject {
         let times = journey.scheduledStationTimes
         guard stations.count > 1, stations.count == times.count else { return [] }
 
-        let first = min(state.currentStationIndex ?? state.segmentTo, stations.count - 1)
+        let current = min(state.currentStationIndex ?? state.segmentTo, stations.count - 1)
         let delay = TimeInterval(state.delayMinutes * 60)
         let transferIds = Set(journey.transferStationIds)
 
+        // Walk back to the 乗り換え this leg was boarded at, or the boarding stop.
+        var legStart = current
+        while legStart > 0, !transferIds.contains(stations[legStart].id) {
+            legStart -= 1
+        }
+
         var anchors: [ReplanAnchor] = []
-        for index in first..<(stations.count - 1) {
+        for index in legStart..<(stations.count - 1) {
             anchors.append(ReplanAnchor(
                 stationIndex: index,
                 station: stations[index],
-                time: times[index].addingTimeInterval(delay)
+                time: times[index].addingTimeInterval(delay),
+                isPast: index < current
             ))
-            if transferIds.contains(stations[index].id) { break }
+            if index >= current, transferIds.contains(stations[index].id) { break }
         }
         return anchors
     }
 
-    /// Stops past `anchor`; picking one only moves the alighting station.
+    /// Stops past `anchor` the train has yet to reach.
     func onwardStops(from anchor: ReplanAnchor) -> [ReplanAnchor] {
-        replanAnchors.filter { $0.stationIndex > anchor.stationIndex }
+        replanAnchors.filter { $0.stationIndex > anchor.stationIndex && !$0.isPast }
     }
 
     /// Alternative itineraries from `anchor` onward, soonest first.
@@ -950,9 +979,11 @@ final class JourneyViewModel: ObservableObject {
         limit: Int = 8
     ) -> [TrainCandidate] {
         guard anchor.station.name != destinationName else { return [] }
+        // Past stops have a departure time behind us; search from now.
+        let from = max(anchor.time, Date())
         return searchTrainCandidates(
             stationNames: [anchor.station.name, destinationName],
-            anchor: .departure(anchor.time.addingTimeInterval(Self.sameStationBufferMinutes * 60)),
+            anchor: .departure(from.addingTimeInterval(Self.sameStationBufferMinutes * 60)),
             transferMinutes: transferMinutes,
             avoidingLineIds: avoidingLineIds,
             limit: limit
@@ -987,7 +1018,6 @@ final class JourneyViewModel: ObservableObject {
     }
 
     /// Swaps the rest of the itinerary for `onward`, boarded at `anchor`.
-    /// Skips the overwrite confirmation — the change is deliberate.
     func replan(from anchor: ReplanAnchor, to onward: TrainCandidate) {
         performStartJourney(candidate: stitched(from: anchor, to: onward) ?? onward)
     }
@@ -1022,8 +1052,7 @@ final class JourneyViewModel: ObservableObject {
         )
     }
 
-    /// Replaces the active journey and everything hanging off it. The Live
-    /// Activity's station list is immutable, so it restarts rather than updates.
+    /// Replaces the active journey; the Live Activity restarts rather than updates.
     private func install(
         journey: Journey,
         line: TrainLine,
@@ -1119,8 +1148,7 @@ final class JourneyViewModel: ObservableObject {
     }
 
 #if DEBUG
-    /// Screenshot harness: starts a journey as if boarded minutes ago,
-    /// without location tracking or a Live Activity.
+    /// Screenshot harness: starts a journey as if boarded minutes ago.
     func debugStartJourney(lineId: String, fromId: String, toId: String, minutesAgo: Double) async {
         guard let resolved = StaticTrainData.resolveJourneyLine(
             lineId: lineId, fromStationId: fromId, toStationId: toId
@@ -1132,8 +1160,7 @@ final class JourneyViewModel: ObservableObject {
             )
         }
         guard let services = timetableCache[staticLine.id] else { return }
-        // Try progressively closer boarding times and keep the ride whose
-        // progress is closest to the middle of the journey.
+        // Keep the ride whose progress lands closest to mid-journey.
         var best: (journey: Journey, state: TrainPositionState, score: Double)?
         for offset in stride(from: minutesAgo, through: 5, by: -2.5) {
             let boarded = Date().addingTimeInterval(-offset * 60)
@@ -1203,9 +1230,7 @@ final class JourneyViewModel: ObservableObject {
 
     // MARK: - LCD Colour
 
-    /// The colour every LCD shows right now. Riders are still on the arriving
-    /// leg at a transfer station, so the new leg takes over once the train
-    /// departs it — the same rule the Live Activity follows.
+    /// The colour every LCD shows now; a new leg takes over once its train departs.
     var currentLineColor: Color {
         let fallback = selectedLine.map(Self.lcdColor) ?? .gray
         guard !journeyLegColors.isEmpty else { return fallback }

@@ -5,113 +5,55 @@ import Backbone
 
 // MARK: - Service Status Sheet (運行情報)
 
-/// Sheet content that peeks at the bottom of the line page and expands into a
-/// web panel showing the operator's official status page.
+/// Medium sheet showing the operator's official status page, with X / Safari escapes.
 struct ServiceStatusSheet: View {
-    static let peekHeight: CGFloat = 72
-
     let lineId: String
     let delayInfo: DelayCheckInfo
-    /// True when opened directly (e.g. from a context menu) rather than as a
-    /// line page's accessory; standalone sheets start expanded and can be
-    /// swiped away since no page's onDisappear will ever clear them.
-    var standalone = false
     @ObservedObject var web: ServiceStatusWebController
-    @State private var detent: PresentationDetent = .height(ServiceStatusSheet.peekHeight)
-
-    private var isPeeking: Bool {
-        detent == .height(Self.peekHeight)
-    }
+    @Environment(\.dismiss) private var dismiss
+    @State private var detent: PresentationDetent = .medium
 
     var body: some View {
-        VStack(spacing: 10) {
-            HStack(spacing: 8) {
-                Image(systemName: "info.circle.fill")
-                    .font(.system(size: 22, weight: .semibold))
-                    .foregroundStyle(.primary)
-                Text("StationTimetable.ServiceStatus")
-                    .font(.system(size: 17, weight: .semibold))
-
-                Spacer()
-
-                if !isPeeking {
+        NavigationStack {
+            Group {
+                if let webView = web.officialWebView {
+                    ServiceStatusWebView(webView: webView)
+                        .ignoresSafeArea(edges: .bottom)
+                }
+            }
+            .navigationTitle("StationTimetable.ServiceStatus")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItemGroup(placement: .topBarLeading) {
+                    Button {
+                        openInSafari()
+                    } label: {
+                        Label("ServiceStatus.OpenInSafari", systemImage: "safari")
+                    }
                     if let xURL = web.xURL {
                         Button {
                             UIApplication.shared.open(xURL)
                         } label: {
-                            // Optically smaller than an SF Symbol at the same size.
-                            Text(verbatim: "𝕏")
-                                .font(.system(size: 27, weight: .medium))
-                                .foregroundStyle(Color.primary)
-                                .frame(width: 44, height: 44)
-                                .contentShape(Circle())
+                            Image("sns.twitter.x")
+                                .resizable()
+                                .scaleEffect(0.8)
                         }
-                        .glassEffect(.regular.interactive(), in: Circle())
                         .accessibilityLabel("ServiceStatus.OpenInX")
-                        .transition(.blurReplace)
                     }
+                }
 
+                ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        openInSafari()
+                        dismiss()
                     } label: {
-                        Image(systemName: "safari")
-                            .font(.system(size: 20, weight: .medium))
-                            .foregroundStyle(Color.primary)
-                            .frame(width: 44, height: 44)
-                            .contentShape(Circle())
+                        Label("Button.Close", systemImage: "xmark")
                     }
-                    .glassEffect(.regular.interactive(), in: Circle())
-                    .accessibilityLabel("ServiceStatus.OpenInSafari")
-                    .transition(.blurReplace)
                 }
-
-                Button {
-                    detent = isPeeking ? .medium : .height(Self.peekHeight)
-                } label: {
-                    Image(systemName: isPeeking ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(Color.primary)
-                        .contentTransition(.symbolEffect(.replace))
-                        .frame(width: 44, height: 44)
-                        .contentShape(Circle())
-                }
-                .glassEffect(.regular.interactive(), in: Circle())
-                .accessibilityLabel("StationTimetable.ServiceStatus")
-            }
-            .padding(.leading, 20)
-            .padding(.trailing, 8)
-            .padding(.top, 12)
-            .contentShape(Rectangle())
-            .onTapGesture {
-                detent = isPeeking ? .medium : .height(Self.peekHeight)
-            }
-
-            // Kept out of the peek state so the fold doesn't clip it.
-            if !isPeeking {
-                if let webView = web.officialWebView {
-                    ServiceStatusWebView(webView: webView)
-                        .ignoresSafeArea(edges: .bottom)
-                        .transition(.opacity)
-                }
-            } else {
-                Spacer(minLength: 0)
             }
         }
-        .animation(.smooth(duration: 0.3), value: isPeeking)
-        .presentationDetents([.height(Self.peekHeight), .medium, .large], selection: $detent)
-        .presentationBackgroundInteraction(.enabled)
+        .presentationDetents([.medium, .large], selection: $detent)
         .presentationContentInteraction(.scrolls)
         .presentationDragIndicator(.visible)
-        .interactiveDismissDisabled(!standalone)
-        .onAppear {
-            if standalone {
-                detent = .medium
-            }
-        }
-        // The sheet stays up while pushing between line pages; start each line at peek.
-        .onChange(of: lineId) {
-            detent = .height(Self.peekHeight)
-        }
 #if DEBUG
         .onAppear {
             if ScreenshotStaging.shared.expandServiceStatus {
@@ -129,52 +71,96 @@ struct ServiceStatusSheet: View {
     }
 }
 
+// MARK: - Toolbar Button
+
+/// The 運行情報 sheet's content; the web view preloads from the moment it is built.
+struct ServiceStatusTarget: Identifiable {
+    let lineId: String
+    let delayInfo: DelayCheckInfo
+    let web: ServiceStatusWebController
+    var id: String { lineId }
+
+    init(lineId: String, delayInfo: DelayCheckInfo) {
+        self.lineId = lineId
+        self.delayInfo = delayInfo
+        self.web = ServiceStatusWebController(delayInfo: delayInfo)
+    }
+}
+
+/// Centered 運行情報 bottom-bar button, shared by the line and timetable pages.
+private struct ServiceStatusToolbar: ViewModifier {
+    @Binding var target: ServiceStatusTarget?
+    let lineId: String
+    let delayInfo: DelayCheckInfo?
+
+    func body(content: Content) -> some View {
+        content
+            .toolbar {
+                ToolbarSpacer(.flexible, placement: .bottomBar)
+
+                ToolbarItem(placement: .bottomBar) {
+                    Button {
+                        guard let delayInfo else { return }
+                        target = ServiceStatusTarget(lineId: lineId, delayInfo: delayInfo)
+                    } label: {
+                        Text("StationTimetable.ServiceStatus")
+                    }
+                    .disabled(delayInfo == nil)
+                }
+
+                ToolbarSpacer(.flexible, placement: .bottomBar)
+            }
+            .sheet(item: $target) { target in
+                ServiceStatusSheet(
+                    lineId: target.lineId,
+                    delayInfo: target.delayInfo,
+                    web: target.web
+                )
+            }
+#if DEBUG
+            .onAppear {
+                if ScreenshotStaging.shared.expandServiceStatus, let delayInfo {
+                    // Left set so the sheet expands itself to .large on appear.
+                    target = ServiceStatusTarget(lineId: lineId, delayInfo: delayInfo)
+                }
+            }
+#endif
+    }
+}
+
+extension View {
+    func serviceStatusToolbar(
+        target: Binding<ServiceStatusTarget?>,
+        lineId: String,
+        delayInfo: DelayCheckInfo?
+    ) -> some View {
+        modifier(ServiceStatusToolbar(target: target, lineId: lineId, delayInfo: delayInfo))
+    }
+}
+
 // MARK: - Presenter
 
-/// Single owner of the 運行情報 sheet across line pages. Pushing from one line
-/// to another swaps the sheet's content in place instead of racing the old
-/// page's dismissal against the new page's presentation.
+/// Presents the 運行情報 sheet from places without their own sheet host.
 @MainActor
 final class ServiceStatusPresenter: ObservableObject {
     struct Context {
         let lineId: String
         let delayInfo: DelayCheckInfo
         let web: ServiceStatusWebController
-        let standalone: Bool
     }
 
     @Published private(set) var context: Context?
-    /// Identifies the page currently holding the sheet up. Keyed per page
-    /// instance rather than per line, so pushing a station timetable on top of
-    /// its own line page hands the sheet over instead of dropping it.
-    private var owner: UUID?
 
-    func activate(owner: UUID, lineId: String, delayInfo: DelayCheckInfo?, standalone: Bool = false) {
-        guard let delayInfo else {
-            deactivate(owner: owner)
-            return
-        }
-        self.owner = owner
-        guard context?.lineId != lineId else { return }
+    func present(lineId: String, delayInfo: DelayCheckInfo?) {
+        guard let delayInfo else { return }
         context = Context(
             lineId: lineId,
             delayInfo: delayInfo,
-            web: ServiceStatusWebController(delayInfo: delayInfo),
-            standalone: standalone
+            web: ServiceStatusWebController(delayInfo: delayInfo)
         )
     }
 
-    /// A push fires the incoming page's onAppear before the outgoing page's
-    /// onDisappear, so only the current owner may clear the sheet.
-    func deactivate(owner: UUID) {
-        if self.owner == owner {
-            self.owner = nil
-            context = nil
-        }
-    }
-
     func dismiss() {
-        owner = nil
         context = nil
     }
 }
@@ -206,7 +192,6 @@ private struct ServiceStatusHost: ViewModifier {
                     ServiceStatusSheet(
                         lineId: context.lineId,
                         delayInfo: context.delayInfo,
-                        standalone: context.standalone,
                         web: context.web
                     )
                 }
@@ -223,10 +208,8 @@ extension View {
 
 // MARK: - Web Controller
 
-/// Preloads the status page in a cookie-less web view so the sheet has content
-/// by the time it is dragged up. Cookies are blocked outright by a content rule
-/// list, and the non-persistent store keeps anything WebKit still writes in
-/// memory only. Every surveyed operator page renders fine without them.
+/// Preloads the status page in a cookie-less web view, so the sheet has
+/// content by the time it is dragged up.
 @MainActor
 final class ServiceStatusWebController: ObservableObject {
     nonisolated let objectWillChange = ObservableObjectPublisher()
@@ -294,11 +277,8 @@ final class ServiceStatusWebController: ObservableObject {
 
 // MARK: - Cookies & Banners
 
-/// Blocks cookies and hides consent banners. Five of the operator status pages
-/// ship one: 北総 (#cookie-agree), 京成 (#cookiePolicy), 東京メトロ (Cookiebot),
-/// 京王 (OneTrust, injected seconds after load) and JR東日本's *English* pages
-/// (#gdprWrapper — the Japanese ones have none). The fuzzy sweep behind them
-/// catches sites that add one later.
+/// Known selectors for the operator pages that ship a consent banner, plus a
+/// fuzzy sweep for any added later.
 @MainActor
 enum CookieBanners {
     /// Hidden outright: each is the consent widget's own root.
@@ -307,16 +287,13 @@ enum CookieBanners {
         #gdprWrapper, #onetrust-consent-sdk
         """
 
-    /// Hidden only when they float over the page, so ordinary page furniture
-    /// that merely mentions cookies (京成's footer link) survives.
+    /// Hidden only when floating, so footer links mentioning cookies survive.
     private static let fuzzySelectors = """
         [id*="ookie"], [class*="ookie"], [id*="onsent"], [class*="onsent"], \
         [id*="gdpr"], [class*="gdpr"], [id*="onetrust"], [class*="onetrust"]
         """
 
-    /// `block-cookies` only strips the HTTP Cookie/Set-Cookie headers; page JS
-    /// can still write `document.cookie`. Neutering it too gets the count to a
-    /// measured zero, and all 35 status pages render byte-identically without it.
+    /// `block-cookies` only strips headers; neuter `document.cookie` too.
     static let sealScript = WKUserScript(
         source: """
         (() => {
@@ -380,8 +357,7 @@ enum CookieBanners {
 
 // MARK: - Navigation Policy
 
-/// Keeps top-level navigation within the operator's own domain; anything else
-/// (news links from X posts, banners, mailto:) flips out to Safari.
+/// Keeps top-level navigation on the operator's domain; anything else goes to Safari.
 private final class RestrictedWebDelegate: NSObject, WKNavigationDelegate, WKUIDelegate {
     private let allowedDomains: Set<String>
 
@@ -419,8 +395,7 @@ private final class RestrictedWebDelegate: NSObject, WKNavigationDelegate, WKUID
             decisionHandler(.allow)
             return
         }
-        // Only a tapped link may leave the app; scripted redirects are dropped
-        // silently rather than yanking the user out to Safari.
+        // Only a tapped link may leave the app; scripted redirects are dropped.
         if isUserInitiated(navigationAction) {
             openExternally(url)
         }

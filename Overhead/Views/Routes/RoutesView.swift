@@ -10,9 +10,31 @@ struct FavoritesSection: View {
     /// Upcoming departures from each favorite's origin, as rail seconds.
     @State private var departuresByPlace: [UUID: [Int]] = [:]
 
-    private static let cardWidth: CGFloat = 176
+    /// Measured rail width; cards are sized from it, not from a fixed constant.
+    @State private var railWidth: CGFloat = 0
+    @Namespace private var editorZoom
+
+    /// Matches the 12pt vertical gap down to the planner card.
+    private static let cardSpacing: CGFloat = 12
+    /// A half-card peeks at the trailing edge to say the rail scrolls.
+    private static let visibleCards: CGFloat = 2.3
     private static let cardHeight: CGFloat = 92
-    private static let sectionHeight: CGFloat = 122
+    private static let sectionHeight: CGFloat = 92
+    private static let cardShape = RoundedRectangle(cornerRadius: 20, style: .continuous)
+
+    /// Keeps the add tiles reading as placeholders next to the glass cards.
+    private var dashedOutline: some View {
+        Self.cardShape.strokeBorder(
+            Color(.systemGray4),
+            style: StrokeStyle(lineWidth: 1.5, dash: [5, 4])
+        )
+    }
+
+    /// 2.3 cards and the 2 gaps between them, whatever the screen is.
+    private var cardWidth: CGFloat {
+        guard railWidth > 0 else { return 176 }
+        return ((railWidth - Self.cardSpacing * 2) / Self.visibleCards).rounded()
+    }
 
     private enum EditorTarget: Identifiable {
         case new
@@ -36,11 +58,11 @@ struct FavoritesSection: View {
     private typealias ResolvedPlace = (line: TrainLine, from: Station, to: Station, vias: [Station], mode: RouteMode)
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            SectionHeader(title: "Section.Favorites")
-            rail
-        }
-        .frame(height: Self.sectionHeight, alignment: .top)
+        rail
+            .frame(height: Self.sectionHeight, alignment: .top)
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { railWidth = $0 }
+            // Trim the 24pt section gap down to the planner's tighter rhythm.
+            .padding(.bottom, -12)
         .task {
             await viewModel.loadLines()
         }
@@ -48,6 +70,9 @@ struct FavoritesSection: View {
             await recomputeDepartures()
         }
         .onAppear { places = SavedPlaceStore.load() }
+        .onReceive(NotificationCenter.default.publisher(for: SavedPlaceStore.didChangeNotification)) { _ in
+            places = SavedPlaceStore.load()
+        }
 #if DEBUG
         .onReceive(ScreenshotStaging.shared.$placeEditorCommand) { command in
             guard let command else { return }
@@ -71,30 +96,32 @@ struct FavoritesSection: View {
                     onSave: { upsert($0) }
                 )
             }
+            .navigationTransition(.zoom(sourceID: target.id, in: editorZoom))
         }
     }
 
     // MARK: - Rail
 
-    private var rail: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            TimelineView(.periodic(from: .now, by: 1)) { context in
-                HStack(alignment: .top, spacing: 10) {
-                    ForEach(places) { place in
-                        if let resolved = resolve(place) {
-                            placeCard(place: place, resolved: resolved, at: context.date)
-                        } else {
-                            brokenPlaceCard(place: place)
+    @ViewBuilder private var rail: some View {
+        if places.isEmpty {
+            emptyCard
+        } else {
+            ScrollView(.horizontal, showsIndicators: false) {
+                TimelineView(.periodic(from: .now, by: 1)) { context in
+                    HStack(alignment: .top, spacing: Self.cardSpacing) {
+                        ForEach(places) { place in
+                            if let resolved = resolve(place) {
+                                placeCard(place: place, resolved: resolved, at: context.date)
+                            } else {
+                                brokenPlaceCard(place: place)
+                            }
                         }
-                    }
-                    addTile
-                    if places.isEmpty {
-                        emptyHint
+                        addTile
                     }
                 }
             }
+            .scrollClipDisabled()
         }
-        .scrollClipDisabled()
     }
 
     private func placeCard(
@@ -127,11 +154,12 @@ struct FavoritesSection: View {
                 countdownLabel(for: place, at: date)
             }
             .padding(EdgeInsets(top: 12, leading: 12, bottom: 11, trailing: 12))
-            .frame(width: Self.cardWidth, height: Self.cardHeight, alignment: .topLeading)
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .frame(width: cardWidth, height: Self.cardHeight, alignment: .topLeading)
+            .glassEffect(.regular.interactive(), in: Self.cardShape)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .matchedTransitionSource(id: EditorTarget.edit(place).id, in: editorZoom)
         .accessibilityLabel("Button.StartJourney")
         .contextMenu {
             editButton(for: place)
@@ -225,9 +253,9 @@ struct FavoritesSection: View {
             Spacer(minLength: 0)
         }
         .padding(EdgeInsets(top: 12, leading: 12, bottom: 11, trailing: 12))
-        .frame(width: Self.cardWidth, height: Self.cardHeight, alignment: .topLeading)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .frame(width: cardWidth, height: Self.cardHeight, alignment: .topLeading)
+        .glassEffect(.regular, in: Self.cardShape)
+        .matchedTransitionSource(id: EditorTarget.edit(place).id, in: editorZoom)
         .contextMenu {
             deleteButton(for: place)
         }
@@ -240,31 +268,38 @@ struct FavoritesSection: View {
             Image(systemName: "plus")
                 .font(.system(size: 20, weight: .medium))
                 .foregroundStyle(.secondary)
-                .frame(width: Self.cardWidth, height: Self.cardHeight)
-                .background {
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .strokeBorder(
-                            Color(.systemGray4),
-                            style: StrokeStyle(lineWidth: 1.5, dash: [5, 4])
-                        )
-                }
+                .frame(width: cardWidth, height: Self.cardHeight)
+                .background(dashedOutline)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .matchedTransitionSource(id: EditorTarget.new.id, in: editorZoom)
         .accessibilityLabel("Button.AddPlace")
     }
 
-    private var emptyHint: some View {
-        VStack(alignment: .leading, spacing: 3) {
-            Text("Place.EmptyTitle")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(.secondary)
-            Text("Place.EmptyDescription")
-                .font(.system(size: 11.5))
-                .foregroundStyle(.tertiary)
-                .fixedSize(horizontal: false, vertical: true)
+    /// Full-width add tile shown when nothing is saved.
+    private var emptyCard: some View {
+        Button {
+            editorTarget = .new
+        } label: {
+            VStack(spacing: 4) {
+                Label("Place.EmptyTitle", systemImage: "plus")
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+                Text("Place.EmptyDescription")
+                    .font(.subheadline)
+                    .foregroundStyle(.tertiary)
+            }
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 16)
+            .frame(maxWidth: .infinity)
+            .frame(height: Self.cardHeight)
+            .background(dashedOutline)
+            .contentShape(Rectangle())
         }
-        .frame(width: 240, height: Self.cardHeight, alignment: .leading)
-        .padding(.leading, 6)
+        .buttonStyle(.plain)
+        .matchedTransitionSource(id: EditorTarget.new.id, in: editorZoom)
+        .accessibilityLabel("Button.AddPlace")
     }
 
     private func editButton(for place: SavedPlace) -> some View {

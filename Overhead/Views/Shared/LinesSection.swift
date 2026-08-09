@@ -6,17 +6,22 @@ import Backbone
 /// Home-screen section listing every train line grouped by operator.
 struct LinesSection: View {
     @ObservedObject var viewModel: JourneyViewModel
-    @State private var expandedOperators: Set<String> = ["Operator:JR-East", "Operator:TokyoMetro"]
+    /// Which operators are open, persisted as a tab-joined list of ids.
+    /// Mirrored into @State: AppStorage writes land outside the withAnimation
+    /// transaction, so toggling it directly never animates.
+    @AppStorage("lines.expandedOperators") private var expandedOperatorsRaw = "Operator:JR-East\tOperator:TokyoMetro"
+    @State private var expandedOperators: Set<String> = []
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            SectionHeader(title: "Tab.Lines")
-
+        VStack(alignment: .leading, spacing: 24) {
             if viewModel.availableLines.isEmpty {
                 emptyState
             } else {
                 browseByLineGrid
             }
+        }
+        .onAppear {
+            expandedOperators = Set(expandedOperatorsRaw.split(separator: "\t").map(String.init))
         }
         .task {
             await viewModel.loadLines()
@@ -53,7 +58,7 @@ struct LinesSection: View {
     private var browseByLineGrid: some View {
         // Eager on purpose: lazy containers mis-estimate the collapsed
         // sections' heights and make the scroll offset jitter.
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 24) {
             ForEach(OperatorSections.sections(for: viewModel.availableLines), id: \.operatorId) { section in
                 let isCollapsed = !expandedOperators.contains(section.operatorId)
 
@@ -66,6 +71,7 @@ struct LinesSection: View {
                                 expandedOperators.remove(section.operatorId)
                             }
                         }
+                        expandedOperatorsRaw = expandedOperators.sorted().joined(separator: "\t")
                     }
 
                     if !isCollapsed {

@@ -11,13 +11,7 @@ struct StationTimetableView: View {
 
     @State private var selectedDirection: String?
     @State private var detailDeparture: StationDeparture?
-    @State private var statusOwner = UUID()
-
-    @Environment(\.serviceStatusPresenter) private var serviceStatusPresenter
-
-    private var isEnglish: Bool {
-        Locale.current.language.languageCode?.identifier == "en"
-    }
+    @State private var statusTarget: ServiceStatusTarget?
 
     var body: some View {
         Group {
@@ -31,18 +25,13 @@ struct StationTimetableView: View {
         }
         .navigationTitle(station.localizedName)
         .navigationBarTitleDisplayMode(.inline)
+        .serviceStatusToolbar(
+            target: $statusTarget,
+            lineId: line.id,
+            delayInfo: viewModel.delayCheckInfo(for: line.id)
+        )
         .onAppear {
             viewModel.loadStationTimetable(stationId: station.id)
-            // Takes the sheet over from the line page it was pushed from, or
-            // raises it when arriving from somewhere without one.
-            serviceStatusPresenter?.activate(
-                owner: statusOwner,
-                lineId: line.id,
-                delayInfo: viewModel.delayCheckInfo(for: line.id)
-            )
-        }
-        .onDisappear {
-            serviceStatusPresenter?.deactivate(owner: statusOwner)
         }
     }
 
@@ -215,13 +204,10 @@ struct StationTimetableView: View {
                 .padding(.bottom, 12)
             }
             .scrollEdgeEffectStyle(.soft, for: .top)
-            .contentMargins(.bottom, ServiceStatusSheet.peekHeight + 12, for: .scrollContent)
             .onAppear {
                 scrollToCurrentHour(proxy: proxy, rows: rows, nowMinutes: nowMinutes)
             }
-            // On push the grid first renders the previous station's stale data
-            // (child onAppear runs before this view's onAppear loads), so
-            // rescroll when the shown station or direction actually changes.
+            // The grid first renders stale data on push, so rescroll on change.
             .onChange(of: "\(timetable.stationId)|\(timetable.railDirection)") {
                 scrollToCurrentHour(proxy: proxy, rows: rows, nowMinutes: nowMinutes)
             }
@@ -282,7 +268,9 @@ struct StationTimetableView: View {
     ) -> some View {
         let minute = departure.departureTime.components(separatedBy: ":").last ?? ""
         let annotation = departure.localizedDestination != primaryDest
-            ? String(departure.localizedDestination.prefix(isEnglish ? 2 : 1)) : ""
+            // Latin names need two letters to read; a single CJK glyph is enough.
+            ? String(departure.localizedDestination.prefix(
+                departure.localizedDestination.first?.isASCII == true ? 2 : 1)) : ""
         return Button {
             detailDeparture = departure
         } label: {
@@ -291,10 +279,9 @@ struct StationTimetableView: View {
                     .font(.system(size: 17, weight: minuteWeight(departure, baseType: baseType)))
                     .monospacedDigit()
                     .foregroundColor(minuteColor(departure, isPast: isPast, baseType: baseType))
-                // Only rows with at least one mark reserve the annotation line,
-                // so unmarked rows stay vertically symmetric.
+                // Unmarked rows skip the annotation line to stay symmetric.
                 if showAnnotationLine {
-                    (Text(departure.isFirst ? "始" : "").foregroundColor(.green)
+                    (Text(departure.isFirst ? "StationTimetable.FirstMark" : "").foregroundColor(.green)
                         + Text(annotation.isEmpty && !departure.isFirst ? " " : annotation).foregroundColor(.gray))
                         .font(.system(size: 9, weight: .bold))
                         .opacity(isPast ? 0.4 : 1)
@@ -327,7 +314,6 @@ struct StationTimetableView: View {
     }
 
     /// Skip-stop tiers: rapid family red, express family orange, liner/limited purple.
-    /// Locals only reach here on lines whose base service skips stations.
     private func gridTypeColor(_ type: TrainService.TrainType) -> Color {
         switch type {
         case .local:
@@ -357,7 +343,7 @@ struct StationTimetableView: View {
                 Text(departure.departureTime)
                     .font(.system(size: 32, weight: .bold))
                     .monospacedDigit()
-                Text(isEnglish ? "dep." : "発")
+                Text("StationTimetable.DepartureSuffix")
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.secondary)
             }
@@ -377,12 +363,12 @@ struct StationTimetableView: View {
             VStack(alignment: .leading, spacing: 6) {
                 departureStatusLabel(departure)
                 if departure.isFirst {
-                    Label(isEnglish ? "Starts at this station" : "この駅始発の列車です",
+                    Label("StationTimetable.StartsHere",
                           systemImage: "arrow.up.forward.circle.fill")
                         .foregroundStyle(.green)
                 }
                 if departure.isLast {
-                    Label(isEnglish ? "Last train of the day" : "本日の最終列車です",
+                    Label("StationTimetable.LastTrain",
                           systemImage: "moon.circle.fill")
                         .foregroundStyle(.red)
                 }
@@ -403,19 +389,17 @@ struct StationTimetableView: View {
             let depMinutes = secs / 60 < 180 ? secs / 60 + 1440 : secs / 60
             let remaining = depMinutes - railNowMinutes(at: Date())
             if remaining < 0 {
-                Label(isEnglish ? "Departed" : "発車済み", systemImage: "checkmark.circle")
+                Label("StationTimetable.Departed", systemImage: "checkmark.circle")
                     .foregroundStyle(.secondary)
             } else if remaining == 0 {
-                Label(isEnglish ? "Departing soon" : "まもなく発車します", systemImage: "clock.fill")
+                Label("StationTimetable.DepartingSoon", systemImage: "clock.fill")
                     .foregroundStyle(.orange)
             } else if remaining < 120 {
-                Label(isEnglish ? "Departs in \(remaining) min" : "あと\(remaining)分で発車します",
+                Label("StationTimetable.DepartsIn \(remaining)",
                       systemImage: "clock.fill")
                     .foregroundStyle(.green)
             } else {
-                Label(isEnglish
-                      ? "Departs in \(remaining / 60) hr \(remaining % 60) min"
-                      : "あと\(remaining / 60)時間\(remaining % 60)分で発車します",
+                Label("StationTimetable.DepartsInHours \(remaining / 60) \(remaining % 60)",
                       systemImage: "clock")
                     .foregroundStyle(.secondary)
             }
@@ -437,14 +421,9 @@ struct StationTimetableView: View {
     private func boardNotice(for timetable: StationTimetableData) -> String? {
         let throughs = throughServices(for: timetable)
         guard !throughs.isEmpty else { return nil }
-        if isEnglish {
-            return throughs.map {
-                "Through service beyond \(junctionName(for: $0)) to the \($0.localizedLineName) for \($0.localizedToward)."
-            }.joined(separator: "  ")
-        }
         return throughs.map {
-            "\(junctionName(for: $0))から\($0.localizedLineName) \($0.localizedToward)へ直通運転しています。"
-        }.joined(separator: "　")
+            String(localized: "Board.ThroughNotice \(junctionName(for: $0)) \($0.localizedLineName) \($0.localizedToward)")
+        }.joined(separator: "  ")
     }
 
     @ViewBuilder
@@ -562,17 +541,13 @@ private struct DepartureBoardView: View {
     private let amber = Color(red: 1.0, green: 0.71, blue: 0.16)
     private let ledGreen = Color(red: 0.22, green: 0.88, blue: 0.43)
 
-    private var isEnglish: Bool {
-        Locale.current.language.languageCode?.identifier == "en"
-    }
-
     var body: some View {
         VStack(spacing: 0) {
             // Rows keep the panel inset; the marquee below runs edge to edge.
             VStack(spacing: 0) {
                 header
                 if departures.isEmpty {
-                    Text(isEnglish ? "No more departures today" : "本日の発車はありません")
+                    Text("Board.NoDepartures")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(ledGreen)
                         .frame(maxWidth: .infinity)
@@ -604,17 +579,16 @@ private struct DepartureBoardView: View {
     }
 
     private func ordinalName(_ index: Int) -> String {
-        if isEnglish { return index == 0 ? "1st" : "2nd" }
-        return index == 0 ? "先発" : "次発"
+        String(localized: index == 0 ? "Board.Ordinal.First" : "Board.Ordinal.Second")
     }
 
     private var header: some View {
         HStack(spacing: 6) {
             Text("").frame(width: 36)
-            Text(isEnglish ? "Train" : "種別").frame(width: 78, alignment: .leading)
-            Text(isEnglish ? "Time" : "発車時刻").frame(width: 56, alignment: .leading)
-            Text(isEnglish ? "Destination" : "行先").frame(maxWidth: .infinity, alignment: .leading)
-            Text(isEnglish ? "Departs" : "発車まで").frame(width: 56, alignment: .trailing)
+            Text("Board.Header.Type").frame(width: 78, alignment: .leading)
+            Text("Board.Header.Time").frame(width: 56, alignment: .leading)
+            Text("Board.Header.Destination").frame(maxWidth: .infinity, alignment: .leading)
+            Text("Board.Header.Countdown").frame(width: 56, alignment: .trailing)
         }
         .font(.system(size: 10, weight: .semibold))
         .foregroundColor(Color(white: 0.55))
@@ -678,7 +652,8 @@ private struct DepartureBoardView: View {
     /// Japanese two-character types get the traditional full-width spacing (快　速).
     private func spacedTypeName(_ type: TrainService.TrainType) -> String {
         let name = type.localizedDisplayName
-        return name.count == 2 && !isEnglish ? name.map(String.init).joined(separator: "　") : name
+        let isCJK = !name.contains { $0.isASCII }
+        return name.count == 2 && isCJK ? name.map(String.init).joined(separator: "　") : name
     }
 
     private func countdownText(_ departure: StationDeparture) -> String {
@@ -686,10 +661,9 @@ private struct DepartureBoardView: View {
         var minutes = secs / 60
         if minutes < 180 { minutes += 1440 }
         let remaining = minutes - nowMinutes
-        if isEnglish {
-            return remaining <= 0 ? "Soon" : "\(remaining) min"
-        }
-        return remaining <= 0 ? "まもなく" : "\(remaining)分"
+        return remaining <= 0
+            ? String(localized: "Board.Countdown.Soon")
+            : String(localized: "Board.Countdown.Minutes \(remaining)")
     }
 }
 
@@ -731,9 +705,7 @@ private struct BoardMarquee: View {
             }
     }
 
-    /// Clock-driven so the cycle deterministically enters at the right edge
-    /// and fully exits left — a state animation can coalesce with the initial
-    /// offset jump and appear mid-panel.
+    /// Clock-driven; a state animation can coalesce and start mid-panel.
     private func offsetX(at date: Date, containerWidth: CGFloat) -> CGFloat {
         guard textWidth > 0, let startDate else { return containerWidth }
         let distance = containerWidth + textWidth

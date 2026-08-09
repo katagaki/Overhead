@@ -5,6 +5,8 @@ import Backbone
 
 struct StationSearchSelectionView: View {
     let lines: [TrainLine]
+    /// Names the role being picked (出発駅/経由駅/到着駅) instead of just 駅.
+    var title: LocalizedStringKey = "ViewTitle.Stations"
     /// For sheet presentation; a pushed nav stack uses the back button instead.
     var showsCloseButton: Bool = false
     /// Merges same-named stations into one row with every line's badge.
@@ -44,7 +46,7 @@ struct StationSearchSelectionView: View {
         .safeAreaInset(edge: .bottom, spacing: 0) {
             searchBar
         }
-        .navigationTitle("ViewTitle.Stations")
+        .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if showsCloseButton {

@@ -75,6 +75,9 @@ extension SavedPlace {
 enum SavedPlaceStore {
     private static let storageKey = "savedPlaces"
 
+    /// Posted after every save so open views re-read the list.
+    static let didChangeNotification = Notification.Name("SavedPlaceStore.didChange")
+
     static func load() -> [SavedPlace] {
         guard let data = UserDefaults.standard.data(forKey: storageKey),
               let decoded = try? JSONDecoder().decode([SavedPlace].self, from: data) else {
@@ -86,5 +89,6 @@ enum SavedPlaceStore {
     static func save(_ places: [SavedPlace]) {
         guard let data = try? JSONEncoder().encode(places) else { return }
         UserDefaults.standard.set(data, forKey: storageKey)
+        NotificationCenter.default.post(name: didChangeNotification, object: nil)
     }
 }

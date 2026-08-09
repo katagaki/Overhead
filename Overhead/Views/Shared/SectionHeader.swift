@@ -2,16 +2,16 @@ import SwiftUI
 
 // MARK: - Section Header
 
-/// The one header every home section uses: title, optional collapse chevron,
-/// and a trailing slot holding either a `SectionAction` or a `SectionStatus`.
-/// The fixed height keeps headers aligned no matter what the trailing slot holds.
+/// Title, optional collapse chevron, and a trailing `SectionAction` or
+/// `SectionStatus`. Fixed height so headers align whatever the slot holds.
 struct SectionHeader<Trailing: View>: View {
     let title: Title
     var collapsed: Bool?
     var onTitleTap: (() -> Void)?
     @ViewBuilder var trailing: Trailing
 
-    static var height: CGFloat { 22 }
+    /// Grows with the subheadline the header is set in, so tall text isn't clipped.
+    @ScaledMetric(relativeTo: .subheadline) private var height: CGFloat = 22
 
     /// Operator names arrive already localized, so they bypass the key lookup.
     enum Title {
@@ -26,7 +26,7 @@ struct SectionHeader<Trailing: View>: View {
             trailing
         }
         .padding(.horizontal, 4)
-        .frame(height: Self.height)
+        .frame(height: height)
     }
 
     @ViewBuilder
@@ -38,7 +38,7 @@ struct SectionHeader<Trailing: View>: View {
                 case .verbatim(let string): Text(string)
                 }
             }
-            .font(.body.weight(.semibold))
+            .font(.subheadline.weight(.semibold))
             .foregroundColor(.secondary)
             if let collapsed {
                 Image(systemName: "chevron.down")
@@ -89,7 +89,7 @@ extension SectionHeader where Trailing == EmptyView {
 
 // MARK: - Trailing Slot
 
-/// Tinted, tappable. The tint is what tells the user it does something.
+/// Tinted and tappable.
 struct SectionAction: View {
     let icon: String
     let label: LocalizedStringKey
@@ -100,9 +100,9 @@ struct SectionAction: View {
         Button(action: action) {
             HStack(spacing: 4) {
                 Image(systemName: icon)
-                    .font(.system(size: 12.5, weight: .semibold))
+                    .font(.subheadline.weight(.semibold))
                 Text(label)
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.subheadline.weight(.semibold))
             }
             .foregroundStyle(enabled ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
             .contentShape(Rectangle())
@@ -112,13 +112,13 @@ struct SectionAction: View {
     }
 }
 
-/// Never tinted, never tappable — for state a section reports but can't act on.
+/// State a section reports but can't act on: never tinted, never tappable.
 struct SectionStatus: View {
     let text: LocalizedStringKey
 
     var body: some View {
         Text(text)
-            .font(.system(size: 13))
+            .font(.subheadline)
             .foregroundStyle(.secondary)
     }
 }

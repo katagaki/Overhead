@@ -4,15 +4,15 @@ import Backbone
 
 // MARK: - Nearby Stations Section
 
-/// Home-screen 付近の駅 rail: one card per nearby station, each line a row
-/// showing the next scheduled departure. Tapping a row flips its direction.
-/// Every state except denied keeps the same height so content below never jumps.
+/// A card per nearby station, a row per line with its next departure.
+/// Tapping a row flips its direction.
 struct NearbyStationsSection: View {
     @ObservedObject var viewModel: JourneyViewModel
     @StateObject private var provider = NearbyStationsProvider()
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.serviceStatusPresenter) private var serviceStatusPresenter
     @AppStorage("journey.walkingSpeed") private var walkingSpeedRaw = WalkingSpeed.normal.rawValue
+    @AppStorage("nearby.collapsed") private var isCollapsed = false
 
     /// Remembered flip per "stationName|lineId", persisted across launches.
     @State private var directionChoices: [String: String] =
@@ -24,8 +24,7 @@ struct NearbyStationsSection: View {
     private static let directionChoicesKey = "nearby.directionChoices"
     /// All cards share one height (3 visible rows); longer lists scroll inside it.
     private static let cardHeight: CGFloat = 182
-    /// Header (~22) + 8 gap + card, exactly — any slack here reads as
-    /// uneven spacing against the root VStack's 24pt section gaps.
+    /// Header (~22) + 8 gap + card, exactly; slack reads as uneven spacing.
     private static let sectionHeight: CGFloat = 212
 
     var body: some View {
@@ -66,19 +65,31 @@ struct NearbyStationsSection: View {
         provider.refreshIfNeeded(lines: viewModel.availableLines)
     }
 
-    /// Fixed-height frame shared by every state except denied.
+    /// Shared by every state except denied, and dropped when collapsed, where
+    /// the header stands alone.
     private func fixedFrame(@ViewBuilder content: () -> some View) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             header
-            content()
+            if !isCollapsed {
+                content()
+                    .transition(
+                        .scale(0.96, anchor: .top)
+                            .combined(with: .opacity)
+                            .combined(with: .blurReplace)
+                    )
+            }
         }
-        .frame(height: Self.sectionHeight, alignment: .top)
+        .frame(height: isCollapsed ? nil : Self.sectionHeight, alignment: .top)
     }
 
     // MARK: - Header
 
     private var header: some View {
-        SectionHeader(title: provider.isReducedAccuracy ? "Nearby.TitleApprox" : "Nearby.Title") {
+        SectionHeader(
+            title: provider.isReducedAccuracy ? "Nearby.TitleApprox" : "Nearby.Title",
+            collapsed: isCollapsed,
+            onTitleTap: { withAnimation(.smooth.speed(2.0)) { isCollapsed.toggle() } }
+        ) {
             switch provider.authorizationStatus {
             case .authorizedWhenInUse, .authorizedAlways:
                 // Always present once authorized; dimmed while locating.
@@ -134,37 +145,33 @@ struct NearbyStationsSection: View {
     }
 
     private var promptCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(spacing: 10) {
             Text("Nearby.Prompt.Title")
-                .font(.system(size: 14.5, weight: .semibold))
-            Text("Nearby.Prompt.Body")
-                .font(.system(size: 12.5))
-                .foregroundStyle(.secondary)
+                .font(.headline)
             Button {
                 provider.requestPermission(lines: viewModel.availableLines)
             } label: {
                 Text("Nearby.Prompt.Button")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .background(Capsule().fill(.tint))
+                    .font(.subheadline.weight(.semibold))
             }
-            .buttonStyle(.plain)
-            Spacer(minLength: 0)
+            .buttonStyle(.borderedProminent)
+            .buttonBorderShape(.capsule)
         }
+        .multilineTextAlignment(.center)
         .padding(17)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 
     private var loadingCard: some View {
         // The header's 測位中… gives way to the label here, so it isn't doubled.
-        ProgressView("Nearby.Locating")
-            .controlSize(.large)
-            .font(.system(size: 13))
-            .foregroundStyle(.secondary)
+        VStack(spacing: 12) {
+            ProgressView()
+            Text("Nearby.Locating")
+                .font(.system(size: 13))
+                .foregroundStyle(.secondary)
+        }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color(.secondarySystemGroupedBackground))
             .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
@@ -220,13 +227,11 @@ struct NearbyStationsSection: View {
                     }
                 }
             }
-            // Rows clip at the bare card edge mid-scroll, but the end of the
-            // list keeps breathing room when scrolled all the way down.
+            // Breathing room at the end of the list, not mid-scroll.
             .contentMargins(.bottom, 10, for: .scrollContent)
             .scrollDisabled(group.hits.count <= 3)
         }
-        // No bottom inset: the row list runs to the card edge so scrolling
-        // content emerges from under the rounded corner.
+        // No bottom inset: rows emerge from under the rounded corner.
         .padding(EdgeInsets(top: 13, leading: 13, bottom: 0, trailing: 13))
         .frame(width: 196, height: Self.cardHeight, alignment: .topLeading)
         .background(Color(.secondarySystemGroupedBackground))
@@ -308,11 +313,9 @@ struct NearbyStationsSection: View {
                 Label("Nearby.OpenTimetable", systemImage: "calendar")
             }
             Button {
-                serviceStatusPresenter?.activate(
-                    owner: UUID(),
+                serviceStatusPresenter?.present(
                     lineId: hit.line.id,
-                    delayInfo: viewModel.delayCheckInfo(for: hit.line.id),
-                    standalone: true
+                    delayInfo: viewModel.delayCheckInfo(for: hit.line.id)
                 )
             } label: {
                 Label("StationTimetable.ServiceStatus", systemImage: "info.circle")
@@ -320,8 +323,7 @@ struct NearbyStationsSection: View {
         }
     }
 
-    /// Loop lines come back to where they started, so every train shows the same
-    /// destination; the direction is what actually tells the two apart.
+    /// Loop lines share one destination, so the direction tells them apart.
     private func destinationLabel(
         for hit: StationSearchHit,
         timetable: StationTimetableData?,

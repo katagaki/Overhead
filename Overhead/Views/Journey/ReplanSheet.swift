@@ -3,8 +3,7 @@ import Backbone
 
 // MARK: - Replan Sheet
 
-/// Mid-journey course change: pick a stop you can still get off at, then take a
-/// different train or a different destination from there.
+/// Mid-journey course change: pick a stop still ahead, then a new train or destination.
 struct ReplanSheet: View {
     @ObservedObject var viewModel: JourneyViewModel
     /// Stop the rider tapped on the route strip; falls back to the next one.
@@ -15,7 +14,6 @@ struct ReplanSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var anchorIndex: Int?
-    @State private var mode: Mode = .train
     @State private var candidates: [TrainCandidate] = []
     @State private var isSearching = false
     @State private var selection: Selection?
@@ -28,6 +26,9 @@ struct ReplanSheet: View {
         case destination
     }
 
+    /// Chosen in the alert that opens this sheet; nothing switches it here.
+    private var mode: Mode { initialMode }
+
     private enum Selection: Equatable {
         case candidate(String)
         case stop(Int)
@@ -35,9 +36,14 @@ struct ReplanSheet: View {
 
     private var anchors: [JourneyViewModel.ReplanAnchor] { viewModel.replanAnchors }
 
+    /// The default: stops behind the train are offered but never preselected.
+    private var nextAnchor: JourneyViewModel.ReplanAnchor? {
+        anchors.first { !$0.isPast } ?? anchors.first
+    }
+
     private var anchor: JourneyViewModel.ReplanAnchor? {
-        guard let anchorIndex else { return anchors.first }
-        return anchors.first { $0.stationIndex == anchorIndex } ?? anchors.first
+        guard let anchorIndex else { return nextAnchor }
+        return anchors.first { $0.stationIndex == anchorIndex } ?? nextAnchor
     }
 
     private var walkingSpeed: WalkingSpeed {
@@ -77,6 +83,7 @@ struct ReplanSheet: View {
             .navigationDestination(isPresented: $searchingStation) {
                 StationSearchSelectionView(
                     lines: viewModel.availableLines,
+                    title: "StationSearch.Title.To",
                     mergesStations: true
                 ) { hit in
                     searchingStation = false
@@ -89,8 +96,7 @@ struct ReplanSheet: View {
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
         .onAppear {
-            anchorIndex = initialAnchorIndex ?? anchors.first?.stationIndex
-            mode = initialMode
+            anchorIndex = initialAnchorIndex ?? nextAnchor?.stationIndex
             searchIfNeeded()
         }
     }
@@ -106,15 +112,6 @@ struct ReplanSheet: View {
                 Text("Replan.Anchor.Header")
             }
 
-            Section {
-                Picker("Replan.Title", selection: $mode) {
-                    Text("Replan.Mode.Train").tag(Mode.train)
-                    Text("Replan.Mode.Destination").tag(Mode.destination)
-                }
-                .pickerStyle(.segmented)
-                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-            }
-
             switch mode {
             case .train: trainSection
             case .destination: destinationSection
@@ -125,11 +122,6 @@ struct ReplanSheet: View {
             if let applyAction {
                 confirmBar(applyAction)
             }
-        }
-        .onChange(of: mode) { _, _ in
-            selection = nil
-            offRouteDestination = nil
-            searchIfNeeded()
         }
         .onChange(of: anchorIndex) { _, _ in
             selection = nil
@@ -163,7 +155,9 @@ struct ReplanSheet: View {
                                     .font(.system(size: 15, weight: .bold))
                                     .lineLimit(1)
                                 Group {
-                                    if candidate.stationIndex == anchors.first?.stationIndex {
+                                    if candidate.isPast {
+                                        Text("Replan.PassedStop")
+                                    } else if candidate.stationIndex == nextAnchor?.stationIndex {
                                         Text("Replan.NextStop")
                                     } else {
                                         Text(verbatim: timeString(candidate.time))
@@ -178,6 +172,7 @@ struct ReplanSheet: View {
                         .padding(.vertical, 8)
                         .background(isSelected ? Color.accentColor : Color(.tertiarySystemFill))
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .opacity(candidate.isPast && !isSelected ? 0.6 : 1)
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)

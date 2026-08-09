@@ -17,35 +17,24 @@ struct CustomLinesSection: View {
     @State private var showImporter = false
     @State private var importError: String?
     @State private var pendingImport: CustomLinePackage?
+    @AppStorage("customLines.collapsed") private var isCollapsed = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            SectionHeader(title: "CustomLine.Section")
-
-            VStack(spacing: 0) {
-                ForEach(store.lines) { line in
-                    NavigationLink(value: CustomLineRoute.edit(line.id)) {
-                        row(for: line)
-                    }
-                    .buttonStyle(.plain)
-                    Divider().padding(.leading, 60)
+            SectionHeader(title: "CustomLine.Section", collapsed: isCollapsed) {
+                withAnimation(.smooth.speed(2.0)) {
+                    isCollapsed.toggle()
                 }
-
-                NavigationLink(value: CustomLineRoute.new) {
-                    actionRow(title: "CustomLine.Create", systemImage: "plus")
-                }
-                .buttonStyle(.plain)
-                Divider().padding(.leading, 60)
-
-                Button {
-                    showImporter = true
-                } label: {
-                    actionRow(title: "CustomLine.ImportFile", systemImage: "square.and.arrow.down")
-                }
-                .buttonStyle(.plain)
             }
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+
+            if !isCollapsed {
+                lineList
+                    .transition(
+                        .scale(0.96, anchor: .top)
+                            .combined(with: .opacity)
+                            .combined(with: .blurReplace)
+                    )
+            }
         }
         .fileImporter(
             isPresented: $showImporter,
@@ -62,6 +51,33 @@ struct CustomLinesSection: View {
         } message: {
             Text(verbatim: importError ?? "")
         }
+    }
+
+    private var lineList: some View {
+        VStack(spacing: 0) {
+            ForEach(store.lines) { line in
+                NavigationLink(value: CustomLineRoute.edit(line.id)) {
+                    row(for: line)
+                }
+                .buttonStyle(.plain)
+                Divider().padding(.leading, 60)
+            }
+
+            NavigationLink(value: CustomLineRoute.new) {
+                actionRow(title: "CustomLine.Create", systemImage: "plus")
+            }
+            .buttonStyle(.plain)
+            Divider().padding(.leading, 60)
+
+            Button {
+                showImporter = true
+            } label: {
+                actionRow(title: "CustomLine.ImportFile", systemImage: "square.and.arrow.down")
+            }
+            .buttonStyle(.plain)
+        }
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
     }
 
     // MARK: Rows

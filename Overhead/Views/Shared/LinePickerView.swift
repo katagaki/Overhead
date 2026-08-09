@@ -16,6 +16,9 @@ enum StationSearch {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return [] }
         let lowered = trimmed.lowercased()
+        // Pronunciation skeleton: めぐろ / メグロ / meguro / Meguro all fold to the same key.
+        let phoneticKey = JapaneseSearch.searchKey(trimmed)
+        let kanaKey = JapaneseSearch.kanaFolded(trimmed)
 
         var hits: [StationSearchHit] = []
         for line in lines {
@@ -23,6 +26,8 @@ enum StationSearch {
                 if station.name.contains(trimmed)
                     || station.nameEn.lowercased().contains(lowered)
                     || station.localizedName.lowercased().contains(lowered)
+                    || (!phoneticKey.isEmpty && station.searchKeys.contains { $0.contains(phoneticKey) })
+                    || (!kanaKey.isEmpty && station.kanaFoldedName.contains(kanaKey))
                     || (!station.stationCode.isEmpty && station.stationCode.lowercased().hasPrefix(lowered)) {
                     hits.append(StationSearchHit(line: line, station: station))
                 }
@@ -30,10 +35,15 @@ enum StationSearch {
         }
 
         func rank(_ hit: StationSearchHit) -> Int {
-            if hit.station.name == trimmed || hit.station.nameEn.lowercased() == lowered {
+            let keys = phoneticKey.isEmpty ? [] : hit.station.searchKeys
+            let folded = hit.station.kanaFoldedName
+            if hit.station.name == trimmed || hit.station.nameEn.lowercased() == lowered
+                || keys.contains(phoneticKey) || (!kanaKey.isEmpty && folded == kanaKey) {
                 return 0
             }
-            if hit.station.name.hasPrefix(trimmed) || hit.station.nameEn.lowercased().hasPrefix(lowered) {
+            if hit.station.name.hasPrefix(trimmed) || hit.station.nameEn.lowercased().hasPrefix(lowered)
+                || keys.contains(where: { $0.hasPrefix(phoneticKey) })
+                || (!kanaKey.isEmpty && folded.hasPrefix(kanaKey)) {
                 return 1
             }
             return 2
@@ -55,8 +65,7 @@ struct StationPickerView: View {
     let line: TrainLine
     @ObservedObject var viewModel: JourneyViewModel
     @State private var selectedDirectionIndex = 0
-    @State private var statusOwner = UUID()
-    @Environment(\.serviceStatusPresenter) private var serviceStatusPresenter
+    @State private var statusTarget: ServiceStatusTarget?
 
     private let trackWidth: CGFloat = 4
     private let dotColumnWidth: CGFloat = 24
@@ -112,27 +121,21 @@ struct StationPickerView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
         }
-        .contentMargins(.bottom, ServiceStatusSheet.peekHeight + 12, for: .scrollContent)
         .background(Color(.systemGroupedBackground))
-        .safeAreaInset(edge: .top) {
+        .safeAreaInset(edge: .top, spacing: 0) {
             if directionOptions.count > 1 {
                 directionPicker
-                    .padding(12)
-                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
-                    .padding(.horizontal, 16)
+                    .glassEffect(.regular, in: .capsule)
+                    .padding(.horizontal)
+                    .padding(.top, 4)
                     .padding(.bottom, 8)
             }
         }
-        .onAppear {
-            serviceStatusPresenter?.activate(
-                owner: statusOwner,
-                lineId: line.id,
-                delayInfo: viewModel.delayCheckInfo(for: line.id)
-            )
-        }
-        .onDisappear {
-            serviceStatusPresenter?.deactivate(owner: statusOwner)
-        }
+        .serviceStatusToolbar(
+            target: $statusTarget,
+            lineId: line.id,
+            delayInfo: viewModel.delayCheckInfo(for: line.id)
+        )
         .navigationTitle(line.localizedName)
         .navigationBarTitleDisplayMode(.inline)
     }

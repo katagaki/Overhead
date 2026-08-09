@@ -10,9 +10,18 @@ struct JourneyView: View {
 
     /// Carried with the presentation; `isPresented` would read a stale index.
     @State private var replanTarget: ReplanTarget?
+    /// The tapped stop, held while the rider says what they want to do there.
+    @State private var replanChoice: ReplanChoice?
 
     private struct ReplanTarget: Identifiable {
         let stationIndex: Int
+        let mode: ReplanSheet.Mode
+        var id: Int { stationIndex }
+    }
+
+    private struct ReplanChoice: Identifiable {
+        let stationIndex: Int
+        let stationName: String
         var id: Int { stationIndex }
     }
 
@@ -31,9 +40,11 @@ struct JourneyView: View {
                 ScrollViewReader { proxy in
                     ScrollView(.vertical, showsIndicators: false) {
                         VStack(spacing: 0) {
-                            journeyHeader(journey: journey, state: state)
-                                .padding(.top, 12)
-                                .padding(.bottom, 20)
+                            if state.delayMinutes > 0 {
+                                journeyHeader(state: state)
+                                    .padding(.top, 12)
+                                    .padding(.bottom, 20)
+                            }
 
                             VerticalLCDLine(
                                 journey: journey,
@@ -41,10 +52,16 @@ struct JourneyView: View {
                                 lineColor: lineColor,
                                 selectableIndices: Set(viewModel.replanAnchors.map(\.stationIndex)),
                                 onSelectStation: { index in
-                                    replanTarget = ReplanTarget(stationIndex: index)
+                                    let stations = journey.journeyStations
+                                    guard stations.indices.contains(index) else { return }
+                                    replanChoice = ReplanChoice(
+                                        stationIndex: index,
+                                        stationName: stations[index].localizedName
+                                    )
                                 }
                             )
                             .padding(.horizontal, 24)
+                            .padding(.top, 12)
 
                             Spacer(minLength: 40)
                         }
@@ -57,8 +74,7 @@ struct JourneyView: View {
                             lineColor: lineColor,
                             orientation: TrainLCDOrientation(rawValue: lcdOrientationRaw) ?? .left
                         )
-                        // PiP docks here so returning to the app animates
-                        // the PiP window into the LCD.
+                        // PiP docks here so restoring animates into the LCD.
                         .overlay {
                             LCDPiPLayerHost()
                                 .frame(width: 1, height: 1)
@@ -68,16 +84,12 @@ struct JourneyView: View {
                         .padding(.bottom, 8)
                     }
                     .safeAreaInset(edge: .bottom) {
-                        Group {
-                            if viewModel.trackingMode == .manual {
-                                manualStationControl(journey: journey, state: state)
-                            } else {
-                                trackingModeCapsule
-                            }
+                        if viewModel.trackingMode == .manual {
+                            manualStationControl(journey: journey, state: state)
+                                .padding(.vertical, 8)
+                                .frame(maxWidth: .infinity)
+                                .contentShape(Rectangle())
                         }
-                        .padding(.vertical, 8)
-                        .frame(maxWidth: .infinity)
-                        .contentShape(Rectangle())
                     }
                     .onAppear {
                         if let idx = state.currentStationIndex {
@@ -91,44 +103,38 @@ struct JourneyView: View {
                 emptyState
             }
         }
+        .alert(
+            Text(verbatim: replanChoice?.stationName ?? ""),
+            isPresented: Binding(
+                get: { replanChoice != nil },
+                set: { if !$0 { replanChoice = nil } }
+            ),
+            presenting: replanChoice
+        ) { choice in
+            Button("Replan.Mode.Train") {
+                replanTarget = ReplanTarget(stationIndex: choice.stationIndex, mode: .train)
+            }
+            Button("Replan.Mode.Destination") {
+                replanTarget = ReplanTarget(stationIndex: choice.stationIndex, mode: .destination)
+            }
+            Button("Button.Cancel", role: .cancel) {}
+        } message: { _ in
+            Text("Replan.Choice.Message")
+        }
         .sheet(item: $replanTarget) { target in
-            ReplanSheet(viewModel: viewModel, initialAnchorIndex: target.stationIndex)
+            ReplanSheet(
+                viewModel: viewModel,
+                initialAnchorIndex: target.stationIndex,
+                initialMode: target.mode
+            )
         }
     }
 
     // MARK: - Header
 
     @ViewBuilder
-    private func journeyHeader(journey: Journey, state: TrainPositionState) -> some View {
+    private func journeyHeader(state: TrainPositionState) -> some View {
         VStack(spacing: 10) {
-            HStack(spacing: 10) {
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(lineColor)
-                    .frame(width: 6, height: 32)
-
-                if let origin = journey.journeyStations.first,
-                   let destination = journey.journeyStations.last {
-                    HStack(spacing: 6) {
-                        Text(origin.localizedName)
-                        Image(systemName: "arrow.right")
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(.secondary)
-                        Text(destination.localizedName)
-                    }
-                    .font(.system(size: 20, weight: .bold))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                } else {
-                    Text(lineDisplayName(for: journey))
-                        .font(.system(size: 20, weight: .bold))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-                }
-
-                Spacer()
-            }
-            .padding(.horizontal, 24)
-
             if state.delayMinutes > 0 {
                 HStack(spacing: 6) {
                     Image(systemName: "exclamationmark.triangle.fill")
@@ -147,71 +153,6 @@ struct JourneyView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .padding(.horizontal, 24)
             }
-        }
-    }
-
-    // MARK: - Tracking Mode Capsule (bottom safe area)
-
-    /// Glass capsule summarizing the tracking mode; tap to refresh position.
-    @ViewBuilder
-    private var trackingModeCapsule: some View {
-        let mode = viewModel.trackingMode
-
-        let content = HStack(spacing: 8) {
-            Image(systemName: modeIcon(mode))
-                .font(.system(size: 12, weight: .semibold))
-            Text(modeLabel(mode))
-                .font(.system(size: 13, weight: .bold))
-
-            if mode == .timetable {
-                Text("Status.WeakGPSSignal")
-                    .font(.system(size: 11))
-                    .opacity(0.7)
-                    .lineLimit(1)
-            }
-
-            Image(systemName: "arrow.clockwise")
-                .font(.system(size: 11, weight: .semibold))
-                .opacity(0.8)
-        }
-        .foregroundColor(modeColor(mode))
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-
-        Button {
-            viewModel.forceRefresh()
-        } label: {
-            content
-                .glassEffect(.regular.tint(modeColor(mode).opacity(0.2)).interactive())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Button.Refresh")
-    }
-
-    private func modeIcon(_ mode: TrackingMode) -> String {
-        switch mode {
-        case .gps: return "location.fill"
-        case .timetable: return "clock.fill"
-        case .blended: return "location.circle"
-        case .manual: return "hand.draw.fill"
-        }
-    }
-
-    private func modeLabel(_ mode: TrackingMode) -> LocalizedStringKey {
-        switch mode {
-        case .gps: return "TrackingMode.GPS"
-        case .timetable: return "TrackingMode.Timetable"
-        case .blended: return "TrackingMode.Blended"
-        case .manual: return "TrackingMode.Manual"
-        }
-    }
-
-    private func modeColor(_ mode: TrackingMode) -> Color {
-        switch mode {
-        case .gps: return .green
-        case .timetable: return .orange
-        case .blended: return .blue
-        case .manual: return .purple
         }
     }
 
@@ -278,23 +219,5 @@ struct JourneyView: View {
                 .font(.system(size: 13))
                 .foregroundStyle(.tertiary)
         }
-    }
-
-    /// Line name without train-type qualifiers, cleaned per 〜-joined segment.
-    private func lineDisplayName(for journey: Journey) -> String {
-        // Longest first so 特別快速 strips before 快速
-        let suffixes = ["通勤快速", "特別快速", "各駅停車", "快速", "急行", "特急"]
-
-        func stripped(_ component: String) -> String {
-            for suffix in suffixes where component.hasSuffix(suffix) && component.count > suffix.count {
-                return String(component.dropLast(suffix.count))
-            }
-            return component
-        }
-
-        return journey.line.localizedName
-            .components(separatedBy: "〜")
-            .map(stripped)
-            .joined(separator: "〜")
     }
 }

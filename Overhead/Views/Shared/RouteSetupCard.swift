@@ -3,9 +3,8 @@ import Backbone
 
 // MARK: - Route Setup Card
 
-/// Planner-style route card shared by the journey planner and the favorite
-/// editor: 出発/経由/到着 rows, swap/add-via controls, and the customization
-/// icon row (walking speed, avoided lines, journey mode).
+/// 出発/経由/到着 rows, swap/add-via controls and the customization row,
+/// shared by the journey planner and the favorite editor.
 struct RouteSetupCard: View {
     let lines: [TrainLine]
     @Binding var fromSelection: StationSearchHit?
@@ -42,6 +41,14 @@ struct RouteSetupCard: View {
             case .addVia: return "addVia"
             }
         }
+
+        var searchTitle: LocalizedStringKey {
+            switch self {
+            case .from: return "StationSearch.Title.From"
+            case .to: return "StationSearch.Title.To"
+            case .via, .addVia: return "StationSearch.Title.Via"
+            }
+        }
     }
 
     private var walkingSpeed: WalkingSpeed {
@@ -62,6 +69,7 @@ struct RouteSetupCard: View {
             NavigationStack {
                 StationSearchSelectionView(
                     lines: lines,
+                    title: target.searchTitle,
                     showsCloseButton: true,
                     mergesStations: true
                 ) { hit in
@@ -151,7 +159,7 @@ struct RouteSetupCard: View {
             } label: {
                 HStack(spacing: 10) {
                     Text("Setup.Via")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.system(size: 11, weight: .medium))
                         .foregroundColor(.secondary)
                         .frame(width: 44, height: 22)
                         .background(Color(.tertiarySystemFill))
@@ -191,7 +199,7 @@ struct RouteSetupCard: View {
         Button(action: action) {
             HStack(spacing: 10) {
                 Text(label)
-                    .font(.system(size: 12, weight: .bold))
+                    .font(.system(size: 11, weight: .medium))
                     .foregroundColor(.secondary)
                     .frame(width: 44, height: 22)
                     .background(Color(.tertiarySystemFill))
@@ -374,8 +382,7 @@ struct CustomizationItem: View {
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
         }
-        // Sized so a 5th item peeks in at the trailing edge when the row
-        // overflows; capped at 82 so wide layouts keep the normal size.
+        // Sized so a 5th item peeks in when the row overflows.
         .containerRelativeFrame(.horizontal) { length, _ in
             let usable = length - Self.rowInset - Self.spacing * 4
             return min(Self.maxWidth, max(Self.minWidth, usable / 4.5))

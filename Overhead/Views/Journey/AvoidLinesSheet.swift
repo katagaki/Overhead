@@ -12,10 +12,14 @@ struct AvoidLinesSheet: View {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else { return lines }
         let lowered = query.lowercased()
+        let phoneticKey = JapaneseSearch.searchKey(query)
+        let kanaKey = JapaneseSearch.kanaFolded(query)
         return lines.filter {
             $0.name.contains(query)
+                || (!kanaKey.isEmpty && JapaneseSearch.kanaFolded($0.name).contains(kanaKey))
                 || $0.localizedName.lowercased().contains(lowered)
                 || $0.nameEn.lowercased().contains(lowered)
+                || JapaneseSearch.matches($0.nameEn, key: phoneticKey)
                 || $0.lineSymbol.lowercased() == lowered
         }
     }
