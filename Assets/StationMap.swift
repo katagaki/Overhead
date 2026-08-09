@@ -1,7 +1,26 @@
-#!/usr/bin/env swift
-// Plots every station in Backbone/StaticData/Lines on a MapKit map.
-// Usage: swift stationmap.swift            (from Assets/StationMap)
-//        swift stationmap.swift <lines-dir>
+#!/bin/sh
+//usr/bin/true; eval "$(awk '/^\/\*BUILD/{f=1;next} /^BUILD\*\//{f=0} f' "$0")"; exit
+/*BUILD
+# Compiles this file once into $TMPDIR and reruns the cached binary after that.
+set -e
+ROOT=$(cd "$(dirname "$0")/.." && pwd)
+BUILD="${TMPDIR:-/tmp}/StationMap.build"
+BIN="$BUILD/StationMap"
+mkdir -p "$BUILD"
+if [ ! -x "$BIN" ] || [ -n "$(find "$0" -newer "$BIN" -print -quit)" ]; then
+  echo "building StationMap..." >&2
+  tail -n +2 "$0" > "$BUILD/main.swift"
+  xcrun swiftc -o "$BIN" "$BUILD/main.swift"
+fi
+exec env STATIONMAP_ROOT="$ROOT" "$BIN" "$@"
+BUILD*/
+
+// Plots every station in a folder of line JSONs on a MapKit map.
+//
+//   ./Assets/StationMap.swift              # defaults to Backbone/StaticData/Lines
+//   ./Assets/StationMap.swift <lines-dir>
+//
+// Pick another folder with the フォルダ button (remembered across launches).
 // Toggle "Show previous positions" to compare against git HEAD: each moved
 // station draws a grey ghost pin and a vector to where it sits now.
 
@@ -69,11 +88,20 @@ func color(fromHex hex: String) -> NSColor {
                    alpha: 1)
 }
 
-/// Reads a file as it exists at git HEAD, so we can show pre-edit positions.
-func gitHEADContents(repoRelativePath: String, repoRoot: URL) -> Data? {
+let linesDirKey = "linesDirectory"
+
+func rememberedLinesDir() -> URL? {
+    UserDefaults.standard.string(forKey: linesDirKey).map { URL(fileURLWithPath: $0) }
+}
+
+func rememberLinesDir(_ dir: URL) {
+    UserDefaults.standard.set(dir.path, forKey: linesDirKey)
+}
+
+func git(_ arguments: [String], in directory: URL) -> Data? {
     let p = Process()
     p.executableURL = URL(fileURLWithPath: "/usr/bin/git")
-    p.arguments = ["-C", repoRoot.path, "show", "HEAD:\(repoRelativePath)"]
+    p.arguments = ["-C", directory.path] + arguments
     let out = Pipe()
     p.standardOutput = out
     p.standardError = Pipe()
@@ -83,7 +111,27 @@ func gitHEADContents(repoRelativePath: String, repoRoot: URL) -> Data? {
     return p.terminationStatus == 0 ? d : nil
 }
 
-func loadStops(linesDir: URL, repoRoot: URL) -> ([Stop], [LineGroup]) {
+/// Reads a file as it exists at git HEAD, so we can show pre-edit positions.
+func gitHEADContents(repoRelativePath: String, repoRoot: URL) -> Data? {
+    git(["show", "HEAD:\(repoRelativePath)"], in: repoRoot)
+}
+
+/// The checkout containing `dir`, plus `dir`'s path inside it — so the ghost
+/// pins work for any folder, not just the one in this repo.
+func gitContext(for dir: URL) -> (root: URL, prefix: String)? {
+    guard let data = git(["rev-parse", "--show-toplevel"], in: dir),
+          let path = String(data: data, encoding: .utf8)?
+            .trimmingCharacters(in: .whitespacesAndNewlines),
+          !path.isEmpty
+    else { return nil }
+    let root = URL(fileURLWithPath: path).standardizedFileURL
+    let full = dir.standardizedFileURL.path
+    guard full.hasPrefix(root.path) else { return nil }
+    let prefix = String(full.dropFirst(root.path.count)).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+    return (root, prefix)
+}
+
+func loadStops(linesDir: URL) -> ([Stop], [LineGroup]) {
     let fm = FileManager.default
     let files = ((try? fm.contentsOfDirectory(atPath: linesDir.path)) ?? [])
         .filter { $0.hasSuffix(".json") }.sorted()
@@ -91,6 +139,7 @@ func loadStops(linesDir: URL, repoRoot: URL) -> ([Stop], [LineGroup]) {
     var stops: [Stop] = []
     var groups: [LineGroup] = []
     let dec = JSONDecoder()
+    let repo = gitContext(for: linesDir)
 
     for file in files {
         let url = linesDir.appendingPathComponent(file)
@@ -102,8 +151,9 @@ func loadStops(linesDir: URL, repoRoot: URL) -> ([Stop], [LineGroup]) {
 
         // Same file at HEAD -> map of station id to its previous coordinate.
         var old: [String: CLLocationCoordinate2D] = [:]
-        let rel = "Backbone/StaticData/Lines/\(file)"
-        if let headData = gitHEADContents(repoRelativePath: rel, repoRoot: repoRoot),
+        let rel = repo.map { $0.prefix.isEmpty ? file : "\($0.prefix)/\(file)" } ?? file
+        if let repoRoot = repo?.root,
+           let headData = gitHEADContents(repoRelativePath: rel, repoRoot: repoRoot),
            let headLines = try? dec.decode([LineJSON].self, from: headData) {
             for l in headLines {
                 for s in l.stations {
@@ -250,8 +300,9 @@ struct MapView: NSViewRepresentable {
 // MARK: - UI
 
 struct ContentView: View {
-    let allStops: [Stop]
-    let groups: [LineGroup]
+    @State private var linesDir: URL
+    @State private var allStops: [Stop]
+    @State private var groups: [LineGroup]
 
     @State private var enabled: Set<String>
     @State private var showPrevious: Bool
@@ -259,12 +310,35 @@ struct ContentView: View {
     @State private var query = ""
     @State private var fitToken = 0
 
-    init(allStops: [Stop], groups: [LineGroup], showPrevious: Bool, onlyMoved: Bool) {
-        self.allStops = allStops
-        self.groups = groups
+    init(linesDir: URL, stops: [Stop], groups: [LineGroup], showPrevious: Bool, onlyMoved: Bool) {
+        _linesDir = State(initialValue: linesDir)
+        _allStops = State(initialValue: stops)
+        _groups = State(initialValue: groups)
         _enabled = State(initialValue: Set(groups.map(\.id)))
         _showPrevious = State(initialValue: showPrevious)
         _onlyMoved = State(initialValue: onlyMoved)
+    }
+
+    private func load(_ dir: URL) {
+        let (stops, groups) = loadStops(linesDir: dir)
+        linesDir = dir
+        allStops = stops
+        self.groups = groups
+        enabled = Set(groups.map(\.id))
+        fitToken += 1
+        rememberLinesDir(dir)
+    }
+
+    private func chooseFolder() {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.allowsMultipleSelection = false
+        panel.directoryURL = linesDir
+        panel.prompt = "Load"
+        panel.message = "Choose a folder of line JSONs"
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        load(url)
     }
 
     var visible: [Stop] {
@@ -290,8 +364,20 @@ struct ContentView: View {
     var body: some View {
         HSplitView {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Stations")
-                    .font(.headline)
+                HStack(spacing: 6) {
+                    Text("Stations")
+                        .font(.headline)
+                    Spacer()
+                    Button { chooseFolder() } label: { Label("Folder", systemImage: "folder") }
+                    Button { load(linesDir) } label: { Image(systemName: "arrow.clockwise") }
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+
+                Text(linesDir.path)
+                    .font(.caption).foregroundStyle(.secondary)
+                    .lineLimit(1).truncationMode(.head).help(linesDir.path)
+
                 Text("\(visible.count) shown · \(allStops.count) total · \(movedCount) moved vs HEAD")
                     .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
 
@@ -346,18 +432,15 @@ let args = Array(CommandLine.arguments.dropFirst())
 let flagPrevious = args.contains("--previous") || args.contains("--moved")
 let flagOnlyMoved = args.contains("--moved")
 
-let scriptDir = URL(fileURLWithPath: CommandLine.arguments[0])
-    .deletingLastPathComponent().standardizedFileURL
-let repoRoot = scriptDir.deletingLastPathComponent().deletingLastPathComponent()
+let repoRoot = URL(fileURLWithPath: ProcessInfo.processInfo.environment["STATIONMAP_ROOT"]
+    ?? URL(fileURLWithPath: CommandLine.arguments[0])
+        .deletingLastPathComponent().deletingLastPathComponent().path).standardizedFileURL
 let positional = args.filter { !$0.hasPrefix("--") }
 let linesDir: URL = positional.first.map { URL(fileURLWithPath: $0) }
+    ?? rememberedLinesDir()
     ?? repoRoot.appendingPathComponent("Backbone/StaticData/Lines")
 
-let (stops, groups) = loadStops(linesDir: linesDir, repoRoot: repoRoot)
-guard !stops.isEmpty else {
-    FileHandle.standardError.write(Data("no stations found under \(linesDir.path)\n".utf8))
-    exit(1)
-}
+let (stops, groups) = loadStops(linesDir: linesDir)
 print("loaded \(stops.count) stations across \(groups.count) lines from \(linesDir.path)")
 print("moved vs HEAD: \(stops.filter { $0.previous != nil }.count)")
 
@@ -368,9 +451,9 @@ let window = NSWindow(
     contentRect: NSRect(x: 0, y: 0, width: 1280, height: 820),
     styleMask: [.titled, .closable, .miniaturizable, .resizable],
     backing: .buffered, defer: false)
-window.title = "Overhead — Station Map (\(stops.count) stations)"
+window.title = "Overhead — Station Map"
 window.contentView = NSHostingView(rootView: ContentView(
-    allStops: stops, groups: groups,
+    linesDir: linesDir, stops: stops, groups: groups,
     showPrevious: flagPrevious, onlyMoved: flagOnlyMoved))
 window.center()
 window.makeKeyAndOrderFront(nil)
