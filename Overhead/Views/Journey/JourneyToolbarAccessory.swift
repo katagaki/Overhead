@@ -55,11 +55,6 @@ struct JourneyToolbarAccessory: View {
         max(0, viewModel.upcomingTransfers.count - shownTransfers.count)
     }
 
-    /// Two badges per change don't fit alongside a third slot and the count.
-    private var showsOnwardBadge: Bool {
-        !(hiddenTransferCount > 0 && slotCount >= 3)
-    }
-
     private var slotCount: Int {
         let leading = showsOrigin || (shownTransfers.isEmpty && nextStation != nil) ? 1 : 0
         return leading + shownTransfers.count + (finalStation != nil ? 1 : 0)
@@ -116,7 +111,7 @@ struct JourneyToolbarAccessory: View {
         }
         for transfer in shownTransfers {
             built.append(Stop(id: built.count, label: "Label.Transfer", station: transfer.station,
-                              trailing: showsOnwardBadge ? onwardStation(for: transfer) : nil,
+                              trailing: onwardStation(for: transfer),
                               onwardColor: transfer.line?.color ?? lineColor))
         }
         if let finalStation {
@@ -157,7 +152,7 @@ struct JourneyToolbarAccessory: View {
             if remaining > 0 {
                 Text("Label.RemainingTransfers \(remaining)")
                     .font(.system(size: 9, weight: .medium))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(color)
                     .fixedSize()
                 rule(color)
             }
