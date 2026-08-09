@@ -72,6 +72,8 @@
 		E4D93A0B2FF7F7C6004D37D7 /* Backbone.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Backbone.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4E1CE923024D6980033A11A /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
 		E4E1DC9E30283C570033A11A /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
+		E4E1DFB7302840F80033A11A /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
+		E4E1E1473028A14E0033A11A /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
 		E4EC35DF300126A300C9FF2A /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
 		E4EC3AED300384AC00C9FF2A /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -100,6 +102,7 @@
 				"Fonts/Hind-Regular.ttf",
 				"Fonts/Hind-SemiBold.ttf",
 				Fonts/Hind.license.txt,
+				Structs/StationBoardSnapshot.swift,
 			);
 			target = 7B5E01DB2F76257200861ADF /* LCDExtension */;
 		};
@@ -233,6 +236,8 @@
 				E45672C3300E72960083C0BD /* Overhead.xcodeproj */,
 				E484513A301FFFA0005E7AA3 /* Overhead.xcodeproj */,
 				E4E1CE923024D6980033A11A /* Overhead.xcodeproj */,
+				E4E1DC9E30283C570033A11A /* Overhead.xcodeproj */,
+				E4E1DFB7302840F80033A11A /* Overhead.xcodeproj */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -253,6 +258,16 @@
 			sourceTree = "<group>";
 		};
 		E4E1DC9F30283C570033A11A /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E4E1DFB8302840F80033A11A /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E4E1E1483028A14E0033A11A /* Products */ = {
 			isa = PBXGroup;
 			name = Products;
 			sourceTree = "<group>";
@@ -405,6 +420,14 @@
 				{
 					ProductGroup = E4561B89300A1AB30083C0BD /* Products */;
 					ProjectRef = E4561B88300A1AB30083C0BD /* Overhead.xcodeproj */;
+				},
+				{
+					ProductGroup = E4E1E1483028A14E0033A11A /* Products */;
+					ProjectRef = E4E1E1473028A14E0033A11A /* Overhead.xcodeproj */;
+				},
+				{
+					ProductGroup = E4E1DFB8302840F80033A11A /* Products */;
+					ProjectRef = E4E1DFB7302840F80033A11A /* Overhead.xcodeproj */;
 				},
 				{
 					ProductGroup = E4EC35E0300126A300C9FF2A /* Products */;
@@ -638,8 +661,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Overhead/Overhead.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = YYM4Z6MU8F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -684,8 +708,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Overhead/Overhead.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = YYM4Z6MU8F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -730,8 +755,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = LCD/LCDExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = YYM4Z6MU8F;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LCD/Info.plist;
@@ -765,8 +791,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = LCD/LCDExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = YYM4Z6MU8F;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LCD/Info.plist;

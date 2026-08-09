@@ -78,8 +78,12 @@ enum SavedPlaceStore {
     /// Posted after every save so open views re-read the list.
     static let didChangeNotification = Notification.Name("SavedPlaceStore.didChange")
 
+    /// App Group suite, so the widget extension can read favorites.
+    private static var defaults: UserDefaults { AppGroup.defaults }
+
     static func load() -> [SavedPlace] {
-        guard let data = UserDefaults.standard.data(forKey: storageKey),
+        migrateIfNeeded()
+        guard let data = defaults.data(forKey: storageKey),
               let decoded = try? JSONDecoder().decode([SavedPlace].self, from: data) else {
             return []
         }
@@ -88,7 +92,15 @@ enum SavedPlaceStore {
 
     static func save(_ places: [SavedPlace]) {
         guard let data = try? JSONEncoder().encode(places) else { return }
-        UserDefaults.standard.set(data, forKey: storageKey)
+        defaults.set(data, forKey: storageKey)
         NotificationCenter.default.post(name: didChangeNotification, object: nil)
+    }
+
+    /// Favorites predate the App Group; the old copy stays as a rollback.
+    private static func migrateIfNeeded() {
+        guard defaults !== UserDefaults.standard,
+              defaults.data(forKey: storageKey) == nil,
+              let legacy = UserDefaults.standard.data(forKey: storageKey) else { return }
+        defaults.set(legacy, forKey: storageKey)
     }
 }

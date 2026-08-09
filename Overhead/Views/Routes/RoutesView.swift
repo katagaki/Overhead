@@ -5,6 +5,7 @@ import Backbone
 
 struct FavoritesSection: View {
     @ObservedObject var viewModel: JourneyViewModel
+    @Environment(\.scenePhase) private var scenePhase
     @State private var places: [SavedPlace] = []
     @State private var editorTarget: EditorTarget?
     /// Upcoming departures from each favorite's origin, as rail seconds.
@@ -69,9 +70,15 @@ struct FavoritesSection: View {
         .task(id: placesSignature) {
             await recomputeDepartures()
         }
-        .onAppear { places = SavedPlaceStore.load() }
+        .onAppear {
+            places = SavedPlaceStore.load()
+            consumePendingDeparture()
+        }
         .onReceive(NotificationCenter.default.publisher(for: SavedPlaceStore.didChangeNotification)) { _ in
             places = SavedPlaceStore.load()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { consumePendingDeparture() }
         }
 #if DEBUG
         .onReceive(ScreenshotStaging.shared.$placeEditorCommand) { command in
@@ -394,6 +401,21 @@ struct FavoritesSection: View {
             transferMinutes: transferMinutes,
             avoidingLineIds: avoided
         ).first)
+    }
+
+    /// Rides the place id the control widget staged, exactly once.
+    private func consumePendingDeparture() {
+        let defaults = AppGroup.defaults
+        guard let idString = defaults.string(forKey: BoardSnapshotStore.pendingPlaceKey) else { return }
+        defaults.removeObject(forKey: BoardSnapshotStore.pendingPlaceKey)
+        guard let id = UUID(uuidString: idString) else { return }
+        Task {
+            await viewModel.loadLines()
+            let current = SavedPlaceStore.load()
+            guard let place = current.first(where: { $0.id == id }),
+                  let resolved = resolve(place) else { return }
+            await start(place, resolved: resolved)
+        }
     }
 
     private func startCandidate(_ candidate: TrainCandidate?) {

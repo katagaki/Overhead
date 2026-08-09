@@ -5,6 +5,7 @@ import Backbone
 struct OverheadApp: App {
 
     @StateObject private var viewModel = JourneyViewModel(previewMode: false)
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
@@ -12,6 +13,16 @@ struct OverheadApp: App {
                 .onOpenURL { url in
                     handleDeepLink(url)
                 }
+                .onReceive(NotificationCenter.default.publisher(
+                    for: SavedPlaceStore.didChangeNotification
+                )) { _ in
+                    BoardSnapshotWriter.refresh()
+                }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                BoardSnapshotWriter.refresh()
+            }
         }
     }
 

@@ -5,5 +5,8 @@ import SwiftUI
 struct LCDBundle: WidgetBundle {
     var body: some Widget {
         TrainJourneyLiveActivity()
+        StationBoardWidget()
+        LineBoardWidget()
+        DepartFavoriteControl()
     }
 }

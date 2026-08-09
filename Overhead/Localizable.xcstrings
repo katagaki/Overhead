@@ -5369,7 +5369,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ is next — time to get off"
+            "value" : "%@ is next, time to get off"
           }
         },
         "ja" : {
@@ -7208,7 +7208,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Same train — only where you get off changes."
+            "value" : "Same train, only where you get off changes."
           }
         },
         "ja" : {
@@ -9929,41 +9929,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正常運行"
-          }
-        }
-      }
-    },
-    "Tab.Lines" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lines"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "路線"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "노선"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "线路"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "路線"
           }
         }
       }
