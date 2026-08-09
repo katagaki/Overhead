@@ -20,13 +20,21 @@ struct SectionHeader<Trailing: View>: View {
     }
 
     var body: some View {
-        HStack(spacing: 8) {
+        let row = HStack(spacing: 8) {
             titleView
             Spacer(minLength: 8)
             trailing
         }
         .padding(.horizontal, 4)
         .frame(height: height)
+        // The whole row toggles; a trailing button still wins the tap.
+        if let onTitleTap {
+            row
+                .contentShape(Rectangle())
+                .onTapGesture(perform: onTitleTap)
+        } else {
+            row
+        }
     }
 
     @ViewBuilder

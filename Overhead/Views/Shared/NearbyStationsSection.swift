@@ -24,8 +24,6 @@ struct NearbyStationsSection: View {
     private static let directionChoicesKey = "nearby.directionChoices"
     /// All cards share one height (3 visible rows); longer lists scroll inside it.
     private static let cardHeight: CGFloat = 182
-    /// Header (~22) + 8 gap + card, exactly; slack reads as uneven spacing.
-    private static let sectionHeight: CGFloat = 212
 
     var body: some View {
         Group {
@@ -66,12 +64,14 @@ struct NearbyStationsSection: View {
     }
 
     /// Shared by every state except denied, and dropped when collapsed, where
-    /// the header stands alone.
+    /// the header stands alone. The height sits on the content, not the stack:
+    /// a frame animating to `nil` snaps instead of collapsing.
     private func fixedFrame(@ViewBuilder content: () -> some View) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             header
             if !isCollapsed {
                 content()
+                    .frame(height: Self.cardHeight, alignment: .top)
                     .transition(
                         .scale(0.96, anchor: .top)
                             .combined(with: .opacity)
@@ -79,7 +79,6 @@ struct NearbyStationsSection: View {
                     )
             }
         }
-        .frame(height: isCollapsed ? nil : Self.sectionHeight, alignment: .top)
     }
 
     // MARK: - Header
