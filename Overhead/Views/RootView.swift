@@ -290,6 +290,9 @@ struct RootView: View {
         case .placeEditor(let editFirst):
             try? await Task.sleep(for: .seconds(0.5))
             ScreenshotStaging.shared.placeEditorCommand = editFirst ? .editFirst : .new
+        case .dismissSheet:
+            try? await Task.sleep(for: .seconds(1.5))
+            showJourneySheet = false
         case .reset:
             viewModel.stopJourney()
             debugTimetableTarget = nil

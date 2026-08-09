@@ -19,6 +19,7 @@ import Backbone
 /// - overtrain://custom-line (seeds the sample line and opens its editor)
 /// - overtrain://home?scroll=lines
 /// - overtrain://place-editor[?edit=first]
+/// - overtrain://dismiss (closes the journey sheet to expose the home bottom bar)
 /// - overtrain://reset
 enum ScreenshotCommand {
     case seedFavorites
@@ -34,6 +35,7 @@ enum ScreenshotCommand {
     case customLineEditor
     case homeScroll(String)
     case placeEditor(editFirst: Bool)
+    case dismissSheet
     case reset
 
     init?(url: URL) {
@@ -88,6 +90,8 @@ enum ScreenshotCommand {
             self = .homeScroll(anchor)
         case "place-editor":
             self = .placeEditor(editFirst: params["edit"] == "first")
+        case "dismiss":
+            self = .dismissSheet
         case "reset":
             self = .reset
         default:

@@ -91,6 +91,7 @@ struct JourneyToolbarAccessory: View {
         Button(action: onTap) {
             row
                 .frame(width: availableWidth, height: Self.barHeight)
+                .drawingGroup()
                 .contentShape(.capsule)
         }
         .buttonStyle(.plain)
@@ -134,7 +135,8 @@ struct JourneyToolbarAccessory: View {
                             connector(stops[stop.id - 1].onwardColor,
                                       remaining: stop.id == last ? hiddenTransferCount : 0)
                         }
-                        slot(stop.label, station: stop.station, trailing: stop.trailing)
+                        slot(stop.label, station: stop.station,
+                             trailing: stop.trailing, trailingColor: stop.onwardColor)
                     }
                 } else if let journey = viewModel.activeJourney {
                     Circle()
@@ -178,13 +180,15 @@ struct JourneyToolbarAccessory: View {
     }
 
     private func slot(
-        _ label: LocalizedStringKey, station: Station, trailing: Station? = nil
+        _ label: LocalizedStringKey, station: Station,
+        trailing: Station? = nil, trailingColor: Color? = nil
     ) -> some View {
         let badges = (station.stationCode.isEmpty ? 0 : 1) + (trailing == nil ? 0 : 1)
         let budget = nameBudget(badges: badges)
         return HStack(spacing: 7) {
             if !station.stationCode.isEmpty {
-                stationBadge(station, dimension: 24)
+                stationBadge(station, color: viewModel.badgeLineColor(arrivingAt: station.id),
+                             dimension: 24)
             }
             VStack(alignment: .leading, spacing: 0) {
                 // At its natural width the caption is what pushes a slot past its share.
@@ -202,7 +206,7 @@ struct JourneyToolbarAccessory: View {
                 }
             }
             if let trailing, !trailing.stationCode.isEmpty {
-                stationBadge(trailing, dimension: 24)
+                stationBadge(trailing, color: trailingColor ?? lineColor, dimension: 24)
             }
         }
         // Leftover width belongs to the connectors.
@@ -210,10 +214,10 @@ struct JourneyToolbarAccessory: View {
     }
 
     @ViewBuilder
-    private func stationBadge(_ station: Station, dimension: CGFloat) -> some View {
+    private func stationBadge(_ station: Station, color: Color, dimension: CGFloat) -> some View {
         StationNumberBadge(
             code: station.stationCode,
-            color: StaticTrainData.line(containingStationId: station.id)?.trainLine.color ?? lineColor,
+            color: color,
             size: .regular,
             stationName: station.name,
             styleOverride: viewModel.activeJourney?.line.badgeStyle

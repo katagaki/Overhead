@@ -1239,6 +1239,17 @@ final class JourneyViewModel: ObservableObject {
         return leg?.color ?? fallback
     }
 
+    /// Badge colour for the line ridden into a journey station.
+    func badgeLineColor(arrivingAt stationId: String) -> Color {
+        let fallback = activeJourney?.line.color ?? selectedLine?.color ?? .accentColor
+        guard let journey = activeJourney, !journeyLegLines.isEmpty,
+              let index = journey.journeyStations.firstIndex(where: { $0.id == stationId }),
+              let leg = journeyLegLines.last(where: { $0.stationIndex < max(index, 1) })
+                ?? journeyLegLines.first
+        else { return fallback }
+        return Color(hex: leg.lineColorHex)
+    }
+
     /// LCD-only line colour; a through-service takes its first component's.
     static func lcdColor(_ line: TrainLine) -> Color {
         let baseId = line.id.split(separator: "+").first.map(String.init) ?? line.id
