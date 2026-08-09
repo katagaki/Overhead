@@ -276,7 +276,7 @@ struct NearbyStationsSection: View {
                         .monospacedDigit()
                         .contentTransition(.numericText())
                     Spacer(minLength: 4)
-                    Text(next.localizedDestination)
+                    Text(destinationLabel(for: hit, timetable: current, departure: next))
                         .font(.system(size: 14.5))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
@@ -318,6 +318,21 @@ struct NearbyStationsSection: View {
                 Label("StationTimetable.ServiceStatus", systemImage: "info.circle")
             }
         }
+    }
+
+    /// Loop lines come back to where they started, so every train shows the same
+    /// destination; the direction is what actually tells the two apart.
+    private func destinationLabel(
+        for hit: StationSearchHit,
+        timetable: StationTimetableData?,
+        departure: StationDeparture
+    ) -> String {
+        guard let timetable, StaticTrainData.line(withId: hit.line.id)?.isLoop == true else {
+            return departure.localizedDestination
+        }
+        return timetable.localizedDirectionName
+            .components(separatedBy: "（")[0]
+            .components(separatedBy: " (")[0]
     }
 
     // MARK: - Direction flip
