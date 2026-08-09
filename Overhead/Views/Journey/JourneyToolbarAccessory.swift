@@ -69,11 +69,11 @@ struct JourneyToolbarAccessory: View {
 
     private var slotWidth: CGFloat {
         let forSlots = contentWidth - connectorWidth * CGFloat(connectorCount) - countWidth
-        return max(56, forSlots / CGFloat(max(1, slotCount)))
+        return max(64, forSlots / CGFloat(max(1, slotCount)))
     }
 
     private func nameBudget(badges: Int) -> CGFloat {
-        max(24, slotWidth - CGFloat(badges) * (Self.badgeDimension + 7))
+        max(36, slotWidth - CGFloat(badges) * (Self.badgeDimension + 7))
     }
 
     private var contentWidth: CGFloat {
@@ -82,10 +82,10 @@ struct JourneyToolbarAccessory: View {
     }
 
     private var connectorWidth: CGFloat {
-        slotCount > 1 ? max(20, contentWidth * 0.10) : 0
+        slotCount > 1 ? max(20, contentWidth * 0.08) : 0
     }
 
-    private var countWidth: CGFloat { hiddenTransferCount > 0 ? 52 : 0 }
+    private var countWidth: CGFloat { hiddenTransferCount > 0 ? 30 : 0 }
 
     var body: some View {
         Button(action: onTap) {

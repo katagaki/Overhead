@@ -4510,7 +4510,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld more"
+            "value" : "+%lld"
           }
         },
         "ja" : {
