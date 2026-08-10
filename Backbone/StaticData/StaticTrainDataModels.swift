@@ -283,6 +283,7 @@ public enum StaticTrainData {
         "JRSagamiLine", "JRHachikoLine", "JRKawagoeLine", "JRNaritaLine", "JRNaritaAbikoLine",
         "JRNaritaAirportLine", "JRSobuMainLine", "JRToganeLine", "JRKashimaLine", "JRKururiLine",
         "JRSotoboLine", "JRUchiboLine", "JRAgatsumaLine", "JRJoetsuLine",
+        "EnodenLine", "ShonanMonorailLine", "RyutetsuLine", "ShibayamaLine",
     ]
 
     static let allLines: [StaticTrainLine] = lineResources.flatMap { LineStore.lines($0) }

@@ -8,12 +8,20 @@ enum OperatorSections {
     /// app. Listed apart so the JR東 section stays the urban network.
     static let dokoTrainSectionId = "Section:DokoTrain"
     static let dokoTrainRailways: Set<String> = [
-        "Railway:JR-East.Uchibo", "Railway:JR-East.Sotobo", "Railway:JR-East.Sobu",
-        "Railway:JR-East.Narita", "Railway:JR-East.NaritaAbikoBranch",
-        "Railway:JR-East.NaritaAirportBranch", "Railway:JR-East.Togane",
-        "Railway:JR-East.Kashima", "Railway:JR-East.Kururi", "Railway:JR-East.Sagami",
-        "Railway:JR-East.Hachiko", "Railway:JR-East.Kawagoe", "Railway:JR-East.Joetsu",
-        "Railway:JR-East.Agatsuma",
+        "Railway:JR-East.Uchibo",
+        "Railway:JR-East.Sotobo",
+        "Railway:JR-East.Sobu",
+        "Railway:JR-East.Narita",
+        "Railway:JR-East.NaritaAbikoBranch",
+        "Railway:JR-East.NaritaAirportBranch",
+        "Railway:JR-East.Togane",
+        "Railway:JR-East.Kashima",
+        "Railway:JR-East.Kururi",
+        "Railway:JR-East.Sagami",
+        "Railway:JR-East.Hachiko",
+        "Railway:JR-East.Kawagoe",
+        "Railway:JR-East.Joetsu",
+        "Railway:JR-East.Agatsuma"
     ]
 
     static let order = [
@@ -40,7 +48,11 @@ enum OperatorSections {
         "Operator:SaitamaTransit",
         "Operator:TamaMonorail",
         "Operator:YokohamaMunicipal",
-        "Operator:YokohamaSeaside"
+        "Operator:YokohamaSeaside",
+        "Operator:Enoden",
+        "Operator:ShonanMonorail",
+        "Operator:Shibayama",
+        "Operator:Ryutetsu"
     ]
 
     /// String catalog keys, resolved in `title(for:)`.
@@ -68,7 +80,11 @@ enum OperatorSections {
         "Operator:SaitamaTransit": "Operator.SaitamaTransit",
         "Operator:TamaMonorail": "Operator.TamaMonorail",
         "Operator:YokohamaMunicipal": "Operator.YokohamaMunicipal",
-        "Operator:YokohamaSeaside": "Operator.YokohamaSeaside"
+        "Operator:YokohamaSeaside": "Operator.YokohamaSeaside",
+        "Operator:Enoden": "Operator.Enoden",
+        "Operator:ShonanMonorail": "Operator.ShonanMonorail",
+        "Operator:Shibayama": "Operator.Shibayama",
+        "Operator:Ryutetsu": "Operator.Ryutetsu"
     ]
 
     static func title(for operatorId: String) -> String {

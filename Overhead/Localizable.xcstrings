@@ -5638,6 +5638,42 @@
         }
       }
     },
+    "Operator.Enoden" : {
+      "comment" : "Name of a railway operator, shown as a section header in the lines list.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enoshima Electric Railway"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "江ノ島電鉄"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "에노시마 전철"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "江之岛电铁"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "江之島電鐵"
+          }
+        }
+      }
+    },
     "Operator.Hokuso" : {
       "comment" : "Name of a railway operator, shown as a section header in the lines list.",
       "extractionState" : "manual",
@@ -5926,6 +5962,42 @@
         }
       }
     },
+    "Operator.Ryutetsu" : {
+      "comment" : "Name of a railway operator, shown as a section header in the lines list.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ryutetsu"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "流鉄"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "류테쓰"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "流铁"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "流鐵"
+          }
+        }
+      }
+    },
     "Operator.SaitamaRailway" : {
       "comment" : "Name of a railway operator, shown as a section header in the lines list.",
       "extractionState" : "manual",
@@ -6030,6 +6102,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "西武"
+          }
+        }
+      }
+    },
+    "Operator.Shibayama" : {
+      "comment" : "Name of a railway operator, shown as a section header in the lines list.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shibayama Railway"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "芝山鉄道"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시바야마 철도"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "芝山铁道"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "芝山鐵道"
+          }
+        }
+      }
+    },
+    "Operator.ShonanMonorail" : {
+      "comment" : "Name of a railway operator, shown as a section header in the lines list.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shonan Monorail"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "湘南モノレール"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "쇼난 모노레일"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "湘南单轨电车"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "湘南單軌電車"
           }
         }
       }

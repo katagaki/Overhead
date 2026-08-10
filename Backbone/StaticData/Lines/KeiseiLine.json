@@ -1587,6 +1587,7 @@
         "stopPatterns": [],
         "throughServices": [
             {
+                "connectingLineId": "Railway:Shibayama.Shibayama",
                 "end": "ascending",
                 "junctionStationId": "Station:Keisei.HigashiNarita.HigashiNarita",
                 "lineNameEn": "Shibayama Railway Line",
