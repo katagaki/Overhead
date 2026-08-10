@@ -16,8 +16,8 @@ extension Color {
         #endif
     }
 
-    /// True for Shibayama's green — Saitama Railway shares the "SR" prefix and
-    /// its blue passes `isGreenDominant` (g .40 vs r 0), so green must also beat blue.
+    /// Saitama Railway shares "SR" and its blue passes `isGreenDominant`
+    /// (g .40 vs r 0), so Shibayama's green must beat blue too.
     var isShibayamaGreen: Bool {
         #if canImport(UIKit)
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
@@ -140,8 +140,6 @@ struct LineSymbolBadge: View {
         case "EN":
             enodenBadge
         case "SR":
-            // Both SR operators use a thin ring and an unbolded grotesque;
-            // only Shibayama sets the letters in the line color.
             srBadge
         case _ where Self.keioSymbols.contains(symbol):
             keioBadge
@@ -256,7 +254,7 @@ struct LineSymbolBadge: View {
             .background(color, in: Circle())
     }
 
-    // MARK: - New Shuttle: filled line-color hexagon, white wide letters
+    // MARK: - New Shuttle: Filled Hexagon
 
     private var newShuttleBadge: some View {
         symbolText(.system(size: 13.5 * f, weight: .bold).width(.expanded), color: .white,
@@ -265,7 +263,7 @@ struct LineSymbolBadge: View {
             .background(color, in: FlatTopHexagon())
     }
 
-    // MARK: - Toden Arakawa: filled cherry blossom
+    // MARK: - Toden Arakawa: Cherry Blossom
 
     private var arakawaBadge: some View {
         symbolText(.custom("Hind-Bold", fixedSize: 15 * f), color: .black, inset: 7 * f,
@@ -279,17 +277,16 @@ struct LineSymbolBadge: View {
             }
     }
 
-    // MARK: - Yurikamome: filled circle split by a red bar
+    // MARK: - Yurikamome: Filled Circle, Red Bar
 
     private var yurikamomeBadge: some View {
-        // The line mark is a plain filled disc; the red bar belongs to the
-        // station number badge only.
+        // The bar belongs to the station badge only.
         symbolText(.custom("Helvetica-Bold", fixedSize: 19 * f), color: .white, inset: 4 * f)
             .frame(width: dimension, height: dimension)
             .background(color, in: Circle())
     }
 
-    // MARK: - Enoden: white core, green ring inside a pale yellow outer ring
+    // MARK: - Enoden: White Core, Green Ring, Yellow Outer Ring
 
     private var enodenBadge: some View {
         symbolText(.custom("Helvetica-Bold", fixedSize: 14 * f),
@@ -423,7 +420,7 @@ struct LineSymbolBadge: View {
                 lineWidth: (color.isShibayamaGreen ? 2.0 : 3.4) * f))
     }
 
-    /// Same indigo disc and wave as the station badge, lettered instead of numbered.
+    /// The station badge's disc, lettered instead of numbered.
     private var seasideBadge: some View {
         Text(symbol)
             .font(.custom("Helvetica-Bold", fixedSize: 13 * f))
@@ -443,14 +440,14 @@ struct LineSymbolBadge: View {
             }
     }
 
-    /// みなとみらい線's line mark is a disc carrying a single large M.
+    /// A disc carrying a single large M.
     private var minatomiraiBadge: some View {
         Text("M")
             .font(.custom("Futura-Bold", fixedSize: 19 * f))
             .lineLimit(1)
             .minimumScaleFactor(0.5)
             .foregroundColor(.white)
-            .offset(y: -0.5 * f)   // Futura's M sits low in its line box
+            .offset(y: -0.5 * f)
             .frame(width: dimension, height: dimension)
             .background(color, in: Circle())
     }
@@ -580,12 +577,12 @@ struct FlatTopHexagon: Shape {
     }
 }
 
-/// 都電荒川線's badge is a five-petal cherry blossom, not a circle.
+/// 都電荒川線's badge is a five-petal cherry blossom.
 /// 三田線's "I" has top and bottom bars; system faces draw a bare stem.
 struct SerifI: Shape {
     func path(in rect: CGRect) -> Path {
         let w = rect.width, h = rect.height
-        // One stroke weight, used for the stem and both bars, so they match.
+        // One stroke weight for the stem and both bars.
         let t = w * 0.34
         let barW = w * 0.74
         let barX = rect.minX + (w - barW) / 2
@@ -602,7 +599,7 @@ struct SakuraBlossom: Shape {
         let c = CGPoint(x: rect.midX, y: rect.midY)
         let r = min(rect.width, rect.height) / 2
         var path = Path()
-        // Core disc plus five overlapping lobes; the non-zero winding unions them.
+        // Non-zero winding unions the core and the five lobes.
         path.addEllipse(in: CGRect(x: c.x - r * 0.64, y: c.y - r * 0.64,
                                    width: r * 1.28, height: r * 1.28))
         for k in 0..<5 {
@@ -615,17 +612,16 @@ struct SakuraBlossom: Shape {
     }
 }
 
-/// The swoosh across みなとみらい線's navy band.
+/// The swoosh across みなとみらい線's plate.
 struct MinatomiraiWave: Shape {
     func path(in rect: CGRect) -> Path {
         let w = rect.width, h = rect.height
         var path = Path()
-        // One full sine period spanning the whole width, drawn as a band that
-        // tapers towards each edge and is thickest in the middle.
+        // One sine period, tapered towards both ends.
         func wave(_ side: CGFloat) -> [CGPoint] {
-            let inset: CGFloat = 0.07                       // keep it off the plate edges
+            let inset: CGFloat = 0.07
             return stride(from: 0.0, through: 1.0, by: 0.025).map { t in
-                let taper = 0.22 + 0.78 * sin(.pi * t)          // thin at the ends
+                let taper = 0.22 + 0.78 * sin(.pi * t)
                 return CGPoint(x: rect.minX + w * (inset + t * (1 - 2 * inset)),
                                y: rect.minY + h * (0.5 + side * 0.11 * taper
                                                    + 0.21 * sin(2 * .pi * t)))
@@ -642,8 +638,7 @@ struct MinatomiraiWave: Shape {
 
 // MARK: - Seaside Wave
 
-/// The disc behind a Seaside Line station number: fills from the top and breaks
-/// into two crests near the bottom, leaving a white band for the wordmark.
+/// Seaside Line's disc, broken by the wave that names the line.
 struct SeasideWave: Shape {
     func path(in rect: CGRect) -> Path {
         let w = rect.width, h = rect.height

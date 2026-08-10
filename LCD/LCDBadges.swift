@@ -16,8 +16,8 @@ extension Color {
         #endif
     }
 
-    /// True for Shibayama's green — Saitama Railway shares the "SR" prefix and
-    /// its blue passes `isGreenDominant` (g .40 vs r 0), so green must also beat blue.
+    /// Saitama Railway shares "SR" and its blue passes `isGreenDominant`
+    /// (g .40 vs r 0), so Shibayama's green must beat blue too.
     var isShibayamaGreen: Bool {
         #if canImport(UIKit)
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
@@ -78,8 +78,6 @@ struct LCDLineSymbolBadge: View {
         case "EN":
             enodenBadge
         case "SR":
-            // Both SR operators use a thin ring and an unbolded grotesque;
-            // only Shibayama sets the letters in the line color.
             srSymbolBadge
         case "KS":
             keiseiBadge(condensed: true)
@@ -279,8 +277,7 @@ struct LCDLineSymbolBadge: View {
     }
 
     private var yurikamomeSymbolBadge: some View {
-        // The line mark is a plain filled disc; the red bar belongs to the
-        // station number badge only.
+        // The bar belongs to the station badge only.
         symbolText(color: .white, inset: 3, hind: false)
             .frame(width: 24, height: 24)
             .background(color, in: Circle())
@@ -347,14 +344,14 @@ struct LCDLineSymbolBadge: View {
             .background(color, in: LCDFlatTopHexagon())
     }
 
-    /// みなとみらい線's line mark is a disc carrying a single large M.
+    /// A disc carrying a single large M.
     private var minatomiraiBadge: some View {
         Text("M")
             .font(.custom("Futura-Bold", fixedSize: 14.5))
             .lineLimit(1)
             .minimumScaleFactor(0.5)
             .foregroundColor(.white)
-            .offset(y: -0.4)   // Futura's M sits low in its line box
+            .offset(y: -0.4)
             .frame(width: 24, height: 24)
             .background(color, in: Circle())
     }
@@ -508,6 +505,7 @@ struct LCDStationNumberBadge: View {
         } else if prefix == "SL" {
             seasideBadge(number: number)
         } else if prefix == "SR" {
+            // Only Shibayama sets the code in the line color.
             srBadge(prefix: prefix, number: number,
                     letterColor: color.isShibayamaGreen ? color : .black)
         } else if prefix == "I" {
@@ -579,7 +577,7 @@ struct LCDStationNumberBadge: View {
     private func condensedCircleBadge(prefix: String, number: String,
                                       ringWidth: CGFloat? = nil) -> some View {
         let d = dimension
-        let big = ringWidth != nil   // thin-ringed lines have room for a larger code
+        let big = ringWidth != nil
 
         return VStack(spacing: 0) {
             Text(prefix)
@@ -826,8 +824,7 @@ struct LCDStationNumberBadge: View {
         VStack(spacing: 0) {
             Text(prefix)
                 .font(.custom("Futura-Bold", fixedSize: d * 0.38))
-                // Bound the width so a three-letter prefix (SMR) is scaled down
-                // to clear the ring instead of running under it.
+                // Keeps a three-letter prefix (SMR) clear of the ring.
                 .frame(width: d * 0.58, height: d * 0.42)
                 .offset(y: d * 0.039)
 
@@ -848,7 +845,7 @@ struct LCDStationNumberBadge: View {
         )
     }
 
-    // MARK: Toden Arakawa: filled cherry blossom
+    // MARK: Toden Arakawa: Cherry Blossom
 
     @ViewBuilder
     private func arakawaBadge(prefix: String, number: String) -> some View {
@@ -879,7 +876,7 @@ struct LCDStationNumberBadge: View {
         }
     }
 
-    // MARK: Yurikamome: filled circle split by a red bar
+    // MARK: Yurikamome: Filled Circle, Red Bar
 
     @ViewBuilder
     private func yurikamomeBadge(prefix: String, number: String) -> some View {
@@ -907,7 +904,7 @@ struct LCDStationNumberBadge: View {
         .overlay(Circle().strokeBorder(Color.white, lineWidth: d * 0.05))
     }
 
-    // MARK: Shibayama: thin line-color ring, code in the line color
+    // MARK: Saitama Railway / Shibayama: Thin Ring
 
     @ViewBuilder
     private func srBadge(prefix: String, number: String, letterColor: Color) -> some View {
@@ -937,7 +934,7 @@ struct LCDStationNumberBadge: View {
             lineWidth: d * (color.isShibayamaGreen ? 0.062 : 0.105)))
     }
 
-    // MARK: Toei Mita: the "I" is drawn, not set
+    // MARK: Toei Mita: Drawn "I"
 
     @ViewBuilder
     private func mitaBadge(number: String) -> some View {
@@ -964,7 +961,7 @@ struct LCDStationNumberBadge: View {
         .overlay(Circle().strokeBorder(color, lineWidth: d * 0.13))
     }
 
-    // MARK: Enoden: white core, green ring inside a pale yellow outer ring
+    // MARK: Enoden: White Core, Green Ring, Yellow Outer Ring
 
     @ViewBuilder
     private func enodenBadge(prefix: String, number: String) -> some View {
@@ -994,7 +991,7 @@ struct LCDStationNumberBadge: View {
         }
     }
 
-    // MARK: Seaside Line: filled indigo disc over a white wave, number only
+    // MARK: Seaside Line: Indigo Disc, White Wave
 
     @ViewBuilder
     private func seasideBadge(number: String) -> some View {
@@ -1188,11 +1185,11 @@ struct LCDStationNumberBadge: View {
 /// The splayed legs under the Seibu train-front logo. Duplicated from the
 /// main app's SeibuTrainLegs because the LCD target is self-contained.
 /// Saitama New Shuttle's plate. Duplicated from the app target, which the widget can't import.
-/// 都電荒川線's badge is a five-petal cherry blossom, not a circle.
+/// 都電荒川線's badge is a five-petal cherry blossom.
 struct LCDSerifI: Shape {
     func path(in rect: CGRect) -> Path {
         let w = rect.width, h = rect.height
-        // One stroke weight, used for the stem and both bars, so they match.
+        // One stroke weight for the stem and both bars.
         let t = w * 0.34
         let barW = w * 0.74
         let barX = rect.minX + (w - barW) / 2
@@ -1209,7 +1206,7 @@ struct LCDSakuraBlossom: Shape {
         let c = CGPoint(x: rect.midX, y: rect.midY)
         let r = min(rect.width, rect.height) / 2
         var path = Path()
-        // Core disc plus five overlapping lobes; the non-zero winding unions them.
+        // Non-zero winding unions the core and the five lobes.
         path.addEllipse(in: CGRect(x: c.x - r * 0.52, y: c.y - r * 0.52,
                                    width: r * 1.04, height: r * 1.04))
         for k in 0..<5 {
@@ -1222,17 +1219,16 @@ struct LCDSakuraBlossom: Shape {
     }
 }
 
-/// The swoosh across みなとみらい線's navy band.
+/// The swoosh across みなとみらい線's plate.
 struct LCDMinatomiraiWave: Shape {
     func path(in rect: CGRect) -> Path {
         let w = rect.width, h = rect.height
         var path = Path()
-        // One full sine period spanning the whole width, drawn as a band that
-        // tapers towards each edge and is thickest in the middle.
+        // One sine period, tapered towards both ends.
         func wave(_ side: CGFloat) -> [CGPoint] {
-            let inset: CGFloat = 0.07                       // keep it off the plate edges
+            let inset: CGFloat = 0.07
             return stride(from: 0.0, through: 1.0, by: 0.025).map { t in
-                let taper = 0.22 + 0.78 * sin(.pi * t)          // thin at the ends
+                let taper = 0.22 + 0.78 * sin(.pi * t)
                 return CGPoint(x: rect.minX + w * (inset + t * (1 - 2 * inset)),
                                y: rect.minY + h * (0.5 + side * 0.11 * taper
                                                    + 0.21 * sin(2 * .pi * t)))
@@ -1267,8 +1263,7 @@ struct LCDSeasideWave: Shape {
 }
 
 struct LCDFlatTopHexagon: Shape {
-    /// New Shuttle's plate is wider than tall (1000:860) with the flats on the
-    /// very top and bottom edges and the points 24.7% in from each side.
+    /// New Shuttle's plate: 1000:860, flats on the top and bottom edges.
     func path(in rect: CGRect) -> Path {
         let w = rect.width
         let h = min(rect.height, w / 1.163)
