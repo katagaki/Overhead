@@ -49,7 +49,13 @@ struct StationNumberBadge: View {
     private static let sotetsuOrange = Color(hex: "#EE7B01")
     private static let minatomiraiNavy = Color(hex: "#1F2A54")
     private static let rinkaiLightBlue = Color(hex: "#96C7C1")
-    private static let tamaGreen = Color(hex: "#3C605F")  // green even though the route line is orange
+    private static let tamaGreen = Color(hex: "#1A948B")  // green even though the route line is orange
+    private static let enodenYellow = Color(hex: "#FFE277")
+    private static let enodenGreen = Color(hex: "#0C6346")
+    private static let enodenLetterColor = Color(hex: "#231F20")
+    private static let seasideIndigo = Color(hex: "#43397E")  // badge indigo, not the route blue
+    private static let yurikamomeRed = Color(hex: "#E60012")
+    private static let minatomiraiWave = Color(hex: "#5FC5EA")
 
     private var parsed: (prefix: String, number: String) {
         let letters = code.prefix(while: \.isLetter)
@@ -124,8 +130,11 @@ struct StationNumberBadge: View {
 
     @ViewBuilder
     private func operatorBadge(prefix: String, number: String) -> some View {
+        let d13 = badgeDimension * 0.13
         if prefix.hasPrefix("J") || Self.squarePrefixes.contains(prefix) {
-            squareBadge(prefix: prefix, number: number)
+            // Tobu's plate is rounder than JR's.
+            squareBadge(prefix: prefix, number: number,
+                        cornerRadius: Self.squarePrefixes.contains(prefix) ? 7.5 : nil)
         } else if Self.seibuPrefixes.contains(prefix) {
             seibuBadge(prefix: prefix, number: number)
         } else if Self.filledSquarePrefixes.contains(prefix) {
@@ -144,8 +153,8 @@ struct StationNumberBadge: View {
             // Hokuso shares the ringed circle but sets its code at normal width.
             keiseiBadge(prefix: prefix, number: number, condensed: prefix != "HS")
         } else if prefix == "TR" {
-            // Toyo Rapid: Metro-style ring, condensed system face.
-            circleBadge(prefix: prefix, number: number, condensed: true)
+            // Toyo Rapid: thin ring matching its line symbol, condensed face.
+            circleBadge(prefix: prefix, number: number, condensed: true, ringWidth: d13 * 0.62)
         } else if prefix == "NT" {
             nipporiToneriBadge(prefix: prefix, number: number)
         } else if prefix == "R" {
@@ -155,8 +164,23 @@ struct StationNumberBadge: View {
         } else if prefix == "B" || (prefix == "G" && color.isGreenDominant) {
             // "G" is shared with Tokyo Metro Ginza (orange); color disambiguates.
             yokohamaBadge(prefix: prefix, number: number)
+        } else if prefix == "SA" {
+            arakawaBadge(prefix: prefix, number: number)
+        } else if prefix == "U" {
+            yurikamomeBadge(prefix: prefix, number: number)
         } else if prefix == "NS" {
             newShuttleBadge(prefix: prefix, number: number)
+        } else if prefix == "EN" {
+            enodenBadge(prefix: prefix, number: number)
+        } else if prefix == "SL" {
+            seasideBadge(number: number)
+        } else if prefix == "SR" {
+            // Both SR operators use a thin ring and an unbolded grotesque;
+            // only Shibayama sets the code in the line color.
+            srBadge(prefix: prefix, number: number,
+                    letterColor: color.isShibayamaGreen ? color : .black)
+        } else if prefix == "I" {
+            mitaBadge(number: number)
         } else {
             circleBadge(prefix: prefix, number: number)
         }
@@ -185,17 +209,19 @@ struct StationNumberBadge: View {
         }
         .lineLimit(1)
         .minimumScaleFactor(0.6)
-        .foregroundColor(Self.tamaGreen.opacity(opacity))
+        // Signage sets the code in black; only the frame is green.
+        .foregroundColor(Color.black.opacity(opacity))
         .frame(width: d, height: d)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 6))
-        .overlay(
-            RoundedRectangle(cornerRadius: 6)
-                .strokeBorder(Self.tamaGreen.opacity(opacity), lineWidth: 3)
-        )
+        // JR-style: rounded outer plate, sharp-cornered white core.
+        .background {
+            ZStack {
+                RoundedRectangle(cornerRadius: 6).fill(Self.tamaGreen.opacity(opacity))
+                Rectangle().fill(Color.white).padding(3)
+            }
+        }
     }
 
-    // MARK: - New Shuttle: filled line-color hexagon, white stacked italic code
+    // MARK: - New Shuttle: filled line-color hexagon, white stacked wide code
 
     @ViewBuilder
     private func newShuttleBadge(prefix: String, number: String) -> some View {
@@ -203,12 +229,12 @@ struct StationNumberBadge: View {
 
         VStack(spacing: 0) {
             Text(prefix)
-                .font(.system(size: d * 0.30, weight: .bold).italic())
+                .font(.system(size: d * 0.30, weight: .bold).width(.expanded))
                 .frame(height: d * 0.40)
                 .offset(y: d * 0.05)
 
             Text(number)
-                .font(.system(size: d * 0.36, weight: .bold).italic())
+                .font(.system(size: d * 0.36, weight: .bold).width(.expanded))
                 .frame(height: d * 0.44)
                 .offset(y: d * -0.03)
         }
@@ -219,6 +245,165 @@ struct StationNumberBadge: View {
         .background(color.opacity(opacity), in: FlatTopHexagon())
     }
 
+    // MARK: - Toden Arakawa: filled cherry blossom
+
+    @ViewBuilder
+    private func arakawaBadge(prefix: String, number: String) -> some View {
+        let d = badgeDimension
+
+        codeStack(prefix: prefix, number: number, font: "Hind",
+                  prefixSize: d * 0.40, numberSize: d * 0.74, soloSize: d * 0.78,
+                  prefixHeight: d * 0.24, numberHeight: d * 0.50,
+                  prefixWidth: d * 0.58,
+                  prefixOffset: d * 0.075, numberOffset: d * 0.015,
+                  numberKerning: d * 0.02)
+        // Signage sets the code in black on the rose blossom.
+        .foregroundColor(Color.black.opacity(opacity))
+        .frame(width: d, height: d)
+        .background {
+            ZStack {
+                Circle().fill(color.opacity(opacity))
+                SakuraBlossom().fill(Color.white).padding(d * 0.06)
+            }
+        }
+    }
+
+    // MARK: - Yurikamome: filled circle split by a red bar
+
+    @ViewBuilder
+    private func yurikamomeBadge(prefix: String, number: String) -> some View {
+        let d = badgeDimension
+
+        VStack(spacing: 0) {
+            Text(prefix)
+                .font(.system(size: d * 0.68, weight: .black))
+                .frame(height: d * 0.36)
+                .offset(y: d * -0.005)
+
+            Rectangle()
+                .fill(Self.yurikamomeRed.opacity(opacity))
+                .frame(width: d * 0.88, height: max(1, d * 0.06))
+
+            Text(number)
+                .font(.system(size: d * 0.74, weight: .black))
+                .frame(height: d * 0.38)
+                .offset(y: d * -0.02)
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.5)
+        .foregroundColor(Color.white.opacity(opacity))
+        .frame(width: d, height: d)
+        .background(color.opacity(opacity), in: Circle())
+        .overlay(Circle().strokeBorder(Color.white.opacity(opacity), lineWidth: d * 0.05))
+    }
+
+    // MARK: - Saitama Railway / Shibayama: thin ring, unbolded grotesque
+
+    @ViewBuilder
+    private func srBadge(prefix: String, number: String, letterColor: Color) -> some View {
+        let d = badgeDimension
+
+        VStack(spacing: 0) {
+            Text(prefix)
+                .font(.system(size: d * (color.isShibayamaGreen ? 0.50 : 0.36),
+                      weight: color.isShibayamaGreen ? .medium : .regular)
+                    .width(color.isShibayamaGreen ? .condensed : .standard))
+                .frame(width: d * 0.58, height: d * 0.28)
+                .offset(y: d * 0.05)
+
+            Text(number)
+                .font(.system(size: d * (color.isShibayamaGreen ? 0.86 : 0.58), weight: .regular)
+                    .width(color.isShibayamaGreen ? .condensed : .standard))
+                .frame(height: d * 0.58)
+                .offset(y: d * -0.03)
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.5)
+        .foregroundColor(letterColor.opacity(opacity))
+        .frame(width: d, height: d)
+        .background(Color.white)
+        .clipShape(Circle())
+        .overlay(Circle().strokeBorder(color.opacity(opacity),
+            lineWidth: d * (color.isShibayamaGreen ? 0.062 : 0.105)))
+    }
+
+    // MARK: - Toei Mita: the "I" is drawn, not set
+
+    /// 三田線's I carries top and bottom bars; the system face has none.
+    @ViewBuilder
+    private func mitaBadge(number: String) -> some View {
+        let d = badgeDimension
+
+        VStack(spacing: 0) {
+            SerifI()
+                .fill(Color.black.opacity(opacity))
+                .frame(width: d * 0.175, height: d * 0.235)
+                .frame(height: d * 0.34)
+                .offset(y: d * 0.025)
+
+            Text(number)
+                .font(.custom("Futura-Bold", size: d * 0.38))
+                .frame(height: d * 0.42)
+                .offset(y: d * -0.06)
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.6)
+        .foregroundColor(Color.black.opacity(opacity))
+        .frame(width: d, height: d)
+        .background(Color.white)
+        .clipShape(Circle())
+        .overlay(Circle().strokeBorder(color.opacity(opacity), lineWidth: d * 0.13))
+    }
+
+    // MARK: - Enoden: white core, green ring inside a pale yellow outer ring
+
+    @ViewBuilder
+    private func enodenBadge(prefix: String, number: String) -> some View {
+        let d = badgeDimension
+
+        codeStack(prefix: prefix, number: number, font: "Helvetica-Bold",
+                  prefixSize: d * 0.30, numberSize: d * 0.56, soloSize: d * 0.58,
+                  prefixHeight: d * 0.28, numberHeight: d * 0.48,
+                  prefixWidth: d * 0.56,
+                  prefixOffset: d * 0.05, numberOffset: d * -0.02)
+        .foregroundColor(Self.enodenLetterColor.opacity(opacity))
+        .frame(width: d, height: d)
+        .background {
+            ZStack {
+                Circle().fill(Self.enodenYellow.opacity(opacity))
+                Circle().fill(Self.enodenGreen.opacity(opacity)).padding(d * 0.05)
+                Circle().fill(Color.white).padding(d * 0.10)
+            }
+        }
+    }
+
+    // MARK: - Seaside Line: filled indigo disc over a white wave, number only
+
+    /// Seaside Line signage carries no letter prefix — just the number over the
+    /// wave that gives the line its name.
+    @ViewBuilder
+    private func seasideBadge(number: String) -> some View {
+        let d = badgeDimension
+
+        // Signage sets 1–9 without a leading zero.
+        Text(number.drop(while: { $0 == "0" }))
+            .font(.custom("Helvetica-Bold", size: d * 0.58))
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
+            .foregroundColor(Color.white.opacity(opacity))
+            .offset(y: d * -0.105)
+            .frame(width: d, height: d)
+            .background {
+                ZStack {
+                    Circle().fill(Color.white)
+                    SeasideWave().fill(Self.seasideIndigo.opacity(opacity))
+                        .clipShape(Circle())
+                        .padding(d * 0.075)
+                    Circle().strokeBorder(Self.seasideIndigo.opacity(opacity), lineWidth: d * 0.026)
+                }
+            }
+    }
+
     // MARK: - Yokohama Municipal: filled line-color circle, white stacked code
 
     @ViewBuilder
@@ -227,13 +412,13 @@ struct StationNumberBadge: View {
 
         VStack(spacing: 0) {
             Text(prefix)
-                .font(.custom("Helvetica-Bold", size: d * 0.34))
-                .frame(height: d * 0.44)
+                .font(.custom("Helvetica-Bold", size: d * 0.42))
+                .frame(height: d * 0.42)
                 .offset(y: d * 0.04)
 
             Text(number)
-                .font(.custom("Helvetica-Bold", size: d * 0.44))
-                .frame(height: d * 0.50)
+                .font(.custom("Helvetica-Bold", size: d * 0.58))
+                .frame(height: d * 0.52)
                 .offset(y: d * -0.02)
         }
         .lineLimit(1)
@@ -252,7 +437,9 @@ struct StationNumberBadge: View {
         prefix: String, number: String, font: String,
         prefixSize: CGFloat, numberSize: CGFloat, soloSize: CGFloat,
         prefixHeight: CGFloat, numberHeight: CGFloat,
+        prefixWidth: CGFloat? = nil,
         prefixOffset: CGFloat = 0, numberOffset: CGFloat = 0,
+        numberKerning: CGFloat = 0,
         spacing: CGFloat = 0
     ) -> some View {
         if prefix.isEmpty {
@@ -265,11 +452,12 @@ struct StationNumberBadge: View {
                 Text(prefix)
                     .font(.custom(font, size: prefixSize))
                     .offset(y: prefixOffset)
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: prefixWidth ?? .infinity)
                     .frame(height: prefixHeight)
 
                 Text(number)
                     .font(.custom(font, size: numberSize))
+                    .kerning(numberKerning)
                     .offset(y: numberOffset)
                     .frame(maxWidth: .infinity)
                     .frame(height: numberHeight)
@@ -282,7 +470,8 @@ struct StationNumberBadge: View {
     // MARK: - JR East / Tobu: Rounded Square Frame
 
     @ViewBuilder
-    private func squareBadge(prefix: String, number: String, textColor: Color = .black) -> some View {
+    private func squareBadge(prefix: String, number: String, textColor: Color = .black,
+                             cornerRadius: CGFloat? = nil) -> some View {
         let d = badgeDimension
         // Generous sizes: Hind's cap height is only 0.678em.
         let prefixSize = d * 0.58
@@ -296,9 +485,9 @@ struct StationNumberBadge: View {
         .foregroundColor(textColor.opacity(opacity))
         .frame(width: d, height: d)
         .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius ?? 6))
         .overlay(
-            RoundedRectangle(cornerRadius: 6)
+            RoundedRectangle(cornerRadius: cornerRadius ?? 6)
                 .strokeBorder(color.opacity(opacity), lineWidth: 3)
         )
     }
@@ -333,17 +522,26 @@ struct StationNumberBadge: View {
     @ViewBuilder
     private func filledSquareBadge(prefix: String, number: String) -> some View {
         let d = badgeDimension
-        let prefixSize = d * 0.64
-        let numberSize = d * 0.76
+        let prefixSize = d * 0.74
+        let numberSize = d * 0.88
 
         codeStack(prefix: prefix, number: number, font: "Hind-Bold",
-                  prefixSize: prefixSize, numberSize: numberSize, soloSize: d * 0.70,
+                  prefixSize: prefixSize, numberSize: numberSize, soloSize: d * 0.82,
                   prefixHeight: prefixSize * 0.65, numberHeight: numberSize * 0.75,
                   prefixOffset: prefixSize * 0.24, numberOffset: numberSize * -0.02,
                   spacing: 1)
         .foregroundColor((Self.filledLetterColors[prefix] ?? .white).opacity(opacity))
         .frame(width: d, height: d)
-        .background(color.opacity(opacity), in: RoundedRectangle(cornerRadius: d * 0.25))
+        .background(color.opacity(opacity),
+                    in: RoundedRectangle(cornerRadius: d * (prefix == "TX" ? 0.20 : 0.25)))
+        // TX sets a white keyline inside the plate; Tokyu's is plain.
+        .overlay {
+            if prefix == "TX" {
+                RoundedRectangle(cornerRadius: d * 0.15)
+                    .strokeBorder(Color.white.opacity(opacity), lineWidth: d * 0.045)
+                    .padding(d * 0.05)
+            }
+        }
     }
 
     // MARK: - Minatomirai: Two-Tone Filled Square
@@ -354,20 +552,27 @@ struct StationNumberBadge: View {
 
         VStack(spacing: 0) {
             Text(prefix)
-                .font(.custom("Helvetica-Bold", size: d * 0.28))
+                .font(.custom("Helvetica-Bold", size: d * 0.30))
                 .frame(maxWidth: .infinity)
-                .frame(height: d * 0.38)
-                .background(Self.minatomiraiNavy.opacity(opacity))
+                .frame(height: d * 0.36)
 
             Text(number)
-                .font(.custom("Helvetica-Bold", size: d * 0.46))
+                .font(.custom("Helvetica-Bold", size: d * 0.52))
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(color.opacity(opacity))
         }
         .lineLimit(1)
         .minimumScaleFactor(0.6)
         .foregroundColor(Color.white.opacity(opacity))
         .frame(width: d, height: d)
+        .background {
+            ZStack(alignment: .top) {
+                color.opacity(opacity)
+                MinatomiraiWave()
+                    .fill(Self.minatomiraiWave.opacity(opacity))
+                    .frame(height: d * 0.20)
+                    .offset(y: d * 0.26)
+            }
+        }
         .clipShape(RoundedRectangle(cornerRadius: d * 0.16))
     }
 
@@ -379,14 +584,14 @@ struct StationNumberBadge: View {
 
         VStack(spacing: 0) {
             Text(prefix)
-                .font(.custom("Hind", size: d * 0.60))
-                .offset(y: d * 0.30 * 0.24)
-                .frame(height: d * 0.4)
+                .font(.custom("Hind", size: d * 0.50))
+                .offset(y: d * 0.04)
+                .frame(height: d * 0.32)
 
             Text(number)
-                .font(.custom("Hind-Semibold", size: d * 0.82))
-                .offset(y: d * 0.42 * 0.02)
-                .frame(height: d * 0.40)
+                .font(.custom("Hind-Semibold", size: d * 0.94))
+                .offset(y: d * 0.01)
+                .frame(height: d * 0.46)
         }
         .lineLimit(1)
         .minimumScaleFactor(0.6)
@@ -462,39 +667,47 @@ struct StationNumberBadge: View {
 
     // MARK: - Metro / Toei / Keisei: Circle Ring
 
-    private func circleBadge(prefix: String, number: String, condensed: Bool = false) -> some View {
+    private func circleBadge(prefix: String, number: String, condensed: Bool = false,
+                             letterColor: Color = .black,
+                             ringWidth: CGFloat? = nil) -> some View {
         let d = badgeDimension
 
         if condensed {
-            return AnyView(condensedCircleBadge(prefix: prefix, number: number))
+            return AnyView(condensedCircleBadge(prefix: prefix, number: number,
+                                                ringWidth: ringWidth))
         }
         return AnyView(codeStack(prefix: prefix, number: number, font: "Futura-Bold",
                   prefixSize: d * 0.38, numberSize: d * 0.38, soloSize: d * 0.50,
                   prefixHeight: d * 0.42, numberHeight: d * 0.42,
+                  // Bound the width so a three-letter prefix (SMR) is scaled down
+                  // to clear the ring instead of running under it.
+                  prefixWidth: d * 0.58,
                   prefixOffset: 1.10, numberOffset: -1.90)
-        .foregroundColor(Color.black.opacity(opacity))
+        .foregroundColor(letterColor.opacity(opacity))
         .frame(width: d, height: d)
         .background(Color.white)
         .clipShape(Circle())
         .overlay(
             Circle()
-                .strokeBorder(color.opacity(opacity), lineWidth: d * 0.13)
+                .strokeBorder(color.opacity(opacity), lineWidth: ringWidth ?? d * 0.13)
         ))
     }
 
     /// Same ringed circle, set in a condensed system face (Toyo Rapid).
-    private func condensedCircleBadge(prefix: String, number: String) -> some View {
+    private func condensedCircleBadge(prefix: String, number: String,
+                                      ringWidth: CGFloat? = nil) -> some View {
         let d = badgeDimension
+        let big = ringWidth != nil   // thin-ringed lines have room for a larger code
 
         return VStack(spacing: 0) {
             Text(prefix)
-                .font(.system(size: d * 0.32, weight: .bold).width(.condensed))
-                .frame(height: d * 0.36)
+                .font(.system(size: d * (big ? 0.40 : 0.32), weight: .bold).width(.condensed))
+                .frame(height: d * (big ? 0.38 : 0.36))
                 .offset(y: d * 0.04)
 
             Text(number)
-                .font(.system(size: d * 0.36, weight: .bold).width(.condensed))
-                .frame(height: d * 0.40)
+                .font(.system(size: d * (big ? 0.46 : 0.36), weight: .bold).width(.condensed))
+                .frame(height: d * (big ? 0.44 : 0.40))
                 .offset(y: d * -0.04)
         }
         .lineLimit(1)
@@ -505,7 +718,7 @@ struct StationNumberBadge: View {
         .clipShape(Circle())
         .overlay(
             Circle()
-                .strokeBorder(color.opacity(opacity), lineWidth: d * 0.13)
+                .strokeBorder(color.opacity(opacity), lineWidth: ringWidth ?? d * 0.13)
         )
     }
 
@@ -517,12 +730,14 @@ struct StationNumberBadge: View {
 
         VStack(spacing: 0) {
             Text(prefix)
-                .font(.custom("Helvetica-Bold", size: d * 0.28))
-                .frame(height: d * 0.25)
+                .font(.custom("Helvetica-Bold", size: d * 0.46))
+                .frame(height: d * 0.24)
+                .offset(y: d * 0.005)
 
             Text(number)
-                .font(.custom("Helvetica-Bold", size: d * 0.38))
-                .frame(height: d * 0.34)
+                .font(.custom("Helvetica-Bold", size: d * 0.64))
+                .frame(height: d * 0.36)
+                .offset(y: d * 0.008)
         }
         .lineLimit(1)
         .minimumScaleFactor(0.6)
@@ -593,8 +808,8 @@ struct StationNumberBadge: View {
                 .offset(y: 0.6)
 
             Text(number)
-                .font(.custom("Helvetica", size: d * 0.44))
-                .frame(height: d * 0.42)
+                .font(.custom("Helvetica", size: d * 0.54))
+                .frame(height: d * 0.46)
                 .offset(y: -0.6)
         }
         .lineLimit(1)
