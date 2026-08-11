@@ -23,6 +23,9 @@ struct VerticalLCDLine: View {
     var selectableIndices: Set<Int> = []
     var onSelectStation: ((Int) -> Void)?
 
+    /// Collapsed runs the rider has opened, keyed by index range.
+    @State private var expandedRanges: Set<String> = []
+
     private let stationSpacing: CGFloat = 72
     private let trackWidth: CGFloat = 3
     private let timeColumnWidth: CGFloat = 44
@@ -42,110 +45,279 @@ struct VerticalLCDLine: View {
         let timetable = journey.journeyTimetable
         let transferIds = Set(journey.transferStationIds)
 
+        let items = lineItems(stations: stations, transferIds: transferIds)
+
         VStack(spacing: 0) {
-            ForEach(Array(stations.enumerated()), id: \.element.id) { index, station in
-                let isFirst = index == 0
-                let isLast = index == stations.count - 1
-                let isTerminal = isFirst || isLast
-                let frac = stations.count > 1 ? Double(index) / Double(stations.count - 1) : 0
-                let isPast = frac <= state.progress + 0.005
-                let isCurrent = state.currentStationIndex == index
-                let isNext = (!isLast && index == state.segmentTo) ||
-                             (state.currentStationIndex != nil && index == (state.currentStationIndex! + 1))
-                let isTransfer = transferIds.contains(station.id)
-                let target = isTransfer && index < stations.count - 1
-                    ? transferTarget(at: station, nextStation: stations[index + 1])
-                    : nil
-                let segFrac = segmentFillFraction(stationIndex: index, totalStations: stations.count)
-                let rowColor = stationColor(station)
-                // Track below a row runs toward the NEXT station, so it takes that station's color.
-                let segColor = index < stations.count - 1 ? stationColor(stations[index + 1]) : rowColor
-                let isSelectable = selectableIndices.contains(index)
-
-                let row = HStack(alignment: .top, spacing: 0) {
-                    timeColumn(for: station, timetable: timetable, isPast: isPast, isCurrent: isCurrent,
-                               preferArrival: isTransfer)
-                        // Same height as the marker so the time centers on the dot.
-                        .frame(width: timeColumnWidth, height: markerHeight)
-
-                    stationCircle(
-                        isPast: isPast,
-                        isCurrent: isCurrent,
-                        isTerminal: isTerminal,
-                        isNext: isNext,
-                        color: rowColor
-                    )
-                    .frame(width: 40, height: markerHeight, alignment: .center)
-
-                    stationLabel(
-                        station: station,
-                        isPast: isPast,
-                        isCurrent: isCurrent,
-                        isNext: isNext && !isTransfer,
-                        isTerminal: isTerminal,
-                        isTransfer: isTransfer,
-                        color: rowColor
-                    )
-                    .padding(.bottom, isLast ? 0 : 14)
-
-                    Spacer()
-
-                    if isSelectable {
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundStyle(.tertiary)
-                            .frame(height: markerHeight)
-                    }
-                }
-                .frame(minHeight: isLast ? 0 : stationSpacing, alignment: .top)
-                .background(alignment: .topLeading) {
-                    if !isLast {
-                        trackSegment(filled: isPast,
-                                     fillFraction: target == nil ? segFrac : (isCurrent ? 1 : min(1, segFrac * 2)),
-                                     dashed: isTransfer, color: segColor)
-                            .frame(width: trackWidth, height: stationSpacing)
-                            .padding(.top, markerHeight / 2)
-                            .padding(.leading, timeColumnWidth + 20 - trackWidth / 2)
-                    }
-                }
-                .overlay(alignment: .topLeading) {
-                    if let target {
-                        Image(systemName: target.station.id == station.id ? "hourglass" : "figure.walk")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.secondary)
-                            .opacity(isPast ? 0.5 : 1.0)
-                            .frame(width: timeColumnWidth, height: markerHeight, alignment: .center)
-                            .padding(.top, stationSpacing / 2)
-                    }
-                }
-
-                if isSelectable {
-                    Button {
-                        onSelectStation?(index)
-                    } label: {
-                        row.contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityHint("Replan.Station.Hint")
-                    .id("station_\(index)")
-                } else {
-                    row
-                        .id("station_\(index)")
-                }
-
-                // Boarding point after the transfer: own dot and departure time
-                if let target {
-                    transferBoardingRow(
-                        station: station,
-                        target: target,
-                        timetable: timetable,
-                        isPast: isPast,
-                        isCurrent: isCurrent,
-                        fillFraction: max(0, segFrac * 2 - 1)
-                    )
+            ForEach(Array(items.enumerated()), id: \.element.id) { position, item in
+                let nextIsFold = position + 1 < items.count && items[position + 1].isFold
+                switch item {
+                case .station(let index, let groupID):
+                    stationRow(index: index, groupID: groupID, stations: stations,
+                               timetable: timetable, transferIds: transferIds,
+                               tightBottom: nextIsFold)
+                case .collapsed(let range):
+                    collapsedRow(range: range, stations: stations, isExpanded: false)
+                case .expandedHandle(let range):
+                    collapsedRow(range: range, stations: stations, isExpanded: true)
                 }
             }
         }
+    }
+
+    // MARK: - Line Items
+
+    private enum LineItem: Identifiable {
+        case station(Int, groupID: String?)
+        case collapsed(ClosedRange<Int>)
+        case expandedHandle(ClosedRange<Int>)
+
+        var id: String {
+            switch self {
+            case .station(let index, _): "s\(index)"
+            case .collapsed(let range), .expandedHandle(let range):
+                "c\(range.lowerBound)-\(range.upperBound)"
+            }
+        }
+
+        var isFold: Bool {
+            switch self {
+            case .station: false
+            case .collapsed, .expandedHandle: true
+            }
+        }
+    }
+
+    /// Rows to draw: terminals, 乗り換え, and the active segment stay put;
+    /// runs of plain intermediate stops fold into one collapsed row.
+    private func lineItems(stations: [Station], transferIds: Set<String>) -> [LineItem] {
+        let count = stations.count
+        guard count > 2 else { return stations.indices.map { .station($0, groupID: nil) } }
+
+        var keep: Set<Int> = [0, count - 1]
+        for (index, station) in stations.enumerated() where transferIds.contains(station.id) {
+            keep.insert(index)
+        }
+        // The LCD above already presents the upcoming station, so only a
+        // station the train is dwelling at pins itself open.
+        if let current = state.currentStationIndex {
+            keep.insert(current)
+        }
+
+        var items: [LineItem] = []
+        var index = 0
+        while index < count {
+            if keep.contains(index) {
+                items.append(.station(index, groupID: nil))
+                index += 1
+                continue
+            }
+            var end = index
+            while end + 1 < count && !keep.contains(end + 1) { end += 1 }
+            let range = index...end
+            if range.count >= 2 {
+                let id = rangeID(range)
+                if expandedRanges.contains(id) {
+                    // The pill stays put as the handle that folds the run back.
+                    items.append(.expandedHandle(range))
+                    items.append(contentsOf: range.map { .station($0, groupID: id) })
+                } else {
+                    items.append(.collapsed(range))
+                }
+            } else {
+                items.append(.station(index, groupID: nil))
+            }
+            index = end + 1
+        }
+        return items
+    }
+
+    private func rangeID(_ range: ClosedRange<Int>) -> String {
+        "\(range.lowerBound)-\(range.upperBound)"
+    }
+
+    // MARK: - Station Row
+
+    @ViewBuilder
+    private func stationRow(index: Int, groupID: String?, stations: [Station],
+                            timetable: [TimetableEntry], transferIds: Set<String>,
+                            tightBottom: Bool) -> some View {
+        let station = stations[index]
+        let isFirst = index == 0
+        let isLast = index == stations.count - 1
+        let isTerminal = isFirst || isLast
+        let frac = stations.count > 1 ? Double(index) / Double(stations.count - 1) : 0
+        let isPast = frac <= state.progress + 0.005
+        let isCurrent = state.currentStationIndex == index
+        let isTransfer = transferIds.contains(station.id)
+        let target = isTransfer && index < stations.count - 1
+            ? transferTarget(at: station, nextStation: stations[index + 1])
+            : nil
+        let segFrac = segmentFillFraction(stationIndex: index, totalStations: stations.count)
+        let rowColor = stationColor(station)
+        // Track below a row runs toward the NEXT station, so it takes that station's color.
+        let segColor = index < stations.count - 1 ? stationColor(stations[index + 1]) : rowColor
+        let isSelectable = selectableIndices.contains(index)
+        // A fold row follows: end at the marker so the fold centers in the gap.
+        // With a boarding row in between, that row tightens instead.
+        let bottomSpan = tightBottom && target == nil ? markerHeight : stationSpacing
+
+        let row = HStack(alignment: .top, spacing: 0) {
+            timeColumn(for: station, timetable: timetable, isPast: isPast, isCurrent: isCurrent,
+                       preferArrival: isTransfer)
+                // Same height as the marker so the time centers on the dot.
+                .frame(width: timeColumnWidth, height: markerHeight)
+
+            stationCircle(
+                isPast: isPast,
+                isCurrent: isCurrent,
+                isTerminal: isTerminal,
+                color: rowColor
+            )
+            .frame(width: 40, height: markerHeight, alignment: .center)
+
+            stationLabel(
+                station: station,
+                isPast: isPast,
+                isCurrent: isCurrent,
+                isTerminal: isTerminal,
+                isTransfer: isTransfer,
+                color: rowColor
+            )
+            .padding(.bottom, isLast || bottomSpan == markerHeight ? 0 : 14)
+
+            Spacer()
+
+            if isSelectable {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.tertiary)
+                    .frame(height: markerHeight)
+            }
+        }
+        .frame(minHeight: isLast ? 0 : bottomSpan, alignment: .top)
+        .background(alignment: .topLeading) {
+            if !isLast {
+                trackSegment(filled: isPast,
+                             fillFraction: target == nil ? segFrac : (isCurrent ? 1 : min(1, segFrac * 2)),
+                             dashed: isTransfer, color: segColor)
+                    .frame(width: trackWidth, height: bottomSpan)
+                    .padding(.top, markerHeight / 2)
+                    .padding(.leading, timeColumnWidth + 20 - trackWidth / 2)
+            }
+        }
+        .overlay(alignment: .topLeading) {
+            if let target {
+                Image(systemName: target.station.id == station.id ? "hourglass" : "figure.walk")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.secondary)
+                    .opacity(isPast ? 0.5 : 1.0)
+                    .frame(width: timeColumnWidth, height: markerHeight, alignment: .center)
+                    .padding(.top, stationSpacing / 2)
+            }
+        }
+
+        if isSelectable {
+            Button {
+                onSelectStation?(index)
+            } label: {
+                row.contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint("Replan.Station.Hint")
+            .id("station_\(index)")
+        } else if let groupID {
+            // Plain rows in an opened run fold it back when tapped.
+            Button {
+                withAnimation(.snappy) {
+                    _ = expandedRanges.remove(groupID)
+                }
+            } label: {
+                row.contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .id("station_\(index)")
+        } else {
+            row
+                .id("station_\(index)")
+        }
+
+        // Boarding point after the transfer: own dot and departure time
+        if let target {
+            transferBoardingRow(
+                station: station,
+                target: target,
+                timetable: timetable,
+                isPast: isPast,
+                isCurrent: isCurrent,
+                fillFraction: max(0, segFrac * 2 - 1),
+                tightBottom: tightBottom
+            )
+        }
+    }
+
+    // MARK: - Collapsed Row
+
+    @ViewBuilder
+    private func collapsedRow(range: ClosedRange<Int>, stations: [Station], isExpanded: Bool) -> some View {
+        let count = stations.count
+        let startFrac = count > 1 ? Double(range.lowerBound) / Double(count - 1) : 0
+        let endFrac = count > 1 ? Double(range.upperBound + 1) / Double(count - 1) : 0
+        // The expanded handle occupies no distance; only the folded pill spans the run.
+        let fill = !isExpanded && endFrac > startFrac
+            ? min(1, max(0, (state.progress - startFrac) / (endFrac - startFrac)))
+            : (state.progress + 0.005 >= startFrac ? 1.0 : 0.0)
+        let isPast = state.progress + 0.005 >= (isExpanded ? startFrac : endFrac)
+        let color = stationColor(stations[range.upperBound])
+        // With the tightened row above, the whole gap stays near a normal one.
+        let rowHeight = stationSpacing * 2 / 3
+
+        Button {
+            withAnimation(.snappy) {
+                if isExpanded {
+                    _ = expandedRanges.remove(rangeID(range))
+                } else {
+                    _ = expandedRanges.insert(rangeID(range))
+                }
+            }
+        } label: {
+            HStack(alignment: .center, spacing: 0) {
+                Color.clear
+                    .frame(width: timeColumnWidth, height: markerHeight)
+
+                // Hidden stops read as dots on the line.
+                VStack(spacing: 4) {
+                    if !isExpanded {
+                        ForEach(0..<3, id: \.self) { _ in
+                            Circle()
+                                .fill(isPast ? color : Color(.systemGray3))
+                                .frame(width: 4, height: 4)
+                        }
+                    }
+                }
+                .frame(width: 40, height: rowHeight, alignment: .center)
+
+                HStack(spacing: 5) {
+                    Text("Journey.CollapsedStops \(range.count)")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(.secondary)
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(.tertiary)
+                }
+                .padding(.leading, 8)
+
+                Spacer()
+            }
+            .frame(height: rowHeight)
+            .contentShape(Rectangle())
+            .background(alignment: .topLeading) {
+                trackSegment(filled: isPast, fillFraction: fill, color: color)
+                    .frame(width: trackWidth, height: rowHeight)
+                    .padding(.top, markerHeight / 2)
+                    .padding(.leading, timeColumnWidth + 20 - trackWidth / 2)
+            }
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Time Column
@@ -229,8 +401,11 @@ struct VerticalLCDLine: View {
         timetable: [TimetableEntry],
         isPast: Bool,
         isCurrent: Bool,
-        fillFraction: Double
+        fillFraction: Double,
+        tightBottom: Bool
     ) -> some View {
+        let bottomSpan = tightBottom ? markerHeight : stationSpacing * 0.8
+
         HStack(alignment: .top, spacing: 0) {
             Group {
                 if let entry = timetable.first(where: { $0.stationId == station.id }),
@@ -248,7 +423,7 @@ struct VerticalLCDLine: View {
                 if isCurrent {
                     // Transfer-to shares the current-station highlight when the transfer is current.
                     stationCircle(isPast: isPast, isCurrent: true, isTerminal: false,
-                                  isNext: false, color: target.line.color)
+                                  color: target.line.color)
                 } else if isPast {
                     // Once passed, fill the dot like any other passed stop.
                     Circle()
@@ -284,14 +459,14 @@ struct VerticalLCDLine: View {
                     .lineLimit(1)
             }
             .padding(.leading, 8)
-            .padding(.bottom, 14)
+            .padding(.bottom, tightBottom ? 0 : 14)
 
             Spacer()
         }
-        .frame(minHeight: stationSpacing * 0.8, alignment: .top)
+        .frame(minHeight: bottomSpan, alignment: .top)
         .background(alignment: .topLeading) {
             trackSegment(filled: isPast, fillFraction: fillFraction, color: target.line.color)
-                .frame(width: trackWidth, height: stationSpacing * 0.8)
+                .frame(width: trackWidth, height: bottomSpan)
                 .padding(.top, markerHeight / 2)
                 .padding(.leading, timeColumnWidth + 20 - trackWidth / 2)
         }
@@ -300,7 +475,7 @@ struct VerticalLCDLine: View {
     // MARK: - Station Circle
 
     @ViewBuilder
-    private func stationCircle(isPast: Bool, isCurrent: Bool, isTerminal: Bool, isNext: Bool, color: Color? = nil) -> some View {
+    private func stationCircle(isPast: Bool, isCurrent: Bool, isTerminal: Bool, color: Color? = nil) -> some View {
         let r = isCurrent ? currentRadius : (isTerminal ? terminalRadius : circleRadius)
         let ringColor = color ?? lineColor
 
@@ -338,19 +513,13 @@ struct VerticalLCDLine: View {
                     .strokeBorder(Color(.systemGray3), lineWidth: 2)
                     .frame(width: r * 2, height: r * 2)
             }
-
-            if isNext && !isCurrent {
-                Circle()
-                    .strokeBorder(ringColor, lineWidth: 2)
-                    .frame(width: r * 2 + 6, height: r * 2 + 6)
-            }
         }
     }
 
     // MARK: - Station Label
 
     @ViewBuilder
-    private func stationLabel(station: Station, isPast: Bool, isCurrent: Bool, isNext: Bool, isTerminal: Bool, isTransfer: Bool = false, color: Color? = nil) -> some View {
+    private func stationLabel(station: Station, isPast: Bool, isCurrent: Bool, isTerminal: Bool, isTransfer: Bool = false, color: Color? = nil) -> some View {
         let accent = color ?? lineColor
         HStack(spacing: 6) {
             if !station.stationCode.isEmpty {
