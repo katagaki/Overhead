@@ -4992,6 +4992,40 @@
         }
       }
     },
+    "Nearby.DepartHere" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depart from Here"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ここから出発"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "여기에서 출발"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从这里出发"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "從這裡出發"
+          }
+        }
+      }
+    },
     "Nearby.FixFailed.Body" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8367,31 +8401,31 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Choose a Train"
+            "value" : "Search Results"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "列車を選択"
+            "value" : "検索結果"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "열차 선택"
+            "value" : "검색 결과"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "选择列车"
+            "value" : "搜索结果"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "選擇列車"
+            "value" : "搜尋結果"
           }
         }
       }

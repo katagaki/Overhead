@@ -22,6 +22,7 @@ final class JourneyViewModel: ObservableObject {
     @Published var stationTimetable: [StationTimetableData] = []
     @Published var isLoadingTimetable = false
     @Published var railDirections: [String: (ja: String, en: String)] = [:]
+    @Published var plannerFromRequest: StationSearchHit?
 
     private let locationTracker = LocationTracker()
     private var cancellables = Set<AnyCancellable>()
@@ -793,8 +794,11 @@ final class JourneyViewModel: ObservableObject {
                 let isTransferIn = legIndex > 0 && i == 0
                 if isTransferIn {
                     guard let prev = entries.popLast() else { return nil }
+                    // Falls back to the merged entry a replan's head legs carry:
+                    // their shared timetable keys the boundary by the arriving ID.
                     let depTime = entryByStationId[station.id]?.departureTime
                         ?? entryByStationId[station.id]?.arrivalTime
+                        ?? prev.departureTime
                     entries.append(TimetableEntry(
                         id: prev.id,
                         stationId: prev.stationId,
@@ -931,8 +935,8 @@ final class JourneyViewModel: ObservableObject {
     /// Less slack than a planned transfer — no concourse walk.
     static let sameStationBufferMinutes: Double = 1
 
-    /// Stops of the leg being ridden, destination excluded; past stops included
-    /// so a rider who overshot can double back.
+    /// Stops ahead of the train, destination excluded; past stops of the current
+    /// leg included so a rider who overshot can double back.
     var replanAnchors: [ReplanAnchor] {
         guard let journey = activeJourney, journey.hasSchedule,
               let state = positionState, state.status != .arrived
@@ -960,7 +964,6 @@ final class JourneyViewModel: ObservableObject {
                 time: times[index].addingTimeInterval(delay),
                 isPast: index < current
             ))
-            if index >= current, transferIds.contains(stations[index].id) { break }
         }
         return anchors
     }
@@ -1022,34 +1025,63 @@ final class JourneyViewModel: ObservableObject {
         performStartJourney(candidate: stitched(from: anchor, to: onward) ?? onward)
     }
 
-    /// `onward` with the ride in progress prepended as a leg; nil if they can't join.
+    /// `onward` with the ride in progress prepended; nil if they can't join.
     func stitched(from anchor: ReplanAnchor, to onward: TrainCandidate) -> TrainCandidate? {
-        guard let head = rideInProgressLeg(upTo: anchor) else { return nil }
-        return compositeCandidate(legs: [head] + onward.legs)
+        guard let head = rideInProgressLegs(upTo: anchor) else { return nil }
+        return compositeCandidate(legs: head + onward.legs)
     }
 
-    /// Boarding station → `anchor` as one leg; nil at the boarding station.
-    private func rideInProgressLeg(upTo anchor: ReplanAnchor) -> CandidateLeg? {
-        guard let journey = activeJourney,
-              let boarding = journey.journeyStations.first,
-              boarding.id != anchor.station.id
-        else { return nil }
-
+    /// Boarding station → `anchor`, split back into one leg per train so an
+    /// anchor beyond a 乗り換え keeps it; nil at the boarding station.
+    private func rideInProgressLegs(upTo anchor: ReplanAnchor) -> [CandidateLeg]? {
+        guard let journey = activeJourney, anchor.stationIndex > 0 else { return nil }
+        let stations = journey.journeyStations
         let timetable = journey.journeyTimetable
-        guard let depEntry = timetable.first(where: { $0.stationId == boarding.id }),
-              let arrEntry = timetable.first(where: { $0.stationId == anchor.station.id }),
-              let dep = depEntry.departureSeconds() ?? depEntry.arrivalSeconds(),
-              let arr = arrEntry.arrivalSeconds() ?? arrEntry.departureSeconds()
-        else { return nil }
+        let transferIds = Set(journey.transferStationIds)
 
-        return CandidateLeg(
-            service: journey.service,
-            line: journey.line,
-            fromStation: boarding,
-            toStation: anchor.station,
-            departureSeconds: dep,
-            arrivalSeconds: arr
-        )
+        var splits = [0]
+        for index in 1..<anchor.stationIndex where transferIds.contains(stations[index].id) {
+            splits.append(index)
+        }
+        splits.append(anchor.stationIndex)
+
+        // A composite journey joins its leg line IDs with "+".
+        let lineIds = journey.line.id.components(separatedBy: "+")
+
+        var legs: [CandidateLeg] = []
+        for legIndex in 0..<(splits.count - 1) {
+            let boundary = stations[splits[legIndex]]
+            let toStation = stations[splits[legIndex + 1]]
+
+            var line = journey.line
+            if legIndex > 0, let boarded = transferLines[boundary.id] {
+                line = boarded
+            } else if lineIds.indices.contains(legIndex),
+                      let resolved = StaticTrainData.line(withId: lineIds[legIndex])?.trainLine {
+                line = resolved
+            }
+            // The journey keeps the arriving leg's station at a transfer; the
+            // boarding side lives on the next line under its own ID.
+            let fromStation = legIndex == 0
+                ? boundary
+                : (line.stations.first(where: { $0.name == boundary.name }) ?? boundary)
+
+            guard let depEntry = timetable.first(where: { $0.stationId == boundary.id }),
+                  let arrEntry = timetable.first(where: { $0.stationId == toStation.id }),
+                  let dep = depEntry.departureSeconds() ?? depEntry.arrivalSeconds(),
+                  let arr = arrEntry.arrivalSeconds() ?? arrEntry.departureSeconds()
+            else { return nil }
+
+            legs.append(CandidateLeg(
+                service: journey.service,
+                line: line,
+                fromStation: fromStation,
+                toStation: toStation,
+                departureSeconds: dep,
+                arrivalSeconds: arr
+            ))
+        }
+        return legs.isEmpty ? nil : legs
     }
 
     /// Replaces the active journey; the Live Activity restarts rather than updates.

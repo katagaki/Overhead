@@ -107,6 +107,15 @@ struct JourneyPlannerSection: View {
         .onReceive(NotificationCenter.default.publisher(for: SavedPlaceStore.didChangeNotification)) { _ in
             savedPlaces = SavedPlaceStore.load()
         }
+        .onReceive(viewModel.$plannerFromRequest) { hit in
+            guard let hit else { return }
+            viewModel.plannerFromRequest = nil
+            withAnimation(.smooth(duration: 0.35)) {
+                fromSelection = hit
+            }
+            persistSelections()
+            invalidateResults()
+        }
 #if DEBUG
         .onReceive(ScreenshotStaging.shared.$plannerCommand) { command in
             guard let command else { return }

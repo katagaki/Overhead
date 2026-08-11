@@ -5,7 +5,7 @@ import Backbone
 // MARK: - Nearby Stations Section
 
 /// A card per nearby station, a row per line with its next departure.
-/// Tapping a row flips its direction.
+/// Tapping a row opens a menu: direction picker, timetable/status, ここから出発.
 struct NearbyStationsSection: View {
     @ObservedObject var viewModel: JourneyViewModel
     @StateObject private var provider = NearbyStationsProvider()
@@ -262,8 +262,36 @@ struct NearbyStationsSection: View {
         let current = currentTimetable(timetables, choiceKey: choiceKey)
         let next = current.flatMap { nextDeparture(in: $0, at: date) }
 
-        return Button {
-            flip(choiceKey: choiceKey, timetables: timetables)
+        return Menu {
+            if timetables.count > 1 {
+                Picker("", selection: directionBinding(choiceKey: choiceKey, timetables: timetables)) {
+                    ForEach(timetables, id: \.railDirection) { timetable in
+                        Text(timetable.localizedDirectionName).tag(timetable.railDirection)
+                    }
+                }
+            }
+            Section {
+                Button {
+                    timetableTarget = NearbyTimetableTarget(hit: hit, directionId: currentDirectionId(timetables, choiceKey: choiceKey))
+                } label: {
+                    Label("Nearby.OpenTimetable", systemImage: "calendar")
+                }
+                Button {
+                    serviceStatusPresenter?.present(
+                        lineId: hit.line.id,
+                        delayInfo: viewModel.delayCheckInfo(for: hit.line.id)
+                    )
+                } label: {
+                    Label("StationTimetable.ServiceStatus", systemImage: "info.circle")
+                }
+            }
+            Section {
+                Button {
+                    viewModel.plannerFromRequest = hit
+                } label: {
+                    Label("Nearby.DepartHere", systemImage: "figure.walk.departure")
+                }
+            }
         } label: {
             HStack(spacing: 9) {
                 if !hit.line.lineSymbol.isEmpty {
@@ -305,21 +333,6 @@ struct NearbyStationsSection: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .contextMenu {
-            Button {
-                timetableTarget = NearbyTimetableTarget(hit: hit, directionId: currentDirectionId(timetables, choiceKey: choiceKey))
-            } label: {
-                Label("Nearby.OpenTimetable", systemImage: "calendar")
-            }
-            Button {
-                serviceStatusPresenter?.present(
-                    lineId: hit.line.id,
-                    delayInfo: viewModel.delayCheckInfo(for: hit.line.id)
-                )
-            } label: {
-                Label("StationTimetable.ServiceStatus", systemImage: "info.circle")
-            }
-        }
     }
 
     /// Loop lines share one destination, so the direction tells them apart.
@@ -336,7 +349,7 @@ struct NearbyStationsSection: View {
             .components(separatedBy: " (")[0]
     }
 
-    // MARK: - Direction flip
+    // MARK: - Direction choice
 
     private func currentTimetable(_ timetables: [StationTimetableData], choiceKey: String) -> StationTimetableData? {
         guard !timetables.isEmpty else { return nil }
@@ -351,15 +364,16 @@ struct NearbyStationsSection: View {
         currentTimetable(timetables, choiceKey: choiceKey)?.railDirection
     }
 
-    private func flip(choiceKey: String, timetables: [StationTimetableData]) {
-        guard timetables.count > 1 else { return }
-        let currentId = currentDirectionId(timetables, choiceKey: choiceKey)
-        let index = timetables.firstIndex { $0.railDirection == currentId } ?? 0
-        let nextId = timetables[(index + 1) % timetables.count].railDirection
-        withAnimation(.smooth(duration: 0.28)) {
-            directionChoices[choiceKey] = nextId
-        }
-        UserDefaults.standard.set(directionChoices, forKey: Self.directionChoicesKey)
+    private func directionBinding(choiceKey: String, timetables: [StationTimetableData]) -> Binding<String> {
+        Binding(
+            get: { currentDirectionId(timetables, choiceKey: choiceKey) ?? "" },
+            set: { newValue in
+                withAnimation(.smooth(duration: 0.28)) {
+                    directionChoices[choiceKey] = newValue
+                }
+                UserDefaults.standard.set(directionChoices, forKey: Self.directionChoicesKey)
+            }
+        )
     }
 
     private func nextDeparture(in timetable: StationTimetableData, at date: Date) -> StationDeparture? {

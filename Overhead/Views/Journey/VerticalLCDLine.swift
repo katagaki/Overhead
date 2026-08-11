@@ -109,9 +109,8 @@ struct VerticalLCDLine: View {
                     }
                 }
                 .overlay(alignment: .topLeading) {
-                    if target != nil {
-                        // Centered in the left gutter, vertically midway between this dot and the next.
-                        Image(systemName: "figure.walk")
+                    if let target {
+                        Image(systemName: target.station.id == station.id ? "hourglass" : "figure.walk")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.secondary)
                             .opacity(isPast ? 0.5 : 1.0)

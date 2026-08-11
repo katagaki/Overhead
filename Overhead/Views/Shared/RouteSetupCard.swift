@@ -210,6 +210,8 @@ struct RouteSetupCard: View {
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundColor(.primary)
                         .lineLimit(1)
+                        .id(selection.id)
+                        .transition(.scale(0.9, anchor: .leading).combined(with: .blurReplace))
                 } else {
                     Text("Setup.SelectStation")
                         .font(.system(size: 16))
