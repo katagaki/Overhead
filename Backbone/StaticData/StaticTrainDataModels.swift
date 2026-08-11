@@ -13,7 +13,73 @@ public enum ScheduleCalendar: String, Codable, CaseIterable, Sendable {
         cal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
         let weekday = cal.component(.weekday, from: date)
         // 1 = Sunday, 7 = Saturday
-        return (weekday == 1 || weekday == 7) ? .saturdayHoliday : .weekday
+        if weekday == 1 || weekday == 7 { return .saturdayHoliday }
+        let c = cal.dateComponents([.year, .month, .day], from: date)
+        guard let year = c.year, let month = c.month, let day = c.day else { return .weekday }
+        return runsOnHolidaySchedule(year: year, month: month, day: day)
+            ? .saturdayHoliday : .weekday
+    }
+
+    // MARK: Japanese National Holidays
+
+    /// Whether operators run the Saturday/holiday timetable on this weekday:
+    /// national holidays (国民の祝日) and the New Year period (Dec 30 – Jan 3),
+    /// when Tokyo-area operators switch to the holiday schedule.
+    static func runsOnHolidaySchedule(year: Int, month: Int, day: Int) -> Bool {
+        if (month == 12 && day >= 30) || (month == 1 && day <= 3) { return true }
+        let leap = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0
+        let cum = leap
+            ? [0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335]
+            : [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
+        return nationalHolidays(year: year, monthStarts: cum)
+            .contains(cum[month - 1] + day)
+    }
+
+    /// National holidays for `year` as day-of-year numbers, under the rules in
+    /// force since 2007. Equinox day approximations are valid through 2099.
+    private static func nationalHolidays(year: Int, monthStarts cum: [Int]) -> Set<Int> {
+        func doy(_ month: Int, _ day: Int) -> Int { cum[month - 1] + day }
+        // Sakamoto's algorithm for Jan 1; 0 = Sunday
+        let y = year - 1
+        let jan1 = (y + y / 4 - y / 100 + y / 400 + 1) % 7
+        func weekday(_ dayOfYear: Int) -> Int { (jan1 + dayOfYear - 1) % 7 }
+        func nthMonday(_ n: Int, of month: Int) -> Int {
+            let first = doy(month, 1)
+            return first + (8 - weekday(first)) % 7 + 7 * (n - 1)
+        }
+        let quads = (year - 1980) / 4
+        let vernal = Int(20.8431 + 0.242194 * Double(year - 1980)) - quads
+        let autumnal = Int(23.2488 + 0.242194 * Double(year - 1980)) - quads
+
+        var days: Set<Int> = [
+            doy(1, 1),                  // 元日
+            nthMonday(2, of: 1),        // 成人の日
+            doy(2, 11),                 // 建国記念の日
+            doy(2, 23),                 // 天皇誕生日
+            doy(3, vernal),             // 春分の日
+            doy(4, 29),                 // 昭和の日
+            doy(5, 3),                  // 憲法記念日
+            doy(5, 4),                  // みどりの日
+            doy(5, 5),                  // こどもの日
+            nthMonday(3, of: 7),        // 海の日
+            doy(8, 11),                 // 山の日
+            nthMonday(3, of: 9),        // 敬老の日
+            doy(9, autumnal),           // 秋分の日
+            nthMonday(2, of: 10),       // スポーツの日
+            doy(11, 3),                 // 文化の日
+            doy(11, 23),                // 勤労感謝の日
+        ]
+        // 振替休日: a holiday on a Sunday moves to the next non-holiday day
+        for d in days.sorted() where weekday(d) == 0 {
+            var sub = d + 1
+            while days.contains(sub) { sub += 1 }
+            days.insert(sub)
+        }
+        // 国民の休日: a non-Sunday weekday between two holidays is itself a holiday
+        for d in days.sorted() where days.contains(d + 2) && !days.contains(d + 1) && weekday(d + 1) != 0 {
+            days.insert(d + 1)
+        }
+        return days
     }
 }
 

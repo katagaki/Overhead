@@ -155,8 +155,34 @@
                 }
             },
             {
-                "expressSaturdayHolidayRuns": [],
-                "expressWeekdayRuns": [],
+                "expressSaturdayHolidayRuns": [
+                    {
+                        "continuesBeyond": false,
+                        "departure": "24:01",
+                        "startsHere": false,
+                        "terminusStationId": "Station:TWR.Rinkai.TokyoTeleport"
+                    },
+                    {
+                        "continuesBeyond": false,
+                        "departure": "24:18",
+                        "startsHere": false,
+                        "terminusStationId": "Station:TWR.Rinkai.TokyoTeleport"
+                    }
+                ],
+                "expressWeekdayRuns": [
+                    {
+                        "continuesBeyond": false,
+                        "departure": "24:01",
+                        "startsHere": false,
+                        "terminusStationId": "Station:TWR.Rinkai.TokyoTeleport"
+                    },
+                    {
+                        "continuesBeyond": false,
+                        "departure": "24:18",
+                        "startsHere": false,
+                        "terminusStationId": "Station:TWR.Rinkai.TokyoTeleport"
+                    }
+                ],
                 "id": "static.RailDirection:TWR.Rinkai.ShinKiba",
                 "intermediateOrigins": [
                     {
@@ -239,14 +265,10 @@
                         {
                             "from": "23:00",
                             "headwayMinutes": 15
-                        },
-                        {
-                            "from": "24:00",
-                            "headwayMinutes": 17
                         }
                     ],
                     "firstDeparture": "05:39",
-                    "lastDeparture": "24:18",
+                    "lastDeparture": "23:47",
                     "trainType": "Local"
                 },
                 "weekday": {
@@ -310,14 +332,10 @@
                         {
                             "from": "23:00",
                             "headwayMinutes": 15
-                        },
-                        {
-                            "from": "24:00",
-                            "headwayMinutes": 17
                         }
                     ],
                     "firstDeparture": "05:39",
-                    "lastDeparture": "24:18",
+                    "lastDeparture": "23:47",
                     "trainType": "Local"
                 }
             }

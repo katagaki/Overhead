@@ -50623,6 +50623,13 @@
                         },
                         {
                             "continuesBeyond": false,
+                            "departure": "14:55",
+                            "startsHere": true,
+                            "stopIndices": [0, 1, 2, 3, 4, 7, 8, 9, 12],
+                            "trainType": "SpecialRapid"
+                        },
+                        {
+                            "continuesBeyond": false,
                             "departure": "15:17",
                             "startsHere": true
                         },
@@ -50630,6 +50637,13 @@
                             "continuesBeyond": false,
                             "departure": "15:35",
                             "startsHere": true
+                        },
+                        {
+                            "continuesBeyond": false,
+                            "departure": "15:55",
+                            "startsHere": true,
+                            "stopIndices": [0, 1, 2, 3, 4, 7, 8, 9, 12],
+                            "trainType": "SpecialRapid"
                         },
                         {
                             "continuesBeyond": false,
@@ -50876,6 +50890,13 @@
                         },
                         {
                             "continuesBeyond": false,
+                            "departure": "14:55",
+                            "startsHere": true,
+                            "stopIndices": [0, 1, 2, 3, 4, 7, 8, 9, 12],
+                            "trainType": "SpecialRapid"
+                        },
+                        {
+                            "continuesBeyond": false,
                             "departure": "15:17",
                             "startsHere": true
                         },
@@ -50883,6 +50904,13 @@
                             "continuesBeyond": false,
                             "departure": "15:35",
                             "startsHere": true
+                        },
+                        {
+                            "continuesBeyond": false,
+                            "departure": "15:55",
+                            "startsHere": true,
+                            "stopIndices": [0, 1, 2, 3, 4, 7, 8, 9, 12],
+                            "trainType": "SpecialRapid"
                         },
                         {
                             "continuesBeyond": false,
@@ -51483,6 +51511,13 @@
                         },
                         {
                             "continuesBeyond": false,
+                            "departure": "09:24",
+                            "startsHere": false,
+                            "stopIndices": [0, 1, 2, 3, 4, 7, 8, 9, 12],
+                            "trainType": "SpecialRapid"
+                        },
+                        {
+                            "continuesBeyond": false,
                             "departure": "09:31",
                             "startsHere": true,
                             "terminusStationId": "Station:JR-East.JobanRapid.Ueno"
@@ -51514,6 +51549,13 @@
                             "departure": "10:16",
                             "startsHere": false,
                             "terminusStationId": "Station:JR-East.JobanRapid.Ueno"
+                        },
+                        {
+                            "continuesBeyond": false,
+                            "departure": "10:24",
+                            "startsHere": false,
+                            "stopIndices": [0, 1, 2, 3, 4, 7, 8, 9, 12],
+                            "trainType": "SpecialRapid"
                         },
                         {
                             "continuesBeyond": false,
@@ -52136,6 +52178,13 @@
                         },
                         {
                             "continuesBeyond": false,
+                            "departure": "09:24",
+                            "startsHere": false,
+                            "stopIndices": [0, 1, 2, 3, 4, 7, 8, 9, 12],
+                            "trainType": "SpecialRapid"
+                        },
+                        {
+                            "continuesBeyond": false,
                             "departure": "09:33",
                             "startsHere": false
                         },
@@ -52161,6 +52210,13 @@
                             "departure": "10:16",
                             "startsHere": false,
                             "terminusStationId": "Station:JR-East.JobanRapid.Ueno"
+                        },
+                        {
+                            "continuesBeyond": false,
+                            "departure": "10:24",
+                            "startsHere": false,
+                            "stopIndices": [0, 1, 2, 3, 4, 7, 8, 9, 12],
+                            "trainType": "SpecialRapid"
                         },
                         {
                             "continuesBeyond": false,
