@@ -56,6 +56,7 @@ nonisolated enum BoardSnapshotWriter {
         choices: [String: String]
     ) -> BoardStation? {
         var boardLines: [BoardLine] = []
+        var displayName = name
         for line in lines {
             guard let station = line.stations.first(where: { $0.name == name }),
                   let staticLine = StaticTrainData.line(withId: line.id) else { continue }
@@ -63,34 +64,36 @@ nonisolated enum BoardSnapshotWriter {
                 for: staticLine, stationId: station.id, calendar: calendar
             )
             guard !timetables.isEmpty else { continue }
+            displayName = station.localizedName
 
             let chosenId = choices["\(name)|\(line.id)"]
             let directions = timetables.enumerated().map { index, timetable in
                 BoardDirection(
                     directionId: timetable.railDirection,
-                    name: timetable.railDirectionName,
+                    name: timetable.localizedDirectionName,
                     isPrimary: chosenId.map { $0 == timetable.railDirection } ?? (index == 0),
                     departures: timetable.departures.map { boardDeparture($0, line: line) }
                 )
             }
             boardLines.append(BoardLine(
                 lineId: line.id,
-                name: line.name,
+                name: line.localizedName,
                 colorHex: line.colorHex,
                 stationCode: station.stationCode,
                 directions: directions
             ))
         }
         guard !boardLines.isEmpty else { return nil }
-        return BoardStation(name: name, lines: boardLines)
+        return BoardStation(name: name, displayName: displayName, lines: boardLines)
     }
 
     private static func boardDeparture(_ departure: StationDeparture, line: TrainLine) -> BoardDeparture {
         BoardDeparture(
             time: departure.departureTime,
-            typeName: departure.trainType.displayNameJa,
+            typeName: departure.trainType.localizedDisplayName,
             tier: tier(of: departure.trainType),
-            destName: departure.destinationName,
+            destName: departure.localizedDestination,
+            // Looked up by the Japanese name; only that one matches the station list.
             destCode: destinationCode(named: departure.destinationName, line: line),
             isOrigin: departure.isFirst
         )
@@ -126,7 +129,7 @@ nonisolated enum BoardSnapshotWriter {
         return BoardPlace(
             id: place.id,
             title: title,
-            destName: dest.name,
+            destName: dest.localizedName,
             destCode: dest.stationCode,
             colorHex: StaticTrainData.line(containingStationId: dest.id)?.colorHex ?? line.colorHex
         )

@@ -38,10 +38,26 @@ nonisolated struct BoardLine: Codable {
 }
 
 nonisolated struct BoardStation: Codable, Identifiable {
+    /// Japanese; the identity the app, the widget configuration and the stored
+    /// direction choices all key off, so it must not follow the display language.
     let name: String
+    let displayName: String
     let lines: [BoardLine]
 
     var id: String { name }
+
+    init(name: String, displayName: String? = nil, lines: [BoardLine]) {
+        self.name = name
+        self.displayName = displayName ?? name
+        self.lines = lines
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        name = try container.decode(String.self, forKey: .name)
+        displayName = try container.decodeIfPresent(String.self, forKey: .displayName) ?? name
+        lines = try container.decode([BoardLine].self, forKey: .lines)
+    }
 }
 
 /// One favorite, pre-resolved for the control widget.

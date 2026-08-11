@@ -77,7 +77,7 @@ struct DepartFavoriteControl: ControlWidget {
         ) { configuration in
             ControlWidgetButton(action: DepartFavoriteIntent(place: configuration.place)) {
                 Label(
-                    configuration.place?.title ?? "お気に入りへ出発",
+                    configuration.place?.title ?? String(localized: "お気に入りへ出発"),
                     systemImage: "tram.fill"
                 )
             }

@@ -38,20 +38,30 @@ struct BoardStationEntity: AppEntity {
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "駅")
     static let defaultQuery = BoardStationQuery()
 
-    let id: String  // station name
+    let id: String  // Japanese station name; stable across display languages
+    let title: String
 
     var displayRepresentation: DisplayRepresentation {
-        DisplayRepresentation(title: "\(id)")
+        DisplayRepresentation(title: "\(title)")
+    }
+
+    static func all() -> [BoardStationEntity] {
+        (BoardSnapshotStore.load()?.stations ?? []).map {
+            BoardStationEntity(id: $0.name, title: $0.displayName)
+        }
     }
 }
 
 struct BoardStationQuery: EntityQuery {
     func entities(for identifiers: [String]) async throws -> [BoardStationEntity] {
-        identifiers.map { BoardStationEntity(id: $0) }
+        let all = BoardStationEntity.all()
+        return identifiers.map { id in
+            all.first { $0.id == id } ?? BoardStationEntity(id: id, title: id)
+        }
     }
 
     func suggestedEntities() async throws -> [BoardStationEntity] {
-        (BoardSnapshotStore.load()?.stations ?? []).map { BoardStationEntity(id: $0.name) }
+        BoardStationEntity.all()
     }
 
     func defaultResult() async -> BoardStationEntity? {
@@ -173,7 +183,7 @@ struct BoardDirectionQuery: EntityQuery {
 
 struct StationBoardIntent: WidgetConfigurationIntent {
     static let title: LocalizedStringResource = "駅の発車標"
-    static let description = IntentDescription("選んだ駅の発車案内を表示します。")
+    static let description = IntentDescription("お気に入りに追加した駅の発車案内を表示します。")
 
     @Parameter(title: "駅")
     var station: BoardStationEntity?
@@ -181,7 +191,7 @@ struct StationBoardIntent: WidgetConfigurationIntent {
 
 struct LineBoardIntent: WidgetConfigurationIntent {
     static let title: LocalizedStringResource = "一路線の発車案内"
-    static let description = IntentDescription("選んだ駅・路線・方面の発車案内を表示します。")
+    static let description = IntentDescription("お気に入りに追加した駅から、選んだ路線・方面の発車案内を表示します。")
 
     static var parameterSummary: some ParameterSummary {
         Summary {
@@ -222,20 +232,28 @@ struct BoardEntry: TimelineEntry {
     let stationName: String?
     let lineId: String?
     let directionId: String?
+    /// Kept separately: a stale snapshot is dropped before the entry is built.
+    let emptyReason: BoardEmptyReason
 
     init(
         date: Date,
         snapshot: StationBoardSnapshot?,
         stationName: String? = nil,
         lineId: String? = nil,
-        directionId: String? = nil
+        directionId: String? = nil,
+        emptyReason: BoardEmptyReason = .stale
     ) {
         self.date = date
         self.snapshot = snapshot
         self.stationName = stationName
         self.lineId = lineId
         self.directionId = directionId
+        self.emptyReason = emptyReason
     }
+}
+
+nonisolated func boardEmptyReason(for snapshot: StationBoardSnapshot?) -> BoardEmptyReason {
+    (snapshot?.stations.isEmpty ?? true) ? .noFavorites : .stale
 }
 
 nonisolated func boardTimeline(
@@ -245,6 +263,7 @@ nonisolated func boardTimeline(
     directionId: String? = nil
 ) -> Timeline<BoardEntry> {
     let snapshot = (base?.railDay == BoardSnapshotStore.railDay()) ? base : nil
+    let reason = boardEmptyReason(for: base)
     let now = Date()
     let start = Date(timeIntervalSince1970: (now.timeIntervalSince1970 / 60).rounded(.down) * 60)
     let entries = (0..<60).map { offset in
@@ -253,7 +272,8 @@ nonisolated func boardTimeline(
             snapshot: snapshot,
             stationName: stationName,
             lineId: lineId,
-            directionId: directionId
+            directionId: directionId,
+            emptyReason: reason
         )
     }
     return Timeline(entries: entries, policy: .atEnd)
@@ -268,7 +288,8 @@ struct StationBoardProvider: AppIntentTimelineProvider {
         let stored = BoardSnapshotStore.load() ?? (context.isPreview ? .sample : nil)
         return BoardEntry(
             date: Date(), snapshot: stored,
-            stationName: configuration.station?.id
+            stationName: configuration.station?.id,
+            emptyReason: boardEmptyReason(for: stored)
         )
     }
 
@@ -292,7 +313,8 @@ struct LineBoardProvider: AppIntentTimelineProvider {
             date: Date(), snapshot: stored,
             stationName: selection.station,
             lineId: selection.lineId,
-            directionId: selection.directionId
+            directionId: selection.directionId,
+            emptyReason: boardEmptyReason(for: stored)
         )
     }
 
@@ -338,21 +360,27 @@ nonisolated func mergedRows(
 
 nonisolated enum BoardCol {
     static let time: CGFloat = 41
-    static let type: CGFloat = 42
+    /// English train types ("Commuter Ltd. Exp.") need far more room than four kanji.
+    static let type: CGFloat = isEnglish ? 70 : 42
+    static let origin: CGFloat = isEnglish ? 66 : 56
     static let badge: CGFloat = 20
+
+    static let isEnglish = Locale.current.language.languageCode?.identifier == "en"
 }
 
 struct BoardColumnHeader: View {
+    private let font: Font = .system(size: 9, weight: .medium)
+
     var body: some View {
         HStack(spacing: 8) {
-            Text("時刻").frame(width: BoardCol.time, alignment: .trailing)
-            Text("種別").frame(width: BoardCol.type, alignment: .leading)
+            SquashedText(text: String(localized: "時刻"), font: font, color: LED.label, alignment: .trailing)
+                .frame(width: BoardCol.time)
+            SquashedText(text: String(localized: "種別"), font: font, color: LED.label)
+                .frame(width: BoardCol.type)
             Color.clear.frame(width: BoardCol.badge, height: 1)
-            Text("行先")
+            SquashedText(text: String(localized: "行先"), font: font, color: LED.label)
             Spacer(minLength: 4)
         }
-        .font(.system(size: 9, weight: .medium))
-        .foregroundStyle(LED.label)
         .padding(.vertical, 3)
     }
 }
@@ -370,22 +398,27 @@ struct BoardRowView: View {
                 .lineLimit(1)
                 .foregroundStyle(LED.amber)
                 .frame(width: BoardCol.time, alignment: .trailing)
-            Text(item.departure.typeName)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(typeColor)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .frame(width: BoardCol.type, alignment: .leading)
+            SquashedText(
+                text: item.departure.typeName,
+                font: .system(size: 13, weight: .semibold),
+                color: typeColor
+            )
+            .frame(width: BoardCol.type)
             destinationBadge
-            Text(item.departure.destName)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(LED.white)
-                .lineLimit(1)
-            Spacer(minLength: 4)
+            // Greedy: takes whatever the fixed columns leave and squashes past that.
+            SquashedText(
+                text: item.departure.destName,
+                font: .system(size: 13, weight: .medium),
+                color: LED.white
+            )
             if item.departure.isOrigin {
-                Text("当駅始発")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(LED.green)
+                SquashedText(
+                    text: String(localized: "当駅始発"),
+                    font: .system(size: 13, weight: .medium),
+                    color: LED.green,
+                    alignment: .trailing,
+                    maxWidth: BoardCol.origin
+                )
             }
         }
         .padding(.vertical, 3)
@@ -411,15 +444,52 @@ struct BoardRule: View {
     }
 }
 
+/// Why the board has nothing to show: no favorites saved yet, or a stale snapshot.
+nonisolated enum BoardEmptyReason {
+    case noFavorites
+    case stale
+    case serviceEnded
+
+    var symbol: String {
+        switch self {
+        case .noFavorites: return "star"
+        case .stale: return "tram.fill"
+        case .serviceEnded: return "moon.stars.fill"
+        }
+    }
+
+    var message: LocalizedStringResource {
+        switch self {
+        case .noFavorites: return "アプリを開いてお気に入りを追加"
+        case .stale: return "アプリを開いて更新"
+        case .serviceEnded: return "本日の運行は終了しました"
+        }
+    }
+
+    /// Accessory families have one short line to work with.
+    var shortMessage: LocalizedStringResource {
+        switch self {
+        case .noFavorites: return "お気に入りを追加"
+        case .stale: return "発車情報なし"
+        case .serviceEnded: return "本日の運行は終了"
+        }
+    }
+}
+
 struct BoardEmptyView: View {
+    let reason: BoardEmptyReason
+
     var body: some View {
         VStack(spacing: 4) {
-            Image(systemName: "tram.fill")
+            Image(systemName: reason.symbol)
                 .font(.system(size: 18))
                 .foregroundStyle(LED.label)
-            Text("アプリを開いて更新")
-                .font(.system(size: 11))
-                .foregroundStyle(LED.label)
+            SquashedText(
+                text: String(localized: reason.message),
+                font: .system(size: 11),
+                color: LED.label,
+                alignment: .center
+            )
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -444,7 +514,7 @@ struct StationBoardView: View {
             if let station {
                 board(for: station)
             } else {
-                BoardEmptyView()
+                BoardEmptyView(reason: entry.emptyReason)
             }
         }
         .padding(13)
@@ -468,22 +538,25 @@ struct StationBoardView: View {
             if large {
                 VStack(spacing: 3) {
                     badges(for: shown, dimension: 24)
-                    Text(station.name)
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(LED.white)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
+                    SquashedText(
+                        text: station.displayName,
+                        font: .system(size: 16, weight: .semibold),
+                        color: LED.white,
+                        alignment: .center
+                    )
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.bottom, 4)
             } else {
-                        HStack(spacing: 6) {
+                HStack(spacing: 6) {
                     badges(for: shown, dimension: 18)
-                    Text(station.name)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(LED.white)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
+                    SquashedText(
+                        text: station.displayName,
+                        font: .system(size: 14, weight: .semibold),
+                        color: LED.white,
+                        alignment: .center,
+                        maxWidth: 190
+                    )
                 }
                 .frame(maxWidth: .infinity)
             }
@@ -520,10 +593,12 @@ struct StationBoardView: View {
     @ViewBuilder
     private func rows(_ items: [BoardRowItem]) -> some View {
         if items.isEmpty {
-            Text("本日の運行は終了しました")
-                .font(.system(size: 11))
-                .foregroundStyle(LED.label)
-                .padding(.vertical, 8)
+            SquashedText(
+                text: String(localized: "本日の運行は終了しました"),
+                font: .system(size: 11),
+                color: LED.label
+            )
+            .padding(.vertical, 8)
         } else {
             ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                 if index > 0 { BoardRule() }
@@ -559,6 +634,11 @@ struct LineBoardView: View {
         guard let direction else { return nil }
 
         return (station, line, direction)
+    }
+
+    /// A configured target with nothing left today means service ended, not a stale snapshot.
+    private var accessoryReason: BoardEmptyReason {
+        target == nil ? entry.emptyReason : .serviceEnded
     }
 
     private var upcoming: [BoardDeparture] {
@@ -601,18 +681,20 @@ struct LineBoardView: View {
                             color: Color(hex: target.line.colorHex),
                             dimension: 24
                         )
-                        Text(target.station.name)
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundStyle(LED.white)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
-                            Text(deps.allSatisfy(\.isOrigin)
-                             ? "\(target.direction.name) · 当駅始発"
-                             : target.direction.name)
-                            .font(.system(size: 10))
-                            .foregroundStyle(LED.label)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
+                        SquashedText(
+                            text: target.station.displayName,
+                            font: .system(size: 15, weight: .semibold),
+                            color: LED.white,
+                            alignment: .center
+                        )
+                        SquashedText(
+                            text: deps.allSatisfy(\.isOrigin)
+                                ? String(format: String(localized: "%@ · 当駅始発"), target.direction.name)
+                                : target.direction.name,
+                            font: .system(size: 10),
+                            color: LED.label,
+                            alignment: .center
+                        )
                     }
                     .frame(maxWidth: .infinity)
 
@@ -627,8 +709,10 @@ struct LineBoardView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+            } else if target != nil {
+                BoardEmptyView(reason: .serviceEnded)
             } else {
-                BoardEmptyView()
+                BoardEmptyView(reason: entry.emptyReason)
             }
         }
     }
@@ -641,12 +725,16 @@ struct LineBoardView: View {
                 .lineLimit(1)
                 .foregroundStyle(LED.amber)
                 .frame(width: 33, alignment: .trailing)
-            Text(dep.typeName)
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(dep.tier.color)
-                .lineLimit(1)
-                .minimumScaleFactor(0.75)
-                .frame(width: 31, alignment: .leading)
+            // English type names ("Commuter Ltd. Exp.") leave the destination
+            // nothing to live on at this size, so the column is Japanese-only.
+            if !BoardCol.isEnglish {
+                SquashedText(
+                    text: dep.typeName,
+                    font: .system(size: 11, weight: .semibold),
+                    color: dep.tier.color
+                )
+                .frame(width: 31)
+            }
             if !dep.destCode.isEmpty {
                 LCDStationNumberBadge(
                     code: dep.destCode,
@@ -673,7 +761,7 @@ struct LineBoardView: View {
                     systemImage: "tram.fill"
                 )
             } else {
-                Label("発車情報なし", systemImage: "tram.fill")
+                Label(accessoryReason.shortMessage, systemImage: accessoryReason.symbol)
             }
         }
     }
@@ -703,7 +791,7 @@ struct LineBoardView: View {
                     }
 
                     HStack(alignment: .firstTextBaseline, spacing: 5) {
-                        countdownLine(left, unit: "分", size: 24, unitSize: 12)
+                        countdownLine(left, unit: String(localized: "分"), size: 24, unitSize: 12)
                             .widgetAccentable()
                         Text("\(first.time)発")
                             .font(.system(size: 11, weight: .medium))
@@ -713,7 +801,7 @@ struct LineBoardView: View {
                     }
                 }
             } else {
-                Label("発車情報なし", systemImage: "tram.fill")
+                Label(accessoryReason.shortMessage, systemImage: accessoryReason.symbol)
                     .font(.system(size: 12))
             }
         }
@@ -734,7 +822,7 @@ struct LineBoardView: View {
                 }
                 .gaugeStyle(.accessoryCircular)
             } else {
-                Image(systemName: "tram.fill")
+                Image(systemName: accessoryReason.symbol)
             }
         }
     }
@@ -772,7 +860,7 @@ struct StationBoardWidget: Widget {
             StationBoardView(entry: entry)
         }
         .configurationDisplayName("駅の発車標")
-        .description("お気に入りの駅の発車案内を表示します。")
+        .description("お気に入りに追加した駅の発車案内を表示します。")
         .supportedFamilies([.systemMedium, .systemLarge])
         .contentMarginsDisabled()
     }
@@ -788,7 +876,7 @@ struct LineBoardWidget: Widget {
             LineBoardView(entry: entry)
         }
         .configurationDisplayName("一路線の発車案内")
-        .description("選んだ駅・路線・方面の次の発車を表示します。")
+        .description("お気に入りに追加した駅から、選んだ路線・方面の次の発車を表示します。")
         .supportedFamilies([.systemSmall, .accessoryInline, .accessoryRectangular, .accessoryCircular])
         .contentMarginsDisabled()
     }
@@ -871,27 +959,53 @@ struct SquashedText: View {
     let text: String
     let font: Font
     let color: Color
+    var alignment: Alignment = .leading
+    /// Set to claim only the width the text needs, squashing past this cap;
+    /// left nil the view fills whatever its container offers.
+    var maxWidth: CGFloat?
     @State private var natural: CGSize = .zero
 
-    var body: some View {
-        GeometryReader { geo in
-            let scale = natural.width > geo.size.width && natural.width > 0
-                ? geo.size.width / natural.width : 1
-            label
-                .fixedSize()
-                .scaleEffect(x: scale, y: 1, anchor: .leading)
-                .frame(width: geo.size.width, height: geo.size.height, alignment: .leading)
+    private var anchor: UnitPoint {
+        switch alignment {
+        case .trailing: return .trailing
+        case .center: return .center
+        default: return .leading
         }
-        .frame(height: natural.height == 0 ? nil : natural.height)
-        .background(
+    }
+
+    var body: some View {
+        core
+            .frame(height: natural.height == 0 ? nil : natural.height)
+            .background(
+                label
+                    .fixedSize()
+                    .hidden()
+                    .background(GeometryReader { proxy in
+                        Color.clear.preference(key: SquashSizeKey.self, value: proxy.size)
+                    })
+            )
+            .onPreferenceChange(SquashSizeKey.self) { natural = $0 }
+    }
+
+    @ViewBuilder
+    private var core: some View {
+        if let maxWidth {
+            let scale = natural.width > maxWidth && natural.width > 0 ? maxWidth / natural.width : 1
+            let footprint = natural.width == 0 ? maxWidth : min(natural.width, maxWidth)
             label
                 .fixedSize()
-                .hidden()
-                .background(GeometryReader { proxy in
-                    Color.clear.preference(key: SquashSizeKey.self, value: proxy.size)
-                })
-        )
-        .onPreferenceChange(SquashSizeKey.self) { natural = $0 }
+                .scaleEffect(x: scale, y: 1, anchor: anchor)
+                .frame(width: footprint, alignment: alignment)
+        } else {
+            GeometryReader { geo in
+                let scale = natural.width > geo.size.width && natural.width > 0
+                    ? geo.size.width / natural.width : 1
+                label
+                    .fixedSize()
+                    .scaleEffect(x: scale, y: 1, anchor: anchor)
+                    .frame(width: geo.size.width, height: geo.size.height, alignment: alignment)
+            }
+        }
     }
 
     private var label: some View {
