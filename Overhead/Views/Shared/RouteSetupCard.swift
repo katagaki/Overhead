@@ -22,6 +22,7 @@ struct RouteSetupCard: View {
     @AppStorage(JourneyNotificationManager.enabledKey) private var notificationsEnabled = true
     @AppStorage(JourneyNotificationManager.leadMinutesKey)
     private var notificationLeadMinutes = JourneyNotificationManager.defaultLeadMinutes
+    @AppStorage(NotificationSound.storageKey) private var notificationSound = NotificationSound.system
     @State private var pickerTarget: PickerTarget?
     @State private var showAvoidLinesSheet = false
 
@@ -324,6 +325,54 @@ struct RouteSetupCard: View {
         )
     }
 
+    /// Previews on selection. Set through a binding rather than `.onChange` so it
+    /// only fires on a deliberate pick, not on any write to the preference.
+    private var notificationSoundBinding: Binding<NotificationSound> {
+        Binding(
+            get: { notificationSound },
+            set: { sound in
+                notificationSound = sound
+                NotificationSoundPreview.shared.play(sound)
+            }
+        )
+    }
+
+    /// Nested menu so the sound sits under the lead time without crowding the
+    /// customization row with a second item.
+    private var notificationSoundMenu: some View {
+        Menu {
+            // Two pickers sharing one binding, rather than one picker with
+            // Sections: a menu flattens Sections inside a Picker and draws no
+            // rule, but it does honour a Divider between sibling elements.
+            // Making no sound is a different kind of choice from picking which
+            // sound, and the rule is what says so.
+            Picker("Settings.Notifications.Sound", selection: notificationSoundBinding) {
+                Text("Settings.Notifications.Sound.Silent")
+                    .tag(NotificationSound.silent)
+            }
+            .pickerStyle(.inline)
+
+            Divider()
+
+            Picker("Settings.Notifications.Sound", selection: notificationSoundBinding) {
+                Text("Settings.Notifications.Sound.System")
+                    .tag(NotificationSound.system)
+                ForEach([NotificationSound.Category.melody, .arrangement, .chime]) { category in
+                    Section(category.label) {
+                        ForEach(NotificationSound.cases(in: category)) { sound in
+                            Text(verbatim: sound.title).tag(sound)
+                        }
+                    }
+                }
+            }
+            .pickerStyle(.inline)
+        } label: {
+            Label("Settings.Notifications.Sound", systemImage: "speaker.wave.2")
+        }
+        // Nothing to choose while alerts are off.
+        .disabled(!notificationsEnabled)
+    }
+
     private var notificationsItem: some View {
         Menu {
             Picker("Settings.Section.Notifications", selection: notificationLeadBinding) {
@@ -332,6 +381,7 @@ struct RouteSetupCard: View {
                     Text("Settings.Notifications.LeadTime \(minutes)").tag(minutes)
                 }
             }
+            notificationSoundMenu
         } label: {
             CustomizationItem(
                 icon: notificationsEnabled ? "bell.badge" : "bell.slash",

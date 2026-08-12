@@ -32,6 +32,19 @@ final class JourneyNotificationManager: NSObject, UNUserNotificationCenterDelega
         return TimeInterval((stored == 0 ? Self.defaultLeadMinutes : stored) * 60)
     }
 
+    /// Read at schedule time rather than cached, so changing the sound applies to
+    /// alerts that have not fired yet. `nil` fires the alert silently; a missing
+    /// file falls back to the system sound rather than going quiet by accident.
+    private static var alertSound: UNNotificationSound? {
+        let choice = NotificationSound.current
+        guard !choice.isSilent else { return nil }
+        guard let fileName = choice.fileName,
+              Bundle.main.url(forResource: fileName, withExtension: nil) != nil else {
+            return .default
+        }
+        return UNNotificationSound(named: UNNotificationSoundName(fileName))
+    }
+
     // MARK: - Scheduling
 
     /// Replaces any pending alerts with ones for this journey.
@@ -127,7 +140,7 @@ final class JourneyNotificationManager: NSObject, UNUserNotificationCenterDelega
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
-        content.sound = .default
+        content.sound = Self.alertSound
 
         return [UNNotificationRequest(
             identifier: Self.identifierPrefix + id,
@@ -156,6 +169,8 @@ final class JourneyNotificationManager: NSObject, UNUserNotificationCenterDelega
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification
     ) async -> UNNotificationPresentationOptions {
-        [.banner, .sound]
+        // Without this the foreground banner plays the default sound even when
+        // the scheduled alert was built silent.
+        NotificationSound.current.isSilent ? [.banner] : [.banner, .sound]
     }
 }
