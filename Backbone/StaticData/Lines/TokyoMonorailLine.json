@@ -2,7 +2,7 @@
     {
         "colorHex": "#003685",
         "delayInfo": {
-            "checkMethodEn": "Check the 東京モノレール service information page or X (@TokyoMonorail). Delays and suspensions are posted as they occur.",
+            "checkMethodEn": "Check the Tokyo Monorail service information page or X (@TokyoMonorail). Delays and suspensions are posted as they occur.",
             "checkMethodJa": "東京モノレール「運行情報」ページまたはX（@TokyoMonorail）で確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
             "statusPageURL": "https://traininfo.jreast.co.jp/train_info/line.aspx?gid=1&lineid=monorail",
             "statusPageURLEn": "https://traininfo.jreast.co.jp/train_info/e/kanto.aspx",

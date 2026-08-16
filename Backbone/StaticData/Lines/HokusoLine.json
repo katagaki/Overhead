@@ -2,11 +2,11 @@
     {
         "colorHex": "#00558F",
         "delayInfo": {
-            "checkMethodEn": "Check the 北総鉄道 service information page. Delays and suspensions are posted as they occur.",
-            "checkMethodJa": "北総鉄道「運行情報」ページで確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.hokuso-railway.co.jp/",
-            "statusPageURLEn": "https://www.hokuso-railway.co.jp/",
-            "xAccount": null
+            "checkMethodEn": "Check the Hokuso Railway service information page or X (@hokusorailway). Delays and suspensions are posted as they occur.",
+            "checkMethodJa": "北総鉄道「運行情報」ページまたはX（@hokusorailway）で確認できます。おおむね15分以上の遅れが発生・見込まれる場合に掲載されます。",
+            "statusPageURL": "https://www.hokuso-railway.co.jp/train_info/",
+            "statusPageURLEn": "https://www.hokuso-railway.co.jp/train_info/",
+            "xAccount": "@hokusorailway"
         },
         "directions": [
             {

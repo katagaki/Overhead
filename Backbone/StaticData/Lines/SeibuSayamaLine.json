@@ -4,8 +4,8 @@
         "delayInfo": {
             "checkMethodEn": "Check the Seibu Railway service status page, the Seibu app, or X (@seiburailway). Delays of roughly 15 minutes or more and suspensions are posted.",
             "checkMethodJa": "西武鉄道「運行情報」ページ、西武線アプリ、またはX（@seiburailway）で確認できます。おおむね15分以上の遅延・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.seiburailway.jp/railwayinfo/",
-            "statusPageURLEn": "https://www.seiburailway.jp/railwayinfo/",
+            "statusPageURL": "https://www.seiburailway.jp/railway/railwayinfo/",
+            "statusPageURLEn": "https://www.seiburailway.jp/en/railway/railwayinfo/",
             "xAccount": "@seiburailway"
         },
         "directions": [

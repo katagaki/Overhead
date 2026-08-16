@@ -52,7 +52,13 @@ enum OperatorSections {
         "Operator:Enoden",
         "Operator:ShonanMonorail",
         "Operator:Shibayama",
-        "Operator:Ryutetsu"
+        "Operator:Ryutetsu",
+        "Operator:Choshi",
+        "Operator:Jomo",
+        "Operator:Kantetsu",
+        "Operator:Hitachinaka",
+        "Operator:Kominato",
+        "Operator:Mooka"
     ]
 
     /// String catalog keys, resolved in `title(for:)`.
@@ -84,7 +90,13 @@ enum OperatorSections {
         "Operator:Enoden": "Operator.Enoden",
         "Operator:ShonanMonorail": "Operator.ShonanMonorail",
         "Operator:Shibayama": "Operator.Shibayama",
-        "Operator:Ryutetsu": "Operator.Ryutetsu"
+        "Operator:Ryutetsu": "Operator.Ryutetsu",
+        "Operator:Choshi": "Operator.Choshi",
+        "Operator:Jomo": "Operator.Jomo",
+        "Operator:Kantetsu": "Operator.Kantetsu",
+        "Operator:Hitachinaka": "Operator.Hitachinaka",
+        "Operator:Kominato": "Operator.Kominato",
+        "Operator:Mooka": "Operator.Mooka"
     ]
 
     static func title(for operatorId: String) -> String {

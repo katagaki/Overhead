@@ -2,7 +2,7 @@
     {
         "colorHex": "#02AC39",
         "delayInfo": {
-            "checkMethodEn": "Check the 東葉高速鉄道 service information page. Delays and suspensions are posted as they occur.",
+            "checkMethodEn": "Check the Toyo Rapid Railway service information page. Delays and suspensions are posted as they occur.",
             "checkMethodJa": "東葉高速鉄道「運行情報」ページで確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
             "statusPageURL": "https://www.toyokosoku.co.jp/",
             "statusPageURLEn": "https://www.toyokosoku.co.jp/",

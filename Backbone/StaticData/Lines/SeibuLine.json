@@ -4,8 +4,8 @@
         "delayInfo": {
             "checkMethodEn": "Check the Seibu Railway operation information page or the Seibu Lines app. Delays and suspensions are posted as they occur.",
             "checkMethodJa": "西武鉄道「運行情報」ページまたは西武線アプリで確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.seiburailway.jp/railwayinfo/",
-            "statusPageURLEn": "https://www.seiburailway.jp/railwayinfo/",
+            "statusPageURL": "https://www.seiburailway.jp/railway/railwayinfo/",
+            "statusPageURLEn": "https://www.seiburailway.jp/en/railway/railwayinfo/",
             "xAccount": "@seiburailway"
         },
         "directions": [
@@ -4142,8 +4142,8 @@
         "delayInfo": {
             "checkMethodEn": "Check the Seibu Railway operation information page or the Seibu Lines app. Delays and suspensions are posted as they occur.",
             "checkMethodJa": "西武鉄道「運行情報」ページまたは西武線アプリで確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.seiburailway.jp/railwayinfo/",
-            "statusPageURLEn": "https://www.seiburailway.jp/railwayinfo/",
+            "statusPageURL": "https://www.seiburailway.jp/railway/railwayinfo/",
+            "statusPageURLEn": "https://www.seiburailway.jp/en/railway/railwayinfo/",
             "xAccount": "@seiburailway"
         },
         "directions": [
@@ -4351,8 +4351,8 @@
         "delayInfo": {
             "checkMethodEn": "Check the Seibu Railway operation information page or the Seibu Lines app. Delays and suspensions are posted as they occur.",
             "checkMethodJa": "西武鉄道「運行情報」ページまたは西武線アプリで確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
-            "statusPageURL": "https://www.seiburailway.jp/railwayinfo/",
-            "statusPageURLEn": "https://www.seiburailway.jp/railwayinfo/",
+            "statusPageURL": "https://www.seiburailway.jp/railway/railwayinfo/",
+            "statusPageURLEn": "https://www.seiburailway.jp/en/railway/railwayinfo/",
             "xAccount": "@seiburailway"
         },
         "directions": [

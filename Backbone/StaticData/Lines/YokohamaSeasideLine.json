@@ -2,7 +2,7 @@
     {
         "colorHex": "#004EA2",
         "delayInfo": {
-            "checkMethodEn": "Check the 横浜シーサイドライン service information page. Delays and suspensions are posted as they occur.",
+            "checkMethodEn": "Check the Yokohama Seaside Line service information page. Delays and suspensions are posted as they occur.",
             "checkMethodJa": "横浜シーサイドライン「運行情報」ページで確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
             "statusPageURL": "https://www.seasideline.co.jp/",
             "statusPageURLEn": "https://www.seasideline.co.jp/",

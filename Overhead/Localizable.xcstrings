@@ -5674,6 +5674,42 @@
         }
       }
     },
+    "Operator.Choshi": {
+      "comment": "Name of a railway operator, shown as a section header in the lines list.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choshi Electric Railway"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "銚子電鉄"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "조시 전철"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "铫子电铁"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "銚子電鐵"
+          }
+        }
+      }
+    },
     "Operator.DokoTrain": {
       "comment": "Name of a railway operator, shown as a section header in the lines list.",
       "extractionState": "manual",
@@ -5746,6 +5782,42 @@
         }
       }
     },
+    "Operator.Hitachinaka": {
+      "comment": "Name of a railway operator, shown as a section header in the lines list.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hitachinaka Seaside Railway"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ひたちなか海浜鉄道"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "히타치나카 해변철도"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "常陆那珂海滨铁道"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "常陸那珂海濱鐵道"
+          }
+        }
+      }
+    },
     "Operator.Hokuso": {
       "comment": "Name of a railway operator, shown as a section header in the lines list.",
       "extractionState": "manual",
@@ -5814,6 +5886,78 @@
           "stringUnit": {
             "state": "translated",
             "value": "JR東日本"
+          }
+        }
+      }
+    },
+    "Operator.Jomo": {
+      "comment": "Name of a railway operator, shown as a section header in the lines list.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jomo Electric Railway"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上毛電気鉄道"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "조모 전기철도"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上毛电气铁道"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上毛電氣鐵道"
+          }
+        }
+      }
+    },
+    "Operator.Kantetsu": {
+      "comment": "Name of a railway operator, shown as a section header in the lines list.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kanto Railway"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "関東鉄道"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "간토 철도"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关东铁道"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "關東鐵道"
           }
         }
       }
@@ -5926,6 +6070,42 @@
         }
       }
     },
+    "Operator.Kominato": {
+      "comment": "Name of a railway operator, shown as a section header in the lines list.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kominato Railway"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "小湊鐵道"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "고미나토 철도"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "小凑铁道"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "小湊鐵道"
+          }
+        }
+      }
+    },
     "Operator.MIR": {
       "comment": "Name of a railway operator, shown as a section header in the lines list.",
       "extractionState": "manual",
@@ -5994,6 +6174,42 @@
           "stringUnit": {
             "state": "translated",
             "value": "港未來線"
+          }
+        }
+      }
+    },
+    "Operator.Mooka": {
+      "comment": "Name of a railway operator, shown as a section header in the lines list.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mooka Railway"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "真岡鐵道"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모오카 철도"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "真冈铁道"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "真岡鐵道"
           }
         }
       }

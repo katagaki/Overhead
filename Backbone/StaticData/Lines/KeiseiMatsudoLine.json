@@ -2,7 +2,7 @@
     {
         "colorHex": "#E95098",
         "delayInfo": {
-            "checkMethodEn": "Check the 京成電鉄 service information page or X (@keisei_official). Delays and suspensions are posted as they occur.",
+            "checkMethodEn": "Check the Keisei Electric Railway service information page or X (@keisei_official). Delays and suspensions are posted as they occur.",
             "checkMethodJa": "京成電鉄「運行情報」ページまたはX（@keisei_official）で確認できます。遅延・運転見合わせが発生した場合に掲載されます。",
             "statusPageURL": "https://www.keisei.co.jp/traininfo/index.php",
             "statusPageURLEn": "https://www.keisei.co.jp/traininfo/index.php",
