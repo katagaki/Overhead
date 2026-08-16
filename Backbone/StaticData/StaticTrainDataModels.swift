@@ -279,6 +279,44 @@ public struct TimetableRun: Hashable, Sendable, Codable {
     }
 }
 
+// MARK: - Schedule Revision (ダイヤ改正)
+
+/// A timetable revision that only takes effect from `validFrom`.
+///
+/// Operators announce a 改正 weeks ahead of the day it starts running, so the
+/// new data has to ship before it is correct to show. A revision carries only
+/// the timetable-bearing fields that actually change; every `nil` field keeps
+/// whatever the line already had. Revisions with a `validFrom` on or before the
+/// service day are applied oldest-first, so a later revision that touches only
+/// one field does not undo an earlier one.
+///
+/// The line's own top-level fields are always the *pre-revision* timetable —
+/// the one in force until the first `validFrom` arrives. Don't fold a revision
+/// into them; that would make the app show the new timetable early.
+public struct ScheduleRevision: Codable, Hashable {
+    /// First service day the revision applies to, `yyyy-MM-dd`, JST.
+    public let validFrom: String
+    /// Rider-facing name of the revision, for provenance in the data files.
+    public var nameJa: String? = nil
+    public var nameEn: String? = nil
+
+    public var directions: [StaticLineDirection]? = nil
+    public var hopTimesMinutes: [Double]? = nil
+    public var upHopTimesMinutes: [Double]? = nil
+    public var exactStationTimes: [String: [Int]]? = nil
+    public var timetableRuns: [TimetableRun]? = nil
+    public var stopPatterns: [TrainService.TrainType: Set<Int>]? = nil
+
+    /// `validFrom` as a JST day number (yyyyMMdd), or nil if unparseable.
+    public var validFromDayKey: Int? {
+        let parts = validFrom.split(separator: "-")
+        guard parts.count == 3,
+              let y = Int(parts[0]), let m = Int(parts[1]), let d = Int(parts[2]),
+              (1...12).contains(m), (1...31).contains(d) else { return nil }
+        return y * 10000 + m * 100 + d
+    }
+}
+
 // MARK: - Static Train Line
 
 public struct StaticTrainLine: Codable, Hashable {
@@ -288,15 +326,41 @@ public struct StaticTrainLine: Codable, Hashable {
     public let operatorId: String  // e.g. "Operator:JR-East"
     public let colorHex: String
     public let stations: [Station]
-    public let hopTimesMinutes: [Double] // count == stations.count - 1
+    public var hopTimesMinutes: [Double] // count == stations.count - 1
     public var upHopTimesMinutes: [Double]? = nil
     public var exactStationTimes: [String: [Int]]? = nil
     public var timetableRuns: [TimetableRun]? = nil
     public var isLoop: Bool = false
-    public let directions: [StaticLineDirection]
+    public var directions: [StaticLineDirection]
     public let delayInfo: DelayCheckInfo
     public var throughServices: [ThroughService] = [] // 直通運転
     public var stopPatterns: [TrainService.TrainType: Set<Int>] = [:]
+    /// Announced 改正 not yet in force; see `ScheduleRevision`. Resolved for the
+    /// current service day by `StaticTrainData`, so consumers never see these.
+    /// Optional, not a defaulted array: the synthesized decoder ignores property
+    /// defaults for non-optionals, and every existing line file omits the key.
+    public var scheduleRevisions: [ScheduleRevision]? = nil
+
+    /// This line's timetable as it stands on `dayKey` (yyyyMMdd, JST), with every
+    /// revision that has come into force applied in announcement order.
+    public func applyingRevisions(onDayKey dayKey: Int) -> StaticTrainLine {
+        let due = (scheduleRevisions ?? [])
+            .compactMap { rev in rev.validFromDayKey.map { (key: $0, rev: rev) } }
+            .filter { $0.key <= dayKey }
+            .sorted { $0.key < $1.key }
+        guard !due.isEmpty else { return self }
+
+        var line = self
+        for (_, rev) in due {
+            if let v = rev.directions { line.directions = v }
+            if let v = rev.hopTimesMinutes { line.hopTimesMinutes = v }
+            if let v = rev.upHopTimesMinutes { line.upHopTimesMinutes = v }
+            if let v = rev.exactStationTimes { line.exactStationTimes = v }
+            if let v = rev.timetableRuns { line.timetableRuns = v }
+            if let v = rev.stopPatterns { line.stopPatterns = v }
+        }
+        return line
+    }
 
     public var trainLine: TrainLine {
         TrainLine(
@@ -354,33 +418,94 @@ public enum StaticTrainData {
         "HitachinakaMinatoLine", "KominatoLine", "MookaLine",
     ]
 
-    static let allLines: [StaticTrainLine] = lineResources.flatMap { LineStore.lines($0) }
+    /// The bundled data exactly as authored — every line's pre-revision timetable.
+    /// Everything outside this file wants `allLines`, which resolves 改正 first.
+    private static let bundledLines: [StaticTrainLine] = lineResources.flatMap { LineStore.lines($0) }
 
-    private static let linesById: [String: StaticTrainLine] = Dictionary(
-        allLines.map { ($0.id, $0) },
-        uniquingKeysWith: { first, _ in first }
-    )
+    /// The day number (yyyyMMdd, JST) a date falls on. Matches `ScheduleCalendar`,
+    /// which also splits on the calendar day rather than the service day — a 24:30
+    /// train therefore switches to a new revision one service day early.
+    public static func dayKey(for date: Date) -> Int {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
+        let c = cal.dateComponents([.year, .month, .day], from: date)
+        return (c.year ?? 1970) * 10000 + (c.month ?? 1) * 100 + (c.day ?? 1)
+    }
 
-    private static let linesByStationId: [String: StaticTrainLine] = {
-        var map: [String: StaticTrainLine] = [:]
-        for line in allLines {
-            for station in line.stations where map[station.id] == nil {
-                map[station.id] = line
+    /// Lines resolved for one service day, plus the lookup maps built from them.
+    private struct Snapshot {
+        let lines: [StaticTrainLine]
+        let byId: [String: StaticTrainLine]
+        let byStationId: [String: StaticTrainLine]
+
+        init(_ lines: [StaticTrainLine]) {
+            self.lines = lines
+            self.byId = Dictionary(lines.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+            var stations: [String: StaticTrainLine] = [:]
+            for line in lines {
+                for station in line.stations where stations[station.id] == nil {
+                    stations[station.id] = line
+                }
             }
+            self.byStationId = stations
         }
-        return map
-    }()
+    }
+
+    private static let snapshotLock = NSLock()
+    private static var snapshots: [Int: Snapshot] = [:]
+
+    /// Most lines carry no revisions at all, so this is a cheap pass — but it is
+    /// cached per day anyway, because the lookup maps are not.
+    private static func snapshot(onDayKey key: Int) -> Snapshot {
+        snapshotLock.lock()
+        defer { snapshotLock.unlock() }
+        if let cached = snapshots[key] { return cached }
+        let built = Snapshot(bundledLines.map { $0.applyingRevisions(onDayKey: key) })
+        // Only today and whatever date the user is planning for stay warm.
+        if snapshots.count >= 4 { snapshots.removeAll() }
+        snapshots[key] = built
+        return built
+    }
+
+    private static func snapshot(on date: Date) -> Snapshot {
+        snapshot(onDayKey: dayKey(for: date))
+    }
+
+    /// Every line, with each announced 改正 applied once its `validFrom` arrives.
+    static var allLines: [StaticTrainLine] { snapshot(on: Date()).lines }
+
+    /// The same lines as they will read on `date` — for planning across a 改正.
+    public static func lines(on date: Date) -> [StaticTrainLine] {
+        snapshot(on: date).lines
+    }
 
     public static func line(withId id: String) -> StaticTrainLine? {
-        linesById[id]
+        snapshot(on: Date()).byId[id]
+    }
+
+    public static func line(withId id: String, on date: Date) -> StaticTrainLine? {
+        snapshot(on: date).byId[id]
     }
 
     public static func line(containingStationId stationId: String) -> StaticTrainLine? {
-        linesByStationId[stationId]
+        snapshot(on: Date()).byStationId[stationId]
+    }
+
+    public static func line(containingStationId stationId: String, on date: Date) -> StaticTrainLine? {
+        snapshot(on: date).byStationId[stationId]
+    }
+
+    /// Revisions announced for `lineId` but not yet in force on `date`.
+    public static func upcomingRevisions(forLineId lineId: String,
+                                         on date: Date = Date()) -> [ScheduleRevision] {
+        let today = dayKey(for: date)
+        return (bundledLines.first { $0.id == lineId }?.scheduleRevisions ?? [])
+            .filter { ($0.validFromDayKey ?? .max) > today }
+            .sorted { ($0.validFromDayKey ?? 0) < ($1.validFromDayKey ?? 0) }
     }
 
     public static func delayCheckInfo(forLineId lineId: String) -> DelayCheckInfo? {
-        linesById[lineId]?.delayInfo
+        snapshot(on: Date()).byId[lineId]?.delayInfo
     }
 
     public static func trainLines() -> [TrainLine] {
@@ -420,7 +545,7 @@ public enum StaticTrainData {
         fromLineId lineId: String,
         boardingStationId: String? = nil
     ) -> [ThroughDestinationGroup] {
-        guard let line = linesById[lineId] else { return [] }
+        guard let line = line(withId: lineId) else { return [] }
         var groups: [ThroughDestinationGroup] = []
         for service in line.throughServices {
             if let boardingStationId {
@@ -471,7 +596,7 @@ public enum StaticTrainData {
         on line: StaticTrainLine
     ) -> ThroughDestinationGroup? {
         guard let targetId = service.connectingLineId,
-              let target = linesById[targetId],
+              let target = StaticTrainData.line(withId: targetId),
               let junction = line.stations.first(where: { $0.id == service.junctionStationId }),
               let jIdx = target.stations.firstIndex(where: { $0.name == junction.name })
         else { return nil }
@@ -789,7 +914,7 @@ public enum StaticTrainData {
         fromStationId: String,
         toStationId: String
     ) -> ResolvedJourneyLine? {
-        guard let line = linesById[lineId],
+        guard let line = line(withId: lineId),
               let fromIdx = line.stations.firstIndex(where: { $0.id == fromStationId })
         else { return nil }
 
