@@ -44,8 +44,10 @@ struct RootView: View {
                         JourneyPlannerSection(viewModel: viewModel)
                         NearbyStationsSection(viewModel: viewModel)
                             .id("nearby")
-                        LinesSection(viewModel: viewModel)
-                            .id("lines")
+                        SearchSection(viewModel: viewModel) { destination in
+                            navigationPath.append(destination)
+                        }
+                        .id("lines")
                         CustomLinesSection(viewModel: viewModel)
                             .id("custom")
                     }
@@ -88,6 +90,9 @@ struct RootView: View {
                 case .attributions:
                     MoreAttributionsView()
                 }
+            }
+            .navigationDestination(for: SearchDestination.self) { destination in
+                searchDestinationView(destination)
             }
             .navigationDestination(for: CustomLineRoute.self) { route in
                 CustomLineEditorView(route: route)
@@ -209,6 +214,25 @@ struct RootView: View {
         .onAppear {
             if !hasDismissedStartupNotice {
                 showStartupNotice = true
+            }
+        }
+    }
+
+    // MARK: - Search Destinations
+
+    @ViewBuilder
+    private func searchDestinationView(_ destination: SearchDestination) -> some View {
+        switch destination {
+        case .operatorLines(let operatorId):
+            OperatorLinesView(operatorId: operatorId, viewModel: viewModel)
+        case .line(let lineId):
+            if let line = viewModel.availableLines.first(where: { $0.id == lineId }) {
+                StationPickerView(line: line, viewModel: viewModel)
+            }
+        case .station(let lineId, let stationId):
+            if let line = viewModel.availableLines.first(where: { $0.id == lineId }),
+               let station = line.stations.first(where: { $0.id == stationId }) {
+                StationTimetableView(station: station, line: line, viewModel: viewModel)
             }
         }
     }

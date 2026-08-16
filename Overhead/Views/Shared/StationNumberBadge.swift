@@ -88,11 +88,13 @@ struct StationNumberBadge: View {
     private static let roundedRatio: CGFloat = 6 / 28
     private static let sharpRatio: CGFloat = 2 / 28
     private static let filledRatio: CGFloat = 0.25
+    private static let choshiRatio: CGFloat = 0.031
 
     /// For callers drawing their own ring around the plate — an outline at the
     /// wrong radius reads as a second, mismatched badge.
     static func cornerRadiusRatio(code: String, color: Color, styleOverride: BadgeStyle? = nil) -> CGFloat {
         if rendersAsCircle(code: code, color: color, styleOverride: styleOverride) { return 0.5 }
+        if styleOverride == nil, code.hasPrefix("CD") { return choshiRatio }
         switch styleOverride {
         case .rounded: return roundedRatio
         case .square: return sharpRatio
@@ -109,7 +111,7 @@ struct StationNumberBadge: View {
         if seibuPrefixes.contains(prefix) { return false }
         if filledSquarePrefixes.contains(prefix) { return false }
         if splitPrefixes.contains(prefix) { return false }
-        if ["MM", "SO", "NT", "TT", "NS"].contains(prefix) { return false }
+        if ["MM", "SO", "NT", "TT", "NS", "CD"].contains(prefix) { return false }
         return true
     }
 
@@ -172,6 +174,8 @@ struct StationNumberBadge: View {
             newShuttleBadge(prefix: prefix, number: number)
         } else if prefix == "EN" {
             enodenBadge(prefix: prefix, number: number)
+        } else if prefix == "CD" {
+            choshiBadge(prefix: prefix, number: number)
         } else if prefix == "SL" {
             seasideBadge(number: number)
         } else if prefix == "SR" {
@@ -373,6 +377,31 @@ struct StationNumberBadge: View {
                 Circle().fill(Color.white).padding(d * 0.10)
             }
         }
+    }
+
+    // MARK: - Choshi: White Plate, Hairline Black Keyline
+
+    /// 銚子電鉄's plate is the one that carries no line colour — black on white,
+    /// so `color` goes unused here on purpose.
+    @ViewBuilder
+    private func choshiBadge(prefix: String, number: String) -> some View {
+        let d = badgeDimension
+        let prefixSize = d * 0.52
+        let numberSize = d * 0.70
+
+        codeStack(prefix: prefix, number: number, font: "Hind-Bold",
+                  prefixSize: prefixSize, numberSize: numberSize, soloSize: d * 0.66,
+                  prefixHeight: prefixSize * 0.75, numberHeight: numberSize * 0.75,
+                  prefixOffset: prefixSize * 0.24, numberOffset: numberSize * -0.06,
+                  spacing: 1)
+        .foregroundColor(Color.black.opacity(opacity))
+        .frame(width: d, height: d)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: d * Self.choshiRatio))
+        .overlay(
+            RoundedRectangle(cornerRadius: d * Self.choshiRatio)
+                .strokeBorder(Color.black.opacity(opacity), lineWidth: d * 0.030)
+        )
     }
 
     // MARK: - Seaside Line: Indigo Disc, White Wave

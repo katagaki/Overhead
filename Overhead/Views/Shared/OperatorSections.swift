@@ -104,6 +104,62 @@ enum OperatorSections {
         return String(localized: String.LocalizationValue(key))
     }
 
+    /// Readings and aliases for search. The titles are kanji-only, so
+    /// 「とうきゅう」/「tokyu」 would otherwise match nothing.
+    static let searchTerms: [String: [String]] = [
+        "Operator:JR-East": ["JR East", "JR東日本", "ジェイアール", "jeiaru"],
+        dokoTrainSectionId: ["どこトレ", "dokotore", "doko train"],
+        "Operator:TokyoMetro": ["東京メトロ", "とうきょうめとろ", "tokyo metro", "営団"],
+        "Operator:Toei": ["都営地下鉄", "とえい", "toei"],
+        "Operator:Keisei": ["けいせい", "keisei"],
+        "Operator:Tobu": ["とうぶ", "tobu"],
+        "Operator:Odakyu": ["おだきゅう", "odakyu"],
+        "Operator:Tokyu": ["とうきゅう", "tokyu", "東京急行"],
+        "Operator:Keikyu": ["けいきゅう", "keikyu", "京浜急行"],
+        "Operator:Keio": ["けいおう", "keio"],
+        "Operator:Seibu": ["せいぶ", "seibu"],
+        "Operator:Sotetsu": ["そうてつ", "sotetsu", "相模鉄道"],
+        "Operator:Minatomirai": ["みなとみらい", "minatomirai", "横浜高速鉄道"],
+        "Operator:SaitamaRailway": ["埼玉高速鉄道", "さいたまこうそく", "saitama", "埼玉スタジアム線"],
+        "Operator:TWR": ["りんかい", "rinkai", "東京臨海高速鉄道"],
+        "Operator:MIR": ["つくばエクスプレス", "つくば", "tsukuba", "tx", "首都圏新都市鉄道"],
+        "Operator:TokyoMonorail": ["とうきょうものれーる", "tokyo monorail", "monorail"],
+        "Operator:Yurikamome": ["ゆりかもめ", "yurikamome"],
+        "Operator:ToyoRapid": ["東葉高速鉄道", "とうよう", "toyo rapid"],
+        "Operator:Hokuso": ["ほくそう", "hokuso"],
+        "Operator:SaitamaTransit": ["埼玉新都市交通", "ニューシャトル", "new shuttle", "saitama"],
+        "Operator:TamaMonorail": ["多摩都市モノレール", "たま", "tama monorail"],
+        "Operator:YokohamaMunicipal": ["横浜市営地下鉄", "よこはま", "yokohama", "ブルーライン", "グリーンライン"],
+        "Operator:YokohamaSeaside": ["横浜シーサイドライン", "しーさいど", "seaside", "yokohama"],
+        "Operator:Enoden": ["江ノ電", "えのでん", "enoden", "enoshima"],
+        "Operator:ShonanMonorail": ["湘南モノレール", "しょうなん", "shonan monorail"],
+        "Operator:Shibayama": ["しばやま", "shibayama"],
+        "Operator:Ryutetsu": ["りゅうてつ", "ryutetsu", "流山"],
+        "Operator:Choshi": ["ちょうし", "choshi"],
+        "Operator:Jomo": ["じょうもう", "jomo"],
+        "Operator:Kantetsu": ["かんてつ", "kantetsu", "kanto railway"],
+        "Operator:Hitachinaka": ["ひたちなか", "hitachinaka"],
+        "Operator:Kominato": ["こみなと", "kominato"],
+        "Operator:Mooka": ["もおか", "mooka"]
+    ]
+
+    /// Case-insensitive substring on the localized title and the readings,
+    /// plus the phonetic skeleton so romaji and kana find each other.
+    static func matches(operatorId: String, query: String) -> Bool {
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return true }
+        let lowered = trimmed.lowercased()
+        let key = JapaneseSearch.searchKey(trimmed)
+        let kana = JapaneseSearch.kanaFolded(trimmed)
+
+        for candidate in (searchTerms[operatorId] ?? []) + [title(for: operatorId)] {
+            if candidate.lowercased().contains(lowered) { return true }
+            if !key.isEmpty, JapaneseSearch.searchKey(candidate).contains(key) { return true }
+            if !kana.isEmpty, JapaneseSearch.kanaFolded(candidate).contains(kana) { return true }
+        }
+        return false
+    }
+
     /// Symbol order (JA, JB, JC… / A, C, E…); symbol-less lines last.
     static func sortedBySymbol(_ lines: [TrainLine]) -> [TrainLine] {
         lines.sorted {

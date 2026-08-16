@@ -139,6 +139,8 @@ struct LineSymbolBadge: View {
             newShuttleBadge
         case "EN":
             enodenBadge
+        case "CD":
+            choshiBadge
         case "SR":
             srBadge
         case _ where Self.keioSymbols.contains(symbol):
@@ -304,6 +306,21 @@ struct LineSymbolBadge: View {
                         .padding(5 * f)
                 }
             }
+    }
+
+    // MARK: - Choshi: white plate, hairline black keyline, black letters
+
+    /// Alone among the operators, 銚子電鉄's numbering plate carries no line
+    /// colour at all — it is black on white, so `color` is deliberately unused.
+    private var choshiBadge: some View {
+        symbolText(.custom("Hind-Bold", fixedSize: 17 * f), color: .black, inset: 3 * f,
+                   nudge: 15 * f * 0.085)
+            .frame(width: dimension, height: dimension)
+            .background(Color.white, in: RoundedRectangle(cornerRadius: dimension * 0.031))
+            .overlay(
+                RoundedRectangle(cornerRadius: dimension * 0.031)
+                    .strokeBorder(Color.black, lineWidth: dimension * 0.030)
+            )
     }
 
     // MARK: - Keisei: blue ring, line-color bold condensed letters

@@ -77,6 +77,8 @@ struct LCDLineSymbolBadge: View {
             newShuttleBadge
         case "EN":
             enodenBadge
+        case "CD":
+            choshiSymbolBadge
         case "SR":
             srSymbolBadge
         case "KS":
@@ -165,6 +167,17 @@ struct LCDLineSymbolBadge: View {
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius)
                     .strokeBorder(color, lineWidth: borderWidth)
+            )
+    }
+
+    /// 銚子電鉄's plate carries no line colour — black on white.
+    private var choshiSymbolBadge: some View {
+        symbolText(color: .black, inset: 2.2, hind: true)
+            .frame(width: 24, height: 24)
+            .background(Color.white, in: RoundedRectangle(cornerRadius: 24 * 0.031))
+            .overlay(
+                RoundedRectangle(cornerRadius: 24 * 0.031)
+                    .strokeBorder(Color.black, lineWidth: 24 * 0.030)
             )
     }
 
@@ -502,6 +515,8 @@ struct LCDStationNumberBadge: View {
             newShuttleBadge(prefix: prefix, number: number)
         } else if prefix == "EN" {
             enodenBadge(prefix: prefix, number: number)
+        } else if prefix == "CD" {
+            choshiBadge(prefix: prefix, number: number)
         } else if prefix == "SL" {
             seasideBadge(number: number)
         } else if prefix == "SR" {
@@ -622,6 +637,40 @@ struct LCDStationNumberBadge: View {
         .foregroundColor(.white)
         .frame(width: d, height: d)
         .background(color, in: Circle())
+    }
+
+    // MARK: Choshi: white plate, hairline black keyline
+
+    /// 銚子電鉄's plate carries no line colour — black on white.
+    @ViewBuilder
+    private func choshiBadge(prefix: String, number: String) -> some View {
+        let d = dimension
+        let prefixSize = d * 0.52
+        let numberSize = d * 0.70
+
+        VStack(spacing: 1) {
+            Text(prefix)
+                .font(.custom("Hind-Bold", fixedSize: prefixSize))
+                .offset(y: prefixSize * 0.24)
+                .frame(maxWidth: .infinity)
+                .frame(height: prefixSize * 0.75)
+
+            Text(number)
+                .font(.custom("Hind-Bold", fixedSize: numberSize))
+                .offset(y: numberSize * -0.06)
+                .frame(maxWidth: .infinity)
+                .frame(height: numberSize * 0.75)
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.6)
+        .foregroundColor(.black)
+        .frame(width: d, height: d)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: d * 0.031))
+        .overlay(
+            RoundedRectangle(cornerRadius: d * 0.031)
+                .strokeBorder(Color.black, lineWidth: d * 0.030)
+        )
     }
 
     // MARK: JR East / Tobu: rounded square frame
