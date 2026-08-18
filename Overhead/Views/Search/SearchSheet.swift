@@ -209,7 +209,7 @@ struct SearchSheet: View {
             HStack(spacing: 10) {
                 Circle()
                     .fill(OperatorSections.brandColor(for: hit.operatorId, lines: hit.lines))
-                    .frame(width: 28, height: 28)
+                    .frame(width: 16, height: 16)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(hit.title)
                         .font(.system(size: 16, weight: .semibold))
