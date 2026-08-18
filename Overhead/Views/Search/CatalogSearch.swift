@@ -56,7 +56,7 @@ enum CatalogSearch {
 
     static func operators(in lines: [TrainLine], query: String) -> [OperatorSearchHit] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        let sections = OperatorSections.sections(for: lines)
+        let sections = OperatorSections.companies(for: lines)
         return sections.compactMap { section in
             guard trimmed.isEmpty || OperatorSections.matches(operatorId: section.operatorId, query: trimmed)
             else { return nil }

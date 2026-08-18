@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import Backbone
 
 // MARK: - Operator Sections
@@ -107,7 +108,8 @@ enum OperatorSections {
     /// Readings and aliases for search. The titles are kanji-only, so
     /// 「とうきゅう」/「tokyu」 would otherwise match nothing.
     static let searchTerms: [String: [String]] = [
-        "Operator:JR-East": ["JR East", "JR東日本", "ジェイアール", "jeiaru"],
+        // どこトレ is JR東's own position service, so it finds JR東.
+        "Operator:JR-East": ["JR East", "JR東日本", "ジェイアール", "jeiaru", "どこトレ", "dokotore"],
         dokoTrainSectionId: ["どこトレ", "dokotore", "doko train"],
         "Operator:TokyoMetro": ["東京メトロ", "とうきょうめとろ", "tokyo metro", "営団"],
         "Operator:Toei": ["都営地下鉄", "とえい", "toei"],
@@ -142,6 +144,31 @@ enum OperatorSections {
         "Operator:Kominato": ["こみなと", "kominato"],
         "Operator:Mooka": ["もおか", "mooka"]
     ]
+
+    /// Logo-mark primary colours for companies whose brand colour differs
+    /// from their lines' route colours. Everyone else falls back to the first
+    /// line's colour, which for single-line operators is the brand colour.
+    private static let brandColorHex: [String: String] = [
+        "Operator:JR-East": "#008803",      // JR mark green
+        "Operator:TokyoMetro": "#109ED4",   // heart-M metro blue
+        "Operator:Toei": "#39A869",         // 東京都 symbol green
+        "Operator:Keisei": "#005AAB",
+        "Operator:Tobu": "#00479D",
+        "Operator:Odakyu": "#018BD3",
+        "Operator:Tokyu": "#EE0011",
+        "Operator:Keikyu": "#C7000B",
+        "Operator:Keio": "#DD0077",
+        "Operator:Seibu": "#036EB8",
+        "Operator:Sotetsu": "#0068B7",
+        "Operator:YokohamaMunicipal": "#0075C2"
+    ]
+
+    static func brandColor(for operatorId: String, lines: [TrainLine]) -> Color {
+        if let hex = brandColorHex[operatorId] {
+            return Color(hex: hex)
+        }
+        return lines.first?.color ?? .secondary
+    }
 
     /// Case-insensitive substring on the localized title and the readings,
     /// plus the phonetic skeleton so romaji and kana find each other.
@@ -184,6 +211,20 @@ enum OperatorSections {
         let sectionOrder = order.filter { grouped[$0] != nil }
             + grouped.keys.filter { !order.contains($0) }.sorted()
         return sectionOrder.compactMap { operatorId in
+            guard let lines = grouped[operatorId] else { return nil }
+            return (operatorId, title(for: operatorId), sortedBySymbol(lines))
+        }
+    }
+
+    /// Grouped by the company that actually runs the lines: どこトレ is a
+    /// position-data source inside JR東, not an operator of its own.
+    static func companies(
+        for lines: [TrainLine]
+    ) -> [(operatorId: String, title: String, lines: [TrainLine])] {
+        let grouped = Dictionary(grouping: lines, by: \.operatorId)
+        let companyOrder = order.filter { $0 != dokoTrainSectionId && grouped[$0] != nil }
+            + grouped.keys.filter { !order.contains($0) }.sorted()
+        return companyOrder.compactMap { operatorId in
             guard let lines = grouped[operatorId] else { return nil }
             return (operatorId, title(for: operatorId), sortedBySymbol(lines))
         }

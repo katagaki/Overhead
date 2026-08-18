@@ -33,12 +33,6 @@ struct SearchSection: View {
         }
         .task {
             await viewModel.loadLines()
-#if DEBUG
-            if UserDefaults.standard.string(forKey: "debugSearchQuery") != nil {
-                try? await Task.sleep(for: .seconds(1))
-                showSearch = true
-            }
-#endif
         }
     }
 

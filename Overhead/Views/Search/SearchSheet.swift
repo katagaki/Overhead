@@ -69,11 +69,6 @@ struct SearchSheet: View {
         }
         .onAppear {
             searchFocused = true
-#if DEBUG
-            if let debugQuery = UserDefaults.standard.string(forKey: "debugSearchQuery") {
-                searchText = debugQuery
-            }
-#endif
         }
     }
 
@@ -86,7 +81,10 @@ struct SearchSheet: View {
             }
         }
         .pickerStyle(.segmented)
+        // Rows scroll under the inset; without the glass they read through it.
+        .glassEffect(.regular, in: .capsule)
         .padding(.horizontal, 16)
+        .padding(.top, 4)
         .padding(.bottom, 8)
     }
 
@@ -209,7 +207,9 @@ struct SearchSheet: View {
     private func operatorRow(_ hit: OperatorSearchHit) -> some View {
         selectionRow(.operatorLines(hit.operatorId)) {
             HStack(spacing: 10) {
-                operatorBadges(hit.lines)
+                Circle()
+                    .fill(OperatorSections.brandColor(for: hit.operatorId, lines: hit.lines))
+                    .frame(width: 28, height: 28)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(hit.title)
                         .font(.system(size: 16, weight: .semibold))
@@ -219,18 +219,6 @@ struct SearchSheet: View {
                 }
             }
         }
-    }
-
-    /// Up to three of the operator's line colours, as a stack of chips.
-    private func operatorBadges(_ lines: [TrainLine]) -> some View {
-        HStack(spacing: 3) {
-            ForEach(lines.prefix(3)) { line in
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(line.color)
-                    .frame(width: 5, height: 30)
-            }
-        }
-        .frame(width: 30, alignment: .leading)
     }
 
     private func lineRow(_ line: TrainLine) -> some View {

@@ -10,8 +10,8 @@ struct SectionHeader<Trailing: View>: View {
     var onTitleTap: (() -> Void)?
     @ViewBuilder var trailing: Trailing
 
-    /// Grows with the subheadline the header is set in, so tall text isn't clipped.
-    @ScaledMetric(relativeTo: .subheadline) private var height: CGFloat = 22
+    /// Grows with the body text the header is set in, so tall text isn't clipped.
+    @ScaledMetric(relativeTo: .body) private var height: CGFloat = 24
 
     /// Operator names arrive already localized, so they bypass the key lookup.
     enum Title {
@@ -46,7 +46,7 @@ struct SectionHeader<Trailing: View>: View {
                 case .verbatim(let string): Text(string)
                 }
             }
-            .font(.subheadline.weight(.semibold))
+            .font(.body.weight(.semibold))
             .foregroundColor(.secondary)
             if let collapsed {
                 Image(systemName: "chevron.down")

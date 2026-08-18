@@ -11,7 +11,7 @@ struct OperatorLinesView: View {
     @State private var selectedLine: TrainLine?
 
     private var lines: [TrainLine] {
-        OperatorSections.sections(for: viewModel.availableLines)
+        OperatorSections.companies(for: viewModel.availableLines)
             .first { $0.operatorId == operatorId }?
             .lines ?? []
     }
