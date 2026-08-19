@@ -34,6 +34,11 @@ struct VerticalLCDLine: View {
     private let circleRadius: CGFloat = 9
     private let terminalRadius: CGFloat = 12
     private let currentRadius: CGFloat = 12
+    // Collapsed folds break the track: solid stub, three dots, solid again.
+    private let dotSize: CGFloat = 4.5
+    private let dotSpacing: CGFloat = 5
+    private let dotBreak: CGFloat = 10
+    private let dotResume: CGFloat = 28
 
     /// Color of the line each station actually belongs to (composite journeys resolve per-leg after a 乗り換え).
     private func stationColor(_ station: Station) -> Color {
@@ -49,12 +54,14 @@ struct VerticalLCDLine: View {
 
         VStack(spacing: 0) {
             ForEach(Array(items.enumerated()), id: \.element.id) { position, item in
-                let nextIsFold = position + 1 < items.count && items[position + 1].isFold
+                let next = position + 1 < items.count ? items[position + 1] : nil
+                let nextIsFold = next?.isFold ?? false
+                let nextIsCollapsed = next?.isCollapsedFold ?? false
                 switch item {
                 case .station(let index, let groupID):
                     stationRow(index: index, groupID: groupID, stations: stations,
                                timetable: timetable, transferIds: transferIds,
-                               tightBottom: nextIsFold)
+                               tightBottom: nextIsFold, dottedBelow: nextIsCollapsed)
                 case .collapsed(let range):
                     collapsedRow(range: range, stations: stations, isExpanded: false)
                 case .expandedHandle(let range):
@@ -84,6 +91,12 @@ struct VerticalLCDLine: View {
             case .station: false
             case .collapsed, .expandedHandle: true
             }
+        }
+
+        /// Only a folded run draws dots, so only it needs the track broken above.
+        var isCollapsedFold: Bool {
+            if case .collapsed = self { return true }
+            return false
         }
     }
 
@@ -140,7 +153,7 @@ struct VerticalLCDLine: View {
     @ViewBuilder
     private func stationRow(index: Int, groupID: String?, stations: [Station],
                             timetable: [TimetableEntry], transferIds: Set<String>,
-                            tightBottom: Bool) -> some View {
+                            tightBottom: Bool, dottedBelow: Bool) -> some View {
         let station = stations[index]
         let isFirst = index == 0
         let isLast = index == stations.count - 1
@@ -200,7 +213,10 @@ struct VerticalLCDLine: View {
                 trackSegment(filled: isPast,
                              fillFraction: target == nil ? segFrac : (isCurrent ? 1 : min(1, segFrac * 2)),
                              dashed: isTransfer, color: segColor)
-                    .frame(width: trackWidth, height: bottomSpan)
+                    // Overrun the next marker so rounded caps never notch at a seam,
+                    // except above a folded run, where the track stops short of its dots.
+                    .frame(width: trackWidth,
+                           height: bottomSpan + trackWidth - (dottedBelow && target == nil ? dotBreak : 0))
                     .padding(.top, markerHeight / 2)
                     .padding(.leading, timeColumnWidth + 20 - trackWidth / 2)
             }
@@ -250,7 +266,8 @@ struct VerticalLCDLine: View {
                 isPast: isPast,
                 isCurrent: isCurrent,
                 fillFraction: max(0, segFrac * 2 - 1),
-                tightBottom: tightBottom
+                tightBottom: tightBottom,
+                dottedBelow: dottedBelow
             )
         }
     }
@@ -284,13 +301,13 @@ struct VerticalLCDLine: View {
                 Color.clear
                     .frame(width: timeColumnWidth, height: markerHeight)
 
-                // Hidden stops read as dots on the line.
-                VStack(spacing: 4) {
+                // Hidden stops read as dots in the break, one per third of the run.
+                VStack(spacing: dotSpacing) {
                     if !isExpanded {
-                        ForEach(0..<3, id: \.self) { _ in
+                        ForEach(0..<3, id: \.self) { i in
                             Circle()
-                                .fill(isPast ? color : Color(.systemGray3))
-                                .frame(width: 4, height: 4)
+                                .fill(fill >= (Double(i) + 0.5) / 3 ? color : Color(.systemGray3))
+                                .frame(width: dotSize, height: dotSize)
                         }
                     }
                 }
@@ -311,10 +328,18 @@ struct VerticalLCDLine: View {
             .frame(height: rowHeight)
             .contentShape(Rectangle())
             .background(alignment: .topLeading) {
-                trackSegment(filled: isPast, fillFraction: fill, color: color)
-                    .frame(width: trackWidth, height: rowHeight)
-                    .padding(.top, markerHeight / 2)
-                    .padding(.leading, timeColumnWidth + 20 - trackWidth / 2)
+                // Folded: the track picks back up below the dots; opened: it runs straight through.
+                let full = rowHeight + trackWidth
+                let skip = isExpanded ? 0 : dotResume
+                let span = full - skip
+                let lowerFill = min(1, max(0, (fill * full - skip) / span))
+                VStack(spacing: 0) {
+                    Color.clear.frame(width: trackWidth, height: skip)
+                    trackSegment(filled: isPast, fillFraction: lowerFill, color: color)
+                        .frame(width: trackWidth, height: span)
+                }
+                .padding(.top, markerHeight / 2)
+                .padding(.leading, timeColumnWidth + 20 - trackWidth / 2)
             }
         }
         .buttonStyle(.plain)
@@ -402,7 +427,8 @@ struct VerticalLCDLine: View {
         isPast: Bool,
         isCurrent: Bool,
         fillFraction: Double,
-        tightBottom: Bool
+        tightBottom: Bool,
+        dottedBelow: Bool
     ) -> some View {
         let bottomSpan = tightBottom ? markerHeight : stationSpacing * 0.8
 
@@ -466,7 +492,7 @@ struct VerticalLCDLine: View {
         .frame(minHeight: bottomSpan, alignment: .top)
         .background(alignment: .topLeading) {
             trackSegment(filled: isPast, fillFraction: fillFraction, color: target.line.color)
-                .frame(width: trackWidth, height: bottomSpan)
+                .frame(width: trackWidth, height: bottomSpan + trackWidth - (dottedBelow ? dotBreak : 0))
                 .padding(.top, markerHeight / 2)
                 .padding(.leading, timeColumnWidth + 20 - trackWidth / 2)
         }
