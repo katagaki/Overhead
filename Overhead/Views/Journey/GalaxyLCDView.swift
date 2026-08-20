@@ -220,7 +220,7 @@ struct GalaxyLCDView: View {
     // MARK: - Plaque
 
     private var plaque: some View {
-        Text(verbatim: "銀河急行　\(destinationStation?.name ?? "")ゆき")
+        Text(verbatim: "銀河急行　\(journey.destinationNameJa)ゆき")
             .font(.system(size: 8))
             .foregroundColor(Color(hex: "#3A2A10"))
             .padding(.horizontal, 13)
@@ -272,10 +272,5 @@ struct GalaxyLCDView: View {
         guard !stations.isEmpty else { return nil }
         let index = state.currentStationIndex ?? state.segmentTo
         return stations[max(0, min(index, stations.count - 1))]
-    }
-
-    private var destinationStation: Station? {
-        journey.line.stations.first { $0.id == journey.service.destinationStationId }
-            ?? journey.journeyStations.last
     }
 }

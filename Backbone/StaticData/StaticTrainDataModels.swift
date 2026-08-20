@@ -119,17 +119,23 @@ public struct ExactRun: Codable, Hashable {
     public let continuesBeyond: Bool
     public let trainType: TrainService.TrainType?
     public let stopIndices: [Int]?
+    // Off-line terminus for through-runs (行き先 as riders see it, e.g. 成田).
+    public let throughDestJa: String?
+    public let throughDestEn: String?
 
     public init(_ departure: String, terminusStationId: String? = nil,
                 startsHere: Bool = true, continuesBeyond: Bool = false,
                 trainType: TrainService.TrainType? = nil,
-                stopIndices: [Int]? = nil) {
+                stopIndices: [Int]? = nil,
+                throughDestJa: String? = nil, throughDestEn: String? = nil) {
         self.departure = departure
         self.terminusStationId = terminusStationId
         self.startsHere = startsHere
         self.continuesBeyond = continuesBeyond
         self.trainType = trainType
         self.stopIndices = stopIndices
+        self.throughDestJa = throughDestJa
+        self.throughDestEn = throughDestEn
     }
 }
 
@@ -1252,7 +1258,9 @@ public enum StaticTrainData {
                 String(format: "%02d:%02d", minutes / 60, minutes % 60),
                 terminusStationId: run.terminusStationId,
                 startsHere: false,
-                continuesBeyond: run.continuesBeyond
+                continuesBeyond: run.continuesBeyond,
+                throughDestJa: run.throughDestJa,
+                throughDestEn: run.throughDestEn
             )
         }
         return ServicePattern(
@@ -1441,7 +1449,9 @@ public enum StaticTimetableGenerator {
                 direction: direction.isAscending ? .outbound : .inbound,
                 timetable: entries,
                 destinationStationId: stations[endIndex].id,
-                originatesAtStart: run.startsHere
+                originatesAtStart: run.startsHere,
+                throughDestinationName: run.throughDestJa,
+                throughDestinationNameEn: run.throughDestEn
             )
         }
     }

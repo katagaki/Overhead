@@ -125,7 +125,7 @@ struct TubeLCDView: View {
     private func buildPages() -> [TubePage] {
         guard let station = headlineStation else { return [] }
         let dwelling = state.currentStationIndex != nil
-        let destEn = destinationStation?.nameEn ?? ""
+        let destEn = journey.destinationNameEn
         var pages: [TubePage] = []
         pages.append(TubePage(text: dwelling
             ? "This station is \(station.nameEn)"
@@ -146,11 +146,6 @@ struct TubeLCDView: View {
         guard !stations.isEmpty else { return nil }
         let index = state.currentStationIndex ?? state.segmentTo
         return stations[max(0, min(index, stations.count - 1))]
-    }
-
-    private var destinationStation: Station? {
-        journey.line.stations.first { $0.id == journey.service.destinationStationId }
-            ?? journey.journeyStations.last
     }
 }
 

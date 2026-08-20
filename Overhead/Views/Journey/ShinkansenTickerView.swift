@@ -84,12 +84,11 @@ struct ShinkansenTickerView: View {
 
     private var segments: [Segment] {
         guard let station = headlineStation else { return [] }
-        let destination = destinationStation
         let dwelling = state.currentStationIndex != nil
         let stops = intermediateStops
         var segments: [Segment] = [
             Segment(text: "この電車は、\(strippedLineName)　", color: .white),
-            Segment(text: "\(typeNameJa)　\(destination?.name ?? "")ゆき", color: Self.orange),
+            Segment(text: "\(typeNameJa)　\(journey.destinationNameJa)ゆき", color: Self.orange),
             Segment(text: "です。", color: .white),
         ]
         if !stops.isEmpty {
@@ -115,7 +114,7 @@ struct ShinkansenTickerView: View {
         segments.append(Segment(text: "　　　This is the ", color: .white))
         segments.append(Segment(text: typeNameEn, color: Self.orange))
         segments.append(Segment(text: " train bound for ", color: .white))
-        segments.append(Segment(text: destination?.nameEn ?? "", color: Self.orange))
+        segments.append(Segment(text: journey.destinationNameEn, color: Self.orange))
         segments.append(Segment(
             text: dwelling ? ". We are now stopped at " : ". The next stop is ",
             color: .white
@@ -129,7 +128,7 @@ struct ShinkansenTickerView: View {
             segments.append(Segment(text: " We will be stopping at ", color: .white))
             segments.append(Segment(text: list, color: Self.orange))
             segments.append(Segment(
-                text: " before arriving at \(destination?.nameEn ?? "").",
+                text: " before arriving at \(journey.destinationNameEn).",
                 color: .white
             ))
         }
@@ -153,11 +152,6 @@ struct ShinkansenTickerView: View {
         guard !stations.isEmpty else { return nil }
         let index = state.currentStationIndex ?? state.segmentTo
         return stations[max(0, min(index, stations.count - 1))]
-    }
-
-    private var destinationStation: Station? {
-        journey.line.stations.first { $0.id == journey.service.destinationStationId }
-            ?? journey.journeyStations.last
     }
 
     private var typeNameJa: String {

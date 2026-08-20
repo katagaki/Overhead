@@ -139,7 +139,6 @@ struct LEDMatrixView: View {
     private func buildPages() -> LEDPanelPages {
         let dwelling = state.currentStationIndex != nil
         guard let station = headlineStation else { return LEDPanelPages(top: [], bottom: []) }
-        let destination = destinationStation
         let type = typeNameJa
         let lineJa = strippedLineName
 
@@ -162,14 +161,14 @@ struct LEDMatrixView: View {
         var bottom: [LEDPage] = []
         bottom.append(LEDPage(segments: [
             .init(text: "この電車は、\(lineJa) ", color: .green),
-            .init(text: "\(type) \(destination?.name ?? "")ゆき", color: .orange),
+            .init(text: "\(type) \(journey.destinationNameJa)ゆき", color: .orange),
             .init(text: "です。", color: .green),
         ], scrolls: true))
         bottom.append(LEDPage(segments: [
             .init(text: "This is the ", color: .green),
             .init(text: typeNameEn, color: .orange),
             .init(text: " train bound for ", color: .green),
-            .init(text: destination?.nameEn ?? "", color: .orange),
+            .init(text: journey.destinationNameEn, color: .orange),
             .init(text: ".", color: .green),
         ], scrolls: true))
         if state.delayMinutes > 0 {
@@ -185,11 +184,6 @@ struct LEDMatrixView: View {
         guard !stations.isEmpty else { return nil }
         let index = state.currentStationIndex ?? state.segmentTo
         return stations[max(0, min(index, stations.count - 1))]
-    }
-
-    private var destinationStation: Station? {
-        journey.line.stations.first { $0.id == journey.service.destinationStationId }
-            ?? journey.journeyStations.last
     }
 
     private var typeNameJa: String {

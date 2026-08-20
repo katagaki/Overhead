@@ -69,7 +69,7 @@ struct LoopLCDView: View {
     private func header(english: Bool, phase: LCDPhase) -> some View {
         HStack(spacing: 0) {
             VStack(alignment: .trailing, spacing: 1) {
-                Text(destinationStation?.name ?? "")
+                Text(journey.destinationNameJa)
                     .font(LCDFont.gothic(size: 12.5, weight: .heavy))
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
@@ -462,11 +462,6 @@ struct LoopLCDView: View {
         guard !stations.isEmpty else { return nil }
         let index = state.currentStationIndex ?? state.segmentTo
         return stations[max(0, min(index, stations.count - 1))]
-    }
-
-    private var destinationStation: Station? {
-        journey.line.stations.first { $0.id == journey.service.destinationStationId }
-            ?? journey.journeyStations.last
     }
 
     /// No car data exists; derive a stable 1...10 from the journey ID.

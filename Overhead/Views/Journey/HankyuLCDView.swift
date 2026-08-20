@@ -54,7 +54,7 @@ struct HankyuLCDView: View {
             typeTab
 
             HStack(alignment: .lastTextBaseline, spacing: 2) {
-                Text(destinationStation?.name ?? "")
+                Text(journey.destinationNameJa)
                     .font(.system(size: 12.5, weight: .bold))
                 Text(verbatim: "ゆき")
                     .font(.system(size: 8, weight: .medium))
@@ -381,11 +381,6 @@ struct HankyuLCDView: View {
         let stations = journey.journeyStations
         guard !stations.isEmpty else { return nil }
         return stations[headlineIndex]
-    }
-
-    private var destinationStation: Station? {
-        journey.line.stations.first { $0.id == journey.service.destinationStationId }
-            ?? journey.journeyStations.last
     }
 
     private var typeName: String {

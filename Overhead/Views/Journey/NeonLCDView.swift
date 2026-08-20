@@ -143,7 +143,7 @@ struct NeonLCDView: View {
     private var hud: some View {
         HStack(spacing: 6) {
             chip("\(journey.line.lineSymbol)::\(typeNameEn.uppercased())", color: Self.cyan, border: Self.cyanDim)
-            chip("DEST::\(destinationStation?.name ?? "")", color: Self.magenta, border: Color(hex: "#7C2C55"))
+            chip("DEST::\(journey.destinationNameJa)", color: Self.magenta, border: Color(hex: "#7C2C55"))
             Spacer()
             TimelineView(.periodic(from: .now, by: 0.5)) { context in
                 HStack(spacing: 1) {
@@ -402,7 +402,7 @@ struct NeonLCDView: View {
             segments.append(("\(transfer.name)@\(station.name) ", Color(hex: "#7F96C4")))
         }
         segments.append(("▸ DEST:", Self.cyan))
-        segments.append(("\(destinationStation?.nameEn.uppercased() ?? "") ", Color(hex: "#7F96C4")))
+        segments.append(("\(journey.destinationNameEn.uppercased()) ", Color(hex: "#7F96C4")))
         segments.append(("▸ JOURNEY:", Self.cyan))
         segments.append(("ACTIVE ", Color(hex: "#7F96C4")))
         return segments
@@ -461,11 +461,6 @@ struct NeonLCDView: View {
         guard !stations.isEmpty else { return nil }
         let index = state.currentStationIndex ?? state.segmentTo
         return stations[max(0, min(index, stations.count - 1))]
-    }
-
-    private var destinationStation: Station? {
-        journey.line.stations.first { $0.id == journey.service.destinationStationId }
-            ?? journey.journeyStations.last
     }
 
     private var typeNameEn: String {

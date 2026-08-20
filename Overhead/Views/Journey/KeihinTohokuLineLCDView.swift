@@ -296,13 +296,7 @@ struct KeihinTohokuLineLCDView: View {
 
     /// Service destination shown above the station box.
     private func destinationLabel(english: Bool) -> String {
-        guard let station = destinationStation else { return "" }
-        return english ? "for \(station.nameEn)" : "\(station.name)　行"
-    }
-
-    private var destinationStation: Station? {
-        journey.line.stations.first { $0.id == journey.service.destinationStationId }
-            ?? journey.journeyStations.last
+        return english ? "for \(journey.destinationNameEn)" : "\(journey.destinationNameJa)　行"
     }
 
     private func transferList(_ lines: [TrainLine]) -> some View {

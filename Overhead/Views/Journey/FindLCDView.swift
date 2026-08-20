@@ -67,7 +67,7 @@ struct FindLCDView: View {
 
             Spacer(minLength: 0)
 
-            Text(verbatim: "to \(destinationStation?.nameEn.uppercased() ?? "")")
+            Text(verbatim: "to \(journey.destinationNameEn.uppercased())")
                 .font(.custom("HelveticaNeue-Bold", size: 8.5))
                 .foregroundColor(Self.toOrange)
                 .lineLimit(1)
@@ -130,8 +130,8 @@ struct FindLCDView: View {
                 }
 
                 let arrowText = mirrored
-                    ? "◄ \(destinationStation?.nameEn.uppercased() ?? "")"
-                    : "\(destinationStation?.nameEn.uppercased() ?? "") ►"
+                    ? "◄ \(journey.destinationNameEn.uppercased())"
+                    : "\(journey.destinationNameEn.uppercased()) ►"
                 ctx.draw(
                     Text(verbatim: arrowText)
                         .font(.custom("HelveticaNeue-Bold", size: 8))
@@ -169,10 +169,5 @@ struct FindLCDView: View {
         guard !stations.isEmpty else { return nil }
         let index = state.currentStationIndex ?? state.segmentTo
         return stations[max(0, min(index, stations.count - 1))]
-    }
-
-    private var destinationStation: Station? {
-        journey.line.stations.first { $0.id == journey.service.destinationStationId }
-            ?? journey.journeyStations.last
     }
 }

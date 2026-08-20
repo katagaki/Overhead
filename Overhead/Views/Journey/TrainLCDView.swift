@@ -161,7 +161,7 @@ struct TrainLCDView: View {
                         .font(LCDFont.latin(size: 9, weight: .bold))
                         .padding(.bottom, 2)
                     HorizontallySquashed(maxWidth: 60) {
-                        Text(verbatim: destinationStation?.nameEn ?? "")
+                        Text(verbatim: journey.destinationNameEn)
                             .font(LCDFont.latin(size: 15, weight: .semibold))
                             .lineLimit(1)
                             .shadow(color: .black.opacity(0.85), radius: 1, x: 0, y: 0)
@@ -174,7 +174,7 @@ struct TrainLCDView: View {
                 // Long names squash horizontally rather than shrinking, so the cap
                 // height matches short ones and nothing runs into the arrow tip.
                 HorizontallySquashed(maxWidth: Self.plateTextWidth) {
-                    Text(destinationStation?.name ?? "")
+                    Text(journey.destinationNameJa)
                         .font(LCDFont.gothic(size: 16, weight: .heavy))
                         .lineLimit(1)
                         .kerning(Self.destinationKerning)
@@ -499,11 +499,6 @@ struct TrainLCDView: View {
         guard !stations.isEmpty else { return nil }
         let index = state.currentStationIndex ?? state.segmentTo
         return stations[max(0, min(index, stations.count - 1))]
-    }
-
-    private var destinationStation: Station? {
-        journey.line.stations.first { $0.id == journey.service.destinationStationId }
-            ?? journey.journeyStations.last
     }
 
     private var typeName: String {

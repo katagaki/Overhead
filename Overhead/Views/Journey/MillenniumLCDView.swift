@@ -92,7 +92,7 @@ struct MillenniumLCDView: View {
                 .foregroundColor(Self.panelNavy)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
-            Text(verbatim: "\(destinationStation?.name ?? "")行き")
+            Text(verbatim: "\(journey.destinationNameJa)行き")
                 .font(.system(size: 6.5, weight: .bold))
                 .foregroundColor(Self.panelNavy.opacity(0.85))
                 .lineLimit(1)
@@ -273,11 +273,6 @@ struct MillenniumLCDView: View {
         guard !stations.isEmpty else { return nil }
         let index = state.currentStationIndex ?? state.segmentTo
         return stations[max(0, min(index, stations.count - 1))]
-    }
-
-    private var destinationStation: Station? {
-        journey.line.stations.first { $0.id == journey.service.destinationStationId }
-            ?? journey.journeyStations.last
     }
 
     private var typeName: String {

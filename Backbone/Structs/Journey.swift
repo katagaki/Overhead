@@ -23,6 +23,19 @@ public struct Journey: Identifiable, Codable {
         self.hasSchedule = hasSchedule
     }
 
+    /// 行き先 as riders see it — an off-line through destination wins over the on-line terminus.
+    public var destinationNameJa: String {
+        service.throughDestinationName ?? destinationStation?.name ?? ""
+    }
+
+    public var destinationNameEn: String {
+        service.throughDestinationNameEn ?? destinationStation?.nameEn ?? ""
+    }
+
+    public var destinationStation: Station? {
+        line.stations.first { $0.id == service.destinationStationId } ?? journeyStations.last
+    }
+
     public var journeyStations: [Station] {
         guard let startIdx = line.stations.firstIndex(where: { $0.id == boardingStationId }),
               let endIdx = line.stations.firstIndex(where: { $0.id == alightingStationId }) else {

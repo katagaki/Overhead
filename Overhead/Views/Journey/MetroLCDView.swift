@@ -63,12 +63,12 @@ struct MetroLCDView: View {
                 if english {
                     Text(verbatim: "for")
                         .font(LCDFont.latin(size: 11, weight: .heavy))
-                    Text(destinationStation?.nameEn ?? "")
+                    Text(journey.destinationNameEn)
                         .font(LCDFont.latin(size: 15, weight: .heavy))
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
                 } else {
-                    Text(destinationStation?.name ?? "")
+                    Text(journey.destinationNameJa)
                         .font(LCDFont.gothic(size: 15, weight: .heavy))
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
@@ -430,11 +430,6 @@ struct MetroLCDView: View {
         guard !stations.isEmpty else { return nil }
         let index = state.currentStationIndex ?? state.segmentTo
         return stations[max(0, min(index, stations.count - 1))]
-    }
-
-    private var destinationStation: Station? {
-        journey.line.stations.first { $0.id == journey.service.destinationStationId }
-            ?? journey.journeyStations.last
     }
 
     private var typeName: String {
