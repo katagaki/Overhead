@@ -14,11 +14,14 @@ public enum LineDataStore {
         return base.appendingPathComponent("LineData", isDirectory: true)
     }()
 
-    static func installedURL(folder: String, file: String) -> URL {
+    public static func installedDirectory(folder: String) -> URL {
         installedRoot
             .appendingPathComponent("Lines", isDirectory: true)
             .appendingPathComponent(folder, isDirectory: true)
-            .appendingPathComponent(file)
+    }
+
+    static func installedURL(folder: String, file: String) -> URL {
+        installedDirectory(folder: folder).appendingPathComponent(file)
     }
 
     static func bundleURL(folder: String, file: String) -> URL? {

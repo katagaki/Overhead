@@ -33,12 +33,17 @@ public final class LineDataInstaller: ObservableObject {
 
     private let defaults = UserDefaults.standard
     private let etagKey = "lineData.catalogETag"
+    private let modifiedKey = "lineData.catalogModified"
     private let checkedKey = "lineData.lastChecked"
     private let session: URLSession
 
     private init() {
         let config = URLSessionConfiguration.default
         config.waitsForConnectivity = true
+        // URLSession's own cache would revalidate behind our back and hand us a
+        // 200, hiding the cheap 304. Ours are the conditional headers that count.
+        config.urlCache = nil
+        config.requestCachePolicy = .reloadIgnoringLocalCacheData
         session = URLSession(configuration: config)
         lastChecked = defaults.object(forKey: checkedKey) as? Date
     }
@@ -52,8 +57,16 @@ public final class LineDataInstaller: ObservableObject {
     @discardableResult
     public func refreshCatalog(force: Bool = false) async throws -> Bool {
         var request = URLRequest(url: Self.baseURL.appendingPathComponent("catalog.json"))
-        if !force, let etag = defaults.string(forKey: etagKey) {
-            request.setValue(etag, forHTTPHeaderField: "If-None-Match")
+        // Only claim to hold a copy if one is actually on disk: otherwise a 304
+        // would leave the app with no catalog at all.
+        let hasLocalCatalog = FileManager.default.fileExists(
+            atPath: LineDataStore.installedRoot.appendingPathComponent("catalog.json").path)
+        if !force, hasLocalCatalog {
+            if let etag = defaults.string(forKey: etagKey) {
+                request.setValue(etag, forHTTPHeaderField: "If-None-Match")
+            } else if let modified = defaults.string(forKey: modifiedKey) {
+                request.setValue(modified, forHTTPHeaderField: "If-Modified-Since")
+            }
         }
         let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse else { throw LineDataError.badResponse(0) }
@@ -78,6 +91,8 @@ public final class LineDataInstaller: ObservableObject {
                        options: .atomic)
         if let etag = http.value(forHTTPHeaderField: "Etag") {
             defaults.set(etag, forKey: etagKey)
+        } else if let modified = http.value(forHTTPHeaderField: "Last-Modified") {
+            defaults.set(modified, forKey: modifiedKey)
         }
         try await refreshBadgeStyles(styles: catalog.styles)
 
@@ -135,7 +150,7 @@ public final class LineDataInstaller: ObservableObject {
         }
 
         // Nothing lands in place until both files have been verified.
-        let dir = LineDataStore.installedURL(folder: line.folder, file: "").deletingLastPathComponent()
+        let dir = LineDataStore.installedDirectory(folder: line.folder)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         try lineData.write(to: dir.appendingPathComponent("Line.json"), options: .atomic)
         try badgeData.write(to: dir.appendingPathComponent("Badge.json"), options: .atomic)
@@ -144,9 +159,8 @@ public final class LineDataInstaller: ObservableObject {
     public func remove(lineIds: [String]) throws {
         for id in lineIds {
             guard let line = Catalog.line(id: id) else { continue }
-            let dir = LineDataStore.installedURL(folder: line.folder, file: "")
-                .deletingLastPathComponent()
-            try? FileManager.default.removeItem(at: dir)
+            try? FileManager.default.removeItem(
+                at: LineDataStore.installedDirectory(folder: line.folder))
         }
         StaticTrainData.invalidate()
         recomputeStale()

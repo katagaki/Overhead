@@ -26,6 +26,8 @@ struct RootView: View {
     @State private var debugTimetableTarget: ScreenshotTimetableTarget?
 #endif
     @Namespace private var journeyZoom
+    @AppStorage("lineData.onboarded") private var lineDataOnboarded = false
+    @State private var showLineDataOnboarding = false
 
     private static let journeyTransitionID = "activeJourney"
     private static let feedbackURL = URL(string: "https://forms.gle/U91cFDFTufF12PeF7")!
@@ -33,6 +35,12 @@ struct RootView: View {
     // Pushed screens reachable from the root.
     private enum Destination: Hashable {
         case attributions
+        case lineData
+    }
+
+    private var needsLineDataOnboarding: Bool {
+        !lineDataOnboarded
+            && Catalog.current.lines.contains { !LineDataStore.isPresent(folder: $0.folder) }
     }
 
     var body: some View {
@@ -89,6 +97,8 @@ struct RootView: View {
                 switch destination {
                 case .attributions:
                     MoreAttributionsView()
+                case .lineData:
+                    LineDataManagerView()
                 }
             }
             .navigationDestination(for: SearchDestination.self) { destination in
@@ -118,6 +128,12 @@ struct RootView: View {
             }
         }
         .serviceStatusHost(serviceStatusPresenter)
+        .task {
+            if needsLineDataOnboarding { showLineDataOnboarding = true }
+        }
+        .sheet(isPresented: $showLineDataOnboarding) {
+            LineDataOnboardingView()
+        }
         .sheet(isPresented: $showJourneySheet) {
             JourneySheetView(viewModel: viewModel)
                 .navigationTransition(.zoom(sourceID: Self.journeyTransitionID, in: journeyZoom))
@@ -248,6 +264,14 @@ struct RootView: View {
                     } label: {
                         Label("Button.EndJourney", systemImage: "stop.circle.fill")
                     }
+                }
+            }
+
+            Section {
+                Button {
+                    navigationPath.append(Destination.lineData)
+                } label: {
+                    Label("LineData.Title", systemImage: "arrow.down.circle")
                 }
             }
 
