@@ -15,480 +15,224 @@
                         "continuesBeyond": false,
                         "departure": "06:51",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "07:49",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "08:09",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "08:52",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "10:12",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "10:52",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "11:11",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "11:52",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "12:10",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "12:31",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "12:51",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "13:11",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "13:30",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "13:51",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "14:10",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "14:31",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "14:51",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "15:11",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "15:30",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "15:50",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "16:50",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "17:09",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "17:29",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "17:50",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "18:08",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "18:28",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "18:49",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "19:08",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "19:28",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "19:48",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "20:08",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "20:27",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     }
                 ],
@@ -497,360 +241,168 @@
                         "continuesBeyond": false,
                         "departure": "07:25",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "Rapid"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "07:47",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "08:58",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "09:48",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "10:03",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "10:30",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "10:41",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "Rapid"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "10:52",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "11:10",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "11:30",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "11:50",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "12:10",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "12:30",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "12:50",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "13:10",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "13:30",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "13:50",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "14:10",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "14:30",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "14:50",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "15:10",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "15:30",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "15:50",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     },
                     {
                         "continuesBeyond": false,
                         "departure": "16:10",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6
-                        ],
+                        "stopIndices": [0, 1, 2, 3, 4, 5, 6],
                         "trainType": "LimitedExpress"
                     }
                 ],
@@ -920,15 +472,7 @@
                         "continuesBeyond": true,
                         "departure": "05:33",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -937,15 +481,7 @@
                         "continuesBeyond": true,
                         "departure": "06:00",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -954,15 +490,7 @@
                         "continuesBeyond": true,
                         "departure": "06:44",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -971,15 +499,7 @@
                         "continuesBeyond": true,
                         "departure": "07:16",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -988,15 +508,7 @@
                         "continuesBeyond": true,
                         "departure": "07:45",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1005,15 +517,7 @@
                         "continuesBeyond": true,
                         "departure": "08:15",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1022,15 +526,7 @@
                         "continuesBeyond": true,
                         "departure": "08:39",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1039,15 +535,7 @@
                         "continuesBeyond": true,
                         "departure": "09:15",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1056,15 +544,7 @@
                         "continuesBeyond": true,
                         "departure": "10:29",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1073,15 +553,7 @@
                         "continuesBeyond": true,
                         "departure": "10:48",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1090,15 +562,7 @@
                         "continuesBeyond": true,
                         "departure": "11:10",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1107,15 +571,7 @@
                         "continuesBeyond": true,
                         "departure": "11:50",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1124,15 +580,7 @@
                         "continuesBeyond": true,
                         "departure": "12:09",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1141,15 +589,7 @@
                         "continuesBeyond": true,
                         "departure": "12:28",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1158,15 +598,7 @@
                         "continuesBeyond": true,
                         "departure": "12:47",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1175,15 +607,7 @@
                         "continuesBeyond": true,
                         "departure": "13:08",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1192,15 +616,7 @@
                         "continuesBeyond": true,
                         "departure": "13:28",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1209,15 +625,7 @@
                         "continuesBeyond": true,
                         "departure": "13:46",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1226,15 +634,7 @@
                         "continuesBeyond": true,
                         "departure": "14:07",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1243,15 +643,7 @@
                         "continuesBeyond": true,
                         "departure": "14:26",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1260,15 +652,7 @@
                         "continuesBeyond": true,
                         "departure": "14:47",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1277,15 +661,7 @@
                         "continuesBeyond": true,
                         "departure": "15:07",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1294,15 +670,7 @@
                         "continuesBeyond": true,
                         "departure": "15:29",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1311,15 +679,7 @@
                         "continuesBeyond": true,
                         "departure": "15:49",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1328,15 +688,7 @@
                         "continuesBeyond": true,
                         "departure": "16:47",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1345,15 +697,7 @@
                         "continuesBeyond": true,
                         "departure": "17:28",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1362,15 +706,7 @@
                         "continuesBeyond": true,
                         "departure": "17:48",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1379,15 +715,7 @@
                         "continuesBeyond": true,
                         "departure": "18:07",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1396,15 +724,7 @@
                         "continuesBeyond": true,
                         "departure": "18:27",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1413,15 +733,7 @@
                         "continuesBeyond": true,
                         "departure": "18:48",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1430,15 +742,7 @@
                         "continuesBeyond": true,
                         "departure": "19:07",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1447,15 +751,7 @@
                         "continuesBeyond": true,
                         "departure": "19:27",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1464,15 +760,7 @@
                         "continuesBeyond": true,
                         "departure": "19:46",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1481,15 +769,7 @@
                         "continuesBeyond": true,
                         "departure": "20:07",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1498,15 +778,7 @@
                         "continuesBeyond": true,
                         "departure": "20:33",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1515,15 +787,7 @@
                         "continuesBeyond": true,
                         "departure": "20:55",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1534,15 +798,7 @@
                         "continuesBeyond": true,
                         "departure": "05:33",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1551,15 +807,7 @@
                         "continuesBeyond": true,
                         "departure": "05:57",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1568,15 +816,7 @@
                         "continuesBeyond": true,
                         "departure": "06:31",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1585,15 +825,7 @@
                         "continuesBeyond": true,
                         "departure": "06:55",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "SemiExpress"
@@ -1602,12 +834,7 @@
                         "continuesBeyond": true,
                         "departure": "07:22",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            3,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 3, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "Express"
@@ -1616,12 +843,7 @@
                         "continuesBeyond": true,
                         "departure": "07:50",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            3,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 3, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "Express"
@@ -1630,15 +852,7 @@
                         "continuesBeyond": true,
                         "departure": "08:06",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1647,15 +861,7 @@
                         "continuesBeyond": true,
                         "departure": "09:29",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1664,15 +870,7 @@
                         "continuesBeyond": true,
                         "departure": "09:45",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1681,15 +879,7 @@
                         "continuesBeyond": true,
                         "departure": "10:09",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1698,15 +888,7 @@
                         "continuesBeyond": true,
                         "departure": "10:27",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1715,15 +897,7 @@
                         "continuesBeyond": true,
                         "departure": "10:47",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1732,15 +906,7 @@
                         "continuesBeyond": true,
                         "departure": "11:08",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1749,15 +915,7 @@
                         "continuesBeyond": true,
                         "departure": "11:27",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1766,15 +924,7 @@
                         "continuesBeyond": true,
                         "departure": "11:47",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1783,15 +933,7 @@
                         "continuesBeyond": true,
                         "departure": "12:07",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1800,15 +942,7 @@
                         "continuesBeyond": true,
                         "departure": "12:27",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1817,15 +951,7 @@
                         "continuesBeyond": true,
                         "departure": "12:47",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1834,15 +960,7 @@
                         "continuesBeyond": true,
                         "departure": "13:07",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1851,15 +969,7 @@
                         "continuesBeyond": true,
                         "departure": "13:27",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1868,15 +978,7 @@
                         "continuesBeyond": true,
                         "departure": "13:47",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1885,15 +987,7 @@
                         "continuesBeyond": true,
                         "departure": "14:07",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1902,15 +996,7 @@
                         "continuesBeyond": true,
                         "departure": "14:27",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1919,15 +1005,7 @@
                         "continuesBeyond": true,
                         "departure": "14:47",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1936,15 +1014,7 @@
                         "continuesBeyond": true,
                         "departure": "15:07",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1953,15 +1023,7 @@
                         "continuesBeyond": true,
                         "departure": "15:27",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1970,15 +1032,7 @@
                         "continuesBeyond": true,
                         "departure": "15:47",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -1987,15 +1041,7 @@
                         "continuesBeyond": true,
                         "departure": "16:07",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -2004,15 +1050,7 @@
                         "continuesBeyond": true,
                         "departure": "16:27",
                         "startsHere": true,
-                        "stopIndices": [
-                            6,
-                            5,
-                            4,
-                            3,
-                            2,
-                            1,
-                            0
-                        ],
+                        "stopIndices": [6, 5, 4, 3, 2, 1, 0],
                         "throughDestEn": "Shinjuku",
                         "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
@@ -2079,14 +1117,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [
-            2,
-            2,
-            2,
-            2,
-            3,
-            3
-        ],
+        "hopTimesMinutes": [2, 2, 2, 2, 3, 3],
         "id": "Railway:Keio.Takao",
         "isLoop": false,
         "nameEn": "Keio Takao Line",

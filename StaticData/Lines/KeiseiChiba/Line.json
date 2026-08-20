@@ -120,17 +120,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [
-            3,
-            2,
-            2,
-            3,
-            2,
-            2,
-            1,
-            2,
-            2
-        ],
+        "hopTimesMinutes": [3, 2, 2, 3, 2, 2, 1, 2, 2],
         "id": "Railway:Keisei.Chiba",
         "isLoop": false,
         "nameEn": "Keisei Chiba Line",

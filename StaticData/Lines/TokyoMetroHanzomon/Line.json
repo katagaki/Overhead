@@ -15,22 +15,14 @@
                 "id": "static.RailDirection:TokyoMetro.Hanzomon.Oshiage",
                 "intermediateOrigins": [
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:07"
-                        ],
+                        "saturdayHolidayDepartures": ["05:07"],
                         "stationId": "Station:TokyoMetro.Hanzomon.Hanzomon",
-                        "weekdayDepartures": [
-                            "05:08"
-                        ]
+                        "weekdayDepartures": ["05:08"]
                     },
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:06"
-                        ],
+                        "saturdayHolidayDepartures": ["05:06"],
                         "stationId": "Station:TokyoMetro.Hanzomon.KiyosumiShirakawa",
-                        "weekdayDepartures": [
-                            "05:06"
-                        ]
+                        "weekdayDepartures": ["05:06"]
                     }
                 ],
                 "isAscending": true,
@@ -103,43 +95,22 @@
                     {
                         "saturdayHolidayDepartures": [],
                         "stationId": "Station:TokyoMetro.Hanzomon.Hanzomon",
-                        "weekdayDepartures": [
-                            "07:38"
-                        ]
+                        "weekdayDepartures": ["07:38"]
                     },
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:02"
-                        ],
+                        "saturdayHolidayDepartures": ["05:02"],
                         "stationId": "Station:TokyoMetro.Hanzomon.Suitengumae",
-                        "weekdayDepartures": [
-                            "05:02"
-                        ]
+                        "weekdayDepartures": ["05:02"]
                     },
                     {
                         "saturdayHolidayDepartures": [],
                         "stationId": "Station:TokyoMetro.Hanzomon.KiyosumiShirakawa",
-                        "weekdayDepartures": [
-                            "07:05",
-                            "07:30",
-                            "07:39",
-                            "07:45",
-                            "07:57",
-                            "08:06",
-                            "08:17",
-                            "08:27",
-                            "08:36"
-                        ]
+                        "weekdayDepartures": ["07:05", "07:30", "07:39", "07:45", "07:57", "08:06", "08:17", "08:27", "08:36"]
                     },
                     {
-                        "saturdayHolidayDepartures": [
-                            "06:13"
-                        ],
+                        "saturdayHolidayDepartures": ["06:13"],
                         "stationId": "Station:TokyoMetro.Hanzomon.Sumiyoshi",
-                        "weekdayDepartures": [
-                            "05:57",
-                            "17:52"
-                        ]
+                        "weekdayDepartures": ["05:57", "17:52"]
                     }
                 ],
                 "isAscending": false,
@@ -205,21 +176,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [
-            2,
-            3,
-            2,
-            2,
-            3,
-            2,
-            3,
-            2,
-            3,
-            3,
-            3,
-            2,
-            2
-        ],
+        "hopTimesMinutes": [2, 3, 2, 2, 3, 2, 3, 2, 3, 3, 3, 2, 2],
         "id": "Railway:TokyoMetro.Hanzomon",
         "isLoop": false,
         "nameEn": "Hanzomon Line",

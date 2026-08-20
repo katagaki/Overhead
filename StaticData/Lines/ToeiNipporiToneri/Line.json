@@ -15,13 +15,9 @@
                 "id": "static.RailDirection:Toei.NipporiToneri.MinumadaiShinsuikoen",
                 "intermediateOrigins": [
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:36"
-                        ],
+                        "saturdayHolidayDepartures": ["05:36"],
                         "stationId": "Station:Toei.NipporiToneri.ToneriKoen",
-                        "weekdayDepartures": [
-                            "05:36"
-                        ]
+                        "weekdayDepartures": ["05:36"]
                     }
                 ],
                 "isAscending": true,
@@ -154,20 +150,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [
-            2,
-            2,
-            2,
-            2,
-            1,
-            1,
-            2,
-            2,
-            1,
-            2,
-            1,
-            2
-        ],
+        "hopTimesMinutes": [2, 2, 2, 2, 1, 1, 2, 2, 1, 2, 1, 2],
         "id": "Railway:Toei.NipporiToneri",
         "isLoop": false,
         "nameEn": "Nippori-Toneri Liner",

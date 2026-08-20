@@ -104,13 +104,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [
-            3,
-            2,
-            4,
-            2,
-            3
-        ],
+        "hopTimesMinutes": [3, 2, 4, 2, 3],
         "id": "Railway:Keisei.Chihara",
         "isLoop": false,
         "nameEn": "Keisei Chihara Line",

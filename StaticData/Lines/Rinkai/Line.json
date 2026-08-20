@@ -15,13 +15,9 @@
                 "id": "static.RailDirection:TWR.Rinkai.Osaki",
                 "intermediateOrigins": [
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:19"
-                        ],
+                        "saturdayHolidayDepartures": ["05:19"],
                         "stationId": "Station:TWR.Rinkai.TokyoTeleport",
-                        "weekdayDepartures": [
-                            "05:19"
-                        ]
+                        "weekdayDepartures": ["05:19"]
                     }
                 ],
                 "isAscending": true,
@@ -186,23 +182,9 @@
                 "id": "static.RailDirection:TWR.Rinkai.ShinKiba",
                 "intermediateOrigins": [
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:27",
-                            "05:37",
-                            "06:07",
-                            "06:22",
-                            "06:55"
-                        ],
+                        "saturdayHolidayDepartures": ["05:27", "05:37", "06:07", "06:22", "06:55"],
                         "stationId": "Station:TWR.Rinkai.TokyoTeleport",
-                        "weekdayDepartures": [
-                            "05:27",
-                            "05:37",
-                            "06:07",
-                            "06:23",
-                            "06:38",
-                            "16:07",
-                            "17:03"
-                        ]
+                        "weekdayDepartures": ["05:27", "05:37", "06:07", "06:23", "06:38", "16:07", "17:03"]
                     }
                 ],
                 "isAscending": false,

@@ -272,10 +272,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [
-            3.0,
-            4.0
-        ],
+        "hopTimesMinutes": [3.0, 4.0],
         "id": "Railway:Kantetsu.Ryugasaki",
         "isLoop": false,
         "nameEn": "Kanto Railway Ryugasaki Line",
@@ -324,11 +321,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    342,
-                    345,
-                    349
-                ],
+                "stops": [342, 345, 349],
                 "terminates": true,
                 "type": "Local"
             },
@@ -337,11 +330,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    361,
-                    364,
-                    368
-                ],
+                "stops": [361, 364, 368],
                 "terminates": true,
                 "type": "Local"
             },
@@ -350,11 +339,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    381,
-                    384,
-                    388
-                ],
+                "stops": [381, 384, 388],
                 "terminates": true,
                 "type": "Local"
             },
@@ -363,11 +348,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    407,
-                    410,
-                    414
-                ],
+                "stops": [407, 410, 414],
                 "terminates": true,
                 "type": "Local"
             },
@@ -376,11 +357,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    429,
-                    432,
-                    436
-                ],
+                "stops": [429, 432, 436],
                 "terminates": true,
                 "type": "Local"
             },
@@ -389,11 +366,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    449,
-                    452,
-                    456
-                ],
+                "stops": [449, 452, 456],
                 "terminates": true,
                 "type": "Local"
             },
@@ -402,11 +375,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    473,
-                    476,
-                    480
-                ],
+                "stops": [473, 476, 480],
                 "terminates": true,
                 "type": "Local"
             },
@@ -415,11 +384,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    497,
-                    500,
-                    504
-                ],
+                "stops": [497, 500, 504],
                 "terminates": true,
                 "type": "Local"
             },
@@ -428,11 +393,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    520,
-                    523,
-                    527
-                ],
+                "stops": [520, 523, 527],
                 "terminates": true,
                 "type": "Local"
             },
@@ -441,11 +402,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    555,
-                    558,
-                    562
-                ],
+                "stops": [555, 558, 562],
                 "terminates": true,
                 "type": "Local"
             },
@@ -454,11 +411,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    590,
-                    593,
-                    597
-                ],
+                "stops": [590, 593, 597],
                 "terminates": true,
                 "type": "Local"
             },
@@ -467,11 +420,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    625,
-                    628,
-                    632
-                ],
+                "stops": [625, 628, 632],
                 "terminates": true,
                 "type": "Local"
             },
@@ -480,11 +429,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    650,
-                    653,
-                    657
-                ],
+                "stops": [650, 653, 657],
                 "terminates": true,
                 "type": "Local"
             },
@@ -493,11 +438,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    685,
-                    688,
-                    692
-                ],
+                "stops": [685, 688, 692],
                 "terminates": true,
                 "type": "Local"
             },
@@ -506,11 +447,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    710,
-                    713,
-                    717
-                ],
+                "stops": [710, 713, 717],
                 "terminates": true,
                 "type": "Local"
             },
@@ -519,11 +456,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    745,
-                    748,
-                    752
-                ],
+                "stops": [745, 748, 752],
                 "terminates": true,
                 "type": "Local"
             },
@@ -532,11 +465,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    770,
-                    773,
-                    777
-                ],
+                "stops": [770, 773, 777],
                 "terminates": true,
                 "type": "Local"
             },
@@ -545,11 +474,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    805,
-                    808,
-                    812
-                ],
+                "stops": [805, 808, 812],
                 "terminates": true,
                 "type": "Local"
             },
@@ -558,11 +483,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    830,
-                    833,
-                    837
-                ],
+                "stops": [830, 833, 837],
                 "terminates": true,
                 "type": "Local"
             },
@@ -571,11 +492,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    865,
-                    868,
-                    872
-                ],
+                "stops": [865, 868, 872],
                 "terminates": true,
                 "type": "Local"
             },
@@ -584,11 +501,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    890,
-                    893,
-                    897
-                ],
+                "stops": [890, 893, 897],
                 "terminates": true,
                 "type": "Local"
             },
@@ -597,11 +510,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    925,
-                    928,
-                    932
-                ],
+                "stops": [925, 928, 932],
                 "terminates": true,
                 "type": "Local"
             },
@@ -610,11 +519,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    960,
-                    963,
-                    967
-                ],
+                "stops": [960, 963, 967],
                 "terminates": true,
                 "type": "Local"
             },
@@ -623,11 +528,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    990,
-                    993,
-                    997
-                ],
+                "stops": [990, 993, 997],
                 "terminates": true,
                 "type": "Local"
             },
@@ -636,11 +537,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1010,
-                    1013,
-                    1017
-                ],
+                "stops": [1010, 1013, 1017],
                 "terminates": true,
                 "type": "Local"
             },
@@ -649,11 +546,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1030,
-                    1033,
-                    1037
-                ],
+                "stops": [1030, 1033, 1037],
                 "terminates": true,
                 "type": "Local"
             },
@@ -662,11 +555,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1055,
-                    1058,
-                    1062
-                ],
+                "stops": [1055, 1058, 1062],
                 "terminates": true,
                 "type": "Local"
             },
@@ -675,11 +564,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1095,
-                    1098,
-                    1102
-                ],
+                "stops": [1095, 1098, 1102],
                 "terminates": true,
                 "type": "Local"
             },
@@ -688,11 +573,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1115,
-                    1118,
-                    1122
-                ],
+                "stops": [1115, 1118, 1122],
                 "terminates": true,
                 "type": "Local"
             },
@@ -701,11 +582,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1135,
-                    1138,
-                    1142
-                ],
+                "stops": [1135, 1138, 1142],
                 "terminates": true,
                 "type": "Local"
             },
@@ -714,11 +591,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1165,
-                    1168,
-                    1172
-                ],
+                "stops": [1165, 1168, 1172],
                 "terminates": true,
                 "type": "Local"
             },
@@ -727,11 +600,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1185,
-                    1188,
-                    1192
-                ],
+                "stops": [1185, 1188, 1192],
                 "terminates": true,
                 "type": "Local"
             },
@@ -740,11 +609,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1209,
-                    1212,
-                    1216
-                ],
+                "stops": [1209, 1212, 1216],
                 "terminates": true,
                 "type": "Local"
             },
@@ -753,11 +618,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1242,
-                    1245,
-                    1249
-                ],
+                "stops": [1242, 1245, 1249],
                 "terminates": true,
                 "type": "Local"
             },
@@ -766,11 +627,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1268,
-                    1271,
-                    1275
-                ],
+                "stops": [1268, 1271, 1275],
                 "terminates": true,
                 "type": "Local"
             },
@@ -779,11 +636,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1295,
-                    1298,
-                    1302
-                ],
+                "stops": [1295, 1298, 1302],
                 "terminates": true,
                 "type": "Local"
             },
@@ -792,11 +645,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1320,
-                    1323,
-                    1327
-                ],
+                "stops": [1320, 1323, 1327],
                 "terminates": true,
                 "type": "Local"
             },
@@ -805,11 +654,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1350,
-                    1353,
-                    1357
-                ],
+                "stops": [1350, 1353, 1357],
                 "terminates": true,
                 "type": "Local"
             },
@@ -818,11 +663,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1375,
-                    1378,
-                    1382
-                ],
+                "stops": [1375, 1378, 1382],
                 "terminates": true,
                 "type": "Local"
             },
@@ -831,11 +672,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1405,
-                    1408,
-                    1412
-                ],
+                "stops": [1405, 1408, 1412],
                 "terminates": true,
                 "type": "Local"
             },
@@ -844,11 +681,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    326,
-                    329,
-                    333
-                ],
+                "stops": [326, 329, 333],
                 "terminates": true,
                 "type": "Local"
             },
@@ -857,11 +690,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    352,
-                    355,
-                    359
-                ],
+                "stops": [352, 355, 359],
                 "terminates": true,
                 "type": "Local"
             },
@@ -870,11 +699,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    371,
-                    374,
-                    378
-                ],
+                "stops": [371, 374, 378],
                 "terminates": true,
                 "type": "Local"
             },
@@ -883,11 +708,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    391,
-                    394,
-                    398
-                ],
+                "stops": [391, 394, 398],
                 "terminates": true,
                 "type": "Local"
             },
@@ -896,11 +717,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    419,
-                    422,
-                    426
-                ],
+                "stops": [419, 422, 426],
                 "terminates": true,
                 "type": "Local"
             },
@@ -909,11 +726,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    439,
-                    442,
-                    446
-                ],
+                "stops": [439, 442, 446],
                 "terminates": true,
                 "type": "Local"
             },
@@ -922,11 +735,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    459,
-                    462,
-                    466
-                ],
+                "stops": [459, 462, 466],
                 "terminates": true,
                 "type": "Local"
             },
@@ -935,11 +744,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    484,
-                    487,
-                    491
-                ],
+                "stops": [484, 487, 491],
                 "terminates": true,
                 "type": "Local"
             },
@@ -948,11 +753,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    506,
-                    509,
-                    513
-                ],
+                "stops": [506, 509, 513],
                 "terminates": true,
                 "type": "Local"
             },
@@ -961,11 +762,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    540,
-                    543,
-                    547
-                ],
+                "stops": [540, 543, 547],
                 "terminates": true,
                 "type": "Local"
             },
@@ -974,11 +771,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    568,
-                    571,
-                    575
-                ],
+                "stops": [568, 571, 575],
                 "terminates": true,
                 "type": "Local"
             },
@@ -987,11 +780,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    600,
-                    603,
-                    607
-                ],
+                "stops": [600, 603, 607],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1000,11 +789,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    635,
-                    638,
-                    642
-                ],
+                "stops": [635, 638, 642],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1013,11 +798,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    660,
-                    663,
-                    667
-                ],
+                "stops": [660, 663, 667],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1026,11 +807,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    695,
-                    698,
-                    702
-                ],
+                "stops": [695, 698, 702],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1039,11 +816,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    720,
-                    723,
-                    727
-                ],
+                "stops": [720, 723, 727],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1052,11 +825,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    755,
-                    758,
-                    762
-                ],
+                "stops": [755, 758, 762],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1065,11 +834,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    780,
-                    783,
-                    787
-                ],
+                "stops": [780, 783, 787],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1078,11 +843,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    815,
-                    818,
-                    822
-                ],
+                "stops": [815, 818, 822],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1091,11 +852,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    840,
-                    843,
-                    847
-                ],
+                "stops": [840, 843, 847],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1104,11 +861,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    875,
-                    878,
-                    882
-                ],
+                "stops": [875, 878, 882],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1117,11 +870,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    910,
-                    913,
-                    917
-                ],
+                "stops": [910, 913, 917],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1130,11 +879,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    935,
-                    938,
-                    942
-                ],
+                "stops": [935, 938, 942],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1143,11 +888,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    970,
-                    973,
-                    977
-                ],
+                "stops": [970, 973, 977],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1156,11 +897,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1000,
-                    1003,
-                    1007
-                ],
+                "stops": [1000, 1003, 1007],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1169,11 +906,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1020,
-                    1023,
-                    1027
-                ],
+                "stops": [1020, 1023, 1027],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1182,11 +915,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1045,
-                    1048,
-                    1052
-                ],
+                "stops": [1045, 1048, 1052],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1195,11 +924,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1065,
-                    1068,
-                    1072
-                ],
+                "stops": [1065, 1068, 1072],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1208,11 +933,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1105,
-                    1108,
-                    1112
-                ],
+                "stops": [1105, 1108, 1112],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1221,11 +942,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1125,
-                    1128,
-                    1132
-                ],
+                "stops": [1125, 1128, 1132],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1234,11 +951,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1145,
-                    1148,
-                    1152
-                ],
+                "stops": [1145, 1148, 1152],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1247,11 +960,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1175,
-                    1178,
-                    1182
-                ],
+                "stops": [1175, 1178, 1182],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1260,11 +969,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1195,
-                    1198,
-                    1202
-                ],
+                "stops": [1195, 1198, 1202],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1273,11 +978,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1218,
-                    1221,
-                    1225
-                ],
+                "stops": [1218, 1221, 1225],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1286,11 +987,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1258,
-                    1261,
-                    1265
-                ],
+                "stops": [1258, 1261, 1265],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1299,11 +996,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1278,
-                    1281,
-                    1285
-                ],
+                "stops": [1278, 1281, 1285],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1312,11 +1005,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1305,
-                    1308,
-                    1312
-                ],
+                "stops": [1305, 1308, 1312],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1325,11 +1014,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1330,
-                    1333,
-                    1337
-                ],
+                "stops": [1330, 1333, 1337],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1338,11 +1023,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1360,
-                    1363,
-                    1367
-                ],
+                "stops": [1360, 1363, 1367],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1351,11 +1032,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1385,
-                    1388,
-                    1392
-                ],
+                "stops": [1385, 1388, 1392],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1364,11 +1041,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    342,
-                    345,
-                    349
-                ],
+                "stops": [342, 345, 349],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1377,11 +1050,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    361,
-                    364,
-                    368
-                ],
+                "stops": [361, 364, 368],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1390,11 +1059,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    381,
-                    384,
-                    388
-                ],
+                "stops": [381, 384, 388],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1403,11 +1068,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    407,
-                    410,
-                    414
-                ],
+                "stops": [407, 410, 414],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1416,11 +1077,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    429,
-                    432,
-                    436
-                ],
+                "stops": [429, 432, 436],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1429,11 +1086,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    449,
-                    452,
-                    456
-                ],
+                "stops": [449, 452, 456],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1442,11 +1095,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    473,
-                    476,
-                    480
-                ],
+                "stops": [473, 476, 480],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1455,11 +1104,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    497,
-                    500,
-                    504
-                ],
+                "stops": [497, 500, 504],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1468,11 +1113,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    520,
-                    523,
-                    527
-                ],
+                "stops": [520, 523, 527],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1481,11 +1122,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    555,
-                    558,
-                    562
-                ],
+                "stops": [555, 558, 562],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1494,11 +1131,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    590,
-                    593,
-                    597
-                ],
+                "stops": [590, 593, 597],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1507,11 +1140,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    625,
-                    628,
-                    632
-                ],
+                "stops": [625, 628, 632],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1520,11 +1149,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    650,
-                    653,
-                    657
-                ],
+                "stops": [650, 653, 657],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1533,11 +1158,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    685,
-                    688,
-                    692
-                ],
+                "stops": [685, 688, 692],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1546,11 +1167,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    710,
-                    713,
-                    717
-                ],
+                "stops": [710, 713, 717],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1559,11 +1176,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    745,
-                    748,
-                    752
-                ],
+                "stops": [745, 748, 752],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1572,11 +1185,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    770,
-                    773,
-                    777
-                ],
+                "stops": [770, 773, 777],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1585,11 +1194,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    805,
-                    808,
-                    812
-                ],
+                "stops": [805, 808, 812],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1598,11 +1203,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    830,
-                    833,
-                    837
-                ],
+                "stops": [830, 833, 837],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1611,11 +1212,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    865,
-                    868,
-                    872
-                ],
+                "stops": [865, 868, 872],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1624,11 +1221,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    890,
-                    893,
-                    897
-                ],
+                "stops": [890, 893, 897],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1637,11 +1230,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    925,
-                    928,
-                    932
-                ],
+                "stops": [925, 928, 932],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1650,11 +1239,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    960,
-                    963,
-                    967
-                ],
+                "stops": [960, 963, 967],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1663,11 +1248,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    990,
-                    993,
-                    997
-                ],
+                "stops": [990, 993, 997],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1676,11 +1257,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1010,
-                    1013,
-                    1017
-                ],
+                "stops": [1010, 1013, 1017],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1689,11 +1266,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1030,
-                    1033,
-                    1037
-                ],
+                "stops": [1030, 1033, 1037],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1702,11 +1275,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1055,
-                    1058,
-                    1062
-                ],
+                "stops": [1055, 1058, 1062],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1715,11 +1284,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1095,
-                    1098,
-                    1102
-                ],
+                "stops": [1095, 1098, 1102],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1728,11 +1293,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1115,
-                    1118,
-                    1122
-                ],
+                "stops": [1115, 1118, 1122],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1741,11 +1302,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1135,
-                    1138,
-                    1142
-                ],
+                "stops": [1135, 1138, 1142],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1754,11 +1311,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1165,
-                    1168,
-                    1172
-                ],
+                "stops": [1165, 1168, 1172],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1767,11 +1320,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1185,
-                    1188,
-                    1192
-                ],
+                "stops": [1185, 1188, 1192],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1780,11 +1329,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1209,
-                    1212,
-                    1216
-                ],
+                "stops": [1209, 1212, 1216],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1793,11 +1338,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1242,
-                    1245,
-                    1249
-                ],
+                "stops": [1242, 1245, 1249],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1806,11 +1347,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1268,
-                    1271,
-                    1275
-                ],
+                "stops": [1268, 1271, 1275],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1819,11 +1356,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1295,
-                    1298,
-                    1302
-                ],
+                "stops": [1295, 1298, 1302],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1832,11 +1365,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1320,
-                    1323,
-                    1327
-                ],
+                "stops": [1320, 1323, 1327],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1845,11 +1374,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1350,
-                    1353,
-                    1357
-                ],
+                "stops": [1350, 1353, 1357],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1858,11 +1383,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1375,
-                    1378,
-                    1382
-                ],
+                "stops": [1375, 1378, 1382],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1871,11 +1392,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1405,
-                    1408,
-                    1412
-                ],
+                "stops": [1405, 1408, 1412],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1884,11 +1401,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    326,
-                    329,
-                    333
-                ],
+                "stops": [326, 329, 333],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1897,11 +1410,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    352,
-                    355,
-                    359
-                ],
+                "stops": [352, 355, 359],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1910,11 +1419,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    371,
-                    374,
-                    378
-                ],
+                "stops": [371, 374, 378],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1923,11 +1428,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    391,
-                    394,
-                    398
-                ],
+                "stops": [391, 394, 398],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1936,11 +1437,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    419,
-                    422,
-                    426
-                ],
+                "stops": [419, 422, 426],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1949,11 +1446,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    439,
-                    442,
-                    446
-                ],
+                "stops": [439, 442, 446],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1962,11 +1455,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    459,
-                    462,
-                    466
-                ],
+                "stops": [459, 462, 466],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1975,11 +1464,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    484,
-                    487,
-                    491
-                ],
+                "stops": [484, 487, 491],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1988,11 +1473,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    506,
-                    509,
-                    513
-                ],
+                "stops": [506, 509, 513],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2001,11 +1482,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    540,
-                    543,
-                    547
-                ],
+                "stops": [540, 543, 547],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2014,11 +1491,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    568,
-                    571,
-                    575
-                ],
+                "stops": [568, 571, 575],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2027,11 +1500,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    600,
-                    603,
-                    607
-                ],
+                "stops": [600, 603, 607],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2040,11 +1509,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    635,
-                    638,
-                    642
-                ],
+                "stops": [635, 638, 642],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2053,11 +1518,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    660,
-                    663,
-                    667
-                ],
+                "stops": [660, 663, 667],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2066,11 +1527,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    695,
-                    698,
-                    702
-                ],
+                "stops": [695, 698, 702],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2079,11 +1536,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    720,
-                    723,
-                    727
-                ],
+                "stops": [720, 723, 727],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2092,11 +1545,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    755,
-                    758,
-                    762
-                ],
+                "stops": [755, 758, 762],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2105,11 +1554,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    780,
-                    783,
-                    787
-                ],
+                "stops": [780, 783, 787],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2118,11 +1563,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    815,
-                    818,
-                    822
-                ],
+                "stops": [815, 818, 822],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2131,11 +1572,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    840,
-                    843,
-                    847
-                ],
+                "stops": [840, 843, 847],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2144,11 +1581,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    875,
-                    878,
-                    882
-                ],
+                "stops": [875, 878, 882],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2157,11 +1590,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    910,
-                    913,
-                    917
-                ],
+                "stops": [910, 913, 917],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2170,11 +1599,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    935,
-                    938,
-                    942
-                ],
+                "stops": [935, 938, 942],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2183,11 +1608,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    970,
-                    973,
-                    977
-                ],
+                "stops": [970, 973, 977],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2196,11 +1617,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1000,
-                    1003,
-                    1007
-                ],
+                "stops": [1000, 1003, 1007],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2209,11 +1626,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1020,
-                    1023,
-                    1027
-                ],
+                "stops": [1020, 1023, 1027],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2222,11 +1635,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1045,
-                    1048,
-                    1052
-                ],
+                "stops": [1045, 1048, 1052],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2235,11 +1644,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1065,
-                    1068,
-                    1072
-                ],
+                "stops": [1065, 1068, 1072],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2248,11 +1653,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1105,
-                    1108,
-                    1112
-                ],
+                "stops": [1105, 1108, 1112],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2261,11 +1662,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1125,
-                    1128,
-                    1132
-                ],
+                "stops": [1125, 1128, 1132],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2274,11 +1671,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1145,
-                    1148,
-                    1152
-                ],
+                "stops": [1145, 1148, 1152],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2287,11 +1680,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1175,
-                    1178,
-                    1182
-                ],
+                "stops": [1175, 1178, 1182],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2300,11 +1689,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1195,
-                    1198,
-                    1202
-                ],
+                "stops": [1195, 1198, 1202],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2313,11 +1698,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1218,
-                    1221,
-                    1225
-                ],
+                "stops": [1218, 1221, 1225],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2326,11 +1707,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1258,
-                    1261,
-                    1265
-                ],
+                "stops": [1258, 1261, 1265],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2339,11 +1716,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1278,
-                    1281,
-                    1285
-                ],
+                "stops": [1278, 1281, 1285],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2352,11 +1725,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1305,
-                    1308,
-                    1312
-                ],
+                "stops": [1305, 1308, 1312],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2365,11 +1734,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1330,
-                    1333,
-                    1337
-                ],
+                "stops": [1330, 1333, 1337],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2378,11 +1743,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1360,
-                    1363,
-                    1367
-                ],
+                "stops": [1360, 1363, 1367],
                 "terminates": true,
                 "type": "Local"
             },
@@ -2391,18 +1752,11 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1385,
-                    1388,
-                    1392
-                ],
+                "stops": [1385, 1388, 1392],
                 "terminates": true,
                 "type": "Local"
             }
         ],
-        "upHopTimesMinutes": [
-            4.0,
-            3.0
-        ]
+        "upHopTimesMinutes": [4.0, 3.0]
     }
 ]

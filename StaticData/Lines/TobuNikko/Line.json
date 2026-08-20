@@ -15,12 +15,7 @@
                         "continuesBeyond": false,
                         "departure": "05:48",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SectionExpress"
                     },
@@ -28,12 +23,7 @@
                         "continuesBeyond": false,
                         "departure": "06:07",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -41,12 +31,7 @@
                         "continuesBeyond": false,
                         "departure": "06:36",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -54,12 +39,7 @@
                         "continuesBeyond": false,
                         "departure": "06:51",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -67,12 +47,7 @@
                         "continuesBeyond": false,
                         "departure": "07:24",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SectionSemiExpress"
                     },
@@ -80,12 +55,7 @@
                         "continuesBeyond": false,
                         "departure": "07:59",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -93,12 +63,7 @@
                         "continuesBeyond": false,
                         "departure": "08:14",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SectionExpress"
                     },
@@ -106,12 +71,7 @@
                         "continuesBeyond": false,
                         "departure": "08:33",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -119,12 +79,7 @@
                         "continuesBeyond": false,
                         "departure": "08:44",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -132,12 +87,7 @@
                         "continuesBeyond": false,
                         "departure": "09:01",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -145,12 +95,7 @@
                         "continuesBeyond": false,
                         "departure": "09:18",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SectionSemiExpress"
                     },
@@ -158,12 +103,7 @@
                         "continuesBeyond": false,
                         "departure": "09:24",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -171,12 +111,7 @@
                         "continuesBeyond": false,
                         "departure": "09:42",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -184,12 +119,7 @@
                         "continuesBeyond": false,
                         "departure": "09:54",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SectionSemiExpress"
                     },
@@ -197,12 +127,7 @@
                         "continuesBeyond": false,
                         "departure": "10:12",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SectionSemiExpress"
                     },
@@ -210,12 +135,7 @@
                         "continuesBeyond": false,
                         "departure": "10:24",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -223,12 +143,7 @@
                         "continuesBeyond": false,
                         "departure": "10:39",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -236,12 +151,7 @@
                         "continuesBeyond": false,
                         "departure": "10:45",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SectionExpress"
                     },
@@ -249,12 +159,7 @@
                         "continuesBeyond": false,
                         "departure": "11:01",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -262,12 +167,7 @@
                         "continuesBeyond": false,
                         "departure": "11:20",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -275,12 +175,7 @@
                         "continuesBeyond": false,
                         "departure": "11:42",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -288,12 +183,7 @@
                         "continuesBeyond": false,
                         "departure": "12:01",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -301,12 +191,7 @@
                         "continuesBeyond": false,
                         "departure": "12:20",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -314,12 +199,7 @@
                         "continuesBeyond": false,
                         "departure": "12:42",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -327,12 +207,7 @@
                         "continuesBeyond": false,
                         "departure": "13:01",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -340,12 +215,7 @@
                         "continuesBeyond": false,
                         "departure": "13:20",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -353,12 +223,7 @@
                         "continuesBeyond": false,
                         "departure": "13:42",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -366,12 +231,7 @@
                         "continuesBeyond": false,
                         "departure": "14:01",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -379,12 +239,7 @@
                         "continuesBeyond": false,
                         "departure": "14:20",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -392,12 +247,7 @@
                         "continuesBeyond": false,
                         "departure": "14:42",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -405,12 +255,7 @@
                         "continuesBeyond": false,
                         "departure": "15:01",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -418,12 +263,7 @@
                         "continuesBeyond": false,
                         "departure": "15:20",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -431,12 +271,7 @@
                         "continuesBeyond": false,
                         "departure": "15:51",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -444,12 +279,7 @@
                         "continuesBeyond": false,
                         "departure": "16:12",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -457,12 +287,7 @@
                         "continuesBeyond": false,
                         "departure": "16:31",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -470,12 +295,7 @@
                         "continuesBeyond": false,
                         "departure": "16:51",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -483,12 +303,7 @@
                         "continuesBeyond": false,
                         "departure": "17:13",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -496,12 +311,7 @@
                         "continuesBeyond": false,
                         "departure": "17:31",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -509,12 +319,7 @@
                         "continuesBeyond": false,
                         "departure": "17:54",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -522,12 +327,7 @@
                         "continuesBeyond": false,
                         "departure": "18:16",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -535,12 +335,7 @@
                         "continuesBeyond": false,
                         "departure": "18:32",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -548,12 +343,7 @@
                         "continuesBeyond": false,
                         "departure": "18:56",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -561,12 +351,7 @@
                         "continuesBeyond": false,
                         "departure": "19:16",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -574,12 +359,7 @@
                         "continuesBeyond": false,
                         "departure": "19:34",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -587,12 +367,7 @@
                         "continuesBeyond": false,
                         "departure": "19:56",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -600,12 +375,7 @@
                         "continuesBeyond": false,
                         "departure": "20:20",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -613,12 +383,7 @@
                         "continuesBeyond": false,
                         "departure": "20:33",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -626,12 +391,7 @@
                         "continuesBeyond": false,
                         "departure": "20:55",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -639,12 +399,7 @@
                         "continuesBeyond": false,
                         "departure": "21:16",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -652,12 +407,7 @@
                         "continuesBeyond": false,
                         "departure": "21:33",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -665,12 +415,7 @@
                         "continuesBeyond": false,
                         "departure": "22:13",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -678,12 +423,7 @@
                         "continuesBeyond": false,
                         "departure": "22:21",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -691,12 +431,7 @@
                         "continuesBeyond": false,
                         "departure": "22:47",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -704,12 +439,7 @@
                         "continuesBeyond": false,
                         "departure": "23:00",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -717,12 +447,7 @@
                         "continuesBeyond": false,
                         "departure": "23:10",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -730,12 +455,7 @@
                         "continuesBeyond": false,
                         "departure": "23:21",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -743,12 +463,7 @@
                         "continuesBeyond": false,
                         "departure": "23:35",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -756,12 +471,7 @@
                         "continuesBeyond": false,
                         "departure": "23:55",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -769,12 +479,7 @@
                         "continuesBeyond": false,
                         "departure": "24:06",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -782,12 +487,7 @@
                         "continuesBeyond": false,
                         "departure": "24:21",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -795,12 +495,7 @@
                         "continuesBeyond": false,
                         "departure": "24:38",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     }
@@ -810,12 +505,7 @@
                         "continuesBeyond": false,
                         "departure": "05:48",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SectionExpress"
                     },
@@ -823,12 +513,7 @@
                         "continuesBeyond": false,
                         "departure": "06:07",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -836,12 +521,7 @@
                         "continuesBeyond": false,
                         "departure": "06:51",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -849,12 +529,7 @@
                         "continuesBeyond": false,
                         "departure": "07:24",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SectionSemiExpress"
                     },
@@ -862,12 +537,7 @@
                         "continuesBeyond": false,
                         "departure": "07:59",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -875,12 +545,7 @@
                         "continuesBeyond": false,
                         "departure": "08:14",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -888,12 +553,7 @@
                         "continuesBeyond": false,
                         "departure": "08:21",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -901,12 +561,7 @@
                         "continuesBeyond": false,
                         "departure": "08:36",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -914,12 +569,7 @@
                         "continuesBeyond": false,
                         "departure": "08:53",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -927,12 +577,7 @@
                         "continuesBeyond": false,
                         "departure": "09:01",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -940,12 +585,7 @@
                         "continuesBeyond": false,
                         "departure": "09:26",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -953,12 +593,7 @@
                         "continuesBeyond": false,
                         "departure": "09:31",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SectionExpress"
                     },
@@ -966,12 +601,7 @@
                         "continuesBeyond": false,
                         "departure": "09:52",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -979,12 +609,7 @@
                         "continuesBeyond": false,
                         "departure": "10:02",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -992,12 +617,7 @@
                         "continuesBeyond": false,
                         "departure": "10:12",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1005,12 +625,7 @@
                         "continuesBeyond": false,
                         "departure": "10:16",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SectionSemiExpress"
                     },
@@ -1018,12 +633,7 @@
                         "continuesBeyond": false,
                         "departure": "10:24",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1031,12 +641,7 @@
                         "continuesBeyond": false,
                         "departure": "10:42",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1044,12 +649,7 @@
                         "continuesBeyond": false,
                         "departure": "11:01",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1057,12 +657,7 @@
                         "continuesBeyond": false,
                         "departure": "11:20",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1070,12 +665,7 @@
                         "continuesBeyond": false,
                         "departure": "11:43",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1083,12 +673,7 @@
                         "continuesBeyond": false,
                         "departure": "12:01",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1096,12 +681,7 @@
                         "continuesBeyond": false,
                         "departure": "12:20",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1109,12 +689,7 @@
                         "continuesBeyond": false,
                         "departure": "12:42",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1122,12 +697,7 @@
                         "continuesBeyond": false,
                         "departure": "13:01",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1135,12 +705,7 @@
                         "continuesBeyond": false,
                         "departure": "13:20",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1148,12 +713,7 @@
                         "continuesBeyond": false,
                         "departure": "13:42",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1161,12 +721,7 @@
                         "continuesBeyond": false,
                         "departure": "14:01",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1174,12 +729,7 @@
                         "continuesBeyond": false,
                         "departure": "14:20",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1187,12 +737,7 @@
                         "continuesBeyond": false,
                         "departure": "14:42",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1200,12 +745,7 @@
                         "continuesBeyond": false,
                         "departure": "15:01",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1213,12 +753,7 @@
                         "continuesBeyond": false,
                         "departure": "15:20",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1226,12 +761,7 @@
                         "continuesBeyond": false,
                         "departure": "15:51",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1239,12 +769,7 @@
                         "continuesBeyond": false,
                         "departure": "16:12",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1252,12 +777,7 @@
                         "continuesBeyond": false,
                         "departure": "16:31",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1265,12 +785,7 @@
                         "continuesBeyond": false,
                         "departure": "16:51",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1278,12 +793,7 @@
                         "continuesBeyond": false,
                         "departure": "17:09",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1291,12 +801,7 @@
                         "continuesBeyond": false,
                         "departure": "17:31",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1304,12 +809,7 @@
                         "continuesBeyond": false,
                         "departure": "17:54",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1317,12 +817,7 @@
                         "continuesBeyond": false,
                         "departure": "17:59",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SectionSemiExpress"
                     },
@@ -1330,12 +825,7 @@
                         "continuesBeyond": false,
                         "departure": "18:16",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1343,12 +833,7 @@
                         "continuesBeyond": false,
                         "departure": "18:32",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1356,12 +841,7 @@
                         "continuesBeyond": false,
                         "departure": "18:51",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SectionSemiExpress"
                     },
@@ -1369,12 +849,7 @@
                         "continuesBeyond": false,
                         "departure": "18:55",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1382,12 +857,7 @@
                         "continuesBeyond": false,
                         "departure": "19:16",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1395,12 +865,7 @@
                         "continuesBeyond": false,
                         "departure": "19:34",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1408,12 +873,7 @@
                         "continuesBeyond": false,
                         "departure": "19:46",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SectionSemiExpress"
                     },
@@ -1421,12 +881,7 @@
                         "continuesBeyond": false,
                         "departure": "19:56",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1434,12 +889,7 @@
                         "continuesBeyond": false,
                         "departure": "20:13",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SectionSemiExpress"
                     },
@@ -1447,12 +897,7 @@
                         "continuesBeyond": false,
                         "departure": "20:20",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1460,12 +905,7 @@
                         "continuesBeyond": false,
                         "departure": "20:33",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1473,12 +913,7 @@
                         "continuesBeyond": false,
                         "departure": "20:46",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SectionSemiExpress"
                     },
@@ -1486,12 +921,7 @@
                         "continuesBeyond": false,
                         "departure": "20:56",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1499,12 +929,7 @@
                         "continuesBeyond": false,
                         "departure": "21:16",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1512,12 +937,7 @@
                         "continuesBeyond": false,
                         "departure": "21:33",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1525,12 +945,7 @@
                         "continuesBeyond": false,
                         "departure": "21:45",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SectionSemiExpress"
                     },
@@ -1538,12 +953,7 @@
                         "continuesBeyond": false,
                         "departure": "21:59",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -1551,12 +961,7 @@
                         "continuesBeyond": false,
                         "departure": "22:21",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     },
@@ -1564,12 +969,7 @@
                         "continuesBeyond": false,
                         "departure": "22:29",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -1577,12 +977,7 @@
                         "continuesBeyond": false,
                         "departure": "22:47",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -1590,12 +985,7 @@
                         "continuesBeyond": false,
                         "departure": "23:00",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -1603,12 +993,7 @@
                         "continuesBeyond": false,
                         "departure": "23:10",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -1616,12 +1001,7 @@
                         "continuesBeyond": false,
                         "departure": "23:21",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -1629,12 +1009,7 @@
                         "continuesBeyond": false,
                         "departure": "23:35",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -1642,12 +1017,7 @@
                         "continuesBeyond": false,
                         "departure": "23:55",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -1655,12 +1025,7 @@
                         "continuesBeyond": false,
                         "departure": "24:11",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -1668,12 +1033,7 @@
                         "continuesBeyond": false,
                         "departure": "24:30",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "SemiExpress"
                     },
@@ -1681,12 +1041,7 @@
                         "continuesBeyond": false,
                         "departure": "24:38",
                         "startsHere": false,
-                        "stopIndices": [
-                            0,
-                            1,
-                            2,
-                            3
-                        ],
+                        "stopIndices": [0, 1, 2, 3],
                         "terminusStationId": "Station:Tobu.Nikko.MinamiKurihashi",
                         "trainType": "Express"
                     }
@@ -1694,166 +1049,24 @@
                 "id": "static.RailDirection:Tobu.Nikko.TobuNikko",
                 "intermediateOrigins": [
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:34",
-                            "06:00",
-                            "06:19",
-                            "06:33",
-                            "06:48",
-                            "07:03",
-                            "07:07",
-                            "07:22",
-                            "07:38",
-                            "07:57",
-                            "08:03",
-                            "08:28",
-                            "08:48",
-                            "09:09",
-                            "09:38",
-                            "10:07",
-                            "10:46",
-                            "11:02",
-                            "11:32",
-                            "12:02",
-                            "12:32",
-                            "13:02",
-                            "13:32",
-                            "14:02",
-                            "14:32",
-                            "15:02",
-                            "15:32",
-                            "16:03",
-                            "16:24",
-                            "16:47",
-                            "17:08",
-                            "17:30",
-                            "17:48",
-                            "18:12",
-                            "18:35",
-                            "18:54",
-                            "19:13",
-                            "19:33",
-                            "19:53",
-                            "20:13",
-                            "20:32",
-                            "20:52",
-                            "21:13",
-                            "21:33",
-                            "21:53",
-                            "22:33",
-                            "23:07",
-                            "23:47"
-                        ],
+                        "saturdayHolidayDepartures": ["05:34", "06:00", "06:19", "06:33", "06:48", "07:03", "07:07", "07:22", "07:38", "07:57", "08:03", "08:28", "08:48", "09:09", "09:38", "10:07", "10:46", "11:02", "11:32", "12:02", "12:32", "13:02", "13:32", "14:02", "14:32", "15:02", "15:32", "16:03", "16:24", "16:47", "17:08", "17:30", "17:48", "18:12", "18:35", "18:54", "19:13", "19:33", "19:53", "20:13", "20:32", "20:52", "21:13", "21:33", "21:53", "22:33", "23:07", "23:47"],
                         "stationId": "Station:Tobu.Nikko.MinamiKurihashi",
-                        "weekdayDepartures": [
-                            "05:34",
-                            "06:00",
-                            "06:19",
-                            "06:33",
-                            "06:48",
-                            "07:03",
-                            "07:07",
-                            "07:22",
-                            "07:38",
-                            "07:57",
-                            "08:03",
-                            "08:28",
-                            "08:48",
-                            "09:09",
-                            "09:38",
-                            "10:07",
-                            "10:46",
-                            "11:02",
-                            "11:32",
-                            "12:02",
-                            "12:32",
-                            "13:02",
-                            "13:32",
-                            "14:02",
-                            "14:32",
-                            "15:02",
-                            "15:32",
-                            "16:03",
-                            "16:24",
-                            "16:47",
-                            "17:08",
-                            "17:30",
-                            "17:48",
-                            "18:12",
-                            "18:35",
-                            "18:54",
-                            "19:13",
-                            "19:33",
-                            "19:53",
-                            "20:13",
-                            "20:32",
-                            "20:52",
-                            "21:13",
-                            "21:33",
-                            "21:53",
-                            "22:33",
-                            "23:07",
-                            "23:47"
-                        ]
+                        "weekdayDepartures": ["05:34", "06:00", "06:19", "06:33", "06:48", "07:03", "07:07", "07:22", "07:38", "07:57", "08:03", "08:28", "08:48", "09:09", "09:38", "10:07", "10:46", "11:02", "11:32", "12:02", "12:32", "13:02", "13:32", "14:02", "14:32", "15:02", "15:32", "16:03", "16:24", "16:47", "17:08", "17:30", "17:48", "18:12", "18:35", "18:54", "19:13", "19:33", "19:53", "20:13", "20:32", "20:52", "21:13", "21:33", "21:53", "22:33", "23:07", "23:47"]
                     },
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:30",
-                            "05:45",
-                            "06:43",
-                            "08:02",
-                            "15:40",
-                            "22:17",
-                            "23:17"
-                        ],
+                        "saturdayHolidayDepartures": ["05:30", "05:45", "06:43", "08:02", "15:40", "22:17", "23:17"],
                         "stationId": "Station:Tobu.Nikko.Tochigi",
-                        "weekdayDepartures": [
-                            "05:30",
-                            "05:45",
-                            "06:43",
-                            "08:02",
-                            "15:40",
-                            "22:17",
-                            "23:17"
-                        ]
+                        "weekdayDepartures": ["05:30", "05:45", "06:43", "08:02", "15:40", "22:17", "23:17"]
                     },
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:07",
-                            "07:01",
-                            "11:32",
-                            "18:55"
-                        ],
+                        "saturdayHolidayDepartures": ["05:07", "07:01", "11:32", "18:55"],
                         "stationId": "Station:Tobu.Nikko.ShinTochigi",
-                        "weekdayDepartures": [
-                            "05:07",
-                            "07:01",
-                            "11:32",
-                            "18:55"
-                        ]
+                        "weekdayDepartures": ["05:07", "07:01", "11:32", "18:55"]
                     },
                     {
-                        "saturdayHolidayDepartures": [
-                            "08:26",
-                            "09:15",
-                            "10:15",
-                            "10:49",
-                            "11:08",
-                            "14:14",
-                            "15:25",
-                            "22:07"
-                        ],
+                        "saturdayHolidayDepartures": ["08:26", "09:15", "10:15", "10:49", "11:08", "14:14", "15:25", "22:07"],
                         "stationId": "Station:Tobu.Nikko.ShimoImaichi",
-                        "weekdayDepartures": [
-                            "08:26",
-                            "09:15",
-                            "10:15",
-                            "10:49",
-                            "11:08",
-                            "14:14",
-                            "15:25",
-                            "22:07"
-                        ]
+                        "weekdayDepartures": ["08:26", "09:15", "10:15", "10:49", "11:08", "14:14", "15:25", "22:07"]
                     },
                     {
                         "saturdayHolidayDepartures": [],
@@ -1862,34 +1075,14 @@
                                 "continuesBeyond": false,
                                 "departure": "07:03",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    4,
-                                    7,
-                                    10,
-                                    11,
-                                    12,
-                                    18,
-                                    23,
-                                    25
-                                ],
+                                "stopIndices": [3, 4, 7, 10, 11, 12, 18, 23, 25],
                                 "trainType": "Express"
                             },
                             {
                                 "continuesBeyond": false,
                                 "departure": "08:03",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    4,
-                                    7,
-                                    10,
-                                    11,
-                                    12,
-                                    18,
-                                    23,
-                                    25
-                                ],
+                                "stopIndices": [3, 4, 7, 10, 11, 12, 18, 23, 25],
                                 "trainType": "Express"
                             }
                         ],
@@ -1900,34 +1093,14 @@
                                 "continuesBeyond": false,
                                 "departure": "07:03",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    4,
-                                    7,
-                                    10,
-                                    11,
-                                    12,
-                                    18,
-                                    23,
-                                    25
-                                ],
+                                "stopIndices": [3, 4, 7, 10, 11, 12, 18, 23, 25],
                                 "trainType": "Express"
                             },
                             {
                                 "continuesBeyond": false,
                                 "departure": "08:03",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    4,
-                                    7,
-                                    10,
-                                    11,
-                                    12,
-                                    18,
-                                    23,
-                                    25
-                                ],
+                                "stopIndices": [3, 4, 7, 10, 11, 12, 18, 23, 25],
                                 "trainType": "Express"
                             }
                         ]
@@ -1981,255 +1154,24 @@
                 "id": "static.RailDirection:Tobu.Nikko.TobuDobutsuKoen",
                 "intermediateOrigins": [
                     {
-                        "saturdayHolidayDepartures": [
-                            "04:59",
-                            "05:09",
-                            "05:23",
-                            "05:38",
-                            "05:59",
-                            "06:10",
-                            "06:23",
-                            "06:33",
-                            "06:39",
-                            "06:42",
-                            "06:53",
-                            "06:59",
-                            "07:07",
-                            "07:16",
-                            "07:27",
-                            "07:40",
-                            "07:54",
-                            "08:05",
-                            "08:21",
-                            "08:35",
-                            "08:51",
-                            "09:02",
-                            "09:12",
-                            "09:31",
-                            "09:40",
-                            "09:52",
-                            "10:15",
-                            "10:39",
-                            "10:56",
-                            "11:18",
-                            "11:38",
-                            "11:56",
-                            "12:18",
-                            "12:38",
-                            "12:56",
-                            "13:18",
-                            "13:38",
-                            "13:56",
-                            "14:18",
-                            "14:36",
-                            "14:58",
-                            "15:21",
-                            "15:38",
-                            "15:55",
-                            "16:09",
-                            "16:18",
-                            "16:38",
-                            "16:49",
-                            "17:11",
-                            "17:33",
-                            "17:53",
-                            "18:11",
-                            "18:26",
-                            "18:52",
-                            "19:11",
-                            "19:32",
-                            "19:53",
-                            "19:59",
-                            "20:11",
-                            "20:27",
-                            "20:42",
-                            "21:03",
-                            "21:10",
-                            "21:18",
-                            "21:33",
-                            "21:48",
-                            "22:07",
-                            "22:23",
-                            "22:45",
-                            "22:59",
-                            "23:18"
-                        ],
+                        "saturdayHolidayDepartures": ["04:59", "05:09", "05:23", "05:38", "05:59", "06:10", "06:23", "06:33", "06:39", "06:42", "06:53", "06:59", "07:07", "07:16", "07:27", "07:40", "07:54", "08:05", "08:21", "08:35", "08:51", "09:02", "09:12", "09:31", "09:40", "09:52", "10:15", "10:39", "10:56", "11:18", "11:38", "11:56", "12:18", "12:38", "12:56", "13:18", "13:38", "13:56", "14:18", "14:36", "14:58", "15:21", "15:38", "15:55", "16:09", "16:18", "16:38", "16:49", "17:11", "17:33", "17:53", "18:11", "18:26", "18:52", "19:11", "19:32", "19:53", "19:59", "20:11", "20:27", "20:42", "21:03", "21:10", "21:18", "21:33", "21:48", "22:07", "22:23", "22:45", "22:59", "23:18"],
                         "stationId": "Station:Tobu.Nikko.MinamiKurihashi",
-                        "weekdayDepartures": [
-                            "04:59",
-                            "05:09",
-                            "05:23",
-                            "05:38",
-                            "05:48",
-                            "05:55",
-                            "05:59",
-                            "06:14",
-                            "06:23",
-                            "06:33",
-                            "06:39",
-                            "06:45",
-                            "06:50",
-                            "06:53",
-                            "06:58",
-                            "07:05",
-                            "07:15",
-                            "07:20",
-                            "07:28",
-                            "07:37",
-                            "07:41",
-                            "07:54",
-                            "08:08",
-                            "08:22",
-                            "08:28",
-                            "08:51",
-                            "09:17",
-                            "09:32",
-                            "09:52",
-                            "10:14",
-                            "10:39",
-                            "10:56",
-                            "11:18",
-                            "11:38",
-                            "11:56",
-                            "12:18",
-                            "12:38",
-                            "12:56",
-                            "13:18",
-                            "13:38",
-                            "13:56",
-                            "14:18",
-                            "14:36",
-                            "14:58",
-                            "15:21",
-                            "15:38",
-                            "15:55",
-                            "16:09",
-                            "16:18",
-                            "16:38",
-                            "16:49",
-                            "17:12",
-                            "17:25",
-                            "17:33",
-                            "17:53",
-                            "18:11",
-                            "18:26",
-                            "18:53",
-                            "19:01",
-                            "19:11",
-                            "19:32",
-                            "19:48",
-                            "19:53",
-                            "20:11",
-                            "20:24",
-                            "20:42",
-                            "21:05",
-                            "21:30",
-                            "21:48",
-                            "22:11",
-                            "22:23",
-                            "22:45",
-                            "22:59",
-                            "23:18"
-                        ]
+                        "weekdayDepartures": ["04:59", "05:09", "05:23", "05:38", "05:48", "05:55", "05:59", "06:14", "06:23", "06:33", "06:39", "06:45", "06:50", "06:53", "06:58", "07:05", "07:15", "07:20", "07:28", "07:37", "07:41", "07:54", "08:08", "08:22", "08:28", "08:51", "09:17", "09:32", "09:52", "10:14", "10:39", "10:56", "11:18", "11:38", "11:56", "12:18", "12:38", "12:56", "13:18", "13:38", "13:56", "14:18", "14:36", "14:58", "15:21", "15:38", "15:55", "16:09", "16:18", "16:38", "16:49", "17:12", "17:25", "17:33", "17:53", "18:11", "18:26", "18:53", "19:01", "19:11", "19:32", "19:48", "19:53", "20:11", "20:24", "20:42", "21:05", "21:30", "21:48", "22:11", "22:23", "22:45", "22:59", "23:18"]
                     },
                     {
-                        "saturdayHolidayDepartures": [
-                            "04:58",
-                            "05:19",
-                            "05:39",
-                            "05:42",
-                            "06:12",
-                            "06:32",
-                            "07:00",
-                            "07:38",
-                            "08:16",
-                            "09:10",
-                            "10:30",
-                            "10:57",
-                            "11:24",
-                            "12:30",
-                            "14:30",
-                            "15:46",
-                            "16:16",
-                            "17:25",
-                            "17:59",
-                            "18:45",
-                            "19:30",
-                            "20:00",
-                            "21:20",
-                            "22:08"
-                        ],
+                        "saturdayHolidayDepartures": ["04:58", "05:19", "05:39", "05:42", "06:12", "06:32", "07:00", "07:38", "08:16", "09:10", "10:30", "10:57", "11:24", "12:30", "14:30", "15:46", "16:16", "17:25", "17:59", "18:45", "19:30", "20:00", "21:20", "22:08"],
                         "stationId": "Station:Tobu.Nikko.ShinTochigi",
-                        "weekdayDepartures": [
-                            "04:58",
-                            "05:19",
-                            "05:39",
-                            "05:42",
-                            "06:12",
-                            "06:32",
-                            "07:00",
-                            "07:38",
-                            "08:16",
-                            "09:10",
-                            "10:30",
-                            "10:57",
-                            "11:24",
-                            "12:30",
-                            "14:30",
-                            "15:46",
-                            "16:16",
-                            "17:25",
-                            "17:59",
-                            "18:45",
-                            "19:30",
-                            "20:00",
-                            "21:20",
-                            "22:08"
-                        ]
+                        "weekdayDepartures": ["04:58", "05:19", "05:39", "05:42", "06:12", "06:32", "07:00", "07:38", "08:16", "09:10", "10:30", "10:57", "11:24", "12:30", "14:30", "15:46", "16:16", "17:25", "17:59", "18:45", "19:30", "20:00", "21:20", "22:08"]
                     },
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:10",
-                            "07:28"
-                        ],
+                        "saturdayHolidayDepartures": ["05:10", "07:28"],
                         "stationId": "Station:Tobu.Nikko.ShinKanuma",
-                        "weekdayDepartures": [
-                            "05:10",
-                            "07:28"
-                        ]
+                        "weekdayDepartures": ["05:10", "07:28"]
                     },
                     {
-                        "saturdayHolidayDepartures": [
-                            "06:25",
-                            "07:02",
-                            "09:34",
-                            "10:52",
-                            "11:35",
-                            "12:35",
-                            "14:35",
-                            "15:21",
-                            "15:50",
-                            "16:34",
-                            "17:02",
-                            "19:21",
-                            "19:53"
-                        ],
+                        "saturdayHolidayDepartures": ["06:25", "07:02", "09:34", "10:52", "11:35", "12:35", "14:35", "15:21", "15:50", "16:34", "17:02", "19:21", "19:53"],
                         "stationId": "Station:Tobu.Nikko.ShimoImaichi",
-                        "weekdayDepartures": [
-                            "06:25",
-                            "07:02",
-                            "09:34",
-                            "10:52",
-                            "11:35",
-                            "12:35",
-                            "14:35",
-                            "15:21",
-                            "15:50",
-                            "16:34",
-                            "17:02",
-                            "19:21",
-                            "19:53"
-                        ]
+                        "weekdayDepartures": ["06:25", "07:02", "09:34", "10:52", "11:35", "12:35", "14:35", "15:21", "15:50", "16:34", "17:02", "19:21", "19:53"]
                     },
                     {
                         "saturdayHolidayDepartures": [],
@@ -2238,12 +1180,7 @@
                                 "continuesBeyond": true,
                                 "departure": "04:59",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "SemiExpress"
@@ -2252,12 +1189,7 @@
                                 "continuesBeyond": true,
                                 "departure": "05:09",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "SemiExpress"
@@ -2266,12 +1198,7 @@
                                 "continuesBeyond": true,
                                 "departure": "05:23",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "SemiExpress"
@@ -2280,12 +1207,7 @@
                                 "continuesBeyond": true,
                                 "departure": "05:38",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2294,12 +1216,7 @@
                                 "continuesBeyond": true,
                                 "departure": "05:59",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2308,12 +1225,7 @@
                                 "continuesBeyond": true,
                                 "departure": "06:10",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2322,12 +1234,7 @@
                                 "continuesBeyond": true,
                                 "departure": "06:23",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "SemiExpress"
@@ -2336,12 +1243,7 @@
                                 "continuesBeyond": true,
                                 "departure": "06:33",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Asakusa",
                                 "throughDestJa": "浅草",
                                 "trainType": "SectionExpress"
@@ -2350,12 +1252,7 @@
                                 "continuesBeyond": true,
                                 "departure": "06:42",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "SemiExpress"
@@ -2364,12 +1261,7 @@
                                 "continuesBeyond": true,
                                 "departure": "06:59",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2378,12 +1270,7 @@
                                 "continuesBeyond": true,
                                 "departure": "07:07",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2392,12 +1279,7 @@
                                 "continuesBeyond": true,
                                 "departure": "07:16",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Nagatsuta",
                                 "throughDestJa": "長津田",
                                 "trainType": "SemiExpress"
@@ -2406,12 +1288,7 @@
                                 "continuesBeyond": true,
                                 "departure": "07:27",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2420,12 +1297,7 @@
                                 "continuesBeyond": true,
                                 "departure": "07:54",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Asakusa",
                                 "throughDestJa": "浅草",
                                 "trainType": "SectionExpress"
@@ -2434,12 +1306,7 @@
                                 "continuesBeyond": true,
                                 "departure": "08:21",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2448,12 +1315,7 @@
                                 "continuesBeyond": true,
                                 "departure": "08:35",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Asakusa",
                                 "throughDestJa": "浅草",
                                 "trainType": "SectionExpress"
@@ -2462,12 +1324,7 @@
                                 "continuesBeyond": true,
                                 "departure": "09:02",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2476,12 +1333,7 @@
                                 "continuesBeyond": true,
                                 "departure": "09:12",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "SemiExpress"
@@ -2490,12 +1342,7 @@
                                 "continuesBeyond": true,
                                 "departure": "09:31",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2504,12 +1351,7 @@
                                 "continuesBeyond": true,
                                 "departure": "09:40",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "SemiExpress"
@@ -2518,12 +1360,7 @@
                                 "continuesBeyond": true,
                                 "departure": "09:52",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2532,12 +1369,7 @@
                                 "continuesBeyond": true,
                                 "departure": "10:15",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "SemiExpress"
@@ -2546,12 +1378,7 @@
                                 "continuesBeyond": true,
                                 "departure": "10:39",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2560,12 +1387,7 @@
                                 "continuesBeyond": true,
                                 "departure": "10:56",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2574,12 +1396,7 @@
                                 "continuesBeyond": true,
                                 "departure": "11:18",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2588,12 +1405,7 @@
                                 "continuesBeyond": true,
                                 "departure": "11:38",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2602,12 +1414,7 @@
                                 "continuesBeyond": true,
                                 "departure": "11:56",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2616,12 +1423,7 @@
                                 "continuesBeyond": true,
                                 "departure": "12:18",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2630,12 +1432,7 @@
                                 "continuesBeyond": true,
                                 "departure": "12:38",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2644,12 +1441,7 @@
                                 "continuesBeyond": true,
                                 "departure": "12:56",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2658,12 +1450,7 @@
                                 "continuesBeyond": true,
                                 "departure": "13:18",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2672,12 +1459,7 @@
                                 "continuesBeyond": true,
                                 "departure": "13:38",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2686,12 +1468,7 @@
                                 "continuesBeyond": true,
                                 "departure": "13:56",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2700,12 +1477,7 @@
                                 "continuesBeyond": true,
                                 "departure": "14:18",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2714,12 +1486,7 @@
                                 "continuesBeyond": true,
                                 "departure": "14:36",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2728,12 +1495,7 @@
                                 "continuesBeyond": true,
                                 "departure": "14:58",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2742,12 +1504,7 @@
                                 "continuesBeyond": true,
                                 "departure": "15:21",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2756,12 +1513,7 @@
                                 "continuesBeyond": true,
                                 "departure": "15:38",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2770,12 +1522,7 @@
                                 "continuesBeyond": true,
                                 "departure": "15:55",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2784,12 +1531,7 @@
                                 "continuesBeyond": true,
                                 "departure": "16:18",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2798,12 +1540,7 @@
                                 "continuesBeyond": true,
                                 "departure": "16:38",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2812,12 +1549,7 @@
                                 "continuesBeyond": true,
                                 "departure": "17:11",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2826,12 +1558,7 @@
                                 "continuesBeyond": true,
                                 "departure": "17:33",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2840,12 +1567,7 @@
                                 "continuesBeyond": true,
                                 "departure": "17:53",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2854,12 +1576,7 @@
                                 "continuesBeyond": true,
                                 "departure": "18:11",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2868,12 +1585,7 @@
                                 "continuesBeyond": true,
                                 "departure": "18:26",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2882,12 +1594,7 @@
                                 "continuesBeyond": true,
                                 "departure": "18:52",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2896,12 +1603,7 @@
                                 "continuesBeyond": true,
                                 "departure": "19:11",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2910,12 +1612,7 @@
                                 "continuesBeyond": true,
                                 "departure": "19:32",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2924,12 +1621,7 @@
                                 "continuesBeyond": true,
                                 "departure": "19:53",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2938,12 +1630,7 @@
                                 "continuesBeyond": true,
                                 "departure": "20:11",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2952,12 +1639,7 @@
                                 "continuesBeyond": true,
                                 "departure": "20:42",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "SemiExpress"
@@ -2966,12 +1648,7 @@
                                 "continuesBeyond": true,
                                 "departure": "21:03",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -2980,12 +1657,7 @@
                                 "continuesBeyond": true,
                                 "departure": "21:18",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "SemiExpress"
@@ -2994,12 +1666,7 @@
                                 "continuesBeyond": true,
                                 "departure": "21:33",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Asakusa",
                                 "throughDestJa": "浅草",
                                 "trainType": "SectionSemiExpress"
@@ -3008,12 +1675,7 @@
                                 "continuesBeyond": true,
                                 "departure": "21:48",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "SemiExpress"
@@ -3022,12 +1684,7 @@
                                 "continuesBeyond": true,
                                 "departure": "22:07",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "SemiExpress"
@@ -3036,12 +1693,7 @@
                                 "continuesBeyond": true,
                                 "departure": "22:23",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Nagatsuta",
                                 "throughDestJa": "長津田",
                                 "trainType": "SemiExpress"
@@ -3050,12 +1702,7 @@
                                 "continuesBeyond": true,
                                 "departure": "23:18",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Kita-Senju",
                                 "throughDestJa": "北千住",
                                 "trainType": "SectionSemiExpress"
@@ -3068,12 +1715,7 @@
                                 "continuesBeyond": true,
                                 "departure": "04:59",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Nagatsuta",
                                 "throughDestJa": "長津田",
                                 "trainType": "SemiExpress"
@@ -3082,12 +1724,7 @@
                                 "continuesBeyond": true,
                                 "departure": "05:09",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "SemiExpress"
@@ -3096,12 +1733,7 @@
                                 "continuesBeyond": true,
                                 "departure": "05:23",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "SemiExpress"
@@ -3110,12 +1742,7 @@
                                 "continuesBeyond": true,
                                 "departure": "05:38",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Nagatsuta",
                                 "throughDestJa": "長津田",
                                 "trainType": "Express"
@@ -3124,12 +1751,7 @@
                                 "continuesBeyond": true,
                                 "departure": "05:48",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "SemiExpress"
@@ -3138,12 +1760,7 @@
                                 "continuesBeyond": true,
                                 "departure": "05:55",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Nagatsuta",
                                 "throughDestJa": "長津田",
                                 "trainType": "SemiExpress"
@@ -3152,12 +1769,7 @@
                                 "continuesBeyond": true,
                                 "departure": "05:59",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3166,12 +1778,7 @@
                                 "continuesBeyond": true,
                                 "departure": "06:14",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "SemiExpress"
@@ -3180,12 +1787,7 @@
                                 "continuesBeyond": true,
                                 "departure": "06:23",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "SemiExpress"
@@ -3194,12 +1796,7 @@
                                 "continuesBeyond": true,
                                 "departure": "06:33",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Nagatsuta",
                                 "throughDestJa": "長津田",
                                 "trainType": "SemiExpress"
@@ -3208,12 +1805,7 @@
                                 "continuesBeyond": true,
                                 "departure": "06:45",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3222,12 +1814,7 @@
                                 "continuesBeyond": true,
                                 "departure": "06:53",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3236,12 +1823,7 @@
                                 "continuesBeyond": true,
                                 "departure": "06:58",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3250,12 +1832,7 @@
                                 "continuesBeyond": true,
                                 "departure": "07:05",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3264,12 +1841,7 @@
                                 "continuesBeyond": true,
                                 "departure": "07:15",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3278,12 +1850,7 @@
                                 "continuesBeyond": true,
                                 "departure": "07:28",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3292,12 +1859,7 @@
                                 "continuesBeyond": true,
                                 "departure": "07:37",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3306,12 +1868,7 @@
                                 "continuesBeyond": true,
                                 "departure": "07:54",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Asakusa",
                                 "throughDestJa": "浅草",
                                 "trainType": "SectionExpress"
@@ -3320,12 +1877,7 @@
                                 "continuesBeyond": true,
                                 "departure": "08:22",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Nagatsuta",
                                 "throughDestJa": "長津田",
                                 "trainType": "SemiExpress"
@@ -3334,12 +1886,7 @@
                                 "continuesBeyond": true,
                                 "departure": "08:28",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Asakusa",
                                 "throughDestJa": "浅草",
                                 "trainType": "SectionExpress"
@@ -3348,12 +1895,7 @@
                                 "continuesBeyond": true,
                                 "departure": "08:51",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "SemiExpress"
@@ -3362,12 +1904,7 @@
                                 "continuesBeyond": true,
                                 "departure": "09:17",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "SemiExpress"
@@ -3376,12 +1913,7 @@
                                 "continuesBeyond": true,
                                 "departure": "09:52",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3390,12 +1922,7 @@
                                 "continuesBeyond": true,
                                 "departure": "10:14",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3404,12 +1931,7 @@
                                 "continuesBeyond": true,
                                 "departure": "10:39",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3418,12 +1940,7 @@
                                 "continuesBeyond": true,
                                 "departure": "10:56",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3432,12 +1949,7 @@
                                 "continuesBeyond": true,
                                 "departure": "11:18",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3446,12 +1958,7 @@
                                 "continuesBeyond": true,
                                 "departure": "11:38",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3460,12 +1967,7 @@
                                 "continuesBeyond": true,
                                 "departure": "11:56",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3474,12 +1976,7 @@
                                 "continuesBeyond": true,
                                 "departure": "12:18",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3488,12 +1985,7 @@
                                 "continuesBeyond": true,
                                 "departure": "12:38",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3502,12 +1994,7 @@
                                 "continuesBeyond": true,
                                 "departure": "12:56",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3516,12 +2003,7 @@
                                 "continuesBeyond": true,
                                 "departure": "13:18",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3530,12 +2012,7 @@
                                 "continuesBeyond": true,
                                 "departure": "13:38",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3544,12 +2021,7 @@
                                 "continuesBeyond": true,
                                 "departure": "13:56",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3558,12 +2030,7 @@
                                 "continuesBeyond": true,
                                 "departure": "14:18",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Nagatsuta",
                                 "throughDestJa": "長津田",
                                 "trainType": "Express"
@@ -3572,12 +2039,7 @@
                                 "continuesBeyond": true,
                                 "departure": "14:36",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3586,12 +2048,7 @@
                                 "continuesBeyond": true,
                                 "departure": "14:58",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3600,12 +2057,7 @@
                                 "continuesBeyond": true,
                                 "departure": "15:21",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3614,12 +2066,7 @@
                                 "continuesBeyond": true,
                                 "departure": "15:38",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3628,12 +2075,7 @@
                                 "continuesBeyond": true,
                                 "departure": "15:55",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3642,12 +2084,7 @@
                                 "continuesBeyond": true,
                                 "departure": "16:18",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3656,12 +2093,7 @@
                                 "continuesBeyond": true,
                                 "departure": "16:38",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3670,12 +2102,7 @@
                                 "continuesBeyond": true,
                                 "departure": "17:12",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3684,12 +2111,7 @@
                                 "continuesBeyond": true,
                                 "departure": "17:25",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Asakusa",
                                 "throughDestJa": "浅草",
                                 "trainType": "SectionSemiExpress"
@@ -3698,12 +2120,7 @@
                                 "continuesBeyond": true,
                                 "departure": "17:33",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3712,12 +2129,7 @@
                                 "continuesBeyond": true,
                                 "departure": "17:53",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3726,12 +2138,7 @@
                                 "continuesBeyond": true,
                                 "departure": "18:11",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3740,12 +2147,7 @@
                                 "continuesBeyond": true,
                                 "departure": "18:26",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3754,12 +2156,7 @@
                                 "continuesBeyond": true,
                                 "departure": "18:53",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3768,12 +2165,7 @@
                                 "continuesBeyond": true,
                                 "departure": "19:11",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3782,12 +2174,7 @@
                                 "continuesBeyond": true,
                                 "departure": "19:32",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3796,12 +2183,7 @@
                                 "continuesBeyond": true,
                                 "departure": "19:53",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3810,12 +2192,7 @@
                                 "continuesBeyond": true,
                                 "departure": "20:11",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3824,12 +2201,7 @@
                                 "continuesBeyond": true,
                                 "departure": "20:24",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3838,12 +2210,7 @@
                                 "continuesBeyond": true,
                                 "departure": "20:42",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Nagatsuta",
                                 "throughDestJa": "長津田",
                                 "trainType": "SemiExpress"
@@ -3852,12 +2219,7 @@
                                 "continuesBeyond": true,
                                 "departure": "21:05",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "SemiExpress"
@@ -3866,12 +2228,7 @@
                                 "continuesBeyond": true,
                                 "departure": "21:30",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Chuo-Rinkan",
                                 "throughDestJa": "中央林間",
                                 "trainType": "Express"
@@ -3880,12 +2237,7 @@
                                 "continuesBeyond": true,
                                 "departure": "21:48",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Nagatsuta",
                                 "throughDestJa": "長津田",
                                 "trainType": "SemiExpress"
@@ -3894,12 +2246,7 @@
                                 "continuesBeyond": true,
                                 "departure": "22:11",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Nagatsuta",
                                 "throughDestJa": "長津田",
                                 "trainType": "SemiExpress"
@@ -3908,12 +2255,7 @@
                                 "continuesBeyond": true,
                                 "departure": "22:23",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Nagatsuta",
                                 "throughDestJa": "長津田",
                                 "trainType": "SemiExpress"
@@ -3922,12 +2264,7 @@
                                 "continuesBeyond": true,
                                 "departure": "22:59",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Oshiage",
                                 "throughDestJa": "押上",
                                 "trainType": "SemiExpress"
@@ -3936,12 +2273,7 @@
                                 "continuesBeyond": true,
                                 "departure": "23:18",
                                 "startsHere": true,
-                                "stopIndices": [
-                                    3,
-                                    2,
-                                    1,
-                                    0
-                                ],
+                                "stopIndices": [3, 2, 1, 0],
                                 "throughDestEn": "Kita-Senju",
                                 "throughDestJa": "北千住",
                                 "trainType": "SectionSemiExpress"
@@ -3992,33 +2324,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [
-            4,
-            3,
-            6,
-            5,
-            9,
-            4,
-            3,
-            5,
-            10,
-            4,
-            6,
-            4,
-            3,
-            3,
-            5,
-            6,
-            4,
-            3,
-            4,
-            7,
-            5,
-            4,
-            8,
-            2,
-            8
-        ],
+        "hopTimesMinutes": [4, 3, 6, 5, 9, 4, 3, 5, 10, 4, 6, 4, 3, 3, 5, 6, 4, 3, 4, 7, 5, 4, 8, 2, 8],
         "id": "Railway:Tobu.Nikko",
         "isLoop": false,
         "nameEn": "Tobu Nikko Line",

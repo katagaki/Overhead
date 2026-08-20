@@ -1750,11 +1750,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [
-            2,
-            3,
-            2
-        ],
+        "hopTimesMinutes": [2, 3, 2],
         "id": "Railway:Keikyu.Zushi",
         "isLoop": false,
         "nameEn": "Keikyu Zushi Line",

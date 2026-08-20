@@ -2972,16 +2972,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [
-            2,
-            2,
-            2,
-            3,
-            2,
-            2,
-            2,
-            3
-        ],
+        "hopTimesMinutes": [2, 2, 2, 3, 2, 2, 2, 3],
         "id": "Railway:Keikyu.Kurihama",
         "isLoop": false,
         "nameEn": "Keikyu Kurihama Line",

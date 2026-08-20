@@ -220,10 +220,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [
-            2.0,
-            2.0
-        ],
+        "hopTimesMinutes": [2.0, 2.0],
         "id": "Railway:JR-East.TsurumiUmiShibauraBranch",
         "isLoop": false,
         "nameEn": "Tsurumi Line Umi-Shibaura Branch",
@@ -272,11 +269,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    397,
-                    399,
-                    401
-                ],
+                "stops": [397, 399, 401],
                 "terminates": true,
                 "type": "Local"
             },
@@ -285,11 +278,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    430,
-                    432,
-                    434
-                ],
+                "stops": [430, 432, 434],
                 "terminates": true,
                 "type": "Local"
             },
@@ -298,11 +287,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    459,
-                    461,
-                    463
-                ],
+                "stops": [459, 461, 463],
                 "terminates": true,
                 "type": "Local"
             },
@@ -311,11 +296,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    488,
-                    490,
-                    492
-                ],
+                "stops": [488, 490, 492],
                 "terminates": true,
                 "type": "Local"
             },
@@ -324,11 +305,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    541,
-                    543,
-                    545
-                ],
+                "stops": [541, 543, 545],
                 "terminates": true,
                 "type": "Local"
             },
@@ -337,11 +314,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    569,
-                    571,
-                    573
-                ],
+                "stops": [569, 571, 573],
                 "terminates": true,
                 "type": "Local"
             },
@@ -350,11 +323,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    658,
-                    660,
-                    661
-                ],
+                "stops": [658, 660, 661],
                 "terminates": true,
                 "type": "Local"
             },
@@ -363,11 +332,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    738,
-                    740,
-                    741
-                ],
+                "stops": [738, 740, 741],
                 "terminates": true,
                 "type": "Local"
             },
@@ -376,11 +341,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    818,
-                    820,
-                    821
-                ],
+                "stops": [818, 820, 821],
                 "terminates": true,
                 "type": "Local"
             },
@@ -389,11 +350,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    898,
-                    900,
-                    901
-                ],
+                "stops": [898, 900, 901],
                 "terminates": true,
                 "type": "Local"
             },
@@ -402,11 +359,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    978,
-                    980,
-                    981
-                ],
+                "stops": [978, 980, 981],
                 "terminates": true,
                 "type": "Local"
             },
@@ -415,11 +368,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1017,
-                    1019,
-                    1021
-                ],
+                "stops": [1017, 1019, 1021],
                 "terminates": true,
                 "type": "Local"
             },
@@ -428,11 +377,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1047,
-                    1049,
-                    1051
-                ],
+                "stops": [1047, 1049, 1051],
                 "terminates": true,
                 "type": "Local"
             },
@@ -441,11 +386,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1077,
-                    1079,
-                    1081
-                ],
+                "stops": [1077, 1079, 1081],
                 "terminates": true,
                 "type": "Local"
             },
@@ -454,11 +395,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1109,
-                    1111,
-                    1113
-                ],
+                "stops": [1109, 1111, 1113],
                 "terminates": true,
                 "type": "Local"
             },
@@ -467,11 +404,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1187,
-                    1189,
-                    1191
-                ],
+                "stops": [1187, 1189, 1191],
                 "terminates": true,
                 "type": "Local"
             },
@@ -480,11 +413,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1237,
-                    1239,
-                    1241
-                ],
+                "stops": [1237, 1239, 1241],
                 "terminates": true,
                 "type": "Local"
             },
@@ -493,11 +422,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    416,
-                    418,
-                    420
-                ],
+                "stops": [416, 418, 420],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -508,11 +433,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    437,
-                    439,
-                    441
-                ],
+                "stops": [437, 439, 441],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -523,11 +444,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    466,
-                    468,
-                    470
-                ],
+                "stops": [466, 468, 470],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -538,11 +455,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    495,
-                    497,
-                    499
-                ],
+                "stops": [495, 497, 499],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -553,11 +466,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    557,
-                    559,
-                    561
-                ],
+                "stops": [557, 559, 561],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -568,11 +477,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    592,
-                    594,
-                    596
-                ],
+                "stops": [592, 594, 596],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -583,11 +488,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    676,
-                    678,
-                    680
-                ],
+                "stops": [676, 678, 680],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -598,11 +499,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    756,
-                    758,
-                    760
-                ],
+                "stops": [756, 758, 760],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -613,11 +510,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    836,
-                    838,
-                    840
-                ],
+                "stops": [836, 838, 840],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -628,11 +521,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    916,
-                    918,
-                    920
-                ],
+                "stops": [916, 918, 920],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -643,11 +532,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    995,
-                    997,
-                    999
-                ],
+                "stops": [995, 997, 999],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -658,11 +543,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1025,
-                    1027,
-                    1029
-                ],
+                "stops": [1025, 1027, 1029],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -673,11 +554,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1064,
-                    1066,
-                    1068
-                ],
+                "stops": [1064, 1066, 1068],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -688,11 +565,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1085,
-                    1087,
-                    1089
-                ],
+                "stops": [1085, 1087, 1089],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -703,11 +576,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1127,
-                    1129,
-                    1131
-                ],
+                "stops": [1127, 1129, 1131],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -718,11 +587,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1195,
-                    1197,
-                    1199
-                ],
+                "stops": [1195, 1197, 1199],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -733,11 +598,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1260,
-                    1262,
-                    1264
-                ],
+                "stops": [1260, 1262, 1264],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -748,11 +609,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    388,
-                    390,
-                    392
-                ],
+                "stops": [388, 390, 392],
                 "terminates": true,
                 "type": "Local"
             },
@@ -761,11 +618,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    410,
-                    412,
-                    414
-                ],
+                "stops": [410, 412, 414],
                 "terminates": true,
                 "type": "Local"
             },
@@ -774,11 +627,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    423,
-                    425,
-                    427
-                ],
+                "stops": [423, 425, 427],
                 "terminates": true,
                 "type": "Local"
             },
@@ -787,11 +636,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    434,
-                    436,
-                    438
-                ],
+                "stops": [434, 436, 438],
                 "terminates": true,
                 "type": "Local"
             },
@@ -800,11 +645,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    446,
-                    448,
-                    450
-                ],
+                "stops": [446, 448, 450],
                 "terminates": true,
                 "type": "Local"
             },
@@ -813,11 +654,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    457,
-                    459,
-                    461
-                ],
+                "stops": [457, 459, 461],
                 "terminates": true,
                 "type": "Local"
             },
@@ -826,11 +663,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    470,
-                    472,
-                    474
-                ],
+                "stops": [470, 472, 474],
                 "terminates": true,
                 "type": "Local"
             },
@@ -839,11 +672,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    499,
-                    501,
-                    503
-                ],
+                "stops": [499, 501, 503],
                 "terminates": true,
                 "type": "Local"
             },
@@ -852,11 +681,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    532,
-                    534,
-                    536
-                ],
+                "stops": [532, 534, 536],
                 "terminates": true,
                 "type": "Local"
             },
@@ -865,11 +690,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    581,
-                    583,
-                    585
-                ],
+                "stops": [581, 583, 585],
                 "terminates": true,
                 "type": "Local"
             },
@@ -878,11 +699,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    658,
-                    660,
-                    661
-                ],
+                "stops": [658, 660, 661],
                 "terminates": true,
                 "type": "Local"
             },
@@ -891,11 +708,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    738,
-                    740,
-                    741
-                ],
+                "stops": [738, 740, 741],
                 "terminates": true,
                 "type": "Local"
             },
@@ -904,11 +717,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    818,
-                    820,
-                    821
-                ],
+                "stops": [818, 820, 821],
                 "terminates": true,
                 "type": "Local"
             },
@@ -917,11 +726,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    898,
-                    900,
-                    901
-                ],
+                "stops": [898, 900, 901],
                 "terminates": true,
                 "type": "Local"
             },
@@ -930,11 +735,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    988,
-                    990,
-                    991
-                ],
+                "stops": [988, 990, 991],
                 "terminates": true,
                 "type": "Local"
             },
@@ -943,11 +744,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1020,
-                    1022,
-                    1024
-                ],
+                "stops": [1020, 1022, 1024],
                 "terminates": true,
                 "type": "Local"
             },
@@ -956,11 +753,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1034,
-                    1036,
-                    1038
-                ],
+                "stops": [1034, 1036, 1038],
                 "terminates": true,
                 "type": "Local"
             },
@@ -969,11 +762,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1052,
-                    1054,
-                    1055
-                ],
+                "stops": [1052, 1054, 1055],
                 "terminates": true,
                 "type": "Local"
             },
@@ -982,11 +771,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1080,
-                    1082,
-                    1083
-                ],
+                "stops": [1080, 1082, 1083],
                 "terminates": true,
                 "type": "Local"
             },
@@ -995,11 +780,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1107,
-                    1109,
-                    1110
-                ],
+                "stops": [1107, 1109, 1110],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1008,11 +789,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1147,
-                    1149,
-                    1151
-                ],
+                "stops": [1147, 1149, 1151],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1021,11 +798,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1182,
-                    1184,
-                    1186
-                ],
+                "stops": [1182, 1184, 1186],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1034,11 +807,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1242,
-                    1244,
-                    1246
-                ],
+                "stops": [1242, 1244, 1246],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1047,11 +816,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1322,
-                    1324,
-                    1326
-                ],
+                "stops": [1322, 1324, 1326],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1060,11 +825,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    398,
-                    400,
-                    402
-                ],
+                "stops": [398, 400, 402],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1075,11 +836,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    417,
-                    419,
-                    421
-                ],
+                "stops": [417, 419, 421],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1090,11 +847,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    430,
-                    432,
-                    434
-                ],
+                "stops": [430, 432, 434],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1105,11 +858,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    444,
-                    446,
-                    448
-                ],
+                "stops": [444, 446, 448],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1120,11 +869,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    453,
-                    455,
-                    457
-                ],
+                "stops": [453, 455, 457],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1135,11 +880,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    465,
-                    467,
-                    469
-                ],
+                "stops": [465, 467, 469],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1150,11 +891,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    481,
-                    483,
-                    485
-                ],
+                "stops": [481, 483, 485],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1165,11 +902,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    509,
-                    511,
-                    513
-                ],
+                "stops": [509, 511, 513],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1180,11 +913,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    558,
-                    560,
-                    562
-                ],
+                "stops": [558, 560, 562],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1195,11 +924,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    596,
-                    598,
-                    600
-                ],
+                "stops": [596, 598, 600],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1210,11 +935,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    676,
-                    678,
-                    680
-                ],
+                "stops": [676, 678, 680],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1225,11 +946,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    756,
-                    758,
-                    760
-                ],
+                "stops": [756, 758, 760],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1240,11 +957,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    836,
-                    838,
-                    840
-                ],
+                "stops": [836, 838, 840],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1255,11 +968,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    916,
-                    918,
-                    920
-                ],
+                "stops": [916, 918, 920],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1270,11 +979,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1012,
-                    1014,
-                    1016
-                ],
+                "stops": [1012, 1014, 1016],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1285,11 +990,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1029,
-                    1031,
-                    1033
-                ],
+                "stops": [1029, 1031, 1033],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1300,11 +1001,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1043,
-                    1045,
-                    1047
-                ],
+                "stops": [1043, 1045, 1047],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1315,11 +1012,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1064,
-                    1066,
-                    1068
-                ],
+                "stops": [1064, 1066, 1068],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1330,11 +1023,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1090,
-                    1092,
-                    1094
-                ],
+                "stops": [1090, 1092, 1094],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1345,11 +1034,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1114,
-                    1116,
-                    1118
-                ],
+                "stops": [1114, 1116, 1118],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1360,11 +1045,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1160,
-                    1162,
-                    1164
-                ],
+                "stops": [1160, 1162, 1164],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1375,11 +1056,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1200,
-                    1202,
-                    1204
-                ],
+                "stops": [1200, 1202, 1204],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1390,11 +1067,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1260,
-                    1262,
-                    1264
-                ],
+                "stops": [1260, 1262, 1264],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
@@ -1405,20 +1078,13 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1340,
-                    1342,
-                    1344
-                ],
+                "stops": [1340, 1342, 1344],
                 "terminates": false,
                 "throughDestEn": "Tsurumi",
                 "throughDestJa": "鶴見",
                 "type": "Local"
             }
         ],
-        "upHopTimesMinutes": [
-            2.0,
-            2.0
-        ]
+        "upHopTimesMinutes": [2.0, 2.0]
     }
 ]

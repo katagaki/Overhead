@@ -817,13 +817,9 @@
                 "id": "static.RailDirection:Sotetsu.Izumino.Futamatagawa",
                 "intermediateOrigins": [
                     {
-                        "saturdayHolidayDepartures": [
-                            "04:43"
-                        ],
+                        "saturdayHolidayDepartures": ["04:43"],
                         "stationId": "Station:Sotetsu.Izumino.Izumino",
-                        "weekdayDepartures": [
-                            "04:43"
-                        ]
+                        "weekdayDepartures": ["04:43"]
                     }
                 ],
                 "isAscending": false,

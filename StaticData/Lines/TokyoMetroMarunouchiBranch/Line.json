@@ -15,28 +15,9 @@
                 "id": "static.RailDirection:TokyoMetro.MarunouchiBranch.NakanoSakaue",
                 "intermediateOrigins": [
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:00",
-                            "05:12"
-                        ],
+                        "saturdayHolidayDepartures": ["05:00", "05:12"],
                         "stationId": "Station:TokyoMetro.MarunouchiBranch.NakanoFujimicho",
-                        "weekdayDepartures": [
-                            "05:00",
-                            "05:12",
-                            "06:08",
-                            "06:24",
-                            "06:38",
-                            "06:51",
-                            "07:08",
-                            "07:23",
-                            "07:29",
-                            "07:38",
-                            "15:21",
-                            "15:27",
-                            "16:08",
-                            "16:18",
-                            "16:29"
-                        ]
+                        "weekdayDepartures": ["05:00", "05:12", "06:08", "06:24", "06:38", "06:51", "07:08", "07:23", "07:29", "07:38", "15:21", "15:27", "16:08", "16:18", "16:29"]
                     }
                 ],
                 "isAscending": true,
@@ -95,13 +76,9 @@
                 "id": "static.RailDirection:TokyoMetro.MarunouchiBranch.Honancho",
                 "intermediateOrigins": [
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:42"
-                        ],
+                        "saturdayHolidayDepartures": ["05:42"],
                         "stationId": "Station:TokyoMetro.MarunouchiBranch.NakanoFujimicho",
-                        "weekdayDepartures": [
-                            "05:20"
-                        ]
+                        "weekdayDepartures": ["05:20"]
                     }
                 ],
                 "isAscending": false,
@@ -155,11 +132,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [
-            2,
-            2,
-            3
-        ],
+        "hopTimesMinutes": [2, 2, 3],
         "id": "Railway:TokyoMetro.MarunouchiBranch",
         "isLoop": false,
         "nameEn": "Marunouchi Line Honancho Branch",

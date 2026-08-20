@@ -296,10 +296,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [
-            5.0,
-            4.0
-        ],
+        "hopTimesMinutes": [5.0, 4.0],
         "id": "Railway:Tobu.KoizumiBranch",
         "isLoop": false,
         "nameEn": "Tobu Koizumi Line (Higashi-Koizumi – Ota)",
@@ -348,11 +345,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    345,
-                    349,
-                    354
-                ],
+                "stops": [345, 349, 354],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -363,11 +356,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    367,
-                    372,
-                    376
-                ],
+                "stops": [367, 372, 376],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -378,11 +367,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    413,
-                    418,
-                    422
-                ],
+                "stops": [413, 418, 422],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -393,11 +378,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    452,
-                    456,
-                    461
-                ],
+                "stops": [452, 456, 461],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -408,11 +389,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    480,
-                    485,
-                    489
-                ],
+                "stops": [480, 485, 489],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -423,11 +400,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    527,
-                    532,
-                    536
-                ],
+                "stops": [527, 532, 536],
                 "terminates": true,
                 "type": "Local"
             },
@@ -436,11 +409,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    566,
-                    570,
-                    575
-                ],
+                "stops": [566, 570, 575],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -451,11 +420,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    627,
-                    632,
-                    636
-                ],
+                "stops": [627, 632, 636],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -466,11 +431,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    689,
-                    693,
-                    698
-                ],
+                "stops": [689, 693, 698],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -481,11 +442,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    749,
-                    753,
-                    758
-                ],
+                "stops": [749, 753, 758],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -496,11 +453,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    809,
-                    813,
-                    818
-                ],
+                "stops": [809, 813, 818],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -511,11 +464,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    869,
-                    873,
-                    878
-                ],
+                "stops": [869, 873, 878],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -526,11 +475,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    925,
-                    929,
-                    934
-                ],
+                "stops": [925, 929, 934],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -541,11 +486,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    948,
-                    953,
-                    957
-                ],
+                "stops": [948, 953, 957],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -556,11 +497,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    990,
-                    994,
-                    999
-                ],
+                "stops": [990, 994, 999],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -571,11 +508,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1036,
-                    1041,
-                    1045
-                ],
+                "stops": [1036, 1041, 1045],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -586,11 +519,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1068,
-                    1073,
-                    1077
-                ],
+                "stops": [1068, 1073, 1077],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -601,11 +530,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1118,
-                    1123,
-                    1127
-                ],
+                "stops": [1118, 1123, 1127],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -616,11 +541,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1150,
-                    1155,
-                    1159
-                ],
+                "stops": [1150, 1155, 1159],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -631,11 +552,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1182,
-                    1186,
-                    1191
-                ],
+                "stops": [1182, 1186, 1191],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -646,11 +563,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1226,
-                    1230,
-                    1235
-                ],
+                "stops": [1226, 1230, 1235],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -661,11 +574,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1268,
-                    1273,
-                    1277
-                ],
+                "stops": [1268, 1273, 1277],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -676,11 +585,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1310,
-                    1314,
-                    1319
-                ],
+                "stops": [1310, 1314, 1319],
                 "terminates": true,
                 "type": "Local"
             },
@@ -689,11 +594,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1371,
-                    1376,
-                    1380
-                ],
+                "stops": [1371, 1376, 1380],
                 "terminates": true,
                 "type": "Local"
             },
@@ -702,11 +603,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1391,
-                    1396,
-                    1400
-                ],
+                "stops": [1391, 1396, 1400],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -717,11 +614,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    333,
-                    337,
-                    342
-                ],
+                "stops": [333, 337, 342],
                 "terminates": true,
                 "type": "Local"
             },
@@ -730,11 +623,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    356,
-                    360,
-                    364
-                ],
+                "stops": [356, 360, 364],
                 "terminates": true,
                 "type": "Local"
             },
@@ -743,11 +632,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    392,
-                    397,
-                    401
-                ],
+                "stops": [392, 397, 401],
                 "terminates": true,
                 "type": "Local"
             },
@@ -756,11 +641,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    437,
-                    441,
-                    446
-                ],
+                "stops": [437, 441, 446],
                 "terminates": true,
                 "type": "Local"
             },
@@ -769,11 +650,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    469,
-                    473,
-                    477
-                ],
+                "stops": [469, 473, 477],
                 "terminates": true,
                 "type": "Local"
             },
@@ -782,11 +659,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    505,
-                    509,
-                    513
-                ],
+                "stops": [505, 509, 513],
                 "terminates": true,
                 "type": "Local"
             },
@@ -795,11 +668,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    554,
-                    558,
-                    562
-                ],
+                "stops": [554, 558, 562],
                 "terminates": true,
                 "type": "Local"
             },
@@ -808,11 +677,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    605,
-                    609,
-                    613
-                ],
+                "stops": [605, 609, 613],
                 "terminates": true,
                 "type": "Local"
             },
@@ -821,11 +686,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    665,
-                    669,
-                    673
-                ],
+                "stops": [665, 669, 673],
                 "terminates": true,
                 "type": "Local"
             },
@@ -834,11 +695,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    725,
-                    729,
-                    733
-                ],
+                "stops": [725, 729, 733],
                 "terminates": true,
                 "type": "Local"
             },
@@ -847,11 +704,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    785,
-                    789,
-                    793
-                ],
+                "stops": [785, 789, 793],
                 "terminates": true,
                 "type": "Local"
             },
@@ -860,11 +713,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    845,
-                    849,
-                    853
-                ],
+                "stops": [845, 849, 853],
                 "terminates": true,
                 "type": "Local"
             },
@@ -873,11 +722,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    908,
-                    912,
-                    916
-                ],
+                "stops": [908, 912, 916],
                 "terminates": true,
                 "type": "Local"
             },
@@ -886,11 +731,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    965,
-                    969,
-                    973
-                ],
+                "stops": [965, 969, 973],
                 "terminates": true,
                 "type": "Local"
             },
@@ -899,11 +740,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    1001,
-                    1005,
-                    1010
-                ],
+                "stops": [1001, 1005, 1010],
                 "terminates": true,
                 "type": "Local"
             },
@@ -912,11 +749,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    1036,
-                    1041,
-                    1045
-                ],
+                "stops": [1036, 1041, 1045],
                 "terminates": true,
                 "type": "Local"
             },
@@ -925,11 +758,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    1083,
-                    1087,
-                    1091
-                ],
+                "stops": [1083, 1087, 1091],
                 "terminates": true,
                 "type": "Local"
             },
@@ -938,11 +767,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    1129,
-                    1134,
-                    1138
-                ],
+                "stops": [1129, 1134, 1138],
                 "terminates": true,
                 "type": "Local"
             },
@@ -951,11 +776,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    1168,
-                    1172,
-                    1176
-                ],
+                "stops": [1168, 1172, 1176],
                 "terminates": true,
                 "type": "Local"
             },
@@ -964,11 +785,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    1201,
-                    1205,
-                    1210
-                ],
+                "stops": [1201, 1205, 1210],
                 "terminates": true,
                 "type": "Local"
             },
@@ -977,11 +794,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    1245,
-                    1250,
-                    1254
-                ],
+                "stops": [1245, 1250, 1254],
                 "terminates": true,
                 "type": "Local"
             },
@@ -990,11 +803,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    1277,
-                    1282,
-                    1286
-                ],
+                "stops": [1277, 1282, 1286],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1003,11 +812,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1348,
-                    1352,
-                    1356
-                ],
+                "stops": [1348, 1352, 1356],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1016,11 +821,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    345,
-                    349,
-                    354
-                ],
+                "stops": [345, 349, 354],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -1031,11 +832,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    367,
-                    372,
-                    376
-                ],
+                "stops": [367, 372, 376],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -1046,11 +843,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    413,
-                    418,
-                    422
-                ],
+                "stops": [413, 418, 422],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -1061,11 +854,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    452,
-                    456,
-                    461
-                ],
+                "stops": [452, 456, 461],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -1076,11 +865,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    480,
-                    485,
-                    489
-                ],
+                "stops": [480, 485, 489],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -1091,11 +876,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    527,
-                    532,
-                    536
-                ],
+                "stops": [527, 532, 536],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1104,11 +885,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    566,
-                    570,
-                    575
-                ],
+                "stops": [566, 570, 575],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -1119,11 +896,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    627,
-                    632,
-                    636
-                ],
+                "stops": [627, 632, 636],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -1134,11 +907,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    689,
-                    693,
-                    698
-                ],
+                "stops": [689, 693, 698],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -1149,11 +918,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    749,
-                    753,
-                    758
-                ],
+                "stops": [749, 753, 758],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -1164,11 +929,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    809,
-                    813,
-                    818
-                ],
+                "stops": [809, 813, 818],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -1179,11 +940,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    869,
-                    873,
-                    878
-                ],
+                "stops": [869, 873, 878],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -1194,11 +951,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    925,
-                    929,
-                    934
-                ],
+                "stops": [925, 929, 934],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -1209,11 +962,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    948,
-                    953,
-                    957
-                ],
+                "stops": [948, 953, 957],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -1224,11 +973,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    990,
-                    994,
-                    999
-                ],
+                "stops": [990, 994, 999],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -1239,11 +984,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1036,
-                    1041,
-                    1045
-                ],
+                "stops": [1036, 1041, 1045],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -1254,11 +995,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1068,
-                    1073,
-                    1077
-                ],
+                "stops": [1068, 1073, 1077],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -1269,11 +1006,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1118,
-                    1123,
-                    1127
-                ],
+                "stops": [1118, 1123, 1127],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -1284,11 +1017,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1150,
-                    1155,
-                    1159
-                ],
+                "stops": [1150, 1155, 1159],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -1299,11 +1028,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1182,
-                    1186,
-                    1191
-                ],
+                "stops": [1182, 1186, 1191],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -1314,11 +1039,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1226,
-                    1230,
-                    1235
-                ],
+                "stops": [1226, 1230, 1235],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -1329,11 +1050,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1268,
-                    1273,
-                    1277
-                ],
+                "stops": [1268, 1273, 1277],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -1344,11 +1061,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1310,
-                    1314,
-                    1319
-                ],
+                "stops": [1310, 1314, 1319],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1357,11 +1070,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1371,
-                    1376,
-                    1380
-                ],
+                "stops": [1371, 1376, 1380],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1370,11 +1079,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": true,
-                "stops": [
-                    1391,
-                    1396,
-                    1400
-                ],
+                "stops": [1391, 1396, 1400],
                 "terminates": false,
                 "throughDestEn": "Akagi",
                 "throughDestJa": "赤城",
@@ -1385,11 +1090,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    333,
-                    337,
-                    342
-                ],
+                "stops": [333, 337, 342],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1398,11 +1099,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    356,
-                    360,
-                    364
-                ],
+                "stops": [356, 360, 364],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1411,11 +1108,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    392,
-                    397,
-                    401
-                ],
+                "stops": [392, 397, 401],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1424,11 +1117,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    437,
-                    441,
-                    446
-                ],
+                "stops": [437, 441, 446],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1437,11 +1126,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    469,
-                    473,
-                    477
-                ],
+                "stops": [469, 473, 477],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1450,11 +1135,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    505,
-                    509,
-                    513
-                ],
+                "stops": [505, 509, 513],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1463,11 +1144,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    554,
-                    558,
-                    562
-                ],
+                "stops": [554, 558, 562],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1476,11 +1153,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    605,
-                    609,
-                    613
-                ],
+                "stops": [605, 609, 613],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1489,11 +1162,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    665,
-                    669,
-                    673
-                ],
+                "stops": [665, 669, 673],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1502,11 +1171,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    725,
-                    729,
-                    733
-                ],
+                "stops": [725, 729, 733],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1515,11 +1180,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    785,
-                    789,
-                    793
-                ],
+                "stops": [785, 789, 793],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1528,11 +1189,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    845,
-                    849,
-                    853
-                ],
+                "stops": [845, 849, 853],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1541,11 +1198,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    908,
-                    912,
-                    916
-                ],
+                "stops": [908, 912, 916],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1554,11 +1207,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    965,
-                    969,
-                    973
-                ],
+                "stops": [965, 969, 973],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1567,11 +1216,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    1001,
-                    1005,
-                    1010
-                ],
+                "stops": [1001, 1005, 1010],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1580,11 +1225,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    1036,
-                    1041,
-                    1045
-                ],
+                "stops": [1036, 1041, 1045],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1593,11 +1234,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    1083,
-                    1087,
-                    1091
-                ],
+                "stops": [1083, 1087, 1091],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1606,11 +1243,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    1129,
-                    1134,
-                    1138
-                ],
+                "stops": [1129, 1134, 1138],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1619,11 +1252,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    1168,
-                    1172,
-                    1176
-                ],
+                "stops": [1168, 1172, 1176],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1632,11 +1261,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    1201,
-                    1205,
-                    1210
-                ],
+                "stops": [1201, 1205, 1210],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1645,11 +1270,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    1245,
-                    1250,
-                    1254
-                ],
+                "stops": [1245, 1250, 1254],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1658,11 +1279,7 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": false,
-                "stops": [
-                    1277,
-                    1282,
-                    1286
-                ],
+                "stops": [1277, 1282, 1286],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1671,18 +1288,11 @@
                 "calendar": "Weekday",
                 "startIndex": 2,
                 "startsHere": true,
-                "stops": [
-                    1348,
-                    1352,
-                    1356
-                ],
+                "stops": [1348, 1352, 1356],
                 "terminates": true,
                 "type": "Local"
             }
         ],
-        "upHopTimesMinutes": [
-            4.0,
-            4.0
-        ]
+        "upHopTimesMinutes": [4.0, 4.0]
     }
 ]

@@ -136,13 +136,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [
-            2,
-            2,
-            2,
-            2,
-            3
-        ],
+        "hopTimesMinutes": [2, 2, 2, 2, 3],
         "id": "Railway:Keisei.Oshiage",
         "isLoop": false,
         "nameEn": "Keisei Oshiage Line",

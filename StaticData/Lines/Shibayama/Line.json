@@ -280,9 +280,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [
-            4.0
-        ],
+        "hopTimesMinutes": [4.0],
         "id": "Railway:Shibayama.Shibayama",
         "isLoop": false,
         "nameEn": "Shibayama Railway Line",
@@ -330,10 +328,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    357,
-                    361
-                ],
+                "stops": [357, 361],
                 "terminates": true,
                 "type": "Local"
             },
@@ -342,10 +337,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    384,
-                    388
-                ],
+                "stops": [384, 388],
                 "terminates": true,
                 "type": "Local"
             },
@@ -354,10 +346,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    403,
-                    407
-                ],
+                "stops": [403, 407],
                 "terminates": true,
                 "type": "Local"
             },
@@ -366,10 +355,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    431,
-                    435
-                ],
+                "stops": [431, 435],
                 "terminates": true,
                 "type": "Local"
             },
@@ -378,10 +364,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    455,
-                    459
-                ],
+                "stops": [455, 459],
                 "terminates": true,
                 "type": "Local"
             },
@@ -390,10 +373,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    474,
-                    478
-                ],
+                "stops": [474, 478],
                 "terminates": true,
                 "type": "Rapid"
             },
@@ -402,10 +382,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    486,
-                    490
-                ],
+                "stops": [486, 490],
                 "terminates": true,
                 "type": "Local"
             },
@@ -414,10 +391,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    518,
-                    522
-                ],
+                "stops": [518, 522],
                 "terminates": true,
                 "type": "Local"
             },
@@ -426,10 +400,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    549,
-                    553
-                ],
+                "stops": [549, 553],
                 "terminates": true,
                 "type": "Local"
             },
@@ -438,10 +409,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    580,
-                    584
-                ],
+                "stops": [580, 584],
                 "terminates": true,
                 "type": "Local"
             },
@@ -450,10 +418,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    620,
-                    624
-                ],
+                "stops": [620, 624],
                 "terminates": true,
                 "type": "Local"
             },
@@ -462,10 +427,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    660,
-                    664
-                ],
+                "stops": [660, 664],
                 "terminates": true,
                 "type": "Local"
             },
@@ -474,10 +436,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    700,
-                    704
-                ],
+                "stops": [700, 704],
                 "terminates": true,
                 "type": "Local"
             },
@@ -486,10 +445,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    751,
-                    755
-                ],
+                "stops": [751, 755],
                 "terminates": true,
                 "type": "Local"
             },
@@ -498,10 +454,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    791,
-                    795
-                ],
+                "stops": [791, 795],
                 "terminates": true,
                 "type": "Local"
             },
@@ -510,10 +463,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    831,
-                    835
-                ],
+                "stops": [831, 835],
                 "terminates": true,
                 "type": "Local"
             },
@@ -522,10 +472,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    871,
-                    875
-                ],
+                "stops": [871, 875],
                 "terminates": true,
                 "type": "Local"
             },
@@ -534,10 +481,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    911,
-                    915
-                ],
+                "stops": [911, 915],
                 "terminates": true,
                 "type": "Local"
             },
@@ -546,10 +490,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    951,
-                    955
-                ],
+                "stops": [951, 955],
                 "terminates": true,
                 "type": "Local"
             },
@@ -558,10 +499,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    983,
-                    987
-                ],
+                "stops": [983, 987],
                 "terminates": true,
                 "type": "Local"
             },
@@ -570,10 +508,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1020,
-                    1024
-                ],
+                "stops": [1020, 1024],
                 "terminates": true,
                 "type": "Local"
             },
@@ -582,10 +517,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1060,
-                    1064
-                ],
+                "stops": [1060, 1064],
                 "terminates": true,
                 "type": "Local"
             },
@@ -594,10 +526,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1086,
-                    1090
-                ],
+                "stops": [1086, 1090],
                 "terminates": true,
                 "type": "RapidLimitedExpress"
             },
@@ -606,10 +535,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1109,
-                    1113
-                ],
+                "stops": [1109, 1113],
                 "terminates": true,
                 "type": "LimitedExpress"
             },
@@ -618,10 +544,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1142,
-                    1146
-                ],
+                "stops": [1142, 1146],
                 "terminates": true,
                 "type": "Local"
             },
@@ -630,10 +553,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1173,
-                    1177
-                ],
+                "stops": [1173, 1177],
                 "terminates": true,
                 "type": "LimitedExpress"
             },
@@ -642,10 +562,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1202,
-                    1206
-                ],
+                "stops": [1202, 1206],
                 "terminates": true,
                 "type": "RapidLimitedExpress"
             },
@@ -654,10 +571,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1227,
-                    1231
-                ],
+                "stops": [1227, 1231],
                 "terminates": true,
                 "type": "Local"
             },
@@ -666,10 +580,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1261,
-                    1265
-                ],
+                "stops": [1261, 1265],
                 "terminates": true,
                 "type": "RapidLimitedExpress"
             },
@@ -678,10 +589,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1312,
-                    1316
-                ],
+                "stops": [1312, 1316],
                 "terminates": true,
                 "type": "LimitedExpress"
             },
@@ -690,10 +598,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1362,
-                    1366
-                ],
+                "stops": [1362, 1366],
                 "terminates": true,
                 "type": "Rapid"
             },
@@ -702,10 +607,7 @@
                 "calendar": "Weekday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1394,
-                    1398
-                ],
+                "stops": [1394, 1398],
                 "terminates": true,
                 "type": "Rapid"
             },
@@ -714,10 +616,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    368,
-                    372
-                ],
+                "stops": [368, 372],
                 "terminates": false,
                 "throughDestEn": "Keisei-Ueno",
                 "throughDestJa": "京成上野",
@@ -728,10 +627,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    397,
-                    401
-                ],
+                "stops": [397, 401],
                 "terminates": false,
                 "throughDestEn": "Keisei-Ueno",
                 "throughDestJa": "京成上野",
@@ -742,10 +638,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    427,
-                    431
-                ],
+                "stops": [427, 431],
                 "terminates": false,
                 "throughDestEn": "Nishi-magome",
                 "throughDestJa": "西馬込",
@@ -756,10 +649,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    443,
-                    447
-                ],
+                "stops": [443, 447],
                 "terminates": false,
                 "throughDestEn": "Keisei-Ueno",
                 "throughDestJa": "京成上野",
@@ -770,10 +660,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    465,
-                    469
-                ],
+                "stops": [465, 469],
                 "terminates": false,
                 "throughDestEn": "Keisei-Ueno",
                 "throughDestJa": "京成上野",
@@ -784,10 +671,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    482,
-                    486
-                ],
+                "stops": [482, 486],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -798,10 +682,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    501,
-                    505
-                ],
+                "stops": [501, 505],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -812,10 +693,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    529,
-                    533
-                ],
+                "stops": [529, 533],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -826,10 +704,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    560,
-                    564
-                ],
+                "stops": [560, 564],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -840,10 +715,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    600,
-                    604
-                ],
+                "stops": [600, 604],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -854,10 +726,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    640,
-                    644
-                ],
+                "stops": [640, 644],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -868,10 +737,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    680,
-                    684
-                ],
+                "stops": [680, 684],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -882,10 +748,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    722,
-                    726
-                ],
+                "stops": [722, 726],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -896,10 +759,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    767,
-                    771
-                ],
+                "stops": [767, 771],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -910,10 +770,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    807,
-                    811
-                ],
+                "stops": [807, 811],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -924,10 +781,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    847,
-                    851
-                ],
+                "stops": [847, 851],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -938,10 +792,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    887,
-                    891
-                ],
+                "stops": [887, 891],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -952,10 +803,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    927,
-                    931
-                ],
+                "stops": [927, 931],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -966,10 +814,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    960,
-                    964
-                ],
+                "stops": [960, 964],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -980,10 +825,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1000,
-                    1004
-                ],
+                "stops": [1000, 1004],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -994,10 +836,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1040,
-                    1044
-                ],
+                "stops": [1040, 1044],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1008,10 +847,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1075,
-                    1079
-                ],
+                "stops": [1075, 1079],
                 "terminates": false,
                 "throughDestEn": "Keisei-Ueno",
                 "throughDestJa": "京成上野",
@@ -1022,10 +858,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1098,
-                    1102
-                ],
+                "stops": [1098, 1102],
                 "terminates": false,
                 "throughDestEn": "Nishi-magome",
                 "throughDestJa": "西馬込",
@@ -1036,10 +869,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1121,
-                    1125
-                ],
+                "stops": [1121, 1125],
                 "terminates": false,
                 "throughDestEn": "Keisei-Ueno",
                 "throughDestJa": "京成上野",
@@ -1050,10 +880,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1158,
-                    1162
-                ],
+                "stops": [1158, 1162],
                 "terminates": false,
                 "throughDestEn": "Keisei-Ueno",
                 "throughDestJa": "京成上野",
@@ -1064,10 +891,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1184,
-                    1188
-                ],
+                "stops": [1184, 1188],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1078,10 +902,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1220,
-                    1224
-                ],
+                "stops": [1220, 1224],
                 "terminates": false,
                 "throughDestEn": "Sogosando",
                 "throughDestJa": "宗吾参道",
@@ -1092,10 +913,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1246,
-                    1250
-                ],
+                "stops": [1246, 1250],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1106,10 +924,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1290,
-                    1294
-                ],
+                "stops": [1290, 1294],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1120,10 +935,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1331,
-                    1335
-                ],
+                "stops": [1331, 1335],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1134,10 +946,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1371,
-                    1375
-                ],
+                "stops": [1371, 1375],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1148,10 +957,7 @@
                 "calendar": "Weekday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1403,
-                    1407
-                ],
+                "stops": [1403, 1407],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1162,10 +968,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    357,
-                    361
-                ],
+                "stops": [357, 361],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1174,10 +977,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    384,
-                    388
-                ],
+                "stops": [384, 388],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1186,10 +986,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    399,
-                    403
-                ],
+                "stops": [399, 403],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1198,10 +995,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    426,
-                    430
-                ],
+                "stops": [426, 430],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1210,10 +1004,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    460,
-                    464
-                ],
+                "stops": [460, 464],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1222,10 +1013,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    491,
-                    495
-                ],
+                "stops": [491, 495],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1234,10 +1022,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    528,
-                    532
-                ],
+                "stops": [528, 532],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1246,10 +1031,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    558,
-                    562
-                ],
+                "stops": [558, 562],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1258,10 +1040,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    596,
-                    600
-                ],
+                "stops": [596, 600],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1270,10 +1049,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    633,
-                    637
-                ],
+                "stops": [633, 637],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1282,10 +1058,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    671,
-                    675
-                ],
+                "stops": [671, 675],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1294,10 +1067,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    711,
-                    715
-                ],
+                "stops": [711, 715],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1306,10 +1076,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    751,
-                    755
-                ],
+                "stops": [751, 755],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1318,10 +1085,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    791,
-                    795
-                ],
+                "stops": [791, 795],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1330,10 +1094,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    831,
-                    835
-                ],
+                "stops": [831, 835],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1342,10 +1103,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    871,
-                    875
-                ],
+                "stops": [871, 875],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1354,10 +1112,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    911,
-                    915
-                ],
+                "stops": [911, 915],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1366,10 +1121,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    951,
-                    955
-                ],
+                "stops": [951, 955],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1378,10 +1130,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    991,
-                    995
-                ],
+                "stops": [991, 995],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1390,10 +1139,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1031,
-                    1035
-                ],
+                "stops": [1031, 1035],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1402,10 +1148,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1069,
-                    1073
-                ],
+                "stops": [1069, 1073],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1414,10 +1157,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1117,
-                    1121
-                ],
+                "stops": [1117, 1121],
                 "terminates": true,
                 "type": "RapidLimitedExpress"
             },
@@ -1426,10 +1166,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1147,
-                    1151
-                ],
+                "stops": [1147, 1151],
                 "terminates": true,
                 "type": "Rapid"
             },
@@ -1438,10 +1175,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1187,
-                    1191
-                ],
+                "stops": [1187, 1191],
                 "terminates": true,
                 "type": "Rapid"
             },
@@ -1450,10 +1184,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1227,
-                    1231
-                ],
+                "stops": [1227, 1231],
                 "terminates": true,
                 "type": "Rapid"
             },
@@ -1462,10 +1193,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1260,
-                    1264
-                ],
+                "stops": [1260, 1264],
                 "terminates": true,
                 "type": "RapidLimitedExpress"
             },
@@ -1474,10 +1202,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1300,
-                    1304
-                ],
+                "stops": [1300, 1304],
                 "terminates": true,
                 "type": "Rapid"
             },
@@ -1486,10 +1211,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1335,
-                    1339
-                ],
+                "stops": [1335, 1339],
                 "terminates": true,
                 "type": "Local"
             },
@@ -1498,10 +1220,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 0,
                 "startsHere": false,
-                "stops": [
-                    1367,
-                    1371
-                ],
+                "stops": [1367, 1371],
                 "terminates": true,
                 "type": "LimitedExpress"
             },
@@ -1510,10 +1229,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    366,
-                    370
-                ],
+                "stops": [366, 370],
                 "terminates": false,
                 "throughDestEn": "Keisei-Ueno",
                 "throughDestJa": "京成上野",
@@ -1524,10 +1240,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    395,
-                    399
-                ],
+                "stops": [395, 399],
                 "terminates": false,
                 "throughDestEn": "Keisei-Ueno",
                 "throughDestJa": "京成上野",
@@ -1538,10 +1251,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    413,
-                    417
-                ],
+                "stops": [413, 417],
                 "terminates": false,
                 "throughDestEn": "Keisei-Ueno",
                 "throughDestJa": "京成上野",
@@ -1552,10 +1262,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    436,
-                    440
-                ],
+                "stops": [436, 440],
                 "terminates": false,
                 "throughDestEn": "Keisei-Ueno",
                 "throughDestJa": "京成上野",
@@ -1566,10 +1273,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    477,
-                    481
-                ],
+                "stops": [477, 481],
                 "terminates": false,
                 "throughDestEn": "Haneda Airport",
                 "throughDestJa": "羽田空港",
@@ -1580,10 +1284,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    511,
-                    515
-                ],
+                "stops": [511, 515],
                 "terminates": false,
                 "throughDestEn": "Keisei-Ueno",
                 "throughDestJa": "京成上野",
@@ -1594,10 +1295,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    537,
-                    541
-                ],
+                "stops": [537, 541],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1608,10 +1306,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    572,
-                    576
-                ],
+                "stops": [572, 576],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1622,10 +1317,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    608,
-                    612
-                ],
+                "stops": [608, 612],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1636,10 +1328,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    647,
-                    651
-                ],
+                "stops": [647, 651],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1650,10 +1339,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    687,
-                    691
-                ],
+                "stops": [687, 691],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1664,10 +1350,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    727,
-                    731
-                ],
+                "stops": [727, 731],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1678,10 +1361,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    767,
-                    771
-                ],
+                "stops": [767, 771],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1692,10 +1372,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    807,
-                    811
-                ],
+                "stops": [807, 811],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1706,10 +1383,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    847,
-                    851
-                ],
+                "stops": [847, 851],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1720,10 +1394,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    887,
-                    891
-                ],
+                "stops": [887, 891],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1734,10 +1405,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    927,
-                    931
-                ],
+                "stops": [927, 931],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1748,10 +1416,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    967,
-                    971
-                ],
+                "stops": [967, 971],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1762,10 +1427,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1007,
-                    1011
-                ],
+                "stops": [1007, 1011],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1776,10 +1438,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1047,
-                    1051
-                ],
+                "stops": [1047, 1051],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1790,10 +1449,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1088,
-                    1092
-                ],
+                "stops": [1088, 1092],
                 "terminates": false,
                 "throughDestEn": "Keisei-Ueno",
                 "throughDestJa": "京成上野",
@@ -1804,10 +1460,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1129,
-                    1133
-                ],
+                "stops": [1129, 1133],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1818,10 +1471,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1167,
-                    1171
-                ],
+                "stops": [1167, 1171],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1832,10 +1482,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1207,
-                    1211
-                ],
+                "stops": [1207, 1211],
                 "terminates": false,
                 "throughDestEn": "Keisei-Takasago",
                 "throughDestJa": "京成高砂",
@@ -1846,10 +1493,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1250,
-                    1254
-                ],
+                "stops": [1250, 1254],
                 "terminates": false,
                 "throughDestEn": "Sogosando",
                 "throughDestJa": "宗吾参道",
@@ -1860,10 +1504,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1281,
-                    1285
-                ],
+                "stops": [1281, 1285],
                 "terminates": false,
                 "throughDestEn": "Sogosando",
                 "throughDestJa": "宗吾参道",
@@ -1874,10 +1515,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1312,
-                    1316
-                ],
+                "stops": [1312, 1316],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1888,10 +1526,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1344,
-                    1348
-                ],
+                "stops": [1344, 1348],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",
@@ -1902,10 +1537,7 @@
                 "calendar": "SaturdayHoliday",
                 "startIndex": 1,
                 "startsHere": true,
-                "stops": [
-                    1376,
-                    1380
-                ],
+                "stops": [1376, 1380],
                 "terminates": false,
                 "throughDestEn": "Keisei-Narita",
                 "throughDestJa": "京成成田",

@@ -1643,20 +1643,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [
-            2,
-            2,
-            2.5,
-            2,
-            2,
-            2,
-            2,
-            1,
-            2,
-            2,
-            2,
-            3
-        ],
+        "hopTimesMinutes": [2, 2, 2.5, 2, 2, 2, 2, 1, 2, 2, 2, 3],
         "id": "Railway:Tokyu.Meguro",
         "isLoop": false,
         "nameEn": "Tokyu Meguro Line",
@@ -1809,15 +1796,7 @@
         ],
         "stopPatterns": [
             "Express",
-            [
-                0,
-                7,
-                12,
-                2,
-                10,
-                8,
-                5
-            ]
+            [0, 7, 12, 2, 10, 8, 5]
         ],
         "throughServices": [
             {
@@ -1848,19 +1827,6 @@
                 "towardJa": "新横浜・相鉄線方面"
             }
         ],
-        "upHopTimesMinutes": [
-            2,
-            2,
-            2,
-            1.5,
-            2,
-            2,
-            2.5,
-            2,
-            2,
-            2,
-            2,
-            2
-        ]
+        "upHopTimesMinutes": [2, 2, 2, 1.5, 2, 2, 2.5, 2, 2, 2, 2, 2]
     }
 ]

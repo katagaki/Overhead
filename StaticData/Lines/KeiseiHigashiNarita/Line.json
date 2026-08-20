@@ -72,9 +72,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [
-            8
-        ],
+        "hopTimesMinutes": [8],
         "id": "Railway:Keisei.HigashiNarita",
         "isLoop": false,
         "nameEn": "Keisei Higashi-Narita Line",

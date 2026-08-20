@@ -4886,14 +4886,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [
-            2,
-            2,
-            2,
-            2,
-            2,
-            3
-        ],
+        "hopTimesMinutes": [2, 2, 2, 2, 2, 3],
         "id": "Railway:Keikyu.Airport",
         "isLoop": false,
         "nameEn": "Keikyu Airport Line",
@@ -4980,11 +4973,7 @@
         ],
         "stopPatterns": [
             "RapidLimitedExpress",
-            [
-                6,
-                0,
-                5
-            ]
+            [6, 0, 5]
         ],
         "throughServices": [
             {

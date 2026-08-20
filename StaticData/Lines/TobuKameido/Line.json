@@ -104,12 +104,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [
-            3,
-            1,
-            2,
-            2
-        ],
+        "hopTimesMinutes": [3, 1, 2, 2],
         "id": "Railway:Tobu.Kameido",
         "isLoop": false,
         "nameEn": "Tobu Kameido Line",

@@ -96,9 +96,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [
-            6
-        ],
+        "hopTimesMinutes": [6],
         "id": "Railway:JR-East.KeiyoBranch",
         "isLoop": false,
         "nameEn": "Keiyo Line Nishi-Funabashi Branch",

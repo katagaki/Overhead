@@ -15,18 +15,9 @@
                 "id": "static.RailDirection:Toei.Shinjuku.Motoyawata",
                 "intermediateOrigins": [
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:01",
-                            "05:12"
-                        ],
+                        "saturdayHolidayDepartures": ["05:01", "05:12"],
                         "stationId": "Station:Toei.Shinjuku.Ojima",
-                        "weekdayDepartures": [
-                            "05:01",
-                            "05:12",
-                            "07:09",
-                            "07:36",
-                            "08:03"
-                        ]
+                        "weekdayDepartures": ["05:01", "05:12", "07:09", "07:36", "08:03"]
                     }
                 ],
                 "isAscending": true,
@@ -97,33 +88,14 @@
                 "id": "static.RailDirection:Toei.Shinjuku.Shinjuku",
                 "intermediateOrigins": [
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:00"
-                        ],
+                        "saturdayHolidayDepartures": ["05:00"],
                         "stationId": "Station:Toei.Shinjuku.Iwamotocho",
-                        "weekdayDepartures": [
-                            "05:00"
-                        ]
+                        "weekdayDepartures": ["05:00"]
                     },
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:00",
-                            "07:06",
-                            "07:25"
-                        ],
+                        "saturdayHolidayDepartures": ["05:00", "07:06", "07:25"],
                         "stationId": "Station:Toei.Shinjuku.Ojima",
-                        "weekdayDepartures": [
-                            "05:00",
-                            "07:20",
-                            "07:28",
-                            "09:31",
-                            "16:23",
-                            "16:36",
-                            "17:05",
-                            "17:11",
-                            "17:18",
-                            "17:27"
-                        ]
+                        "weekdayDepartures": ["05:00", "07:20", "07:28", "09:31", "16:23", "16:36", "17:05", "17:11", "17:18", "17:27"]
                     }
                 ],
                 "isAscending": false,
@@ -189,28 +161,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            1,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            3,
-            3
-        ],
+        "hopTimesMinutes": [2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3],
         "id": "Railway:Toei.Shinjuku",
         "isLoop": false,
         "nameEn": "Toei Shinjuku Line",

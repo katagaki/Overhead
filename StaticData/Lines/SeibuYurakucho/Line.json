@@ -136,10 +136,7 @@
                 }
             }
         ],
-        "hopTimesMinutes": [
-            2,
-            2
-        ],
+        "hopTimesMinutes": [2, 2],
         "id": "Railway:Seibu.SeibuYurakucho",
         "isLoop": false,
         "nameEn": "Seibu Yurakucho Line",

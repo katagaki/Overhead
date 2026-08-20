@@ -17,9 +17,7 @@
                     {
                         "saturdayHolidayDepartures": [],
                         "stationId": "Station:YokohamaMunicipal.Green.TsuzukiFureainooka",
-                        "weekdayDepartures": [
-                            "05:59"
-                        ]
+                        "weekdayDepartures": ["05:59"]
                     }
                 ],
                 "isAscending": true,
@@ -114,15 +112,9 @@
                 "id": "static.RailDirection:YokohamaMunicipal.Green.Nakayama",
                 "intermediateOrigins": [
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:13",
-                            "05:24"
-                        ],
+                        "saturdayHolidayDepartures": ["05:13", "05:24"],
                         "stationId": "Station:YokohamaMunicipal.Green.Kawawacho",
-                        "weekdayDepartures": [
-                            "05:13",
-                            "05:24"
-                        ]
+                        "weekdayDepartures": ["05:13", "05:24"]
                     }
                 ],
                 "isAscending": false,

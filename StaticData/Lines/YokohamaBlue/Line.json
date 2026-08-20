@@ -15,93 +15,29 @@
                 "id": "static.RailDirection:YokohamaMunicipal.Blue.Azamino",
                 "intermediateOrigins": [
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:16",
-                            "09:10",
-                            "10:11",
-                            "10:41",
-                            "11:11",
-                            "11:40",
-                            "12:10",
-                            "12:40",
-                            "13:10",
-                            "13:40",
-                            "14:10",
-                            "14:40",
-                            "15:10",
-                            "15:41",
-                            "16:11",
-                            "16:41",
-                            "17:11",
-                            "17:41",
-                            "18:11",
-                            "18:41",
-                            "19:11",
-                            "19:41",
-                            "20:11"
-                        ],
+                        "saturdayHolidayDepartures": ["05:16", "09:10", "10:11", "10:41", "11:11", "11:40", "12:10", "12:40", "13:10", "13:40", "14:10", "14:40", "15:10", "15:41", "16:11", "16:41", "17:11", "17:41", "18:11", "18:41", "19:11", "19:41", "20:11"],
                         "stationId": "Station:YokohamaMunicipal.Blue.Odoriba",
-                        "weekdayDepartures": [
-                            "05:16",
-                            "06:27",
-                            "10:40",
-                            "11:10",
-                            "11:40",
-                            "12:10",
-                            "12:40",
-                            "13:10",
-                            "13:40",
-                            "14:10",
-                            "14:40",
-                            "15:12",
-                            "15:42",
-                            "16:12"
-                        ]
+                        "weekdayDepartures": ["05:16", "06:27", "10:40", "11:10", "11:40", "12:10", "12:40", "13:10", "13:40", "14:10", "14:40", "15:12", "15:42", "16:12"]
                     },
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:14",
-                            "05:45",
-                            "06:08"
-                        ],
+                        "saturdayHolidayDepartures": ["05:14", "05:45", "06:08"],
                         "stationId": "Station:YokohamaMunicipal.Blue.Kaminagaya",
-                        "weekdayDepartures": [
-                            "05:14",
-                            "05:44",
-                            "06:07",
-                            "06:17",
-                            "06:26",
-                            "06:44"
-                        ]
+                        "weekdayDepartures": ["05:14", "05:44", "06:07", "06:17", "06:26", "06:44"]
                     },
                     {
                         "saturdayHolidayDepartures": [],
                         "stationId": "Station:YokohamaMunicipal.Blue.Kamiooka",
-                        "weekdayDepartures": [
-                            "06:03"
-                        ]
+                        "weekdayDepartures": ["06:03"]
                     },
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:26"
-                        ],
+                        "saturdayHolidayDepartures": ["05:26"],
                         "stationId": "Station:YokohamaMunicipal.Blue.Yokohama",
-                        "weekdayDepartures": [
-                            "05:26"
-                        ]
+                        "weekdayDepartures": ["05:26"]
                     },
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:15",
-                            "05:29"
-                        ],
+                        "saturdayHolidayDepartures": ["05:15", "05:29"],
                         "stationId": "Station:YokohamaMunicipal.Blue.Nippa",
-                        "weekdayDepartures": [
-                            "05:15",
-                            "05:29",
-                            "06:10",
-                            "06:27"
-                        ]
+                        "weekdayDepartures": ["05:15", "05:29", "06:10", "06:27"]
                     }
                 ],
                 "isAscending": true,
@@ -204,85 +140,19 @@
                 "id": "static.RailDirection:YokohamaMunicipal.Blue.Shonandai",
                 "intermediateOrigins": [
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:12",
-                            "05:23",
-                            "05:33",
-                            "06:19",
-                            "06:34",
-                            "09:21",
-                            "10:11",
-                            "19:40"
-                        ],
+                        "saturdayHolidayDepartures": ["05:12", "05:23", "05:33", "06:19", "06:34", "09:21", "10:11", "19:40"],
                         "stationId": "Station:YokohamaMunicipal.Blue.Kaminagaya",
-                        "weekdayDepartures": [
-                            "05:12",
-                            "05:23",
-                            "05:32",
-                            "06:22",
-                            "06:30",
-                            "06:44",
-                            "06:53",
-                            "07:11"
-                        ]
+                        "weekdayDepartures": ["05:12", "05:23", "05:32", "06:22", "06:30", "06:44", "06:53", "07:11"]
                     },
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:09",
-                            "23:38"
-                        ],
+                        "saturdayHolidayDepartures": ["05:09", "23:38"],
                         "stationId": "Station:YokohamaMunicipal.Blue.ShinYokohama",
-                        "weekdayDepartures": [
-                            "05:09"
-                        ]
+                        "weekdayDepartures": ["05:09"]
                     },
                     {
-                        "saturdayHolidayDepartures": [
-                            "05:14",
-                            "09:17",
-                            "09:47",
-                            "10:17",
-                            "10:44",
-                            "11:14",
-                            "11:44",
-                            "12:14",
-                            "12:44",
-                            "13:14",
-                            "13:44",
-                            "14:14",
-                            "14:44",
-                            "15:14",
-                            "15:44",
-                            "16:16",
-                            "16:47",
-                            "17:17",
-                            "17:47",
-                            "18:17",
-                            "18:47",
-                            "19:17",
-                            "19:47",
-                            "20:17"
-                        ],
+                        "saturdayHolidayDepartures": ["05:14", "09:17", "09:47", "10:17", "10:44", "11:14", "11:44", "12:14", "12:44", "13:14", "13:44", "14:14", "14:44", "15:14", "15:44", "16:16", "16:47", "17:17", "17:47", "18:17", "18:47", "19:17", "19:47", "20:17"],
                         "stationId": "Station:YokohamaMunicipal.Blue.Nippa",
-                        "weekdayDepartures": [
-                            "05:14",
-                            "05:55",
-                            "06:23",
-                            "06:49",
-                            "10:14",
-                            "10:44",
-                            "11:14",
-                            "11:44",
-                            "12:14",
-                            "12:44",
-                            "13:14",
-                            "13:44",
-                            "14:14",
-                            "14:44",
-                            "15:14",
-                            "15:45",
-                            "16:17"
-                        ]
+                        "weekdayDepartures": ["05:14", "05:55", "06:23", "06:49", "10:14", "10:44", "11:14", "11:44", "12:14", "12:44", "13:14", "13:44", "14:14", "14:44", "15:14", "15:45", "16:17"]
                     }
                 ],
                 "isAscending": false,
