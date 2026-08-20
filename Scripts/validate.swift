@@ -14,13 +14,6 @@ let root = CommandLine.arguments.count > 1
     : FileManager.default.currentDirectoryPath + "/StaticData"
 
 struct BadgeFile: Decodable { let lines: [String: LineBadgeConfig] }
-struct CatalogLine: Decodable { let id: String; let folder: String; let sha256: String }
-struct Catalog: Decodable {
-    let schemaVersion: Int
-    let styles: [String]
-    let lines: [CatalogLine]
-}
-
 var failures: [String] = []
 func fail(_ message: String) { failures.append(message) }
 
@@ -96,7 +89,7 @@ for (from, to) in connects where !seenIds.contains(to) {
 // The catalog must be in step with what is on disk.
 if let catalogData = fm.contents(atPath: "\(root)/catalog.json") {
     do {
-        let catalog = try JSONDecoder().decode(Catalog.self, from: catalogData)
+        let catalog = try JSONDecoder().decode(LineCatalog.self, from: catalogData)
         let catalogIds = Set(catalog.lines.map(\.id))
         for missing in seenIds.subtracting(catalogIds).sorted() {
             fail("catalog.json is missing \(missing) — re-run make-catalog.py")
