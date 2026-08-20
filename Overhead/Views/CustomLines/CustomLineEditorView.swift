@@ -60,15 +60,20 @@ struct CustomLineEditorView: View {
             }
 
             Section {
-                Picker(selection: $draft.badgeStyle) {
-                    ForEach(BadgeStyle.allCases) { style in
-                        Text(badgeStyleLabel(style)).tag(style)
-                    }
+                NavigationLink {
+                    CustomLineBadgeStyleView(line: $draft)
                 } label: {
-                    Text("CustomLine.Badge.Style")
+                    LabeledContent {
+                        HStack(spacing: 8) {
+                            LineSymbolBadge(symbol: draft.symbol.isEmpty ? "＋" : draft.symbol,
+                                            color: draft.color, dimension: 26,
+                                            styleOverride: draft.styleId)
+                            Text(BadgeStyles.displayName(draft.styleId))
+                        }
+                    } label: {
+                        Text("CustomLine.Badge.Style")
+                    }
                 }
-                .pickerStyle(.segmented)
-                .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
             } header: {
                 Text("CustomLine.Badge")
             }
@@ -174,14 +179,6 @@ struct CustomLineEditorView: View {
         }
     }
 
-    private func badgeStyleLabel(_ style: BadgeStyle) -> LocalizedStringKey {
-        switch style {
-        case .rounded: return "CustomLine.Badge.Rounded"
-        case .ring: return "CustomLine.Badge.Ring"
-        case .filled: return "CustomLine.Badge.Filled"
-        case .square: return "CustomLine.Badge.Square"
-        }
-    }
 
     private var normalizedDraft: CustomLine {
         var copy = draft

@@ -22,3 +22,6 @@ CLAUDE.md
 
 # Secrets (ODPT key etc.) — never commit
 .env
+
+# Badge comparison harness output
+Assets/BadgeCompare/comparison/

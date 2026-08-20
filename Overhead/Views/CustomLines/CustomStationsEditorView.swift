@@ -17,7 +17,7 @@ struct CustomStationsEditorView: View {
                         CustomStationDetailView(
                             station: $line.stations[index],
                             code: line.stationCode(at: index),
-                            style: line.badgeStyle,
+                            style: line.styleId,
                             color: line.color
                         )
                     } label: {
@@ -79,7 +79,7 @@ struct CustomStationsEditorView: View {
                 CustomStationDetailView(
                     station: $line.stations[last],
                     code: line.stationCode(at: last),
-                    style: line.badgeStyle,
+                    style: line.styleId,
                     color: line.color
                 )
             }
@@ -102,7 +102,7 @@ struct CustomStationsEditorView: View {
                 code: line.stationCode(at: index),
                 color: line.color,
                 size: .compact,
-                styleOverride: line.badgeStyle
+                styleOverride: line.styleId
             )
             VStack(alignment: .leading, spacing: 1) {
                 (station.name.isEmpty ? Text("CustomLine.Station.Unnamed") : Text(verbatim: station.name))
@@ -143,7 +143,7 @@ struct CustomStationsEditorView: View {
 struct CustomStationDetailView: View {
     @Binding var station: CustomStation
     let code: String
-    let style: BadgeStyle
+    let style: String
     let color: Color
 
     @StateObject private var location = OneShotLocation()

@@ -1,0 +1,16 @@
+{
+    "lines": {
+        "Railway:Odakyu.Enoshima": {
+            "style": "odakyu",
+            "symbol": "OH"
+        },
+        "Railway:Odakyu.Odawara": {
+            "style": "odakyu",
+            "symbol": "OH"
+        },
+        "Railway:Odakyu.Tama": {
+            "style": "odakyu",
+            "symbol": "OH"
+        }
+    }
+}

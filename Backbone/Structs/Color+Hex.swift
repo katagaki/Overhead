@@ -1,4 +1,7 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 public extension Color {
     init(hex: String) {
@@ -14,5 +17,19 @@ public extension Color {
             r = 0; g = 0; b = 0
         }
         self.init(red: r, green: g, blue: b)
+    }
+}
+
+public extension Color {
+    /// Round-trips back to the "#RRGGBB" the line data was built from.
+    var hexString: String {
+        #if canImport(UIKit)
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        UIColor(self).getRed(&r, green: &g, blue: &b, alpha: &a)
+        return String(format: "#%02X%02X%02X",
+                      Int((r * 255).rounded()), Int((g * 255).rounded()), Int((b * 255).rounded()))
+        #else
+        return "#000000"
+        #endif
     }
 }

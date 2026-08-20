@@ -171,7 +171,7 @@ enum ScreenshotSeeder {
             nameEn: "Kivotos M-Line",
             symbol: "M",
             colorHex: "#0067C0",
-            badgeStyle: .rounded,
+            badgeStyleId: "jr",
             isLoop: false,
             stations: [
                 CustomStation(id: "Custom:Station.M01", name: "ミレニアム中央", nameEn: "Millennium Central"),

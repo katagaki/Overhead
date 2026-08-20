@@ -1,0 +1,20 @@
+{
+    "lines": {
+        "Railway:Keikyu.Airport": {
+            "style": "keikyu",
+            "symbol": "KK"
+        },
+        "Railway:Keikyu.Kurihama": {
+            "style": "keikyu",
+            "symbol": "KK"
+        },
+        "Railway:Keikyu.Main": {
+            "style": "keikyu",
+            "symbol": "KK"
+        },
+        "Railway:Keikyu.Zushi": {
+            "style": "keikyu",
+            "symbol": "KK"
+        }
+    }
+}

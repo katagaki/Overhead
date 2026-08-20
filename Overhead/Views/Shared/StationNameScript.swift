@@ -133,7 +133,7 @@ struct LCDTransferLineName: View {
     let fontSize: CGFloat
     var symbol: String = ""
     var badgeColor: Color = .clear
-    var badgeStyle: BadgeStyle? = nil
+    var badgeStyleId: String? = nil
     var kerning: CGFloat = 0
     var color: Color = .black
 
@@ -143,7 +143,7 @@ struct LCDTransferLineName: View {
         HStack(alignment: .top, spacing: 1.5) {
             if !symbol.isEmpty {
                 LineSymbolBadge(symbol: symbol, color: badgeColor, dimension: 7,
-                                styleOverride: badgeStyle)
+                                styleOverride: badgeStyleId)
                     .frame(height: rowHeight)
             }
             VStack(alignment: .leading, spacing: 0) {

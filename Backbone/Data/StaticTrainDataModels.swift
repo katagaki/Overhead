@@ -398,35 +398,35 @@ struct RunTimes {
 
 public enum StaticTrainData {
 
-    // One JSON resource per operator; see LineStore and StaticData/Lines/.
-    private static let lineResources = [
-        "JREastLine", "TokyoMetroLine", "ToeiLine", "KeiseiLine", "TobuLine",
-        "OdakyuLine", "TokyuLine", "TokyuOimachiLine", "TokyuIkegamiLine",
-        "TokyuTamagawaLine", "TokyuSetagayaLine", "TokyuShinYokohamaLine",
-        "KodomonokuniLine", "KeikyuLine", "KeioLine", "KeioInokashiraLine",
-        "SeibuLine", "SotetsuLine", "SotetsuIzuminoLine", "SotetsuShinYokohamaLine",
-        "MinatomiraiLine", "SaitamaRapidLine", "RinkaiLine", "TsukubaExpressLine",
-        "TamaMonorailLine", "YokohamaBlueLine", "YokohamaGreenLine",
-        "TobuIsesakiLine", "TobuSanoLine", "TobuKiryuLine", "TobuKoizumiLine",
-        "TobuKoizumiBranchLine", "TobuOgoseLine", "TobuUtsunomiyaLine", "TobuKinugawaLine",
-        "KeioKeibajoLine", "KeioDobutsuenLine",
-        "SeibuHaijimaLine", "SeibuKokubunjiLine", "SeibuTamakoLine", "SeibuTamagawaLine",
-        "SeibuSayamaLine", "SeibuYamaguchiLine", "SeibuSeibuenLine", "SeibuToshimaLine",
-        "SeibuChichibuLine", "YurikamomeLine",
-        "TokyoMonorailLine", "ToyoRapidLine", "HokusoLine", "YokohamaSeasideLine",
-        "NewShuttleLine", "KeiseiMatsudoLine",
-        "JRTsurumiLine", "JRTsurumiOkawaLine", "JRTsurumiUmiShibauraLine", "JRNambuBranchLine",
-        "JRSagamiLine", "JRHachikoLine", "JRKawagoeLine", "JRNaritaLine", "JRNaritaAbikoLine",
-        "JRNaritaAirportLine", "JRSobuMainLine", "JRToganeLine", "JRKashimaLine", "JRKururiLine",
-        "JRSotoboLine", "JRUchiboLine", "JRAgatsumaLine", "JRJoetsuLine",
-        "EnodenLine", "ShonanMonorailLine", "RyutetsuLine", "ShibayamaLine",
-        "ChoshiLine", "JomoLine", "KantetsuJosoLine", "KantetsuRyugasakiLine",
-        "HitachinakaMinatoLine", "KominatoLine", "MookaLine",
+    /// One folder per operator under StaticData/Lines/; each holds Line.json
+    /// (timetables) and Badge.json (badge assignments).
+    public static let lineFolders = [
+        "JREast", "TokyoMetro", "Toei", "Keisei",
+        "Tobu", "Odakyu", "Tokyu", "TokyuOimachi",
+        "TokyuIkegami", "TokyuTamagawa", "TokyuSetagaya", "TokyuShinYokohama",
+        "Kodomonokuni", "Keikyu", "Keio", "KeioInokashira",
+        "Seibu", "Sotetsu", "SotetsuIzumino", "SotetsuShinYokohama",
+        "Minatomirai", "SaitamaRapid", "Rinkai", "TsukubaExpress",
+        "TamaMonorail", "YokohamaBlue", "YokohamaGreen", "TobuIsesaki",
+        "TobuSano", "TobuKiryu", "TobuKoizumi", "TobuKoizumiBranch",
+        "TobuOgose", "TobuUtsunomiya", "TobuKinugawa", "KeioKeibajo",
+        "KeioDobutsuen", "SeibuHaijima", "SeibuKokubunji", "SeibuTamako",
+        "SeibuTamagawa", "SeibuSayama", "SeibuYamaguchi", "SeibuSeibuen",
+        "SeibuToshima", "SeibuChichibu", "Yurikamome", "TokyoMonorail",
+        "ToyoRapid", "Hokuso", "YokohamaSeaside", "NewShuttle",
+        "KeiseiMatsudo", "JRTsurumi", "JRTsurumiOkawa", "JRTsurumiUmiShibaura",
+        "JRNambuBranch", "JRSagami", "JRHachiko", "JRKawagoe",
+        "JRNarita", "JRNaritaAbiko", "JRNaritaAirport", "JRSobuMain",
+        "JRTogane", "JRKashima", "JRKururi", "JRSotobo",
+        "JRUchibo", "JRAgatsuma", "JRJoetsu", "Enoden",
+        "ShonanMonorail", "Ryutetsu", "Shibayama", "Choshi",
+        "Jomo", "KantetsuJoso", "KantetsuRyugasaki", "HitachinakaMinato",
+        "Kominato", "Mooka",
     ]
 
     /// The bundled data exactly as authored — every line's pre-revision timetable.
     /// Everything outside this file wants `allLines`, which resolves 改正 first.
-    private static let bundledLines: [StaticTrainLine] = lineResources.flatMap { LineStore.lines($0) }
+    private static let bundledLines: [StaticTrainLine] = lineFolders.flatMap { LineStore.lines($0) }
 
     /// The day number (yyyyMMdd, JST) a date falls on. Matches `ScheduleCalendar`,
     /// which also splits on the calendar day rather than the service day — a 24:30
@@ -512,6 +512,11 @@ public enum StaticTrainData {
 
     public static func delayCheckInfo(forLineId lineId: String) -> DelayCheckInfo? {
         snapshot(on: Date()).byId[lineId]?.delayInfo
+    }
+
+    /// The line's own colour, straight from the data (no 改正 resolution needed).
+    public static func colorHex(forLineId id: String) -> String? {
+        bundledLines.first { $0.id == id }?.colorHex
     }
 
     public static func trainLines() -> [TrainLine] {

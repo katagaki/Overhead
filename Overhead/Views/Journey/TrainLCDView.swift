@@ -88,7 +88,7 @@ struct TrainLCDView: View {
                             let ratio = StationNumberBadge.cornerRadiusRatio(
                                 code: station.stationCode,
                                 color: stationColor(station),
-                                styleOverride: journey.line.badgeStyle
+                                styleOverride: journey.line.badgeStyleId
                             )
                             scaledStationBadge(station, dimension: 26)
                                 .overlay(
@@ -390,7 +390,7 @@ struct TrainLCDView: View {
             ForEach(lines) { line in
                 LCDTransferLineName(name: line.name, fontSize: 6.5,
                                     symbol: line.lineSymbol, badgeColor: line.color,
-                                    badgeStyle: line.badgeStyle)
+                                    badgeStyleId: line.badgeStyleId)
             }
         }
         .padding(.horizontal, 1)
@@ -542,7 +542,7 @@ struct TrainLCDView: View {
             color: stationColor(station),
             size: .regular,
             stationName: station.name,
-            styleOverride: journey.line.badgeStyle
+            styleOverride: journey.line.badgeStyleId
         )
         .scaleEffect(dimension / 28)
         .frame(width: dimension, height: dimension)

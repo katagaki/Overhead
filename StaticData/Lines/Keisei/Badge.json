@@ -1,0 +1,35 @@
+{
+    "lines": {
+        "Railway:Keisei.Chiba": {
+            "style": "keisei",
+            "symbol": "KS"
+        },
+        "Railway:Keisei.Chihara": {
+            "style": "keisei",
+            "symbol": "KS"
+        },
+        "Railway:Keisei.HigashiNarita": {
+            "style": "keisei",
+            "symbol": "KS"
+        },
+        "Railway:Keisei.Kanamachi": {
+            "style": "keisei",
+            "symbol": "KS"
+        },
+        "Railway:Keisei.Main": {
+            "style": "keisei",
+            "symbol": "KS"
+        },
+        "Railway:Keisei.NaritaSkyAccess": {
+            "stationStyleOverrides": {
+                "HS": "hokuso"
+            },
+            "style": "keisei",
+            "symbol": "KS"
+        },
+        "Railway:Keisei.Oshiage": {
+            "style": "keisei",
+            "symbol": "KS"
+        }
+    }
+}

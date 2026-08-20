@@ -1,0 +1,28 @@
+{
+    "lines": {
+        "Railway:Tobu.Daishi": {
+            "style": "tobu",
+            "symbol": "TS"
+        },
+        "Railway:Tobu.Kameido": {
+            "style": "tobu",
+            "symbol": "TS"
+        },
+        "Railway:Tobu.Nikko": {
+            "style": "tobu",
+            "symbol": "TS"
+        },
+        "Railway:Tobu.TobuSkytree": {
+            "style": "tobu",
+            "symbol": "TS"
+        },
+        "Railway:Tobu.TobuUrbanPark": {
+            "style": "tobu",
+            "symbol": "TD"
+        },
+        "Railway:Tobu.Tojo": {
+            "style": "tobu",
+            "symbol": "TJ"
+        }
+    }
+}

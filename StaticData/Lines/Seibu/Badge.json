@@ -1,0 +1,16 @@
+{
+    "lines": {
+        "Railway:Seibu.Ikebukuro": {
+            "style": "seibu",
+            "symbol": "SI"
+        },
+        "Railway:Seibu.SeibuYurakucho": {
+            "style": "seibu",
+            "symbol": "SI"
+        },
+        "Railway:Seibu.Shinjuku": {
+            "style": "seibu",
+            "symbol": "SS"
+        }
+    }
+}

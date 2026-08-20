@@ -21,7 +21,7 @@ struct CustomLineImportView: View {
                         HStack(spacing: 12) {
                             LineSymbolBadge(symbol: line.symbol.isEmpty ? "＋" : line.symbol,
                                             color: line.color, dimension: 36,
-                                            styleOverride: line.badgeStyle)
+                                            styleOverride: line.styleId)
                             VStack(alignment: .leading, spacing: 1) {
                                 (line.localizedName.isEmpty ? Text("CustomLine.Unnamed") : Text(verbatim: line.localizedName))
                                     .font(.system(size: 16, weight: .medium))

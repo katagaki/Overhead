@@ -215,7 +215,7 @@ struct JourneyToolbarAccessory: View {
             color: color,
             size: .regular,
             stationName: station.name,
-            styleOverride: viewModel.activeJourney?.line.badgeStyle
+            styleOverride: viewModel.activeJourney?.line.badgeStyleId
         )
         .scaleEffect(dimension / 28)
         .frame(width: dimension, height: dimension)

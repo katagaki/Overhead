@@ -85,7 +85,7 @@ struct CustomLinesSection: View {
     private func row(for line: CustomLine) -> some View {
         HStack(spacing: 12) {
             LineSymbolBadge(symbol: line.symbol.isEmpty ? "＋" : line.symbol, color: line.color,
-                            dimension: 36, styleOverride: line.badgeStyle)
+                            dimension: 36, styleOverride: line.styleId)
 
             VStack(alignment: .leading, spacing: 1) {
                 (line.localizedName.isEmpty ? Text("CustomLine.Unnamed") : Text(verbatim: line.localizedName))

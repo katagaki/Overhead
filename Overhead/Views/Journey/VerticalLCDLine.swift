@@ -476,7 +476,7 @@ struct VerticalLCDLine: View {
                         opacity: isPast && !isCurrent ? 0.6 : 1.0,
                         size: .regular,
                         stationName: target.station.name,
-                        styleOverride: journey.line.badgeStyle
+                        styleOverride: journey.line.badgeStyleId
                     )
                 }
                 Text(target.station.localizedName)
@@ -555,7 +555,7 @@ struct VerticalLCDLine: View {
                     opacity: isPast && !isCurrent ? 0.4 : 1.0,
                     size: .regular,
                     stationName: station.name,
-                    styleOverride: journey.line.badgeStyle
+                    styleOverride: journey.line.badgeStyleId
                 )
             }
 

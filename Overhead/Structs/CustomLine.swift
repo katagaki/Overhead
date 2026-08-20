@@ -43,7 +43,18 @@ struct CustomLine: Identifiable, Codable, Hashable {
     /// Line symbol / badge prefix, e.g. "YH". Uppercased, ≤2 chars.
     var symbol: String
     var colorHex: String
+    /// Optional so lines saved before style ids still decode.
+    var badgeStyleId: String?
+    /// Mirror of the chosen style in the old four-shape vocabulary, so a build
+    /// that predates style ids can still open a shared .ohl.
     var badgeStyle: BadgeStyle = .rounded
+
+    var styleId: String { badgeStyleId ?? badgeStyle.styleId }
+
+    mutating func setStyleId(_ id: String) {
+        badgeStyleId = id
+        badgeStyle = BadgeStyle.allCases.first { $0.styleId == id } ?? .rounded
+    }
     var isLoop: Bool = false
     var stations: [CustomStation] = []
     /// Minutes between consecutive stations; count == max(0, stations.count - 1).
@@ -95,7 +106,7 @@ struct CustomLine: Identifiable, Codable, Hashable {
             operatorId: "Operator:Custom",
             stations: backboneStations(),
             colorHex: colorHex,
-            badgeStyle: badgeStyle
+            badgeStyleId: styleId
         )
     }
 

@@ -12,13 +12,13 @@ struct StationSearchRow: View {
                     color: hit.line.color,
                     size: .compact,
                     stationName: hit.station.name,
-                    styleOverride: hit.line.badgeStyle
+                    styleOverride: hit.line.badgeStyleId
                 )
             } else if !hit.line.lineSymbol.isEmpty {
                 LineSymbolBadge(
                     symbol: hit.line.lineSymbol,
                     color: hit.line.color,
-                    styleOverride: hit.line.badgeStyle
+                    styleOverride: hit.line.badgeStyleId
                 )
             } else {
                 RoundedRectangle(cornerRadius: 3)

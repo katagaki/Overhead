@@ -1,20 +1,18 @@
 import Foundation
 
-/// Badge shape for a user-created line's station numbers (custom codes have no operator to infer it from).
+/// Legacy four-shape choice for user-created lines. Superseded by badge style
+/// ids; kept so lines saved before the change still decode.
 public enum BadgeStyle: String, Codable, CaseIterable, Sendable, Hashable, Identifiable {
-    case rounded   // JR-style: color frame, white core, black code
-    case ring      // Metro-style: color ring, white core
-    case filled    // Tokyu-style: solid color, white code
-    case square    // thin color border, sharp corners
+    case rounded, ring, filled, square
 
     public var id: String { rawValue }
 
-    public var labelJa: String {
+    public var styleId: String {
         switch self {
-        case .rounded: return "角丸"
-        case .ring: return "リング"
-        case .filled: return "塗り"
-        case .square: return "スクエア"
+        case .rounded: return "jr"
+        case .ring:    return "metro"
+        case .filled:  return "tokyu"
+        case .square:  return "square"
         }
     }
 }

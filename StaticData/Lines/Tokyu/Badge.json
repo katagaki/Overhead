@@ -1,0 +1,16 @@
+{
+    "lines": {
+        "Railway:Tokyu.DenEnToshi": {
+            "style": "tokyu",
+            "symbol": "DT"
+        },
+        "Railway:Tokyu.Meguro": {
+            "style": "tokyu",
+            "symbol": "MG"
+        },
+        "Railway:Tokyu.Toyoko": {
+            "style": "tokyu",
+            "symbol": "TY"
+        }
+    }
+}
