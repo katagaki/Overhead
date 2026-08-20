@@ -13606,6 +13606,8 @@
                         "departure": "04:38",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13613,6 +13615,8 @@
                         "departure": "04:58",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -13620,6 +13624,8 @@
                         "departure": "05:18",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -13627,6 +13633,8 @@
                         "departure": "05:37",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -13634,6 +13642,8 @@
                         "departure": "05:56",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -13641,6 +13651,8 @@
                         "departure": "06:10",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -13648,6 +13660,8 @@
                         "departure": "06:22",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "Rapid"
                     },
                     {
@@ -13655,6 +13669,8 @@
                         "departure": "06:25",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "Express"
                     },
                     {
@@ -13662,6 +13678,8 @@
                         "departure": "06:33",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -13669,6 +13687,8 @@
                         "departure": "06:44",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -13676,6 +13696,8 @@
                         "departure": "06:53",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -13683,6 +13705,8 @@
                         "departure": "07:01",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13690,6 +13714,8 @@
                         "departure": "07:11",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -13697,6 +13723,8 @@
                         "departure": "07:14",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -13704,6 +13732,8 @@
                         "departure": "07:23",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13711,6 +13741,8 @@
                         "departure": "07:31",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -13718,6 +13750,8 @@
                         "departure": "07:34",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -13725,6 +13759,8 @@
                         "departure": "07:42",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13732,6 +13768,8 @@
                         "departure": "07:52",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -13739,6 +13777,8 @@
                         "departure": "08:01",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13746,6 +13786,8 @@
                         "departure": "08:12",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -13753,6 +13795,8 @@
                         "departure": "08:24",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13760,6 +13804,8 @@
                         "departure": "08:42",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -13767,6 +13813,8 @@
                         "departure": "08:52",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13774,6 +13822,8 @@
                         "departure": "09:01",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13781,6 +13831,8 @@
                         "departure": "09:11",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -13788,6 +13840,8 @@
                         "departure": "09:25",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13795,6 +13849,8 @@
                         "departure": "09:30",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -13802,6 +13858,8 @@
                         "departure": "09:34",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -13809,6 +13867,8 @@
                         "departure": "09:42",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -13816,6 +13876,8 @@
                         "departure": "09:52",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13823,6 +13885,8 @@
                         "departure": "10:01",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13830,6 +13894,8 @@
                         "departure": "10:12",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -13837,6 +13903,8 @@
                         "departure": "10:28",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13844,6 +13912,8 @@
                         "departure": "10:49",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13851,6 +13921,8 @@
                         "departure": "11:01",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13858,6 +13930,8 @@
                         "departure": "11:25",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13865,6 +13939,8 @@
                         "departure": "11:45",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13872,6 +13948,8 @@
                         "departure": "12:06",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13879,6 +13957,8 @@
                         "departure": "12:25",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13886,6 +13966,8 @@
                         "departure": "12:45",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13893,6 +13975,8 @@
                         "departure": "13:05",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13900,6 +13984,8 @@
                         "departure": "13:25",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13907,6 +13993,8 @@
                         "departure": "13:45",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13914,6 +14002,8 @@
                         "departure": "14:02",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13921,6 +14011,8 @@
                         "departure": "14:25",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -13928,6 +14020,8 @@
                         "departure": "14:45",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13935,6 +14029,8 @@
                         "departure": "15:05",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13942,6 +14038,8 @@
                         "departure": "15:25",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13949,6 +14047,8 @@
                         "departure": "15:45",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -13956,6 +14056,8 @@
                         "departure": "16:11",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -13963,6 +14065,8 @@
                         "departure": "16:16",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Express"
                     },
                     {
@@ -13970,6 +14074,8 @@
                         "departure": "16:31",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -13977,6 +14083,8 @@
                         "departure": "16:35",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Express"
                     },
                     {
@@ -13984,6 +14092,8 @@
                         "departure": "16:44",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -13991,6 +14101,8 @@
                         "departure": "16:52",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -13998,6 +14110,8 @@
                         "departure": "16:56",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14005,6 +14119,8 @@
                         "departure": "17:05",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14012,6 +14128,8 @@
                         "departure": "17:11",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14019,6 +14137,8 @@
                         "departure": "17:15",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14026,6 +14146,8 @@
                         "departure": "17:24",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14033,6 +14155,8 @@
                         "departure": "17:32",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14040,6 +14164,8 @@
                         "departure": "17:37",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14047,6 +14173,8 @@
                         "departure": "17:44",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14054,6 +14182,8 @@
                         "departure": "17:52",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14061,6 +14191,8 @@
                         "departure": "17:57",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14068,6 +14200,8 @@
                         "departure": "18:04",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14075,6 +14209,8 @@
                         "departure": "18:13",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14082,6 +14218,8 @@
                         "departure": "18:17",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14089,6 +14227,8 @@
                         "departure": "18:25",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14096,6 +14236,8 @@
                         "departure": "18:35",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14103,6 +14245,8 @@
                         "departure": "18:44",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14110,6 +14254,8 @@
                         "departure": "18:52",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14117,6 +14263,8 @@
                         "departure": "18:57",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14124,6 +14272,8 @@
                         "departure": "19:04",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14131,6 +14281,8 @@
                         "departure": "19:13",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14138,6 +14290,8 @@
                         "departure": "19:17",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14145,6 +14299,8 @@
                         "departure": "19:25",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14152,6 +14308,8 @@
                         "departure": "19:32",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14159,6 +14317,8 @@
                         "departure": "19:37",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14166,6 +14326,8 @@
                         "departure": "19:44",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14173,6 +14335,8 @@
                         "departure": "20:04",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14180,6 +14344,8 @@
                         "departure": "20:25",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14187,6 +14353,8 @@
                         "departure": "20:48",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14194,6 +14362,8 @@
                         "departure": "21:05",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14201,6 +14371,8 @@
                         "departure": "21:15",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14208,6 +14380,8 @@
                         "departure": "21:41",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14222,6 +14396,8 @@
                         "departure": "22:17",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14229,6 +14405,8 @@
                         "departure": "22:30",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14236,6 +14414,8 @@
                         "departure": "22:45",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "Rapid"
                     },
                     {
@@ -14243,6 +14423,8 @@
                         "departure": "23:28",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Tsutsujigaoka",
+                        "throughDestJa": "つつじヶ丘",
                         "trainType": "Rapid"
                     },
                     {
@@ -14250,6 +14432,8 @@
                         "departure": "23:43",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Tsutsujigaoka",
+                        "throughDestJa": "つつじヶ丘",
                         "trainType": "Rapid"
                     }
                 ],
@@ -14259,6 +14443,8 @@
                         "departure": "04:38",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14266,6 +14452,8 @@
                         "departure": "04:58",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14273,6 +14461,8 @@
                         "departure": "05:18",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14280,6 +14470,8 @@
                         "departure": "05:38",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14287,6 +14479,8 @@
                         "departure": "05:53",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14294,6 +14488,8 @@
                         "departure": "06:03",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14301,6 +14497,8 @@
                         "departure": "06:08",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14308,6 +14506,8 @@
                         "departure": "06:15",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14315,6 +14515,8 @@
                         "departure": "06:24",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14322,6 +14524,8 @@
                         "departure": "06:28",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14329,6 +14533,8 @@
                         "departure": "06:37",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14336,6 +14542,8 @@
                         "departure": "06:41",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14343,6 +14551,8 @@
                         "departure": "06:49",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14350,6 +14560,8 @@
                         "departure": "07:00",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14357,6 +14569,8 @@
                         "departure": "07:06",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14364,6 +14578,8 @@
                         "departure": "07:18",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Express"
                     },
                     {
@@ -14371,6 +14587,8 @@
                         "departure": "07:22",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14385,6 +14603,8 @@
                         "departure": "07:48",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Ojima",
+                        "throughDestJa": "大島",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14392,6 +14612,8 @@
                         "departure": "08:04",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Ojima",
+                        "throughDestJa": "大島",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14399,6 +14621,8 @@
                         "departure": "08:11",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14406,6 +14630,8 @@
                         "departure": "08:17",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14413,6 +14639,8 @@
                         "departure": "08:21",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Ojima",
+                        "throughDestJa": "大島",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14420,6 +14648,8 @@
                         "departure": "08:36",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Ojima",
+                        "throughDestJa": "大島",
                         "trainType": "Rapid"
                     },
                     {
@@ -14427,6 +14657,8 @@
                         "departure": "08:45",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "Rapid"
                     },
                     {
@@ -14434,6 +14666,8 @@
                         "departure": "08:56",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Ojima",
+                        "throughDestJa": "大島",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14441,6 +14675,8 @@
                         "departure": "09:02",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14448,6 +14684,8 @@
                         "departure": "09:06",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14455,6 +14693,8 @@
                         "departure": "09:12",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14462,6 +14702,8 @@
                         "departure": "09:21",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14469,6 +14711,8 @@
                         "departure": "09:25",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14483,6 +14727,8 @@
                         "departure": "10:04",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14490,6 +14736,8 @@
                         "departure": "10:13",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14497,6 +14745,8 @@
                         "departure": "10:26",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14511,6 +14761,8 @@
                         "departure": "10:46",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14518,6 +14770,8 @@
                         "departure": "11:05",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14525,6 +14779,8 @@
                         "departure": "11:25",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14532,6 +14788,8 @@
                         "departure": "11:45",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14539,6 +14797,8 @@
                         "departure": "12:05",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14546,6 +14806,8 @@
                         "departure": "12:25",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14553,6 +14815,8 @@
                         "departure": "12:45",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14560,6 +14824,8 @@
                         "departure": "13:05",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14567,6 +14833,8 @@
                         "departure": "13:25",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14574,6 +14842,8 @@
                         "departure": "13:45",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14581,6 +14851,8 @@
                         "departure": "14:05",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14588,6 +14860,8 @@
                         "departure": "14:25",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14595,6 +14869,8 @@
                         "departure": "14:45",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14602,6 +14878,8 @@
                         "departure": "15:05",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14609,6 +14887,8 @@
                         "departure": "15:25",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14616,6 +14896,8 @@
                         "departure": "15:45",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14623,6 +14905,8 @@
                         "departure": "15:55",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14630,6 +14914,8 @@
                         "departure": "16:02",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14637,6 +14923,8 @@
                         "departure": "16:06",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14644,6 +14932,8 @@
                         "departure": "16:14",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14651,6 +14941,8 @@
                         "departure": "16:18",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "Express"
                     },
                     {
@@ -14658,6 +14950,8 @@
                         "departure": "16:26",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14665,6 +14959,8 @@
                         "departure": "16:34",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14672,6 +14968,8 @@
                         "departure": "16:37",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14679,6 +14977,8 @@
                         "departure": "16:46",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14686,6 +14986,8 @@
                         "departure": "16:53",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14693,6 +14995,8 @@
                         "departure": "16:58",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14700,6 +15004,8 @@
                         "departure": "17:03",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "Rapid"
                     },
                     {
@@ -14707,6 +15013,8 @@
                         "departure": "17:10",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14714,6 +15022,8 @@
                         "departure": "17:13",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14721,6 +15031,8 @@
                         "departure": "17:20",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14728,6 +15040,8 @@
                         "departure": "17:29",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Tsutsujigaoka",
+                        "throughDestJa": "つつじヶ丘",
                         "trainType": "Rapid"
                     },
                     {
@@ -14735,6 +15049,8 @@
                         "departure": "17:32",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Express"
                     },
                     {
@@ -14742,6 +15058,8 @@
                         "departure": "17:40",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14749,6 +15067,8 @@
                         "departure": "17:44",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14756,6 +15076,8 @@
                         "departure": "17:49",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Tsutsujigaoka",
+                        "throughDestJa": "つつじヶ丘",
                         "trainType": "Rapid"
                     },
                     {
@@ -14763,6 +15085,8 @@
                         "departure": "17:54",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Express"
                     },
                     {
@@ -14770,6 +15094,8 @@
                         "departure": "18:17",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14777,6 +15103,8 @@
                         "departure": "18:20",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14784,6 +15112,8 @@
                         "departure": "18:29",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Tsutsujigaoka",
+                        "throughDestJa": "つつじヶ丘",
                         "trainType": "Rapid"
                     },
                     {
@@ -14791,6 +15121,8 @@
                         "departure": "18:34",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Express"
                     },
                     {
@@ -14798,6 +15130,8 @@
                         "departure": "18:40",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14805,6 +15139,8 @@
                         "departure": "18:44",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14812,6 +15148,8 @@
                         "departure": "18:50",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Tsutsujigaoka",
+                        "throughDestJa": "つつじヶ丘",
                         "trainType": "Rapid"
                     },
                     {
@@ -14819,6 +15157,8 @@
                         "departure": "18:56",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14826,6 +15166,8 @@
                         "departure": "19:00",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14833,6 +15175,8 @@
                         "departure": "19:09",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Tsutsujigaoka",
+                        "throughDestJa": "つつじヶ丘",
                         "trainType": "Rapid"
                     },
                     {
@@ -14840,6 +15184,8 @@
                         "departure": "19:17",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14847,6 +15193,8 @@
                         "departure": "19:21",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -14854,6 +15202,8 @@
                         "departure": "19:29",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Tsutsujigaoka",
+                        "throughDestJa": "つつじヶ丘",
                         "trainType": "Rapid"
                     },
                     {
@@ -14861,6 +15211,8 @@
                         "departure": "19:34",
                         "startsHere": true,
                         "stopIndices": [11, 9, 7, 6, 2, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Express"
                     },
                     {
@@ -14868,6 +15220,8 @@
                         "departure": "19:40",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14882,6 +15236,8 @@
                         "departure": "20:10",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14889,6 +15245,8 @@
                         "departure": "20:30",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14896,6 +15254,8 @@
                         "departure": "20:50",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14903,6 +15263,8 @@
                         "departure": "21:12",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14910,6 +15272,8 @@
                         "departure": "21:39",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "Rapid"
                     },
                     {
@@ -14917,6 +15281,8 @@
                         "departure": "21:52",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "Rapid"
                     },
                     {
@@ -14924,6 +15290,8 @@
                         "departure": "22:03",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14931,6 +15299,8 @@
                         "departure": "22:17",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14938,6 +15308,8 @@
                         "departure": "22:30",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Motoyawata",
+                        "throughDestJa": "本八幡",
                         "trainType": "Rapid"
                     },
                     {
@@ -14945,6 +15317,8 @@
                         "departure": "22:45",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "Rapid"
                     },
                     {
@@ -14952,6 +15326,8 @@
                         "departure": "23:14",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Tsutsujigaoka",
+                        "throughDestJa": "つつじヶ丘",
                         "trainType": "Rapid"
                     },
                     {
@@ -14959,6 +15335,8 @@
                         "departure": "23:28",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Sakurajosui",
+                        "throughDestJa": "桜上水",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -14966,6 +15344,8 @@
                         "departure": "23:43",
                         "startsHere": true,
                         "stopIndices": [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Tsutsujigaoka",
+                        "throughDestJa": "つつじヶ丘",
                         "trainType": "Rapid"
                     }
                 ],
@@ -15109,6 +15489,8 @@
                                 "departure": "18:52",
                                 "startsHere": true,
                                 "stopIndices": [5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             }
                         ],
@@ -15120,6 +15502,8 @@
                                 "departure": "18:28",
                                 "startsHere": true,
                                 "stopIndices": [5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Tsutsujigaoka",
+                                "throughDestJa": "つつじヶ丘",
                                 "trainType": "Rapid"
                             }
                         ]
@@ -15132,6 +15516,8 @@
                                 "departure": "06:44",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15139,6 +15525,8 @@
                                 "departure": "08:02",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "Express"
                             },
                             {
@@ -15146,6 +15534,8 @@
                                 "departure": "08:22",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "Express"
                             },
                             {
@@ -15153,6 +15543,8 @@
                                 "departure": "08:42",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15160,6 +15552,8 @@
                                 "departure": "08:45",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15167,6 +15561,8 @@
                                 "departure": "09:02",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "Express"
                             },
                             {
@@ -15174,6 +15570,8 @@
                                 "departure": "09:22",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "Express"
                             },
                             {
@@ -15181,6 +15579,8 @@
                                 "departure": "10:04",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "Express"
                             },
                             {
@@ -15188,6 +15588,8 @@
                                 "departure": "10:23",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "Express"
                             },
                             {
@@ -15195,6 +15597,8 @@
                                 "departure": "10:45",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15202,6 +15606,8 @@
                                 "departure": "10:46",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15209,6 +15615,8 @@
                                 "departure": "11:05",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15216,6 +15624,8 @@
                                 "departure": "11:07",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15223,6 +15633,8 @@
                                 "departure": "11:25",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15230,6 +15642,8 @@
                                 "departure": "11:27",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15237,6 +15651,8 @@
                                 "departure": "11:45",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15244,6 +15660,8 @@
                                 "departure": "11:47",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15251,6 +15669,8 @@
                                 "departure": "12:05",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15258,6 +15678,8 @@
                                 "departure": "12:07",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15265,6 +15687,8 @@
                                 "departure": "12:25",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15272,6 +15696,8 @@
                                 "departure": "12:27",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15279,6 +15705,8 @@
                                 "departure": "12:45",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15286,6 +15714,8 @@
                                 "departure": "12:47",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15293,6 +15723,8 @@
                                 "departure": "13:05",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15300,6 +15732,8 @@
                                 "departure": "13:07",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15307,6 +15741,8 @@
                                 "departure": "13:25",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15314,6 +15750,8 @@
                                 "departure": "13:27",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15321,6 +15759,8 @@
                                 "departure": "13:45",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15328,6 +15768,8 @@
                                 "departure": "13:47",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15335,6 +15777,8 @@
                                 "departure": "14:04",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15342,6 +15786,8 @@
                                 "departure": "14:06",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15349,6 +15795,8 @@
                                 "departure": "14:24",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15356,6 +15804,8 @@
                                 "departure": "14:27",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15363,6 +15813,8 @@
                                 "departure": "14:45",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15370,6 +15822,8 @@
                                 "departure": "14:46",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15377,6 +15831,8 @@
                                 "departure": "15:04",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15384,6 +15840,8 @@
                                 "departure": "15:06",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15391,6 +15849,8 @@
                                 "departure": "15:24",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15398,6 +15858,8 @@
                                 "departure": "15:26",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15405,6 +15867,8 @@
                                 "departure": "15:45",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15412,6 +15876,8 @@
                                 "departure": "15:47",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15419,6 +15885,8 @@
                                 "departure": "16:04",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15426,6 +15894,8 @@
                                 "departure": "16:07",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15433,6 +15903,8 @@
                                 "departure": "20:05",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15440,6 +15912,8 @@
                                 "departure": "20:07",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15447,6 +15921,8 @@
                                 "departure": "20:25",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15454,6 +15930,8 @@
                                 "departure": "20:27",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15461,6 +15939,8 @@
                                 "departure": "20:46",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15468,6 +15948,8 @@
                                 "departure": "20:49",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15475,6 +15957,8 @@
                                 "departure": "21:09",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15482,6 +15966,8 @@
                                 "departure": "21:40",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "SemiExpress"
                             }
                         ],
@@ -15493,6 +15979,8 @@
                                 "departure": "06:04",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15500,6 +15988,8 @@
                                 "departure": "07:01",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15507,6 +15997,8 @@
                                 "departure": "07:45",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "Express"
                             },
                             {
@@ -15514,6 +16006,8 @@
                                 "departure": "08:08",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15521,6 +16015,8 @@
                                 "departure": "09:44",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15535,6 +16031,8 @@
                                 "departure": "10:05",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15542,6 +16040,8 @@
                                 "departure": "10:07",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15549,6 +16049,8 @@
                                 "departure": "10:25",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15556,6 +16058,8 @@
                                 "departure": "10:45",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15563,6 +16067,8 @@
                                 "departure": "11:05",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15570,6 +16076,8 @@
                                 "departure": "11:07",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15577,6 +16085,8 @@
                                 "departure": "11:25",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15584,6 +16094,8 @@
                                 "departure": "11:27",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15591,6 +16103,8 @@
                                 "departure": "11:45",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15598,6 +16112,8 @@
                                 "departure": "11:47",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15605,6 +16121,8 @@
                                 "departure": "12:05",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15612,6 +16130,8 @@
                                 "departure": "12:07",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15619,6 +16139,8 @@
                                 "departure": "12:25",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15626,6 +16148,8 @@
                                 "departure": "12:27",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15633,6 +16157,8 @@
                                 "departure": "12:45",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15640,6 +16166,8 @@
                                 "departure": "12:47",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15647,6 +16175,8 @@
                                 "departure": "13:05",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15654,6 +16184,8 @@
                                 "departure": "13:07",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15661,6 +16193,8 @@
                                 "departure": "13:25",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15668,6 +16202,8 @@
                                 "departure": "13:27",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15675,6 +16211,8 @@
                                 "departure": "13:45",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15682,6 +16220,8 @@
                                 "departure": "13:47",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15689,6 +16229,8 @@
                                 "departure": "14:05",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15696,6 +16238,8 @@
                                 "departure": "14:07",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15703,6 +16247,8 @@
                                 "departure": "14:25",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15710,6 +16256,8 @@
                                 "departure": "14:27",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15717,6 +16265,8 @@
                                 "departure": "14:45",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15724,6 +16274,8 @@
                                 "departure": "14:47",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15731,6 +16283,8 @@
                                 "departure": "15:05",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15738,6 +16292,8 @@
                                 "departure": "15:07",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15745,6 +16301,8 @@
                                 "departure": "15:25",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15752,6 +16310,8 @@
                                 "departure": "15:27",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15759,6 +16319,8 @@
                                 "departure": "15:45",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15766,6 +16328,8 @@
                                 "departure": "15:47",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15773,6 +16337,8 @@
                                 "departure": "18:11",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15780,6 +16346,8 @@
                                 "departure": "18:14",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15787,6 +16355,8 @@
                                 "departure": "18:20",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "Express"
                             },
                             {
@@ -15794,6 +16364,8 @@
                                 "departure": "19:01",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "Express"
                             },
                             {
@@ -15801,6 +16373,8 @@
                                 "departure": "19:22",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "Express"
                             },
                             {
@@ -15808,6 +16382,8 @@
                                 "departure": "20:01",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15815,6 +16391,8 @@
                                 "departure": "20:11",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15822,6 +16400,8 @@
                                 "departure": "20:14",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15829,6 +16409,8 @@
                                 "departure": "20:31",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15836,6 +16418,8 @@
                                 "departure": "20:34",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15843,6 +16427,8 @@
                                 "departure": "20:52",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 2, 0],
+                                "throughDestEn": "Shinjuku",
+                                "throughDestJa": "新宿",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -15850,6 +16436,8 @@
                                 "departure": "20:54",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -15857,6 +16445,8 @@
                                 "departure": "21:12",
                                 "startsHere": true,
                                 "stopIndices": [7, 6, 5, 4, 3, 2, 1, 0],
+                                "throughDestEn": "Motoyawata",
+                                "throughDestJa": "本八幡",
                                 "trainType": "SemiExpress"
                             }
                         ]
@@ -16548,6 +17138,8 @@
                         "departure": "05:33",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16555,6 +17147,8 @@
                         "departure": "06:00",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16562,6 +17156,8 @@
                         "departure": "06:44",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16569,6 +17165,8 @@
                         "departure": "07:16",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16576,6 +17174,8 @@
                         "departure": "07:45",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16583,6 +17183,8 @@
                         "departure": "08:15",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16590,6 +17192,8 @@
                         "departure": "08:39",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16597,6 +17201,8 @@
                         "departure": "09:15",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16604,6 +17210,8 @@
                         "departure": "10:29",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16611,6 +17219,8 @@
                         "departure": "10:48",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16618,6 +17228,8 @@
                         "departure": "11:10",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16625,6 +17237,8 @@
                         "departure": "11:50",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16632,6 +17246,8 @@
                         "departure": "12:09",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16639,6 +17255,8 @@
                         "departure": "12:28",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16646,6 +17264,8 @@
                         "departure": "12:47",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16653,6 +17273,8 @@
                         "departure": "13:08",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16660,6 +17282,8 @@
                         "departure": "13:28",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16667,6 +17291,8 @@
                         "departure": "13:46",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16674,6 +17300,8 @@
                         "departure": "14:07",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16681,6 +17309,8 @@
                         "departure": "14:26",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16688,6 +17318,8 @@
                         "departure": "14:47",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16695,6 +17327,8 @@
                         "departure": "15:07",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16702,6 +17336,8 @@
                         "departure": "15:29",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16709,6 +17345,8 @@
                         "departure": "15:49",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16716,6 +17354,8 @@
                         "departure": "16:47",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16723,6 +17363,8 @@
                         "departure": "17:28",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16730,6 +17372,8 @@
                         "departure": "17:48",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16737,6 +17381,8 @@
                         "departure": "18:07",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16744,6 +17390,8 @@
                         "departure": "18:27",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16751,6 +17399,8 @@
                         "departure": "18:48",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16758,6 +17408,8 @@
                         "departure": "19:07",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16765,6 +17417,8 @@
                         "departure": "19:27",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16772,6 +17426,8 @@
                         "departure": "19:46",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16779,6 +17435,8 @@
                         "departure": "20:07",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16786,6 +17444,8 @@
                         "departure": "20:33",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16793,6 +17453,8 @@
                         "departure": "20:55",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     }
                 ],
@@ -16802,6 +17464,8 @@
                         "departure": "05:33",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16809,6 +17473,8 @@
                         "departure": "05:57",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16816,6 +17482,8 @@
                         "departure": "06:31",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16823,6 +17491,8 @@
                         "departure": "06:55",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -16830,6 +17500,8 @@
                         "departure": "07:22",
                         "startsHere": true,
                         "stopIndices": [6, 5, 3, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "Express"
                     },
                     {
@@ -16837,6 +17509,8 @@
                         "departure": "07:50",
                         "startsHere": true,
                         "stopIndices": [6, 5, 3, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "Express"
                     },
                     {
@@ -16844,6 +17518,8 @@
                         "departure": "08:06",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16851,6 +17527,8 @@
                         "departure": "09:29",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16858,6 +17536,8 @@
                         "departure": "09:45",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16865,6 +17545,8 @@
                         "departure": "10:09",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16872,6 +17554,8 @@
                         "departure": "10:27",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16879,6 +17563,8 @@
                         "departure": "10:47",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16886,6 +17572,8 @@
                         "departure": "11:08",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16893,6 +17581,8 @@
                         "departure": "11:27",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16900,6 +17590,8 @@
                         "departure": "11:47",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16907,6 +17599,8 @@
                         "departure": "12:07",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16914,6 +17608,8 @@
                         "departure": "12:27",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16921,6 +17617,8 @@
                         "departure": "12:47",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16928,6 +17626,8 @@
                         "departure": "13:07",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16935,6 +17635,8 @@
                         "departure": "13:27",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16942,6 +17644,8 @@
                         "departure": "13:47",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16949,6 +17653,8 @@
                         "departure": "14:07",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16956,6 +17662,8 @@
                         "departure": "14:27",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16963,6 +17671,8 @@
                         "departure": "14:47",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16970,6 +17680,8 @@
                         "departure": "15:07",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16977,6 +17689,8 @@
                         "departure": "15:27",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16984,6 +17698,8 @@
                         "departure": "15:47",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16991,6 +17707,8 @@
                         "departure": "16:07",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -16998,6 +17716,8 @@
                         "departure": "16:27",
                         "startsHere": true,
                         "stopIndices": [6, 5, 4, 3, 2, 1, 0],
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     }
                 ],

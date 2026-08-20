@@ -1471,6 +1471,8 @@
                     919
                 ],
                 "terminates": false,
+                "throughDestEn": "Shinjuku",
+                "throughDestJa": "新宿",
                 "type": "LimitedExpress"
             },
             {
@@ -2744,6 +2746,8 @@
                     919
                 ],
                 "terminates": false,
+                "throughDestEn": "Shinjuku",
+                "throughDestJa": "新宿",
                 "type": "LimitedExpress"
             },
             {

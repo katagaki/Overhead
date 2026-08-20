@@ -442,6 +442,8 @@
                         "departure": "17:33",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Ikebukuro.NishiTokorozawa",
+                        "throughDestEn": "Seibukyujo-Mae",
+                        "throughDestJa": "西武球場前",
                         "trainType": "Rapid"
                     },
                     {
@@ -584,6 +586,8 @@
                         "departure": "20:35",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Ikebukuro.NishiTokorozawa",
+                        "throughDestEn": "Seibukyujo-Mae",
+                        "throughDestJa": "西武球場前",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -609,6 +613,8 @@
                         "departure": "21:10",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Ikebukuro.NishiTokorozawa",
+                        "throughDestEn": "Seibukyujo-Mae",
+                        "throughDestJa": "西武球場前",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -1886,6 +1892,8 @@
                         "departure": "07:01",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                        "throughDestEn": "Shin-kiba",
+                        "throughDestJa": "新木場",
                         "trainType": "Rapid"
                     },
                     {
@@ -1905,6 +1913,8 @@
                         "departure": "07:25",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                        "throughDestEn": "Motomachi-Chukagai",
+                        "throughDestJa": "元町・中華街",
                         "trainType": "Rapid"
                     },
                     {
@@ -1936,6 +1946,8 @@
                         "departure": "08:10",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                        "throughDestEn": "Motomachi-Chukagai",
+                        "throughDestJa": "元町・中華街",
                         "trainType": "RapidExpress"
                     },
                     {
@@ -2027,6 +2039,8 @@
                         "departure": "10:40",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                        "throughDestEn": "Motomachi-Chukagai",
+                        "throughDestJa": "元町・中華街",
                         "trainType": "RapidExpress"
                     },
                     {
@@ -2046,6 +2060,8 @@
                         "departure": "11:09",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                        "throughDestEn": "Motomachi-Chukagai",
+                        "throughDestJa": "元町・中華街",
                         "trainType": "RapidExpress"
                     },
                     {
@@ -2065,6 +2081,8 @@
                         "departure": "11:40",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                        "throughDestEn": "Motomachi-Chukagai",
+                        "throughDestJa": "元町・中華街",
                         "trainType": "RapidExpress"
                     },
                     {
@@ -2288,6 +2306,8 @@
                         "departure": "18:55",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                        "throughDestEn": "Motomachi-Chukagai",
+                        "throughDestJa": "元町・中華街",
                         "trainType": "Rapid"
                     },
                     {
@@ -2301,6 +2321,8 @@
                         "departure": "19:26",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                        "throughDestEn": "Motomachi-Chukagai",
+                        "throughDestJa": "元町・中華街",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -2314,6 +2336,8 @@
                         "departure": "19:56",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                        "throughDestEn": "Motomachi-Chukagai",
+                        "throughDestJa": "元町・中華街",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -2455,6 +2479,8 @@
                         "departure": "06:56",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                        "throughDestEn": "Motomachi-Chukagai",
+                        "throughDestJa": "元町・中華街",
                         "trainType": "Rapid"
                     },
                     {
@@ -2486,6 +2512,8 @@
                         "departure": "07:20",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                        "throughDestEn": "Shin-kiba",
+                        "throughDestJa": "新木場",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -2511,6 +2539,8 @@
                         "departure": "07:51",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                        "throughDestEn": "Motomachi-Chukagai",
+                        "throughDestJa": "元町・中華街",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -2542,6 +2572,8 @@
                         "departure": "08:36",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                        "throughDestEn": "Motomachi-Chukagai",
+                        "throughDestJa": "元町・中華街",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -2879,6 +2911,8 @@
                         "departure": "19:01",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                        "throughDestEn": "Shin-kiba",
+                        "throughDestJa": "新木場",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -2997,6 +3031,8 @@
                                 "departure": "21:56",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Shin-kiba",
+                                "throughDestJa": "新木場",
                                 "trainType": "SemiExpress"
                             }
                         ]
@@ -3025,6 +3061,8 @@
                                 "departure": "09:39",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "SemiExpress"
                             }
                         ]
@@ -3043,6 +3081,8 @@
                                 "departure": "09:10",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -3074,6 +3114,8 @@
                                 "departure": "17:25",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Shin-kiba",
+                                "throughDestJa": "新木場",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -3139,6 +3181,8 @@
                                 "departure": "17:58",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Shin-kiba",
+                                "throughDestJa": "新木場",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -3205,6 +3249,8 @@
                                 "departure": "06:45",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Shin-kiba",
+                                "throughDestJa": "新木場",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -3218,6 +3264,8 @@
                                 "departure": "08:52",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3225,6 +3273,8 @@
                                 "departure": "09:22",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3232,6 +3282,8 @@
                                 "departure": "09:54",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3245,6 +3297,8 @@
                                 "departure": "10:24",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3264,6 +3318,8 @@
                                 "departure": "12:24",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3277,6 +3333,8 @@
                                 "departure": "12:54",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3284,6 +3342,8 @@
                                 "departure": "13:24",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3291,6 +3351,8 @@
                                 "departure": "13:54",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3298,6 +3360,8 @@
                                 "departure": "14:24",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3305,6 +3369,8 @@
                                 "departure": "14:54",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3312,6 +3378,8 @@
                                 "departure": "15:24",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3325,6 +3393,8 @@
                                 "departure": "15:54",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3332,6 +3402,8 @@
                                 "departure": "16:24",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3339,6 +3411,8 @@
                                 "departure": "16:54",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3346,6 +3420,8 @@
                                 "departure": "17:54",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3353,6 +3429,8 @@
                                 "departure": "18:19",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -3378,6 +3456,8 @@
                                 "departure": "20:44",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -3425,6 +3505,8 @@
                                 "departure": "06:51",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Shin-kiba",
+                                "throughDestJa": "新木場",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -3438,6 +3520,8 @@
                                 "departure": "07:06",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "Rapid"
                             },
                             {
@@ -3445,6 +3529,8 @@
                                 "departure": "07:08",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Shin-kiba",
+                                "throughDestJa": "新木場",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -3458,6 +3544,8 @@
                                 "departure": "07:21",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Shin-kiba",
+                                "throughDestJa": "新木場",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -3471,6 +3559,8 @@
                                 "departure": "07:33",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -3484,6 +3574,8 @@
                                 "departure": "07:50",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "Rapid"
                             },
                             {
@@ -3491,6 +3583,8 @@
                                 "departure": "07:57",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Shin-kiba",
+                                "throughDestJa": "新木場",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -3498,6 +3592,8 @@
                                 "departure": "08:01",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Shin-kiba",
+                                "throughDestJa": "新木場",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -3511,6 +3607,8 @@
                                 "departure": "08:41",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -3530,6 +3628,8 @@
                                 "departure": "09:40",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -3543,6 +3643,8 @@
                                 "departure": "10:24",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3550,6 +3652,8 @@
                                 "departure": "10:54",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3557,6 +3661,8 @@
                                 "departure": "11:24",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3564,6 +3670,8 @@
                                 "departure": "11:54",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3571,6 +3679,8 @@
                                 "departure": "12:24",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3578,6 +3688,8 @@
                                 "departure": "12:54",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3585,6 +3697,8 @@
                                 "departure": "13:24",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3592,6 +3706,8 @@
                                 "departure": "13:54",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3599,6 +3715,8 @@
                                 "departure": "14:24",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3606,6 +3724,8 @@
                                 "departure": "14:54",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3613,6 +3733,8 @@
                                 "departure": "15:24",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3620,6 +3742,8 @@
                                 "departure": "15:54",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3627,6 +3751,8 @@
                                 "departure": "16:24",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Motomachi-Chukagai",
+                                "throughDestJa": "元町・中華街",
                                 "trainType": "RapidExpress"
                             },
                             {
@@ -3640,6 +3766,8 @@
                                 "departure": "16:52",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Shin-kiba",
+                                "throughDestJa": "新木場",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -3659,6 +3787,8 @@
                                 "departure": "17:22",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Shin-kiba",
+                                "throughDestJa": "新木場",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -3684,6 +3814,8 @@
                                 "departure": "18:20",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Shin-kiba",
+                                "throughDestJa": "新木場",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -3709,6 +3841,8 @@
                                 "departure": "19:53",
                                 "startsHere": true,
                                 "terminusStationId": "Station:Seibu.Ikebukuro.Nerima",
+                                "throughDestEn": "Shin-kiba",
+                                "throughDestJa": "新木場",
                                 "trainType": "SemiExpress"
                             },
                             {
@@ -4381,6 +4515,8 @@
                         "departure": "06:30",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4400,6 +4536,8 @@
                         "departure": "07:00",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4413,6 +4551,8 @@
                         "departure": "07:20",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4426,6 +4566,8 @@
                         "departure": "07:40",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4439,6 +4581,8 @@
                         "departure": "07:54",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -4464,6 +4608,8 @@
                         "departure": "08:26",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Tamagawa-Josui",
+                        "throughDestJa": "玉川上水",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -4490,6 +4636,8 @@
                         "departure": "08:58",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Tamagawa-Josui",
+                        "throughDestJa": "玉川上水",
                         "trainType": "Express"
                     },
                     {
@@ -4509,6 +4657,8 @@
                         "departure": "09:20",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4522,6 +4672,8 @@
                         "departure": "09:38",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4542,6 +4694,8 @@
                         "departure": "09:56",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4549,6 +4703,8 @@
                         "departure": "10:04",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Tamagawa-Josui",
+                        "throughDestJa": "玉川上水",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -4568,6 +4724,8 @@
                         "departure": "10:21",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4581,6 +4739,8 @@
                         "departure": "10:41",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4594,6 +4754,8 @@
                         "departure": "11:01",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4607,6 +4769,8 @@
                         "departure": "11:21",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4620,6 +4784,8 @@
                         "departure": "11:41",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4633,6 +4799,8 @@
                         "departure": "12:01",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4646,6 +4814,8 @@
                         "departure": "12:21",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4660,6 +4830,8 @@
                         "departure": "12:41",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4673,6 +4845,8 @@
                         "departure": "13:01",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4686,6 +4860,8 @@
                         "departure": "13:21",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4699,6 +4875,8 @@
                         "departure": "13:41",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4712,6 +4890,8 @@
                         "departure": "14:01",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4725,6 +4905,8 @@
                         "departure": "14:21",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4738,6 +4920,8 @@
                         "departure": "14:41",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4751,6 +4935,8 @@
                         "departure": "15:01",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4764,6 +4950,8 @@
                         "departure": "15:21",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4777,6 +4965,8 @@
                         "departure": "15:41",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4790,6 +4980,8 @@
                         "departure": "16:01",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4827,6 +5019,8 @@
                         "departure": "17:02",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4840,6 +5034,8 @@
                         "departure": "17:19",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4853,6 +5049,8 @@
                         "departure": "17:32",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4866,6 +5064,8 @@
                         "departure": "17:49",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4873,6 +5073,8 @@
                         "departure": "17:54",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -4892,6 +5094,8 @@
                         "departure": "18:19",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4905,6 +5109,8 @@
                         "departure": "18:32",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4918,6 +5124,8 @@
                         "departure": "18:49",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4931,6 +5139,8 @@
                         "departure": "19:02",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4958,6 +5168,8 @@
                         "departure": "19:32",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -4977,6 +5189,8 @@
                         "departure": "19:57",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5010,6 +5224,8 @@
                         "departure": "20:41",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5049,6 +5265,8 @@
                         "departure": "21:41",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5062,6 +5280,8 @@
                         "departure": "22:01",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5088,6 +5308,8 @@
                         "departure": "22:41",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5101,6 +5323,8 @@
                         "departure": "23:01",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -5114,6 +5338,8 @@
                         "departure": "23:21",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5168,6 +5394,8 @@
                         "departure": "06:24",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5199,6 +5427,8 @@
                         "departure": "07:08",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5212,6 +5442,8 @@
                         "departure": "07:22",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5232,6 +5464,8 @@
                         "departure": "07:45",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Tamagawa-Josui",
+                        "throughDestJa": "玉川上水",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -5245,6 +5479,8 @@
                         "departure": "07:53",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5259,6 +5495,8 @@
                         "departure": "08:02",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -5266,6 +5504,8 @@
                         "departure": "08:05",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Tamagawa-Josui",
+                        "throughDestJa": "玉川上水",
                         "trainType": "Express"
                     },
                     {
@@ -5279,6 +5519,8 @@
                         "departure": "08:12",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Tamagawa-Josui",
+                        "throughDestJa": "玉川上水",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -5292,6 +5534,8 @@
                         "departure": "08:20",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5312,6 +5556,8 @@
                         "departure": "08:32",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -5339,6 +5585,8 @@
                         "departure": "08:54",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5359,6 +5607,8 @@
                         "departure": "09:10",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -5385,6 +5635,8 @@
                         "departure": "09:41",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5405,6 +5657,8 @@
                         "departure": "10:01",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5418,6 +5672,8 @@
                         "departure": "10:21",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5431,6 +5687,8 @@
                         "departure": "10:41",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5444,6 +5702,8 @@
                         "departure": "11:01",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5457,6 +5717,8 @@
                         "departure": "11:21",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5470,6 +5732,8 @@
                         "departure": "11:41",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5483,6 +5747,8 @@
                         "departure": "12:01",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5496,6 +5762,8 @@
                         "departure": "12:21",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5509,6 +5777,8 @@
                         "departure": "12:41",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5522,6 +5792,8 @@
                         "departure": "13:01",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5535,6 +5807,8 @@
                         "departure": "13:21",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5548,6 +5822,8 @@
                         "departure": "13:41",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5561,6 +5837,8 @@
                         "departure": "14:01",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5574,6 +5852,8 @@
                         "departure": "14:21",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5587,6 +5867,8 @@
                         "departure": "14:41",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5600,6 +5882,8 @@
                         "departure": "15:01",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5613,6 +5897,8 @@
                         "departure": "15:21",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5626,6 +5912,8 @@
                         "departure": "15:41",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5639,6 +5927,8 @@
                         "departure": "16:01",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5652,6 +5942,8 @@
                         "departure": "16:21",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5665,6 +5957,8 @@
                         "departure": "16:37",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -5684,6 +5978,8 @@
                         "departure": "16:58",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -5722,6 +6018,8 @@
                         "departure": "17:42",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5735,6 +6033,8 @@
                         "departure": "17:56",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -5767,6 +6067,8 @@
                         "departure": "18:27",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -5780,6 +6082,8 @@
                         "departure": "18:38",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -5799,6 +6103,8 @@
                         "departure": "18:56",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -5824,6 +6130,8 @@
                         "departure": "19:26",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -5837,6 +6145,8 @@
                         "departure": "19:41",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5850,6 +6160,8 @@
                         "departure": "19:57",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -5882,6 +6194,8 @@
                         "departure": "20:35",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5901,6 +6215,8 @@
                         "departure": "20:57",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -5926,6 +6242,8 @@
                         "departure": "21:27",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -5945,6 +6263,8 @@
                         "departure": "21:52",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5952,6 +6272,8 @@
                         "departure": "22:03",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Tamagawa-Josui",
+                        "throughDestJa": "玉川上水",
                         "trainType": "SemiExpress"
                     },
                     {
@@ -5971,6 +6293,8 @@
                         "departure": "22:35",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {
@@ -5984,6 +6308,8 @@
                         "departure": "22:54",
                         "startsHere": true,
                         "terminusStationId": "Station:Seibu.Shinjuku.Kodaira",
+                        "throughDestEn": "Haijima",
+                        "throughDestJa": "拝島",
                         "trainType": "Express"
                     },
                     {

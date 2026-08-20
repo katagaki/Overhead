@@ -38,6 +38,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -53,6 +55,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -68,6 +72,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -146,6 +152,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -168,6 +176,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -190,6 +200,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -212,6 +224,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -297,6 +311,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -340,6 +356,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -404,6 +422,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -461,6 +481,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -602,6 +624,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -638,6 +662,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -681,6 +707,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -717,6 +745,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -739,6 +769,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -770,6 +802,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -785,6 +819,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -800,6 +836,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -808,6 +846,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -823,6 +863,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -859,6 +901,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -874,6 +918,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -910,6 +956,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -932,6 +980,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -947,6 +997,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -1034,6 +1086,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -1245,6 +1299,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -1288,6 +1344,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -1359,6 +1417,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -1381,6 +1441,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -1410,6 +1472,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -1460,6 +1524,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -1496,6 +1562,8 @@
                         "startsHere": true,
                         "stopIndices": [0, 4, 7, 8, 9],
                         "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                        "throughDestEn": "Shonandai",
+                        "throughDestJa": "湘南台",
                         "trainType": "Rapid"
                     },
                     {
@@ -2012,6 +2080,8 @@
                                 "startsHere": false,
                                 "stopIndices": [7, 9],
                                 "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                                "throughDestEn": "Shonandai",
+                                "throughDestJa": "湘南台",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -2199,6 +2269,8 @@
                                 "startsHere": false,
                                 "stopIndices": [7, 9],
                                 "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                                "throughDestEn": "Shonandai",
+                                "throughDestJa": "湘南台",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -2214,6 +2286,8 @@
                                 "startsHere": false,
                                 "stopIndices": [7, 9],
                                 "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                                "throughDestEn": "Shonandai",
+                                "throughDestJa": "湘南台",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -2222,6 +2296,8 @@
                                 "startsHere": false,
                                 "stopIndices": [7, 9],
                                 "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                                "throughDestEn": "Shonandai",
+                                "throughDestJa": "湘南台",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -2230,6 +2306,8 @@
                                 "startsHere": false,
                                 "stopIndices": [7, 9],
                                 "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                                "throughDestEn": "Shonandai",
+                                "throughDestJa": "湘南台",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -2238,6 +2316,8 @@
                                 "startsHere": false,
                                 "stopIndices": [7, 9],
                                 "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                                "throughDestEn": "Shonandai",
+                                "throughDestJa": "湘南台",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -2253,6 +2333,8 @@
                                 "startsHere": false,
                                 "stopIndices": [7, 9],
                                 "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                                "throughDestEn": "Shonandai",
+                                "throughDestJa": "湘南台",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -2296,6 +2378,8 @@
                                 "startsHere": false,
                                 "stopIndices": [7, 9],
                                 "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                                "throughDestEn": "Shonandai",
+                                "throughDestJa": "湘南台",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -2346,6 +2430,8 @@
                                 "startsHere": false,
                                 "stopIndices": [7, 9],
                                 "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                                "throughDestEn": "Shonandai",
+                                "throughDestJa": "湘南台",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -2368,6 +2454,8 @@
                                 "startsHere": false,
                                 "stopIndices": [7, 9],
                                 "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                                "throughDestEn": "Shonandai",
+                                "throughDestJa": "湘南台",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -2390,6 +2478,8 @@
                                 "startsHere": false,
                                 "stopIndices": [7, 9],
                                 "terminusStationId": "Station:Sotetsu.Main.Futamatagawa",
+                                "throughDestEn": "Shonandai",
+                                "throughDestJa": "湘南台",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -2552,6 +2642,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Ogawamachi",
+                        "throughDestJa": "小川町",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -2567,6 +2659,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -2582,6 +2676,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -2611,6 +2707,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Omiya",
+                        "throughDestJa": "大宮",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -2626,6 +2724,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Hatogaya",
+                        "throughDestJa": "鳩ヶ谷",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -2641,6 +2741,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Omiya",
+                        "throughDestJa": "大宮",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -2663,6 +2765,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shibuya",
+                        "throughDestJa": "渋谷",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -2671,6 +2775,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Urawa-misono",
+                        "throughDestJa": "浦和美園",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -2686,6 +2792,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Kawagoeshi",
+                        "throughDestJa": "川越市",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -2701,6 +2809,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Takashimadaira",
+                        "throughDestJa": "高島平",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -2723,6 +2833,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -2745,6 +2857,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -2767,6 +2881,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -2796,6 +2912,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -2839,6 +2957,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3064,6 +3184,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Nishi-takashimadaira",
+                        "throughDestJa": "西高島平",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3114,6 +3236,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Takashimadaira",
+                        "throughDestJa": "高島平",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3143,6 +3267,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Urawa-misono",
+                        "throughDestJa": "浦和美園",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3158,6 +3284,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3173,6 +3301,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Nishi-takashimadaira",
+                        "throughDestJa": "西高島平",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3181,6 +3311,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3266,6 +3398,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Nishi-takashimadaira",
+                        "throughDestJa": "西高島平",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3323,6 +3457,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3345,6 +3481,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3353,6 +3491,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Nishi-takashimadaira",
+                        "throughDestJa": "西高島平",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3398,6 +3538,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shibuya",
+                        "throughDestJa": "渋谷",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3413,6 +3555,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3428,6 +3572,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3443,6 +3589,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Nishi-takashimadaira",
+                        "throughDestJa": "西高島平",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3465,6 +3613,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3487,6 +3637,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Kawagoe",
+                        "throughDestJa": "川越",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3502,6 +3654,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Nishi-takashimadaira",
+                        "throughDestJa": "西高島平",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3517,6 +3671,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Akabane",
+                        "throughDestJa": "赤羽",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3553,6 +3709,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Urawa-misono",
+                        "throughDestJa": "浦和美園",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3575,6 +3733,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Akabane",
+                        "throughDestJa": "赤羽",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3597,6 +3757,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Kawagoe",
+                        "throughDestJa": "川越",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3619,6 +3781,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Ikebukuro",
+                        "throughDestJa": "池袋",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3641,6 +3805,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Urawa-misono",
+                        "throughDestJa": "浦和美園",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3670,6 +3836,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Urawa-misono",
+                        "throughDestJa": "浦和美園",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3741,6 +3909,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Nishi-takashimadaira",
+                        "throughDestJa": "西高島平",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3966,6 +4136,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -3995,6 +4167,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -4010,6 +4184,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Urawa-misono",
+                        "throughDestJa": "浦和美園",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -4039,6 +4215,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Urawa-misono",
+                        "throughDestJa": "浦和美園",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -4068,6 +4246,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -4090,6 +4270,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Urawa-misono",
+                        "throughDestJa": "浦和美園",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -4119,6 +4301,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Urawa-misono",
+                        "throughDestJa": "浦和美園",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -4155,6 +4339,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -4177,6 +4363,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -4213,6 +4401,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -4228,6 +4418,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -4257,6 +4449,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Urawa-misono",
+                        "throughDestJa": "浦和美園",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -4286,6 +4480,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Akabane-iwabuchi",
+                        "throughDestJa": "赤羽岩淵",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -4315,6 +4511,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Musashi-Kosugi",
+                        "throughDestJa": "武蔵小杉",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -4330,6 +4528,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Nishi-takashimadaira",
+                        "throughDestJa": "西高島平",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -4345,6 +4545,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Shinjuku",
+                        "throughDestJa": "新宿",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -4360,6 +4562,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Musashi-Kosugi",
+                        "throughDestJa": "武蔵小杉",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -4382,6 +4586,8 @@
                         "startsHere": true,
                         "stopIndices": [17, 13, 9, 7],
                         "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                        "throughDestEn": "Musashi-Kosugi",
+                        "throughDestJa": "武蔵小杉",
                         "trainType": "LimitedExpress"
                     },
                     {
@@ -4809,6 +5015,8 @@
                                 "startsHere": false,
                                 "stopIndices": [9, 7],
                                 "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                                "throughDestEn": "Kawagoeshi",
+                                "throughDestJa": "川越市",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -4866,6 +5074,8 @@
                                 "startsHere": false,
                                 "stopIndices": [9, 7],
                                 "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                                "throughDestEn": "Shibuya",
+                                "throughDestJa": "渋谷",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -4899,6 +5109,8 @@
                                 "startsHere": false,
                                 "stopIndices": [9, 8, 7],
                                 "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                                "throughDestEn": "Shinjuku-sanchome",
+                                "throughDestJa": "新宿三丁目",
                                 "trainType": "CommuterLimitedExpress"
                             },
                             {
@@ -4914,6 +5126,8 @@
                                 "startsHere": false,
                                 "stopIndices": [9, 8, 7],
                                 "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                                "throughDestEn": "Takashimadaira",
+                                "throughDestJa": "高島平",
                                 "trainType": "CommuterLimitedExpress"
                             },
                             {
@@ -4943,6 +5157,8 @@
                                 "startsHere": false,
                                 "stopIndices": [9, 8, 7],
                                 "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                                "throughDestEn": "Shibuya",
+                                "throughDestJa": "渋谷",
                                 "trainType": "CommuterLimitedExpress"
                             },
                             {
@@ -4951,6 +5167,8 @@
                                 "startsHere": false,
                                 "stopIndices": [9, 8, 7],
                                 "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                                "throughDestEn": "Wakoshi",
+                                "throughDestJa": "和光市",
                                 "trainType": "CommuterLimitedExpress"
                             },
                             {
@@ -4973,6 +5191,8 @@
                                 "startsHere": false,
                                 "stopIndices": [9, 8, 7],
                                 "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                                "throughDestEn": "Kawagoeshi",
+                                "throughDestJa": "川越市",
                                 "trainType": "CommuterLimitedExpress"
                             },
                             {
@@ -5023,6 +5243,8 @@
                                 "startsHere": false,
                                 "stopIndices": [9, 7],
                                 "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                                "throughDestEn": "Wakoshi",
+                                "throughDestJa": "和光市",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -5038,6 +5260,8 @@
                                 "startsHere": false,
                                 "stopIndices": [9, 7],
                                 "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                                "throughDestEn": "Shiki",
+                                "throughDestJa": "志木",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -5046,6 +5270,8 @@
                                 "startsHere": false,
                                 "stopIndices": [9, 7],
                                 "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                                "throughDestEn": "Shinrin-Koen",
+                                "throughDestJa": "森林公園",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -5061,6 +5287,8 @@
                                 "startsHere": false,
                                 "stopIndices": [9, 7],
                                 "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                                "throughDestEn": "Wakoshi",
+                                "throughDestJa": "和光市",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -5076,6 +5304,8 @@
                                 "startsHere": false,
                                 "stopIndices": [9, 7],
                                 "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                                "throughDestEn": "Shiki",
+                                "throughDestJa": "志木",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -5084,6 +5314,8 @@
                                 "startsHere": false,
                                 "stopIndices": [9, 7],
                                 "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                                "throughDestEn": "Shinrin-Koen",
+                                "throughDestJa": "森林公園",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -5092,6 +5324,8 @@
                                 "startsHere": false,
                                 "stopIndices": [9, 7],
                                 "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                                "throughDestEn": "Wakoshi",
+                                "throughDestJa": "和光市",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -5100,6 +5334,8 @@
                                 "startsHere": false,
                                 "stopIndices": [9, 7],
                                 "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                                "throughDestEn": "Musashi-Kosugi",
+                                "throughDestJa": "武蔵小杉",
                                 "trainType": "LimitedExpress"
                             },
                             {
@@ -5137,6 +5373,8 @@
                                 "startsHere": true,
                                 "stopIndices": [13, 9, 7],
                                 "terminusStationId": "Station:Sotetsu.Main.Nishiya",
+                                "throughDestEn": "Urawa-misono",
+                                "throughDestJa": "浦和美園",
                                 "trainType": "LimitedExpress"
                             }
                         ]
