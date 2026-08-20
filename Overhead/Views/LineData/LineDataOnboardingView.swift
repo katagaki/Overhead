@@ -73,15 +73,23 @@ struct LineDataOnboardingView: View {
         .buttonStyle(.plain)
     }
 
+    /// One badge per distinct symbol: JR East has a dozen lines sharing the
+    /// plain JR mark, and ten copies of it says nothing.
+    private func distinctBadges(_ lines: [CatalogLine]) -> [CatalogLine] {
+        var seen = Set<String>()
+        return lines.filter { seen.insert("\($0.symbol)|\($0.colorHex)").inserted }
+    }
+
     @ViewBuilder
     private func badgeStrip(_ lines: [CatalogLine]) -> some View {
+        let shown = distinctBadges(lines)
         HStack(spacing: 4) {
-            ForEach(lines.prefix(10)) { line in
+            ForEach(shown.prefix(10)) { line in
                 LineSymbolBadge(symbol: line.symbol, color: Color(hex: line.colorHex),
                                 dimension: 22, styleOverride: line.badgeStyle)
             }
-            if lines.count > 10 {
-                Text("+\(lines.count - 10)")
+            if shown.count > 10 {
+                Text("+\(shown.count - 10)")
                     .font(.caption2).foregroundStyle(.secondary)
             }
         }
