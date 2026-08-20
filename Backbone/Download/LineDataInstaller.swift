@@ -35,7 +35,7 @@ public final class LineDataInstaller: ObservableObject {
     private let etagKey = "lineData.catalogETag"
     private let modifiedKey = "lineData.catalogModified"
     private let checkedKey = "lineData.lastChecked"
-    private let session: URLSession
+    private nonisolated let session: URLSession
 
     private init() {
         let config = URLSessionConfiguration.default
@@ -50,6 +50,13 @@ public final class LineDataInstaller: ObservableObject {
 
     public var isBusy: Bool { !inFlight.isEmpty }
 
+    /// Only claim to hold a copy if one is actually on disk: otherwise a 304
+    /// would leave the app with no catalog at all.
+    private var hasLocalCatalog: Bool {
+        FileManager.default.fileExists(
+            atPath: LineDataStore.installedRoot.appendingPathComponent("catalog.json").path)
+    }
+
     // MARK: - Update check
 
     /// One conditional GET. A 304 costs a few hundred bytes and means there is
@@ -57,10 +64,6 @@ public final class LineDataInstaller: ObservableObject {
     @discardableResult
     public func refreshCatalog(force: Bool = false) async throws -> Bool {
         var request = URLRequest(url: Self.baseURL.appendingPathComponent("catalog.json"))
-        // Only claim to hold a copy if one is actually on disk: otherwise a 304
-        // would leave the app with no catalog at all.
-        let hasLocalCatalog = FileManager.default.fileExists(
-            atPath: LineDataStore.installedRoot.appendingPathComponent("catalog.json").path)
         if !force, hasLocalCatalog {
             if let etag = defaults.string(forKey: etagKey) {
                 request.setValue(etag, forHTTPHeaderField: "If-None-Match")
@@ -89,12 +92,8 @@ public final class LineDataInstaller: ObservableObject {
                                                 withIntermediateDirectories: true)
         try data.write(to: LineDataStore.installedRoot.appendingPathComponent("catalog.json"),
                        options: .atomic)
-        if let etag = http.value(forHTTPHeaderField: "Etag") {
-            defaults.set(etag, forKey: etagKey)
-        } else if let modified = http.value(forHTTPHeaderField: "Last-Modified") {
-            defaults.set(modified, forKey: modifiedKey)
-        }
-        try await refreshBadgeStyles(styles: catalog.styles)
+        storeValidator(from: http)
+        try await refreshBadgeStyles(styles: catalog.styles, base: Self.baseURL)
 
         Catalog.reload()
         StaticTrainData.invalidate()
@@ -102,14 +101,34 @@ public final class LineDataInstaller: ObservableObject {
         return true
     }
 
+    private func storeValidator(from http: HTTPURLResponse) {
+        if let etag = http.value(forHTTPHeaderField: "Etag") {
+            defaults.set(etag, forKey: etagKey)
+        } else if let modified = http.value(forHTTPHeaderField: "Last-Modified") {
+            defaults.set(modified, forKey: modifiedKey)
+        }
+    }
+
     /// Styles ship with the data, so a new operator needs no app release.
-    private func refreshBadgeStyles(styles: [String]) async throws {
+    private func refreshBadgeStyles(styles: [String], base: URL) async throws {
         let dir = LineDataStore.installedRoot.appendingPathComponent("BadgeStyles", isDirectory: true)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        for style in styles {
-            let url = Self.baseURL.appendingPathComponent("BadgeStyles/\(style).json")
-            guard let data = try? await fetch(url) else { continue }
-            try data.write(to: dir.appendingPathComponent("\(style).json"), options: .atomic)
+        for batch in styles.chunked(into: Self.parallelism) {
+            let fetched = await withTaskGroup(of: (String, Data?).self) { group in
+                for style in batch {
+                    group.addTask { [session] in
+                        let url = base.appendingPathComponent("BadgeStyles/\(style).json")
+                        return (style, try? await Self.fetch(url, using: session))
+                    }
+                }
+                var out: [(String, Data?)] = []
+                for await result in group { out.append(result) }
+                return out
+            }
+            for (style, data) in fetched {
+                guard let data else { continue }
+                try data.write(to: dir.appendingPathComponent("\(style).json"), options: .atomic)
+            }
         }
     }
 
@@ -126,30 +145,61 @@ public final class LineDataInstaller: ObservableObject {
 
     // MARK: - Install and remove
 
+    /// A base set is dozens of lines; downloading them one after another is
+    /// most of a first launch.
+    static let parallelism = 6
+
     public func install(lineIds: [String]) async throws {
-        for id in lineIds {
+        let lines = try lineIds.map { id -> CatalogLine in
             guard let line = Catalog.line(id: id) else { throw LineDataError.notInCatalog(id) }
-            inFlight.insert(id)
-            defer { inFlight.remove(id) }
-            try await install(line)
+            return line
         }
-        StaticTrainData.invalidate()
-        recomputeStale()
+        inFlight.formUnion(lineIds)
+        defer {
+            inFlight.subtract(lineIds)
+            StaticTrainData.invalidate()
+            recomputeStale()
+        }
+
+        let base = Self.baseURL
+        for batch in lines.chunked(into: Self.parallelism) {
+            let fetched = try await withThrowingTaskGroup(
+                of: (CatalogLine, Data, Data).self
+            ) { group -> [(CatalogLine, Data, Data)] in
+                for line in batch {
+                    group.addTask { [session] in
+                        try await Self.download(line, base: base, using: session)
+                    }
+                }
+                var out: [(CatalogLine, Data, Data)] = []
+                for try await result in group { out.append(result) }
+                return out
+            }
+            for (line, lineData, badgeData) in fetched {
+                try write(line, lineData: lineData, badgeData: badgeData)
+            }
+            inFlight.subtract(batch.map(\.id))
+        }
     }
 
-    private func install(_ line: CatalogLine) async throws {
-        let lineData = try await fetch(Self.baseURL
-            .appendingPathComponent("Lines/\(line.folder)/Line.json"))
-        guard Self.hash(lineData) == line.sha256 else {
+    /// Both files are fetched and verified before either is written.
+    private nonisolated static func download(
+        _ line: CatalogLine, base: URL, using session: URLSession
+    ) async throws -> (CatalogLine, Data, Data) {
+        let lineData = try await fetch(
+            base.appendingPathComponent("Lines/\(line.folder)/Line.json"), using: session)
+        guard hash(lineData) == line.sha256 else {
             throw LineDataError.checksumMismatch("\(line.folder)/Line.json")
         }
-        let badgeData = try await fetch(Self.baseURL
-            .appendingPathComponent("Lines/\(line.folder)/Badge.json"))
-        guard Self.hash(badgeData) == line.badgeSha256 else {
+        let badgeData = try await fetch(
+            base.appendingPathComponent("Lines/\(line.folder)/Badge.json"), using: session)
+        guard hash(badgeData) == line.badgeSha256 else {
             throw LineDataError.checksumMismatch("\(line.folder)/Badge.json")
         }
+        return (line, lineData, badgeData)
+    }
 
-        // Nothing lands in place until both files have been verified.
+    private func write(_ line: CatalogLine, lineData: Data, badgeData: Data) throws {
         let dir = LineDataStore.installedDirectory(folder: line.folder)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         try lineData.write(to: dir.appendingPathComponent("Line.json"), options: .atomic)
@@ -172,7 +222,7 @@ public final class LineDataInstaller: ObservableObject {
 
     // MARK: - Helpers
 
-    private func fetch(_ url: URL) async throws -> Data {
+    private nonisolated static func fetch(_ url: URL, using session: URLSession) async throws -> Data {
         let (data, response) = try await session.data(from: url)
         guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
             throw LineDataError.badResponse((response as? HTTPURLResponse)?.statusCode ?? 0)
@@ -180,7 +230,13 @@ public final class LineDataInstaller: ObservableObject {
         return data
     }
 
-    private static func hash(_ data: Data) -> String {
+    private nonisolated static func hash(_ data: Data) -> String {
         SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+    }
+}
+
+private extension Array {
+    func chunked(into size: Int) -> [[Element]] {
+        stride(from: 0, to: count, by: size).map { Array(self[$0..<Swift.min($0 + size, count)]) }
     }
 }

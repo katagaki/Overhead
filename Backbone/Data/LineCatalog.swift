@@ -46,6 +46,7 @@ public struct CatalogStation: Decodable, Hashable, Sendable {
 
 public struct LineCatalog: Decodable, Sendable {
     public let schemaVersion: Int
+    /// Release version, shown in the app.
     public let version: String
     public let styles: [String]
     public let lines: [CatalogLine]
