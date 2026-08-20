@@ -398,48 +398,36 @@ struct RunTimes {
 
 public enum StaticTrainData {
 
-    /// One folder per line under StaticData/Lines/; each holds Line.json
-    /// (timetable) and Badge.json (badge assignment).
-    public static let lineFolders = [
-        "Choshi", "Enoden", "HitachinakaMinato", "Hokuso",
-        "JRAgatsuma", "JRChuoRapid", "JRChuoSobuLocal", "JRHachiko",
-        "JRItsukaichi", "JRJobanLocal", "JRJobanRapid", "JRJoetsu",
-        "JRKashima", "JRKawagoe", "JRKeihinTohoku", "JRKeiyo",
-        "JRKeiyoBranch", "JRKururi", "JRMusashino", "JRNambu",
-        "JRNambuBranch", "JRNarita", "JRNaritaAbiko", "JRNaritaAirport",
-        "JROme", "JRSagami", "JRSaikyoKawagoe", "JRShonanShinjuku",
-        "JRSobuMain", "JRSotobo", "JRTakasaki", "JRTogane",
-        "JRTokaido", "JRTsurumi", "JRTsurumiOkawa", "JRTsurumiUmiShibaura",
-        "JRUchibo", "JRUtsunomiya", "JRYamanote", "JRYokohama",
-        "JRYokosukaSobu", "Jomo", "KantetsuJoso", "KantetsuRyugasaki",
-        "KeikyuAirport", "KeikyuKurihama", "KeikyuMain", "KeikyuZushi",
-        "Keio", "KeioDobutsuen", "KeioInokashira", "KeioKeibajo",
-        "KeioSagamihara", "KeioTakao", "KeiseiChiba", "KeiseiChihara",
-        "KeiseiHigashiNarita", "KeiseiKanamachi", "KeiseiMain", "KeiseiMatsudo",
-        "KeiseiNaritaSkyAccess", "KeiseiOshiage", "Kodomonokuni", "Kominato",
-        "Minatomirai", "Mooka", "NewShuttle", "OdakyuEnoshima",
-        "OdakyuOdawara", "OdakyuTama", "Rinkai", "Ryutetsu",
-        "SaitamaRapid", "SeibuChichibu", "SeibuHaijima", "SeibuIkebukuro",
-        "SeibuKokubunji", "SeibuSayama", "SeibuSeibuen", "SeibuShinjuku",
-        "SeibuTamagawa", "SeibuTamako", "SeibuToshima", "SeibuYamaguchi",
-        "SeibuYurakucho", "Shibayama", "ShonanMonorail", "Sotetsu",
-        "SotetsuIzumino", "SotetsuShinYokohama", "TamaMonorail", "TobuDaishi",
-        "TobuIsesaki", "TobuKameido", "TobuKinugawa", "TobuKiryu",
-        "TobuKoizumi", "TobuKoizumiBranch", "TobuNikko", "TobuOgose",
-        "TobuSano", "TobuSkytree", "TobuTojo", "TobuUrbanPark",
-        "TobuUtsunomiya", "ToeiArakawa", "ToeiAsakusa", "ToeiMita",
-        "ToeiNipporiToneri", "ToeiOedo", "ToeiShinjuku", "TokyoMetroChiyoda",
-        "TokyoMetroFukutoshin", "TokyoMetroGinza", "TokyoMetroHanzomon", "TokyoMetroHibiya",
-        "TokyoMetroMarunouchi", "TokyoMetroMarunouchiBranch", "TokyoMetroNamboku", "TokyoMetroTozai",
-        "TokyoMetroYurakucho", "TokyoMonorail", "TokyuDenEnToshi", "TokyuIkegami",
-        "TokyuMeguro", "TokyuOimachi", "TokyuSetagaya", "TokyuShinYokohama",
-        "TokyuTamagawa", "TokyuToyoko", "ToyoRapid", "TsukubaExpress",
-        "YokohamaBlue", "YokohamaGreen", "YokohamaSeaside", "Yurikamome",
-    ]
+    /// Folders the app can read right now — downloaded, or bundled seed.
+    public static var lineFolders: [String] {
+        Catalog.current.lines.map(\.folder).filter(LineDataStore.isPresent)
+    }
 
     /// The bundled data exactly as authored — every line's pre-revision timetable.
     /// Everything outside this file wants `allLines`, which resolves 改正 first.
-    private static let bundledLines: [StaticTrainLine] = lineFolders.flatMap { LineStore.lines($0) }
+    private static let linesLock = NSLock()
+    private static var cachedLines: [StaticTrainLine]?
+
+    private static var loadedLines: [StaticTrainLine] {
+        linesLock.lock(); defer { linesLock.unlock() }
+        if let cachedLines { return cachedLines }
+        let built = lineFolders.flatMap { LineStore.lines($0) }
+        cachedLines = built
+        return built
+    }
+
+    /// Call after installing or removing line data. Clears the decoded lines
+    /// and every per-day snapshot built from them.
+    public static func invalidate() {
+        linesLock.lock(); cachedLines = nil; linesLock.unlock()
+        displayLock.lock(); cachedTrainLines = nil; displayLock.unlock()
+        snapshotLock.lock(); snapshots.removeAll(); snapshotLock.unlock()
+        Catalog.reload()
+        BadgeStyles.invalidate()
+        NotificationCenter.default.post(name: Self.didChangeNotification, object: nil)
+    }
+
+    public static let didChangeNotification = Notification.Name("StaticTrainDataDidChange")
 
     /// The day number (yyyyMMdd, JST) a date falls on. Matches `ScheduleCalendar`,
     /// which also splits on the calendar day rather than the service day — a 24:30
@@ -479,7 +467,7 @@ public enum StaticTrainData {
         snapshotLock.lock()
         defer { snapshotLock.unlock() }
         if let cached = snapshots[key] { return cached }
-        let built = Snapshot(bundledLines.map { $0.applyingRevisions(onDayKey: key) })
+        let built = Snapshot(loadedLines.map { $0.applyingRevisions(onDayKey: key) })
         // Only today and whatever date the user is planning for stay warm.
         if snapshots.count >= 4 { snapshots.removeAll() }
         snapshots[key] = built
@@ -518,7 +506,7 @@ public enum StaticTrainData {
     public static func upcomingRevisions(forLineId lineId: String,
                                          on date: Date = Date()) -> [ScheduleRevision] {
         let today = dayKey(for: date)
-        return (bundledLines.first { $0.id == lineId }?.scheduleRevisions ?? [])
+        return (loadedLines.first { $0.id == lineId }?.scheduleRevisions ?? [])
             .filter { ($0.validFromDayKey ?? .max) > today }
             .sorted { ($0.validFromDayKey ?? 0) < ($1.validFromDayKey ?? 0) }
     }
@@ -529,10 +517,27 @@ public enum StaticTrainData {
 
     /// The line's own colour, straight from the data (no 改正 resolution needed).
     public static func colorHex(forLineId id: String) -> String? {
-        bundledLines.first { $0.id == id }?.colorHex
+        loadedLines.first { $0.id == id }?.colorHex
     }
 
+    /// Its own lock: building the list reaches back through `loadedLines`,
+    /// and NSLock is not recursive.
+    private static let displayLock = NSLock()
+    private static var cachedTrainLines: [TrainLine]?
+
+    /// Sorted display list. Cached: it is read per station row while a
+    /// journey is on screen.
     public static func trainLines() -> [TrainLine] {
+        displayLock.lock()
+        if let cachedTrainLines { displayLock.unlock(); return cachedTrainLines }
+        displayLock.unlock()
+
+        let built = buildTrainLines()
+        displayLock.lock(); cachedTrainLines = built; displayLock.unlock()
+        return built
+    }
+
+    private static func buildTrainLines() -> [TrainLine] {
         allLines
             .map(\.trainLine)
             .sorted {

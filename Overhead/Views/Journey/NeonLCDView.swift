@@ -21,7 +21,7 @@ struct NeonLCDView: View {
     private static let rowBlue = Color(hex: "#9FB2D8")
     private static let glitchPeriod = 6.0
 
-    private static let allLines = StaticTrainData.trainLines()
+    private static var allLines: [TrainLine] { StaticTrainData.trainLines() }
     private static let clockFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "H:mm:ss"

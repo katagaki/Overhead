@@ -39,7 +39,7 @@ struct LoopLCDView: View {
         51.4 - 46.8 * pow(t, 1.15)
     }
 
-    private static let allLines = StaticTrainData.trainLines()
+    private static var allLines: [TrainLine] { StaticTrainData.trainLines() }
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1.0)) { context in
