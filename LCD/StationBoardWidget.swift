@@ -347,7 +347,7 @@ nonisolated func mergedRows(
 ) -> [BoardRowItem] {
     lines.flatMap { line, direction in
         direction.departures.compactMap { dep -> BoardRowItem? in
-            guard let left = dep.minutesUntil(nowRailMinutes: nowRailMinutes), left >= 0 else { return nil }
+            guard let left = dep.minutesUntil(nowRailMinutes: nowRailMinutes), left > 0 else { return nil }
             return BoardRowItem(line: line, directionId: direction.directionId, departure: dep, minutesLeft: left)
         }
     }
@@ -644,8 +644,9 @@ struct LineBoardView: View {
     private var upcoming: [BoardDeparture] {
         guard let target else { return [] }
         let now = BoardSnapshotStore.railNowMinutes(at: entry.date)
+        // A train on its departure minute has left, so it drops off the board.
         return target.direction.departures.filter {
-            ($0.minutesUntil(nowRailMinutes: now) ?? -1) >= 0
+            ($0.minutesUntil(nowRailMinutes: now) ?? 0) > 0
         }
     }
 

@@ -379,8 +379,8 @@ struct NearbyStationsSection: View {
     private func nextDeparture(in timetable: StationTimetableData, at date: Date) -> StationDeparture? {
         let nowMinutes = Self.railNowMinutes(at: date)
         return timetable.departures.first { departure in
-            guard let secs = TimetableEntry.parseRailTime(departure.departureTime) else { return false }
-            return secs / 60 >= nowMinutes
+            guard let minutes = TimetableEntry.railMinutes(departure.departureTime) else { return false }
+            return minutes > nowMinutes
         }
     }
 
@@ -390,11 +390,8 @@ struct NearbyStationsSection: View {
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = tz
         let comps = cal.dateComponents([.hour, .minute], from: date)
-        var nowMinutes = (comps.hour ?? 0) * 60 + (comps.minute ?? 0)
-        if nowMinutes < 180 {
-            nowMinutes += 1440
-        }
-        return nowMinutes
+        let nowMinutes = (comps.hour ?? 0) * 60 + (comps.minute ?? 0)
+        return TimetableEntry.railMinutes(fromMinutes: nowMinutes)
     }
 
     // MARK: - Timetable computation

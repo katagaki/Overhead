@@ -18,7 +18,9 @@ nonisolated struct BoardDeparture: Codable {
     var railMinutes: Int? {
         let parts = time.split(separator: ":")
         guard parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]) else { return nil }
-        return h * 60 + m
+        let minutes = h * 60 + m
+        // Same rail-day basis as railNowMinutes, so post-midnight trains stay upcoming.
+        return minutes < 180 ? minutes + 1440 : minutes
     }
 }
 
@@ -113,8 +115,7 @@ nonisolated enum BoardSnapshotStore {
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
         let c = cal.dateComponents([.hour, .minute], from: date)
-        var minutes = (c.hour ?? 0) * 60 + (c.minute ?? 0)
-        if minutes < 180 { minutes += 1440 }
-        return minutes
+        let minutes = (c.hour ?? 0) * 60 + (c.minute ?? 0)
+        return minutes < 180 ? minutes + 1440 : minutes
     }
 }

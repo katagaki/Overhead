@@ -1530,9 +1530,13 @@ public enum StaticTimetableGenerator {
                     destEn: service.throughDestinationNameEn ?? dest.nameEn
                 )
             }
-            guard let lastMinute = byMinute.keys.max() else { return nil }
+            // Rail order, so post-midnight departures sort after the evening ones.
+            let orderedMinutes = byMinute.keys.sorted {
+                TimetableEntry.railMinutes(fromMinutes: $0) < TimetableEntry.railMinutes(fromMinutes: $1)
+            }
+            guard let lastMinute = orderedMinutes.last else { return nil }
 
-            let departures = byMinute.keys.sorted().enumerated().map { (i, minute) -> StationDeparture in
+            let departures = orderedMinutes.enumerated().map { (i, minute) -> StationDeparture in
                 let row = byMinute[minute]!
                 return StationDeparture(
                     id: "\(line.id).\(direction.id).\(stationId)_\(i)",

@@ -143,9 +143,7 @@ struct StationTimetableView: View {
     private func hourRows(_ departures: [StationDeparture]) -> [HourRow] {
         var byHour: [Int: [StationDeparture]] = [:]
         for departure in departures {
-            guard let secs = TimetableEntry.parseRailTime(departure.departureTime) else { continue }
-            var minutes = secs / 60
-            if minutes < 180 { minutes += 1440 }
+            guard let minutes = TimetableEntry.railMinutes(departure.departureTime) else { continue }
             byHour[minutes / 60, default: []].append(departure)
         }
         return byHour.keys.sorted().map { HourRow(hour: $0, departures: byHour[$0]!) }
@@ -386,12 +384,11 @@ struct StationTimetableView: View {
     @ViewBuilder
     private func departureStatusLabel(_ departure: StationDeparture) -> some View {
         if let secs = TimetableEntry.parseRailTime(departure.departureTime) {
-            let depMinutes = secs / 60 < 180 ? secs / 60 + 1440 : secs / 60
-            let remaining = depMinutes - railNowMinutes(at: Date())
-            if remaining < 0 {
+            let remaining = TimetableEntry.railMinutes(fromMinutes: secs / 60) - railNowMinutes(at: Date())
+            if remaining <= 0 {
                 Label("StationTimetable.Departed", systemImage: "checkmark.circle")
                     .foregroundStyle(.secondary)
-            } else if remaining == 0 {
+            } else if remaining == 1 {
                 Label("StationTimetable.DepartingSoon", systemImage: "clock.fill")
                     .foregroundStyle(.orange)
             } else if remaining < 120 {
@@ -501,18 +498,14 @@ struct StationTimetableView: View {
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = tz
         let comps = cal.dateComponents([.hour, .minute], from: date)
-        var nowMinutes = (comps.hour ?? 0) * 60 + (comps.minute ?? 0)
-        if nowMinutes < 180 {
-            nowMinutes += 1440
-        }
-        return nowMinutes
+        let nowMinutes = (comps.hour ?? 0) * 60 + (comps.minute ?? 0)
+        return TimetableEntry.railMinutes(fromMinutes: nowMinutes)
     }
 
     private func isPast(_ departure: StationDeparture, nowMinutes: Int) -> Bool {
-        guard let secs = TimetableEntry.parseRailTime(departure.departureTime) else { return false }
-        var minutes = secs / 60
-        if minutes < 180 { minutes += 1440 }
-        return minutes < nowMinutes - 1
+        guard let minutes = TimetableEntry.railMinutes(departure.departureTime) else { return false }
+        // On the departure minute the train has already left.
+        return minutes <= nowMinutes
     }
 
     /// Matches on the shared `isAscending` axis since the picker merges same-direction options.
@@ -657,11 +650,9 @@ private struct DepartureBoardView: View {
     }
 
     private func countdownText(_ departure: StationDeparture) -> String {
-        guard let secs = TimetableEntry.parseRailTime(departure.departureTime) else { return "" }
-        var minutes = secs / 60
-        if minutes < 180 { minutes += 1440 }
+        guard let minutes = TimetableEntry.railMinutes(departure.departureTime) else { return "" }
         let remaining = minutes - nowMinutes
-        return remaining <= 0
+        return remaining <= 1
             ? String(localized: "Board.Countdown.Soon")
             : String(localized: "Board.Countdown.Minutes \(remaining)")
     }
