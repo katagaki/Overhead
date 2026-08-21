@@ -4626,6 +4626,38 @@
         }
       }
     },
+    "LineData.Download": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ダウンロード"
+          }
+        }
+      }
+    },
+    "LineData.Downloading": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloading"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ダウンロード中"
+          }
+        }
+      }
+    },
     "LineData.Error": {
       "localizations": {
         "en": {
@@ -4654,6 +4686,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld路線をダウンロード"
+          }
+        }
+      }
+    },
+    "LineData.Installed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloaded"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ダウンロード済み"
           }
         }
       }
@@ -4701,7 +4749,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "すべての事業者から選ぶ"
+            "value": "すべての事業者から選択"
           }
         }
       }
@@ -4749,7 +4797,23 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "路線を選ぶ"
+            "value": "路線を選択"
+          }
+        }
+      }
+    },
+    "LineData.Remove": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "削除"
           }
         }
       }

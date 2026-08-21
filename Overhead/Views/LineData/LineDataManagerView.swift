@@ -86,6 +86,8 @@ struct LineDataManagerView: View {
     @ViewBuilder
     private func lineRow(_ line: CatalogLine) -> some View {
         let installed = model.isInstalled(line)
+        let downloading = installer.inFlight.contains(line.id)
+
         HStack(spacing: 10) {
             LineSymbolBadge(symbol: line.symbol, color: Color(hex: line.colorHex),
                             dimension: 26, styleOverride: line.badgeStyle)
@@ -95,24 +97,36 @@ struct LineDataManagerView: View {
                     .font(.caption2).foregroundStyle(.secondary)
             }
             Spacer()
-            if installer.inFlight.contains(line.id) {
-                ProgressView()
+
+            if downloading {
+                DownloadDonut(progress: installer.progress[line.id] ?? 0)
             } else if installed {
-                Button(role: .destructive) {
-                    model.remove(line)
-                } label: {
-                    Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
-                }
-                .buttonStyle(.plain)
+                Image(systemName: "checkmark")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .accessibilityLabel("LineData.Installed")
             } else {
                 Button {
                     model.toggle(line)
                 } label: {
                     Image(systemName: model.selection.contains(line.id)
-                          ? "plus.circle.fill" : "plus.circle")
-                        .foregroundStyle(model.selection.contains(line.id) ? Color.accentColor : .secondary)
+                          ? "icloud.and.arrow.down.fill" : "icloud.and.arrow.down")
+                        .font(.system(size: 17))
+                        .foregroundStyle(model.selection.contains(line.id)
+                                         ? Color.accentColor : Color.secondary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("LineData.Download")
+            }
+        }
+        .contentShape(Rectangle())
+        .swipeActions(edge: .trailing) {
+            if installed {
+                Button(role: .destructive) {
+                    model.remove(line)
+                } label: {
+                    Label("LineData.Remove", systemImage: "trash")
+                }
             }
         }
     }
@@ -138,5 +152,30 @@ struct LineDataManagerView: View {
             .padding()
             .background(.regularMaterial)
         }
+    }
+}
+
+// MARK: - Progress Donut
+
+/// Determinate ring with a stop square, the shape iOS uses for downloads.
+struct DownloadDonut: View {
+    let progress: Double
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(Color(.systemGray4), lineWidth: 2)
+            Circle()
+                .trim(from: 0, to: max(0.02, min(1, progress)))
+                .stroke(Color.accentColor,
+                        style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+                .animation(.linear(duration: 0.2), value: progress)
+            RoundedRectangle(cornerRadius: 1.5)
+                .fill(Color.accentColor)
+                .frame(width: 6, height: 6)
+        }
+        .frame(width: 20, height: 20)
+        .accessibilityLabel("LineData.Downloading")
     }
 }

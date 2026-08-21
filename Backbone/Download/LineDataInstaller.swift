@@ -28,6 +28,8 @@ public final class LineDataInstaller: ObservableObject {
     public static var baseURL = URL(string: "https://raw.githubusercontent.com/katagaki/OverheadData/main/")!
 
     @Published public private(set) var inFlight: Set<String> = []
+    /// 0...1 per line while it downloads, for a determinate indicator.
+    @Published public private(set) var progress: [String: Double] = [:]
     @Published public private(set) var lastChecked: Date?
     @Published public private(set) var staleLineIds: Set<String> = []
 
@@ -155,8 +157,10 @@ public final class LineDataInstaller: ObservableObject {
             return line
         }
         inFlight.formUnion(lineIds)
+        for id in lineIds { progress[id] = 0 }
         defer {
             inFlight.subtract(lineIds)
+            for id in lineIds { progress[id] = nil }
             StaticTrainData.invalidate()
             recomputeStale()
         }
@@ -168,7 +172,9 @@ public final class LineDataInstaller: ObservableObject {
             ) { group -> [(CatalogLine, Data, Data)] in
                 for line in batch {
                     group.addTask { [session] in
-                        try await Self.download(line, base: base, using: session)
+                        try await Self.download(line, base: base, using: session) { fraction in
+                            Task { @MainActor in self.report(fraction, for: line.id) }
+                        }
                     }
                 }
                 var out: [(CatalogLine, Data, Data)] = []
@@ -178,16 +184,22 @@ public final class LineDataInstaller: ObservableObject {
             for (line, lineData, badgeData) in fetched {
                 try write(line, lineData: lineData, badgeData: badgeData)
             }
-            inFlight.subtract(batch.map(\.id))
+            for line in batch { inFlight.remove(line.id); progress[line.id] = nil }
         }
+    }
+
+    fileprivate func report(_ fraction: Double, for id: String) {
+        progress[id] = min(1, max(0, fraction))
     }
 
     /// Both files are fetched and verified before either is written.
     private nonisolated static func download(
-        _ line: CatalogLine, base: URL, using session: URLSession
+        _ line: CatalogLine, base: URL, using session: URLSession,
+        onProgress: @escaping @Sendable (Double) -> Void
     ) async throws -> (CatalogLine, Data, Data) {
-        let lineData = try await fetch(
-            base.appendingPathComponent("Lines/\(line.folder)/Line.json"), using: session)
+        let lineData = try await fetchWithProgress(
+            base.appendingPathComponent("Lines/\(line.folder)/Line.json"),
+            using: session, onProgress: onProgress)
         guard hash(lineData) == line.sha256 else {
             throw LineDataError.checksumMismatch("\(line.folder)/Line.json")
         }
@@ -222,6 +234,20 @@ public final class LineDataInstaller: ObservableObject {
 
     // MARK: - Helpers
 
+    /// Line.json is the bulk of a line, so its byte count is the progress.
+    private nonisolated static func fetchWithProgress(
+        _ url: URL, using session: URLSession,
+        onProgress: @escaping @Sendable (Double) -> Void
+    ) async throws -> Data {
+        let delegate = DownloadProgressDelegate(onProgress: onProgress)
+        let (fileURL, response) = try await session.download(from: url, delegate: delegate)
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+            throw LineDataError.badResponse((response as? HTTPURLResponse)?.statusCode ?? 0)
+        }
+        defer { try? FileManager.default.removeItem(at: fileURL) }
+        return try Data(contentsOf: fileURL)
+    }
+
     private nonisolated static func fetch(_ url: URL, using session: URLSession) async throws -> Data {
         let (data, response) = try await session.data(from: url)
         guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
@@ -239,4 +265,23 @@ private extension Array {
     func chunked(into size: Int) -> [[Element]] {
         stride(from: 0, to: count, by: size).map { Array(self[$0..<Swift.min($0 + size, count)]) }
     }
+}
+
+/// Reports byte progress for a single download.
+private final class DownloadProgressDelegate: NSObject, URLSessionDownloadDelegate, @unchecked Sendable {
+    private let onProgress: @Sendable (Double) -> Void
+
+    init(onProgress: @escaping @Sendable (Double) -> Void) {
+        self.onProgress = onProgress
+    }
+
+    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask,
+                    didWriteData bytesWritten: Int64, totalBytesWritten: Int64,
+                    totalBytesExpectedToWrite totalBytesExpected: Int64) {
+        guard totalBytesExpected > 0 else { return }
+        onProgress(Double(totalBytesWritten) / Double(totalBytesExpected))
+    }
+
+    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask,
+                    didFinishDownloadingTo location: URL) {}
 }
