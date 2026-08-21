@@ -416,6 +416,26 @@ public enum StaticTrainData {
         return built
     }
 
+    /// Folds freshly installed lines into the cache instead of dropping it, so
+    /// installing one line does not re-read and re-decode every other one.
+    public static func absorb(_ lines: [StaticTrainLine]) {
+        guard !lines.isEmpty else { return }
+        linesLock.lock()
+        if var cached = cachedLines {
+            let incoming = Set(lines.map(\.id))
+            cached.removeAll { incoming.contains($0.id) }
+            cached.append(contentsOf: lines)
+            cachedLines = cached
+        }
+        linesLock.unlock()
+
+        // Derived views are cheap to rebuild and hold no file I/O.
+        displayLock.lock(); cachedTrainLines = nil; displayLock.unlock()
+        snapshotLock.lock(); snapshots.removeAll(); snapshotLock.unlock()
+        BadgeStyles.invalidate()
+        NotificationCenter.default.post(name: Self.didChangeNotification, object: nil)
+    }
+
     /// Call after installing or removing line data. Clears the decoded lines
     /// and every per-day snapshot built from them.
     public static func invalidate() {

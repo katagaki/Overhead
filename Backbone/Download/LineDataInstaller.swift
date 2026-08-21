@@ -80,7 +80,7 @@ public final class LineDataInstaller: ObservableObject {
         defaults.set(lastChecked, forKey: checkedKey)
 
         if http.statusCode == 304 {
-            recomputeStale()
+            await recomputeStale()
             return false
         }
         guard http.statusCode == 200 else { throw LineDataError.badResponse(http.statusCode) }
@@ -99,7 +99,7 @@ public final class LineDataInstaller: ObservableObject {
 
         Catalog.reload()
         StaticTrainData.invalidate()
-        recomputeStale()
+        await recomputeStale()
         return true
     }
 
@@ -135,13 +135,18 @@ public final class LineDataInstaller: ObservableObject {
     }
 
     /// An installed line whose bytes no longer match the catalog is stale.
-    public func recomputeStale() {
-        var stale: Set<String> = []
-        for line in Catalog.current.lines where LineDataStore.isDownloaded(folder: line.folder) {
-            let url = LineDataStore.installedURL(folder: line.folder, file: "Line.json")
-            guard let data = try? Data(contentsOf: url) else { continue }
-            if Self.hash(data) != line.sha256 { stale.insert(line.id) }
-        }
+    /// Hashing every installed file is not main-thread work.
+    public func recomputeStale() async {
+        let lines = Catalog.current.lines
+        let stale = await Task.detached(priority: .utility) { () -> Set<String> in
+            var out: Set<String> = []
+            for line in lines where LineDataStore.isDownloaded(folder: line.folder) {
+                let url = LineDataStore.installedURL(folder: line.folder, file: "Line.json")
+                guard let data = try? Data(contentsOf: url) else { continue }
+                if Self.hash(data) != line.sha256 { out.insert(line.id) }
+            }
+            return out
+        }.value
         staleLineIds = stale
     }
 
@@ -161,8 +166,7 @@ public final class LineDataInstaller: ObservableObject {
         defer {
             inFlight.subtract(lineIds)
             for id in lineIds { progress[id] = nil }
-            StaticTrainData.invalidate()
-            recomputeStale()
+            Task { await recomputeStale() }
         }
 
         let base = Self.baseURL
@@ -181,9 +185,14 @@ public final class LineDataInstaller: ObservableObject {
                 for try await result in group { out.append(result) }
                 return out
             }
+            var installed: [StaticTrainLine] = []
             for (line, lineData, badgeData) in fetched {
                 try write(line, lineData: lineData, badgeData: badgeData)
+                installed.append(contentsOf:
+                    (try? JSONDecoder().decode([StaticTrainLine].self, from: lineData)) ?? [])
             }
+            // Each batch shows up as soon as it lands, rather than at the end.
+            StaticTrainData.absorb(installed)
             for line in batch { inFlight.remove(line.id); progress[line.id] = nil }
         }
     }
@@ -225,7 +234,7 @@ public final class LineDataInstaller: ObservableObject {
                 at: LineDataStore.installedDirectory(folder: line.folder))
         }
         StaticTrainData.invalidate()
-        recomputeStale()
+        Task { await recomputeStale() }
     }
 
     public func updateStale() async throws {

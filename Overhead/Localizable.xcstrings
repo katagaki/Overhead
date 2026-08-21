@@ -4642,6 +4642,22 @@
         }
       }
     },
+    "LineData.DownloadAll": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download all"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すべてダウンロード"
+          }
+        }
+      }
+    },
     "LineData.Downloading": {
       "localizations": {
         "en": {

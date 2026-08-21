@@ -46,7 +46,6 @@ struct LineDataManagerView: View {
         }
         .navigationTitle("LineData.Title")
         .navigationBarTitleDisplayMode(.inline)
-        .safeAreaInset(edge: .bottom) { installBar }
         .alert("LineData.Error", isPresented: .constant(model.error != nil)) {
             Button("Shared.OK") { model.error = nil }
         } message: {
@@ -66,20 +65,48 @@ struct LineDataManagerView: View {
                 }
             }
         } header: {
-            Button {
-                if expanded.contains(operatorId) { expanded.remove(operatorId) }
-                else { expanded.insert(operatorId) }
-            } label: {
-                HStack {
-                    Image(systemName: expanded.contains(operatorId) ? "chevron.down" : "chevron.right")
-                        .font(.caption2)
-                    Text(OperatorSections.title(for: operatorId))
-                    Spacer()
-                    Text("\(installed)/\(lines.count)")
-                        .monospacedDigit()
+            let pending = lines.filter {
+                !model.isInstalled($0) && !installer.inFlight.contains($0.id)
+            }
+            HStack(spacing: 10) {
+                Button {
+                    if expanded.contains(operatorId) { expanded.remove(operatorId) }
+                    else { expanded.insert(operatorId) }
+                } label: {
+                    HStack {
+                        Image(systemName: expanded.contains(operatorId)
+                              ? "chevron.down" : "chevron.right")
+                            .font(.caption2)
+                        Text(OperatorSections.title(for: operatorId))
+                        Spacer()
+                        Text("\(installed)/\(lines.count)")
+                            .monospacedDigit()
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+
+                if !pending.isEmpty {
+                    Button {
+                        download(pending)
+                    } label: {
+                        Image(systemName: "icloud.and.arrow.down")
+                            .foregroundStyle(Color.accentColor)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("LineData.DownloadAll")
                 }
             }
-            .buttonStyle(.plain)
+        }
+    }
+
+    /// Fire and forget: a tap starts the download and returns immediately.
+    private func download(_ lines: [CatalogLine]) {
+        let ids = lines.map(\.id)
+        guard !ids.isEmpty else { return }
+        Task {
+            do { try await installer.install(lineIds: ids) }
+            catch { model.error = error.localizedDescription }
         }
     }
 
@@ -107,13 +134,11 @@ struct LineDataManagerView: View {
                     .accessibilityLabel("LineData.Installed")
             } else {
                 Button {
-                    model.toggle(line)
+                    download([line])
                 } label: {
-                    Image(systemName: model.selection.contains(line.id)
-                          ? "icloud.and.arrow.down.fill" : "icloud.and.arrow.down")
+                    Image(systemName: "icloud.and.arrow.down")
                         .font(.system(size: 17))
-                        .foregroundStyle(model.selection.contains(line.id)
-                                         ? Color.accentColor : Color.secondary)
+                        .foregroundStyle(Color.accentColor)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("LineData.Download")
@@ -128,29 +153,6 @@ struct LineDataManagerView: View {
                     Label("LineData.Remove", systemImage: "trash")
                 }
             }
-        }
-    }
-
-    @ViewBuilder
-    private var installBar: some View {
-        if !model.selection.isEmpty {
-            VStack(spacing: 8) {
-                Button {
-                    Task { await model.install() }
-                } label: {
-                    HStack {
-                        if model.isWorking { ProgressView().tint(.white) }
-                        Text("LineData.Install \(model.selection.count)")
-                        Text(LineDataModel.formatted(bytes: model.selectedBytes))
-                            .foregroundStyle(.white.opacity(0.7))
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(model.isWorking)
-            }
-            .padding()
-            .background(.regularMaterial)
         }
     }
 }
