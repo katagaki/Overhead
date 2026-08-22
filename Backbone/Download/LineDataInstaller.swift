@@ -72,6 +72,8 @@ public final class LineDataInstaller: ObservableObject {
     private let modifiedKey = "lineData.catalogModified"
     private let checkedKey = "lineData.lastChecked"
     private let pinnedKey = "lineData.pinnedToLegacy"
+    /// The schema the pin was taken for, so a later build can drop it.
+    private let pinnedSchemaKey = "lineData.pinnedSchema"
     private nonisolated let session: URLSession
 
     /// Bytes of finished lines, plus the fraction each in-flight one has read.
@@ -88,6 +90,12 @@ public final class LineDataInstaller: ObservableObject {
         session = URLSession(configuration: config)
         lastChecked = defaults.object(forKey: checkedKey) as? Date
         needsAppUpdate = defaults.bool(forKey: pinnedKey)
+        // The pin belongs to the build that took it: once the app understands
+        // a newer schema, it follows the live catalog again.
+        if needsAppUpdate,
+           defaults.integer(forKey: pinnedSchemaKey) < Catalog.supportedSchemaVersion {
+            pin(toLegacy: false)
+        }
     }
 
     /// The catalog this build should read. Once the repository moves to a
@@ -192,6 +200,7 @@ public final class LineDataInstaller: ObservableObject {
         guard pinned != needsAppUpdate else { return }
         needsAppUpdate = pinned
         defaults.set(pinned, forKey: pinnedKey)
+        defaults.set(pinned ? Catalog.supportedSchemaVersion : 0, forKey: pinnedSchemaKey)
         defaults.removeObject(forKey: etagKey)
         defaults.removeObject(forKey: modifiedKey)
     }

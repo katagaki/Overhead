@@ -40,7 +40,10 @@ struct RootView: View {
     }
 
     private var needsLineDataOnboarding: Bool {
-        !lineDataOnboarded
+        // An app update that moved the schema on leaves the installed copy
+        // unreadable-in-spirit, so the sheet comes back as an update.
+        if Catalog.needsSchemaUpgrade { return true }
+        return !lineDataOnboarded
             && Catalog.current.lines.contains { !LineDataStore.isPresent(folder: $0.folder) }
     }
 

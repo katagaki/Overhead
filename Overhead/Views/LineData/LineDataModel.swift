@@ -23,6 +23,15 @@ final class LineDataModel: ObservableObject {
         catch { self.error = error.localizedDescription }
     }
 
+    /// A schema change makes the installed catalog unusable, so the catalog
+    /// itself is refetched before the lines it now describes.
+    func upgrade() async {
+        do {
+            try await installer.refreshCatalog(force: true)
+            try await installer.sync()
+        } catch { self.error = error.localizedDescription }
+    }
+
     func checkForUpdates() async {
         do { try await installer.refreshCatalog() }
         catch { self.error = error.localizedDescription }

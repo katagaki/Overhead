@@ -4614,6 +4614,40 @@
         }
       }
     },
+    "LineData.AppTooOld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App Update Required"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アプリの更新が必要です"
+          }
+        }
+      }
+    },
+    "LineData.AppTooOld.Footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The newest line data needs a newer version of the app. Until you update, this build keeps using the data published for it."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最新の路線データはこのバージョンでは読み込めません。App Storeでアプリを更新してください。それまでは、このバージョン向けのデータを使い続けます。"
+          }
+        }
+      }
+    },
     "LineData.Download": {
       "extractionState": "stale",
       "localizations": {
@@ -4643,6 +4677,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "ダウンロード中"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다운로드 중"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在下载"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在下載"
           }
         }
       }
@@ -4676,6 +4728,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "ダウンロードに失敗しました"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다운로드 실패"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下载失败"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下載失敗"
           }
         }
       }
@@ -4711,6 +4781,24 @@
             "state": "translated",
             "value": "首都圏の全路線の時刻表をまとめて取り込みます。取り込んだあとは、通信がなくても発車時刻を確認できます。"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "수도권 모든 노선의 시각표를 한 번에 받습니다. 받은 뒤에는 네트워크 없이도 출발 시각을 확인할 수 있습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一次性下载首都圈全部线路的时刻表。下载后，即使没有网络也能查看发车时刻。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一次下載首都圈全部路線的時刻表。下載後，即使沒有網路也能查看發車時刻。"
+          }
         }
       }
     },
@@ -4728,6 +4816,24 @@
             "state": "translated",
             "value": "ダウンロード（%@）"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다운로드(%@)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下载（%@）"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下載（%@）"
+          }
         }
       }
     },
@@ -4744,6 +4850,129 @@
           "stringUnit": {
             "state": "translated",
             "value": "路線データを取得"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노선 데이터 받기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下载线路数据"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下載路線資料"
+          }
+        }
+      }
+    },
+    "LineData.Onboarding.Update %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update (%@)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新（%@）"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "업데이트(%@)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新（%@）"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新（%@）"
+          }
+        }
+      }
+    },
+    "LineData.Onboarding.Update.Body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This version reads a new data format, so every line's timetable is downloaded again."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アプリの更新にあわせてデータの形式が変わりました。首都圏の全路線の時刻表をもう一度取り込みます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이번 버전은 새로운 데이터 형식을 사용합니다. 모든 노선의 시각표를 다시 받습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此版本使用新的数据格式，将重新下载所有线路的时刻表。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此版本使用新的資料格式，將重新下載所有路線的時刻表。"
+          }
+        }
+      }
+    },
+    "LineData.Onboarding.Update.Title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update line data"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "路線データを更新"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노선 데이터 업데이트"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新线路数据"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新路線資料"
           }
         }
       }
@@ -4811,6 +5040,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld路線・%@"
+          }
+        }
+      }
+    },
+    "LineData.Update.OtherLines %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld more lines"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "＋他%lld路線"
           }
         }
       }
@@ -10365,6 +10611,24 @@
             "state": "translated",
             "value": "OK"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "확인"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "好"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "好"
+          }
         }
       }
     },
@@ -11715,57 +11979,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "慢"
-          }
-        }
-      }
-    },
-    "LineData.Update.OtherLines %lld": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+%lld more lines"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "＋他%lld路線"
-          }
-        }
-      }
-    },
-    "LineData.AppTooOld": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "App Update Required"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "アプリの更新が必要です"
-          }
-        }
-      }
-    },
-    "LineData.AppTooOld.Footer": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The newest line data needs a newer version of the app. Until you update, this build keeps using the data published for it."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "最新の路線データはこのバージョンでは読み込めません。App Storeでアプリを更新してください。それまでは、このバージョン向けのデータを使い続けます。"
           }
         }
       }

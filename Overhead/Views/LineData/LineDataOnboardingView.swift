@@ -10,16 +10,33 @@ struct LineDataOnboardingView: View {
     @StateObject private var model = LineDataModel()
     @ObservedObject private var installer = LineDataInstaller.shared
     @AppStorage("lineData.onboarded") private var onboarded = false
+    /// Held, not recomputed: the catalog stops being stale mid-download.
+    @State private var isUpgrade = Catalog.needsSchemaUpgrade
 
     private var lineCount: Int { Catalog.current.lines.count }
+
+    private var titleKey: LocalizedStringKey {
+        isUpgrade ? "LineData.Onboarding.Update.Title" : "LineData.Onboarding.Title"
+    }
+
+    private var bodyKey: LocalizedStringKey {
+        isUpgrade ? "LineData.Onboarding.Update.Body" : "LineData.Onboarding.Body"
+    }
+
+    private var actionKey: LocalizedStringKey {
+        let size = LineDataModel.formatted(bytes: installer.catalogBytes)
+        return isUpgrade
+            ? "LineData.Onboarding.Update \(size)"
+            : "LineData.Onboarding.Download \(size)"
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
             LineDataBadgeWall()
             VStack(alignment: .leading, spacing: 8) {
-                Text("LineData.Onboarding.Title")
+                Text(titleKey)
                     .font(.largeTitle.bold())
-                Text("LineData.Onboarding.Body")
+                Text(bodyKey)
                     .foregroundStyle(.secondary)
             }
             .padding(.horizontal, 20)
@@ -54,14 +71,15 @@ struct LineDataOnboardingView: View {
 
             Button {
                 Task {
-                    await model.download()
+                    if isUpgrade { await model.upgrade() } else { await model.download() }
                     if !installer.hasPendingWork {
                         onboarded = true
                         dismiss()
                     }
                 }
             } label: {
-                Text("LineData.Onboarding.Download \(LineDataModel.formatted(bytes: installer.catalogBytes))")
+                Text(actionKey)
+                    .fontWeight(.medium)
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.glassProminent)
@@ -85,13 +103,13 @@ struct LineDataBadgeWall: View {
     private static let lineIds = [
         "Railway:JR-East.Yamanote", "Railway:TokyoMetro.Ginza", "Railway:Tokyu.Toyoko",
         "Railway:Toei.Oedo", "Railway:Keio.Keio", "Railway:MIR.TsukubaExpress",
-        "Railway:JR-East.ChuoRapid", "Railway:TokyoMetro.Marunouchi", "Railway:Odakyu.Odawara",
+        "Railway:JR-East.KeihinTohoku", "Railway:TokyoMetro.Marunouchi", "Railway:Odakyu.Odawara",
         "Railway:Seibu.Ikebukuro", "Railway:Yurikamome.Yurikamome", "Railway:Enoden.Enoshima",
-        "Railway:JR-East.KeihinTohoku", "Railway:TokyoMetro.Hanzomon", "Railway:Keikyu.Main",
+        "Railway:JR-East.ChuoRapid", "Railway:TokyoMetro.Hanzomon", "Railway:Keikyu.Main",
         "Railway:Toei.Asakusa", "Railway:Tobu.Tojo", "Railway:TamaMonorail.TamaMonorail",
         "Railway:JR-East.ChuoSobuLocal", "Railway:TokyoMetro.Tozai", "Railway:Keisei.Main",
         "Railway:Tokyu.DenEnToshi", "Railway:YokohamaMunicipal.Blue", "Railway:TWR.Rinkai",
-        "Railway:JR-East.SaikyoKawagoe", "Railway:TokyoMetro.Namboku", "Railway:Seibu.Shinjuku",
+        "Railway:JR-East.JobanLocal", "Railway:TokyoMetro.Chiyoda", "Railway:Seibu.Shinjuku",
         "Railway:Keio.Inokashira", "Railway:Minatomirai.Minatomirai", "Railway:Toei.Shinjuku"
     ]
 
@@ -100,8 +118,10 @@ struct LineDataBadgeWall: View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 6),
                   spacing: 10) {
             ForEach(lines) { line in
-                LineSymbolBadge(symbol: line.symbol, color: Color(hex: line.colorHex),
-                                dimension: dimension, styleOverride: line.badgeStyle)
+                BadgeOutline(width: 1.5) {
+                    LineSymbolBadge(symbol: line.symbol, color: Color(hex: line.colorHex),
+                                    dimension: dimension, styleOverride: line.badgeStyle)
+                }
             }
         }
         .padding(.horizontal, 20)
@@ -111,6 +131,32 @@ struct LineDataBadgeWall: View {
         // same yellow in either theme, and runs to both edges of the sheet.
         .background(Self.panelYellow)
         .accessibilityHidden(true)
+    }
+}
+
+/// A white edge around a plate, cut from the plate's own silhouette so a
+/// circle, a hexagon and a blossom each keep their shape against the yellow.
+private struct BadgeOutline<Content: View>: View {
+    let width: CGFloat
+    @ViewBuilder var content: Content
+
+    private static var directions: [CGPoint] {
+        [CGPoint(x: 1, y: 0), CGPoint(x: -1, y: 0), CGPoint(x: 0, y: 1), CGPoint(x: 0, y: -1),
+         CGPoint(x: 0.7, y: 0.7), CGPoint(x: -0.7, y: 0.7),
+         CGPoint(x: 0.7, y: -0.7), CGPoint(x: -0.7, y: -0.7)]
+    }
+
+    var body: some View {
+        content
+            .background {
+                ZStack {
+                    ForEach(Array(Self.directions.enumerated()), id: \.offset) { _, direction in
+                        Color.white
+                            .mask { content }
+                            .offset(x: direction.x * width, y: direction.y * width)
+                    }
+                }
+            }
     }
 }
 

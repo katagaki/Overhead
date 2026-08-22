@@ -124,6 +124,12 @@ public enum Catalog {
         return catalog
     }
 
+    /// The installed copy was written for an older schema, so the app has
+    /// moved past its own data and the catalog has to come down again.
+    public static var needsSchemaUpgrade: Bool {
+        current.schemaVersion < supportedSchemaVersion
+    }
+
     public static func reload() {
         lock.lock(); loaded = nil; lock.unlock()
         indexLock.lock(); cachedIndex = nil; indexLock.unlock()
