@@ -15,9 +15,15 @@ struct CustomLineBadgeStyleView: View {
 
     var body: some View {
         ScrollView {
-            LazyVGrid(columns: columns, spacing: 12) {
-                ForEach(BadgeStyles.all, id: \.id) { spec in
-                    styleCell(spec)
+            LazyVGrid(columns: columns, spacing: 12, pinnedViews: .sectionHeaders) {
+                ForEach(BadgeStyles.grouped, id: \.category) { group in
+                    Section {
+                        ForEach(group.styles, id: \.id) { spec in
+                            styleCell(spec)
+                        }
+                    } header: {
+                        sectionHeader(group.category)
+                    }
                 }
             }
             .padding(16)
@@ -25,6 +31,33 @@ struct CustomLineBadgeStyleView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle("CustomLine.Badge.Style")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func sectionHeader(_ category: BadgeStyleCategory) -> some View {
+        Text(LocalizedStringKey(category.titleKey))
+            .font(.headline)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, 8)
+            .padding(.bottom, 4)
+            .background(Color(.systemGroupedBackground))
+    }
+
+    private func squashedLine(_ text: String, isSelected: Bool) -> some View {
+        HorizontallySquashed {
+            Text(text)
+                .font(.caption2)
+                .lineLimit(1)
+                .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
+        }
+    }
+
+    /// "JR東日本（駅ナンバリングなし）" -> the name, then the bracket on its own line.
+    private static func split(_ name: String) -> (head: String, bracketed: String?) {
+        guard let open = name.firstIndex(where: { $0 == "（" || $0 == "(" }),
+              let last = name.last, last == "）" || last == ")"
+        else { return (name, nil) }
+        let head = name[name.startIndex..<open].trimmingCharacters(in: .whitespaces)
+        return (head.isEmpty ? name : head, String(name[open...]))
     }
 
     @ViewBuilder
@@ -43,11 +76,12 @@ struct CustomLineBadgeStyleView: View {
                 }
                 .frame(height: 36)
 
-                Text(BadgeStyles.displayName(spec.id))
-                    .font(.caption2)
-                    .lineLimit(2, reservesSpace: true)
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
+                let name = Self.split(BadgeStyles.displayName(spec.id))
+                VStack(spacing: 1) {
+                    squashedLine(name.head, isSelected: isSelected)
+                    // Always drawn, so a bracketless name reserves the same height.
+                    squashedLine(name.bracketed ?? " ", isSelected: isSelected)
+                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(.vertical, 12)

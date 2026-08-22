@@ -102,6 +102,43 @@ public enum BadgeStyles {
         specs.values.sorted { ($0.nameJa ?? $0.id) < ($1.nameJa ?? $1.id) }
     }
 
+    /// `all`, split by plate silhouette, in `BadgeStyleCategory.allCases` order.
+    public static var grouped: [(category: BadgeStyleCategory, styles: [BadgeStyleSpec])] {
+        let byCategory = Dictionary(grouping: all) { category($0) }
+        return BadgeStyleCategory.allCases.compactMap { category in
+            guard let styles = byCategory[category], !styles.isEmpty else { return nil }
+            return (category, styles)
+        }
+    }
+
+    private static let plainShapes: Set<String> = ["rect", "roundedRect", "circle"]
+    /// Past this the corners have eaten the sides — 小田急's squircle.
+    private static let squircleRadiusRatio: CGFloat = 0.3
+
+    /// From the base layer of the plate. Bespoke art (西武's train logo) and a
+    /// decorative layer anywhere in the stack (荒川線's sakura, シーサイド and
+    /// みなとみらい's waves) make it an odd one out.
+    public static func category(_ spec: BadgeStyleSpec) -> BadgeStyleCategory {
+        let layers = (spec.line.layers ?? []) + (spec.station?.layers ?? [])
+        guard spec.line.renderer == nil, spec.station?.renderer == nil,
+              !layers.isEmpty,
+              layers.allSatisfy({ plainShapes.contains($0.shape) })
+        else { return .other }
+        guard let base = spec.line.layers?.first ?? spec.station?.clip ?? layers.first
+        else { return .other }
+        if let ratio = base.radiusRatio, ratio > squircleRadiusRatio { return .other }
+        switch base.shape {
+        case "rect", "roundedRect": return .square
+        case "circle":              return .circle
+        default:                    return .other
+        }
+    }
+
+    public static func category(_ id: String) -> BadgeStyleCategory {
+        guard let spec = spec(id) else { return .other }
+        return category(spec)
+    }
+
     public static func displayName(_ id: String) -> String {
         guard let spec = specs[id] else { return id }
         let ja = Locale.current.language.languageCode?.identifier != "en"

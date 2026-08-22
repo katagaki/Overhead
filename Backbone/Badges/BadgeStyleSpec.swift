@@ -137,6 +137,19 @@ public struct StationFace: Decodable {
     var renderer: String?
 }
 
+/// How a plate reads at a glance, for grouping in pickers.
+public enum BadgeStyleCategory: String, CaseIterable, Sendable {
+    case square, circle, other
+
+    public var titleKey: String {
+        switch self {
+        case .square: return "CustomLine.Badge.Category.Squares"
+        case .circle: return "CustomLine.Badge.Category.Circles"
+        case .other:  return "CustomLine.Badge.Category.Others"
+        }
+    }
+}
+
 public struct BadgeStyleSpec: Decodable {
     public var id: String
     public var nameJa: String?
