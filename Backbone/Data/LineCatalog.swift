@@ -57,10 +57,14 @@ public struct CatalogSegment: Decodable, Identifiable, Hashable, Sendable {
     public let order: Int
     /// Readings and aliases, since the names are kanji/kana only.
     public let searchTerms: [String]?
+    /// Optional: catalogs published before the names carried ko/zh omit them.
+    public let nameKo: String?
+    public let nameZhHans: String?
+    public let nameZhHant: String?
 
     public var localizedName: String {
-        let lang = Locale.current.language.languageCode?.identifier ?? "ja"
-        return lang == "en" && !nameEn.isEmpty ? nameEn : nameJa
+        CatalogNames.pick(ja: nameJa, en: nameEn, ko: nameKo,
+                          zhHans: nameZhHans, zhHant: nameZhHant)
     }
 }
 
@@ -78,10 +82,34 @@ public struct CatalogOperator: Decodable, Identifiable, Hashable, Sendable {
     public let brandColorHex: String?
     /// Official website, the source for the operator's favicon.
     public let website: String?
+    /// Optional: catalogs published before the names carried ko/zh omit them.
+    public let nameKo: String?
+    public let nameZhHans: String?
+    public let nameZhHant: String?
 
     public var localizedName: String {
-        let lang = Locale.current.language.languageCode?.identifier ?? "ja"
-        return lang == "en" && !nameEn.isEmpty ? nameEn : nameJa
+        CatalogNames.pick(ja: nameJa, en: nameEn, ko: nameKo,
+                          zhHans: nameZhHans, zhHant: nameZhHant)
+    }
+}
+
+/// The catalog's names arrive per language, and Japanese is the one every
+/// entry has, so it is what an untranslated name falls back to.
+enum CatalogNames {
+    static func pick(ja: String, en: String, ko: String?,
+                     zhHans: String?, zhHant: String?) -> String {
+        func or(_ value: String?) -> String {
+            let value = value ?? ""
+            return value.isEmpty ? ja : value
+        }
+        switch Locale.current.language.languageCode?.identifier ?? "ja" {
+        case "en": return or(en)
+        case "ko": return or(ko)
+        case "zh":
+            let script = Locale.current.language.script?.identifier ?? ""
+            return or(script == "Hant" ? zhHant : zhHans)
+        default: return ja
+        }
     }
 }
 

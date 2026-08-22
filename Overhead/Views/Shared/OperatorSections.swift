@@ -65,51 +65,11 @@ enum OperatorSections {
         "Operator:Mooka"
     ]
 
-    /// String catalog keys, resolved in `title(for:)`.
-    static let titleKeys: [String: String] = [
-        "Operator:JR-East": "Operator.JREast",
-        "Operator:TokyoMetro": "Operator.TokyoMetro",
-        "Operator:Toei": "Operator.Toei",
-        "Operator:Keisei": "Operator.Keisei",
-        "Operator:Tobu": "Operator.Tobu",
-        "Operator:Odakyu": "Operator.Odakyu",
-        "Operator:Tokyu": "Operator.Tokyu",
-        "Operator:Keikyu": "Operator.Keikyu",
-        "Operator:Keio": "Operator.Keio",
-        "Operator:Seibu": "Operator.Seibu",
-        "Operator:Sotetsu": "Operator.Sotetsu",
-        "Operator:Minatomirai": "Operator.Minatomirai",
-        "Operator:SaitamaRailway": "Operator.SaitamaRailway",
-        "Operator:TWR": "Operator.TWR",
-        "Operator:MIR": "Operator.MIR",
-        "Operator:TokyoMonorail": "Operator.TokyoMonorail",
-        "Operator:Yurikamome": "Operator.Yurikamome",
-        "Operator:ToyoRapid": "Operator.ToyoRapid",
-        "Operator:Hokuso": "Operator.Hokuso",
-        "Operator:SaitamaTransit": "Operator.SaitamaTransit",
-        "Operator:TamaMonorail": "Operator.TamaMonorail",
-        "Operator:YokohamaMunicipal": "Operator.YokohamaMunicipal",
-        "Operator:YokohamaSeaside": "Operator.YokohamaSeaside",
-        "Operator:Enoden": "Operator.Enoden",
-        "Operator:ShonanMonorail": "Operator.ShonanMonorail",
-        "Operator:Shibayama": "Operator.Shibayama",
-        "Operator:Ryutetsu": "Operator.Ryutetsu",
-        "Operator:Choshi": "Operator.Choshi",
-        "Operator:Jomo": "Operator.Jomo",
-        "Operator:Kantetsu": "Operator.Kantetsu",
-        "Operator:Hitachinaka": "Operator.Hitachinaka",
-        "Operator:Kominato": "Operator.Kominato",
-        "Operator:Mooka": "Operator.Mooka"
-    ]
 
+    /// Names live in the data, in every language the app ships, so a new
+    /// operator needs no app release.
     static func title(for operatorId: String) -> String {
         if let segment = segment(forSectionId: operatorId) { return segment.localizedName }
-        // Established operators keep their string-catalog entry — it carries
-        // ko/zh, which the data's ja/en pair cannot. Everyone newer is named
-        // by the catalog.
-        if let key = titleKeys[operatorId] {
-            return String(localized: String.LocalizationValue(key))
-        }
         return Catalog.operatorInfo(id: operatorId)?.localizedName ?? operatorId
     }
 
