@@ -14,8 +14,10 @@ public struct TrainLine: Identifiable, Codable, Hashable {
     /// Set by user-created (Custom:) lines, whose codes match no operator.
     /// nil lets the badge be resolved from the symbol.
     public var badgeStyleId: String?
+    /// Section within the operator, when it publishes more than one.
+    public var segmentId: String?
 
-    public init(id: String, name: String, nameEn: String, nameKo: String = "", nameZhHans: String = "", nameZhHant: String = "", operatorId: String, stations: [Station], colorHex: String, badgeStyleId: String? = nil) {
+    public init(id: String, name: String, nameEn: String, nameKo: String = "", nameZhHans: String = "", nameZhHant: String = "", operatorId: String, stations: [Station], colorHex: String, badgeStyleId: String? = nil, segmentId: String? = nil) {
         self.id = id
         self.name = name
         self.nameEn = nameEn
@@ -26,6 +28,7 @@ public struct TrainLine: Identifiable, Codable, Hashable {
         self.stations = stations
         self.colorHex = colorHex
         self.badgeStyleId = badgeStyleId
+        self.segmentId = segmentId
     }
 
     /// True for user-created lines. These never enter the static route graph,

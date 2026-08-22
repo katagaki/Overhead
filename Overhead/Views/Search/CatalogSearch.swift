@@ -74,21 +74,28 @@ enum CatalogSearch {
         let lowered = trimmed.lowercased()
         let phoneticKey = JapaneseSearch.searchKey(trimmed)
 
-        let hits = lines.filter { rank($0, trimmed: trimmed, lowered: lowered, key: phoneticKey) != nil }
         let orderIndex = Dictionary(
             uniqueKeysWithValues: OperatorSections.order.enumerated().map { ($0.element, $0.offset) }
         )
 
-        return hits.sorted { left, right in
-            let leftRank = rank(left, trimmed: trimmed, lowered: lowered, key: phoneticKey) ?? 9
-            let rightRank = rank(right, trimmed: trimmed, lowered: lowered, key: phoneticKey) ?? 9
-            if leftRank != rightRank { return leftRank < rightRank }
-            let leftOrder = orderIndex[left.operatorId] ?? .max
-            let rightOrder = orderIndex[right.operatorId] ?? .max
-            if leftOrder != rightOrder { return leftOrder < rightOrder }
-            if left.lineSymbol != right.lineSymbol { return left.lineSymbol < right.lineSymbol }
-            return left.localizedName < right.localizedName
-        }
+        // Ranked once per line, not once per comparison.
+        return lines
+            .compactMap { line -> (rank: Int, line: TrainLine)? in
+                guard let rank = rank(line, trimmed: trimmed, lowered: lowered, key: phoneticKey)
+                else { return nil }
+                return (rank, line)
+            }
+            .sorted { left, right in
+                if left.rank != right.rank { return left.rank < right.rank }
+                let leftOrder = orderIndex[left.line.operatorId] ?? .max
+                let rightOrder = orderIndex[right.line.operatorId] ?? .max
+                if leftOrder != rightOrder { return leftOrder < rightOrder }
+                if left.line.lineSymbol != right.line.lineSymbol {
+                    return left.line.lineSymbol < right.line.lineSymbol
+                }
+                return left.line.localizedName < right.line.localizedName
+            }
+            .map(\.line)
     }
 
     /// Nil when the line doesn't match at all; lower is a closer match.

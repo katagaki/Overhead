@@ -19,6 +19,8 @@ public struct CatalogLine: Decodable, Identifiable, Hashable, Sendable {
     public let badgeSha256: String
     /// Lines this one runs through to.
     public let connects: [String]
+    /// Section within the operator, when it publishes more than one.
+    public let segment: String?
 
     public var localizedName: String {
         let lang = Locale.current.language.languageCode?.identifier ?? "ja"
@@ -44,19 +46,45 @@ public struct CatalogStation: Decodable, Hashable, Sendable {
     }
 }
 
+/// An extra section inside an operator — JR East lists its どこトレ lines apart
+/// from the urban network. Data, so a new one needs no app release.
+public struct CatalogSegment: Decodable, Identifiable, Hashable, Sendable {
+    public let id: String
+    public let operatorId: String
+    public let nameJa: String
+    public let nameEn: String
+    /// Position among that operator's segments.
+    public let order: Int
+    /// Readings and aliases, since the names are kanji/kana only.
+    public let searchTerms: [String]?
+
+    public var localizedName: String {
+        let lang = Locale.current.language.languageCode?.identifier ?? "ja"
+        return lang == "en" && !nameEn.isEmpty ? nameEn : nameJa
+    }
+}
+
 public struct LineCatalog: Decodable, Sendable {
     public let schemaVersion: Int
     /// Release version, shown in the app.
     public let version: String
     public let styles: [String]
+    /// Where this catalog's line files live under the repository root. Empty
+    /// for the current generation; a snapshot frozen for older apps sets it.
+    public let dataPath: String?
+    /// Optional: catalogs published before segments existed omit the key.
+    public let segments: [CatalogSegment]?
     public let lines: [CatalogLine]
     public let stations: [CatalogStation]
 
     static let empty = LineCatalog(schemaVersion: Catalog.supportedSchemaVersion,
-                                   version: "none", styles: [], lines: [], stations: [])
+                                   version: "none", styles: [], segments: [],
+                                   lines: [], stations: [])
 
-    init(schemaVersion: Int, version: String, styles: [String],
+    init(schemaVersion: Int, version: String, styles: [String], segments: [CatalogSegment],
          lines: [CatalogLine], stations: [CatalogStation]) {
+        self.dataPath = nil
+        self.segments = segments
         self.schemaVersion = schemaVersion
         self.version = version
         self.styles = styles
@@ -82,7 +110,15 @@ public enum Catalog {
     }
 
     private static func load() -> LineCatalog? {
-        guard let data = LineDataStore.catalogData() else { return nil }
+        if let data = LineDataStore.catalogData(), let catalog = decode(data) { return catalog }
+        // An installed catalog this build cannot read — a newer schema, or a
+        // truncated file — must not leave the app with no network at all: the
+        // bundled seed is always readable by the build that shipped it.
+        if let seed = LineDataStore.bundledCatalogData(), let catalog = decode(seed) { return catalog }
+        return nil
+    }
+
+    private static func decode(_ data: Data) -> LineCatalog? {
         guard let catalog = try? JSONDecoder().decode(LineCatalog.self, from: data) else { return nil }
         guard catalog.schemaVersion <= supportedSchemaVersion else { return nil }
         return catalog
@@ -117,6 +153,10 @@ public enum Catalog {
         return built
     }
 
+    /// Prefix for line downloads, so an app pinned to an older generation
+    /// keeps fetching the snapshot its catalog describes.
+    public static var dataPath: String { current.dataPath ?? "" }
+
     public static func line(id: String) -> CatalogLine? { index.byId[id] }
     public static func line(folder: String) -> CatalogLine? { index.byFolder[folder] }
     public static func stations(ofLine id: String) -> [CatalogStation] {
@@ -129,5 +169,18 @@ public enum Catalog {
 
     public static func lines(ofOperator operatorId: String) -> [CatalogLine] {
         current.lines.filter { $0.operatorId == operatorId }.sorted { $0.id < $1.id }
+    }
+
+    // MARK: Segments
+
+    public static var segments: [CatalogSegment] { current.segments ?? [] }
+
+    public static func segment(id: String) -> CatalogSegment? {
+        segments.first { $0.id == id }
+    }
+
+    /// That operator's extra sections, in the order the data gives them.
+    public static func segments(ofOperator operatorId: String) -> [CatalogSegment] {
+        segments.filter { $0.operatorId == operatorId }.sorted { $0.order < $1.order }
     }
 }

@@ -245,11 +245,10 @@ struct FavoritesSection: View {
     /// The favourite is fine — its line data just is not on the device.
     private func missingDataCard(place: SavedPlace) -> some View {
         let missing = SavedPlaceLineData.missingLines(for: place)
-        let bytes = missing.reduce(0) { $0 + $1.bytes }
-        let downloading = missing.contains { installer.inFlight.contains($0.id) }
+        let downloading = installer.isDownloading
 
         return Button {
-            Task { try? await installer.install(lineIds: missing.map(\.id)) }
+            Task { try? await installer.sync() }
         } label: {
             VStack(alignment: .leading, spacing: 5) {
                 HStack(alignment: .firstTextBaseline, spacing: 7) {
@@ -282,7 +281,7 @@ struct FavoritesSection: View {
                         Text("Place.Downloading")
                     } else {
                         Image(systemName: "arrow.down.circle.fill")
-                        Text(LineDataModel.formatted(bytes: bytes))
+                        Text(LineDataModel.formatted(bytes: installer.pendingBytes))
                     }
                 }
                 .font(.system(size: 12, weight: .medium))

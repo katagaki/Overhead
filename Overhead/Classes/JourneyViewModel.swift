@@ -74,9 +74,21 @@ final class JourneyViewModel: ObservableObject {
 
     init(previewMode: Bool = false) {
         bindLocationTracker()
+        bindLineData()
         if previewMode {
             loadPreviewData()
         }
+    }
+
+    /// Line data arrives after launch on a fresh install, and again whenever an
+    /// update patches a line. Debounced: a download absorbs a batch at a time.
+    private func bindLineData() {
+        NotificationCenter.default.publisher(for: StaticTrainData.didChangeNotification)
+            .debounce(for: .seconds(0.75), scheduler: DispatchQueue.main)
+            .sink { [weak self] _ in
+                Task { @MainActor in await self?.forceRefreshLines() }
+            }
+            .store(in: &cancellables)
     }
 
     private func bindLocationTracker() {

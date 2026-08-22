@@ -346,6 +346,9 @@ public struct StaticTrainLine: Codable, Hashable {
     /// Optional, not a defaulted array: the synthesized decoder ignores property
     /// defaults for non-optionals, and every existing line file omits the key.
     public var scheduleRevisions: [ScheduleRevision]? = nil
+    /// An extra section inside the operator, e.g. JR East's どこトレ lines.
+    /// Optional for the same reason as `scheduleRevisions`.
+    public var segment: String? = nil
 
     /// This line's timetable as it stands on `dayKey` (yyyyMMdd, JST), with every
     /// revision that has come into force applied in announcement order.
@@ -375,7 +378,8 @@ public struct StaticTrainLine: Codable, Hashable {
             nameEn: nameEn,
             operatorId: operatorId,
             stations: stations,
-            colorHex: colorHex
+            colorHex: colorHex,
+            segmentId: segment
         )
     }
 }

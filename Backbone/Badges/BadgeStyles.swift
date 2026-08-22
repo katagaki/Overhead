@@ -10,11 +10,15 @@ public enum BadgeStyles {
     private static var cachedConfigs: [String: LineBadgeConfig]?
     private static var cachedIndex: (bySymbol: [String: String], bySymbolColor: [String: String])?
 
+    /// Built outside the lock. `NSLock` is not recursive, and these tables
+    /// reach through each other — the index reads the configs — so holding it
+    /// across a build deadlocks the thread that is drawing a badge.
     private static var specs: [String: BadgeStyleSpec] {
-        tablesLock.lock(); defer { tablesLock.unlock() }
-        if let cachedSpecs { return cachedSpecs }
+        tablesLock.lock()
+        if let cachedSpecs { tablesLock.unlock(); return cachedSpecs }
+        tablesLock.unlock()
         let built = buildSpecs()
-        cachedSpecs = built
+        tablesLock.lock(); cachedSpecs = built; tablesLock.unlock()
         return built
     }
 
@@ -36,10 +40,11 @@ public enum BadgeStyles {
     }
 
     private static var configs: [String: LineBadgeConfig] {
-        tablesLock.lock(); defer { tablesLock.unlock() }
-        if let cachedConfigs { return cachedConfigs }
+        tablesLock.lock()
+        if let cachedConfigs { tablesLock.unlock(); return cachedConfigs }
+        tablesLock.unlock()
         let built = buildConfigs()
-        cachedConfigs = built
+        tablesLock.lock(); cachedConfigs = built; tablesLock.unlock()
         return built
     }
 
@@ -59,10 +64,11 @@ public enum BadgeStyles {
     /// Symbol -> style, plus symbol+colour for the prefixes two operators share
     /// ("G" is Ginza and Yokohama Green; "SR" is Saitama Railway and Shibayama).
     private static var index: (bySymbol: [String: String], bySymbolColor: [String: String]) {
-        tablesLock.lock(); defer { tablesLock.unlock() }
-        if let cachedIndex { return cachedIndex }
+        tablesLock.lock()
+        if let cachedIndex { tablesLock.unlock(); return cachedIndex }
+        tablesLock.unlock()
         let built = buildIndex()
-        cachedIndex = built
+        tablesLock.lock(); cachedIndex = built; tablesLock.unlock()
         return built
     }
 

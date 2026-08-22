@@ -3,14 +3,12 @@ import CryptoKit
 import Combine
 
 public enum LineDataError: LocalizedError {
-    case notInCatalog(String)
     case badResponse(Int)
     case checksumMismatch(String)
     case schemaTooNew(Int)
 
     public var errorDescription: String? {
         switch self {
-        case .notInCatalog(let id): return "\(id) is not in the catalog"
         case .badResponse(let code): return "Server returned \(code)"
         case .checksumMismatch(let file): return "\(file) did not match its checksum"
         case .schemaTooNew(let v): return "Data format \(v) is newer than this app understands"
@@ -18,7 +16,38 @@ public enum LineDataError: LocalizedError {
     }
 }
 
-/// Downloads line data and installs it beside the bundled seed.
+/// A file the device does not have, or has an outdated copy of.
+public struct PendingLine: Identifiable, Sendable, Equatable {
+    public let line: CatalogLine
+    public let needsLine: Bool
+    public let needsBadge: Bool
+
+    public var id: String { line.id }
+
+    /// Line.json is the bulk of a line; a badge-only patch is a few kilobytes.
+    var weight: Int { needsLine ? line.bytes : 2_048 }
+}
+
+/// What a running download has done so far.
+public struct LineDataProgress: Sendable, Equatable {
+    public var totalLines: Int
+    public var completedLines: Int
+    public var totalBytes: Int
+    public var completedBytes: Int
+    /// The line being written, for a caption.
+    public var currentLine: String?
+
+    public var fraction: Double {
+        guard totalBytes > 0 else { return 0 }
+        return min(1, max(0, Double(completedBytes) / Double(totalBytes)))
+    }
+}
+
+/// Keeps the device's copy of the data repository in step with the catalog.
+///
+/// The app carries every line, so there is nothing to choose: one download
+/// brings the device up to the catalog, and later checks re-fetch only the
+/// lines whose hashes moved.
 @MainActor
 public final class LineDataInstaller: ObservableObject {
 
@@ -27,17 +56,27 @@ public final class LineDataInstaller: ObservableObject {
     /// Root of the published data repository.
     public static var baseURL = URL(string: "https://raw.githubusercontent.com/katagaki/OverheadData/main/")!
 
-    @Published public private(set) var inFlight: Set<String> = []
-    /// 0...1 per line while it downloads, for a determinate indicator.
-    @Published public private(set) var progress: [String: Double] = [:]
+    /// Outstanding work: missing lines on a fresh install, changed ones after.
+    @Published public private(set) var pending: [PendingLine] = []
+    /// Non-nil only while a download is running.
+    @Published public private(set) var progress: LineDataProgress?
+    @Published public private(set) var isChecking = false
+    /// The published data has moved to a format this build cannot read.
+    @Published public private(set) var needsAppUpdate = false
     @Published public private(set) var lastChecked: Date?
-    @Published public private(set) var staleLineIds: Set<String> = []
+    /// How many of the catalog's lines are on the device.
+    @Published public private(set) var installedCount = 0
 
     private let defaults = UserDefaults.standard
     private let etagKey = "lineData.catalogETag"
     private let modifiedKey = "lineData.catalogModified"
     private let checkedKey = "lineData.lastChecked"
+    private let pinnedKey = "lineData.pinnedToLegacy"
     private nonisolated let session: URLSession
+
+    /// Bytes of finished lines, plus the fraction each in-flight one has read.
+    private var settledBytes = 0
+    private var partialBytes: [String: Int] = [:]
 
     private init() {
         let config = URLSessionConfiguration.default
@@ -48,24 +87,41 @@ public final class LineDataInstaller: ObservableObject {
         config.requestCachePolicy = .reloadIgnoringLocalCacheData
         session = URLSession(configuration: config)
         lastChecked = defaults.object(forKey: checkedKey) as? Date
+        needsAppUpdate = defaults.bool(forKey: pinnedKey)
     }
 
-    public var isBusy: Bool { !inFlight.isEmpty }
-
-    /// Only claim to hold a copy if one is actually on disk: otherwise a 304
-    /// would leave the app with no catalog at all.
-    private var hasLocalCatalog: Bool {
-        FileManager.default.fileExists(
-            atPath: LineDataStore.installedRoot.appendingPathComponent("catalog.json").path)
+    /// The catalog this build should read. Once the repository moves to a
+    /// newer schema, an old build keeps reading the snapshot frozen for it.
+    private var catalogURL: URL {
+        needsAppUpdate
+            ? Self.baseURL.appendingPathComponent(
+                "legacy/v\(Catalog.supportedSchemaVersion)/catalog.json")
+            : Self.baseURL.appendingPathComponent("catalog.json")
     }
+
+    // MARK: - State
+
+    public var isDownloading: Bool { progress != nil }
+    public var isBusy: Bool { isDownloading || isChecking }
+    /// Nothing on the device yet, so the next download is the first one.
+    public var isFirstDownload: Bool { installedCount == 0 }
+    public var hasPendingWork: Bool { !pending.isEmpty }
+    /// Worth badging: data the device is missing or has fallen behind on.
+    public var hasUpdate: Bool { hasPendingWork && !isDownloading }
+    public var pendingBytes: Int { pending.reduce(0) { $0 + $1.weight } }
+    /// Everything the catalog lists, for the first-run offer.
+    public var catalogBytes: Int { Catalog.current.lines.reduce(0) { $0 + $1.bytes } }
 
     // MARK: - Update check
 
-    /// One conditional GET. A 304 costs a few hundred bytes and means there is
-    /// nothing to do.
+    /// One conditional GET. A 304 costs a few hundred bytes and means the
+    /// catalog is unchanged, so the pending set cannot have moved either.
     @discardableResult
     public func refreshCatalog(force: Bool = false) async throws -> Bool {
-        var request = URLRequest(url: Self.baseURL.appendingPathComponent("catalog.json"))
+        isChecking = true
+        defer { isChecking = false }
+
+        var request = URLRequest(url: catalogURL)
         if !force, hasLocalCatalog {
             if let etag = defaults.string(forKey: etagKey) {
                 request.setValue(etag, forHTTPHeaderField: "If-None-Match")
@@ -80,27 +136,71 @@ public final class LineDataInstaller: ObservableObject {
         defaults.set(lastChecked, forKey: checkedKey)
 
         if http.statusCode == 304 {
-            await recomputeStale()
+            await recomputePending()
             return false
         }
         guard http.statusCode == 200 else { throw LineDataError.badResponse(http.statusCode) }
 
         let catalog = try JSONDecoder().decode(LineCatalog.self, from: data)
         guard catalog.schemaVersion <= Catalog.supportedSchemaVersion else {
+            // The repository has moved on. Pin to the snapshot kept for this
+            // schema if there is one, and say so either way — silently serving
+            // stale timetables forever is worse than an honest row.
+            pin(toLegacy: true)
+            if try await adoptLegacyCatalog() { return true }
             throw LineDataError.schemaTooNew(catalog.schemaVersion)
         }
+        if !needsAppUpdate { pin(toLegacy: false) }
 
         try FileManager.default.createDirectory(at: LineDataStore.installedRoot,
                                                 withIntermediateDirectories: true)
         try data.write(to: LineDataStore.installedRoot.appendingPathComponent("catalog.json"),
                        options: .atomic)
         storeValidator(from: http)
-        try await refreshBadgeStyles(styles: catalog.styles, base: Self.baseURL)
-
         Catalog.reload()
         StaticTrainData.invalidate()
-        await recomputeStale()
+        try await refreshBadgeStyles(styles: catalog.styles, base: Self.baseURL)
+        await recomputePending()
         return true
+    }
+
+    /// Fetches the catalog frozen for this build's schema. False when the
+    /// repository publishes no snapshot for it.
+    private func adoptLegacyCatalog() async throws -> Bool {
+        var request = URLRequest(url: catalogURL)
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+        let (data, response) = try await session.data(for: request)
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200,
+              let catalog = try? JSONDecoder().decode(LineCatalog.self, from: data),
+              catalog.schemaVersion <= Catalog.supportedSchemaVersion
+        else { return false }
+
+        try FileManager.default.createDirectory(at: LineDataStore.installedRoot,
+                                                withIntermediateDirectories: true)
+        try data.write(to: LineDataStore.installedRoot.appendingPathComponent("catalog.json"),
+                       options: .atomic)
+        storeValidator(from: http)
+        Catalog.reload()
+        StaticTrainData.invalidate()
+        try await refreshBadgeStyles(styles: catalog.styles, base: Self.baseURL)
+        await recomputePending()
+        return true
+    }
+
+    /// Validators belong to whichever catalog we are following.
+    private func pin(toLegacy pinned: Bool) {
+        guard pinned != needsAppUpdate else { return }
+        needsAppUpdate = pinned
+        defaults.set(pinned, forKey: pinnedKey)
+        defaults.removeObject(forKey: etagKey)
+        defaults.removeObject(forKey: modifiedKey)
+    }
+
+    /// Only claim to hold a copy if one is actually on disk: otherwise a 304
+    /// would leave the app with no catalog at all.
+    private var hasLocalCatalog: Bool {
+        FileManager.default.fileExists(
+            atPath: LineDataStore.installedRoot.appendingPathComponent("catalog.json").path)
     }
 
     private func storeValidator(from http: HTTPURLResponse) {
@@ -119,7 +219,8 @@ public final class LineDataInstaller: ObservableObject {
             let fetched = await withTaskGroup(of: (String, Data?).self) { group in
                 for style in batch {
                     group.addTask { [session] in
-                        let url = base.appendingPathComponent("BadgeStyles/\(style).json")
+                        let url = base.appendingPathComponent(
+                            "\(Catalog.dataPath)BadgeStyles/\(style).json")
                         return (style, try? await Self.fetch(url, using: session))
                     }
                 }
@@ -134,111 +235,202 @@ public final class LineDataInstaller: ObservableObject {
         }
     }
 
-    /// An installed line whose bytes no longer match the catalog is stale.
-    /// Hashing every installed file is not main-thread work.
-    public func recomputeStale() async {
+    // MARK: - Pending work
+
+    /// Compares what is on disk against the catalog's hashes. Hashing 18 MB is
+    /// not main-thread work, and the file per line is the patch unit: a line
+    /// whose hash still matches is not fetched again.
+    public func recomputePending() async {
         let lines = Catalog.current.lines
-        let stale = await Task.detached(priority: .utility) { () -> Set<String> in
-            var out: Set<String> = []
-            for line in lines where LineDataStore.isDownloaded(folder: line.folder) {
-                let url = LineDataStore.installedURL(folder: line.folder, file: "Line.json")
-                guard let data = try? Data(contentsOf: url) else { continue }
-                if Self.hash(data) != line.sha256 { out.insert(line.id) }
+        let result = await Task.detached(priority: .utility) { () -> ([PendingLine], Int) in
+            var work: [PendingLine] = []
+            var installed = 0
+            for line in lines {
+                let lineURL = LineDataStore.installedURL(folder: line.folder, file: "Line.json")
+                let badgeURL = LineDataStore.installedURL(folder: line.folder, file: "Badge.json")
+                let lineData = try? Data(contentsOf: lineURL)
+                let badgeData = try? Data(contentsOf: badgeURL)
+                if lineData != nil { installed += 1 }
+                let needsLine = lineData.map { Self.hash($0) != line.sha256 } ?? true
+                let needsBadge = badgeData.map { Self.hash($0) != line.badgeSha256 } ?? true
+                if needsLine || needsBadge {
+                    work.append(PendingLine(line: line, needsLine: needsLine, needsBadge: needsBadge))
+                }
             }
-            return out
+            return (work, installed)
         }.value
-        staleLineIds = stale
+        pending = result.0
+        installedCount = result.1
     }
 
-    // MARK: - Install and remove
+    // MARK: - Download
 
-    /// A base set is dozens of lines; downloading them one after another is
-    /// most of a first launch.
+    /// A first run is 136 lines; downloading them one after another is most of
+    /// a first launch.
     static let parallelism = 6
 
-    public func install(lineIds: [String]) async throws {
-        let lines = try lineIds.map { id -> CatalogLine in
-            guard let line = Catalog.line(id: id) else { throw LineDataError.notInCatalog(id) }
-            return line
-        }
-        inFlight.formUnion(lineIds)
-        for id in lineIds { progress[id] = 0 }
-        defer {
-            inFlight.subtract(lineIds)
-            for id in lineIds { progress[id] = nil }
-            Task { await recomputeStale() }
+    /// Brings the device up to the catalog. Everything the catalog lists ends
+    /// up on disk; lines it no longer lists are dropped.
+    public func sync() async throws {
+        guard !isDownloading else { return }
+        if pending.isEmpty { await recomputePending() }
+        let work = pending
+        guard !work.isEmpty else {
+            pruneObsoleteFolders()
+            return
         }
 
-        let base = Self.baseURL
-        for batch in lines.chunked(into: Self.parallelism) {
-            let fetched = try await withThrowingTaskGroup(
-                of: (CatalogLine, Data, Data).self
-            ) { group -> [(CatalogLine, Data, Data)] in
-                for line in batch {
+        settledBytes = 0
+        partialBytes = [:]
+        progress = LineDataProgress(totalLines: work.count, completedLines: 0,
+                                    totalBytes: work.reduce(0) { $0 + $1.weight },
+                                    completedBytes: 0, currentLine: nil)
+        defer {
+            progress = nil
+            partialBytes = [:]
+        }
+
+        do {
+            try await download(work, base: Self.baseURL)
+        } catch {
+            // Whatever landed before the failure still counts as installed.
+            await recomputePending()
+            throw error
+        }
+        pruneObsoleteFolders()
+        await recomputePending()
+    }
+
+    private func download(_ work: [PendingLine], base: URL) async throws {
+        // One bad file should not cost the user the other 135 lines: each
+        // failure is set aside, the rest install, and the first one is raised
+        // at the end so the screen still says something went wrong.
+        var failures: [Error] = []
+
+        for batch in work.chunked(into: Self.parallelism) {
+            let fetched = await withTaskGroup(
+                of: (PendingLine, Result<(Data?, Data?), Error>).self
+            ) { group -> [(PendingLine, Result<(Data?, Data?), Error>)] in
+                for item in batch {
                     group.addTask { [session] in
-                        try await Self.download(line, base: base, using: session) { fraction in
-                            Task { @MainActor in self.report(fraction, for: line.id) }
+                        do {
+                            let (_, lineData, badgeData) = try await Self.download(
+                                item, base: base, using: session
+                            ) { fraction in
+                                Task { @MainActor in self.report(fraction, for: item) }
+                            }
+                            return (item, .success((lineData, badgeData)))
+                        } catch {
+                            return (item, .failure(error))
                         }
                     }
                 }
-                var out: [(CatalogLine, Data, Data)] = []
-                for try await result in group { out.append(result) }
+                var out: [(PendingLine, Result<(Data?, Data?), Error>)] = []
+                for await result in group { out.append(result) }
                 return out
             }
+
             var installed: [StaticTrainLine] = []
-            for (line, lineData, badgeData) in fetched {
-                try write(line, lineData: lineData, badgeData: badgeData)
-                installed.append(contentsOf:
-                    (try? JSONDecoder().decode([StaticTrainLine].self, from: lineData)) ?? [])
+            var badgesChanged = false
+            for (item, result) in fetched {
+                switch result {
+                case .success(let (lineData, badgeData)):
+                    try write(item.line, lineData: lineData, badgeData: badgeData)
+                    if badgeData != nil { badgesChanged = true }
+                    if let lineData {
+                        installed.append(contentsOf:
+                            (try? JSONDecoder().decode([StaticTrainLine].self, from: lineData)) ?? [])
+                    }
+                case .failure(let error):
+                    failures.append(error)
+                }
+                settledBytes += item.weight
+                partialBytes[item.id] = nil
+                progress?.completedLines += 1
+                progress?.currentLine = item.line.localizedName
+            }
+            progress?.completedBytes = settledBytes
+            // A badge-only patch never reaches `absorb`, so its plate would
+            // stay stale until the next launch.
+            if badgesChanged, installed.isEmpty {
+                BadgeStyles.invalidate()
+                NotificationCenter.default.post(name: StaticTrainData.didChangeNotification,
+                                                object: nil)
             }
             // Each batch shows up as soon as it lands, rather than at the end.
             StaticTrainData.absorb(installed)
-            for line in batch { inFlight.remove(line.id); progress[line.id] = nil }
+        }
+
+        if let first = failures.first { throw first }
+    }
+
+    /// Throws away every installed line and fetches the catalog afresh — the
+    /// repair path for a copy that will not decode.
+    public func redownloadEverything() async throws {
+        guard !isDownloading else { return }
+        try? FileManager.default.removeItem(
+            at: LineDataStore.installedRoot.appendingPathComponent("Lines", isDirectory: true))
+        StaticTrainData.invalidate()
+        await recomputePending()
+        try await sync()
+    }
+
+    /// A line dropped from the catalog is data the app can no longer describe.
+    private func pruneObsoleteFolders() {
+        let root = LineDataStore.installedRoot.appendingPathComponent("Lines", isDirectory: true)
+        guard let folders = try? FileManager.default.contentsOfDirectory(
+            atPath: root.path) else { return }
+        let known = Set(Catalog.current.lines.map(\.folder))
+        for folder in folders where !known.contains(folder) {
+            try? FileManager.default.removeItem(at: root.appendingPathComponent(folder))
         }
     }
 
-    fileprivate func report(_ fraction: Double, for id: String) {
-        progress[id] = min(1, max(0, fraction))
+    fileprivate func report(_ fraction: Double, for item: PendingLine) {
+        guard progress != nil else { return }
+        partialBytes[item.id] = Int(Double(item.weight) * min(1, max(0, fraction)))
+        progress?.completedBytes = settledBytes + partialBytes.values.reduce(0, +)
     }
 
-    /// Both files are fetched and verified before either is written.
+    /// Only the files whose hashes moved are fetched, and both are verified
+    /// before either is written.
     private nonisolated static func download(
-        _ line: CatalogLine, base: URL, using session: URLSession,
+        _ item: PendingLine, base: URL, using session: URLSession,
         onProgress: @escaping @Sendable (Double) -> Void
-    ) async throws -> (CatalogLine, Data, Data) {
-        let lineData = try await fetchWithProgress(
-            base.appendingPathComponent("Lines/\(line.folder)/Line.json"),
-            using: session, onProgress: onProgress)
-        guard hash(lineData) == line.sha256 else {
-            throw LineDataError.checksumMismatch("\(line.folder)/Line.json")
+    ) async throws -> (PendingLine, Data?, Data?) {
+        let folder = item.line.folder
+        let root = Catalog.dataPath
+        var lineData: Data?
+        var badgeData: Data?
+        if item.needsLine {
+            let data = try await fetchWithProgress(
+                base.appendingPathComponent("\(root)Lines/\(folder)/Line.json"),
+                using: session, onProgress: onProgress)
+            guard hash(data) == item.line.sha256 else {
+                throw LineDataError.checksumMismatch("\(folder)/Line.json")
+            }
+            lineData = data
         }
-        let badgeData = try await fetch(
-            base.appendingPathComponent("Lines/\(line.folder)/Badge.json"), using: session)
-        guard hash(badgeData) == line.badgeSha256 else {
-            throw LineDataError.checksumMismatch("\(line.folder)/Badge.json")
+        if item.needsBadge {
+            let data = try await fetch(
+                base.appendingPathComponent("\(root)Lines/\(folder)/Badge.json"), using: session)
+            guard hash(data) == item.line.badgeSha256 else {
+                throw LineDataError.checksumMismatch("\(folder)/Badge.json")
+            }
+            badgeData = data
         }
-        return (line, lineData, badgeData)
+        return (item, lineData, badgeData)
     }
 
-    private func write(_ line: CatalogLine, lineData: Data, badgeData: Data) throws {
+    private func write(_ line: CatalogLine, lineData: Data?, badgeData: Data?) throws {
         let dir = LineDataStore.installedDirectory(folder: line.folder)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        try lineData.write(to: dir.appendingPathComponent("Line.json"), options: .atomic)
-        try badgeData.write(to: dir.appendingPathComponent("Badge.json"), options: .atomic)
-    }
-
-    public func remove(lineIds: [String]) throws {
-        for id in lineIds {
-            guard let line = Catalog.line(id: id) else { continue }
-            try? FileManager.default.removeItem(
-                at: LineDataStore.installedDirectory(folder: line.folder))
+        if let lineData {
+            try lineData.write(to: dir.appendingPathComponent("Line.json"), options: .atomic)
         }
-        StaticTrainData.invalidate()
-        Task { await recomputeStale() }
-    }
-
-    public func updateStale() async throws {
-        try await install(lineIds: Array(staleLineIds))
+        if let badgeData {
+            try badgeData.write(to: dir.appendingPathComponent("Badge.json"), options: .atomic)
+        }
     }
 
     // MARK: - Helpers

@@ -3,49 +3,42 @@ import Backbone
 
 // MARK: - Line Data Manager
 
+/// Reads like Software Update: what the update is, how big it is, what it
+/// touches, and one row that starts it.
 struct LineDataManagerView: View {
     @StateObject private var model = LineDataModel()
     @ObservedObject private var installer = LineDataInstaller.shared
-    @State private var expanded: Set<String> = []
 
     var body: some View {
         List {
-            if !installer.staleLineIds.isEmpty {
+            if installer.needsAppUpdate {
                 Section {
-                    Button {
-                        Task { try? await installer.updateStale() }
-                    } label: {
-                        LabeledContent {
-                            Text("\(installer.staleLineIds.count)")
-                        } label: {
-                            Label("LineData.UpdatesAvailable", systemImage: "arrow.down.circle")
-                        }
-                    }
+                    Label("LineData.AppTooOld", systemImage: "exclamationmark.triangle")
+                } footer: {
+                    Text("LineData.AppTooOld.Footer")
                 }
             }
 
-            ForEach(model.orderedOperators, id: \.self) { operatorId in
-                operatorSection(operatorId)
+            if installer.isDownloading || installer.hasPendingWork {
+                Section {
+                    updateSummary
+                    actionRow
+                }
             }
 
             Section {
-                Button {
-                    Task { await model.checkForUpdates() }
-                } label: {
-                    Label("LineData.CheckNow", systemImage: "arrow.clockwise")
-                }
-                if let checked = installer.lastChecked {
-                    LabeledContent("LineData.LastChecked") {
-                        Text(checked, style: .relative)
-                    }
-                }
                 LabeledContent("LineData.Version") {
-                    Text(Catalog.current.version).monospaced()
+                    Text(Catalog.current.version)
+                }
+                LabeledContent("LineData.Section.Included") {
+                    Text("LineData.LineCount \(Catalog.current.lines.count)")
                 }
             }
         }
         .navigationTitle("LineData.Title")
         .navigationBarTitleDisplayMode(.inline)
+        .refreshable { await model.checkForUpdates() }
+        .task { await installer.recomputePending() }
         .alert("LineData.Error", isPresented: .constant(model.error != nil)) {
             Button("Shared.OK") { model.error = nil }
         } message: {
@@ -53,131 +46,60 @@ struct LineDataManagerView: View {
         }
     }
 
-    @ViewBuilder
-    private func operatorSection(_ operatorId: String) -> some View {
-        let lines = model.lines(for: operatorId)
-        let installed = lines.filter(model.isInstalled).count
+    // MARK: Update summary
 
-        Section {
-            if expanded.contains(operatorId) {
-                ForEach(lines) { line in
-                    lineRow(line)
-                }
-            }
-        } header: {
-            let pending = lines.filter {
-                !model.isInstalled($0) && !installer.inFlight.contains($0.id)
-            }
-            HStack(spacing: 10) {
-                Button {
-                    if expanded.contains(operatorId) { expanded.remove(operatorId) }
-                    else { expanded.insert(operatorId) }
-                } label: {
-                    HStack {
-                        Image(systemName: expanded.contains(operatorId)
-                              ? "chevron.down" : "chevron.right")
-                            .font(.caption2)
-                        Text(OperatorSections.title(for: operatorId))
-                        Spacer()
-                        Text("\(installed)/\(lines.count)")
-                            .monospacedDigit()
-                    }
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-
-                if !pending.isEmpty {
-                    Button {
-                        download(pending)
-                    } label: {
-                        Image(systemName: "icloud.and.arrow.down")
-                            .foregroundStyle(Color.accentColor)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("LineData.DownloadAll")
-                }
-            }
+    private var updateSummary: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(installer.isFirstDownload ? "LineData.Update.First" : "LineData.Update.Title")
+                .font(.title3.weight(.semibold))
+            Text("LineData.Update.Meta \(installer.pending.count) \(LineDataModel.formatted(bytes: installer.pendingBytes))")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            affectedLines
+                .padding(.top, 6)
         }
+        .padding(.vertical, 6)
     }
 
-    /// Fire and forget: a tap starts the download and returns immediately.
-    private func download(_ lines: [CatalogLine]) {
-        let ids = lines.map(\.id)
-        guard !ids.isEmpty else { return }
-        Task {
-            do { try await installer.install(lineIds: ids) }
-            catch { model.error = error.localizedDescription }
-        }
-    }
-
+    /// Which lines the update touches, the way Software Update names what it
+    /// contains. Lines already on the device are named by their plate; ones
+    /// the device has never held have no plate the user would recognise, so
+    /// they are counted instead. A first download is all of them, and says
+    /// nothing.
     @ViewBuilder
-    private func lineRow(_ line: CatalogLine) -> some View {
-        let installed = model.isInstalled(line)
-        let downloading = installer.inFlight.contains(line.id)
-
-        HStack(spacing: 10) {
-            LineSymbolBadge(symbol: line.symbol, color: Color(hex: line.colorHex),
-                            dimension: 26, styleOverride: line.badgeStyle)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(line.localizedName)
-                Text(LineDataModel.formatted(bytes: line.bytes))
-                    .font(.caption2).foregroundStyle(.secondary)
+    private var affectedLines: some View {
+        if !installer.isFirstDownload {
+            let held = installer.pending.map(\.line)
+                .filter { LineDataStore.isDownloaded(folder: $0.folder) }
+            let newCount = installer.pending.count - held.count
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 30), spacing: 6, alignment: .leading)],
+                      alignment: .leading, spacing: 6) {
+                ForEach(held) { line in
+                    LineSymbolBadge(symbol: line.symbol, color: Color(hex: line.colorHex),
+                                    dimension: 26, styleOverride: line.badgeStyle)
+                }
             }
-            Spacer()
-
-            if downloading {
-                DownloadDonut(progress: installer.progress[line.id] ?? 0)
-            } else if installed {
-                Image(systemName: "checkmark")
-                    .font(.system(size: 14, weight: .semibold))
+            if newCount > 0 {
+                Text("LineData.Update.OtherLines \(newCount)")
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
-                    .accessibilityLabel("LineData.Installed")
-            } else {
-                Button {
-                    download([line])
-                } label: {
-                    Image(systemName: "icloud.and.arrow.down")
-                        .font(.system(size: 17))
-                        .foregroundStyle(Color.accentColor)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("LineData.Download")
-            }
-        }
-        .contentShape(Rectangle())
-        .swipeActions(edge: .trailing) {
-            if installed {
-                Button(role: .destructive) {
-                    model.remove(line)
-                } label: {
-                    Label("LineData.Remove", systemImage: "trash")
-                }
+                    .padding(.top, held.isEmpty ? 0 : 4)
             }
         }
     }
-}
 
-// MARK: - Progress Donut
+    // MARK: Action
 
-/// Determinate ring with a stop square, the shape iOS uses for downloads.
-struct DownloadDonut: View {
-    let progress: Double
-
-    var body: some View {
-        ZStack {
-            Circle()
-                .stroke(Color(.systemGray4), lineWidth: 2)
-            Circle()
-                .trim(from: 0, to: max(0.02, min(1, progress)))
-                .stroke(Color.accentColor,
-                        style: StrokeStyle(lineWidth: 2, lineCap: .round))
-                .rotationEffect(.degrees(-90))
-                .animation(.linear(duration: 0.2), value: progress)
-            RoundedRectangle(cornerRadius: 1.5)
-                .fill(Color.accentColor)
-                .frame(width: 6, height: 6)
+    @ViewBuilder
+    private var actionRow: some View {
+        if let progress = installer.progress {
+            LineDataProgressBlock(progress: progress)
+                .padding(.vertical, 6)
+        } else {
+            Button("LineData.DownloadNow") {
+                Task { await model.download() }
+            }
+            .disabled(installer.isChecking)
         }
-        .frame(width: 20, height: 20)
-        .accessibilityLabel("LineData.Downloading")
     }
 }

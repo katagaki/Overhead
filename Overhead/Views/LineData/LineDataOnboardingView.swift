@@ -3,129 +3,168 @@ import Backbone
 
 // MARK: - First-run line download
 
-/// Offers the base network — JR East and the Tokyo subways — so a new install
-/// is usable in one tap, with everything else a browse away.
+/// The app carries every line in the catalog, so the first run has one
+/// decision: download now, or later.
 struct LineDataOnboardingView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var model = LineDataModel()
+    @ObservedObject private var installer = LineDataInstaller.shared
     @AppStorage("lineData.onboarded") private var onboarded = false
 
-    private var baseLines: [CatalogLine] {
-        Catalog.current.lines.filter { LineDataModel.baseOperators.contains($0.operatorId) }
-    }
+    private var lineCount: Int { Catalog.current.lines.count }
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("LineData.Onboarding.Title")
-                            .font(.largeTitle.bold())
-                        Text("LineData.Onboarding.Body")
-                            .foregroundStyle(.secondary)
-                    }
-
-                    ForEach(LineDataModel.baseOperators, id: \.self) { operatorId in
-                        operatorCard(operatorId)
-                    }
-
-                    NavigationLink {
-                        LineDataManagerView()
-                    } label: {
-                        Label("LineData.Onboarding.BrowseAll", systemImage: "list.bullet")
-                    }
-                }
-                .padding(20)
+        VStack(alignment: .leading, spacing: 24) {
+            LineDataBadgeWall()
+            VStack(alignment: .leading, spacing: 8) {
+                Text("LineData.Onboarding.Title")
+                    .font(.largeTitle.bold())
+                Text("LineData.Onboarding.Body")
+                    .foregroundStyle(.secondary)
             }
-            .safeAreaInset(edge: .bottom) { actions }
-            .navigationBarTitleDisplayMode(.inline)
+            .padding(.horizontal, 20)
+            Spacer(minLength: 0)
         }
-        .interactiveDismissDisabled(model.isWorking)
-        .onAppear { model.selectBaseSet() }
-    }
-
-    @ViewBuilder
-    private func operatorCard(_ operatorId: String) -> some View {
-        let lines = model.lines(for: operatorId)
-        let selected = lines.allSatisfy { model.selection.contains($0.id) }
-
-        Button {
-            model.toggleOperator(operatorId)
-        } label: {
-            HStack(alignment: .top, spacing: 12) {
-                Image(systemName: selected ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(selected ? Color.accentColor : .secondary)
-                    .font(.title3)
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(OperatorSections.title(for: operatorId))
-                        .font(.headline)
-                    Text("\(lines.count) 路線 · " +
-                         LineDataModel.formatted(bytes: lines.reduce(0) { $0 + $1.bytes }))
-                        .font(.caption).foregroundStyle(.secondary)
-                    badgeStrip(lines)
-                }
-                Spacer()
-            }
-            .padding(14)
-            .background(Color(.secondarySystemGroupedBackground),
-                        in: RoundedRectangle(cornerRadius: 14))
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .safeAreaInset(edge: .bottom) { actions }
+        .ignoresSafeArea(edges: .top)
+        .interactiveDismissDisabled(true)
+        .onChange(of: installer.installedCount) { _, count in
+            // However the download was started, finishing it ends the sheet.
+            guard lineCount > 0, count == lineCount, !installer.isDownloading else { return }
+            onboarded = true
+            dismiss()
         }
-        .buttonStyle(.plain)
-    }
-
-    /// One badge per distinct symbol: JR East has a dozen lines sharing the
-    /// plain JR mark, and ten copies of it says nothing.
-    private func distinctBadges(_ lines: [CatalogLine]) -> [CatalogLine] {
-        var seen = Set<String>()
-        return lines.filter { seen.insert("\($0.symbol)|\($0.colorHex)").inserted }
-    }
-
-    @ViewBuilder
-    private func badgeStrip(_ lines: [CatalogLine]) -> some View {
-        let shown = distinctBadges(lines)
-        HStack(spacing: 4) {
-            ForEach(shown.prefix(10)) { line in
-                LineSymbolBadge(symbol: line.symbol, color: Color(hex: line.colorHex),
-                                dimension: 22, styleOverride: line.badgeStyle)
-            }
-            if shown.count > 10 {
-                Text("+\(shown.count - 10)")
-                    .font(.caption2).foregroundStyle(.secondary)
-            }
+        .alert("LineData.Error", isPresented: .constant(model.error != nil)) {
+            Button("Shared.OK") { model.error = nil }
+        } message: {
+            Text(model.error ?? "")
         }
     }
 
     @ViewBuilder
     private var actions: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 12) {
+            if let progress = installer.progress {
+                LineDataProgressCapsule(progress: progress)
+            } else {
+                // Holds the capsule's place, so the button never moves.
+                Color.clear.frame(height: 44)
+            }
+
             Button {
                 Task {
-                    await model.install()
-                    onboarded = true
-                    dismiss()
-                }
-            } label: {
-                HStack {
-                    if model.isWorking { ProgressView().tint(.white) }
-                    Text("LineData.Onboarding.Download")
-                    if !model.selection.isEmpty {
-                        Text(LineDataModel.formatted(bytes: model.selectedBytes))
-                            .foregroundStyle(.white.opacity(0.7))
+                    await model.download()
+                    if !installer.hasPendingWork {
+                        onboarded = true
+                        dismiss()
                     }
                 }
-                .frame(maxWidth: .infinity)
+            } label: {
+                Text("LineData.Onboarding.Download \(LineDataModel.formatted(bytes: installer.catalogBytes))")
+                    .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.glassProminent)
             .controlSize(.large)
-            .disabled(model.selection.isEmpty || model.isWorking)
-
-            Button("LineData.Onboarding.Later") {
-                onboarded = true
-                dismiss()
-            }
-            .disabled(model.isWorking)
+            .disabled(installer.isBusy)
         }
         .padding()
-        .background(.regularMaterial)
+    }
+}
+
+// MARK: - Badge wall
+
+/// The network as artwork. Hand-picked so the plates read as a spread of
+/// operators rather than a column of JR marks.
+struct LineDataBadgeWall: View {
+    var dimension: CGFloat = 34
+
+    /// Station guide-sign yellow, the ground these plates hang on.
+    private static let panelYellow = Color(hex: "#FFD400")
+
+    private static let lineIds = [
+        "Railway:JR-East.Yamanote", "Railway:TokyoMetro.Ginza", "Railway:Tokyu.Toyoko",
+        "Railway:Toei.Oedo", "Railway:Keio.Keio", "Railway:MIR.TsukubaExpress",
+        "Railway:JR-East.ChuoRapid", "Railway:TokyoMetro.Marunouchi", "Railway:Odakyu.Odawara",
+        "Railway:Seibu.Ikebukuro", "Railway:Yurikamome.Yurikamome", "Railway:Enoden.Enoshima",
+        "Railway:JR-East.KeihinTohoku", "Railway:TokyoMetro.Hanzomon", "Railway:Keikyu.Main",
+        "Railway:Toei.Asakusa", "Railway:Tobu.Tojo", "Railway:TamaMonorail.TamaMonorail",
+        "Railway:JR-East.ChuoSobuLocal", "Railway:TokyoMetro.Tozai", "Railway:Keisei.Main",
+        "Railway:Tokyu.DenEnToshi", "Railway:YokohamaMunicipal.Blue", "Railway:TWR.Rinkai",
+        "Railway:JR-East.SaikyoKawagoe", "Railway:TokyoMetro.Namboku", "Railway:Seibu.Shinjuku",
+        "Railway:Keio.Inokashira", "Railway:Minatomirai.Minatomirai", "Railway:Toei.Shinjuku"
+    ]
+
+    var body: some View {
+        let lines = Self.lineIds.compactMap(Catalog.line(id:))
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 6),
+                  spacing: 10) {
+            ForEach(lines) { line in
+                LineSymbolBadge(symbol: line.symbol, color: Color(hex: line.colorHex),
+                                dimension: dimension, styleOverride: line.badgeStyle)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 24)
+        .frame(maxWidth: .infinity)
+        // The plates are drawn for signage: the panel behind them stays the
+        // same yellow in either theme, and runs to both edges of the sheet.
+        .background(Self.panelYellow)
+        .accessibilityHidden(true)
+    }
+}
+
+// MARK: - Progress
+
+/// A glass capsule that fills as the download runs, so the button below never
+/// has to change size or place.
+struct LineDataProgressCapsule: View {
+    let progress: LineDataProgress
+
+    var body: some View {
+        GeometryReader { proxy in
+            ZStack(alignment: .leading) {
+                // Square right edge, so a short fill reads as a bar and not a pill.
+                Rectangle()
+                    .fill(Color.accentColor.opacity(0.35))
+                    .frame(width: proxy.size.width * progress.fraction)
+                    .animation(.linear(duration: 0.2), value: progress.fraction)
+                HStack(spacing: 8) {
+                    Text(progress.currentLine ?? String(localized: "LineData.Downloading"))
+                        .lineLimit(1)
+                    Spacer(minLength: 0)
+                    Text(verbatim: "\(progress.completedLines) / \(progress.totalLines)")
+                }
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 18)
+            }
+            .clipShape(.capsule)
+        }
+        .frame(height: 44)
+        .glassEffect(.regular, in: .capsule)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+// MARK: - Progress row
+
+/// The same progress, shaped for a list row.
+struct LineDataProgressBlock: View {
+    let progress: LineDataProgress
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            ProgressView(value: progress.fraction)
+                .animation(.linear(duration: 0.2), value: progress.fraction)
+            HStack {
+                Text(progress.currentLine ?? String(localized: "LineData.Downloading"))
+                    .lineLimit(1)
+                Spacer(minLength: 8)
+                Text(verbatim: "\(progress.completedLines) / \(progress.totalLines)")
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
     }
 }

@@ -58,6 +58,11 @@ public enum LineDataStore {
     static func catalogData() -> Data? {
         let installed = installedRoot.appendingPathComponent("catalog.json")
         if let data = try? Data(contentsOf: installed) { return data }
+        return bundledCatalogData()
+    }
+
+    /// The catalog that shipped with this build, ignoring anything installed.
+    static func bundledCatalogData() -> Data? {
         guard let url = bundle.url(forResource: "catalog", withExtension: "json",
                                    subdirectory: "StaticData") else { return nil }
         return try? Data(contentsOf: url)
