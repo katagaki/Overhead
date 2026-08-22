@@ -4637,7 +4637,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The newest line data needs a newer version of the app. Until you update, this build keeps using the data published for it."
+            "value": "The newest timetable data needs a newer version of the app. Until you update, this build keeps using the data published for it."
           }
         },
         "ja": {
@@ -4843,7 +4843,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Download line data"
+            "value": "Download timetable data"
           }
         },
         "ja": {
@@ -4913,7 +4913,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The app has been updated, so the line data needs to be updated as well. After that, departures work without a connection again."
+            "value": "The app has been updated, so the timetable data needs to be updated as well. After that, departures work without a connection again."
           }
         },
         "ja": {
@@ -4948,7 +4948,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Update line data"
+            "value": "Update timetable data"
           }
         },
         "ja": {
@@ -4999,7 +4999,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Line Data"
+            "value": "Timetable Data"
           }
         },
         "ja": {
@@ -5016,7 +5016,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Line Data"
+            "value": "Timetable Data"
           }
         },
         "ja": {
@@ -5067,7 +5067,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "New Line Data"
+            "value": "New Timetable Data"
           }
         },
         "ja": {
@@ -7663,7 +7663,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Line data needed"
+            "value": "Timetable data needed"
           }
         },
         "ja": {
