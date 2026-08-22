@@ -426,31 +426,31 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No more departures today"
+            "value": "Service has ended for today"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "本日の発車はありません"
+            "value": "本日の運行は終了しました"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "오늘 남은 출발 편이 없습니다"
+            "value": "오늘 운행이 종료되었습니다"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "今日已无发车"
+            "value": "今日运行已结束"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "今日已無發車"
+            "value": "今日營運已結束"
           }
         }
       }
