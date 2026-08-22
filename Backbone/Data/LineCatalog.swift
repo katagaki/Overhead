@@ -64,6 +64,25 @@ public struct CatalogSegment: Decodable, Identifiable, Hashable, Sendable {
     }
 }
 
+/// An operator's name, ordering, and search aliases. Data, so a new
+/// company needs no app release.
+public struct CatalogOperator: Decodable, Identifiable, Hashable, Sendable {
+    public let id: String
+    public let nameJa: String
+    public let nameEn: String
+    /// Position among the operator sections.
+    public let order: Int
+    /// Readings and aliases, since the names are kanji/kana only.
+    public let searchTerms: [String]?
+    /// Logo-mark colour, when it differs from the lines' route colours.
+    public let brandColorHex: String?
+
+    public var localizedName: String {
+        let lang = Locale.current.language.languageCode?.identifier ?? "ja"
+        return lang == "en" && !nameEn.isEmpty ? nameEn : nameJa
+    }
+}
+
 public struct LineCatalog: Decodable, Sendable {
     public let schemaVersion: Int
     /// Release version, shown in the app.
@@ -74,17 +93,20 @@ public struct LineCatalog: Decodable, Sendable {
     public let dataPath: String?
     /// Optional: catalogs published before segments existed omit the key.
     public let segments: [CatalogSegment]?
+    /// Optional: catalogs published before operator data existed omit the key.
+    public let operators: [CatalogOperator]?
     public let lines: [CatalogLine]
     public let stations: [CatalogStation]
 
     static let empty = LineCatalog(schemaVersion: Catalog.supportedSchemaVersion,
                                    version: "none", styles: [], segments: [],
-                                   lines: [], stations: [])
+                                   operators: [], lines: [], stations: [])
 
     init(schemaVersion: Int, version: String, styles: [String], segments: [CatalogSegment],
-         lines: [CatalogLine], stations: [CatalogStation]) {
+         operators: [CatalogOperator], lines: [CatalogLine], stations: [CatalogStation]) {
         self.dataPath = nil
         self.segments = segments
+        self.operators = operators
         self.schemaVersion = schemaVersion
         self.version = version
         self.styles = styles
@@ -175,6 +197,18 @@ public enum Catalog {
 
     public static func lines(ofOperator operatorId: String) -> [CatalogLine] {
         current.lines.filter { $0.operatorId == operatorId }.sorted { $0.id < $1.id }
+    }
+
+    // MARK: Operators
+
+    /// Operator data, in section order. Empty for catalogs published before
+    /// operators moved into the data.
+    public static var catalogOperators: [CatalogOperator] {
+        (current.operators ?? []).sorted { $0.order < $1.order }
+    }
+
+    public static func operatorInfo(id: String) -> CatalogOperator? {
+        current.operators?.first { $0.id == id }
     }
 
     // MARK: Segments

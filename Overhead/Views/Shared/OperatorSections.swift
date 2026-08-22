@@ -22,7 +22,14 @@ enum OperatorSections {
         return Catalog.segment(id: String(sectionId.dropFirst(segmentPrefix.count)))
     }
 
-    static let order = [
+    /// Section order comes from the catalog's operator data; the list below
+    /// is a fallback for catalogs published before operators moved into it.
+    static var order: [String] {
+        let ids = Catalog.catalogOperators.map(\.id)
+        return ids.isEmpty ? fallbackOrder : ids
+    }
+
+    private static let fallbackOrder = [
         "Operator:JR-East",
         "Operator:TokyoMetro",
         "Operator:Toei",
@@ -97,8 +104,13 @@ enum OperatorSections {
 
     static func title(for operatorId: String) -> String {
         if let segment = segment(forSectionId: operatorId) { return segment.localizedName }
-        guard let key = titleKeys[operatorId] else { return operatorId }
-        return String(localized: String.LocalizationValue(key))
+        // Established operators keep their string-catalog entry — it carries
+        // ko/zh, which the data's ja/en pair cannot. Everyone newer is named
+        // by the catalog.
+        if let key = titleKeys[operatorId] {
+            return String(localized: String.LocalizationValue(key))
+        }
+        return Catalog.operatorInfo(id: operatorId)?.localizedName ?? operatorId
     }
 
     /// Readings and aliases for search. The titles are kanji-only, so
@@ -161,7 +173,7 @@ enum OperatorSections {
     static func brandColor(for operatorId: String, lines: [TrainLine]) -> Color {
         // A segment wears its operator's colours.
         let operatorId = segment(forSectionId: operatorId)?.operatorId ?? operatorId
-        if let hex = brandColorHex[operatorId] {
+        if let hex = Catalog.operatorInfo(id: operatorId)?.brandColorHex ?? brandColorHex[operatorId] {
             return Color(hex: hex)
         }
         return lines.first?.color ?? .secondary
@@ -176,7 +188,9 @@ enum OperatorSections {
         let key = JapaneseSearch.searchKey(trimmed)
         let kana = JapaneseSearch.kanaFolded(trimmed)
 
-        let terms = segment(forSectionId: operatorId)?.searchTerms ?? searchTerms[operatorId] ?? []
+        let terms = segment(forSectionId: operatorId)?.searchTerms
+            ?? Catalog.operatorInfo(id: operatorId)?.searchTerms
+            ?? searchTerms[operatorId] ?? []
         for candidate in terms + [title(for: operatorId)] {
             if candidate.lowercased().contains(lowered) { return true }
             if !key.isEmpty, JapaneseSearch.searchKey(candidate).contains(key) { return true }
