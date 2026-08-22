@@ -241,13 +241,15 @@ struct StationPickerView: View {
                     color: line.color,
                     size: .compact,
                     stationName: station.name,
-                    styleOverride: line.badgeStyleId
+                    styleOverride: line.badgeStyleId,
+                    lineId: line.id
                 )
             } else if !line.lineSymbol.isEmpty {
                 LineSymbolBadge(
                     symbol: line.lineSymbol,
                     color: line.color,
-                    styleOverride: line.badgeStyleId
+                    styleOverride: line.badgeStyleId,
+                    lineId: line.id
                 )
             }
 

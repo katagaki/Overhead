@@ -63,6 +63,8 @@ struct LineLeadingBadge: View {
     let line: TrainLine
     var dimension: CGFloat = 38
 
+    @ObservedObject private var favicons = OperatorFavicons.shared
+
     @ViewBuilder var body: some View {
         if !line.lineSymbol.isEmpty {
             LineSymbolBadge(
@@ -72,6 +74,8 @@ struct LineLeadingBadge: View {
                 styleOverride: line.badgeStyleId,
                 lineId: line.id
             )
+        } else if let icon = favicons.icon(for: line.operatorId) {
+            OperatorIconPlate(icon: icon, size: dimension)
         } else {
             RoundedRectangle(cornerRadius: 4)
                 .fill(line.color)

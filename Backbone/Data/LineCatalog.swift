@@ -76,6 +76,8 @@ public struct CatalogOperator: Decodable, Identifiable, Hashable, Sendable {
     public let searchTerms: [String]?
     /// Logo-mark colour, when it differs from the lines' route colours.
     public let brandColorHex: String?
+    /// Official website, the source for the operator's favicon.
+    public let website: String?
 
     public var localizedName: String {
         let lang = Locale.current.language.languageCode?.identifier ?? "ja"

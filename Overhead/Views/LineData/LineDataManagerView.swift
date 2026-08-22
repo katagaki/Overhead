@@ -76,7 +76,8 @@ struct LineDataManagerView: View {
                       alignment: .leading, spacing: 6) {
                 ForEach(held) { line in
                     LineSymbolBadge(symbol: line.symbol, color: Color(hex: line.colorHex),
-                                    dimension: 26, styleOverride: line.badgeStyle)
+                                    dimension: 26, styleOverride: line.badgeStyle,
+                                    lineId: line.id)
                 }
             }
             if newCount > 0 {

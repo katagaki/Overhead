@@ -244,9 +244,10 @@ struct SearchSheet: View {
     private func operatorRow(_ hit: OperatorSearchHit) -> some View {
         selectionRow(.operatorLines(hit.operatorId)) {
             HStack(spacing: 10) {
-                Circle()
-                    .fill(OperatorSections.brandColor(for: hit.operatorId, lines: hit.lines))
-                    .frame(width: 16, height: 16)
+                OperatorIcon(
+                    operatorId: hit.operatorId,
+                    fallbackColor: OperatorSections.brandColor(for: hit.operatorId, lines: hit.lines)
+                )
                 VStack(alignment: .leading, spacing: 2) {
                     Text(hit.title)
                         .font(.system(size: 16, weight: .semibold))

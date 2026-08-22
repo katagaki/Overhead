@@ -308,7 +308,8 @@ struct MetroLCDView: View {
             ForEach(lines) { line in
                 LCDTransferLineName(name: line.name, fontSize: 6.5,
                                     symbol: line.lineSymbol, badgeColor: line.color,
-                                    badgeStyleId: line.badgeStyleId, kerning: -0.3)
+                                    badgeStyleId: line.badgeStyleId,
+                                    badgeLineId: line.id, kerning: -0.3)
             }
         }
         .padding(.horizontal, 1)
@@ -459,7 +460,8 @@ struct MetroLCDView: View {
             color: stationColor(station),
             size: .regular,
             stationName: station.name,
-            styleOverride: journey.line.badgeStyleId
+            styleOverride: journey.line.badgeStyleId,
+            lineId: journey.line.id
         )
         .scaleEffect(dimension / 28)
         .frame(width: dimension, height: dimension)

@@ -214,7 +214,8 @@ struct MillenniumLCDView: View {
                 color: stationColor(station),
                 size: .regular,
                 stationName: station.name,
-                styleOverride: journey.line.badgeStyleId
+                styleOverride: journey.line.badgeStyleId,
+                lineId: journey.line.id
             )
             .scaleEffect(dimension / 28)
             .frame(width: dimension, height: dimension)

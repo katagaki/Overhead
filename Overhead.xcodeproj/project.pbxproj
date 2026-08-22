@@ -10,7 +10,7 @@
 		7B5E01DF2F76257300861ADF /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7B5E01DE2F76257200861ADF /* WidgetKit.framework */; };
 		7B5E01E12F76257300861ADF /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7B5E01E02F76257300861ADF /* SwiftUI.framework */; };
 		7B5E01EE2F76257500861ADF /* LCDExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 7B5E01DC2F76257200861ADF /* LCDExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		E4BADE02303500010000BADE /* StaticData in Resources */ = {isa = PBXBuildFile; fileRef = E4BADE01303500010000BADE /* StaticData */; };
+		E4993C143039BF5B00B1D0C4 /* FaviconFinder in Frameworks */ = {isa = PBXBuildFile; productRef = E4993C133039BF5B00B1D0C4 /* FaviconFinder */; };
 		E4D93A112FF7F7C6004D37D7 /* Backbone.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4D93A0B2FF7F7C6004D37D7 /* Backbone.framework */; };
 		E4D93A122FF7F7C6004D37D7 /* Backbone.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E4D93A0B2FF7F7C6004D37D7 /* Backbone.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
@@ -71,10 +71,10 @@
 		E484513A301FFFA0005E7AA3 /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
 		E49259BD3035162B003CAF52 /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
 		E4926C893036E6F4003CAF52 /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
+		E4993B4C303977B900B1D0C4 /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
 		E49DCE832FFCFB2B005BA3DF /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
 		E49DCEF12FFD1371005BA3DF /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
 		E49DD0293000C7F8005BA3DF /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
-		E4BADE01303500010000BADE /* StaticData */ = {isa = PBXFileReference; lastKnownFileType = folder; path = StaticData; sourceTree = "<group>"; };
 		E4D93A0B2FF7F7C6004D37D7 /* Backbone.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Backbone.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4E1CE923024D6980033A11A /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
 		E4E1DC9E30283C570033A11A /* Overhead.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Overhead.xcodeproj; sourceTree = "<group>"; };
@@ -145,6 +145,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E4D93A112FF7F7C6004D37D7 /* Backbone.framework in Frameworks */,
+				E4993C143039BF5B00B1D0C4 /* FaviconFinder in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -173,7 +174,6 @@
 				7B5E01CC2F7624FC00861ADF /* Overhead */,
 				7B5E01E22F76257300861ADF /* LCD */,
 				E4D93A0C2FF7F7C6004D37D7 /* Backbone */,
-				E4BADE01303500010000BADE /* StaticData */,
 				7B5E01DD2F76257200861ADF /* Frameworks */,
 				7B5E01CB2F7624FC00861ADF /* Products */,
 				E49DCED12FFD1371005BA3DF /* Recovered References */,
@@ -244,6 +244,11 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		E4993B4D303977B900B1D0C4 /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
 		E49DCE842FFCFB2B005BA3DF /* Products */ = {
 			isa = PBXGroup;
 			name = Products;
@@ -269,6 +274,7 @@
 				E43D5CEE302AB76B00C689F6 /* Overhead.xcodeproj */,
 				E4039404302C006E00757750 /* Overhead.xcodeproj */,
 				E49259BD3035162B003CAF52 /* Overhead.xcodeproj */,
+				E4926C893036E6F4003CAF52 /* Overhead.xcodeproj */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -347,6 +353,7 @@
 			);
 			name = Overhead;
 			packageProductDependencies = (
+				E4993C133039BF5B00B1D0C4 /* FaviconFinder */,
 			);
 			productName = Overhead;
 			productReference = 7B5E01CA2F7624FC00861ADF /* Overhead.app */;
@@ -428,6 +435,9 @@
 			);
 			mainGroup = 7B5E01C12F7624FC00861ADF;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				E4993C123039BF5B00B1D0C4 /* XCRemoteSwiftPackageReference "FaviconFinder" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7B5E01CB2F7624FC00861ADF /* Products */;
 			projectDirPath = "";
@@ -489,6 +499,10 @@
 					ProjectRef = E49DCEF12FFD1371005BA3DF /* Overhead.xcodeproj */;
 				},
 				{
+					ProductGroup = E4993B4D303977B900B1D0C4 /* Products */;
+					ProjectRef = E4993B4C303977B900B1D0C4 /* Overhead.xcodeproj */;
+				},
+				{
 					ProductGroup = E49DD02A3000C7F8005BA3DF /* Products */;
 					ProjectRef = E49DD0293000C7F8005BA3DF /* Overhead.xcodeproj */;
 				},
@@ -533,7 +547,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E4BADE02303500010000BADE /* StaticData in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1008,6 +1021,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E4993C123039BF5B00B1D0C4 /* XCRemoteSwiftPackageReference "FaviconFinder" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/will-lumley/FaviconFinder";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.1.5;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E4993C133039BF5B00B1D0C4 /* FaviconFinder */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E4993C123039BF5B00B1D0C4 /* XCRemoteSwiftPackageReference "FaviconFinder" */;
+			productName = FaviconFinder;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 7B5E01C22F7624FC00861ADF /* Project object */;
 }

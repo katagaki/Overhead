@@ -32,6 +32,22 @@ struct MoreAttributionsView: View {
             } header: {
                 Text(verbatim: "OpenStreetMap")
             }
+            Section {
+                Text(verbatim: """
+                    Some railway operator logo marks are rasterised from vector \
+                    images hosted on Wikimedia Commons. These simple logo marks \
+                    are below the threshold of originality and are in the public \
+                    domain; other operator icons are the favicons published on \
+                    each operator's own website.
+
+                    All logo marks remain trademarks of their respective \
+                    operators and are used solely to identify the operators.
+
+                    https://commons.wikimedia.org
+                    """)
+            } header: {
+                Text(verbatim: "Wikimedia Commons")
+            }
             ForEach(Self.fonts, id: \.name) { font in
                 Section {
                     if let note = font.note {

@@ -267,7 +267,8 @@ struct FavoritesSection: View {
                 HStack(spacing: 5) {
                     ForEach(missing.prefix(3)) { line in
                         LineSymbolBadge(symbol: line.symbol, color: Color(hex: line.colorHex),
-                                        dimension: 18, styleOverride: line.badgeStyle)
+                                        dimension: 18, styleOverride: line.badgeStyle,
+                                        lineId: line.id)
                     }
                     if missing.count > 3 {
                         Text("+\(missing.count - 3)")

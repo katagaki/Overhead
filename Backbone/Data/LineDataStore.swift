@@ -24,6 +24,13 @@ public enum LineDataStore {
         installedDirectory(folder: folder).appendingPathComponent(file)
     }
 
+    /// Curated operator mark shipped with the seed, when the data has one.
+    public static func operatorIconURL(operatorId: String) -> URL? {
+        let name = operatorId.replacingOccurrences(of: ":", with: "_")
+        return bundle.url(forResource: name, withExtension: "png",
+                          subdirectory: "StaticData/OperatorIcons")
+    }
+
     static func bundleURL(folder: String, file: String) -> URL? {
         let name = (file as NSString).deletingPathExtension
         let ext = (file as NSString).pathExtension

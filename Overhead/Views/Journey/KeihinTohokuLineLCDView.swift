@@ -304,7 +304,8 @@ struct KeihinTohokuLineLCDView: View {
             ForEach(lines) { line in
                 LCDTransferLineName(name: line.name, fontSize: 6.5,
                                     symbol: line.lineSymbol, badgeColor: line.color,
-                                    badgeStyleId: line.badgeStyleId)
+                                    badgeStyleId: line.badgeStyleId,
+                                    badgeLineId: line.id)
             }
         }
         .padding(.horizontal, 1)
@@ -442,7 +443,8 @@ struct KeihinTohokuLineLCDView: View {
             color: stationColor(station),
             size: .regular,
             stationName: station.name,
-            styleOverride: journey.line.badgeStyleId
+            styleOverride: journey.line.badgeStyleId,
+            lineId: journey.line.id
         )
         .scaleEffect(dimension / 28)
         .frame(width: dimension, height: dimension)

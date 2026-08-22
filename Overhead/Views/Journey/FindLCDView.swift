@@ -79,7 +79,7 @@ struct FindLCDView: View {
 
     private var bullet: some View {
         LineSymbolBadge(symbol: journey.line.lineSymbol, color: lineColor, dimension: 26,
-                        styleOverride: journey.line.badgeStyleId)
+                        styleOverride: journey.line.badgeStyleId, lineId: journey.line.id)
     }
 
     // MARK: - Strip Map

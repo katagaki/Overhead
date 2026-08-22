@@ -11,8 +11,11 @@ if [ ! -f "$DATA/catalog.json" ]; then
   exit 1
 fi
 
-rm -rf "$SEED/BadgeStyles"
+rm -rf "$SEED/BadgeStyles" "$SEED/OperatorIcons"
 mkdir -p "$SEED"
 cp "$DATA/catalog.json" "$SEED/catalog.json"
 cp -R "$DATA/BadgeStyles" "$SEED/BadgeStyles"
-echo "seed refreshed: catalog + $(ls "$SEED/BadgeStyles" | wc -l | tr -d ' ') styles"
+if [ -d "$DATA/OperatorIcons" ]; then
+  cp -R "$DATA/OperatorIcons" "$SEED/OperatorIcons"
+fi
+echo "seed refreshed: catalog + $(ls "$SEED/BadgeStyles" | wc -l | tr -d ' ') styles + $(ls "$SEED/OperatorIcons" 2>/dev/null | wc -l | tr -d ' ') operator icons"

@@ -99,7 +99,8 @@ struct AvoidLinesSheet: View {
                         symbol: line.lineSymbol,
                         color: line.color,
                         dimension: 30,
-                        styleOverride: line.badgeStyleId
+                        styleOverride: line.badgeStyleId,
+                        lineId: line.id
                     )
                 } else {
                     RoundedRectangle(cornerRadius: 3)

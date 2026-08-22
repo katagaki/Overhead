@@ -120,7 +120,8 @@ struct LineDataBadgeWall: View {
             ForEach(lines) { line in
                 BadgeOutline(width: 1.5) {
                     LineSymbolBadge(symbol: line.symbol, color: Color(hex: line.colorHex),
-                                    dimension: dimension, styleOverride: line.badgeStyle)
+                                    dimension: dimension, styleOverride: line.badgeStyle,
+                                    lineId: line.id)
                 }
             }
         }
