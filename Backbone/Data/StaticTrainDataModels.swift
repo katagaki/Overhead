@@ -86,11 +86,20 @@ public enum ScheduleCalendar: String, Codable, CaseIterable, Sendable {
 // MARK: - Delay Check Info
 
 public struct DelayCheckInfo: Codable, Hashable {
-    public let statusPageURL: String
-    public let statusPageURLEn: String
+    public let statusPageURLText: LocalizedText
     public let xAccount: String?
-    public let checkMethodJa: String
-    public let checkMethodEn: String
+    public let checkMethodText: LocalizedText
+
+    enum CodingKeys: String, CodingKey {
+        case xAccount
+        case statusPageURLText = "statusPageURL"
+        case checkMethodText = "checkMethod"
+    }
+
+    public var statusPageURL: String { statusPageURLText.ja }
+    public var statusPageURLEn: String { statusPageURLText.en }
+    public var checkMethodJa: String { checkMethodText.ja }
+    public var checkMethodEn: String { checkMethodText.en }
 
     public var localizedCheckMethod: String {
         let lang = Locale.current.language.languageCode?.identifier ?? "ja"
@@ -120,8 +129,10 @@ public struct ExactRun: Codable, Hashable {
     public let trainType: TrainService.TrainType?
     public let stopIndices: [Int]?
     // Off-line terminus for through-runs (行き先 as riders see it, e.g. 成田).
-    public let throughDestJa: String?
-    public let throughDestEn: String?
+    public let throughDest: LocalizedText?
+
+    public var throughDestJa: String? { throughDest?.ja }
+    public var throughDestEn: String? { throughDest?.en }
 
     public init(_ departure: String, terminusStationId: String? = nil,
                 startsHere: Bool = true, continuesBeyond: Bool = false,
@@ -134,8 +145,9 @@ public struct ExactRun: Codable, Hashable {
         self.continuesBeyond = continuesBeyond
         self.trainType = trainType
         self.stopIndices = stopIndices
-        self.throughDestJa = throughDestJa
-        self.throughDestEn = throughDestEn
+        self.throughDest = (throughDestJa == nil && throughDestEn == nil)
+            ? nil
+            : LocalizedText(ja: throughDestJa ?? "", en: throughDestEn ?? "")
     }
 }
 
@@ -196,8 +208,10 @@ public struct IntermediateOrigin: Codable, Hashable {
 
 public struct StaticLineDirection: Codable, Hashable {
     public let id: String        // e.g. "static.RailDirection:TokyoMetro.Ginza.Asakusa"
-    public let nameJa: String    // e.g. "浅草方面"
-    public let nameEn: String    // e.g. "For Asakusa"
+    public let name: LocalizedText  // e.g. 「浅草方面」/ "For Asakusa"
+
+    public var nameJa: String { name.ja }
+    public var nameEn: String { name.en }
     public let isAscending: Bool // true: trains run through `stations` in array order; false: reversed
     public let weekday: ServicePattern
     public let saturdayHoliday: ServicePattern
@@ -213,8 +227,7 @@ public struct StaticLineDirection: Codable, Hashable {
         expressSaturdayHolidayRuns: [ExactRun] = []
     ) {
         self.id = id
-        self.nameJa = nameJa
-        self.nameEn = nameEn
+        self.name = LocalizedText(ja: nameJa, en: nameEn)
         self.isAscending = isAscending
         self.weekday = weekday
         self.saturdayHoliday = saturdayHoliday
@@ -244,12 +257,26 @@ public struct ThroughService: Codable, Hashable {
 
     public let junctionStationId: String
     public let end: LineEnd
-    public let lineNameJa: String   // e.g. "東急東横線"
-    public let lineNameEn: String   // e.g. "Tokyu Toyoko Line"
-    public let towardJa: String     // e.g. "元町・中華街方面"
-    public let towardEn: String     // e.g. "for Motomachi-Chukagai"
+    public let lineName: LocalizedText  // e.g. 「東急東横線」
+    public let toward: LocalizedText    // e.g. 「元町・中華街方面」
+
+    public var lineNameJa: String { lineName.ja }
+    public var lineNameEn: String { lineName.en }
+    public var towardJa: String { toward.ja }
+    public var towardEn: String { toward.en }
     // Set when the connecting line is bundled in the app; nil for external operators
     public var connectingLineId: String? = nil
+
+    public init(junctionStationId: String, end: LineEnd,
+                lineNameJa: String, lineNameEn: String,
+                towardJa: String, towardEn: String,
+                connectingLineId: String? = nil) {
+        self.junctionStationId = junctionStationId
+        self.end = end
+        self.lineName = LocalizedText(ja: lineNameJa, en: lineNameEn)
+        self.toward = LocalizedText(ja: towardJa, en: towardEn)
+        self.connectingLineId = connectingLineId
+    }
 
     public var localizedLineName: String {
         let lang = Locale.current.language.languageCode?.identifier ?? "ja"
@@ -273,15 +300,19 @@ public struct TimetableRun: Hashable, Sendable, Codable {
     public let type: TrainService.TrainType
     public let terminates: Bool
     // Off-line terminus for through-runs (行き先 as riders see it, e.g. 我孫子).
-    public var throughDestJa: String? = nil
-    public var throughDestEn: String? = nil
+    public var throughDest: LocalizedText? = nil
+
+    public var throughDestJa: String? { throughDest?.ja }
+    public var throughDestEn: String? { throughDest?.en }
     public init(_ calendar: ScheduleCalendar, _ ascending: Bool, _ startIndex: Int,
                 _ startsHere: Bool, _ type: TrainService.TrainType, _ stops: [Int],
                 terminates: Bool = true, throughDestJa: String? = nil, throughDestEn: String? = nil) {
         self.calendar = calendar; self.ascending = ascending; self.startIndex = startIndex
         self.startsHere = startsHere; self.type = type; self.stops = stops
         self.terminates = terminates
-        self.throughDestJa = throughDestJa; self.throughDestEn = throughDestEn
+        self.throughDest = (throughDestJa == nil && throughDestEn == nil)
+            ? nil
+            : LocalizedText(ja: throughDestJa ?? "", en: throughDestEn ?? "")
     }
 }
 
@@ -303,8 +334,10 @@ public struct ScheduleRevision: Codable, Hashable {
     /// First service day the revision applies to, `yyyy-MM-dd`, JST.
     public let validFrom: String
     /// Rider-facing name of the revision, for provenance in the data files.
-    public var nameJa: String? = nil
-    public var nameEn: String? = nil
+    public var name: LocalizedText? = nil
+
+    public var nameJa: String? { name?.ja }
+    public var nameEn: String? { name?.en }
 
     public var directions: [StaticLineDirection]? = nil
     public var hopTimesMinutes: [Double]? = nil
@@ -327,9 +360,11 @@ public struct ScheduleRevision: Codable, Hashable {
 
 public struct StaticTrainLine: Codable, Hashable {
     public let id: String          // e.g. "Railway:JR-East.Yamanote"
-    public let nameJa: String
-    public let nameEn: String
+    public let name: LocalizedText
     public let operatorId: String  // e.g. "Operator:JR-East"
+
+    public var nameJa: String { name.ja }
+    public var nameEn: String { name.en }
     public let colorHex: String
     public let stations: [Station]
     public var hopTimesMinutes: [Double] // count == stations.count - 1
@@ -349,6 +384,64 @@ public struct StaticTrainLine: Codable, Hashable {
     /// An extra section inside the operator, e.g. JR East's どこトレ lines.
     /// Optional for the same reason as `scheduleRevisions`.
     public var segment: String? = nil
+
+    public init(id: String, name: LocalizedText, operatorId: String,
+                colorHex: String, stations: [Station], hopTimesMinutes: [Double],
+                upHopTimesMinutes: [Double]? = nil,
+                exactStationTimes: [String: [Int]]? = nil,
+                timetableRuns: [TimetableRun]? = nil,
+                isLoop: Bool = false, directions: [StaticLineDirection],
+                delayInfo: DelayCheckInfo,
+                throughServices: [ThroughService] = [],
+                stopPatterns: [TrainService.TrainType: Set<Int>] = [:],
+                scheduleRevisions: [ScheduleRevision]? = nil,
+                segment: String? = nil) {
+        self.id = id
+        self.name = name
+        self.operatorId = operatorId
+        self.colorHex = colorHex
+        self.stations = stations
+        self.hopTimesMinutes = hopTimesMinutes
+        self.upHopTimesMinutes = upHopTimesMinutes
+        self.exactStationTimes = exactStationTimes
+        self.timetableRuns = timetableRuns
+        self.isLoop = isLoop
+        self.directions = directions
+        self.delayInfo = delayInfo
+        self.throughServices = throughServices
+        self.stopPatterns = stopPatterns
+        self.scheduleRevisions = scheduleRevisions
+        self.segment = segment
+    }
+
+    public init(id: String, nameJa: String, nameEn: String, operatorId: String,
+                colorHex: String, stations: [Station], hopTimesMinutes: [Double],
+                upHopTimesMinutes: [Double]? = nil,
+                exactStationTimes: [String: [Int]]? = nil,
+                timetableRuns: [TimetableRun]? = nil,
+                isLoop: Bool = false, directions: [StaticLineDirection],
+                delayInfo: DelayCheckInfo,
+                throughServices: [ThroughService] = [],
+                stopPatterns: [TrainService.TrainType: Set<Int>] = [:],
+                scheduleRevisions: [ScheduleRevision]? = nil,
+                segment: String? = nil) {
+        self.id = id
+        self.name = LocalizedText(ja: nameJa, en: nameEn)
+        self.operatorId = operatorId
+        self.colorHex = colorHex
+        self.stations = stations
+        self.hopTimesMinutes = hopTimesMinutes
+        self.upHopTimesMinutes = upHopTimesMinutes
+        self.exactStationTimes = exactStationTimes
+        self.timetableRuns = timetableRuns
+        self.isLoop = isLoop
+        self.directions = directions
+        self.delayInfo = delayInfo
+        self.throughServices = throughServices
+        self.stopPatterns = stopPatterns
+        self.scheduleRevisions = scheduleRevisions
+        self.segment = segment
+    }
 
     /// This line's timetable as it stands on `dayKey` (yyyyMMdd, JST), with every
     /// revision that has come into force applied in announcement order.
@@ -374,8 +467,11 @@ public struct StaticTrainLine: Codable, Hashable {
     public var trainLine: TrainLine {
         TrainLine(
             id: id,
-            name: nameJa,
-            nameEn: nameEn,
+            name: name.ja,
+            nameEn: name.en,
+            nameKo: name.ko,
+            nameZhHans: name.zhHans,
+            nameZhHant: name.zhHant,
             operatorId: operatorId,
             stations: stations,
             colorHex: colorHex,
@@ -1201,8 +1297,8 @@ public enum StaticTrainData {
 
         var composite = StaticTrainLine(
             id: "\(origin.id)+\(target.id)",
-            nameJa: "\(origin.nameJa)〜\(target.nameJa)",
-            nameEn: "\(origin.nameEn) – \(target.nameEn)",
+            name: LocalizedText.joined(origin.name, target.name,
+                                       separator: "〜", englishSeparator: " – "),
             operatorId: origin.operatorId,
             colorHex: origin.colorHex,
             stations: stations,

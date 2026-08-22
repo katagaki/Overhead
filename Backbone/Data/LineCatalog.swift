@@ -6,8 +6,6 @@ import Foundation
 public struct CatalogLine: Decodable, Identifiable, Hashable, Sendable {
     public let id: String
     public let folder: String
-    public let nameJa: String
-    public let nameEn: String
     public let operatorId: String
     public let colorHex: String
     public let isLoop: Bool
@@ -22,10 +20,12 @@ public struct CatalogLine: Decodable, Identifiable, Hashable, Sendable {
     /// Section within the operator, when it publishes more than one.
     public let segment: String?
 
-    public var localizedName: String {
-        let lang = Locale.current.language.languageCode?.identifier ?? "ja"
-        return lang == "en" && !nameEn.isEmpty ? nameEn : nameJa
-    }
+    /// Every language the data carries, under the data's `name` key.
+    public let name: LocalizedText
+
+    public var nameJa: String { name.ja }
+    public var nameEn: String { name.en }
+    public var localizedName: String { name.localized }
 }
 
 /// Every station in the network, so search and 付近の駅 cover lines that are
@@ -34,16 +34,16 @@ public struct CatalogStation: Decodable, Hashable, Sendable {
     public let id: String
     public let lineId: String
     public let index: Int
-    public let nameJa: String
-    public let nameEn: String
     public let code: String
     public let lat: Double?
     public let lon: Double?
 
-    public var localizedName: String {
-        let lang = Locale.current.language.languageCode?.identifier ?? "ja"
-        return lang == "en" && !nameEn.isEmpty ? nameEn : nameJa
-    }
+    /// Every language the data carries, under the data's `name` key.
+    public let name: LocalizedText
+
+    public var nameJa: String { name.ja }
+    public var nameEn: String { name.en }
+    public var localizedName: String { name.localized }
 }
 
 /// An extra section inside an operator — JR East lists its どこトレ lines apart
@@ -51,29 +51,23 @@ public struct CatalogStation: Decodable, Hashable, Sendable {
 public struct CatalogSegment: Decodable, Identifiable, Hashable, Sendable {
     public let id: String
     public let operatorId: String
-    public let nameJa: String
-    public let nameEn: String
     /// Position among that operator's segments.
     public let order: Int
     /// Readings and aliases, since the names are kanji/kana only.
     public let searchTerms: [String]?
-    /// Optional: catalogs published before the names carried ko/zh omit them.
-    public let nameKo: String?
-    public let nameZhHans: String?
-    public let nameZhHant: String?
 
-    public var localizedName: String {
-        CatalogNames.pick(ja: nameJa, en: nameEn, ko: nameKo,
-                          zhHans: nameZhHans, zhHant: nameZhHant)
-    }
+    /// Every language the data carries, under the data's `name` key.
+    public let name: LocalizedText
+
+    public var nameJa: String { name.ja }
+    public var nameEn: String { name.en }
+    public var localizedName: String { name.localized }
 }
 
 /// An operator's name, ordering, and search aliases. Data, so a new
 /// company needs no app release.
 public struct CatalogOperator: Decodable, Identifiable, Hashable, Sendable {
     public let id: String
-    public let nameJa: String
-    public let nameEn: String
     /// Position among the operator sections.
     public let order: Int
     /// Readings and aliases, since the names are kanji/kana only.
@@ -82,36 +76,15 @@ public struct CatalogOperator: Decodable, Identifiable, Hashable, Sendable {
     public let brandColorHex: String?
     /// Official website, the source for the operator's favicon.
     public let website: String?
-    /// Optional: catalogs published before the names carried ko/zh omit them.
-    public let nameKo: String?
-    public let nameZhHans: String?
-    public let nameZhHant: String?
 
-    public var localizedName: String {
-        CatalogNames.pick(ja: nameJa, en: nameEn, ko: nameKo,
-                          zhHans: nameZhHans, zhHant: nameZhHant)
-    }
+    /// Every language the data carries, under the data's `name` key.
+    public let name: LocalizedText
+
+    public var nameJa: String { name.ja }
+    public var nameEn: String { name.en }
+    public var localizedName: String { name.localized }
 }
 
-/// The catalog's names arrive per language, and Japanese is the one every
-/// entry has, so it is what an untranslated name falls back to.
-enum CatalogNames {
-    static func pick(ja: String, en: String, ko: String?,
-                     zhHans: String?, zhHant: String?) -> String {
-        func or(_ value: String?) -> String {
-            let value = value ?? ""
-            return value.isEmpty ? ja : value
-        }
-        switch Locale.current.language.languageCode?.identifier ?? "ja" {
-        case "en": return or(en)
-        case "ko": return or(ko)
-        case "zh":
-            let script = Locale.current.language.script?.identifier ?? ""
-            return or(script == "Hant" ? zhHant : zhHans)
-        default: return ja
-        }
-    }
-}
 
 public struct LineCatalog: Decodable, Sendable {
     public let schemaVersion: Int
@@ -152,7 +125,7 @@ public struct LineCatalog: Decodable, Sendable {
 public enum Catalog {
 
     /// A catalog claiming a newer schema is ignored rather than half-read.
-    public static let supportedSchemaVersion = 1
+    public static let supportedSchemaVersion = 2
 
     private static let lock = NSLock()
     private static var loaded: LineCatalog?
