@@ -10,16 +10,26 @@ struct OperatorLinesView: View {
 
     @State private var selectedLine: TrainLine?
 
-    private var lines: [TrainLine] {
-        OperatorSections.companies(for: viewModel.availableLines)
-            .first { $0.operatorId == operatorId }?
-            .lines ?? []
+    private var groups: [(id: String, title: String?, lines: [TrainLine])] {
+        OperatorSections.groups(forOperator: operatorId, lines: viewModel.availableLines)
     }
 
     var body: some View {
         ScrollView {
-            LineGrid(lines: lines) { line in
-                selectedLine = line
+            VStack(alignment: .leading, spacing: 18) {
+                ForEach(groups, id: \.id) { group in
+                    VStack(alignment: .leading, spacing: 10) {
+                        if let title = group.title {
+                            Text(title)
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                                .padding(.horizontal, 6)
+                        }
+                        LineGrid(lines: group.lines) { line in
+                            selectedLine = line
+                        }
+                    }
+                }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)

@@ -5,40 +5,74 @@ import SwiftUI
 /// from `StaticData/Lines/<Folder>/Badge.json`.
 public enum BadgeStyles {
 
-    private final class BundleToken {}
-    private static let bundle = Bundle(for: BundleToken.self)
+    private static let tablesLock = NSLock()
+    private static var cachedSpecs: [String: BadgeStyleSpec]?
+    private static var cachedConfigs: [String: LineBadgeConfig]?
+    private static var cachedIndex: (bySymbol: [String: String], bySymbolColor: [String: String])?
 
-    private static let specs: [String: BadgeStyleSpec] = {
+    /// Built outside the lock. `NSLock` is not recursive, and these tables
+    /// reach through each other — the index reads the configs — so holding it
+    /// across a build deadlocks the thread that is drawing a badge.
+    private static var specs: [String: BadgeStyleSpec] {
+        tablesLock.lock()
+        if let cachedSpecs { tablesLock.unlock(); return cachedSpecs }
+        tablesLock.unlock()
+        let built = buildSpecs()
+        tablesLock.lock(); cachedSpecs = built; tablesLock.unlock()
+        return built
+    }
+
+    /// Call when the underlying data changes.
+    public static func invalidate() {
+        tablesLock.lock()
+        cachedSpecs = nil; cachedConfigs = nil; cachedIndex = nil
+        tablesLock.unlock()
+    }
+
+    private static func buildSpecs() -> [String: BadgeStyleSpec] {
         var out: [String: BadgeStyleSpec] = [:]
-        let urls = bundle.urls(forResourcesWithExtension: "json",
-                              subdirectory: "StaticData/BadgeStyles") ?? []
-        for url in urls {
-            guard let data = try? Data(contentsOf: url),
-                  let spec = try? JSONDecoder().decode(BadgeStyleSpec.self, from: data)
+        for data in LineDataStore.badgeStyleData() {
+            guard let spec = try? JSONDecoder().decode(BadgeStyleSpec.self, from: data)
             else { continue }
             out[spec.id] = spec
         }
         return out
-    }()
+    }
 
-    private static let configs: [String: LineBadgeConfig] = {
+    private static var configs: [String: LineBadgeConfig] {
+        tablesLock.lock()
+        if let cachedConfigs { tablesLock.unlock(); return cachedConfigs }
+        tablesLock.unlock()
+        let built = buildConfigs()
+        tablesLock.lock(); cachedConfigs = built; tablesLock.unlock()
+        return built
+    }
+
+    private static func buildConfigs() -> [String: LineBadgeConfig] {
         var out: [String: LineBadgeConfig] = [:]
-        for folder in StaticTrainData.lineFolders {
-            guard let url = bundle.url(forResource: "Badge", withExtension: "json",
-                                       subdirectory: "StaticData/Lines/\(folder)"),
-                  let data = try? Data(contentsOf: url),
+        for line in Catalog.current.lines {
+            guard let data = LineDataStore.data(folder: line.folder, file: "Badge.json"),
                   let file = try? JSONDecoder().decode(BadgeFile.self, from: data)
             else { continue }
             out.merge(file.lines) { a, _ in a }
         }
         return out
-    }()
+    }
 
     private struct BadgeFile: Decodable { let lines: [String: LineBadgeConfig] }
 
     /// Symbol -> style, plus symbol+colour for the prefixes two operators share
     /// ("G" is Ginza and Yokohama Green; "SR" is Saitama Railway and Shibayama).
-    private static let index: (bySymbol: [String: String], bySymbolColor: [String: String]) = {
+    private static var index: (bySymbol: [String: String], bySymbolColor: [String: String]) {
+        tablesLock.lock()
+        if let cachedIndex { tablesLock.unlock(); return cachedIndex }
+        tablesLock.unlock()
+        let built = buildIndex()
+        tablesLock.lock(); cachedIndex = built; tablesLock.unlock()
+        return built
+    }
+
+    private static func buildIndex() -> (bySymbol: [String: String], bySymbolColor: [String: String]) {
         var bySymbol: [String: String] = [:]
         var bySymbolColor: [String: String] = [:]
         var ambiguous: Set<String> = []
@@ -48,13 +82,13 @@ public enum BadgeStyles {
                 ambiguous.insert(config.symbol)
             }
             bySymbol[config.symbol] = config.style
-            if let hex = StaticTrainData.colorHex(forLineId: lineId) {
+            if let hex = Catalog.line(id: lineId)?.colorHex {
                 bySymbolColor["\(config.symbol)|\(hex.uppercased())"] = config.style
             }
         }
         for symbol in ambiguous { bySymbol.removeValue(forKey: symbol) }
         return (bySymbol, bySymbolColor)
-    }()
+    }
 
     /// Anything unrecognised falls back to the JR plate.
     public static let fallbackStyleId = "jr"

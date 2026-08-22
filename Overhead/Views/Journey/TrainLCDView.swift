@@ -27,7 +27,7 @@ struct TrainLCDView: View {
     /// Header HStack spacing plus the car column's slack left of its white box.
     private static let nameOverhang: CGFloat = 10 + (56 - 18) - 4
 
-    private static let allLines = StaticTrainData.trainLines()
+    private static var allLines: [TrainLine] { StaticTrainData.trainLines() }
     private static let clockFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "H:mm"

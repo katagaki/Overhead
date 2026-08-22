@@ -5,29 +5,25 @@ import Backbone
 // MARK: - Operator Sections
 
 enum OperatorSections {
-    /// Lines whose positions JR East publishes through どこトレ, not the main
-    /// app. Listed apart so the JR東 section stays the urban network.
-    static let dokoTrainSectionId = "Section:DokoTrain"
-    static let dokoTrainRailways: Set<String> = [
-        "Railway:JR-East.Uchibo",
-        "Railway:JR-East.Sotobo",
-        "Railway:JR-East.Sobu",
-        "Railway:JR-East.Narita",
-        "Railway:JR-East.NaritaAbikoBranch",
-        "Railway:JR-East.NaritaAirportBranch",
-        "Railway:JR-East.Togane",
-        "Railway:JR-East.Kashima",
-        "Railway:JR-East.Kururi",
-        "Railway:JR-East.Sagami",
-        "Railway:JR-East.Hachiko",
-        "Railway:JR-East.Kawagoe",
-        "Railway:JR-East.Joetsu",
-        "Railway:JR-East.Agatsuma"
-    ]
+    /// Sections that are not operators: an operator's own extra segments,
+    /// named in the data (`Segments.json`). `Section:` keeps them apart from
+    /// operator ids in the same section-id namespace.
+    static let segmentPrefix = "Section:"
+
+    /// Which section a line belongs to: its operator, or that operator's
+    /// segment when the data puts it in one.
+    static func sectionId(for line: TrainLine) -> String {
+        guard let segment = line.segmentId else { return line.operatorId }
+        return segmentPrefix + segment
+    }
+
+    static func segment(forSectionId sectionId: String) -> CatalogSegment? {
+        guard sectionId.hasPrefix(segmentPrefix) else { return nil }
+        return Catalog.segment(id: String(sectionId.dropFirst(segmentPrefix.count)))
+    }
 
     static let order = [
         "Operator:JR-East",
-        dokoTrainSectionId,
         "Operator:TokyoMetro",
         "Operator:Toei",
         "Operator:Keisei",
@@ -65,7 +61,6 @@ enum OperatorSections {
     /// String catalog keys, resolved in `title(for:)`.
     static let titleKeys: [String: String] = [
         "Operator:JR-East": "Operator.JREast",
-        dokoTrainSectionId: "Operator.DokoTrain",
         "Operator:TokyoMetro": "Operator.TokyoMetro",
         "Operator:Toei": "Operator.Toei",
         "Operator:Keisei": "Operator.Keisei",
@@ -101,6 +96,7 @@ enum OperatorSections {
     ]
 
     static func title(for operatorId: String) -> String {
+        if let segment = segment(forSectionId: operatorId) { return segment.localizedName }
         guard let key = titleKeys[operatorId] else { return operatorId }
         return String(localized: String.LocalizationValue(key))
     }
@@ -110,7 +106,6 @@ enum OperatorSections {
     static let searchTerms: [String: [String]] = [
         // どこトレ is JR東's own position service, so it finds JR東.
         "Operator:JR-East": ["JR East", "JR東日本", "ジェイアール", "jeiaru", "どこトレ", "dokotore"],
-        dokoTrainSectionId: ["どこトレ", "dokotore", "doko train"],
         "Operator:TokyoMetro": ["東京メトロ", "とうきょうめとろ", "tokyo metro", "営団"],
         "Operator:Toei": ["都営地下鉄", "とえい", "toei"],
         "Operator:Keisei": ["けいせい", "keisei"],
@@ -164,6 +159,8 @@ enum OperatorSections {
     ]
 
     static func brandColor(for operatorId: String, lines: [TrainLine]) -> Color {
+        // A segment wears its operator's colours.
+        let operatorId = segment(forSectionId: operatorId)?.operatorId ?? operatorId
         if let hex = brandColorHex[operatorId] {
             return Color(hex: hex)
         }
@@ -179,7 +176,8 @@ enum OperatorSections {
         let key = JapaneseSearch.searchKey(trimmed)
         let kana = JapaneseSearch.kanaFolded(trimmed)
 
-        for candidate in (searchTerms[operatorId] ?? []) + [title(for: operatorId)] {
+        let terms = segment(forSectionId: operatorId)?.searchTerms ?? searchTerms[operatorId] ?? []
+        for candidate in terms + [title(for: operatorId)] {
             if candidate.lowercased().contains(lowered) { return true }
             if !key.isEmpty, JapaneseSearch.searchKey(candidate).contains(key) { return true }
             if !kana.isEmpty, JapaneseSearch.kanaFolded(candidate).contains(kana) { return true }
@@ -205,15 +203,47 @@ enum OperatorSections {
     static func sections(
         for lines: [TrainLine]
     ) -> [(operatorId: String, title: String, lines: [TrainLine])] {
-        let grouped = Dictionary(grouping: lines) {
-            dokoTrainRailways.contains($0.id) ? dokoTrainSectionId : $0.operatorId
+        let grouped = Dictionary(grouping: lines, by: sectionId(for:))
+        // Each operator is followed by its own segments.
+        var sectionOrder: [String] = []
+        for operatorId in order {
+            if grouped[operatorId] != nil { sectionOrder.append(operatorId) }
+            for segment in Catalog.segments(ofOperator: operatorId) {
+                let id = segmentPrefix + segment.id
+                if grouped[id] != nil { sectionOrder.append(id) }
+            }
         }
-        let sectionOrder = order.filter { grouped[$0] != nil }
-            + grouped.keys.filter { !order.contains($0) }.sorted()
+        sectionOrder += grouped.keys.filter { !sectionOrder.contains($0) }.sorted()
         return sectionOrder.compactMap { operatorId in
             guard let lines = grouped[operatorId] else { return nil }
             return (operatorId, title(for: operatorId), sortedBySymbol(lines))
         }
+    }
+
+    /// One operator's lines, split into its own and each of its segments.
+    /// The default group has no title — the screen is already named for it.
+    static func groups(
+        forOperator operatorId: String, lines: [TrainLine]
+    ) -> [(id: String, title: String?, lines: [TrainLine])] {
+        let mine = lines.filter { $0.operatorId == operatorId }
+        var out: [(id: String, title: String?, lines: [TrainLine])] = []
+        let ownLines = mine.filter { $0.segmentId == nil }
+        if !ownLines.isEmpty {
+            out.append((operatorId, nil, sortedBySymbol(ownLines)))
+        }
+        for segment in Catalog.segments(ofOperator: operatorId) {
+            let segmentLines = mine.filter { $0.segmentId == segment.id }
+            guard !segmentLines.isEmpty else { continue }
+            out.append((segmentPrefix + segment.id, segment.localizedName,
+                        sortedBySymbol(segmentLines)))
+        }
+        // A segment the catalog no longer names still has to go somewhere.
+        let placed = Set(out.flatMap { $0.lines.map(\.id) })
+        let orphans = mine.filter { !placed.contains($0.id) }
+        if !orphans.isEmpty {
+            out.append((operatorId + ".other", nil, sortedBySymbol(orphans)))
+        }
+        return out
     }
 
     /// Grouped by the company that actually runs the lines: どこトレ is a
@@ -222,7 +252,7 @@ enum OperatorSections {
         for lines: [TrainLine]
     ) -> [(operatorId: String, title: String, lines: [TrainLine])] {
         let grouped = Dictionary(grouping: lines, by: \.operatorId)
-        let companyOrder = order.filter { $0 != dokoTrainSectionId && grouped[$0] != nil }
+        let companyOrder = order.filter { grouped[$0] != nil }
             + grouped.keys.filter { !order.contains($0) }.sorted()
         return companyOrder.compactMap { operatorId in
             guard let lines = grouped[operatorId] else { return nil }

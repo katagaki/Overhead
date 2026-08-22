@@ -22,7 +22,7 @@ struct KeihinTohokuLineLCDView: View {
     private static let markerGreenDark = Color(hex: "#1D981A")
     private static let languageFlipSeconds = 4.0
 
-    private static let allLines = StaticTrainData.trainLines()
+    private static var allLines: [TrainLine] { StaticTrainData.trainLines() }
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 0.5)) { context in

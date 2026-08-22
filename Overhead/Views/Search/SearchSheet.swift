@@ -11,11 +11,25 @@ struct SearchSheet: View {
 
     @State private var searchText = ""
     @State private var scope: SearchScope
+    @State private var results = Results.empty
     @FocusState private var searchFocused: Bool
     @Environment(\.dismiss) private var dismiss
 
     /// How many of each kind the combined scope shows before もっと見る.
     private static let previewLimit = 5
+    /// A loose query matches hundreds of stops; rows past this are noise, and
+    /// drawing their plates is what makes typing stutter.
+    private static let scopeLimit = 100
+
+    /// One query's hits, computed off the main thread.
+    private struct Results {
+        var operators: [OperatorSearchHit] = []
+        var lines: [TrainLine] = []
+        var stations: [StationSearchHit] = []
+
+        static let empty = Results()
+        var isEmpty: Bool { operators.isEmpty && lines.isEmpty && stations.isEmpty }
+    }
 
     init(lines: [TrainLine], initialScope: SearchScope = .all, onSelect: @escaping (SearchDestination) -> Void) {
         self.lines = lines
@@ -27,16 +41,32 @@ struct SearchSheet: View {
         searchText.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    private var operatorHits: [OperatorSearchHit] {
-        CatalogSearch.operators(in: lines, query: query)
+    /// Every operator, for the idle browse list.
+    private var allOperators: [OperatorSearchHit] {
+        CatalogSearch.operators(in: lines, query: "")
     }
 
-    private var lineHits: [TrainLine] {
-        CatalogSearch.lines(in: lines, query: query)
-    }
-
-    private var stationHits: [StationSearchHit] {
-        StationSearch.search(lines: lines, query: query)
+    /// Debounced, and off the main thread: the whole network is 2,000 stations,
+    /// and a one-character query touches most of them. Explicitly main-actor:
+    /// the detached task resumes on a background executor, and a state write
+    /// from there never reaches the view.
+    @MainActor
+    private func runSearch() async {
+        let text = query
+        guard !text.isEmpty else {
+            results = .empty
+            return
+        }
+        try? await Task.sleep(for: .milliseconds(150))
+        guard !Task.isCancelled else { return }
+        let source = lines
+        let computed = await Task.detached(priority: .userInitiated) {
+            Results(operators: CatalogSearch.operators(in: source, query: text),
+                    lines: CatalogSearch.lines(in: source, query: text),
+                    stations: StationSearch.search(lines: source, query: text))
+        }.value
+        guard !Task.isCancelled else { return }
+        results = computed
     }
 
     var body: some View {
@@ -66,6 +96,9 @@ struct SearchSheet: View {
                     }
                 }
             }
+        }
+        .task(id: query) {
+            await runSearch()
         }
         .onAppear {
             searchFocused = true
@@ -126,12 +159,12 @@ struct SearchSheet: View {
         switch scope {
         case .all, .operators:
             Section("Search.Section.Operators") {
-                ForEach(operatorHits) { hit in
+                ForEach(allOperators) { hit in
                     operatorRow(hit)
                 }
             }
         case .lines:
-            ForEach(operatorHits) { hit in
+            ForEach(allOperators) { hit in
                 Section(hit.title) {
                     ForEach(hit.lines) { line in
                         lineRow(line)
@@ -147,11 +180,11 @@ struct SearchSheet: View {
 
     @ViewBuilder
     private var resultsContent: some View {
-        let operators = operatorHits
-        let matchedLines = lineHits
-        let stations = stationHits
+        let operators = results.operators
+        let matchedLines = results.lines
+        let stations = results.stations
 
-        if operators.isEmpty, matchedLines.isEmpty, stations.isEmpty {
+        if results.isEmpty {
             hintRow("Search.NoResults")
         } else {
             if scope == .all || scope == .operators, !operators.isEmpty {
@@ -182,12 +215,16 @@ struct SearchSheet: View {
     }
 
     private func limited<Element>(_ items: [Element]) -> [Element] {
-        scope == .all ? Array(items.prefix(Self.previewLimit)) : items
+        Array(items.prefix(scope == .all ? Self.previewLimit : Self.scopeLimit))
     }
 
     @ViewBuilder
     private func moreRow(count: Int, scope target: SearchScope) -> some View {
-        if scope == .all, count > Self.previewLimit {
+        if scope != .all, count > Self.scopeLimit {
+            Text("Search.MoreCount \(count - Self.scopeLimit)")
+                .font(.system(size: 15))
+                .foregroundColor(.secondary)
+        } else if scope == .all, count > Self.previewLimit {
             Button {
                 scope = target
             } label: {

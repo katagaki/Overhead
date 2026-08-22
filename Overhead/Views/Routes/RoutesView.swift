@@ -7,6 +7,7 @@ struct FavoritesSection: View {
     @ObservedObject var viewModel: JourneyViewModel
     @Environment(\.scenePhase) private var scenePhase
     @State private var places: [SavedPlace] = []
+    @ObservedObject private var installer = LineDataInstaller.shared
     @State private var editorTarget: EditorTarget?
     /// Upcoming departures from each favorite's origin, as rail seconds.
     @State private var departuresByPlace: [UUID: [Int]] = [:]
@@ -119,6 +120,8 @@ struct FavoritesSection: View {
                         ForEach(places) { place in
                             if let resolved = resolve(place) {
                                 placeCard(place: place, resolved: resolved, at: context.date)
+                            } else if !SavedPlaceLineData.missingLines(for: place).isEmpty {
+                                missingDataCard(place: place)
                             } else {
                                 brokenPlaceCard(place: place)
                             }
@@ -237,6 +240,64 @@ struct FavoritesSection: View {
                 .foregroundStyle(.tertiary)
                 .monospacedDigit()
         }
+    }
+
+    /// The favourite is fine — its line data just is not on the device.
+    private func missingDataCard(place: SavedPlace) -> some View {
+        let missing = SavedPlaceLineData.missingLines(for: place)
+        let downloading = installer.isDownloading
+
+        return Button {
+            Task { try? await installer.sync() }
+        } label: {
+            VStack(alignment: .leading, spacing: 5) {
+                HStack(alignment: .firstTextBaseline, spacing: 7) {
+                    Image(systemName: place.kind.iconName)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 22, height: 22)
+                        .background(Color(.systemGray3), in: RoundedRectangle(cornerRadius: 7))
+                    Text(displayName(of: place))
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                    Spacer(minLength: 0)
+                }
+                HStack(spacing: 5) {
+                    ForEach(missing.prefix(3)) { line in
+                        LineSymbolBadge(symbol: line.symbol, color: Color(hex: line.colorHex),
+                                        dimension: 18, styleOverride: line.badgeStyle)
+                    }
+                    if missing.count > 3 {
+                        Text("+\(missing.count - 3)")
+                            .font(.system(size: 11)).foregroundStyle(.secondary)
+                    }
+                }
+                Spacer(minLength: 0)
+                HStack(spacing: 5) {
+                    if downloading {
+                        ProgressView().controlSize(.mini)
+                        Text("Place.Downloading")
+                    } else {
+                        Image(systemName: "arrow.down.circle.fill")
+                        Text(LineDataModel.formatted(bytes: installer.pendingBytes))
+                    }
+                }
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(Color.accentColor)
+            }
+            .padding(EdgeInsets(top: 12, leading: 12, bottom: 11, trailing: 12))
+            .frame(width: cardWidth, height: Self.cardHeight, alignment: .topLeading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(downloading)
+        .glassEffect(.regular, in: Self.cardShape)
+        .contextMenu {
+            deleteButton(for: place)
+        }
+        .accessibilityLabel(Text("Place.NeedsDownload"))
     }
 
     private func brokenPlaceCard(place: SavedPlace) -> some View {

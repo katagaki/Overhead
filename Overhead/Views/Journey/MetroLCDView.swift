@@ -27,7 +27,7 @@ struct MetroLCDView: View {
     private static let passedGray = Color(hex: "#8E9196")
     private static let languageFlipSeconds = 4.0
 
-    private static let allLines = StaticTrainData.trainLines()
+    private static var allLines: [TrainLine] { StaticTrainData.trainLines() }
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 0.5)) { context in

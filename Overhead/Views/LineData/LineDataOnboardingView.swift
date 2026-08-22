@@ -1,0 +1,170 @@
+import SwiftUI
+import Backbone
+
+// MARK: - First-run line download
+
+/// The app carries every line in the catalog, so the first run has one
+/// decision: download now, or later.
+struct LineDataOnboardingView: View {
+    @Environment(\.dismiss) private var dismiss
+    @StateObject private var model = LineDataModel()
+    @ObservedObject private var installer = LineDataInstaller.shared
+    @AppStorage("lineData.onboarded") private var onboarded = false
+
+    private var lineCount: Int { Catalog.current.lines.count }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            LineDataBadgeWall()
+            VStack(alignment: .leading, spacing: 8) {
+                Text("LineData.Onboarding.Title")
+                    .font(.largeTitle.bold())
+                Text("LineData.Onboarding.Body")
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 20)
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .safeAreaInset(edge: .bottom) { actions }
+        .ignoresSafeArea(edges: .top)
+        .interactiveDismissDisabled(true)
+        .onChange(of: installer.installedCount) { _, count in
+            // However the download was started, finishing it ends the sheet.
+            guard lineCount > 0, count == lineCount, !installer.isDownloading else { return }
+            onboarded = true
+            dismiss()
+        }
+        .alert("LineData.Error", isPresented: .constant(model.error != nil)) {
+            Button("Shared.OK") { model.error = nil }
+        } message: {
+            Text(model.error ?? "")
+        }
+    }
+
+    @ViewBuilder
+    private var actions: some View {
+        VStack(spacing: 12) {
+            if let progress = installer.progress {
+                LineDataProgressCapsule(progress: progress)
+            } else {
+                // Holds the capsule's place, so the button never moves.
+                Color.clear.frame(height: 44)
+            }
+
+            Button {
+                Task {
+                    await model.download()
+                    if !installer.hasPendingWork {
+                        onboarded = true
+                        dismiss()
+                    }
+                }
+            } label: {
+                Text("LineData.Onboarding.Download \(LineDataModel.formatted(bytes: installer.catalogBytes))")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.glassProminent)
+            .controlSize(.large)
+            .disabled(installer.isBusy)
+        }
+        .padding()
+    }
+}
+
+// MARK: - Badge wall
+
+/// The network as artwork. Hand-picked so the plates read as a spread of
+/// operators rather than a column of JR marks.
+struct LineDataBadgeWall: View {
+    var dimension: CGFloat = 34
+
+    /// Station guide-sign yellow, the ground these plates hang on.
+    private static let panelYellow = Color(hex: "#FFD400")
+
+    private static let lineIds = [
+        "Railway:JR-East.Yamanote", "Railway:TokyoMetro.Ginza", "Railway:Tokyu.Toyoko",
+        "Railway:Toei.Oedo", "Railway:Keio.Keio", "Railway:MIR.TsukubaExpress",
+        "Railway:JR-East.ChuoRapid", "Railway:TokyoMetro.Marunouchi", "Railway:Odakyu.Odawara",
+        "Railway:Seibu.Ikebukuro", "Railway:Yurikamome.Yurikamome", "Railway:Enoden.Enoshima",
+        "Railway:JR-East.KeihinTohoku", "Railway:TokyoMetro.Hanzomon", "Railway:Keikyu.Main",
+        "Railway:Toei.Asakusa", "Railway:Tobu.Tojo", "Railway:TamaMonorail.TamaMonorail",
+        "Railway:JR-East.ChuoSobuLocal", "Railway:TokyoMetro.Tozai", "Railway:Keisei.Main",
+        "Railway:Tokyu.DenEnToshi", "Railway:YokohamaMunicipal.Blue", "Railway:TWR.Rinkai",
+        "Railway:JR-East.SaikyoKawagoe", "Railway:TokyoMetro.Namboku", "Railway:Seibu.Shinjuku",
+        "Railway:Keio.Inokashira", "Railway:Minatomirai.Minatomirai", "Railway:Toei.Shinjuku"
+    ]
+
+    var body: some View {
+        let lines = Self.lineIds.compactMap(Catalog.line(id:))
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 6),
+                  spacing: 10) {
+            ForEach(lines) { line in
+                LineSymbolBadge(symbol: line.symbol, color: Color(hex: line.colorHex),
+                                dimension: dimension, styleOverride: line.badgeStyle)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 24)
+        .frame(maxWidth: .infinity)
+        // The plates are drawn for signage: the panel behind them stays the
+        // same yellow in either theme, and runs to both edges of the sheet.
+        .background(Self.panelYellow)
+        .accessibilityHidden(true)
+    }
+}
+
+// MARK: - Progress
+
+/// A glass capsule that fills as the download runs, so the button below never
+/// has to change size or place.
+struct LineDataProgressCapsule: View {
+    let progress: LineDataProgress
+
+    var body: some View {
+        GeometryReader { proxy in
+            ZStack(alignment: .leading) {
+                // Square right edge, so a short fill reads as a bar and not a pill.
+                Rectangle()
+                    .fill(Color.accentColor.opacity(0.35))
+                    .frame(width: proxy.size.width * progress.fraction)
+                    .animation(.linear(duration: 0.2), value: progress.fraction)
+                HStack(spacing: 8) {
+                    Text(progress.currentLine ?? String(localized: "LineData.Downloading"))
+                        .lineLimit(1)
+                    Spacer(minLength: 0)
+                    Text(verbatim: "\(progress.completedLines) / \(progress.totalLines)")
+                }
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 18)
+            }
+            .clipShape(.capsule)
+        }
+        .frame(height: 44)
+        .glassEffect(.regular, in: .capsule)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+// MARK: - Progress row
+
+/// The same progress, shaped for a list row.
+struct LineDataProgressBlock: View {
+    let progress: LineDataProgress
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            ProgressView(value: progress.fraction)
+                .animation(.linear(duration: 0.2), value: progress.fraction)
+            HStack {
+                Text(progress.currentLine ?? String(localized: "LineData.Downloading"))
+                    .lineLimit(1)
+                Spacer(minLength: 8)
+                Text(verbatim: "\(progress.completedLines) / \(progress.totalLines)")
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
+    }
+}

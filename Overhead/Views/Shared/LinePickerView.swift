@@ -49,13 +49,18 @@ enum StationSearch {
             return 2
         }
 
-        return hits.sorted {
-            let l = rank($0)
-            let r = rank($1)
-            if l != r { return l < r }
-            if $0.station.name != $1.station.name { return $0.station.name < $1.station.name }
-            return $0.line.nameEn < $1.line.nameEn
-        }
+        // Rank once per hit: a comparator that re-derives it runs the kana
+        // folding O(n log n) times, and a loose query matches hundreds of stops.
+        return hits
+            .map { (rank: rank($0), hit: $0) }
+            .sorted {
+                if $0.rank != $1.rank { return $0.rank < $1.rank }
+                if $0.hit.station.name != $1.hit.station.name {
+                    return $0.hit.station.name < $1.hit.station.name
+                }
+                return $0.hit.line.nameEn < $1.hit.line.nameEn
+            }
+            .map(\.hit)
     }
 }
 

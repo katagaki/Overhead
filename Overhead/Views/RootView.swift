@@ -5,6 +5,7 @@ import Backbone
 struct RootView: View {
     @ObservedObject var viewModel: JourneyViewModel
     @ObservedObject private var customStore = CustomLineStore.shared
+    @ObservedObject private var lineDataInstaller = LineDataInstaller.shared
 
     @AppStorage(JourneyMode.storageKey) private var journeyMode = JourneyMode.hybrid
     @AppStorage("hasDismissedStartupNotice") private var hasDismissedStartupNotice = false
@@ -26,6 +27,8 @@ struct RootView: View {
     @State private var debugTimetableTarget: ScreenshotTimetableTarget?
 #endif
     @Namespace private var journeyZoom
+    @AppStorage("lineData.onboarded") private var lineDataOnboarded = false
+    @State private var showLineDataOnboarding = false
 
     private static let journeyTransitionID = "activeJourney"
     private static let feedbackURL = URL(string: "https://forms.gle/U91cFDFTufF12PeF7")!
@@ -33,7 +36,16 @@ struct RootView: View {
     // Pushed screens reachable from the root.
     private enum Destination: Hashable {
         case attributions
+        case lineData
     }
+
+    private var needsLineDataOnboarding: Bool {
+        !lineDataOnboarded
+            && Catalog.current.lines.contains { !LineDataStore.isPresent(folder: $0.folder) }
+    }
+
+    /// A conditional GET is cheap, but not on every appearance.
+    private static let updateCheckInterval: TimeInterval = 6 * 60 * 60
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
@@ -89,6 +101,8 @@ struct RootView: View {
                 switch destination {
                 case .attributions:
                     MoreAttributionsView()
+                case .lineData:
+                    LineDataManagerView()
                 }
             }
             .navigationDestination(for: SearchDestination.self) { destination in
@@ -118,6 +132,17 @@ struct RootView: View {
             }
         }
         .serviceStatusHost(serviceStatusPresenter)
+        .task {
+            if needsLineDataOnboarding { showLineDataOnboarding = true }
+            await checkForLineDataUpdates()
+        }
+        .sheet(isPresented: $showLineDataOnboarding) {
+            // The disclaimer waits its turn: two modals on a first launch land
+            // on top of each other.
+            if !hasDismissedStartupNotice { showStartupNotice = true }
+        } content: {
+            LineDataOnboardingView()
+        }
         .sheet(isPresented: $showJourneySheet) {
             JourneySheetView(viewModel: viewModel)
                 .navigationTransition(.zoom(sourceID: Self.journeyTransitionID, in: journeyZoom))
@@ -212,7 +237,7 @@ struct RootView: View {
             Text("StartupNotice.Message")
         }
         .onAppear {
-            if !hasDismissedStartupNotice {
+            if !hasDismissedStartupNotice, !needsLineDataOnboarding {
                 showStartupNotice = true
             }
         }
@@ -252,6 +277,21 @@ struct RootView: View {
             }
 
             Section {
+                Button {
+                    navigationPath.append(Destination.lineData)
+                } label: {
+                    Label {
+                        Text("LineData.Title")
+                        if lineDataInstaller.hasUpdate {
+                            Text("LineData.UpdatesAvailable")
+                        }
+                    } icon: {
+                        Image(systemName: "cylinder.split.1x2")
+                    }
+                }
+            }
+
+            Section {
                 Link(destination: Self.feedbackURL) {
                     Label("More.SendFeedback", systemImage: "exclamationmark.bubble")
                 }
@@ -267,8 +307,28 @@ struct RootView: View {
             }
         } label: {
             Image(systemName: "ellipsis")
+                .overlay(alignment: .topTrailing) {
+                    if lineDataInstaller.hasUpdate {
+                        Circle()
+                            .fill(Color.red)
+                            .frame(width: 8, height: 8)
+                            .offset(x: 6, y: -6)
+                    }
+                }
         }
-        .accessibilityLabel("ViewTitle.More")
+        .accessibilityLabel(lineDataInstaller.hasUpdate
+                            ? Text("ViewTitle.More.UpdateAvailable") : Text("ViewTitle.More"))
+    }
+
+    /// Keeps the menu badge honest without spending a request every launch.
+    private func checkForLineDataUpdates() async {
+        guard lineDataOnboarded, !lineDataInstaller.isBusy else { return }
+        if let checked = lineDataInstaller.lastChecked,
+           Date().timeIntervalSince(checked) < Self.updateCheckInterval {
+            await lineDataInstaller.recomputePending()
+            return
+        }
+        _ = try? await lineDataInstaller.refreshCatalog()
     }
 
 #if DEBUG
