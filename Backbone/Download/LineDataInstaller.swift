@@ -168,6 +168,7 @@ public final class LineDataInstaller: ObservableObject {
         Catalog.reload()
         StaticTrainData.invalidate()
         try await refreshBadgeStyles(styles: catalog.styles, base: Self.baseURL)
+        try await refreshOperatorIcons(icons: catalog.operatorIcons ?? [], base: Self.baseURL)
         await recomputePending()
         return true
     }
@@ -191,6 +192,7 @@ public final class LineDataInstaller: ObservableObject {
         Catalog.reload()
         StaticTrainData.invalidate()
         try await refreshBadgeStyles(styles: catalog.styles, base: Self.baseURL)
+        try await refreshOperatorIcons(icons: catalog.operatorIcons ?? [], base: Self.baseURL)
         await recomputePending()
         return true
     }
@@ -240,6 +242,33 @@ public final class LineDataInstaller: ObservableObject {
             for (style, data) in fetched {
                 guard let data else { continue }
                 try data.write(to: dir.appendingPathComponent("\(style).json"), options: .atomic)
+            }
+        }
+    }
+
+    /// The curated operator marks, for the operators whose own sites serve no
+    /// usable favicon. Data, like the styles, so a new mark needs no release.
+    private func refreshOperatorIcons(icons: [String], base: URL) async throws {
+        guard !icons.isEmpty else { return }
+        let dir = LineDataStore.installedRoot.appendingPathComponent("OperatorIcons",
+                                                                    isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        for batch in icons.chunked(into: Self.parallelism) {
+            let fetched = await withTaskGroup(of: (String, Data?).self) { group in
+                for icon in batch {
+                    group.addTask { [session] in
+                        let url = base.appendingPathComponent(
+                            "\(Catalog.dataPath)OperatorIcons/\(icon).png")
+                        return (icon, try? await Self.fetch(url, using: session))
+                    }
+                }
+                var out: [(String, Data?)] = []
+                for await result in group { out.append(result) }
+                return out
+            }
+            for (icon, data) in fetched {
+                guard let data else { continue }
+                try data.write(to: dir.appendingPathComponent("\(icon).png"), options: .atomic)
             }
         }
     }

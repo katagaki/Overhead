@@ -90,6 +90,9 @@ public struct LineCatalog: Decodable, Sendable {
     /// Release version, shown in the app.
     public let version: String
     public let styles: [String]
+    /// Curated operator marks, for operators whose sites have no usable
+    /// favicon. Optional: catalogs published before the icons existed omit it.
+    public let operatorIcons: [String]?
     /// Where this catalog's line files live under the repository root. Empty
     /// for the current generation; a snapshot frozen for older apps sets it.
     public let dataPath: String?
@@ -112,6 +115,7 @@ public struct LineCatalog: Decodable, Sendable {
         self.schemaVersion = schemaVersion
         self.version = version
         self.styles = styles
+        self.operatorIcons = []
         self.lines = lines
         self.stations = stations
     }

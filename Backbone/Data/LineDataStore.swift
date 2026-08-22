@@ -24,11 +24,14 @@ public enum LineDataStore {
         installedDirectory(folder: folder).appendingPathComponent(file)
     }
 
-    /// Curated operator mark shipped with the seed, when the data has one.
+    /// Curated operator mark, downloaded with the catalog. The app ships no
+    /// data of its own, so this is the installed copy or nothing.
     public static func operatorIconURL(operatorId: String) -> URL? {
         let name = operatorId.replacingOccurrences(of: ":", with: "_")
-        return bundle.url(forResource: name, withExtension: "png",
-                          subdirectory: "StaticData/OperatorIcons")
+        let url = installedRoot
+            .appendingPathComponent("OperatorIcons", isDirectory: true)
+            .appendingPathComponent("\(name).png")
+        return FileManager.default.fileExists(atPath: url.path) ? url : nil
     }
 
     static func bundleURL(folder: String, file: String) -> URL? {

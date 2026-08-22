@@ -45,17 +45,17 @@ struct CustomLineBadgeStyleView: View {
 
                 Text(BadgeStyles.displayName(spec.id))
                     .font(.caption2)
-                    .lineLimit(2)
+                    .lineLimit(2, reservesSpace: true)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
             }
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(.vertical, 12)
             .padding(.horizontal, 6)
             .background(Color(.secondarySystemGroupedBackground),
-                        in: RoundedRectangle(cornerRadius: 14))
+                        in: RoundedRectangle(cornerRadius: 26, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 14)
+                RoundedRectangle(cornerRadius: 26, style: .continuous)
                     .strokeBorder(isSelected ? Color.accentColor : .clear, lineWidth: 2)
             }
         }
