@@ -402,15 +402,19 @@ public final class LineDataInstaller: ObservableObject {
         if let first = failures.first { throw first }
     }
 
-    /// Throws away every installed line and fetches the catalog afresh — the
-    /// repair path for a copy that will not decode.
-    public func redownloadEverything() async throws {
+    /// Throws away everything that was downloaded — lines, the catalog, the
+    /// badge styles and the operator marks — leaving the app on the seed it
+    /// shipped with. The repair path for a copy that will not decode, and for
+    /// data that has gone stale in a way a patch cannot reach.
+    public func removeAllData() async {
         guard !isDownloading else { return }
-        try? FileManager.default.removeItem(
-            at: LineDataStore.installedRoot.appendingPathComponent("Lines", isDirectory: true))
+        try? FileManager.default.removeItem(at: LineDataStore.installedRoot)
+        defaults.removeObject(forKey: etagKey)
+        defaults.removeObject(forKey: modifiedKey)
+        defaults.removeObject(forKey: checkedKey)
+        lastChecked = nil
         StaticTrainData.invalidate()
         await recomputePending()
-        try await sync()
     }
 
     /// A line dropped from the catalog is data the app can no longer describe.

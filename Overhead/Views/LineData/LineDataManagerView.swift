@@ -8,6 +8,8 @@ import Backbone
 struct LineDataManagerView: View {
     @StateObject private var model = LineDataModel()
     @ObservedObject private var installer = LineDataInstaller.shared
+    @AppStorage("lineData.onboarded") private var onboarded = false
+    @State private var isConfirmingDelete = false
 
     var body: some View {
         List {
@@ -34,11 +36,34 @@ struct LineDataManagerView: View {
                     Text("LineData.LineCount \(Catalog.current.lines.count)")
                 }
             }
+
+            Section {
+                Button("LineData.Redownload", role: .destructive) {
+                    isConfirmingDelete = true
+                }
+                .disabled(installer.isBusy)
+            } footer: {
+                Text("LineData.Redownload.Footer")
+            }
         }
         .navigationTitle("LineData.Title")
         .navigationBarTitleDisplayMode(.inline)
         .refreshable { await model.checkForUpdates() }
         .task { await installer.recomputePending() }
+        .confirmationDialog("LineData.Redownload.Confirm", isPresented: $isConfirmingDelete,
+                            titleVisibility: .visible) {
+            Button("LineData.Redownload.Action", role: .destructive) {
+                Task {
+                    await model.deleteAllData()
+                    // The first-run sheet is the only download screen that
+                    // starts from nothing, so the root brings it back.
+                    onboarded = false
+                }
+            }
+            Button("Button.Cancel", role: .cancel) { }
+        } message: {
+            Text("LineData.Redownload.Confirm.Message")
+        }
         .alert("LineData.Error", isPresented: .constant(model.error != nil)) {
             Button("Shared.OK") { model.error = nil }
         } message: {

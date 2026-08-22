@@ -5082,6 +5082,181 @@
         }
       }
     },
+    "LineData.Redownload": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "路線データを削除して再取得"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete and Redownload"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "삭제 후 다시 받기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除并重新下载"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刪除並重新下載"
+          }
+        }
+      }
+    },
+    "LineData.Redownload.Action": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "削除して再取得"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete and Redownload"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "삭제 후 다시 받기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除并重新下载"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刪除並重新下載"
+          }
+        }
+      }
+    },
+    "LineData.Redownload.Confirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "路線データを削除しますか？"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete all line data?"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노선 데이터를 삭제할까요?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "要删除线路数据吗？"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "要刪除路線資料嗎？"
+          }
+        }
+      }
+    },
+    "LineData.Redownload.Confirm.Message": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存されている路線データをすべて削除します。取得しなおすまで、発車時刻は表示できません。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every downloaded line is removed. Departures stay unavailable until the data is downloaded again."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "저장된 노선 데이터를 모두 삭제합니다. 다시 받을 때까지 출발 시각을 볼 수 없습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将删除已保存的所有线路数据。在重新下载之前无法显示发车时刻。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "將刪除已儲存的所有路線資料。在重新下載之前無法顯示發車時刻。"
+          }
+        }
+      }
+    },
+    "LineData.Redownload.Footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "端末に保存されている路線データをすべて削除し、最初から取得しなおします。事業者のマークも取得しなおします。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Removes everything downloaded to this device, then starts over from scratch. Operator marks are fetched again too."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "기기에 저장된 노선 데이터를 모두 삭제하고 처음부터 다시 받습니다. 사업자 마크도 다시 받습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除设备上保存的所有线路数据，并从头重新下载。运营商标志也会重新获取。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刪除裝置上儲存的所有路線資料，並從頭重新下載。業者標誌也會重新取得。"
+          }
+        }
+      }
+    },
     "LineData.Section.Included": {
       "extractionState": "manual",
       "localizations": {

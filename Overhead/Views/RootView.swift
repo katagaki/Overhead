@@ -139,6 +139,14 @@ struct RootView: View {
             if needsLineDataOnboarding { showLineDataOnboarding = true }
             await checkForLineDataUpdates()
         }
+        .onChange(of: lineDataOnboarded) { _, isOnboarded in
+            // The manager screen clears the flag after wiping the data; the
+            // first-run sheet is what downloads from nothing, so it comes
+            // back, over the root rather than over the screen being left.
+            guard !isOnboarded, needsLineDataOnboarding else { return }
+            navigationPath = NavigationPath()
+            showLineDataOnboarding = true
+        }
         .sheet(isPresented: $showLineDataOnboarding) {
             // The disclaimer waits its turn: two modals on a first launch land
             // on top of each other.

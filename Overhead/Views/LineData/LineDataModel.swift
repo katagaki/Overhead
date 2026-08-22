@@ -32,6 +32,13 @@ final class LineDataModel: ObservableObject {
         } catch { self.error = error.localizedDescription }
     }
 
+    /// Wipes the downloaded data and the marks derived from it, leaving the
+    /// app as it was before its first download.
+    func deleteAllData() async {
+        await installer.removeAllData()
+        OperatorFavicons.shared.reset()
+    }
+
     func checkForUpdates() async {
         do { try await installer.refreshCatalog() }
         catch { self.error = error.localizedDescription }

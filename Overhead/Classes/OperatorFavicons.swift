@@ -52,6 +52,14 @@ final class OperatorFavicons: ObservableObject {
         return nil
     }
 
+    /// Drops every cached mark, on disk and in memory, so the next render
+    /// resolves each operator from scratch. For the data reset.
+    func reset() {
+        try? FileManager.default.removeItem(at: Self.cacheDirectory)
+        icons.removeAll()
+        missed.removeAll()
+    }
+
     private func load(_ operatorId: String) {
         guard !inFlight.contains(operatorId) else { return }
         inFlight.insert(operatorId)
