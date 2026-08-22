@@ -24,19 +24,21 @@ struct LineSymbolBadge: View {
 
 // MARK: - Style resolution
 
-/// Picks a style: an explicit override, then the line's Badge.json entry,
+/// Picks a style: the line's Badge.json entry, then an explicit override,
 /// then the symbol index. Anything unresolved falls back to the JR plate.
+/// The config wins over the override because it carries the line's own
+/// colour overrides; overrides serve lines with no config (custom lines).
 struct BadgeResolution {
     let styleId: String
     let overrides: [String: String]?
 
     init(symbol: String, color: Color, styleOverride: String?, lineId: String?) {
-        if let styleOverride {
-            styleId = styleOverride
-            overrides = nil
-        } else if let lineId, let config = BadgeStyles.config(lineId: lineId) {
+        if let lineId, let config = BadgeStyles.config(lineId: lineId) {
             styleId = config.style
             overrides = config.colors
+        } else if let styleOverride {
+            styleId = styleOverride
+            overrides = nil
         } else {
             styleId = BadgeStyles.styleId(symbol: symbol, colorHex: color.hexString)
             overrides = nil
@@ -47,12 +49,12 @@ struct BadgeResolution {
     /// carrying another operator's code keeps that operator's plate.
     init(code: String, color: Color, styleOverride: String?, lineId: String?) {
         let prefix = String(code.prefix(while: \.isLetter))
-        if let styleOverride {
-            styleId = styleOverride
-            overrides = nil
-        } else if let lineId, let config = BadgeStyles.config(lineId: lineId) {
+        if let lineId, let config = BadgeStyles.config(lineId: lineId) {
             styleId = config.stationStyle(forPrefix: prefix)
             overrides = config.colors
+        } else if let styleOverride {
+            styleId = styleOverride
+            overrides = nil
         } else {
             styleId = BadgeStyles.styleId(symbol: prefix, colorHex: color.hexString)
             overrides = nil

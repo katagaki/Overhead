@@ -69,7 +69,8 @@ struct LineLeadingBadge: View {
                 symbol: line.lineSymbol,
                 color: line.color,
                 dimension: dimension,
-                styleOverride: line.badgeStyleId
+                styleOverride: line.badgeStyleId,
+                lineId: line.id
             )
         } else {
             RoundedRectangle(cornerRadius: 4)

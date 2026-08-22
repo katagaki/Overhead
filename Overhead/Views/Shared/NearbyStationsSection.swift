@@ -295,7 +295,8 @@ struct NearbyStationsSection: View {
         } label: {
             HStack(spacing: 9) {
                 if !hit.line.lineSymbol.isEmpty {
-                    LineSymbolBadge(symbol: hit.line.lineSymbol, color: hit.line.color, dimension: 26)
+                    LineSymbolBadge(symbol: hit.line.lineSymbol, color: hit.line.color, dimension: 26,
+                                    lineId: hit.line.id)
                 } else {
                     RoundedRectangle(cornerRadius: 3)
                         .fill(hit.line.color)
