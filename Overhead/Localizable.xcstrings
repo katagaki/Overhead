@@ -4913,31 +4913,31 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "This version reads a new data format, so every line's timetable is downloaded again."
+            "value": "The app has been updated, so the train data needs to be downloaded once more. After that, departures work without a connection again."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "アプリの更新にあわせてデータの形式が変わりました。首都圏の全路線の時刻表をもう一度取り込みます。"
+            "value": "アプリが新しくなったので、列車のデータをもう一度取り込みます。取り込んだあとは、これまでどおり通信がなくても発車時刻を確認できます。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "이번 버전은 새로운 데이터 형식을 사용합니다. 모든 노선의 시각표를 다시 받습니다."
+            "value": "앱이 새로워져서 열차 데이터를 한 번 더 받아야 합니다. 받은 뒤에는 지금까지처럼 네트워크 없이도 출발 시각을 확인할 수 있습니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "此版本使用新的数据格式，将重新下载所有线路的时刻表。"
+            "value": "应用已更新，列车数据需要重新下载一次。下载后，仍然可以在没有网络时查看发车时刻。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "此版本使用新的資料格式，將重新下載所有路線的時刻表。"
+            "value": "應用程式已更新，列車資料需要重新下載一次。下載後，仍然可以在沒有網路時查看發車時刻。"
           }
         }
       }
