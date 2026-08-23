@@ -437,7 +437,9 @@ struct VerticalLCDLine: View {
         tightBottom: Bool,
         dottedBelow: Bool
     ) -> some View {
-        let bottomSpan = tightBottom ? markerHeight : stationSpacing * 0.8
+        // Full spacing, like any other stop: the ride away from a 乗り換え is a
+        // segment like the rest, and a shortened one reads as a shorter hop.
+        let bottomSpan = tightBottom ? markerHeight : stationSpacing
 
         HStack(alignment: .top, spacing: 0) {
             Group {
