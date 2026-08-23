@@ -126,18 +126,16 @@ struct VerticalLCDLine: View {
             }
             var end = index
             while end + 1 < count && !keep.contains(end + 1) { end += 1 }
+            // Even a lone passed-through stop folds, so every run between two
+            // kept rows reads the same way.
             let range = index...end
-            if range.count >= 2 {
-                let id = rangeID(range)
-                if expandedRanges.contains(id) {
-                    // The pill stays put as the handle that folds the run back.
-                    items.append(.expandedHandle(range))
-                    items.append(contentsOf: range.map { .station($0, groupID: id) })
-                } else {
-                    items.append(.collapsed(range))
-                }
+            let id = rangeID(range)
+            if expandedRanges.contains(id) {
+                // The pill stays put as the handle that folds the run back.
+                items.append(.expandedHandle(range))
+                items.append(contentsOf: range.map { .station($0, groupID: id) })
             } else {
-                items.append(.station(index, groupID: nil))
+                items.append(.collapsed(range))
             }
             index = end + 1
         }
