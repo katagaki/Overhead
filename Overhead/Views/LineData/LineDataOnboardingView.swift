@@ -93,40 +93,82 @@ struct LineDataOnboardingView: View {
 
 // MARK: - Badge wall
 
-/// The network as artwork. Hand-picked so the plates read as a spread of
-/// operators rather than a column of JR marks.
+/// The network as artwork. The plates are drawn at random from the whole
+/// catalog and swapped out every few seconds, so the wall never reads as the
+/// same fixed set twice.
 struct LineDataBadgeWall: View {
     var dimension: CGFloat = 34
     @ObservedObject private var installer = LineDataInstaller.shared
+    @State private var lines: [CatalogLine] = []
     @State private var revealed = false
+    /// Where a hidden plate sits: left before it comes in, right after it
+    /// leaves, so the wall reads as one pass across the panel.
+    @State private var hiddenOffset: CGFloat = -travel
 
     /// Station guide-sign yellow, the ground these plates hang on.
     private static let panelYellow = Color(hex: "#FFD400")
 
-    private static let lineIds = [
-        "Railway:JR-East.Yamanote", "Railway:TokyoMetro.Ginza", "Railway:Tokyu.Toyoko",
-        "Railway:Toei.Oedo", "Railway:Keio.Keio", "Railway:MIR.TsukubaExpress",
-        "Railway:JR-East.KeihinTohoku", "Railway:TokyoMetro.Marunouchi", "Railway:Odakyu.Odawara",
-        "Railway:Seibu.Ikebukuro", "Railway:Yurikamome.Yurikamome", "Railway:Enoden.Enoshima",
-        "Railway:JR-East.ChuoRapid", "Railway:TokyoMetro.Hanzomon", "Railway:Keikyu.Main",
-        "Railway:Toei.Asakusa", "Railway:Tobu.Tojo", "Railway:TamaMonorail.TamaMonorail",
-        "Railway:JR-East.ChuoSobuLocal", "Railway:TokyoMetro.Tozai", "Railway:Keisei.Main",
-        "Railway:Tokyu.DenEnToshi", "Railway:YokohamaMunicipal.Blue", "Railway:TWR.Rinkai",
-        "Railway:JR-East.JobanLocal", "Railway:TokyoMetro.Chiyoda", "Railway:Seibu.Shinjuku",
-        "Railway:Keio.Inokashira", "Railway:Minatomirai.Minatomirai", "Railway:Toei.Shinjuku"
-    ]
-
     private static let columns = 6
+    private static let rows = 5
+    private static let slots = columns * rows
     private static let spacing: CGFloat = 10
+    private static let outline: CGFloat = 1.5
+    /// How long a set of plates stays up, apart from its own animations.
+    private static let dwell: Duration = .seconds(4.5)
+    /// The wall moves row by row, with a small lean across each row.
+    private static let rowStagger = 0.12
+    private static let columnStagger = 0.02
+    private static let travel: CGFloat = 28
+    private static let fadeIn = 0.55
+    private static let fadeOut = 0.4
+    /// A beat with the next set laid in but still hidden, so the plates are
+    /// built and rasterized before anything has to move.
+    private static let warmup: Duration = .milliseconds(180)
+
+    /// When a plate at this slot starts moving.
+    private static func delay(slot: Int) -> Double {
+        Double(slot / columns) * rowStagger + Double(slot % columns) * columnStagger
+    }
+
+    /// The longest a sweep can take: the last plate's delay plus its own run.
+    private static func sweep(_ duration: Double) -> Double {
+        duration + delay(slot: max(slots - 1, 0))
+    }
+
+    /// The plate carries its own white edge, so a row is wider than the badge.
+    private var plate: CGFloat { dimension + Self.outline * 2 }
 
     private var panelHeight: CGFloat {
-        let rows = (Self.lineIds.count + Self.columns - 1) / Self.columns
-        return CGFloat(rows) * dimension + CGFloat(rows - 1) * Self.spacing + 48
+        CGFloat(Self.rows) * plate + CGFloat(Self.rows - 1) * Self.spacing + 48
+    }
+
+    /// A fresh draw, capped per operator so a shuffle cannot hand back a wall
+    /// of one company's marks.
+    private static func sample() -> [CatalogLine] {
+        // Lines with no symbol of their own would hang a blank plate.
+        let all = Catalog.current.lines.filter { !$0.symbol.isEmpty }
+        guard !all.isEmpty else { return [] }
+        var perOperator: [String: Int] = [:]
+        var picked: [CatalogLine] = []
+        let shuffled = all.shuffled()
+        for line in shuffled where picked.count < slots {
+            let taken = perOperator[line.operatorId, default: 0]
+            guard taken < 3 else { continue }
+            perOperator[line.operatorId] = taken + 1
+            picked.append(line)
+        }
+        // Too few operators to fill the wall under the cap: top it up anyway.
+        if picked.count < slots {
+            let chosen = Set(picked.map(\.id))
+            for line in shuffled where !chosen.contains(line.id) && picked.count < slots {
+                picked.append(line)
+            }
+        }
+        return picked
     }
 
     var body: some View {
         let styleCount = BadgeStyles.all.count
-        let lines = styleCount == 0 ? [] : Self.lineIds.compactMap(Catalog.line(id:))
         ZStack {
             if lines.isEmpty {
                 ProgressView()
@@ -136,21 +178,25 @@ struct LineDataBadgeWall: View {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Self.spacing),
                                          count: Self.columns),
                           spacing: Self.spacing) {
-                    ForEach(Array(lines.enumerated()), id: \.element.id) { index, line in
-                        BadgeOutline(width: 1.5) {
+                    // Keyed by slot, not by line: a plate swaps its contents in
+                    // place rather than being torn out of the grid.
+                    ForEach(Array(lines.enumerated()), id: \.offset) { index, line in
+                        BadgeOutline(width: Self.outline) {
                             LineSymbolBadge(symbol: line.symbol, color: Color(hex: line.colorHex),
                                             dimension: dimension, styleOverride: line.badgeStyle,
                                             lineId: line.id)
                         }
-                        .opacity(revealed ? 1 : 0)
-                        .offset(x: revealed ? 0 : 28)
-                        .animation(.smooth(duration: 0.45).delay(Double(index) * 0.02),
+                        // Not quite zero: a fully clear layer is skipped
+                        // outright, and the work lands on the first frame in.
+                        .opacity(revealed ? 1 : 0.01)
+                        .offset(x: revealed ? 0 : hiddenOffset)
+                        .animation(.easeOut(duration: revealed ? Self.fadeIn : Self.fadeOut)
+                            .delay(Self.delay(slot: index)),
                                    value: revealed)
                     }
                 }
                 .id(styleCount)
                 .padding(.horizontal, 20)
-                .onAppear { revealed = true }
             }
         }
         .animation(.easeInOut(duration: 0.25), value: lines.isEmpty)
@@ -160,6 +206,34 @@ struct LineDataBadgeWall: View {
         // same yellow in either theme, and runs to both edges of the sheet.
         .background(Self.panelYellow)
         .accessibilityHidden(true)
+        .task(id: styleCount) { await rotate() }
+    }
+
+    /// Deal a wall, hold it, sweep it out, deal the next one. The deal always
+    /// happens a beat before the reveal: building thirty plates on the frame
+    /// the animation starts is what makes it stutter.
+    private func rotate() async {
+        let out = Self.sweep(Self.fadeOut)
+        lines = Self.sample()
+        hiddenOffset = -Self.travel
+        try? await Task.sleep(for: Self.warmup)
+        guard !Task.isCancelled else { return }
+        revealed = true
+        while !Task.isCancelled {
+            try? await Task.sleep(for: Self.dwell)
+            guard !Task.isCancelled else { return }
+            hiddenOffset = Self.travel
+            revealed = false
+            try? await Task.sleep(for: .seconds(out))
+            guard !Task.isCancelled else { return }
+            lines = Self.sample()
+            // Untweened, since nothing the animation watches changes: the
+            // plates step back to the left edge while still invisible.
+            hiddenOffset = -Self.travel
+            try? await Task.sleep(for: Self.warmup)
+            guard !Task.isCancelled else { return }
+            revealed = true
+        }
     }
 }
 
@@ -186,6 +260,10 @@ private struct BadgeOutline<Content: View>: View {
                     }
                 }
             }
+            // Nine layers per plate is too much to keep live while thirty of
+            // them animate: rasterize once, then move the flattened texture.
+            .padding(width)
+            .drawingGroup()
     }
 }
 
