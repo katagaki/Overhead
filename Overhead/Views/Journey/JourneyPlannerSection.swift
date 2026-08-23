@@ -391,7 +391,8 @@ struct JourneyPlannerSection: View {
                     .font(.system(size: 12))
                     .foregroundColor(.secondary)
 
-                if let platform = boardingPlatform(for: candidate.legs.first) {
+                if candidate.legs.count == 1,
+                   let platform = boardingPlatform(for: candidate.legs.first) {
                     Text("Candidate.Platform \(platform)")
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(.secondary)
@@ -417,9 +418,7 @@ struct JourneyPlannerSection: View {
     @ViewBuilder
     private func singleLegSummary(candidate: TrainCandidate, leg: CandidateLeg) -> some View {
         HStack(spacing: 6) {
-            RoundedRectangle(cornerRadius: 2)
-                .fill(leg.line.color)
-                .frame(width: 4, height: 16)
+            LineLeadingBadge(line: leg.line, dimension: 18)
 
             Text(leg.line.localizedName)
                 .font(.system(size: 13, weight: .semibold))
@@ -462,9 +461,7 @@ struct JourneyPlannerSection: View {
         VStack(alignment: .leading, spacing: 5) {
             ForEach(Array(candidate.legs.enumerated()), id: \.offset) { index, leg in
                 HStack(spacing: 5) {
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(leg.line.color)
-                        .frame(width: 4, height: 14)
+                    LineLeadingBadge(line: leg.line, dimension: 16)
 
                     Text(leg.line.localizedName)
                         .font(.system(size: 12, weight: .semibold))
@@ -475,6 +472,16 @@ struct JourneyPlannerSection: View {
                     Text(leg.fromStation.localizedName)
                         .font(.system(size: 12))
                         .lineLimit(1)
+                    if let platform = boardingPlatform(for: leg) {
+                        Text("Candidate.Platform \(platform)")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 1)
+                            .background(Color(.tertiarySystemFill))
+                            .clipShape(Capsule())
+                            .fixedSize()
+                    }
                     if candidate.hasSchedule {
                         Text(displayTime(leg.departureTime))
                             .font(.system(size: 12, weight: .semibold, design: .rounded))
