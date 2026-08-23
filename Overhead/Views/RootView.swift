@@ -140,10 +140,10 @@ struct RootView: View {
             await checkForLineDataUpdates()
         }
         .onChange(of: lineDataOnboarded) { _, isOnboarded in
-            // The manager screen clears the flag after wiping the data; the
+            // The manager screen clears the flag as it starts the wipe; the
             // first-run sheet is what downloads from nothing, so it comes
             // back, over the root rather than over the screen being left.
-            guard !isOnboarded, needsLineDataOnboarding else { return }
+            guard !isOnboarded else { return }
             navigationPath = NavigationPath()
             showLineDataOnboarding = true
         }

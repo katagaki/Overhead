@@ -53,12 +53,11 @@ struct LineDataManagerView: View {
         .confirmationDialog("LineData.Redownload.Confirm", isPresented: $isConfirmingDelete,
                             titleVisibility: .visible) {
             Button("LineData.Redownload.Action", role: .destructive) {
-                Task {
-                    await model.deleteAllData()
-                    // The first-run sheet is the only download screen that
-                    // starts from nothing, so the root brings it back.
-                    onboarded = false
-                }
+                // The first-run sheet is the only download screen that starts
+                // from nothing, so the root brings it back — right away, with
+                // the wipe running behind it.
+                onboarded = false
+                model.deleteAllData()
             }
             Button("Button.Cancel", role: .cancel) { }
         } message: {

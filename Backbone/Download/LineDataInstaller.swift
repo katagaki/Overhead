@@ -111,6 +111,8 @@ public final class LineDataInstaller: ObservableObject {
 
     public var isDownloading: Bool { progress != nil }
     public var isBusy: Bool { isDownloading || isChecking }
+    /// A wipe in flight; a download started meanwhile waits for it.
+    private var wipeTask: Task<Void, Never>?
     /// Nothing on the device yet, so the next download is the first one.
     public var isFirstDownload: Bool { installedCount == 0 }
     public var hasPendingWork: Bool { !pending.isEmpty }
@@ -310,6 +312,7 @@ public final class LineDataInstaller: ObservableObject {
     /// Brings the device up to the catalog. Everything the catalog lists ends
     /// up on disk; lines it no longer lists are dropped.
     public func sync() async throws {
+        await wipeTask?.value
         guard !isDownloading else { return }
         if pending.isEmpty { await recomputePending() }
         let work = pending
@@ -415,6 +418,12 @@ public final class LineDataInstaller: ObservableObject {
         lastChecked = nil
         StaticTrainData.invalidate()
         await recomputePending()
+    }
+
+    /// Started without waiting, so a screen can move on while the disk
+    /// catches up; anything that downloads next lands behind it.
+    public func beginRemoveAllData() {
+        wipeTask = Task { [weak self] in await self?.removeAllData() }
     }
 
     /// A line dropped from the catalog is data the app can no longer describe.
