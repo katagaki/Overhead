@@ -347,6 +347,7 @@ public struct ScheduleRevision: Codable, Hashable {
     public var stopPatterns: [TrainService.TrainType: Set<Int>]? = nil
     /// Platforms move at 改正 and during 工事, so they revise like the timetable.
     public var platforms: [String: String]? = nil
+    public var runPlatforms: [String: [String: String]]? = nil
 
     /// `validFrom` as a JST day number (yyyyMMdd), or nil if unparseable.
     public var validFromDayKey: Int? {
@@ -381,11 +382,22 @@ public struct StaticTrainLine: Codable, Hashable {
     /// Departure platform (番線) keyed `"<stationId>|A"` / `"<stationId>|D"` for
     /// the ascending and descending directions, following `exactStationTimes`.
     ///
-    /// A string, not a number: 「5・6」 and letter suffixes both occur. Absent
-    /// wherever the platform depends on the train rather than the direction —
-    /// 新宿's 中央線 trains for 立川 leave from 9, 11 or 12番線 — so nil is an
-    /// ordinary answer, not missing data to be filled in later.
+    /// A string, not a number: 「5・6」 and letter suffixes both occur. Where a
+    /// station's platform depends on the train rather than the direction, this
+    /// holds its usual track and `runPlatforms` names the exceptions — or, when
+    /// no track is usual, this is absent and `runPlatforms` carries every train.
+    /// nil is an ordinary answer, not missing data to be filled in later.
     public var platforms: [String: String]? = nil
+    /// Platforms that depend on the train rather than the direction, keyed like
+    /// `exactStationTimes` — `"<calendar>|<A|D>|<stationId>"` — and then by the
+    /// train's departure time there.
+    ///
+    /// Where the station-direction also has a `platforms` entry that is the
+    /// usual track and this lists only the trains leaving from somewhere else;
+    /// where it has none — 上野's 快速 split evenly between 11 and 12番線 — every
+    /// train is listed, and a train missing from the list has no answer rather
+    /// than a coin-flip one.
+    public var runPlatforms: [String: [String: String]]? = nil
     /// Announced 改正 not yet in force; see `ScheduleRevision`. Resolved for the
     /// current service day by `StaticTrainData`, so consumers never see these.
     /// Optional, not a defaulted array: the synthesized decoder ignores property
@@ -471,35 +483,88 @@ public struct StaticTrainLine: Codable, Hashable {
             if let v = rev.timetableRuns { line.timetableRuns = v }
             if let v = rev.stopPatterns { line.stopPatterns = v }
             if let v = rev.platforms { line.platforms = v }
+            if let v = rev.runPlatforms { line.runPlatforms = v }
         }
         return line
     }
 
     /// The 番線 trains leave this station from, heading the given way, or nil
-    /// when the data doesn't say — which includes every station where the
-    /// platform depends on the train.
-    public func platform(atStationId stationId: String, ascending: Bool) -> String? {
-        platforms?["\(stationId)|\(ascending ? "A" : "D")"]
+    /// when the data doesn't say.
+    ///
+    /// `departure` is the train's own departure time there ("HH:mm", may exceed
+    /// 24:00); with it a station whose platform depends on the train can still
+    /// answer. Without it only the direction-wide answer is available, which at
+    /// such a station is nil.
+    public func platform(atStationId stationId: String, ascending: Bool,
+                         departure: String? = nil,
+                         calendar: ScheduleCalendar? = nil) -> String? {
+        let suffix = ascending ? "A" : "D"
+        if let departure, let calendar,
+           let byTrain = runPlatforms?["\(calendar.rawValue)|\(suffix)|\(stationId)"],
+           let platform = byTrain[departure] {
+            return platform
+        }
+        return platforms?["\(stationId)|\(suffix)"]
     }
 
     /// The platform to board at, for someone riding on toward `nextStationId`.
     /// Takes the direction from the pair rather than a flag, since that is what
     /// every caller has: a journey knows the stop it is heading for next.
-    public func boardingPlatform(atStationId stationId: String, nextStationId: String) -> String? {
-        guard platforms != nil,
-              let from = stations.firstIndex(where: { $0.id == stationId }),
-              let to = stations.firstIndex(where: { $0.id == nextStationId })
+    public func boardingPlatform(atStationId stationId: String, nextStationId: String,
+                                 departure: String? = nil,
+                                 calendar: ScheduleCalendar? = nil) -> String? {
+        guard platforms != nil || runPlatforms != nil,
+              let ascending = ascends(from: stationId, to: nextStationId)
         else { return nil }
-        let ascending: Bool
-        if isLoop {
-            // Either way round reaches the other station; the shorter arc is the
-            // one a service actually takes.
-            let forward = (to - from + stations.count) % stations.count
-            ascending = forward != 0 && forward <= stations.count / 2
-        } else {
-            ascending = to > from
+        return platform(atStationId: stationId, ascending: ascending,
+                        departure: departure, calendar: calendar)
+    }
+
+    /// The platform to board at, for someone catching a train at `date`.
+    ///
+    /// A train that leaves just after midnight belongs to the service day it
+    /// started in, and the timetable files it as 24:15 rather than 00:15, so
+    /// both readings of the clock are tried before the direction's usual track.
+    public func boardingPlatform(atStationId stationId: String, nextStationId: String,
+                                 departureAt date: Date) -> String? {
+        guard platforms != nil || runPlatforms != nil,
+              let ascending = ascends(from: stationId, to: nextStationId)
+        else { return nil }
+        for (departure, calendar) in Self.railTimes(at: date) {
+            let key = "\(calendar.rawValue)|\(ascending ? "A" : "D")|\(stationId)"
+            if let platform = runPlatforms?[key]?[departure] { return platform }
         }
         return platform(atStationId: stationId, ascending: ascending)
+    }
+
+    /// Whether a service running from one of these stations to the other travels
+    /// in `stations` order.
+    private func ascends(from stationId: String, to nextStationId: String) -> Bool? {
+        guard let from = stations.firstIndex(where: { $0.id == stationId }),
+              let to = stations.firstIndex(where: { $0.id == nextStationId })
+        else { return nil }
+        guard isLoop else { return to > from }
+        // Either way round reaches the other station; the shorter arc is the
+        // one a service actually takes.
+        let forward = (to - from + stations.count) % stations.count
+        return forward != 0 && forward <= stations.count / 2
+    }
+
+    /// The "HH:mm" a departure could be filed under, with the service day each
+    /// reading belongs to — the plain clock first, then the 24-hour-plus form
+    /// the previous service day would have used.
+    static func railTimes(at date: Date) -> [(String, ScheduleCalendar)] {
+        var japan = Calendar(identifier: .gregorian)
+        japan.timeZone = TimeZone(identifier: "Asia/Tokyo")!
+        let parts = japan.dateComponents([.hour, .minute], from: date)
+        guard let hour = parts.hour, let minute = parts.minute else { return [] }
+        var readings = [(String(format: "%02d:%02d", hour, minute), ScheduleCalendar.current(at: date))]
+        if hour < 4 {
+            let yesterday = date.addingTimeInterval(-4 * 3600)
+            readings.append((String(format: "%02d:%02d", hour + 24, minute),
+                             ScheduleCalendar.current(at: yesterday)))
+        }
+        return readings
     }
 
     public var trainLine: TrainLine {

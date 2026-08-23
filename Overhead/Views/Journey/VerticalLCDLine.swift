@@ -596,11 +596,17 @@ struct VerticalLCDLine: View {
     }
 
     /// The platform to board at, for a rider carrying on to `next`.
+    /// The train's own departure time comes along: where a station's platform
+    /// depends on which train turns up, that is what picks it.
     private func boardingPlatform(at station: Station, next: Station?) -> String? {
         guard let next,
               let line = StaticTrainData.line(containingStationId: station.id)
         else { return nil }
-        return line.boardingPlatform(atStationId: station.id, nextStationId: next.id)
+        let departure = journey.journeyTimetable
+            .first { $0.stationId == station.id }?.departureTime
+        return line.boardingPlatform(atStationId: station.id, nextStationId: next.id,
+                                     departure: departure,
+                                     calendar: .current(at: journey.startedAt))
     }
 
     // MARK: - Helpers

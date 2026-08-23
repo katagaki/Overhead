@@ -530,7 +530,9 @@ struct JourneyPlannerSection: View {
               index + 1 < leg.service.timetable.count
         else { return nil }
         return line.boardingPlatform(atStationId: leg.fromStation.id,
-                                     nextStationId: leg.service.timetable[index + 1].stationId)
+                                     nextStationId: leg.service.timetable[index + 1].stationId,
+                                     departure: leg.service.timetable[index].departureTime,
+                                     calendar: .current(at: anchorDate))
     }
 
     private func displayTime(_ railTime: String) -> String {

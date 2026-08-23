@@ -110,7 +110,8 @@ final class JourneyNotificationManager: NSObject, UNUserNotificationCenterDelega
             // one on the line they are about to board, not the one they arrived on.
             let platform = index + 1 < stations.count
                 ? boardingPlatform(at: stations[index + 1],
-                                   next: index + 2 < stations.count ? stations[index + 2] : nil)
+                                   next: index + 2 < stations.count ? stations[index + 2] : nil,
+                                   departingAt: times[index + 1])
                 : nil
             let body: String
             switch (transferLines[station.id], platform) {
@@ -143,12 +144,14 @@ final class JourneyNotificationManager: NSObject, UNUserNotificationCenterDelega
         return requests
     }
 
-    /// The 番線 to board from at a transfer, when the data says.
-    private func boardingPlatform(at station: Station, next: Station?) -> String? {
+    /// The 番線 to board from at a transfer, when the data says. The departure
+    /// time settles it where the platform depends on the train.
+    private func boardingPlatform(at station: Station, next: Station?, departingAt date: Date) -> String? {
         guard let next,
               let line = StaticTrainData.line(containingStationId: station.id)
         else { return nil }
-        return line.boardingPlatform(atStationId: station.id, nextStationId: next.id)
+        return line.boardingPlatform(atStationId: station.id, nextStationId: next.id,
+                                     departureAt: date)
     }
 
     /// Empty when the moment has already passed.
