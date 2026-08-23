@@ -46,6 +46,7 @@ struct LineDataOnboardingView: View {
         .safeAreaInset(edge: .bottom) { actions }
         .ignoresSafeArea(edges: .top)
         .interactiveDismissDisabled(true)
+        .task { await model.prepare() }
         .onChange(of: installer.installedCount) { _, count in
             // However the download was started, finishing it ends the sheet.
             guard lineCount > 0, count == lineCount, !installer.isDownloading else { return }
@@ -96,6 +97,8 @@ struct LineDataOnboardingView: View {
 /// operators rather than a column of JR marks.
 struct LineDataBadgeWall: View {
     var dimension: CGFloat = 34
+    @ObservedObject private var installer = LineDataInstaller.shared
+    @State private var revealed = false
 
     /// Station guide-sign yellow, the ground these plates hang on.
     private static let panelYellow = Color(hex: "#FFD400")
@@ -113,21 +116,46 @@ struct LineDataBadgeWall: View {
         "Railway:Keio.Inokashira", "Railway:Minatomirai.Minatomirai", "Railway:Toei.Shinjuku"
     ]
 
+    private static let columns = 6
+    private static let spacing: CGFloat = 10
+
+    private var panelHeight: CGFloat {
+        let rows = (Self.lineIds.count + Self.columns - 1) / Self.columns
+        return CGFloat(rows) * dimension + CGFloat(rows - 1) * Self.spacing + 48
+    }
+
     var body: some View {
-        let lines = Self.lineIds.compactMap(Catalog.line(id:))
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 6),
-                  spacing: 10) {
-            ForEach(lines) { line in
-                BadgeOutline(width: 1.5) {
-                    LineSymbolBadge(symbol: line.symbol, color: Color(hex: line.colorHex),
-                                    dimension: dimension, styleOverride: line.badgeStyle,
-                                    lineId: line.id)
+        let styleCount = BadgeStyles.all.count
+        let lines = styleCount == 0 ? [] : Self.lineIds.compactMap(Catalog.line(id:))
+        ZStack {
+            if lines.isEmpty {
+                ProgressView()
+                    .controlSize(.extraLarge)
+                    .tint(.black.opacity(0.4))
+            } else {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Self.spacing),
+                                         count: Self.columns),
+                          spacing: Self.spacing) {
+                    ForEach(Array(lines.enumerated()), id: \.element.id) { index, line in
+                        BadgeOutline(width: 1.5) {
+                            LineSymbolBadge(symbol: line.symbol, color: Color(hex: line.colorHex),
+                                            dimension: dimension, styleOverride: line.badgeStyle,
+                                            lineId: line.id)
+                        }
+                        .opacity(revealed ? 1 : 0)
+                        .offset(x: revealed ? 0 : 28)
+                        .animation(.smooth(duration: 0.45).delay(Double(index) * 0.02),
+                                   value: revealed)
+                    }
                 }
+                .id(styleCount)
+                .padding(.horizontal, 20)
+                .onAppear { revealed = true }
             }
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 24)
+        .animation(.easeInOut(duration: 0.25), value: lines.isEmpty)
         .frame(maxWidth: .infinity)
+        .frame(height: panelHeight)
         // The plates are drawn for signage: the panel behind them stays the
         // same yellow in either theme, and runs to both edges of the sheet.
         .background(Self.panelYellow)

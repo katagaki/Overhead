@@ -39,6 +39,10 @@ final class LineDataModel: ObservableObject {
         OperatorFavicons.shared.reset()
     }
 
+    func prepare() async {
+        try? await installer.refreshCatalog()
+    }
+
     func checkForUpdates() async {
         do { try await installer.refreshCatalog() }
         catch { self.error = error.localizedDescription }

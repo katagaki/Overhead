@@ -43,6 +43,7 @@ struct RootView: View {
         // An app update that moved the schema on leaves the installed copy
         // unreadable-in-spirit, so the sheet comes back as an update.
         if Catalog.needsSchemaUpgrade { return true }
+        if Catalog.current.lines.isEmpty { return true }
         return !lineDataOnboarded
             && Catalog.current.lines.contains { !LineDataStore.isPresent(folder: $0.folder) }
     }

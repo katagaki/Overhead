@@ -134,6 +134,7 @@ public final class LineDataInstaller: ObservableObject {
     /// catalog is unchanged, so the pending set cannot have moved either.
     @discardableResult
     public func refreshCatalog(force: Bool = false) async throws -> Bool {
+        await wipeTask?.value
         isChecking = true
         defer { isChecking = false }
 
@@ -175,6 +176,11 @@ public final class LineDataInstaller: ObservableObject {
         storeValidator(from: http)
         Catalog.reload()
         StaticTrainData.invalidate()
+        defer {
+            BadgeStyles.invalidate()
+            NotificationCenter.default.post(name: StaticTrainData.didChangeNotification,
+                                            object: nil)
+        }
         try await refreshBadgeStyles(styles: catalog.styles, base: Self.baseURL)
         try await refreshOperatorIcons(icons: catalog.operatorIcons ?? [], base: Self.baseURL)
         await recomputePending()
@@ -199,6 +205,11 @@ public final class LineDataInstaller: ObservableObject {
         storeValidator(from: http)
         Catalog.reload()
         StaticTrainData.invalidate()
+        defer {
+            BadgeStyles.invalidate()
+            NotificationCenter.default.post(name: StaticTrainData.didChangeNotification,
+                                            object: nil)
+        }
         try await refreshBadgeStyles(styles: catalog.styles, base: Self.baseURL)
         try await refreshOperatorIcons(icons: catalog.operatorIcons ?? [], base: Self.baseURL)
         await recomputePending()
@@ -326,6 +337,7 @@ public final class LineDataInstaller: ObservableObject {
     public func sync() async throws {
         await wipeTask?.value
         guard !isDownloading else { return }
+        if Catalog.current.lines.isEmpty { try await refreshCatalog(force: true) }
         if pending.isEmpty { await recomputePending() }
         let work = pending
         guard !work.isEmpty else {
