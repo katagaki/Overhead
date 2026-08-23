@@ -194,7 +194,12 @@ struct VerticalLCDLine: View {
                 isCurrent: isCurrent,
                 isTerminal: isTerminal,
                 isTransfer: isTransfer,
-                color: rowColor
+                color: rowColor,
+                // Only where the rider boards: at a transfer the platform belongs
+                // to the boarding row below, and mid-journey they are already on.
+                platform: isFirst && !stations.isEmpty
+                    ? boardingPlatform(at: station, next: stations.count > 1 ? stations[1] : nil)
+                    : nil
             )
             .padding(.bottom, isLast || bottomSpan == markerHeight ? 0 : 14)
 
@@ -262,6 +267,7 @@ struct VerticalLCDLine: View {
             transferBoardingRow(
                 station: station,
                 target: target,
+                next: index < stations.count - 1 ? stations[index + 1] : nil,
                 timetable: timetable,
                 isPast: isPast,
                 isCurrent: isCurrent,
@@ -423,6 +429,7 @@ struct VerticalLCDLine: View {
     private func transferBoardingRow(
         station: Station,
         target: (station: Station, line: TrainLine),
+        next: Station?,
         timetable: [TimetableEntry],
         isPast: Bool,
         isCurrent: Bool,
@@ -484,6 +491,10 @@ struct VerticalLCDLine: View {
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(isPast && !isCurrent ? .secondary : .primary)
                     .lineLimit(1)
+
+                if let platform = boardingPlatform(at: target.station, next: next) {
+                    platformLabel(platform, isPast: isPast && !isCurrent)
+                }
             }
             .padding(.leading, 8)
             .padding(.bottom, tightBottom ? 0 : 14)
@@ -546,7 +557,7 @@ struct VerticalLCDLine: View {
     // MARK: - Station Label
 
     @ViewBuilder
-    private func stationLabel(station: Station, isPast: Bool, isCurrent: Bool, isTerminal: Bool, isTransfer: Bool = false, color: Color? = nil) -> some View {
+    private func stationLabel(station: Station, isPast: Bool, isCurrent: Bool, isTerminal: Bool, isTransfer: Bool = false, color: Color? = nil, platform: String? = nil) -> some View {
         let accent = color ?? lineColor
         HStack(spacing: 6) {
             if !station.stationCode.isEmpty {
@@ -565,8 +576,31 @@ struct VerticalLCDLine: View {
                 .font(.system(size: isCurrent || isTerminal || isTransfer ? 18 : 15,
                               weight: isCurrent || isTerminal || isTransfer ? .bold : .medium))
                 .foregroundColor(isPast && !isCurrent ? .secondary : .primary)
+
+            if let platform {
+                platformLabel(platform, isPast: isPast && !isCurrent)
+            }
         }
         .padding(.leading, 8)
+    }
+
+    // MARK: - Platform
+
+    /// 番線 for a stop the rider boards at. Most stations have no entry — the
+    /// platform varies by train there — so this is absent more often than not.
+    @ViewBuilder
+    private func platformLabel(_ platform: String, isPast: Bool) -> some View {
+        Text("Journey.Platform \(platform)")
+            .font(.system(size: 12, weight: .semibold))
+            .foregroundStyle(isPast ? .tertiary : .secondary)
+    }
+
+    /// The platform to board at, for a rider carrying on to `next`.
+    private func boardingPlatform(at station: Station, next: Station?) -> String? {
+        guard let next,
+              let line = StaticTrainData.line(containingStationId: station.id)
+        else { return nil }
+        return line.boardingPlatform(atStationId: station.id, nextStationId: next.id)
     }
 
     // MARK: - Helpers

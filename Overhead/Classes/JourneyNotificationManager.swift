@@ -106,10 +106,21 @@ final class JourneyNotificationManager: NSObject, UNUserNotificationCenterDelega
 
         let transferIds = Set(journey.transferStationIds)
         for (index, station) in stations.enumerated() where transferIds.contains(station.id) {
+            // The rider is standing at the transfer; the platform they need is the
+            // one on the line they are about to board, not the one they arrived on.
+            let platform = index + 1 < stations.count
+                ? boardingPlatform(at: stations[index + 1],
+                                   next: index + 2 < stations.count ? stations[index + 2] : nil)
+                : nil
             let body: String
-            if let line = transferLines[station.id] {
+            switch (transferLines[station.id], platform) {
+            case (let line?, let platform?):
+                body = String(localized: "Notification.Transfer.BodyPlatform \(station.localizedName) \(line.localizedName) \(platform)")
+            case (let line?, nil):
                 body = String(localized: "Notification.Transfer.Body \(station.localizedName) \(line.localizedName)")
-            } else {
+            case (nil, let platform?):
+                body = String(localized: "Notification.Transfer.BodyNoLinePlatform \(station.localizedName) \(platform)")
+            case (nil, nil):
                 body = String(localized: "Notification.Transfer.BodyNoLine \(station.localizedName)")
             }
             requests.append(contentsOf: request(
@@ -130,6 +141,14 @@ final class JourneyNotificationManager: NSObject, UNUserNotificationCenterDelega
         }
 
         return requests
+    }
+
+    /// The 番線 to board from at a transfer, when the data says.
+    private func boardingPlatform(at station: Station, next: Station?) -> String? {
+        guard let next,
+              let line = StaticTrainData.line(containingStationId: station.id)
+        else { return nil }
+        return line.boardingPlatform(atStationId: station.id, nextStationId: next.id)
     }
 
     /// Empty when the moment has already passed.

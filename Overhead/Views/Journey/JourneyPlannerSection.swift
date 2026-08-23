@@ -391,8 +391,8 @@ struct JourneyPlannerSection: View {
                     .font(.system(size: 12))
                     .foregroundColor(.secondary)
 
-                if let walkMinutes = searchWalkMinutes {
-                    Text("Candidate.Walk \(walkMinutes)")
+                if let platform = boardingPlatform(for: candidate.legs.first) {
+                    Text("Candidate.Platform \(platform)")
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(.secondary)
                         .padding(.horizontal, 6)
@@ -519,6 +519,18 @@ struct JourneyPlannerSection: View {
         let minutes = Int(interval / 60)
         guard minutes < 100 else { return nil }
         return max(0, minutes)
+    }
+
+    /// 番線 the first leg boards at. Absent for most stations, and for every
+    /// station where the platform depends on which train turns up.
+    private func boardingPlatform(for leg: CandidateLeg?) -> String? {
+        guard let leg,
+              let line = StaticTrainData.line(containingStationId: leg.fromStation.id),
+              let index = leg.service.timetable.firstIndex(where: { $0.stationId == leg.fromStation.id }),
+              index + 1 < leg.service.timetable.count
+        else { return nil }
+        return line.boardingPlatform(atStationId: leg.fromStation.id,
+                                     nextStationId: leg.service.timetable[index + 1].stationId)
     }
 
     private func displayTime(_ railTime: String) -> String {
