@@ -30,7 +30,7 @@ struct LineDataManagerView: View {
 
             Section {
                 LabeledContent("LineData.Version") {
-                    Text(Catalog.current.version)
+                    Text(installer.installedVersion)
                 }
                 LabeledContent("LineData.Section.Included") {
                     Text("LineData.LineCount \(Catalog.current.lines.count)")

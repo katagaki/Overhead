@@ -66,6 +66,10 @@ public final class LineDataInstaller: ObservableObject {
     @Published public private(set) var lastChecked: Date?
     /// How many of the catalog's lines are on the device.
     @Published public private(set) var installedCount = 0
+    /// The version the data on disk answers to. The catalog file lands during
+    /// the check, ahead of the lines it describes, so its own version runs on
+    /// in front of what the device actually holds.
+    @Published public private(set) var installedVersion: String = Catalog.current.version
 
     private let defaults = UserDefaults.standard
     private let etagKey = "lineData.catalogETag"
@@ -74,6 +78,7 @@ public final class LineDataInstaller: ObservableObject {
     private let pinnedKey = "lineData.pinnedToLegacy"
     /// The schema the pin was taken for, so a later build can drop it.
     private let pinnedSchemaKey = "lineData.pinnedSchema"
+    private let installedVersionKey = "lineData.installedVersion"
     private nonisolated let session: URLSession
 
     /// Bytes of finished lines, plus the fraction each in-flight one has read.
@@ -89,6 +94,7 @@ public final class LineDataInstaller: ObservableObject {
         config.requestCachePolicy = .reloadIgnoringLocalCacheData
         session = URLSession(configuration: config)
         lastChecked = defaults.object(forKey: checkedKey) as? Date
+        installedVersion = defaults.string(forKey: installedVersionKey) ?? Catalog.current.version
         needsAppUpdate = defaults.bool(forKey: pinnedKey)
         // The pin belongs to the build that took it: once the app understands
         // a newer schema, it follows the live catalog again.
@@ -301,6 +307,12 @@ public final class LineDataInstaller: ObservableObject {
         }.value
         pending = result.0
         installedCount = result.1
+        // Nothing outstanding means the disk matches the catalog, so the
+        // catalog's version is now the installed one.
+        if result.0.isEmpty {
+            installedVersion = Catalog.current.version
+            defaults.set(installedVersion, forKey: installedVersionKey)
+        }
     }
 
     // MARK: - Download
@@ -415,8 +427,10 @@ public final class LineDataInstaller: ObservableObject {
         defaults.removeObject(forKey: etagKey)
         defaults.removeObject(forKey: modifiedKey)
         defaults.removeObject(forKey: checkedKey)
+        defaults.removeObject(forKey: installedVersionKey)
         lastChecked = nil
         StaticTrainData.invalidate()
+        installedVersion = Catalog.current.version
         await recomputePending()
     }
 
