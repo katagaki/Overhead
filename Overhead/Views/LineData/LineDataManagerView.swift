@@ -9,6 +9,8 @@ struct LineDataManagerView: View {
     @StateObject private var model = LineDataModel()
     @ObservedObject private var installer = LineDataInstaller.shared
     @AppStorage("lineData.onboarded") private var onboarded = false
+    @AppStorage(LineDataAutoUpdater.enabledKey) private var autoUpdate = false
+    @AppStorage(LineDataAutoUpdater.notifyKey) private var notifyOnUpdate = false
     @State private var isConfirmingDelete = false
     /// How many plates the summary row fits at the current width.
     @State private var rowCapacity = 0
@@ -18,6 +20,8 @@ struct LineDataManagerView: View {
 
     var body: some View {
         List {
+            autoUpdateSection
+
             if installer.needsAppUpdate {
                 Section {
                     Label("LineData.AppTooOld", systemImage: "exclamationmark.triangle")
@@ -72,6 +76,32 @@ struct LineDataManagerView: View {
             Button("Shared.OK") { model.error = nil }
         } message: {
             Text(model.error ?? "")
+        }
+    }
+
+    // MARK: Automatic updates
+
+    /// Two switches rather than one: updating on its own and being told about
+    /// it are separate wishes, and neither is on until the user says so.
+    private var autoUpdateSection: some View {
+        Section {
+            Toggle("LineData.AutoUpdate", isOn: $autoUpdate)
+                .onChange(of: autoUpdate) { _, _ in
+                    LineDataAutoUpdater.shared.settingsChanged()
+                }
+            Toggle("LineData.AutoUpdate.Notify", isOn: $notifyOnUpdate)
+                .disabled(!autoUpdate)
+                .onChange(of: notifyOnUpdate) { _, isOn in
+                    guard isOn else { return }
+                    Task {
+                        // Denied permission would leave a switch on that can
+                        // never fire anything.
+                        notifyOnUpdate = await LineDataAutoUpdater.shared
+                            .requestNotificationAuthorization()
+                    }
+                }
+        } footer: {
+            Text("LineData.AutoUpdate.Footer")
         }
     }
 

@@ -7,6 +7,12 @@ struct OverheadApp: App {
     @StateObject private var viewModel = JourneyViewModel(previewMode: false)
     @Environment(\.scenePhase) private var scenePhase
 
+    init() {
+        // Background tasks must be registered before launch finishes, and this
+        // app has no AppDelegate to do it in.
+        LineDataAutoUpdater.shared.register()
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView(viewModel: viewModel)
@@ -20,8 +26,15 @@ struct OverheadApp: App {
                 }
         }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active {
+            switch phase {
+            case .active:
                 BoardSnapshotWriter.refresh()
+            case .background:
+                // The only moment a request can be submitted for a night the
+                // app will not be open for.
+                LineDataAutoUpdater.shared.schedule()
+            default:
+                break
             }
         }
     }

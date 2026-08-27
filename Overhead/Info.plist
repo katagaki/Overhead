@@ -56,10 +56,15 @@
 		<string>DotGothic16-Regular.ttf</string>
 		<string>OvertrainPixel12.ttf</string>
 	</array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.tsubuzaki.Overhead.dataRefresh</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
 		<string>audio</string>
+		<string>processing</string>
 	</array>
 	<key>UTExportedTypeDeclarations</key>
 	<array>

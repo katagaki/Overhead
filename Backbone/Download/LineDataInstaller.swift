@@ -79,20 +79,20 @@ public final class LineDataInstaller: ObservableObject {
     /// The schema the pin was taken for, so a later build can drop it.
     private let pinnedSchemaKey = "lineData.pinnedSchema"
     private let installedVersionKey = "lineData.installedVersion"
-    private nonisolated let session: URLSession
+    /// The background refresh must not spend the user's cellular allowance;
+    /// the screens they are looking at may use whatever they are connected to.
+    public var restrictsToUnmeteredNetworks = false
+    private nonisolated let meteredSession: URLSession
+    private nonisolated let unmeteredSession: URLSession
+    private var session: URLSession { restrictsToUnmeteredNetworks ? unmeteredSession : meteredSession }
 
     /// Bytes of finished lines, plus the fraction each in-flight one has read.
     private var settledBytes = 0
     private var partialBytes: [String: Int] = [:]
 
     private init() {
-        let config = URLSessionConfiguration.default
-        config.waitsForConnectivity = true
-        // URLSession's own cache would revalidate behind our back and hand us a
-        // 200, hiding the cheap 304. Ours are the conditional headers that count.
-        config.urlCache = nil
-        config.requestCachePolicy = .reloadIgnoringLocalCacheData
-        session = URLSession(configuration: config)
+        meteredSession = URLSession(configuration: Self.configuration(unmetered: false))
+        unmeteredSession = URLSession(configuration: Self.configuration(unmetered: true))
         lastChecked = defaults.object(forKey: checkedKey) as? Date
         installedVersion = defaults.string(forKey: installedVersionKey) ?? Catalog.current.version
         needsAppUpdate = defaults.bool(forKey: pinnedKey)
@@ -102,6 +102,22 @@ public final class LineDataInstaller: ObservableObject {
            defaults.integer(forKey: pinnedSchemaKey) < Catalog.supportedSchemaVersion {
             pin(toLegacy: false)
         }
+    }
+
+    private static func configuration(unmetered: Bool) -> URLSessionConfiguration {
+        let config = URLSessionConfiguration.default
+        config.waitsForConnectivity = true
+        // URLSession's own cache would revalidate behind our back and hand us a
+        // 200, hiding the cheap 304. Ours are the conditional headers that count.
+        config.urlCache = nil
+        config.requestCachePolicy = .reloadIgnoringLocalCacheData
+        if unmetered {
+            // A backstop behind the path check, in case the phone falls back to
+            // cellular part-way through a run.
+            config.allowsExpensiveNetworkAccess = false
+            config.allowsConstrainedNetworkAccess = false
+        }
+        return config
     }
 
     /// The catalog this build should read. Once the repository moves to a
