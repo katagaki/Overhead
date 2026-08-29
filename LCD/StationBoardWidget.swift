@@ -364,11 +364,14 @@ nonisolated enum BoardCol {
     static let type: CGFloat = isEnglish ? 70 : 42
     static let origin: CGFloat = isEnglish ? 66 : 56
     static let badge: CGFloat = 20
+    static let platform: CGFloat = 22
 
     static let isEnglish = Locale.current.language.languageCode?.identifier == "en"
 }
 
 struct BoardColumnHeader: View {
+    var showsPlatform: Bool = false
+
     private let font: Font = .system(size: 9, weight: .medium)
 
     var body: some View {
@@ -380,6 +383,11 @@ struct BoardColumnHeader: View {
             Color.clear.frame(width: BoardCol.badge, height: 1)
             SquashedText(text: String(localized: "行先"), font: font, color: LED.label)
             Spacer(minLength: 4)
+            if showsPlatform {
+                SquashedText(text: String(localized: "番線"), font: font,
+                             color: LED.label, alignment: .trailing)
+                    .frame(width: BoardCol.platform)
+            }
         }
         .padding(.vertical, 3)
     }
@@ -387,6 +395,7 @@ struct BoardColumnHeader: View {
 
 struct BoardRowView: View {
     let item: BoardRowItem
+    var showsPlatform: Bool = false
 
     private var typeColor: Color { item.departure.tier.color }
 
@@ -419,6 +428,15 @@ struct BoardRowView: View {
                     alignment: .trailing,
                     maxWidth: BoardCol.origin
                 )
+            }
+            if showsPlatform {
+                SquashedText(
+                    text: item.departure.platform ?? "",
+                    font: .system(size: 13, weight: .semibold),
+                    color: LED.green,
+                    alignment: .trailing
+                )
+                .frame(width: BoardCol.platform)
             }
         }
         .padding(.vertical, 3)
@@ -561,13 +579,16 @@ struct StationBoardView: View {
                 .frame(maxWidth: .infinity)
             }
 
-            BoardColumnHeader()
-            BoardRule()
-            rows(mergedRows(
+            let items = mergedRows(
                 lines: large ? all : primary,
                 nowRailMinutes: now,
                 limit: large ? 8 : 4
-            ))
+            )
+            let showsPlatform = items.contains { $0.departure.platform != nil }
+
+            BoardColumnHeader(showsPlatform: showsPlatform)
+            BoardRule()
+            rows(items, showsPlatform: showsPlatform)
 
             Spacer(minLength: 0)
         }
@@ -591,7 +612,7 @@ struct StationBoardView: View {
     }
 
     @ViewBuilder
-    private func rows(_ items: [BoardRowItem]) -> some View {
+    private func rows(_ items: [BoardRowItem], showsPlatform: Bool) -> some View {
         if items.isEmpty {
             SquashedText(
                 text: String(localized: "本日の運行は終了しました"),
@@ -602,7 +623,7 @@ struct StationBoardView: View {
         } else {
             ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                 if index > 0 { BoardRule() }
-                BoardRowView(item: item)
+                BoardRowView(item: item, showsPlatform: showsPlatform)
             }
         }
     }

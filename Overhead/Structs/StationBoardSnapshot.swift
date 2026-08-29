@@ -14,6 +14,8 @@ nonisolated struct BoardDeparture: Codable {
     let destCode: String
     /// 当駅始発
     let isOrigin: Bool
+    /// 番線, where the line's data has one. nil on most lines.
+    var platform: String? = nil
 
     var railMinutes: Int? {
         let parts = time.split(separator: ":")

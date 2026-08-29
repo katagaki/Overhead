@@ -1556,6 +1556,41 @@
         }
       }
     },
+    "番線" : {
+      "comment" : "Departure board column header for the platform a train leaves from.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Track"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "番線"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "승강장"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "站台"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月台"
+          }
+        }
+      }
+    },
     "発車情報なし" : {
       "comment" : "Accessory widget label when no departure is available.",
       "localizations" : {

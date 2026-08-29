@@ -68,11 +68,17 @@ nonisolated enum BoardSnapshotWriter {
 
             let chosenId = choices["\(name)|\(line.id)"]
             let directions = timetables.enumerated().map { index, timetable in
-                BoardDirection(
+                let ascending = staticLine.directions
+                    .first(where: { $0.id == timetable.railDirection })?.isAscending
+                return BoardDirection(
                     directionId: timetable.railDirection,
                     name: timetable.localizedDirectionName,
                     isPrimary: chosenId.map { $0 == timetable.railDirection } ?? (index == 0),
-                    departures: timetable.departures.map { boardDeparture($0, line: line) }
+                    departures: timetable.departures.map {
+                        boardDeparture($0, line: line, staticLine: staticLine,
+                                       stationId: station.id, ascending: ascending,
+                                       calendar: calendar)
+                    }
                 )
             }
             boardLines.append(BoardLine(
@@ -87,7 +93,14 @@ nonisolated enum BoardSnapshotWriter {
         return BoardStation(name: name, displayName: displayName, lines: boardLines)
     }
 
-    private static func boardDeparture(_ departure: StationDeparture, line: TrainLine) -> BoardDeparture {
+    private static func boardDeparture(
+        _ departure: StationDeparture,
+        line: TrainLine,
+        staticLine: StaticTrainLine,
+        stationId: String,
+        ascending: Bool?,
+        calendar: ScheduleCalendar
+    ) -> BoardDeparture {
         BoardDeparture(
             time: departure.departureTime,
             typeName: departure.trainType.localizedDisplayName,
@@ -95,7 +108,11 @@ nonisolated enum BoardSnapshotWriter {
             destName: departure.localizedDestination,
             // Looked up by the Japanese name; only that one matches the station list.
             destCode: destinationCode(named: departure.destinationName, line: line),
-            isOrigin: departure.isFirst
+            isOrigin: departure.isFirst,
+            platform: ascending.flatMap {
+                staticLine.platform(atStationId: stationId, ascending: $0,
+                                    departure: departure.departureTime, calendar: calendar)
+            }
         )
     }
 
