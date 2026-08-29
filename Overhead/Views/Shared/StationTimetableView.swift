@@ -89,6 +89,7 @@ struct StationTimetableView: View {
                     departures: upcomingDepartures(in: visibleDepartures(timetable), nowMinutes: nowMinutes),
                     nowMinutes: nowMinutes,
                     typeColor: boardTypeColor,
+                    platform: { platform(for: $0, in: timetable) },
                     noticeText: boardNotice(for: timetable)
                 )
                 // The LED panel is always dark regardless of system appearance.
@@ -332,18 +333,40 @@ struct StationTimetableView: View {
         type.skipsStations ? gridTypeColor(type) : .green
     }
 
+    // MARK: - Platforms
+
+    /// 番線 this departure leaves from, where the line's data says. Most lines
+    /// carry none, and at some stations only certain trains have an answer.
+    private func platform(for departure: StationDeparture, in timetable: StationTimetableData) -> String? {
+        guard let staticLine = StaticTrainData.line(withId: line.id),
+              staticLine.platforms != nil || staticLine.runPlatforms != nil,
+              let direction = staticLine.directions.first(where: { $0.id == timetable.railDirection })
+        else { return nil }
+        return staticLine.platform(atStationId: station.id,
+                                   ascending: direction.isAscending,
+                                   departure: departure.departureTime,
+                                   calendar: .current())
+    }
+
 
     // MARK: - Departure Detail
 
     private func departureDetail(_ departure: StationDeparture) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .firstTextBaseline, spacing: 3) {
-                Text(departure.departureTime)
-                    .font(.system(size: 32, weight: .bold))
-                    .monospacedDigit()
-                Text("StationTimetable.DepartureSuffix")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.secondary)
+            VStack(alignment: .leading, spacing: 2) {
+                if let platform = currentTimetable.flatMap({ platform(for: departure, in: $0) }) {
+                    Text("Journey.Platform \(platform)")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.secondary)
+                }
+                HStack(alignment: .firstTextBaseline, spacing: 3) {
+                    Text(departure.departureTime)
+                        .font(.system(size: 32, weight: .bold))
+                        .monospacedDigit()
+                    Text("StationTimetable.DepartureSuffix")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.secondary)
+                }
             }
             HStack(spacing: 8) {
                 Text(departure.trainType.localizedDisplayName)
@@ -528,6 +551,7 @@ private struct DepartureBoardView: View {
     let departures: [StationDeparture]
     let nowMinutes: Int
     let typeColor: (TrainService.TrainType) -> Color
+    let platform: (StationDeparture) -> String?
     let noticeText: String?
 
     private let boardBackground = Color(red: 0.024, green: 0.031, blue: 0.039)
@@ -571,6 +595,11 @@ private struct DepartureBoardView: View {
         )
     }
 
+    /// The right-hand column shows 番線 where the line has them, else the countdown.
+    private var showsPlatform: Bool {
+        departures.contains { platform($0) != nil }
+    }
+
     private func ordinalName(_ index: Int) -> String {
         String(localized: index == 0 ? "Board.Ordinal.First" : "Board.Ordinal.Second")
     }
@@ -581,7 +610,8 @@ private struct DepartureBoardView: View {
             Text("Board.Header.Type").frame(width: 78, alignment: .leading)
             Text("Board.Header.Time").frame(width: 56, alignment: .leading)
             Text("Board.Header.Destination").frame(maxWidth: .infinity, alignment: .leading)
-            Text("Board.Header.Countdown").frame(width: 56, alignment: .trailing)
+            Text(showsPlatform ? "Board.Header.Platform" : "Board.Header.Countdown")
+                .frame(width: 56, alignment: .trailing)
         }
         .font(.system(size: 10, weight: .semibold))
         .foregroundColor(Color(white: 0.55))
@@ -610,7 +640,7 @@ private struct DepartureBoardView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            Text(countdownText(departure))
+            Text(showsPlatform ? platform(departure) ?? "" : countdownText(departure))
                 .font(.system(size: 17, weight: .bold))
                 .monospacedDigit()
                 .foregroundColor(ledGreen)
