@@ -100,6 +100,11 @@ struct StyledTrainLCDView: View {
             NeonLCDView(journey: journey, state: state, lineColor: lineColor, orientation: orientation)
         case .galaxy:
             GalaxyLCDView(journey: journey, state: state, lineColor: lineColor, orientation: orientation)
+        case .rinkai:
+            RinkaiLCDView(journey: journey, state: state, lineColor: lineColor, orientation: orientation)
+        case .tsukubaExpress:
+            TsukubaExpressLCDView(journey: journey, state: state, lineColor: lineColor,
+                                  orientation: orientation)
         }
     }
 }
