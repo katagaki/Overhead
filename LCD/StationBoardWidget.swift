@@ -447,12 +447,47 @@ struct BoardRowView: View {
         if item.departure.destCode.isEmpty {
             Color.clear.frame(width: BoardCol.badge, height: 1)
         } else {
-            LCDStationNumberBadge(
+            BoardBadge(
                 code: item.departure.destCode,
                 color: Color(hex: item.line.colorHex),
                 dimension: BoardCol.badge
             )
         }
+    }
+}
+
+/// A station number badge that keeps its line colour under the tinted and clear
+/// home-screen styles.
+///
+/// Those styles flatten every view to one colour, which turns a badge into an
+/// unreadable blank plate. Only `Image` can opt out, so outside full-colour
+/// mode the badge is rasterised and the bitmap marked `.fullColor`.
+struct BoardBadge: View {
+    let code: String
+    let color: Color
+    var dimension: CGFloat = 22
+
+    @Environment(\.widgetRenderingMode) private var renderingMode
+    @Environment(\.displayScale) private var displayScale
+
+    var body: some View {
+        if renderingMode == .fullColor {
+            badge
+        } else if let rasterized {
+            rasterized.widgetAccentedRenderingMode(.fullColor)
+        } else {
+            badge
+        }
+    }
+
+    private var badge: LCDStationNumberBadge {
+        LCDStationNumberBadge(code: code, color: color, dimension: dimension)
+    }
+
+    @MainActor private var rasterized: Image? {
+        let renderer = ImageRenderer(content: badge)
+        renderer.scale = displayScale
+        return renderer.uiImage.map { Image(uiImage: $0) }
     }
 }
 
@@ -602,7 +637,7 @@ struct StationBoardView: View {
         }
         return HStack(spacing: 3) {
             ForEach(seen.prefix(6), id: \.lineId) { line in
-                LCDStationNumberBadge(
+                BoardBadge(
                     code: line.stationCode,
                     color: Color(hex: line.colorHex),
                     dimension: dimension
@@ -698,7 +733,7 @@ struct LineBoardView: View {
             if let target, !deps.isEmpty {
                 VStack(alignment: .leading, spacing: 0) {
                     VStack(spacing: 2) {
-                        LCDStationNumberBadge(
+                        BoardBadge(
                             code: target.line.stationCode,
                             color: Color(hex: target.line.colorHex),
                             dimension: 24
@@ -758,7 +793,7 @@ struct LineBoardView: View {
                 .frame(width: 31)
             }
             if !dep.destCode.isEmpty {
-                LCDStationNumberBadge(
+                BoardBadge(
                     code: dep.destCode,
                     color: Color(hex: line.colorHex),
                     dimension: 14
