@@ -42,7 +42,9 @@ struct LCDStylePickerSheet: View {
     private static let cellWidthFraction: CGFloat = 0.4
     private static let spacing: CGFloat = 12
     private static let horizontalPadding: CGFloat = 16
-    private static let cellPadding: CGFloat = 6
+    private static let cellPadding: CGFloat = 12
+    /// Breathing room either side of the title, inside the card's own padding.
+    private static let titleInset: CGFloat = 4
     private static let cornerRadius: CGFloat = 24
     /// Room the title takes under the preview, spacing included.
     private static let titleAllowance: CGFloat = 46
@@ -59,7 +61,7 @@ struct LCDStylePickerSheet: View {
                 // right edge, so the row reads as scrollable.
                 let cellWidth = geo.size.width * Self.cellWidthFraction
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 20) {
+                    LazyVStack(alignment: .leading, spacing: 6) {
                         ForEach(TrainLCDStyleCategory.allCases) { category in
                             Section {
                                 ScrollView(.horizontal, showsIndicators: false) {
@@ -75,7 +77,7 @@ struct LCDStylePickerSheet: View {
                                     .font(.headline)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .padding(.horizontal, Self.horizontalPadding)
-                                    .padding(.vertical, 6)
+                                    .padding(.top, 14)
                             }
                         }
                     }
@@ -147,9 +149,11 @@ struct LCDStylePickerSheet: View {
                     .allowsHitTesting(false)
 
                 // Long names squash on one line rather than wrapping.
-                HorizontallySquashed(maxWidth: width - Self.cellPadding * 2) {
+                HorizontallySquashed(
+                    maxWidth: width - (Self.cellPadding + Self.titleInset) * 2
+                ) {
                     Text(verbatim: style.label)
-                        .font(.body)
+                        .font(.subheadline)
                         .foregroundStyle(.primary)
                         .lineLimit(1)
                 }
