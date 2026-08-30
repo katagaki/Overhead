@@ -45,7 +45,7 @@ enum TrainLCDStyle: String, CaseIterable, Identifiable {
         case .joban: return "常磐線風"
         case .keihinTohoku: return "京浜東北線風"
         case .yamanote: return "山手線風"
-        case .tokyoMetro: return "東京メトロ風"
+        case .tokyoMetro: return "メトロ風"
         case .ledMatrix: return "3色LED風"
         case .kivotos: return "キヴォトス広域都市鉄道風"
         case .shinkansen: return "新幹線テロップ風"
