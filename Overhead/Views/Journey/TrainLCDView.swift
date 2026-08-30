@@ -38,12 +38,12 @@ struct TrainLCDView: View {
         TimelineView(.periodic(from: .now, by: 0.5)) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
-                let english = LCDLanguageRotation.current(at: context.date) == .en
+                let language = LCDLanguageRotation.current(at: context.date)
                 let phase = LCDPhase.of(journey: journey, state: state, now: context.date)
                 VStack(spacing: 0) {
-                    header(now: context.date, english: english, phase: phase)
+                    header(now: context.date, language: language, phase: phase)
                         .frame(height: Self.headerHeight)
-                    progression(now: context.date, english: english)
+                    progression(now: context.date, language: language)
                         .frame(maxHeight: .infinity)
                 }
                 .frame(width: Self.designWidth, height: Self.designHeight)
@@ -57,18 +57,18 @@ struct TrainLCDView: View {
 
     // MARK: - Header (black area)
 
-    private func header(now: Date, english: Bool, phase: LCDPhase) -> some View {
+    private func header(now: Date, language: TrainLCDLanguage, phase: LCDPhase) -> some View {
         HStack(alignment: .top, spacing: 10) {
-            destinationPlate(english: english)
+            destinationPlate(language: language)
 
             VStack(spacing: 0) {
                 HStack(alignment: .top, spacing: 3) {
-                    Text(headlineLabel(english: english, phase: phase))
-                        .font(english ? LCDFont.latin(size: 12, weight: .bold)
+                    Text(headlineLabel(language: language, phase: phase))
+                        .font(language.isLatin ? LCDFont.latin(size: 12, weight: .bold)
                                       : LCDFont.gothic(size: 12, weight: .bold))
                     Spacer()
-                    Text(verbatim: english ? "Time" : "現在時刻")
-                        .font(english ? LCDFont.latin(size: 9, weight: .medium)
+                    Text(verbatim: language.clockLabel)
+                        .font(language.isLatin ? LCDFont.latin(size: 9, weight: .medium)
                                       : LCDFont.gothic(size: 8, weight: .medium))
                         .opacity(0.85)
                     Text(Self.clockFormatter.string(from: now))
@@ -95,16 +95,16 @@ struct TrainLCDView: View {
                                 )
                         }
                         Group {
-                            if english {
+                            if language.isLatin {
                                 // Descenders otherwise sit on the panel edge.
-                                FillingLatinName(name: station.nameEn, baseSize: 34,
+                                FillingLatinName(name: language.name(station), baseSize: 34,
                                                  weight: .semibold)
                                     .padding(.bottom, 6)
                                     .offset(y: 1)
                             } else {
-                                let kerning = Self.nameKerning(station.name)
+                                let kerning = Self.nameKerning(language.name(station))
                                 HorizontallySquashed {
-                                    Text(station.name)
+                                    Text(language.name(station))
                                         .font(LCDFont.gothic(size: 34, weight: .bold))
                                         .foregroundColor(.white)
                                         .kerning(kerning)
@@ -127,7 +127,7 @@ struct TrainLCDView: View {
             .padding(.top, 2)
             .padding(.bottom, 2)
 
-            carColumn(english: english)
+            carColumn(language: language)
                 .padding(.top, 2)
         }
         .padding(.trailing, 2)
@@ -135,13 +135,13 @@ struct TrainLCDView: View {
         .background(Color(hue: 0.0, saturation: 0.0, brightness: 0.1))
     }
 
-    private func destinationPlate(english: Bool) -> some View {
+    private func destinationPlate(language: TrainLCDLanguage) -> some View {
         VStack(spacing: 2) {
-            Text(english ? typeNameEn : typeName)
-                .font(english ? LCDFont.latin(size: 17, weight: .black)
+            Text(language.typeName(ja: typeName, en: typeNameEn))
+                .font(language.isLatin ? LCDFont.latin(size: 17, weight: .black)
                               : LCDFont.gothic(size: 15, weight: .black))
-                .kerning(english ? 0 : typeKerning)
-                .padding(.leading, english ? 0 : typeKerning)
+                .kerning(language.isLatin ? 0 : typeKerning)
+                .padding(.leading, language.isLatin ? 0 : typeKerning)
                 .foregroundColor(lineColor)
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
@@ -152,13 +152,13 @@ struct TrainLCDView: View {
 
             Spacer(minLength: 0)
 
-            if english {
+            if language.isLatin {
                 HStack(alignment: .bottom, spacing: 3) {
                     Text(verbatim: "for")
                         .font(LCDFont.latin(size: 9, weight: .bold))
                         .padding(.bottom, 2)
                     HorizontallySquashed(maxWidth: 60) {
-                        Text(verbatim: journey.destinationNameEn)
+                        Text(verbatim: language.destinationName(journey))
                             .font(LCDFont.latin(size: 15, weight: .semibold))
                             .lineLimit(1)
                             .shadow(color: .black.opacity(0.85), radius: 1, x: 0, y: 0)
@@ -171,7 +171,7 @@ struct TrainLCDView: View {
                 // Long names squash horizontally rather than shrinking, so the cap
                 // height matches short ones and nothing runs into the arrow tip.
                 HorizontallySquashed(maxWidth: Self.plateTextWidth) {
-                    Text(journey.destinationNameJa)
+                    Text(language.destinationName(journey))
                         .font(LCDFont.gothic(size: 16, weight: .heavy))
                         .lineLimit(1)
                         .kerning(Self.destinationKerning)
@@ -184,10 +184,10 @@ struct TrainLCDView: View {
                 .offset(y: Self.destinationLift)
             }
 
-            Text(verbatim: "ゆき")
+            Text(verbatim: language == .zh ? "方向" : "ゆき")
                 .font(LCDFont.gothic(size: 8, weight: .bold))
                 .foregroundColor(.white)
-                .opacity(english ? 0 : 1)
+                .opacity(language.isLatin ? 0 : 1)
                 .frame(maxWidth: .infinity, alignment: .trailing)
         }
         .padding(EdgeInsets(top: 4, leading: 5, bottom: 3, trailing: 16))
@@ -202,7 +202,7 @@ struct TrainLCDView: View {
     }
 
     @ViewBuilder
-    private func carColumn(english: Bool) -> some View {
+    private func carColumn(language: TrainLCDLanguage) -> some View {
         let numberBox = Text(verbatim: "\(carNumber)")
             .font(.system(size: 16, weight: .heavy))
             .lineLimit(1)
@@ -211,9 +211,9 @@ struct TrainLCDView: View {
             .frame(width: 18, height: 18)
             .background(Color.white, in: RoundedRectangle(cornerRadius: 2))
         Group {
-            if english {
+            if language.isLatin {
                 HStack(alignment: .top, spacing: 3) {
-                    Text(verbatim: "Car No.")
+                    Text(verbatim: language.carLabel)
                         .font(LCDFont.latin(size: 9, weight: .bold))
                         .foregroundColor(.white)
                         .lineLimit(1)
@@ -223,7 +223,7 @@ struct TrainLCDView: View {
             } else {
                 VStack(alignment: .trailing, spacing: 2) {
                     numberBox
-                    Text(verbatim: "号車")
+                    Text(verbatim: language.carLabel)
                         .font(LCDFont.gothic(size: 8, weight: .bold))
                         .foregroundColor(.white)
                 }
@@ -234,7 +234,7 @@ struct TrainLCDView: View {
 
     // MARK: - Progression (white area)
 
-    private func progression(now: Date, english: Bool) -> some View {
+    private func progression(now: Date, language: TrainLCDLanguage) -> some View {
         let (columns, markerSlot) = stops(now: now)
         let colWidth = (Self.designWidth - 20) / CGFloat(max(columns.count, 1))
         let markerCenter = markerSlot * colWidth
@@ -484,11 +484,15 @@ struct TrainLCDView: View {
         )
     }
 
-    private func headlineLabel(english: Bool, phase: LCDPhase) -> String {
+    private func headlineLabel(language: TrainLCDLanguage, phase: LCDPhase) -> String {
+        language.headline(phase) { japanese(phase: $0) }
+    }
+
+    private func japanese(phase: LCDPhase) -> String {
         switch phase {
-        case .next: return english ? "Next" : "つぎは"
-        case .approaching: return english ? "Soon" : "まもなく"
-        case .dwelling: return english ? "Now stopping at" : "ただいま"
+        case .next: return "つぎは"
+        case .approaching: return "まもなく"
+        case .dwelling: return "ただいま"
         }
     }
 

@@ -27,11 +27,11 @@ struct KeihinTohokuLineLCDView: View {
         TimelineView(.periodic(from: .now, by: 0.5)) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
-                let english = LCDLanguageRotation.current(at: context.date) == .en
+                let language = LCDLanguageRotation.current(at: context.date)
                 VStack(spacing: 0) {
-                    header(english: english)
+                    header(language: language)
                         .frame(height: Self.headerHeight)
-                    progression(now: context.date, english: english)
+                    progression(now: context.date, language: language)
                         .frame(maxHeight: .infinity)
                 }
                 .frame(width: Self.designWidth, height: Self.designHeight)
@@ -45,16 +45,16 @@ struct KeihinTohokuLineLCDView: View {
 
     // MARK: - Header (gray bar)
 
-    private func header(english: Bool) -> some View {
+    private func header(language: TrainLCDLanguage) -> some View {
         VStack(spacing: 1) {
-            Text(destinationLabel(english: english))
-                .font(english ? LCDFont.latin(size: 11, weight: .bold)
+            Text(destinationLabel(language: language))
+                .font(language.isLatin ? LCDFont.latin(size: 11, weight: .bold)
                               : LCDFont.gothic(size: 11, weight: .bold))
                 .foregroundColor(.black)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
                 .frame(width: Self.boxWidth, height: 12, alignment: .leading)
-            stationBox(english: english)
+            stationBox(language: language)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
         .padding(.bottom, 2)
@@ -64,7 +64,7 @@ struct KeihinTohokuLineLCDView: View {
                 .padding(.leading, 7)
         }
         .overlay(alignment: .topTrailing) {
-            carColumn
+            carColumn(language: language)
                 .padding(.top, 4)
                 .padding(.trailing, 7)
         }
@@ -100,16 +100,16 @@ struct KeihinTohokuLineLCDView: View {
     private static let boxWidth: CGFloat = 190
 
     /// White box: badge docked left, name spread across the rest.
-    private func stationBox(english: Bool) -> some View {
+    private func stationBox(language: TrainLCDLanguage) -> some View {
         HStack(spacing: 0) {
             if let station = headlineStation {
                 if !station.stationCode.isEmpty {
                     scaledStationBadge(station, dimension: Self.boxHeight - 9)
                         .padding(4.5)
                 }
-                if english {
+                if language.isLatin {
                     HorizontallySquashed {
-                        Text(station.nameEn)
+                        Text(language.name(station))
                             .font(LCDFont.latin(size: 25, weight: .heavy))
                             .foregroundColor(.black)
                             .lineLimit(1)
@@ -120,7 +120,7 @@ struct KeihinTohokuLineLCDView: View {
                     .padding(.horizontal, 8)
                     .frame(maxWidth: .infinity)
                 } else {
-                    spreadName(station.name)
+                    spreadName(language.name(station))
                         .padding(.horizontal, 20)
                         .frame(maxWidth: .infinity)
                 }
@@ -147,14 +147,14 @@ struct KeihinTohokuLineLCDView: View {
         return SpreadSquashName(chars: chars, size: size, gothic: true)
     }
 
-    private var carColumn: some View {
+    private func carColumn(language: TrainLCDLanguage) -> some View {
         VStack(spacing: 2) {
             Text(verbatim: "\(carNumber)")
                 .font(.system(size: 15, weight: .heavy))
                 .foregroundColor(lineColor)
                 .frame(width: 26, height: 20)
                 .background(Color.white, in: RoundedRectangle(cornerRadius: 2))
-            Text(verbatim: "号車")
+            Text(verbatim: language.carLabel)
                 .font(LCDFont.gothic(size: 8, weight: .bold))
                 .foregroundColor(.black)
         }
@@ -162,7 +162,7 @@ struct KeihinTohokuLineLCDView: View {
 
     // MARK: - Progression (white area, Joban-style)
 
-    private func progression(now: Date, english: Bool) -> some View {
+    private func progression(now: Date, language: TrainLCDLanguage) -> some View {
         let (columns, markerSlot) = stops(now: now)
         let colWidth = (Self.designWidth - 20) / CGFloat(max(columns.count, 1))
         let markerCenter = markerSlot * colWidth
@@ -170,7 +170,7 @@ struct KeihinTohokuLineLCDView: View {
         return VStack(spacing: 0) {
             HStack(spacing: 0) {
                 ForEach(columns) { col in
-                    columnName(col.station, english: english, colWidth: colWidth)
+                    columnName(col.station, language: language, colWidth: colWidth)
                         .frame(width: colWidth, height: 52, alignment: .bottom)
                         .opacity(col.isPassed ? Self.passedOpacity : 1)
                 }
@@ -242,13 +242,13 @@ struct KeihinTohokuLineLCDView: View {
     // Long names squash vertically; mixed kanji/katakana names split into
     // parallel columns with the shorter part spaced out, like the real display.
     @ViewBuilder
-    private func columnName(_ station: Station, english: Bool, colWidth: CGFloat) -> some View {
-        if english {
-            AngledEnglishStationName(name: station.nameEn, fontSize: 9,
+    private func columnName(_ station: Station, language: TrainLCDLanguage, colWidth: CGFloat) -> some View {
+        if language.isLatin {
+            AngledEnglishStationName(name: language.name(station), fontSize: 9,
                                      width: colWidth, height: 52,
                                      mirrored: orientation == .right)
         } else {
-            VerticalStationName(name: station.name, fontSize: 11, charBox: 12,
+            VerticalStationName(name: language.name(station), fontSize: 11, charBox: 12,
                                 availableHeight: 52, color: .black,
                                 columnAnchor: .bottom, gothic: true)
         }
@@ -292,8 +292,13 @@ struct KeihinTohokuLineLCDView: View {
     }
 
     /// Service destination shown above the station box.
-    private func destinationLabel(english: Bool) -> String {
-        return english ? "for \(journey.destinationNameEn)" : "\(journey.destinationNameJa)　行"
+    private func destinationLabel(language: TrainLCDLanguage) -> String {
+        let name = language.destinationName(journey)
+        switch language {
+        case .ja: return "\(name)　行"
+        case .en: return "for \(name)"
+        case .zh: return "开往\(name)"
+        }
     }
 
     private func transferList(_ lines: [TrainLine]) -> some View {

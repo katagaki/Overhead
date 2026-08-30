@@ -42,21 +42,21 @@ enum TrainLCDStyle: String, CaseIterable, Identifiable {
     /// Japanese aesthetic label, shown verbatim.
     var label: String {
         switch self {
-        case .joban: return "常磐線風"
-        case .keihinTohoku: return "京浜東北線風"
-        case .yamanote: return "山手線風"
-        case .tokyoMetro: return "メトロ風"
-        case .ledMatrix: return "3色LED風"
-        case .kivotos: return "キヴォトス広域都市鉄道風"
-        case .shinkansen: return "新幹線テロップ風"
-        case .hankyu: return "阪急風"
-        case .tube: return "ロンドン地下鉄風"
-        case .find: return "NY地下鉄FIND風"
-        case .neon: return "近未来メトロ風"
-        case .galaxy: return "銀河急行風"
-        case .rinkai: return "りんかい線風"
-        case .tsukubaExpress: return "つくばエクスプレス風"
-        case .keisei: return "京成風"
+        case .joban: return "常磐線"
+        case .keihinTohoku: return "京浜東北線"
+        case .yamanote: return "山手線"
+        case .tokyoMetro: return "メトロ"
+        case .ledMatrix: return "3色LED"
+        case .kivotos: return "キヴォトス広域都市鉄道"
+        case .shinkansen: return "新幹線テロップ"
+        case .hankyu: return "阪急"
+        case .tube: return "ロンドン地下鉄"
+        case .find: return "NY地下鉄FIND"
+        case .neon: return "近未来メトロ"
+        case .galaxy: return "銀河急行"
+        case .rinkai: return "りんかい線"
+        case .tsukubaExpress: return "つくばエクスプレス"
+        case .keisei: return "京成"
         }
     }
 }

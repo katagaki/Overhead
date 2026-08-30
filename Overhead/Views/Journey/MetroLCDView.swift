@@ -32,14 +32,14 @@ struct MetroLCDView: View {
         TimelineView(.periodic(from: .now, by: 0.5)) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
-                let english = LCDLanguageRotation.current(at: context.date) == .en
+                let language = LCDLanguageRotation.current(at: context.date)
                 let phase = LCDPhase.of(journey: journey, state: state, now: context.date)
                 VStack(spacing: 0) {
-                    destinationStrip(english: english)
+                    destinationStrip(language: language)
                         .frame(height: Self.destStripHeight)
-                    headlineBand(english: english, phase: phase)
+                    headlineBand(language: language, phase: phase)
                         .frame(height: Self.headlineHeight)
-                    progression(now: context.date, english: english)
+                    progression(now: context.date, language: language)
                         .frame(maxHeight: .infinity)
                 }
                 .frame(width: Self.designWidth, height: Self.designHeight)
@@ -53,23 +53,23 @@ struct MetroLCDView: View {
 
     // MARK: - Destination Strip (top, white)
 
-    private func destinationStrip(english: Bool) -> some View {
+    private func destinationStrip(language: TrainLCDLanguage) -> some View {
         HStack(spacing: 8) {
-            typeBox(english: english)
+            typeBox(language: language)
             HStack(alignment: .lastTextBaseline, spacing: 4) {
-                if english {
+                if language.isLatin {
                     Text(verbatim: "for")
                         .font(LCDFont.latin(size: 11, weight: .heavy))
-                    Text(journey.destinationNameEn)
+                    Text(language.destinationName(journey))
                         .font(LCDFont.latin(size: 15, weight: .heavy))
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
                 } else {
-                    Text(journey.destinationNameJa)
+                    Text(language.destinationName(journey))
                         .font(LCDFont.gothic(size: 15, weight: .heavy))
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
-                    Text(verbatim: "ゆき")
+                    Text(verbatim: language == .zh ? "方向" : "ゆき")
                         .font(LCDFont.gothic(size: 15, weight: .heavy))
                 }
             }
@@ -78,16 +78,16 @@ struct MetroLCDView: View {
         }
         .padding(.leading, 6)
         .overlay(alignment: .trailing) {
-            carBox(english: english)
+            carBox(language: language)
                 .padding(.trailing, 8)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .metalBandGradient(.white)
     }
 
-    private func typeBox(english: Bool) -> some View {
-        Text(english ? typeNameEn : typeName)
-            .font(english ? LCDFont.latin(size: 13, weight: .heavy)
+    private func typeBox(language: TrainLCDLanguage) -> some View {
+        Text(language.typeName(ja: typeName, en: typeNameEn))
+            .font(language.isLatin ? LCDFont.latin(size: 13, weight: .heavy)
                           : LCDFont.gothic(size: 13, weight: .heavy))
             .foregroundColor(.white)
             .lineLimit(1)
@@ -98,7 +98,7 @@ struct MetroLCDView: View {
             .clipShape(RoundedRectangle(cornerRadius: 2))
     }
 
-    private func carBox(english: Bool) -> some View {
+    private func carBox(language: TrainLCDLanguage) -> some View {
         HStack(spacing: 3) {
             Text(verbatim: "\(carNumber)")
                 .font(.system(size: 13, weight: .heavy))
@@ -108,8 +108,8 @@ struct MetroLCDView: View {
                     Color(hue: 0, saturation: 0, brightness: 0.12),
                     in: RoundedRectangle(cornerRadius: 3)
                 )
-            Text(verbatim: english ? "Car No." : "号車")
-                .font(english ? LCDFont.latin(size: 8, weight: .bold)
+            Text(verbatim: language.carLabel)
+                .font(language.isLatin ? LCDFont.latin(size: 8, weight: .bold)
                               : LCDFont.gothic(size: 8, weight: .bold))
                 .foregroundColor(.black)
                 .fixedSize()
@@ -118,12 +118,12 @@ struct MetroLCDView: View {
 
     // MARK: - Headline Band (silver gradient)
 
-    private func headlineBand(english: Bool, phase: LCDPhase) -> some View {
+    private func headlineBand(language: TrainLCDLanguage, phase: LCDPhase) -> some View {
         HStack(spacing: 9) {
             // Fixed label zone, trailing-aligned: longer EN text grows leftward
             // and the badge never shifts on flip.
-            Text(headlineLabel(english: english, phase: phase))
-                .font(english ? LCDFont.latin(size: 10, weight: .bold)
+            Text(headlineLabel(language: language, phase: phase))
+                .font(language.isLatin ? LCDFont.latin(size: 10, weight: .bold)
                               : LCDFont.gothic(size: 13, weight: .bold))
                 .foregroundColor(.black)
                 .lineLimit(1)
@@ -144,8 +144,8 @@ struct MetroLCDView: View {
                     }
                 }
                 HorizontallySquashed {
-                    Text(english ? station.nameEn : station.name)
-                        .font(english ? LCDFont.latin(size: 32, weight: .heavy)
+                    Text(language.name(station))
+                        .font(language.isLatin ? LCDFont.latin(size: 32, weight: .heavy)
                                       : LCDFont.gothic(size: 32, weight: .heavy))
                         .foregroundColor(.black)
                         .lineLimit(1)
@@ -184,7 +184,7 @@ struct MetroLCDView: View {
 
     // MARK: - Progression (white area)
 
-    private func progression(now: Date, english: Bool) -> some View {
+    private func progression(now: Date, language: TrainLCDLanguage) -> some View {
         let (builtCols, builtSlot) = columns(now: now)
         let blinkRed = Int(now.timeIntervalSinceReferenceDate * 2) % 2 == 0
         let mirrored = orientation == .left
@@ -262,7 +262,7 @@ struct MetroLCDView: View {
             HStack(spacing: 0) {
                 ForEach(cols) { col in
                     columnName(col.station, passed: col.isPassed,
-                               english: english, colWidth: colWidth)
+                               language: language, colWidth: colWidth)
                         .frame(width: colWidth)
                 }
             }
@@ -313,17 +313,17 @@ struct MetroLCDView: View {
     }
 
     @ViewBuilder
-    private func columnName(_ station: Station, passed: Bool, english: Bool,
+    private func columnName(_ station: Station, passed: Bool, language: TrainLCDLanguage,
                             colWidth: CGFloat) -> some View {
-        if english {
-            RotatedEnglishStationName(name: station.nameEn, fontSize: 10.5,
+        if language.isLatin {
+            RotatedEnglishStationName(name: language.name(station), fontSize: 10.5,
                                       width: colWidth, height: Self.namesHeight - 8,
                                       color: passed ? Self.passedGray : .black,
                                       textAnchor: .leading)
                 .padding(.top, 4)
                 .frame(height: Self.namesHeight, alignment: .top)
         } else {
-            VerticalStationName(name: station.name, fontSize: 11.5, charBox: 12,
+            VerticalStationName(name: language.name(station), fontSize: 11.5, charBox: 12,
                                 availableHeight: Self.namesHeight - 8,
                                 color: passed ? Self.passedGray : .black,
                                 columnAnchor: .top, justifiedSingle: true, gothic: true)
@@ -415,11 +415,15 @@ struct MetroLCDView: View {
         return "\(letters)-\(digits)"
     }
 
-    private func headlineLabel(english: Bool, phase: LCDPhase) -> String {
+    private func headlineLabel(language: TrainLCDLanguage, phase: LCDPhase) -> String {
+        language.headline(phase) { japanese(phase: $0) }
+    }
+
+    private func japanese(phase: LCDPhase) -> String {
         switch phase {
-        case .next: return english ? "Next" : "つぎは"
-        case .approaching: return english ? "Arriving at" : "まもなく"
-        case .dwelling: return english ? "Now stopping at" : "ただいま"
+        case .next: return "つぎは"
+        case .approaching: return "まもなく"
+        case .dwelling: return "ただいま"
         }
     }
 

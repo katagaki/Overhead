@@ -45,7 +45,7 @@ struct LCDStylePickerSheet: View {
     private static let cellPadding: CGFloat = 6
     private static let cornerRadius: CGFloat = 24
     /// Room the title takes under the preview, spacing included.
-    private static let titleAllowance: CGFloat = 56
+    private static let titleAllowance: CGFloat = 46
 
     /// A 4:3 window, so styles of that shape use the full card width.
     private static func previewHeight(cellWidth: CGFloat) -> CGFloat {
@@ -146,12 +146,14 @@ struct LCDStylePickerSheet: View {
                     .frame(maxHeight: .infinity)
                     .allowsHitTesting(false)
 
-                Text(verbatim: style.label)
-                    .font(.body)
-                    .foregroundStyle(.primary)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity)
+                // Long names squash on one line rather than wrapping.
+                HorizontallySquashed(maxWidth: width - Self.cellPadding * 2) {
+                    Text(verbatim: style.label)
+                        .font(.body)
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity)
             }
             .padding(Self.cellPadding)
             .frame(width: width,

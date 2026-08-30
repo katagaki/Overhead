@@ -44,12 +44,12 @@ struct LoopLCDView: View {
         TimelineView(.periodic(from: .now, by: 1.0)) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
-                let english = LCDLanguageRotation.current(at: context.date) == .en
+                let language = LCDLanguageRotation.current(at: context.date)
                 let phase = LCDPhase.of(journey: journey, state: state, now: context.date)
                 VStack(spacing: 0) {
-                    header(english: english, phase: phase)
+                    header(language: language, phase: phase)
                         .frame(height: Self.headerHeight)
-                    arcBody(now: context.date, english: english)
+                    arcBody(now: context.date, language: language)
                         .frame(maxHeight: .infinity)
                 }
                 .frame(width: Self.designWidth, height: Self.designHeight)
@@ -63,15 +63,15 @@ struct LoopLCDView: View {
 
     // MARK: - Header
 
-    private func header(english: Bool, phase: LCDPhase) -> some View {
+    private func header(language: TrainLCDLanguage, phase: LCDPhase) -> some View {
         HStack(spacing: 0) {
             VStack(alignment: .trailing, spacing: 1) {
-                Text(journey.destinationNameJa)
+                Text(language.destinationName(journey))
                     .font(LCDFont.gothic(size: 12.5, weight: .heavy))
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
                     .frame(height: 13)
-                Text(verbatim: "方面")
+                Text(verbatim: language == .zh ? "方向" : "方面")
                     .font(LCDFont.gothic(size: 6.5, weight: .bold))
                     .frame(height: 7)
             }
@@ -87,24 +87,24 @@ struct LoopLCDView: View {
                 .padding(.bottom, 3)
                 .padding(.leading, 7)
 
-            Text(headlineLabel(english: english, phase: phase))
-                .font(english ? LCDFont.latin(size: 10, weight: .bold)
+            Text(headlineLabel(language: language, phase: phase))
+                .font(language.isLatin ? LCDFont.latin(size: 10, weight: .bold)
                               : LCDFont.gothic(size: 10, weight: .bold))
                 .foregroundColor(.white)
                 .frame(maxHeight: .infinity, alignment: .top)
                 .padding(.top, 3)
                 .padding(.leading, 7)
 
-            spreadName(english: english)
+            spreadName(language: language)
                 .frame(maxWidth: .infinity)
                 // Cap at the slot height: the gothic name's tall line box
                 // would otherwise inflate the row, displacing the flexible
                 // and edge-anchored siblings (color bar gap, 次は, 号車).
                 .frame(height: Self.headerHeight)
-                .padding(.horizontal, namePadding(english: english))
+                .padding(.horizontal, namePadding(language: language))
                 // Descenders (Mejiro, Nippori) would otherwise graze the bar's
                 // bottom edge, so the romaji rides a touch higher than the kanji.
-                .offset(y: english ? 1 : 3)
+                .offset(y: language.isLatin ? 1 : 3)
 
             VStack(alignment: .center, spacing: -2) {
                 Text(verbatim: "\(carNumber)")
@@ -128,17 +128,17 @@ struct LoopLCDView: View {
     }
 
     @ViewBuilder
-    private func spreadName(english: Bool) -> some View {
+    private func spreadName(language: TrainLCDLanguage) -> some View {
         if let station = headlineStation {
-            if english {
+            if language.isLatin {
                 HorizontallySquashed {
-                    Text(station.nameEn)
+                    Text(language.name(station))
                         .font(LCDFont.latin(size: 46, weight: .semibold))
                         .foregroundColor(.white)
                         .lineLimit(1)
                 }
             } else {
-                let chars = Array(station.name)
+                let chars = Array(language.name(station))
                 // Four kanji only fit at full height once the gaps tighten and
                 // the glyphs give up a few points — otherwise they squash.
                 let wide = chars.count >= 4
@@ -156,14 +156,14 @@ struct LoopLCDView: View {
     }
 
     /// The name slot's side inset; four-kanji names need the extra room.
-    private func namePadding(english: Bool) -> CGFloat {
-        if english { return 6 }
+    private func namePadding(language: TrainLCDLanguage) -> CGFloat {
+        if language.isLatin { return 6 }
         return (headlineStation?.name.count ?? 0) >= 4 ? 8 : 22
     }
 
     // MARK: - Arc Body
 
-    private func arcBody(now: Date, english: Bool) -> some View {
+    private func arcBody(now: Date, language: TrainLCDLanguage) -> some View {
         let stops = arcStops(now: now)
         let mirrored = orientation == .right
 
@@ -253,11 +253,11 @@ struct LoopLCDView: View {
                     let labelDY = Self.labelDY[min(index, Self.labelDY.count - 1)]
                     let labelSize = Self.labelSize[min(index, Self.labelSize.count - 1)]
                     let name = ctx.resolve(
-                        english
-                            ? Text(stop.station.nameEn)
+                        language.isLatin
+                            ? Text(language.name(stop.station))
                                 .font(LCDFont.latin(size: labelSize * 0.8, weight: .bold))
                                 .foregroundColor(.black)
-                            : Text(stop.station.name)
+                            : Text(language.name(stop.station))
                                 .font(LCDFont.gothic(size: labelSize, weight: .bold))
                                 .foregroundColor(.black)
                     )
@@ -446,11 +446,15 @@ struct LoopLCDView: View {
         return Array(result.prefix(Self.maxStops))
     }
 
-    private func headlineLabel(english: Bool, phase: LCDPhase) -> String {
+    private func headlineLabel(language: TrainLCDLanguage, phase: LCDPhase) -> String {
+        language.headline(phase) { japanese(phase: $0) }
+    }
+
+    private func japanese(phase: LCDPhase) -> String {
         switch phase {
-        case .next: return english ? "Next" : "次は"
-        case .approaching: return english ? "Soon" : "まもなく"
-        case .dwelling: return english ? "Now at" : "ただいま"
+        case .next: return "次は"
+        case .approaching: return "まもなく"
+        case .dwelling: return "ただいま"
         }
     }
 

@@ -45,11 +45,11 @@ struct RinkaiLCDView: View {
         TimelineView(.periodic(from: .now, by: 0.5)) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
-                let english = LCDLanguageRotation.current(at: context.date) == .en
+                let language = LCDLanguageRotation.current(at: context.date)
                 VStack(spacing: 0) {
-                    header(english: english)
+                    header(language: language)
                         .frame(height: Self.headerHeight)
-                    board(now: context.date, english: english)
+                    board(now: context.date, language: language)
                         .frame(maxHeight: .infinity)
                 }
                 .frame(width: Self.designWidth, height: Self.designHeight)
@@ -63,7 +63,7 @@ struct RinkaiLCDView: View {
 
     // MARK: - Header
 
-    private func header(english: Bool) -> some View {
+    private func header(language: TrainLCDLanguage) -> some View {
         VStack(spacing: 0) {
             LinearGradient(
                 stops: [
@@ -80,18 +80,18 @@ struct RinkaiLCDView: View {
                     .fill(Color.white.opacity(0.8))
                     .frame(height: 0.7)
             }
-            content(english: english)
+            content(language: language)
                 .frame(maxHeight: .infinity)
                 .background(Self.headerBlack)
-                .overlay(alignment: .topLeading) { typeTag(english: english) }
-                .overlay(alignment: .topTrailing) { carBox(english: english) }
+                .overlay(alignment: .topLeading) { typeTag(language: language) }
+                .overlay(alignment: .topTrailing) { carBox(language: language) }
         }
     }
 
-    private func content(english: Bool) -> some View {
+    private func content(language: TrainLCDLanguage) -> some View {
         HStack(alignment: .bottom, spacing: 7) {
-            Text(english ? journey.line.nameEn : journey.line.name)
-                .font(english ? LCDFont.latin(size: 14, weight: .bold)
+            Text(language.lineName(journey.line))
+                .font(language.isLatin ? LCDFont.latin(size: 14, weight: .bold)
                               : LCDFont.gothic(size: 17, weight: .bold))
                 .foregroundColor(.white)
                 .lineLimit(1)
@@ -113,22 +113,22 @@ struct RinkaiLCDView: View {
                    !destination.stationCode.isEmpty {
                     scaledStationBadge(destination, dimension: 24)
                 }
-                HStack(alignment: .firstTextBaseline, spacing: english ? 5 : 10) {
-                    if english {
+                HStack(alignment: .firstTextBaseline, spacing: language.isLatin ? 5 : 10) {
+                    if language.isLatin {
                         Text(verbatim: "for")
                             .font(LCDFont.latin(size: 12, weight: .bold))
                             .foregroundColor(.white)
                     }
                     HorizontallySquashed(maxWidth: 140, alignment: .leading) {
-                        Text(english ? journey.destinationNameEn : journey.destinationNameJa)
-                            .font(english ? LCDFont.latin(size: 28, weight: .bold)
+                        Text(language.destinationName(journey))
+                            .font(language.isLatin ? LCDFont.latin(size: 28, weight: .bold)
                                           : LCDFont.gothic(size: 31, weight: .heavy))
                             .foregroundColor(.white)
                             .lineLimit(1)
                     }
                     .frame(height: 34)
-                    if !english {
-                        Text(verbatim: "ゆき")
+                    if !language.isLatin {
+                        Text(verbatim: language == .zh ? "方向" : "ゆき")
                             .font(LCDFont.gothic(size: 18, weight: .heavy))
                             .foregroundColor(.white)
                     }
@@ -143,10 +143,10 @@ struct RinkaiLCDView: View {
     }
 
     /// Hangs off the rail's hairline, rounded on the bottom corners only.
-    private func typeTag(english: Bool) -> some View {
+    private func typeTag(language: TrainLCDLanguage) -> some View {
         let plate = UnevenRoundedRectangle(bottomLeadingRadius: 4, bottomTrailingRadius: 4)
-        return Text(english ? typeNameEn : typeName)
-            .font(english ? LCDFont.latin(size: 10, weight: .bold)
+        return Text(language.typeName(ja: typeName, en: typeNameEn))
+            .font(language.isLatin ? LCDFont.latin(size: 10, weight: .bold)
                           : LCDFont.gothic(size: 12, weight: .bold))
             .foregroundColor(.white)
             .lineLimit(1)
@@ -163,17 +163,17 @@ struct RinkaiLCDView: View {
     }
 
     /// Hung from the rail's hairline, rounded on the bottom corners only.
-    private func carBox(english: Bool) -> some View {
+    private func carBox(language: TrainLCDLanguage) -> some View {
         let plate = UnevenRoundedRectangle(bottomLeadingRadius: 4, bottomTrailingRadius: 4)
         return HStack(alignment: .firstTextBaseline, spacing: 1.5) {
-            if english {
+            if language.isLatin {
                 Text(verbatim: "Car")
                     .font(LCDFont.latin(size: 9, weight: .bold))
             }
             Text(verbatim: "\(carNumber)")
                 .font(LCDFont.latin(size: 15, weight: .bold))
-            if !english {
-                Text(verbatim: "号車")
+            if !language.isLatin {
+                Text(verbatim: language.carLabel)
                     .font(LCDFont.gothic(size: 9, weight: .bold))
             }
         }
@@ -194,7 +194,7 @@ struct RinkaiLCDView: View {
 
     // MARK: - Board
 
-    private func board(now: Date, english: Bool) -> some View {
+    private func board(now: Date, language: TrainLCDLanguage) -> some View {
         let (columns, markerSlot) = stops(now: now)
         let colWidth = (Self.designWidth - 16 - Self.bandTail) / CGFloat(max(columns.count, 1))
         let markerCenter = markerSlot * colWidth
@@ -202,7 +202,7 @@ struct RinkaiLCDView: View {
         return VStack(spacing: 0) {
             HStack(alignment: .bottom, spacing: 0) {
                 ForEach(columns) { col in
-                    columnName(col.station, english: english)
+                    columnName(col.station, language: language)
                         .frame(width: colWidth, height: Self.nameRowHeight, alignment: .center)
                         .opacity(col.isPassed ? 0.4 : 1)
                 }
@@ -330,13 +330,15 @@ struct RinkaiLCDView: View {
 
     /// Kanji stays through the English phase; the side column carries the
     /// other signage languages.
-    private func columnName(_ station: Station, english: Bool) -> some View {
+    private func columnName(_ station: Station, language: TrainLCDLanguage) -> some View {
         HStack(alignment: .center, spacing: 1) {
             VerticalStationName(name: station.name, fontSize: 13, charBox: 12,
                                 availableHeight: Self.nameRowHeight, color: .black,
                                 columnAnchor: .top, justifiedSingle: true, gothic: true)
                 .frame(height: Self.nameRowHeight, alignment: .top)
-            let reading = english ? station.nameZhHans : station.nameKo
+            // The Chinese phase would only echo the kanji above it, so it
+            // keeps the Korean reading the Japanese phase shows.
+            let reading = language == .en ? station.nameZhHans : station.nameKo
             if !reading.isEmpty {
                 VerticalStationName(name: reading, fontSize: 5.5, weight: .medium, charBox: 6,
                                     availableHeight: Self.nameRowHeight,

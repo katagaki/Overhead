@@ -61,17 +61,17 @@ struct KeiseiLCDView: View {
         TimelineView(.periodic(from: .now, by: 0.5)) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
-                let english = LCDLanguageRotation.current(at: context.date) == .en
+                let language = LCDLanguageRotation.current(at: context.date)
                 let phase = LCDPhase.of(journey: journey, state: state, now: context.date)
                 VStack(spacing: 0) {
-                    destinationRow(english: english)
+                    destinationRow(language: language)
                         .frame(height: Self.destRowHeight)
                     Rectangle()
                         .fill(Self.markerRed)
                         .frame(height: Self.ruleHeight)
-                    headline(phase: phase, english: english)
+                    headline(phase: phase, language: language)
                         .frame(height: Self.headlineHeight)
-                    board(now: context.date, english: english)
+                    board(now: context.date, language: language)
                         .frame(maxHeight: .infinity)
                     Rectangle()
                         .fill(Self.boardInk)
@@ -89,11 +89,11 @@ struct KeiseiLCDView: View {
     // MARK: - Destination row
 
     /// Three islands — type, destination, car — floating on the chrome blue.
-    private func destinationRow(english: Bool) -> some View {
+    private func destinationRow(language: TrainLCDLanguage) -> some View {
         HStack(spacing: Self.islandGap) {
-            typePlate(english: english)
-            destinationIsland(english: english)
-            carBox(english: english)
+            typePlate(language: language)
+            destinationIsland(language: language)
+            carBox(language: language)
         }
         .padding(.horizontal, Self.islandGap)
         .padding(.vertical, 2)
@@ -101,28 +101,28 @@ struct KeiseiLCDView: View {
         .background(headlineGradient)
     }
 
-    private func destinationIsland(english: Bool) -> some View {
+    private func destinationIsland(language: TrainLCDLanguage) -> some View {
         HStack(spacing: 4) {
             if let destination = journey.destinationStation,
                !destination.stationCode.isEmpty {
                 outlinedBadge(destination, dimension: 25, outline: .white, width: 1)
             }
             HStack(alignment: .firstTextBaseline, spacing: 3) {
-                if english {
+                if language.isLatin {
                     Text(verbatim: "for")
                         .font(LCDFont.latin(size: 10, weight: .bold))
                         .foregroundColor(Self.boardInk)
                 }
                 HorizontallySquashed(maxWidth: 190, alignment: .leading) {
-                    Text(english ? journey.destinationNameEn : journey.destinationNameJa)
-                        .font(english ? LCDFont.latin(size: 20, weight: .bold)
+                    Text(language.destinationName(journey))
+                        .font(language.isLatin ? LCDFont.latin(size: 20, weight: .bold)
                                       : LCDFont.gothic(size: 22, weight: .bold))
                         .foregroundColor(Self.boardInk)
                         .lineLimit(1)
                 }
                 .frame(height: 25)
-                if !english {
-                    Text(verbatim: "行")
+                if !language.isLatin {
+                    Text(verbatim: language == .zh ? "方向" : "行")
                         .font(LCDFont.gothic(size: 14, weight: .bold))
                         .foregroundColor(Self.boardInk)
                 }
@@ -137,12 +137,12 @@ struct KeiseiLCDView: View {
         )
     }
 
-    private func typePlate(english: Bool) -> some View {
-        Text(english ? typeNameEn : typeName)
-            .font(english ? LCDFont.latin(size: 11, weight: .bold)
+    private func typePlate(language: TrainLCDLanguage) -> some View {
+        Text(language.typeName(ja: typeName, en: typeNameEn))
+            .font(language.isLatin ? LCDFont.latin(size: 11, weight: .bold)
                           : LCDFont.gothic(size: 17, weight: .bold))
             .multilineTextAlignment(.center)
-            .lineLimit(english ? 2 : 1)
+            .lineLimit(language.isLatin ? 2 : 1)
             .lineSpacing(-1)
             .minimumScaleFactor(0.6)
             .foregroundColor(.white)
@@ -156,15 +156,15 @@ struct KeiseiLCDView: View {
             .overlay(Rectangle().strokeBorder(Color.white, lineWidth: 0.8))
     }
 
-    private func carBox(english: Bool) -> some View {
+    private func carBox(language: TrainLCDLanguage) -> some View {
         VStack(spacing: -0.5) {
             Text(verbatim: "Car No.")
                 .font(LCDFont.latin(size: 9, weight: .bold))
             HStack(alignment: .firstTextBaseline, spacing: 0.5) {
                 Text(verbatim: "\(carNumber)")
                     .font(LCDFont.latin(size: 16, weight: .bold))
-                if !english {
-                    Text(verbatim: "号車")
+                if !language.isLatin {
+                    Text(verbatim: language.carLabel)
                         .font(LCDFont.gothic(size: 7.5, weight: .bold))
                 }
             }
@@ -181,11 +181,11 @@ struct KeiseiLCDView: View {
 
     // MARK: - Headline
 
-    private func headline(phase: LCDPhase, english: Bool) -> some View {
+    private func headline(phase: LCDPhase, language: TrainLCDLanguage) -> some View {
         let station = headlineStation
         return HStack(spacing: 5) {
-            Text(phaseLabel(phase, english: english))
-                .font(english ? LCDFont.latin(size: 12, weight: .bold)
+            Text(phaseLabel(phase, language: language))
+                .font(language.isLatin ? LCDFont.latin(size: 12, weight: .bold)
                               : LCDFont.gothic(size: 13, weight: .bold))
                 .foregroundColor(.white)
                 .lineLimit(1)
@@ -197,8 +197,8 @@ struct KeiseiLCDView: View {
                 }
                 HStack(spacing: 5) {
                     HorizontallySquashed(maxWidth: 240, alignment: .leading) {
-                        Text(english ? station.nameEn : station.name)
-                            .font(english ? LCDFont.latin(size: 29, weight: .bold)
+                        Text(language.name(station))
+                            .font(language.isLatin ? LCDFont.latin(size: 29, weight: .bold)
                                           : LCDFont.gothic(size: 33, weight: .heavy))
                             .foregroundColor(.white)
                             .lineLimit(1)
@@ -220,17 +220,21 @@ struct KeiseiLCDView: View {
         return stations[max(0, min(index, stations.count - 1))]
     }
 
-    private func phaseLabel(_ phase: LCDPhase, english: Bool) -> String {
+    private func phaseLabel(_ phase: LCDPhase, language: TrainLCDLanguage) -> String {
+        language.headline(phase) { japanese(phase: $0) }
+    }
+
+    private func japanese(phase: LCDPhase) -> String {
         switch phase {
-        case .dwelling: return english ? "Now at" : "ただいま"
-        case .approaching: return english ? "Soon" : "まもなく"
-        case .next: return english ? "Next" : "つぎは"
+        case .dwelling: return "ただいま"
+        case .approaching: return "まもなく"
+        case .next: return "つぎは"
         }
     }
 
     // MARK: - Board
 
-    private func board(now: Date, english: Bool) -> some View {
+    private func board(now: Date, language: TrainLCDLanguage) -> some View {
         let (columns, markerSlot) = stops(now: now)
         let colWidth = (Self.designWidth - 8) / CGFloat(max(columns.count, 1))
 
@@ -277,7 +281,7 @@ struct KeiseiLCDView: View {
         .padding(.top, Self.boardTopPad)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(boardGradient)
-        .overlay(alignment: .bottom) { footer(english: english) }
+        .overlay(alignment: .bottom) { footer(language: language) }
     }
 
     /// Travel runs toward the leading edge, as the real board reads.
@@ -345,7 +349,7 @@ struct KeiseiLCDView: View {
 
     /// 「◯◯の次は◯◯にとまります。」— the strip along the foot of the board.
     @ViewBuilder
-    private func footer(english: Bool) -> some View {
+    private func footer(language: TrainLCDLanguage) -> some View {
         let stations = journey.journeyStations
         let index = (state.currentStationIndex ?? state.segmentTo)
         if stations.indices.contains(index), stations.indices.contains(index + 1) {
@@ -354,19 +358,19 @@ struct KeiseiLCDView: View {
                 Image(systemName: "exclamationmark.circle.fill")
                     .font(.system(size: 8))
                     .foregroundColor(Self.markerRed)
-                if english {
+                if language.isLatin {
                     Text(verbatim: "The stop after")
                         .font(LCDFont.latin(size: 8, weight: .medium))
-                    footerStation(here, english: true)
+                    footerStation(here, language: language)
                     Text(verbatim: "is")
                         .font(LCDFont.latin(size: 8, weight: .medium))
-                    footerStation(next, english: true)
+                    footerStation(next, language: language)
                 } else {
-                    footerStation(here, english: false)
-                    Text(verbatim: "の次は")
+                    footerStation(here, language: language)
+                    Text(verbatim: language == .zh ? "的下一站是" : "の次は")
                         .font(LCDFont.gothic(size: 8))
-                    footerStation(next, english: false)
-                    Text(verbatim: "にとまります。")
+                    footerStation(next, language: language)
+                    Text(verbatim: language == .zh ? "。" : "にとまります。")
                         .font(LCDFont.gothic(size: 8))
                 }
             }
@@ -378,13 +382,13 @@ struct KeiseiLCDView: View {
         }
     }
 
-    private func footerStation(_ station: Station, english: Bool) -> some View {
+    private func footerStation(_ station: Station, language: TrainLCDLanguage) -> some View {
         HStack(spacing: 1.5) {
             if !station.stationCode.isEmpty {
                 scaledStationBadge(station, dimension: 10)
             }
-            Text(english ? station.nameEn : station.name)
-                .font(english ? LCDFont.latin(size: 8.5, weight: .bold)
+            Text(language.name(station))
+                .font(language.isLatin ? LCDFont.latin(size: 8.5, weight: .bold)
                               : LCDFont.gothic(size: 9, weight: .bold))
         }
     }

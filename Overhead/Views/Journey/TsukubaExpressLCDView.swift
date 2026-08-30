@@ -40,8 +40,8 @@ struct TsukubaExpressLCDView: View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
-                let english = LCDLanguageRotation.current(at: context.date) == .en
-                strip(now: context.date, english: english)
+                let language = LCDLanguageRotation.current(at: context.date)
+                strip(now: context.date, language: language)
                     .frame(width: Self.designWidth, height: Self.designHeight)
                     .scaleEffect(scale, anchor: .topLeading)
             }
@@ -51,7 +51,7 @@ struct TsukubaExpressLCDView: View {
         }
     }
 
-    private func strip(now: Date, english: Bool) -> some View {
+    private func strip(now: Date, language: TrainLCDLanguage) -> some View {
         let (columns, markerSlot) = stops(now: now)
         let usable = Self.designWidth - Self.gutter - Self.leadIn - Self.trailTail - 8
         let colWidth = usable / CGFloat(max(columns.count, 1))
@@ -62,13 +62,13 @@ struct TsukubaExpressLCDView: View {
             HStack(spacing: 0) {
                 ForEach(columns) { col in
                     Group {
-                        if english {
-                            AngledTXName(en: col.station.nameEn, ja: col.station.name,
+                        if language.isLatin {
+                            AngledTXName(en: language.name(col.station), ja: col.station.name,
                                          width: colWidth, height: Self.nameRowHeight,
                                          mirrored: mirrored,
                                          color: col.isPassed ? Self.passedSlate : Self.ink)
                         } else {
-                            verticalName(col)
+                            verticalName(col, language: language)
                         }
                     }
                     .frame(width: colWidth, height: Self.nameRowHeight)
@@ -91,11 +91,11 @@ struct TsukubaExpressLCDView: View {
             .frame(maxWidth: .infinity, alignment: mirrored ? .trailing : .leading)
 
             band(columns: columns, colWidth: colWidth,
-                 markerCenter: markerCenter, mirrored: mirrored, english: english)
+                 markerCenter: markerCenter, mirrored: mirrored, language: language)
 
             HStack(alignment: .top, spacing: 0) {
                 ForEach(columns) { col in
-                    caption(col, width: colWidth, english: english)
+                    caption(col, width: colWidth, language: language)
                         .frame(width: colWidth, alignment: .topLeading)
                 }
             }
@@ -110,12 +110,13 @@ struct TsukubaExpressLCDView: View {
             LinearGradient(colors: [.white, Self.panel],
                            startPoint: .top, endPoint: .bottom)
         )
-        .overlay(alignment: .topLeading) { gutterLabels(english: english) }
+        .overlay(alignment: .topLeading) { gutterLabels(language: language) }
     }
 
-    private func gutterLabels(english: Bool) -> some View {
-        Text(verbatim: english ? "Travel Times" : "所要時間")
-            .font(english ? LCDFont.latin(size: 5.5)
+    private func gutterLabels(language: TrainLCDLanguage) -> some View {
+        Text(verbatim: language == .zh ? "所需时间"
+                        : (language.isLatin ? "Travel Times" : "所要時間"))
+            .font(language.isLatin ? LCDFont.latin(size: 5.5)
                           : LCDFont.gothic(size: 6))
             .foregroundColor(Self.ink)
             .lineLimit(1)
@@ -125,10 +126,10 @@ struct TsukubaExpressLCDView: View {
     }
 
     /// The Japanese face sets the stops vertically, reading beside them.
-    private func verticalName(_ col: LCDStop) -> some View {
+    private func verticalName(_ col: LCDStop, language: TrainLCDLanguage) -> some View {
         let tint = col.isPassed ? Self.passedSlate : Self.ink
         return HStack(alignment: .bottom, spacing: 0.5) {
-            VerticalStationName(name: col.station.name, fontSize: 7.5, charBox: 7.5,
+            VerticalStationName(name: language.name(col.station), fontSize: 7.5, charBox: 7.5,
                                 availableHeight: Self.nameRowHeight, color: tint,
                                 columnAnchor: .bottom, gothic: true)
             if !col.station.nameKo.isEmpty {
@@ -143,15 +144,15 @@ struct TsukubaExpressLCDView: View {
     }
 
     private func band(columns: [LCDStop], colWidth: CGFloat,
-                      markerCenter: CGFloat, mirrored: Bool, english: Bool) -> some View {
+                      markerCenter: CGFloat, mirrored: Bool, language: TrainLCDLanguage) -> some View {
         colourBand(columns: columns, colWidth: colWidth, markerCenter: markerCenter,
-                   mirrored: mirrored, english: english)
+                   mirrored: mirrored, language: language)
     }
 
     /// The line's colour for what is left, grey for what is already run.
     private func colourBand(columns: [LCDStop], colWidth: CGFloat,
                             markerCenter: CGFloat, mirrored: Bool,
-                            english: Bool) -> some View {
+                            language: TrainLCDLanguage) -> some View {
         let count = CGFloat(max(columns.count, 1))
         let runWidth = colWidth * count
         let lead = Self.leadIn
@@ -204,8 +205,8 @@ struct TsukubaExpressLCDView: View {
             .padding(mirrored ? .trailing : .leading, lead)
             .frame(maxWidth: .infinity, alignment: mirrored ? .trailing : .leading)
 
-            Text(verbatim: english ? "min" : "分")
-                .font(english ? LCDFont.latin(size: 6, weight: .bold)
+            Text(verbatim: language.minuteLabel)
+                .font(language.isLatin ? LCDFont.latin(size: 6, weight: .bold)
                               : LCDFont.gothic(size: 7, weight: .bold))
                 .foregroundColor(.white)
                 .frame(width: lead - Self.bandHeight, height: Self.bandHeight)
@@ -243,7 +244,7 @@ struct TsukubaExpressLCDView: View {
     }
 
     @ViewBuilder
-    private func caption(_ col: LCDStop, width: CGFloat, english: Bool) -> some View {
+    private func caption(_ col: LCDStop, width: CGFloat, language: TrainLCDLanguage) -> some View {
         if let line = col.transfers.first {
             VStack(alignment: .leading, spacing: 0) {
                 Rectangle()
@@ -255,8 +256,8 @@ struct TsukubaExpressLCDView: View {
                 HStack(alignment: .top, spacing: 1.5) {
                     LineSymbolBadge(symbol: line.lineSymbol, color: line.color, dimension: 5.5,
                                     styleOverride: line.badgeStyleId, lineId: line.id)
-                    Text(english ? line.nameEn : line.name)
-                        .font(english ? LCDFont.latin(size: 4.6)
+                    Text(language.lineName(line))
+                        .font(language.isLatin ? LCDFont.latin(size: 4.6)
                                       : LCDFont.gothic(size: 4.6))
                         .foregroundColor(col.isPassed ? Self.passedSlate : Self.ink)
                         .lineLimit(2)
