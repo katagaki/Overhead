@@ -105,6 +105,9 @@ struct StyledTrainLCDView: View {
         case .tsukubaExpress:
             TsukubaExpressLCDView(journey: journey, state: state, lineColor: lineColor,
                                   orientation: orientation)
+        case .keisei:
+            KeiseiLCDView(journey: journey, state: state, lineColor: lineColor,
+                          orientation: orientation)
         }
     }
 }

@@ -16,6 +16,7 @@ enum TrainLCDStyle: String, CaseIterable, Identifiable {
     case galaxy
     case rinkai
     case tsukubaExpress
+    case keisei
 
     static let storageKey = "journey.lcdStyle"
 
@@ -55,6 +56,7 @@ enum TrainLCDStyle: String, CaseIterable, Identifiable {
         case .galaxy: return "銀河急行風"
         case .rinkai: return "りんかい線風"
         case .tsukubaExpress: return "つくばエクスプレス風"
+        case .keisei: return "京成風"
         }
     }
 }
@@ -80,7 +82,7 @@ enum TrainLCDStyleCategory: String, CaseIterable, Identifiable {
         switch self {
         case .standard:
             return [.joban, .yamanote, .keihinTohoku, .tokyoMetro,
-                    .rinkai, .tsukubaExpress, .hankyu, .find]
+                    .rinkai, .tsukubaExpress, .keisei, .hankyu, .find]
         case .strips: return [.ledMatrix, .shinkansen, .tube]
         case .fictional: return [.kivotos, .neon, .galaxy]
         }
