@@ -20,7 +20,6 @@ struct KeihinTohokuLineLCDView: View {
     private static let passedOpacity: CGFloat = 0.4
     private static let markerGreenLight = Color(hex: "#58CB42")
     private static let markerGreenDark = Color(hex: "#1D981A")
-    private static let languageFlipSeconds = 4.0
 
     private static var allLines: [TrainLine] { StaticTrainData.trainLines() }
 
@@ -28,9 +27,7 @@ struct KeihinTohokuLineLCDView: View {
         TimelineView(.periodic(from: .now, by: 0.5)) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
-                let english = Int(
-                    context.date.timeIntervalSinceReferenceDate / Self.languageFlipSeconds
-                ) % 2 == 1
+                let english = LCDLanguageRotation.current(at: context.date) == .en
                 VStack(spacing: 0) {
                     header(english: english)
                         .frame(height: Self.headerHeight)

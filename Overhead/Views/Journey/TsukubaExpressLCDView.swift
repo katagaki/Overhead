@@ -25,7 +25,6 @@ struct TsukubaExpressLCDView: View {
     private static let minuteBox = CGSize(width: 12, height: 8.5)
     private static let bandPastTop = Color(hex: "#8B90A1")
     private static let bandPastBottom = Color(hex: "#5A5F70")
-    private static let languageFlipSeconds = 4.0
     private static let passedSlate = Color(hex: "#A6AABB")
     private static let ink = Color(hex: "#2B3049")
     private static let markerYellow = Color(hex: "#F2C230")
@@ -41,9 +40,7 @@ struct TsukubaExpressLCDView: View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
-                let english = Int(
-                    context.date.timeIntervalSinceReferenceDate / Self.languageFlipSeconds
-                ) % 2 == 1
+                let english = LCDLanguageRotation.current(at: context.date) == .en
                 strip(now: context.date, english: english)
                     .frame(width: Self.designWidth, height: Self.designHeight)
                     .scaleEffect(scale, anchor: .topLeading)

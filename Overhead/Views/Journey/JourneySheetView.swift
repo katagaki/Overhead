@@ -7,15 +7,12 @@ struct JourneySheetView: View {
     @State private var showingEndConfirmation = false
     @State private var shareImage: ShareableImage?
     @State private var statusTarget: ServiceStatusTarget?
+    @State private var showingStylePicker = false
     @AppStorage(TrainLCDStyle.storageKey) private var lcdStyleRaw = TrainLCDStyle.joban.rawValue
-    @AppStorage(TrainLCDOrientation.storageKey) private var lcdOrientationRaw = TrainLCDOrientation.left.rawValue
     @Namespace private var statusZoom
 
     private static let statusTransitionID = "serviceStatus"
-
-    private var orientation: TrainLCDOrientation {
-        TrainLCDOrientation(rawValue: lcdOrientationRaw) ?? .left
-    }
+    private static let styleTransitionID = "lcdStyle"
 
     /// Journey lines with a status page; a through-service joins its legs with "+".
     private var statusLines: [(id: String, name: String)] {
@@ -81,36 +78,21 @@ struct JourneySheetView: View {
                     ToolbarSpacer(.flexible, placement: .bottomBar)
 
                     ToolbarItem(placement: .bottomBar) {
-                        Menu {
-                            ForEach(TrainLCDStyleCategory.allCases) { category in
-                                Section(category.label) {
-                                    Picker("Button.LCDStyle", selection: $lcdStyleRaw) {
-                                        ForEach(category.styles) { style in
-                                            Text(verbatim: style.label).tag(style.rawValue)
-                                        }
-                                    }
-                                    .pickerStyle(.inline)
-                                }
-                            }
+                        Button {
+                            showingStylePicker = true
                         } label: {
-                            Label("Button.LCDStyle", systemImage: "square.text.square")
+                            Label("Button.LCDStyle", systemImage: "gearshape")
                         }
-                        // Opening upward would otherwise reverse the style list.
-                        .menuOrder(.fixed)
+                        .matchedTransitionSource(id: Self.styleTransitionID, in: statusZoom)
                     }
 
-                    ToolbarItem(placement: .bottomBar) {
-                        Button {
-                            lcdOrientationRaw = (orientation == .left
-                                ? TrainLCDOrientation.right
-                                : TrainLCDOrientation.left).rawValue
-                        } label: {
-                            Label("Button.LCDOrientation", systemImage: "arrow.left.arrow.right")
-                        }
-                    }
                 }
         }
         .presentationDragIndicator(.visible)
+        .sheet(isPresented: $showingStylePicker) {
+            LCDStylePickerSheet(styleRaw: $lcdStyleRaw)
+                .navigationTransition(.zoom(sourceID: Self.styleTransitionID, in: statusZoom))
+        }
         .sheet(item: $shareImage) { shareable in
             ActivityView(items: [shareable.image])
         }

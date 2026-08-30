@@ -30,7 +30,6 @@ struct KeiseiLCDView: View {
     private static let boardInk = Color(hex: "#11223F")
     private static let boardBackground = Color(hex: "#FDFDFF")
     private static let footerBackground = Color(hex: "#E7EEF8")
-    private static let languageFlipSeconds = 4.0
 
     private static var allLines: [TrainLine] { StaticTrainData.trainLines() }
 
@@ -62,9 +61,7 @@ struct KeiseiLCDView: View {
         TimelineView(.periodic(from: .now, by: 0.5)) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
-                let english = Int(
-                    context.date.timeIntervalSinceReferenceDate / Self.languageFlipSeconds
-                ) % 2 == 1
+                let english = LCDLanguageRotation.current(at: context.date) == .en
                 let phase = LCDPhase.of(journey: journey, state: state, now: context.date)
                 VStack(spacing: 0) {
                     destinationRow(english: english)

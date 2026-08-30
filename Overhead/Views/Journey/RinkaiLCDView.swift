@@ -27,7 +27,6 @@ struct RinkaiLCDView: View {
     private static let boxGrayBottom = Color(hex: "#D3D6DE")
     private static let codeInk = Color(hex: "#1B2233")
     private static let carBoxGray = Color(hex: "#C9CCD4")
-    private static let languageFlipSeconds = 4.0
     private static let nameRowHeight: CGFloat = 60
     private static let bandHeight: CGFloat = 16
     private static let minuteBox = CGSize(width: 18, height: 13)
@@ -46,9 +45,7 @@ struct RinkaiLCDView: View {
         TimelineView(.periodic(from: .now, by: 0.5)) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
-                let english = Int(
-                    context.date.timeIntervalSinceReferenceDate / Self.languageFlipSeconds
-                ) % 2 == 1
+                let english = LCDLanguageRotation.current(at: context.date) == .en
                 VStack(spacing: 0) {
                     header(english: english)
                         .frame(height: Self.headerHeight)

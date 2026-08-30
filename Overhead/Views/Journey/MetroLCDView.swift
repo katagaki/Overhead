@@ -25,7 +25,6 @@ struct MetroLCDView: View {
     private static let markerBlue = Color(hex: "#1D2088")
     private static let markerRed = Color(hex: "#D7000F")
     private static let passedGray = Color(hex: "#8E9196")
-    private static let languageFlipSeconds = 4.0
 
     private static var allLines: [TrainLine] { StaticTrainData.trainLines() }
 
@@ -33,9 +32,7 @@ struct MetroLCDView: View {
         TimelineView(.periodic(from: .now, by: 0.5)) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
-                let english = Int(
-                    context.date.timeIntervalSinceReferenceDate / Self.languageFlipSeconds
-                ) % 2 == 1
+                let english = LCDLanguageRotation.current(at: context.date) == .en
                 let phase = LCDPhase.of(journey: journey, state: state, now: context.date)
                 VStack(spacing: 0) {
                     destinationStrip(english: english)

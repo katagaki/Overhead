@@ -17,7 +17,6 @@ struct LoopLCDView: View {
     private static let headerHeight: CGFloat = 58
     private static let maxStops = 5
     private static let markerRed = Color(hex: "#7A2B20")
-    private static let languageFlipSeconds = 4.0
 
     // Stop layout, dialed in by hand.
     private static let stopT: [CGFloat] = [0.2, 0.33, 0.44, 0.53, 0.62]
@@ -45,9 +44,7 @@ struct LoopLCDView: View {
         TimelineView(.periodic(from: .now, by: 1.0)) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
-                let english = Int(
-                    context.date.timeIntervalSinceReferenceDate / Self.languageFlipSeconds
-                ) % 2 == 1
+                let english = LCDLanguageRotation.current(at: context.date) == .en
                 let phase = LCDPhase.of(journey: journey, state: state, now: context.date)
                 VStack(spacing: 0) {
                     header(english: english, phase: phase)

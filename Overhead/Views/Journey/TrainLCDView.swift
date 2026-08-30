@@ -23,7 +23,6 @@ struct TrainLCDView: View {
     private static let movingMarkerWidth: CGFloat = 16
     private static let passedOpacity: CGFloat = 0.4
     private static let passedBandGray = Color(hex: "#8E9196")
-    private static let languageFlipSeconds = 4.0
     /// Header HStack spacing plus the car column's slack left of its white box.
     private static let nameOverhang: CGFloat = 10 + (56 - 18) - 4
 
@@ -39,9 +38,7 @@ struct TrainLCDView: View {
         TimelineView(.periodic(from: .now, by: 0.5)) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
-                let english = Int(
-                    context.date.timeIntervalSinceReferenceDate / Self.languageFlipSeconds
-                ) % 2 == 1
+                let english = LCDLanguageRotation.current(at: context.date) == .en
                 let phase = LCDPhase.of(journey: journey, state: state, now: context.date)
                 VStack(spacing: 0) {
                     header(now: context.date, english: english, phase: phase)
