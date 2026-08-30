@@ -140,13 +140,20 @@ struct RootView: View {
             if needsLineDataOnboarding { showLineDataOnboarding = true }
             await checkForLineDataUpdates()
         }
-        .onChange(of: lineDataOnboarded) { _, isOnboarded in
+        .onChange(of: lineDataInstaller.wipeCount) { _, _ in
             // The manager screen clears the flag as it starts the wipe; the
             // first-run sheet is what downloads from nothing, so it comes
             // back, over the root rather than over the screen being left.
-            guard !isOnboarded else { return }
+            // The wipe itself is the trigger: clearing a flag that is already
+            // clear says nothing, and a second wipe has to bring the sheet
+            // back too.
             navigationPath = NavigationPath()
-            showLineDataOnboarding = true
+            Task { @MainActor in
+                // A sheet raised in the same turn as the pop is swallowed by
+                // the transition, leaving the app on an empty catalog.
+                try? await Task.sleep(for: .milliseconds(450))
+                showLineDataOnboarding = true
+            }
         }
         .sheet(isPresented: $showLineDataOnboarding) {
             // The disclaimer waits its turn: two modals on a first launch land

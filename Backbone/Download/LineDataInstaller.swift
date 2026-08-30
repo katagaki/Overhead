@@ -70,6 +70,9 @@ public final class LineDataInstaller: ObservableObject {
     /// the check, ahead of the lines it describes, so its own version runs on
     /// in front of what the device actually holds.
     @Published public private(set) var installedVersion: String = Catalog.current.version
+    /// Bumped by every wipe, so a screen watching for one sees the second in
+    /// a row as well as the first.
+    @Published public private(set) var wipeCount = 0
 
     private let defaults = UserDefaults.standard
     private let etagKey = "lineData.catalogETag"
@@ -465,6 +468,7 @@ public final class LineDataInstaller: ObservableObject {
     /// Started without waiting, so a screen can move on while the disk
     /// catches up; anything that downloads next lands behind it.
     public func beginRemoveAllData() {
+        wipeCount += 1
         wipeTask = Task { [weak self] in await self?.removeAllData() }
     }
 

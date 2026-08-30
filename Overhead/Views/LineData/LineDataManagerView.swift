@@ -35,6 +35,16 @@ struct LineDataManagerView: View {
                     updateSummary
                     actionRow
                 }
+            } else if Catalog.current.lines.isEmpty {
+                // A wipe that could not reach the catalog afterwards leaves
+                // nothing to describe and nothing pending, so this screen is
+                // the only way back.
+                Section {
+                    Button("LineData.DownloadNow") {
+                        Task { await model.upgrade() }
+                    }
+                    .disabled(installer.isBusy)
+                }
             }
 
             Section {
@@ -59,8 +69,7 @@ struct LineDataManagerView: View {
         .navigationBarTitleDisplayMode(.inline)
         .refreshable { await model.checkForUpdates() }
         .task { await installer.recomputePending() }
-        .confirmationDialog("LineData.Redownload.Confirm", isPresented: $isConfirmingDelete,
-                            titleVisibility: .visible) {
+        .alert("LineData.Redownload.Confirm", isPresented: $isConfirmingDelete) {
             Button("LineData.Redownload.Action", role: .destructive) {
                 // The first-run sheet is the only download screen that starts
                 // from nothing, so the root brings it back — right away, with
