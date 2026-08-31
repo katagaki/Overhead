@@ -787,10 +787,19 @@ struct LCDLineView: View {
                         // Pulled apart, with the track punched out between
                         // them: the rider steps off one line and onto the
                         // other. The hole shows the band, whatever it is.
+                        // Punched to the rings' own shape, so the track still
+                        // runs up to each of them.
+                        ForEach([-1.0, 1.0], id: \.self) { side in
+                            Circle()
+                                .fill(Color.black)
+                                .blendMode(.destinationOut)
+                                .frame(width: baseRadius * 2, height: baseRadius * 2)
+                                .position(x: x + side * (baseRadius + 2), y: centerY)
+                        }
                         Rectangle()
                             .fill(Color.black)
                             .blendMode(.destinationOut)
-                            .frame(width: baseRadius * 2 + 16, height: baseRadius * 2 + 4)
+                            .frame(width: 6, height: trackHeight + 1)
                             .position(x: x, y: centerY)
                         Circle()
                             .strokeBorder(color(at: i), lineWidth: 2)
