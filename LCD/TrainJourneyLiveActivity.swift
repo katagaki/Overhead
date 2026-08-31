@@ -644,6 +644,18 @@ struct LCDLineView: View {
         stationColors.indices.contains(index) ? stationColors[index] : lineColor
     }
 
+    /// Last station on the outgoing line at each colour change — a 直通
+    /// junction, or a 乗り換え where the rider swaps trains.
+    private var junctionIndices: [Int] {
+        guard stationColors.count == stationCount else { return [] }
+        return (0..<max(stationCount - 1, 0)).filter { stationColors[$0] != stationColors[$0 + 1] }
+    }
+
+    /// Riders stay aboard through a 直通 junction; a 乗り換え they don't.
+    private func isChangeStop(_ index: Int) -> Bool {
+        transferIndices.contains(index) || transferIndices.contains(index + 1)
+    }
+
     /// Runs of one line along the track, in points from the track's leading
     /// edge, changing colour at the junction stop itself.
     private func trackRuns(lineWidth: CGFloat) -> [(color: Color, start: CGFloat, end: CGFloat?)] {
@@ -755,8 +767,42 @@ struct LCDLineView: View {
                     let isTransfer = transferIndices.contains(i)
                     let isKey = isNext || isTerminal || isTransfer
                     let r = emphasisRadius
+                    // The stop the line changes at draws itself; a 直通 keeps
+                    // one circle in both colours, a 乗り換え splits into two.
+                    let isJunction = junctionIndices.contains(i) && !isNext
+                    let nextColor = color(at: min(i + 1, stationCount - 1))
 
-                    if !isKey {
+                    if isJunction, !isChangeStop(i) {
+                        HStack(spacing: 0) {
+                            color(at: i)
+                            nextColor
+                        }
+                        .frame(width: (r + 2) * 2, height: (r + 2) * 2)
+                        .clipShape(Circle())
+                        .overlay(Circle().strokeBorder(terminalFill, lineWidth: 1.5))
+                        .position(x: x, y: centerY)
+                    }
+
+                    if isJunction, isChangeStop(i) {
+                        // Pulled apart, with the track punched out between
+                        // them: the rider steps off one line and onto the
+                        // other. The hole shows the band, whatever it is.
+                        Rectangle()
+                            .fill(Color.black)
+                            .blendMode(.destinationOut)
+                            .frame(width: baseRadius * 2 + 16, height: baseRadius * 2 + 4)
+                            .position(x: x, y: centerY)
+                        Circle()
+                            .strokeBorder(color(at: i), lineWidth: 2)
+                            .frame(width: baseRadius * 2, height: baseRadius * 2)
+                            .position(x: x - baseRadius - 2, y: centerY)
+                        Circle()
+                            .strokeBorder(nextColor, lineWidth: 2)
+                            .frame(width: baseRadius * 2, height: baseRadius * 2)
+                            .position(x: x + baseRadius + 2, y: centerY)
+                    }
+
+                    if !isKey, !isJunction {
                         let stops = stopsAt(i)
                         let dotR = stops ? baseRadius : skippedRadius
                         Circle()
@@ -769,12 +815,14 @@ struct LCDLineView: View {
 
                     if isKey {
                         ZStack {
-                            Circle()
-                                .fill(terminalFill)
-                                .frame(width: r * 2, height: r * 2)
-                            Circle()
-                                .strokeBorder(isPast ? color(at: i) : trackColor, lineWidth: 2)
-                                .frame(width: r * 2, height: r * 2)
+                            if !isJunction {
+                                Circle()
+                                    .fill(terminalFill)
+                                    .frame(width: r * 2, height: r * 2)
+                                Circle()
+                                    .strokeBorder(isPast ? color(at: i) : trackColor, lineWidth: 2)
+                                    .frame(width: r * 2, height: r * 2)
+                            }
 
                             if isNext {
                                 Circle()
@@ -808,6 +856,7 @@ struct LCDLineView: View {
                 }
 
             }
+            .compositingGroup()
             .frame(height: Self.height)
         }
         .frame(height: Self.height)
