@@ -777,9 +777,8 @@ struct LCDLineView: View {
                             color(at: i)
                             nextColor
                         }
-                        .frame(width: (r + 2) * 2, height: (r + 2) * 2)
+                        .frame(width: baseRadius * 2, height: baseRadius * 2)
                         .clipShape(Circle())
-                        .overlay(Circle().strokeBorder(terminalFill, lineWidth: 1.5))
                         .position(x: x, y: centerY)
                     }
 
@@ -897,6 +896,25 @@ struct ExpandedIslandLineView: View {
         attributes.legLines.dropFirst().map(\.stationIndex)
     }
 
+    /// The station's own line colour; through-services put more than one on
+    /// the same journey.
+    private func color(at index: Int) -> Color {
+        attributes.stationColors.indices.contains(index)
+            ? Color(hex: attributes.stationColors[index]) : lineColor
+    }
+
+    /// Last station on the outgoing line at each colour change.
+    private var junctionIndices: [Int] {
+        let colors = attributes.stationColors
+        guard colors.count == attributes.stationCount else { return [] }
+        return (0..<max(attributes.stationCount - 1, 0)).filter { colors[$0] != colors[$0 + 1] }
+    }
+
+    /// Riders stay aboard through a 直通 junction; a 乗り換え they don't.
+    private func isChangeStop(_ index: Int) -> Bool {
+        transferIndices.contains(index) || transferIndices.contains(index + 1)
+    }
+
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
@@ -911,14 +929,38 @@ struct ExpandedIslandLineView: View {
                     .frame(width: w - pad * 2, height: trackHeight)
                     .offset(x: pad)
 
-                ProgressView(timerInterval: state.journeyInterval, countsDown: false) {
-                } currentValueLabel: {
+                // One fill per line ridden, masked to its stretch of track.
+                let trackWidth = w - pad * 2
+                let junctions = junctionIndices
+                let bounds: [CGFloat] = junctions.map {
+                    trackWidth * CGFloat($0) / CGFloat(max(count - 1, 1))
                 }
-                .progressViewStyle(.linear)
-                .tint(lineColor)
-                .frame(width: w - pad * 2, height: trackHeight)
-                .clipped()
-                .position(x: pad + (w - pad * 2) / 2, y: 6)
+                ZStack(alignment: .leading) {
+                    ForEach(0...junctions.count, id: \.self) { run in
+                        let start = run == 0 ? 0 : bounds[run - 1]
+                        let end = run == junctions.count ? nil : bounds[run]
+                        ProgressView(timerInterval: state.journeyInterval, countsDown: false) {
+                        } currentValueLabel: {
+                        }
+                        .progressViewStyle(.linear)
+                        .tint(color(at: run == 0 ? 0 : junctions[run - 1] + 1))
+                        .frame(width: trackWidth, height: trackHeight)
+                        .clipped()
+                        .mask(alignment: .leading) {
+                            HStack(spacing: 0) {
+                                Color.clear.frame(width: max(0, start))
+                                if let end {
+                                    Color.black.frame(width: max(0, end - start))
+                                    Color.clear.frame(maxWidth: .infinity)
+                                } else {
+                                    Color.black.frame(maxWidth: .infinity)
+                                }
+                            }
+                        }
+                    }
+                }
+                .frame(width: trackWidth, height: trackHeight)
+                .position(x: pad + trackWidth / 2, y: 6)
 
                 ForEach(0..<count, id: \.self) { i in
                     let frac = count > 1 ? Double(i) / Double(count - 1) : 0
@@ -928,16 +970,53 @@ struct ExpandedIslandLineView: View {
                     let isTerminal = i == 0 || i == count - 1
                     let isTransfer = transferIndices.contains(i)
                     let r = emphR
+                    let isJunction = junctionIndices.contains(i) && !isNext
+                    let nextColor = color(at: min(i + 1, count - 1))
 
-                    if isNext || isTerminal || isTransfer {
+                    if isJunction, !isChangeStop(i) {
+                        HStack(spacing: 0) {
+                            color(at: i)
+                            nextColor
+                        }
+                        .frame(width: r * 2, height: r * 2)
+                        .clipShape(Circle())
+                        .position(x: x, y: 6)
+                    }
+
+                    if isJunction, isChangeStop(i) {
+                        // Two rings with the track cut between them: the rider
+                        // steps off one line and onto the other.
+                        ForEach([-1.0, 1.0], id: \.self) { side in
+                            Circle()
+                                .fill(Color.black)
+                                .blendMode(.destinationOut)
+                                .frame(width: r * 2, height: r * 2)
+                                .position(x: x + side * (r + 0.5), y: 6)
+                        }
+                        Rectangle()
+                            .fill(Color.black)
+                            .blendMode(.destinationOut)
+                            .frame(width: 4, height: trackHeight + 1)
+                            .position(x: x, y: 6)
+                        Circle()
+                            .strokeBorder(color(at: i), lineWidth: 1.5)
+                            .frame(width: r * 2, height: r * 2)
+                            .position(x: x - r - 0.5, y: 6)
+                        Circle()
+                            .strokeBorder(nextColor, lineWidth: 1.5)
+                            .frame(width: r * 2, height: r * 2)
+                            .position(x: x + r + 0.5, y: 6)
+                    }
+
+                    if isNext || isTerminal || isTransfer, !isJunction {
                         ZStack {
                             Circle()
-                                .fill(isPast ? lineColor : Color(white: 0.4))
+                                .fill(isPast ? color(at: i) : Color(white: 0.4))
                                 .frame(width: r * 2, height: r * 2)
 
                             if isTerminal || isTransfer {
                                 Circle()
-                                    .strokeBorder(isPast ? lineColor : Color(white: 0.4), lineWidth: 1.5)
+                                    .strokeBorder(isPast ? color(at: i) : Color(white: 0.4), lineWidth: 1.5)
                                     .frame(width: r * 2 + 3, height: r * 2 + 3)
                             }
 
@@ -946,7 +1025,7 @@ struct ExpandedIslandLineView: View {
                                     .fill(Color.white)
                                     .frame(width: r, height: r)
                                 Circle()
-                                    .strokeBorder(lineColor, lineWidth: 1)
+                                    .strokeBorder(color(at: i), lineWidth: 1)
                                     .frame(width: r * 2 + 3, height: r * 2 + 3)
                             }
                         }
@@ -954,6 +1033,7 @@ struct ExpandedIslandLineView: View {
                     }
                 }
             }
+            .compositingGroup()
             .frame(height: 12)
         }
         .frame(height: 12)
