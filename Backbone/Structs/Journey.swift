@@ -23,13 +23,17 @@ public struct Journey: Identifiable, Codable {
         self.hasSchedule = hasSchedule
     }
 
-    /// 行き先 as riders see it — an off-line through destination wins over the on-line terminus.
-    public var destinationNameJa: String {
-        service.throughDestinationName ?? destinationStation?.name ?? ""
+    /// 行き先 as riders see it — an off-line through destination wins over the
+    /// on-line terminus — in every language the data carries.
+    public var destinationNames: LocalizedText {
+        service.throughDestination ?? destinationStation?.names ?? LocalizedText(ja: "")
     }
 
+    public var destinationNameJa: String { destinationNames.ja }
+
     public var destinationNameEn: String {
-        service.throughDestinationNameEn ?? destinationStation?.nameEn ?? ""
+        let names = destinationNames
+        return names.en.isEmpty ? names.ja : names.en
     }
 
     public var destinationStation: Station? {

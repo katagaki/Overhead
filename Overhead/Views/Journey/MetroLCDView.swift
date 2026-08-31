@@ -69,7 +69,7 @@ struct MetroLCDView: View {
                         .font(LCDFont.gothic(size: 15, weight: .heavy))
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
-                    Text(verbatim: language == .zh ? "方向" : "ゆき")
+                    Text(verbatim: language.destinationSuffix(japanese: "ゆき"))
                         .font(LCDFont.gothic(size: 15, weight: .heavy))
                 }
             }
@@ -198,7 +198,7 @@ struct MetroLCDView: View {
         return VStack(spacing: 0) {
             HStack(alignment: .bottom, spacing: 0) {
                 ForEach(cols) { col in
-                    transferList(col.transfers)
+                    transferList(col.transfers, language: language)
                         .frame(width: colWidth, alignment: .bottomLeading)
                 }
             }
@@ -231,7 +231,15 @@ struct MetroLCDView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .frame(height: Self.bandHeight)
-            .metalBandGradient(lineColor)
+            .background {
+                SegmentedBand(
+                    segments: LCDBandSegments.of(cols.map(\.station), fallback: lineColor,
+                                                 columnWidth: colWidth, origin: leadInset),
+                    fallback: lineColor
+                ) { color in
+                    Rectangle().fill(MetalBandGradient.gradient(color))
+                }
+            }
             .compositingGroup()
             .shadow(color: .black.opacity(0.4), radius: 0.8, x: 0, y: 1)
             .overlay(alignment: mirrored ? .bottomLeading : .bottomTrailing) {
@@ -300,10 +308,10 @@ struct MetroLCDView: View {
             .frame(width: 15, height: Self.bandHeight - 2)
     }
 
-    private func transferList(_ lines: [TrainLine]) -> some View {
+    private func transferList(_ lines: [TrainLine], language: TrainLCDLanguage) -> some View {
         VStack(alignment: .leading, spacing: 0.5) {
             ForEach(lines) { line in
-                LCDTransferLineName(name: line.name, fontSize: 6.5,
+                LCDTransferLineName(name: language.lineName(line), fontSize: 6.5,
                                     symbol: line.lineSymbol, badgeColor: line.color,
                                     badgeStyleId: line.badgeStyleId,
                                     badgeLineId: line.id, kerning: -0.3)
@@ -515,18 +523,20 @@ private struct DirectionMarker: Shape {
 private struct MetalBandGradient: ViewModifier {
     let base: Color
 
-    func body(content: Content) -> some View {
-        content.background(
-            LinearGradient(
-                stops: [
-                    .init(color: base, location: 0),
-                    .init(color: base, location: 0.5),
-                    .init(color: base.luminanceScaled(by: 0.9), location: 0.51),
-                    .init(color: base, location: 1),
-                ],
-                startPoint: .top, endPoint: .bottom
-            )
+    static func gradient(_ base: Color) -> LinearGradient {
+        LinearGradient(
+            stops: [
+                .init(color: base, location: 0),
+                .init(color: base, location: 0.5),
+                .init(color: base.luminanceScaled(by: 0.9), location: 0.51),
+                .init(color: base, location: 1),
+            ],
+            startPoint: .top, endPoint: .bottom
         )
+    }
+
+    func body(content: Content) -> some View {
+        content.background(Self.gradient(base))
     }
 }
 

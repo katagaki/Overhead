@@ -525,7 +525,8 @@ struct LockScreenLiveActivityView: View {
                 journeyInterval: state.journeyInterval,
                 nextStationIndexOverride: state.nextStationIndex,
                 onLightBackground: true,
-                transferIndices: transferIndices
+                transferIndices: transferIndices,
+                stationColors: attributes.stationColors.map { Color(hex: $0) }
             )
 
             HStack(alignment: .firstTextBaseline, spacing: 5) {
@@ -634,6 +635,35 @@ struct LCDLineView: View {
     var nextStationIndexOverride: Int? = nil
     var onLightBackground: Bool = false
     var transferIndices: [Int] = []
+    /// Each station's own line colour; empty falls back to `lineColor`.
+    var stationColors: [Color] = []
+
+    /// The colour of the line the station belongs to — a 乗り換え or a 直通
+    /// junction puts stations of more than one line on the same journey.
+    private func color(at index: Int) -> Color {
+        stationColors.indices.contains(index) ? stationColors[index] : lineColor
+    }
+
+    /// Runs of one line along the track, in points from the track's leading
+    /// edge, changing colour at the junction stop itself.
+    private func trackRuns(lineWidth: CGFloat) -> [(color: Color, start: CGFloat, end: CGFloat?)] {
+        guard stationCount > 1, stationColors.count == stationCount else {
+            return [(lineColor, 0, nil)]
+        }
+        func center(_ index: Int) -> CGFloat {
+            lineWidth * CGFloat(index) / CGFloat(stationCount - 1)
+        }
+        var runs: [(color: Color, start: CGFloat, end: CGFloat?)] = []
+        var runStart = 0
+        for index in 1...stationCount where
+            index == stationCount || stationColors[index] != stationColors[index - 1] {
+            runs.append((stationColors[runStart],
+                         runStart == 0 ? 0 : center(runStart - 1),
+                         index == stationCount ? nil : center(index - 1)))
+            runStart = index
+        }
+        return runs
+    }
 
     private var trackColor: Color {
         onLightBackground ? Color(white: 0.65) : Color(white: 0.3)
@@ -680,21 +710,41 @@ struct LCDLineView: View {
                     .frame(width: lineWidth, height: trackHeight)
                     .offset(x: padding, y: centerY - trackHeight / 2)
 
-                if let interval = journeyInterval {
-                    ProgressView(timerInterval: interval, countsDown: false) {
-                    } currentValueLabel: {
+                // One fill per line ridden, each masked to its stretch of the
+                // track, so the ridden bar changes colour at the junction.
+                ZStack(alignment: .leading) {
+                    ForEach(Array(trackRuns(lineWidth: lineWidth).enumerated()), id: \.offset) { _, run in
+                        Group {
+                            if let interval = journeyInterval {
+                                ProgressView(timerInterval: interval, countsDown: false) {
+                                } currentValueLabel: {
+                                }
+                                .progressViewStyle(.linear)
+                                .tint(run.color)
+                                .frame(width: lineWidth, height: trackHeight)
+                                .clipped()
+                            } else {
+                                RoundedRectangle(cornerRadius: 1)
+                                    .fill(run.color)
+                                    .frame(width: max(0, lineWidth * progress), height: trackHeight)
+                                    .frame(width: lineWidth, alignment: .leading)
+                            }
+                        }
+                        .mask(alignment: .leading) {
+                            HStack(spacing: 0) {
+                                Color.clear.frame(width: max(0, run.start))
+                                if let end = run.end {
+                                    Color.black.frame(width: max(0, end - run.start))
+                                    Color.clear.frame(maxWidth: .infinity)
+                                } else {
+                                    Color.black.frame(maxWidth: .infinity)
+                                }
+                            }
+                        }
                     }
-                    .progressViewStyle(.linear)
-                    .tint(lineColor)
-                    .frame(width: lineWidth, height: trackHeight)
-                    .clipped()
-                    .position(x: padding + lineWidth / 2, y: centerY)
-                } else {
-                    RoundedRectangle(cornerRadius: 1)
-                        .fill(lineColor)
-                        .frame(width: max(0, lineWidth * progress), height: trackHeight)
-                        .offset(x: padding, y: centerY - trackHeight / 2)
                 }
+                .frame(width: lineWidth, height: trackHeight)
+                .offset(x: padding, y: centerY - trackHeight / 2)
 
                 ForEach(0..<stationCount, id: \.self) { i in
                     let frac = stationCount > 1 ? Double(i) / Double(stationCount - 1) : 0
@@ -711,7 +761,7 @@ struct LCDLineView: View {
                         let dotR = stops ? baseRadius : skippedRadius
                         Circle()
                             .fill(stops
-                                  ? (isPast ? lineColor : futureDotColor)
+                                  ? (isPast ? color(at: i) : futureDotColor)
                                   : skippedDotColor(isPast: isPast))
                             .frame(width: dotR * 2, height: dotR * 2)
                             .position(x: x, y: centerY)
@@ -723,15 +773,15 @@ struct LCDLineView: View {
                                 .fill(terminalFill)
                                 .frame(width: r * 2, height: r * 2)
                             Circle()
-                                .strokeBorder(isPast ? lineColor : trackColor, lineWidth: 2)
+                                .strokeBorder(isPast ? color(at: i) : trackColor, lineWidth: 2)
                                 .frame(width: r * 2, height: r * 2)
 
                             if isNext {
                                 Circle()
-                                    .fill(lineColor)
+                                    .fill(color(at: i))
                                     .frame(width: r, height: r)
                                 Circle()
-                                    .strokeBorder(lineColor, lineWidth: 1.5)
+                                    .strokeBorder(color(at: i), lineWidth: 1.5)
                                     .frame(width: r * 2 + 4, height: r * 2 + 4)
                             }
                         }
@@ -740,7 +790,7 @@ struct LCDLineView: View {
                         if (isTerminal || isTransfer) && !isNext {
                             Text(truncatedName(stationNames[i]))
                                 .font(.system(size: 8, weight: isTransfer ? .bold : .regular))
-                                .foregroundColor(isTransfer ? lineColor : labelColor)
+                                .foregroundColor(isTransfer ? color(at: i) : labelColor)
                                 .lineLimit(1)
                                 .frame(width: 40)
                                 .position(x: x, y: centerY - r - 9)
@@ -749,7 +799,7 @@ struct LCDLineView: View {
                         if isNext {
                             Text(truncatedName(stationNames[i]))
                                 .font(.system(size: 9, weight: .bold))
-                                .foregroundColor(lineColor)
+                                .foregroundColor(color(at: i))
                                 .lineLimit(1)
                                 .frame(width: 44)
                                 .position(x: x, y: centerY + r + 10)

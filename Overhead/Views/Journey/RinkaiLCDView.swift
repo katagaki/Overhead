@@ -37,8 +37,13 @@ struct RinkaiLCDView: View {
 
     // Chrome takes the line's own colour.
     private var railBlue: Color { lineColor.lcdTint(saturation: 1.3, brightness: 0.81) }
-    private var bandLight: Color { lineColor.lcdTint(saturation: 1.25, brightness: 0.86) }
-    private var bandDark: Color { lineColor.lcdTint(saturation: 1.3, brightness: 0.56) }
+    private func bandGradient(_ base: Color) -> LinearGradient {
+        LinearGradient(
+            colors: [base.lcdTint(saturation: 1.25, brightness: 0.86),
+                     base.lcdTint(saturation: 1.3, brightness: 0.56)],
+            startPoint: .top, endPoint: .bottom
+        )
+    }
     private var boardBackground: Color { lineColor.lcdTint(saturation: 0.045, brightness: 0.975) }
 
     var body: some View {
@@ -128,7 +133,7 @@ struct RinkaiLCDView: View {
                     }
                     .frame(height: 34)
                     if !language.isLatin {
-                        Text(verbatim: language == .zh ? "方向" : "ゆき")
+                        Text(verbatim: language.destinationSuffix(japanese: "ゆき"))
                             .font(LCDFont.gothic(size: 18, weight: .heavy))
                             .foregroundColor(.white)
                     }
@@ -226,7 +231,7 @@ struct RinkaiLCDView: View {
 
             HStack(alignment: .top, spacing: 0) {
                 ForEach(columns) { col in
-                    transferList(col.transfers)
+                    transferList(col.transfers, language: language)
                         .frame(width: colWidth, alignment: .topLeading)
                         .opacity(col.isPassed ? 0.4 : 1)
                 }
@@ -257,13 +262,18 @@ struct RinkaiLCDView: View {
 
         return ZStack(alignment: flipped ? .trailing : .leading) {
             // Centred in the board, clear of both edges.
-            RoundedRectangle(cornerRadius: 4)
-                .fill(LinearGradient(
-                    colors: [bandLight, bandDark],
-                    startPoint: .top, endPoint: .bottom
-                ))
-                .frame(maxWidth: .infinity)
-                .frame(height: Self.bandHeight)
+            SegmentedBand(
+                segments: LCDBandSegments.of(columns.map(\.station), fallback: lineColor,
+                                             columnWidth: colWidth,
+                                             // The run is tail-padded on its far end.
+                                             origin: flipped ? Self.bandTail : 0),
+                fallback: lineColor
+            ) { color in
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(bandGradient(color))
+                    .frame(maxWidth: .infinity)
+                    .frame(height: Self.bandHeight)
+            }
             HStack(spacing: 0) {
                 ForEach(columns) { col in
                     Group {
@@ -349,10 +359,10 @@ struct RinkaiLCDView: View {
         }
     }
 
-    private func transferList(_ lines: [TrainLine]) -> some View {
+    private func transferList(_ lines: [TrainLine], language: TrainLCDLanguage) -> some View {
         VStack(alignment: .leading, spacing: 1) {
             ForEach(lines) { line in
-                LCDTransferLineName(name: line.name, fontSize: 6,
+                LCDTransferLineName(name: language.lineName(line), fontSize: 6,
                                     symbol: line.lineSymbol, badgeColor: line.color,
                                     badgeStyleId: line.badgeStyleId,
                                     badgeLineId: line.id, color: Self.codeInk)

@@ -203,11 +203,21 @@ struct HankyuLCDView: View {
                 let originX = orientation == .right ? x0 : x1
                 let y = geo.size.height - Self.circleCenterFromBottom
 
+                let runs = LCDBandSegments.runs(model.stops.map(\.station), fallback: lineColor)
+
                 ZStack {
-                    Rectangle()
-                        .fill(lineGradient(lineColor))
-                        .frame(width: x1 - x0, height: Self.lineHeight)
-                        .position(x: (x0 + x1) / 2, y: y)
+                    // A run per line ridden, so the track changes colour at a
+                    // 乗り換え or a 直通 junction.
+                    ForEach(Array(runs.enumerated()), id: \.offset) { _, run in
+                        let from = run.range.lowerBound == 0
+                            ? x0 : centerX(CGFloat(run.range.lowerBound) - 1)
+                        let to = run.range.upperBound == count - 1
+                            ? x1 : centerX(CGFloat(run.range.upperBound))
+                        Rectangle()
+                            .fill(lineGradient(run.color))
+                            .frame(width: to - from, height: Self.lineHeight)
+                            .position(x: (from + to) / 2, y: y)
+                    }
                     if let trainPos = model.trainPos {
                         let chevronX = centerX(CGFloat(trainPos))
                         Rectangle()
@@ -246,7 +256,7 @@ struct HankyuLCDView: View {
             .fill(col.isNext ? Self.nextYellow : Color.white)
             .overlay(
                 Circle().stroke(
-                    col.isPassed ? Self.passedGray : lineColor,
+                    col.isPassed ? Self.passedGray : stationColor(col.station),
                     lineWidth: 1
                 )
             )

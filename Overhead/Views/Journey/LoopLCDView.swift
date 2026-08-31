@@ -71,7 +71,7 @@ struct LoopLCDView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
                     .frame(height: 13)
-                Text(verbatim: language == .zh ? "方向" : "方面")
+                Text(verbatim: language.directionSuffix)
                     .font(LCDFont.gothic(size: 6.5, weight: .bold))
                     .frame(height: 7)
             }
@@ -174,35 +174,55 @@ struct LoopLCDView: View {
                 }
 
                 let samples = 25
-                var upperEdge: [CGPoint] = []
-                var lowerEdge: [CGPoint] = []
-                for i in 0...samples {
-                    let t = CGFloat(i) / CGFloat(samples)
-                    let p = arcPoint(t)
-                    let n = arcNormal(t)
-                    let half = Self.arcWidth(t) / 2
-                    upperEdge.append(x(CGPoint(x: p.x - n.x * half, y: p.y - n.y * half)))
-                    lowerEdge.append(x(CGPoint(x: p.x + n.x * half, y: p.y + n.y * half)))
+                func bandPath(from t0: CGFloat, to t1: CGFloat) -> Path {
+                    var upperEdge: [CGPoint] = []
+                    var lowerEdge: [CGPoint] = []
+                    for i in 0...samples {
+                        let t = t0 + (t1 - t0) * CGFloat(i) / CGFloat(samples)
+                        let p = arcPoint(t)
+                        let n = arcNormal(t)
+                        let half = Self.arcWidth(t) / 2
+                        upperEdge.append(x(CGPoint(x: p.x - n.x * half, y: p.y - n.y * half)))
+                        lowerEdge.append(x(CGPoint(x: p.x + n.x * half, y: p.y + n.y * half)))
+                    }
+                    var band = Path()
+                    band.move(to: upperEdge[0])
+                    for p in upperEdge.dropFirst() { band.addLine(to: p) }
+                    for p in lowerEdge.reversed() { band.addLine(to: p) }
+                    band.closeSubpath()
+                    return band
                 }
-                var band = Path()
-                band.move(to: upperEdge[0])
-                for p in upperEdge.dropFirst() { band.addLine(to: p) }
-                for p in lowerEdge.reversed() { band.addLine(to: p) }
-                band.closeSubpath()
-                ctx.fill(band, with: .color(lineColor))
+                func shadowPath(from t0: CGFloat, to t1: CGFloat) -> Path {
+                    var shadow = Path()
+                    for i in 0...samples {
+                        let t = t0 + (t1 - t0) * CGFloat(i) / CGFloat(samples)
+                        let p = arcPoint(t)
+                        let n = arcNormal(t)
+                        let offset = Self.arcWidth(t) / 2 + 1.5
+                        let point = x(CGPoint(x: p.x + n.x * offset, y: p.y + n.y * offset))
+                        if i == 0 { shadow.move(to: point) } else { shadow.addLine(to: point) }
+                    }
+                    return shadow
+                }
+                /// The junction stop before `index`, where the colour turns.
+                func boundaryT(_ index: Int) -> CGFloat {
+                    Self.stopT[min(max(index - 1, 0), Self.stopT.count - 1)]
+                }
 
-                var shadow = Path()
-                for (i, t) in (0...samples).map({ (CGFloat($0) / CGFloat(samples)) }).enumerated() {
-                    let p = arcPoint(t)
-                    let n = arcNormal(t)
-                    let offset = Self.arcWidth(t) / 2 + 1.5
-                    let point = x(CGPoint(x: p.x + n.x * offset, y: p.y + n.y * offset))
-                    if i == 0 { shadow.move(to: point) } else { shadow.addLine(to: point) }
+                // One run per line ridden, so the arc changes colour where the
+                // train changes line — a 乗り換え or a 直通 junction.
+                let runs = LCDBandSegments.runs(stops.map(\.station), fallback: lineColor)
+                for run in runs.isEmpty ? [(color: lineColor, range: 0...0)] : runs {
+                    // A hair of overlap, or the runs leave a seam between them.
+                    let t0 = run.range.lowerBound == 0 ? 0 : boundaryT(run.range.lowerBound) - 0.004
+                    let t1 = run.range.upperBound >= stops.count - 1
+                        ? 1 : boundaryT(run.range.upperBound + 1)
+                    ctx.fill(bandPath(from: t0, to: t1), with: .color(run.color))
+                    ctx.stroke(
+                        shadowPath(from: t0, to: t1), with: .color(arcShadow(run.color)),
+                        style: StrokeStyle(lineWidth: 2.5, lineCap: .butt)
+                    )
                 }
-                ctx.stroke(
-                    shadow, with: .color(arcShadowColor),
-                    style: StrokeStyle(lineWidth: 2.5, lineCap: .butt)
-                )
 
                 for (index, stop) in stops.enumerated() {
                     let t = Self.stopT[min(index, Self.stopT.count - 1)]
@@ -341,11 +361,11 @@ struct LoopLCDView: View {
         )
     }
 
-    private var arcShadowColor: Color {
-        let ui = UIColor(lineColor)
+    private func arcShadow(_ base: Color) -> Color {
+        let ui = UIColor(base)
         var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
         guard ui.getHue(&h, saturation: &s, brightness: &b, alpha: &a) else {
-            return lineColor
+            return base
         }
         return Color(hue: h, saturation: s, brightness: b * 0.55, opacity: a)
     }

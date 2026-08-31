@@ -131,23 +131,18 @@ public struct ExactRun: Codable, Hashable {
     // Off-line terminus for through-runs (行き先 as riders see it, e.g. 成田).
     public let throughDest: LocalizedText?
 
-    public var throughDestJa: String? { throughDest?.ja }
-    public var throughDestEn: String? { throughDest?.en }
-
     public init(_ departure: String, terminusStationId: String? = nil,
                 startsHere: Bool = true, continuesBeyond: Bool = false,
                 trainType: TrainService.TrainType? = nil,
                 stopIndices: [Int]? = nil,
-                throughDestJa: String? = nil, throughDestEn: String? = nil) {
+                throughDest: LocalizedText? = nil) {
         self.departure = departure
         self.terminusStationId = terminusStationId
         self.startsHere = startsHere
         self.continuesBeyond = continuesBeyond
         self.trainType = trainType
         self.stopIndices = stopIndices
-        self.throughDest = (throughDestJa == nil && throughDestEn == nil)
-            ? nil
-            : LocalizedText(ja: throughDestJa ?? "", en: throughDestEn ?? "")
+        self.throughDest = throughDest
     }
 }
 
@@ -302,17 +297,13 @@ public struct TimetableRun: Hashable, Sendable, Codable {
     // Off-line terminus for through-runs (行き先 as riders see it, e.g. 我孫子).
     public var throughDest: LocalizedText? = nil
 
-    public var throughDestJa: String? { throughDest?.ja }
-    public var throughDestEn: String? { throughDest?.en }
     public init(_ calendar: ScheduleCalendar, _ ascending: Bool, _ startIndex: Int,
                 _ startsHere: Bool, _ type: TrainService.TrainType, _ stops: [Int],
-                terminates: Bool = true, throughDestJa: String? = nil, throughDestEn: String? = nil) {
+                terminates: Bool = true, throughDest: LocalizedText? = nil) {
         self.calendar = calendar; self.ascending = ascending; self.startIndex = startIndex
         self.startsHere = startsHere; self.type = type; self.stops = stops
         self.terminates = terminates
-        self.throughDest = (throughDestJa == nil && throughDestEn == nil)
-            ? nil
-            : LocalizedText(ja: throughDestJa ?? "", en: throughDestEn ?? "")
+        self.throughDest = throughDest
     }
 }
 
@@ -1505,8 +1496,7 @@ public enum StaticTrainData {
                 terminusStationId: run.terminusStationId,
                 startsHere: false,
                 continuesBeyond: run.continuesBeyond,
-                throughDestJa: run.throughDestJa,
-                throughDestEn: run.throughDestEn
+                throughDest: run.throughDest
             )
         }
         return ServicePattern(
@@ -1565,8 +1555,7 @@ public enum StaticTimetableGenerator {
                 timetable: entries,
                 destinationStationId: line.stations[destAbs].id,
                 originatesAtStart: run.startsHere,
-                throughDestinationName: run.throughDestJa,
-                throughDestinationNameEn: run.throughDestEn
+                throughDestination: run.throughDest
             )
         }
     }
@@ -1696,8 +1685,7 @@ public enum StaticTimetableGenerator {
                 timetable: entries,
                 destinationStationId: stations[endIndex].id,
                 originatesAtStart: run.startsHere,
-                throughDestinationName: run.throughDestJa,
-                throughDestinationNameEn: run.throughDestEn
+                throughDestination: run.throughDest
             )
         }
     }

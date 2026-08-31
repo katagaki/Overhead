@@ -33,8 +33,11 @@ struct TsukubaExpressLCDView: View {
     private static var allLines: [TrainLine] { StaticTrainData.trainLines() }
 
     // The run still to come takes the line's own colour.
-    private var runTop: Color { lineColor.lcdTint(saturation: 1.5, brightness: 0.90) }
-    private var runBottom: Color { lineColor.lcdTint(saturation: 1.6, brightness: 0.70) }
+    private func runGradient(_ base: Color) -> LinearGradient {
+        LinearGradient(colors: [base.lcdTint(saturation: 1.5, brightness: 0.90),
+                                base.lcdTint(saturation: 1.6, brightness: 0.70)],
+                       startPoint: .top, endPoint: .bottom)
+    }
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
@@ -114,8 +117,7 @@ struct TsukubaExpressLCDView: View {
     }
 
     private func gutterLabels(language: TrainLCDLanguage) -> some View {
-        Text(verbatim: language == .zh ? "所需时间"
-                        : (language.isLatin ? "Travel Times" : "所要時間"))
+        Text(verbatim: language.travelTimesLabel)
             .font(language.isLatin ? LCDFont.latin(size: 5.5)
                           : LCDFont.gothic(size: 6))
             .foregroundColor(Self.ink)
@@ -166,10 +168,16 @@ struct TsukubaExpressLCDView: View {
         }
 
         return ZStack(alignment: mirrored ? .trailing : .leading) {
-            TXBandShape(roundedOnTrailing: !mirrored)
-                .fill(LinearGradient(colors: [runTop, runBottom],
-                                     startPoint: .top, endPoint: .bottom))
-                .frame(height: Self.bandHeight)
+            SegmentedBand(
+                segments: LCDBandSegments.of(columns.map(\.station), fallback: lineColor,
+                                             columnWidth: colWidth,
+                                             origin: mirrored ? Self.trailTail : lead),
+                fallback: lineColor
+            ) { color in
+                TXBandShape(roundedOnTrailing: !mirrored)
+                    .fill(runGradient(color))
+                    .frame(height: Self.bandHeight)
+            }
 
             // Everything behind the train, capped where the train stands.
             UnevenRoundedRectangle(

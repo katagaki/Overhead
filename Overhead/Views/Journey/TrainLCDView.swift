@@ -184,7 +184,7 @@ struct TrainLCDView: View {
                 .offset(y: Self.destinationLift)
             }
 
-            Text(verbatim: language == .zh ? "方向" : "ゆき")
+            Text(verbatim: language.destinationSuffix(japanese: "ゆき"))
                 .font(LCDFont.gothic(size: 8, weight: .bold))
                 .foregroundColor(.white)
                 .opacity(language.isLatin ? 0 : 1)
@@ -252,10 +252,16 @@ struct TrainLCDView: View {
             ZStack(alignment: .leading) {
                 let tailPad = max(0, colWidth / 2 - 6)
                 let totalWidth = colWidth * CGFloat(max(columns.count, 1))
-                ArrowBandShape(tipOnTrailing: orientation == .right)
-                    .fill(lineColor)
-                    .frame(height: 17)
-                    .padding(orientation == .right ? .leading : .trailing, tailPad)
+                SegmentedBand(
+                    segments: LCDBandSegments.of(columns.map(\.station), fallback: lineColor,
+                                                 columnWidth: colWidth),
+                    fallback: lineColor
+                ) { color in
+                    ArrowBandShape(tipOnTrailing: orientation == .right)
+                        .fill(color)
+                        .frame(height: 17)
+                        .padding(orientation == .right ? .leading : .trailing, tailPad)
+                }
                 // The stretch behind the train turns gray, marker to tail edge.
                 if orientation == .right {
                     Rectangle()
@@ -309,7 +315,7 @@ struct TrainLCDView: View {
 
             HStack(alignment: .top, spacing: 0) {
                 ForEach(columns) { col in
-                    transferList(col.transfers)
+                    transferList(col.transfers, language: language)
                         .frame(width: colWidth, alignment: .topLeading)
                         .opacity(col.isPassed ? Self.passedOpacity : 1)
                 }
@@ -382,10 +388,10 @@ struct TrainLCDView: View {
             .frame(width: Self.movingMarkerWidth, height: 20)
     }
 
-    private func transferList(_ lines: [TrainLine]) -> some View {
+    private func transferList(_ lines: [TrainLine], language: TrainLCDLanguage) -> some View {
         VStack(alignment: .leading, spacing: 1) {
             ForEach(lines) { line in
-                LCDTransferLineName(name: line.name, fontSize: 6.5,
+                LCDTransferLineName(name: language.lineName(line), fontSize: 6.5,
                                     symbol: line.lineSymbol, badgeColor: line.color,
                                     badgeStyleId: line.badgeStyleId,
                                     badgeLineId: line.id)

@@ -188,10 +188,18 @@ struct KeihinTohokuLineLCDView: View {
             }
 
             ZStack(alignment: .leading) {
-                YamanoteArrowBandShape(tipOnTrailing: orientation == .right)
-                    .fill(lineColor)
-                    .frame(height: 17)
-                    .padding(orientation == .right ? .leading : .trailing, -10)
+                SegmentedBand(
+                    segments: LCDBandSegments.of(columns.map(\.station), fallback: lineColor,
+                                                 columnWidth: colWidth,
+                                                 // The band overhangs its tail end by 10.
+                                                 origin: orientation == .right ? 10 : 0),
+                    fallback: lineColor
+                ) { color in
+                    YamanoteArrowBandShape(tipOnTrailing: orientation == .right)
+                        .fill(color)
+                        .frame(height: 17)
+                }
+                .padding(orientation == .right ? .leading : .trailing, -10)
                 HStack(spacing: 0) {
                     ForEach(columns) { col in
                         Group {
@@ -218,7 +226,7 @@ struct KeihinTohokuLineLCDView: View {
 
             HStack(alignment: .top, spacing: 0) {
                 ForEach(columns) { col in
-                    transferList(col.transfers)
+                    transferList(col.transfers, language: language)
                         .frame(width: colWidth, alignment: .topLeading)
                         .opacity(col.isPassed ? Self.passedOpacity : 1)
                 }
@@ -298,13 +306,14 @@ struct KeihinTohokuLineLCDView: View {
         case .ja: return "\(name)　行"
         case .en: return "for \(name)"
         case .zh: return "开往\(name)"
+        case .ko: return "\(name)행"
         }
     }
 
-    private func transferList(_ lines: [TrainLine]) -> some View {
+    private func transferList(_ lines: [TrainLine], language: TrainLCDLanguage) -> some View {
         VStack(alignment: .leading, spacing: 1) {
             ForEach(lines) { line in
-                LCDTransferLineName(name: line.name, fontSize: 6.5,
+                LCDTransferLineName(name: language.lineName(line), fontSize: 6.5,
                                     symbol: line.lineSymbol, badgeColor: line.color,
                                     badgeStyleId: line.badgeStyleId,
                                     badgeLineId: line.id)

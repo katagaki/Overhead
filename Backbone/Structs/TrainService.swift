@@ -9,9 +9,14 @@ public struct TrainService: Identifiable, Codable {
     public let destinationStationId: String
     // 当駅始発; false for through-runs entering from a connecting line.
     public let originatesAtStart: Bool
-    // Off-line terminus for through-runs continuing past the line's end.
-    public var throughDestinationName: String? = nil
-    public var throughDestinationNameEn: String? = nil
+    // Off-line terminus for through-runs continuing past the line's end,
+    // in every language the data carries it in.
+    public var throughDestination: LocalizedText? = nil
+
+    public var throughDestinationName: String? { throughDestination?.ja }
+    public var throughDestinationNameEn: String? {
+        throughDestination.map { $0.en.isEmpty ? $0.ja : $0.en }
+    }
 
     public init(
         id: String,
@@ -21,8 +26,7 @@ public struct TrainService: Identifiable, Codable {
         timetable: [TimetableEntry],
         destinationStationId: String,
         originatesAtStart: Bool = true,
-        throughDestinationName: String? = nil,
-        throughDestinationNameEn: String? = nil
+        throughDestination: LocalizedText? = nil
     ) {
         self.id = id
         self.lineId = lineId
@@ -31,8 +35,7 @@ public struct TrainService: Identifiable, Codable {
         self.timetable = timetable
         self.destinationStationId = destinationStationId
         self.originatesAtStart = originatesAtStart
-        self.throughDestinationName = throughDestinationName
-        self.throughDestinationNameEn = throughDestinationNameEn
+        self.throughDestination = throughDestination
     }
 
     public enum TrainType: String, Codable, Sendable, CaseIterable {

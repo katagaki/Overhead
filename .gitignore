@@ -8,6 +8,9 @@ DerivedData/
 # Build
 build/
 
+# Scratch renders, screenshots
+tmp/
+
 # macOS
 .DS_Store
 

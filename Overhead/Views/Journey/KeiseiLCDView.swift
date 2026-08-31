@@ -52,8 +52,9 @@ struct KeiseiLCDView: View {
     }
 
     /// The run bar keeps a little depth of its own.
-    private var bandGradient: LinearGradient {
-        LinearGradient(colors: [lineColor.lcdChrome(luminance: 0.125), bandBlue],
+    private func bandGradient(_ base: Color) -> LinearGradient {
+        LinearGradient(colors: [base.lcdChrome(luminance: 0.125),
+                                base.lcdChrome(luminance: 0.089)],
                        startPoint: .top, endPoint: .bottom)
     }
 
@@ -122,7 +123,7 @@ struct KeiseiLCDView: View {
                 }
                 .frame(height: 25)
                 if !language.isLatin {
-                    Text(verbatim: language == .zh ? "方向" : "行")
+                    Text(verbatim: language.destinationSuffix(japanese: "行"))
                         .font(LCDFont.gothic(size: 14, weight: .bold))
                         .foregroundColor(Self.boardInk)
                 }
@@ -268,7 +269,7 @@ struct KeiseiLCDView: View {
 
             HStack(alignment: .top, spacing: 0) {
                 ForEach(columns) { col in
-                    transferList(col.transfers)
+                    transferList(col.transfers, language: language)
                         .frame(width: colWidth, alignment: .top)
                         .opacity(col.isPassed ? 0.35 : 1)
                 }
@@ -289,9 +290,17 @@ struct KeiseiLCDView: View {
 
     private func band(columns: [LCDStop], colWidth: CGFloat, markerSlot: Int?) -> some View {
         ZStack {
-            Rectangle()
-                .fill(bandGradient)
-                .frame(height: Self.bandHeight)
+            SegmentedBand(
+                segments: LCDBandSegments.of(columns.map(\.station), fallback: lineColor,
+                                             columnWidth: colWidth,
+                                             // The bar runs full-bleed past the board's inset.
+                                             origin: 4),
+                fallback: lineColor
+            ) { color in
+                Rectangle()
+                    .fill(bandGradient(color))
+                    .frame(height: Self.bandHeight)
+            }
             HStack(spacing: 0) {
                 ForEach(Array(columns.enumerated()), id: \.element.id) { index, col in
                     stopBox(col, isMarker: index == markerSlot)
@@ -331,14 +340,14 @@ struct KeiseiLCDView: View {
         }
     }
 
-    private func transferList(_ lines: [TrainLine]) -> some View {
+    private func transferList(_ lines: [TrainLine], language: TrainLCDLanguage) -> some View {
         VStack(spacing: 0.5) {
             if !lines.isEmpty {
                 Image(systemName: "tram.fill")
                     .font(.system(size: 6.5))
                     .foregroundColor(Self.boardInk)
                 ForEach(lines) { line in
-                    LCDTransferLineName(name: line.name, fontSize: 6.5,
+                    LCDTransferLineName(name: language.lineName(line), fontSize: 6.5,
                                         symbol: line.lineSymbol, badgeColor: line.color,
                                         badgeStyleId: line.badgeStyleId,
                                         badgeLineId: line.id, color: Self.boardInk)
@@ -367,10 +376,10 @@ struct KeiseiLCDView: View {
                     footerStation(next, language: language)
                 } else {
                     footerStation(here, language: language)
-                    Text(verbatim: language == .zh ? "的下一站是" : "の次は")
+                    Text(verbatim: language.nextStopConnector)
                         .font(LCDFont.gothic(size: 8))
                     footerStation(next, language: language)
-                    Text(verbatim: language == .zh ? "。" : "にとまります。")
+                    Text(verbatim: language.nextStopSuffix)
                         .font(LCDFont.gothic(size: 8))
                 }
             }
