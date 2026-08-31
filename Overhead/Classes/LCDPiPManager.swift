@@ -151,7 +151,7 @@ final class LCDPiPManager: NSObject, ObservableObject {
             space: CGColorSpaceCreateDeviceRGB(),
             bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
         ) else { return nil }
-        // Black under the LCD screen's rounded corners, matching the PiP window.
+        // Video buffers carry no alpha; the frame covers this fill entirely.
         context.setFillColor(CGColor(gray: 0, alpha: 1))
         context.fill(CGRect(x: 0, y: 0, width: width, height: height))
         context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
