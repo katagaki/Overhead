@@ -287,15 +287,14 @@ extension JourneyViewModel {
         )
         .frame(width: 360)
 
-        // Unpadded (PiP) frames drop the bezel so the screen fills the
-        // window, and get a rounder screen — radius 6 reads too square at
-        // PiP-window size, and the iPhone's smaller window needs more still.
-        let isPhone = UIDevice.current.userInterfaceIdiom == .phone
+        // Unpadded (PiP) frames drop the bezel and the screen rounding: the
+        // PiP window does its own clipping, so any radius here just lets the
+        // buffer's black fill show through at the corners.
         let content = padded
             ? AnyView(lcd.padding(12).background(Color(.systemBackground)))
             : AnyView(
                 lcd
-                    .environment(\.lcdScreenCornerRadius, isPhone ? 22 : 12)
+                    .environment(\.lcdScreenCornerRadius, 0)
                     .environment(\.lcdBezelHidden, true)
             )
         let renderer = ImageRenderer(content: content)
