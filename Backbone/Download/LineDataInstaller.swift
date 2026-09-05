@@ -53,8 +53,31 @@ public final class LineDataInstaller: ObservableObject {
 
     public static let shared = LineDataInstaller()
 
+    /// The branch the data repository is normally read from.
+    public static let defaultBranch = "main"
+    private static let branchKey = "lineData.branch"
+
+    /// Branch of the data repository the device tracks. `overhead://trackChange`
+    /// points a build at work in progress; everything else stays on `main`.
+    public static var branch: String {
+        get { UserDefaults.standard.string(forKey: branchKey) ?? defaultBranch }
+        set {
+            let trimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmed.isEmpty || trimmed == defaultBranch {
+                UserDefaults.standard.removeObject(forKey: branchKey)
+            } else {
+                UserDefaults.standard.set(trimmed, forKey: branchKey)
+            }
+        }
+    }
+
     /// Root of the published data repository.
-    public static var baseURL = URL(string: "https://raw.githubusercontent.com/katagaki/OverheadData/main/")!
+    public static var baseURL: URL {
+        let branch = branch
+        let escaped = branch.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? branch
+        return URL(string: "https://raw.githubusercontent.com/katagaki/OverheadData/\(escaped)/")
+            ?? URL(string: "https://raw.githubusercontent.com/katagaki/OverheadData/\(defaultBranch)/")!
+    }
 
     /// Outstanding work: missing lines on a fresh install, changed ones after.
     @Published public private(set) var pending: [PendingLine] = []
@@ -470,6 +493,22 @@ public final class LineDataInstaller: ObservableObject {
     public func beginRemoveAllData() {
         wipeCount += 1
         wipeTask = Task { [weak self] in await self?.removeAllData() }
+    }
+
+    /// Points the device at another branch of the data repository. The stored
+    /// hashes and conditional-GET tags belong to the branch being left, so the
+    /// switch takes everything down with it and downloads the branch afresh.
+    @discardableResult
+    public func switchBranch(to branch: String) -> Bool {
+        guard !isBusy else { return false }
+        let trimmed = branch.trimmingCharacters(in: .whitespacesAndNewlines)
+        let target = trimmed.isEmpty ? Self.defaultBranch : trimmed
+        guard target != Self.branch else { return false }
+        Self.branch = target
+        // A pin taken against the branch being left says nothing about the new one.
+        pin(toLegacy: false)
+        beginRemoveAllData()
+        return true
     }
 
     /// A line dropped from the catalog is data the app can no longer describe.

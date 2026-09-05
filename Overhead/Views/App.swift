@@ -6,6 +6,9 @@ struct OverheadApp: App {
 
     @StateObject private var viewModel = JourneyViewModel(previewMode: false)
     @Environment(\.scenePhase) private var scenePhase
+    /// overhead://trackChange — which branch of the data repository to follow.
+    @State private var showBranchAlert = false
+    @State private var branchField = ""
 
     init() {
         // Background tasks must be registered before launch finishes, and this
@@ -18,6 +21,22 @@ struct OverheadApp: App {
             RootView(viewModel: viewModel)
                 .onOpenURL { url in
                     handleDeepLink(url)
+                }
+                .alert("Data branch", isPresented: $showBranchAlert) {
+                    TextField(LineDataInstaller.defaultBranch, text: $branchField)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                    Button("Set branch") {
+                        LineDataInstaller.shared.switchBranch(to: branchField)
+                    }
+                    Button("Reset to main") {
+                        LineDataInstaller.shared.switchBranch(to: LineDataInstaller.defaultBranch)
+                    }
+                    Button("Cancel", role: .cancel) { }
+                } message: {
+                    Text("Train data is downloaded from the \(LineDataInstaller.branch) "
+                         + "branch of OverheadData. Changing it clears the installed data "
+                         + "and downloads the new branch.")
                 }
                 .onReceive(NotificationCenter.default.publisher(
                     for: SavedPlaceStore.didChangeNotification
@@ -49,9 +68,13 @@ struct OverheadApp: App {
 
         guard url.scheme == "overhead" else { return }
 
-        switch url.host {
+        // Foundation may normalise the host's case; match on the lowered form.
+        switch url.host?.lowercased() {
         case "refresh-delay":
             viewModel.forceRefresh()
+        case "trackchange":
+            branchField = LineDataInstaller.branch
+            showBranchAlert = true
         default:
             break
         }
