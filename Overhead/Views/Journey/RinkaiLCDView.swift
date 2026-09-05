@@ -266,7 +266,8 @@ struct RinkaiLCDView: View {
                 segments: LCDBandSegments.of(columns.map(\.station), fallback: lineColor,
                                              columnWidth: colWidth,
                                              // The run is tail-padded on its far end.
-                                             origin: flipped ? Self.bandTail : 0),
+                                             origin: flipped ? Self.bandTail : 0,
+                                             travelsForward: !flipped),
                 fallback: lineColor
             ) { color in
                 RoundedRectangle(cornerRadius: 4)

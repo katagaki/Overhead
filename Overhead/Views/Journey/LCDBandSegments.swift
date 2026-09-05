@@ -25,9 +25,13 @@ enum LCDBandSegments {
     /// of `columnWidth` starting `origin` from the band's leading edge. The
     /// colour changes at the junction stop itself — the last one on the line
     /// being left — not in the gap after it.
+    /// `travelsForward` when the array reads past → future; the junction stop
+    /// sits on the other side of the break when it reads future → past.
     static func of(_ stations: [Station], fallback: Color,
-                   columnWidth: CGFloat, origin: CGFloat = 0) -> [LCDBandSegment] {
+                   columnWidth: CGFloat, origin: CGFloat = 0,
+                   travelsForward: Bool = false) -> [LCDBandSegment] {
         guard !stations.isEmpty else { return [] }
+        let anchor: CGFloat = travelsForward ? -0.5 : 0.5
         let lines = stations.map { StaticTrainData.line(containingStationId: $0.id)?.trainLine }
         var segments: [LCDBandSegment] = []
         var runStart = 0
@@ -36,8 +40,8 @@ enum LCDBandSegments {
             segments.append(LCDBandSegment(
                 id: segments.count,
                 color: lines[runStart].map(JourneyViewModel.lcdColor) ?? fallback,
-                start: runStart == 0 ? 0 : origin + (CGFloat(runStart) - 0.5) * columnWidth,
-                end: index == stations.count ? nil : origin + (CGFloat(index) - 0.5) * columnWidth
+                start: runStart == 0 ? 0 : origin + (CGFloat(runStart) + anchor) * columnWidth,
+                end: index == stations.count ? nil : origin + (CGFloat(index) + anchor) * columnWidth
             ))
             runStart = index
         }

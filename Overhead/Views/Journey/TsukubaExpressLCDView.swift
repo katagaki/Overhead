@@ -171,7 +171,8 @@ struct TsukubaExpressLCDView: View {
             SegmentedBand(
                 segments: LCDBandSegments.of(columns.map(\.station), fallback: lineColor,
                                              columnWidth: colWidth,
-                                             origin: mirrored ? Self.trailTail : lead),
+                                             origin: mirrored ? Self.trailTail : lead,
+                                             travelsForward: mirrored),
                 fallback: lineColor
             ) { color in
                 TXBandShape(roundedOnTrailing: !mirrored)
@@ -345,7 +346,9 @@ struct TsukubaExpressLCDView: View {
         }
 
         if orientation == .right {
-            return (columns.reversed(), CGFloat(columns.count) - markerSlot)
+            // The band measures from its trailing end when mirrored, so the
+            // slot already counts from the right — don't flip it twice.
+            return (columns.reversed(), markerSlot)
         }
         return (columns, markerSlot)
     }

@@ -254,7 +254,8 @@ struct TrainLCDView: View {
                 let totalWidth = colWidth * CGFloat(max(columns.count, 1))
                 SegmentedBand(
                     segments: LCDBandSegments.of(columns.map(\.station), fallback: lineColor,
-                                                 columnWidth: colWidth),
+                                                 columnWidth: colWidth,
+                                                 travelsForward: orientation == .right),
                     fallback: lineColor
                 ) { color in
                     ArrowBandShape(tipOnTrailing: orientation == .right)

@@ -294,7 +294,8 @@ struct KeiseiLCDView: View {
                 segments: LCDBandSegments.of(columns.map(\.station), fallback: lineColor,
                                              columnWidth: colWidth,
                                              // The bar runs full-bleed past the board's inset.
-                                             origin: 4),
+                                             origin: 4,
+                                             travelsForward: orientation == .right),
                 fallback: lineColor
             ) { color in
                 Rectangle()

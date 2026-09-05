@@ -192,7 +192,8 @@ struct KeihinTohokuLineLCDView: View {
                     segments: LCDBandSegments.of(columns.map(\.station), fallback: lineColor,
                                                  columnWidth: colWidth,
                                                  // The band overhangs its tail end by 10.
-                                                 origin: orientation == .right ? 10 : 0),
+                                                 origin: orientation == .right ? 10 : 0,
+                                                 travelsForward: orientation == .right),
                     fallback: lineColor
                 ) { color in
                     YamanoteArrowBandShape(tipOnTrailing: orientation == .right)

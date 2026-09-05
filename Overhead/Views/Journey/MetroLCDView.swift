@@ -234,7 +234,8 @@ struct MetroLCDView: View {
             .background {
                 SegmentedBand(
                     segments: LCDBandSegments.of(cols.map(\.station), fallback: lineColor,
-                                                 columnWidth: colWidth, origin: leadInset),
+                                                 columnWidth: colWidth, origin: leadInset,
+                                                 travelsForward: !mirrored),
                     fallback: lineColor
                 ) { color in
                     Rectangle().fill(MetalBandGradient.gradient(color))
