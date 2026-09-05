@@ -14,6 +14,7 @@ struct SavedPlace: Identifiable, Codable, Equatable {
     var toStationId: String
     var viaStationIds: [String] = []
     var walkingSpeedRaw: String = WalkingSpeed.normal.rawValue
+    var preferOriginating: Bool = false
     var avoidedLineIds: [String] = []
     var ignoreTimetable: Bool = false
 
@@ -51,7 +52,7 @@ struct SavedPlace: Identifiable, Codable, Equatable {
 extension SavedPlace {
     private enum CodingKeys: String, CodingKey {
         case id, kind, customName, lineId, fromStationId, toStationId
-        case viaStationIds, walkingSpeedRaw, avoidedLineIds, ignoreTimetable
+        case viaStationIds, walkingSpeedRaw, preferOriginating, avoidedLineIds, ignoreTimetable
     }
 
     init(from decoder: Decoder) throws {
@@ -65,6 +66,7 @@ extension SavedPlace {
         viaStationIds = try container.decodeIfPresent([String].self, forKey: .viaStationIds) ?? []
         walkingSpeedRaw = try container.decodeIfPresent(String.self, forKey: .walkingSpeedRaw)
             ?? WalkingSpeed.normal.rawValue
+        preferOriginating = try container.decodeIfPresent(Bool.self, forKey: .preferOriginating) ?? false
         avoidedLineIds = try container.decodeIfPresent([String].self, forKey: .avoidedLineIds) ?? []
         ignoreTimetable = try container.decodeIfPresent(Bool.self, forKey: .ignoreTimetable) ?? false
     }

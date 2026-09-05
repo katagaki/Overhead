@@ -11,6 +11,8 @@ struct RouteSetupCard: View {
     @Binding var viaSelections: [StationSearchHit]
     @Binding var toSelection: StationSearchHit?
     @Binding var walkingSpeedRaw: String
+    /// 始発優先 — float trains that start at the boarding station to the top.
+    @Binding var preferOriginating: Bool
     @Binding var avoidedLineIds: Set<String>
     /// Runs after any station row changes (the planner persists + invalidates).
     var onStationsChanged: () -> Void = {}
@@ -252,6 +254,7 @@ struct RouteSetupCard: View {
                     leadingItems
                 }
                 walkingSpeedItem
+                preferOriginatingItem
                 avoidLinesItem
                 journeyModeItem
                 notificationsItem
@@ -278,6 +281,22 @@ struct RouteSetupCard: View {
                 icon: walkingSpeed.iconName,
                 label: "Setup.WalkingSpeed",
                 active: walkingSpeed != .none
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var preferOriginatingItem: some View {
+        Menu {
+            Picker("Setup.PreferOriginating", selection: $preferOriginating) {
+                Text("Setup.PreferOriginating.Off").tag(false)
+                Text("Setup.PreferOriginating.On").tag(true)
+            }
+        } label: {
+            CustomizationItem(
+                icon: "carseat.left.fill",
+                label: "Setup.PreferOriginating",
+                active: preferOriginating
             )
         }
         .buttonStyle(.plain)

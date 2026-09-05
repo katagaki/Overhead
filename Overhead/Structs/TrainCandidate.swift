@@ -11,6 +11,11 @@ struct CandidateLeg {
     let departureSeconds: Int   // seconds since service-day midnight (may exceed 24h)
     let arrivalSeconds: Int
 
+    /// 当駅始発 — the train starts its run at this leg's boarding station.
+    var startsHere: Bool {
+        service.originatesAtStart && service.timetable.first?.stationId == fromStation.id
+    }
+
     var departureTime: String { CandidateLeg.railTimeString(departureSeconds) }
     var arrivalTime: String { CandidateLeg.railTimeString(arrivalSeconds) }
 
@@ -34,6 +39,12 @@ struct TrainCandidate: Identifiable {
     var hasSchedule: Bool = true
 
     var transferCount: Int { legs.count - 1 }
+
+    /// 始発: the train you board first starts its run where you get on.
+    /// Untimed routes have no real service behind them, so they never qualify.
+    var startsAtBoarding: Bool {
+        hasSchedule && (legs.first?.startsHere ?? false)
+    }
 
     /// IDs are valid on `journeyLine` (the transfer station keeps the arriving leg's ID).
     var transferStationIds: [String] {

@@ -305,6 +305,7 @@ final class JourneyViewModel: ObservableObject {
         transferMinutes: Double = StaticTrainData.transferBufferMinutes,
         avoidingLineIds: Set<String> = [],
         notDepartingBefore earliest: Date? = nil,
+        preferringOriginating: Bool = false,
         limit: Int = 12
     ) -> [TrainCandidate] {
         guard stationNames.count >= 2,
@@ -333,7 +334,8 @@ final class JourneyViewModel: ObservableObject {
             let direct = directCandidates(
                 fromName: fromName, toName: toName,
                 anchor: rideAnchor, floorSec: floorSec, calendar: calendar,
-                avoidingLineIds: avoidingLineIds, limit: limit
+                avoidingLineIds: avoidingLineIds,
+                preferringOriginating: preferringOriginating, limit: limit
             )
             if !direct.isEmpty { return direct }
         }
@@ -347,7 +349,8 @@ final class JourneyViewModel: ObservableObject {
         return candidates(
             forPlan: plan,
             anchor: rideAnchor, floorSec: floorSec, calendar: calendar,
-            transferMinutes: transferMinutes, limit: 8
+            transferMinutes: transferMinutes,
+            preferringOriginating: preferringOriginating, limit: 8
         )
     }
 
@@ -395,6 +398,7 @@ final class JourneyViewModel: ObservableObject {
         floorSec: Int?,
         calendar: ScheduleCalendar,
         avoidingLineIds: Set<String>,
+        preferringOriginating: Bool,
         limit: Int
     ) -> [TrainCandidate] {
         let routes = StaticTrainData.directRoutes(
@@ -430,20 +434,33 @@ final class JourneyViewModel: ObservableObject {
             }
         }
 
-        return Array(sorted(candidates, anchor: anchor).prefix(limit))
+        return Array(sorted(candidates, anchor: anchor,
+                            preferringOriginating: preferringOriginating).prefix(limit))
     }
 
     /// 到着時刻 searches lead with the latest itinerary that still makes it.
-    private func sorted(_ candidates: [TrainCandidate], anchor: RideAnchor) -> [TrainCandidate] {
+    /// 始発優先 outranks the clock: a seat is worth waiting for.
+    private func sorted(
+        _ candidates: [TrainCandidate],
+        anchor: RideAnchor,
+        preferringOriginating: Bool = false
+    ) -> [TrainCandidate] {
+        let byTime: (TrainCandidate, TrainCandidate) -> Bool
         switch anchor {
         case .departAtOrAfter:
-            return candidates.sorted { $0.departureSeconds < $1.departureSeconds }
+            byTime = { $0.departureSeconds < $1.departureSeconds }
         case .arriveAtOrBefore:
-            return candidates.sorted {
+            byTime = {
                 $0.arrivalSeconds == $1.arrivalSeconds
                     ? $0.departureSeconds > $1.departureSeconds
                     : $0.arrivalSeconds > $1.arrivalSeconds
             }
+        }
+        guard preferringOriginating else { return candidates.sorted(by: byTime) }
+        return candidates.sorted {
+            $0.startsAtBoarding == $1.startsAtBoarding
+                ? byTime($0, $1)
+                : $0.startsAtBoarding
         }
     }
 
@@ -644,6 +661,7 @@ final class JourneyViewModel: ObservableObject {
         floorSec: Int?,
         calendar: ScheduleCalendar,
         transferMinutes: Double,
+        preferringOriginating: Bool,
         limit: Int
     ) -> [TrainCandidate] {
         // Search the anchored end first, then chain away from it.
@@ -674,7 +692,7 @@ final class JourneyViewModel: ObservableObject {
 
         // A plan that stayed on one line is plain direct rides — no composite.
         if plan.count == 1 {
-            return anchoredRides.map { ride in
+            let single = anchoredRides.map { ride in
                 TrainCandidate(
                     id: "\(ride.service.id)|\(anchoredLeg.staticLine.id)|\(anchoredLeg.fromStation.id)|\(anchoredLeg.toStation.id)",
                     legs: [leg(anchoredLeg, ride)],
@@ -685,6 +703,7 @@ final class JourneyViewModel: ObservableObject {
                     toStation: anchoredLeg.toStation
                 )
             }
+            return sorted(single, anchor: anchor, preferringOriginating: preferringOriginating)
         }
 
         var candidates: [TrainCandidate] = []
@@ -735,7 +754,7 @@ final class JourneyViewModel: ObservableObject {
                 unique.append(candidate)
             }
         }
-        return sorted(unique, anchor: anchor)
+        return sorted(unique, anchor: anchor, preferringOriginating: preferringOriginating)
     }
 
     /// Concrete services on a line between two of its stations.

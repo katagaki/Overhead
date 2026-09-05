@@ -14,6 +14,7 @@ struct PlaceEditorView: View {
     @State private var viaSelections: [StationSearchHit] = []
     @State private var toSelection: StationSearchHit?
     @State private var walkingSpeedRaw = WalkingSpeed.normal.rawValue
+    @State private var preferOriginating = false
     @State private var avoidedLineIds: Set<String> = []
     @Environment(\.dismiss) private var dismiss
 
@@ -28,6 +29,7 @@ struct PlaceEditorView: View {
                     viaSelections: $viaSelections,
                     toSelection: $toSelection,
                     walkingSpeedRaw: $walkingSpeedRaw,
+                    preferOriginating: $preferOriginating,
                     avoidedLineIds: $avoidedLineIds
                 )
 
@@ -149,6 +151,7 @@ struct PlaceEditorView: View {
         kind = existing.kind
         customName = existing.customName
         walkingSpeedRaw = existing.walkingSpeedRaw
+        preferOriginating = existing.preferOriginating
         avoidedLineIds = Set(existing.avoidedLineIds)
 
         let savedLine = availableLines.first(where: { $0.id == existing.lineId })
@@ -195,6 +198,7 @@ struct PlaceEditorView: View {
             toStationId: to.station.id,
             viaStationIds: viaSelections.map(\.station.id),
             walkingSpeedRaw: walkingSpeedRaw,
+            preferOriginating: preferOriginating,
             avoidedLineIds: avoidedLineIds.sorted(),
             ignoreTimetable: existingPlace?.ignoreTimetable ?? false
         )

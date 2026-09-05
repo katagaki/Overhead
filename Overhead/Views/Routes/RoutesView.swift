@@ -457,7 +457,8 @@ struct FavoritesSection: View {
             stationNames: names,
             anchor: .departure(Date()),
             transferMinutes: transferMinutes,
-            avoidingLineIds: avoided
+            avoidingLineIds: avoided,
+            preferringOriginating: place.preferOriginating
         ).first ?? viewModel.searchRouteOptions(
             stationNames: names,
             transferMinutes: transferMinutes,

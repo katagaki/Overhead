@@ -13,6 +13,7 @@ struct JourneyPlannerSection: View {
     @State private var timeMode: TimeMode = .now
     @State private var pinnedDate = Date()
     @AppStorage("journey.walkingSpeed") private var walkingSpeedRaw = WalkingSpeed.normal.rawValue
+    @AppStorage("journey.preferOriginating") private var preferOriginating = false
     @AppStorage("journey.avoidedLines") private var avoidedLinesJSON = ""
     @AppStorage(JourneyMode.storageKey) private var journeyMode = JourneyMode.hybrid
     @AppStorage("journey.setup.stations") private var storedStationsJSON = ""
@@ -134,6 +135,7 @@ struct JourneyPlannerSection: View {
             viaSelections: $viaSelections,
             toSelection: $toSelection,
             walkingSpeedRaw: $walkingSpeedRaw,
+            preferOriginating: $preferOriginating,
             avoidedLineIds: avoidedLineIdsBinding,
             onStationsChanged: {
                 persistSelections()
@@ -155,6 +157,9 @@ struct JourneyPlannerSection: View {
             )
         }
         .onChange(of: walkingSpeedRaw) { _, _ in
+            invalidateResults()
+        }
+        .onChange(of: preferOriginating) { _, _ in
             invalidateResults()
         }
         .onChange(of: journeyMode) { _, _ in
@@ -257,6 +262,7 @@ struct JourneyPlannerSection: View {
                 toStationId: to.station.id,
                 viaStationIds: viaSelections.map(\.station.id),
                 walkingSpeedRaw: walkingSpeedRaw,
+                preferOriginating: preferOriginating,
                 avoidedLineIds: avoidedLineIds.sorted()
             ))
         }
@@ -391,6 +397,10 @@ struct JourneyPlannerSection: View {
                     .font(.system(size: 12))
                     .foregroundColor(.secondary)
 
+                if candidate.startsAtBoarding {
+                    originatingBadge
+                }
+
                 if candidate.legs.count == 1,
                    let platform = boardingPlatform(for: candidate.legs.first) {
                     Text("Candidate.Platform \(platform)")
@@ -413,6 +423,17 @@ struct JourneyPlannerSection: View {
                 }
             }
         }
+    }
+
+    /// 始発 — you board where the train starts, so there is a seat waiting.
+    private var originatingBadge: some View {
+        Text("Candidate.Originating")
+            .font(.system(size: 11, weight: .bold))
+            .foregroundColor(.white)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(Color.green)
+            .clipShape(Capsule())
     }
 
     @ViewBuilder
@@ -619,7 +640,8 @@ struct JourneyPlannerSection: View {
                 anchor: anchor,
                 transferMinutes: walkingSpeed.transferMinutes,
                 avoidingLineIds: avoided,
-                notDepartingBefore: earliestDeparture
+                notDepartingBefore: earliestDeparture,
+                preferringOriginating: preferOriginating
             )
             hasSearched = true
             isSearching = false
