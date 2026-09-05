@@ -375,8 +375,9 @@ struct RootView: View {
             ScreenshotStaging.shared.plannerCommand = .departure
         case .plannerArrival:
             ScreenshotStaging.shared.plannerCommand = .arrival
-        case .timetable(let target, let hidePast):
+        case .timetable(let target, let hidePast, let popoverType):
             ScreenshotStaging.shared.hidePastDepartures = hidePast
+            ScreenshotStaging.shared.timetablePopoverType = popoverType
             viewModel.loadStationTimetable(stationId: target.stationId)
             try? await Task.sleep(for: .seconds(1))
             debugTimetableTarget = target

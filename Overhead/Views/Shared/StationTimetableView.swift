@@ -210,8 +210,32 @@ struct StationTimetableView: View {
             .onChange(of: "\(timetable.stationId)|\(timetable.railDirection)") {
                 scrollToCurrentHour(proxy: proxy, rows: rows, nowMinutes: nowMinutes)
             }
+#if DEBUG
+            // Screenshot harness: open the popover for a staged train type.
+            .onAppear {
+                stageDeparturePopover(in: rows, proxy: proxy)
+            }
+#endif
         }
     }
+
+#if DEBUG
+    private func stageDeparturePopover(in rows: [HourRow], proxy: ScrollViewProxy) {
+        guard let type = ScreenshotStaging.shared.timetablePopoverType else { return }
+        ScreenshotStaging.shared.timetablePopoverType = nil
+        let match = rows.flatMap(\.departures).first {
+            $0.trainType.localizedDisplayName.contains(type)
+        }
+        guard let match, let hour = rows.first(where: { $0.departures.contains(where: { $0.id == match.id }) })?.hour
+        else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            proxy.scrollTo(hour, anchor: UnitPoint(x: 0, y: 0.055))
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                detailDeparture = match
+            }
+        }
+    }
+#endif
 
     private func scrollToCurrentHour(proxy: ScrollViewProxy, rows: [HourRow], nowMinutes: Int) {
         guard let target = rows.first(where: { $0.hour >= nowMinutes / 60 })?.hour else { return }
@@ -376,9 +400,12 @@ struct StationTimetableView: View {
                     .padding(.vertical, 3)
                     .background(departure.trainType.skipsStations ? gridTypeColor(departure.trainType) : line.color)
                     .clipShape(Capsule())
+                    .fixedSize()
                 if !departure.localizedDestination.isEmpty {
                     Text("\(departure.localizedDestination) 行")
                         .font(.system(size: 17, weight: .semibold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
                 }
             }
             VStack(alignment: .leading, spacing: 6) {

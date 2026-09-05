@@ -14,7 +14,7 @@ import Backbone
 /// - overtrain://lcd?style=<TrainLCDStyle raw value>
 /// - overtrain://journey?minutesAgo=45[&line=…&from=…&to=…]
 /// - overtrain://planner?action=search|avoid|departure|arrival
-/// - overtrain://timetable[?line=…&station=…&hidePast=0]
+/// - overtrain://timetable[?line=…&station=…&hidePast=0&popover=<train type>]
 /// - overtrain://line[?line=…&status=expanded]
 /// - overtrain://custom-line (seeds the sample line and opens its editor)
 /// - overtrain://home?scroll=lines
@@ -30,7 +30,7 @@ enum ScreenshotCommand {
     case plannerAvoid
     case plannerDeparture
     case plannerArrival
-    case timetable(ScreenshotTimetableTarget, hidePast: Bool)
+    case timetable(ScreenshotTimetableTarget, hidePast: Bool, popoverType: String?)
     case linePage(ScreenshotLineTarget)
     case customLineEditor
     case homeScroll(String)
@@ -74,7 +74,8 @@ enum ScreenshotCommand {
                     lineId: params["line"] ?? "Railway:JR-East.JobanRapid",
                     stationId: params["station"] ?? "Station:JR-East.JobanRapid.Tokyo"
                 ),
-                hidePast: params["hidePast"] != "0"
+                hidePast: params["hidePast"] != "0",
+                popoverType: params["popover"]
             )
         case "line":
             self = .linePage(
@@ -121,6 +122,8 @@ final class ScreenshotStaging: ObservableObject {
     @Published var plannerCommand: PlannerCommand?
     /// Station timetables hide departed rows while staging.
     @Published var hidePastDepartures = false
+    /// Opens the departure popover for the first matching train type.
+    @Published var timetablePopoverType: String?
     /// Line pages open with the service status sheet expanded.
     @Published var expandServiceStatus = false
     /// Anchor id for RootView's ScrollViewReader.
