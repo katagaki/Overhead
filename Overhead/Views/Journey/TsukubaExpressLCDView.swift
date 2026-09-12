@@ -179,18 +179,13 @@ struct TsukubaExpressLCDView: View {
                                              travelsForward: mirrored),
                 fallback: lineColor
             ) { color in
-                TXBandShape(roundedOnTrailing: !mirrored)
+                TXBandShape(roundedOnLeading: !mirrored)
                     .fill(runGradient(color))
                     .frame(height: Self.bandHeight)
             }
 
             // Everything behind the train, capped where the train stands.
-            UnevenRoundedRectangle(
-                topLeadingRadius: mirrored ? Self.bandHeight / 2 : 0,
-                bottomLeadingRadius: mirrored ? Self.bandHeight / 2 : 0,
-                bottomTrailingRadius: mirrored ? 0 : Self.bandHeight / 2,
-                topTrailingRadius: mirrored ? 0 : Self.bandHeight / 2
-            )
+            Rectangle()
                 .fill(LinearGradient(colors: [Self.bandPastTop, Self.bandPastBottom],
                                      startPoint: .top, endPoint: .bottom))
                 // Reach under the point, or its notch shows the run through.
@@ -438,20 +433,20 @@ private struct AngledTXName: View {
 // MARK: - Shapes
 
 private struct TXBandShape: Shape {
-    var roundedOnTrailing = true
+    /// The nose the train runs towards is capped; the rear runs square off the edge.
+    var roundedOnLeading = true
 
     func path(in rect: CGRect) -> Path {
         let r = rect.height / 2
-        // The leading end is chisel-cut at 45°, tip on the bottom corner.
-        let cut = rect.height
         var p = Path()
-        p.move(to: CGPoint(x: rect.minX + cut, y: rect.minY))
-        p.addLine(to: CGPoint(x: rect.maxX - r, y: rect.minY))
-        p.addArc(center: CGPoint(x: rect.maxX - r, y: rect.midY), radius: r,
-                 startAngle: .degrees(-90), endAngle: .degrees(90), clockwise: false)
-        p.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        p.move(to: CGPoint(x: rect.minX + r, y: rect.minY))
+        p.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+        p.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        p.addLine(to: CGPoint(x: rect.minX + r, y: rect.maxY))
+        p.addArc(center: CGPoint(x: rect.minX + r, y: rect.midY), radius: r,
+                 startAngle: .degrees(90), endAngle: .degrees(270), clockwise: false)
         p.closeSubpath()
-        return roundedOnTrailing ? p : p.mirroredHorizontally(in: rect)
+        return roundedOnLeading ? p : p.mirroredHorizontally(in: rect)
     }
 }
 
