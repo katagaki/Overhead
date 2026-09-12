@@ -156,17 +156,12 @@ struct TsukubaExpressLCDView: View {
     private func colourBand(columns: [LCDStop], colWidth: CGFloat,
                             markerCenter: CGFloat, mirrored: Bool,
                             language: TrainLCDLanguage, now: Date) -> some View {
-        let count = CGFloat(max(columns.count, 1))
         // Metro-style alternation: the marker flips colour twice a second.
         let navyPhase = Int(now.timeIntervalSinceReferenceDate * 2) % 2 == 0
         let markerTint = navyPhase ? Self.markerNavy : Self.markerYellow
-        let runWidth = colWidth * count
         let lead = Self.leadIn
         let ahead = mirrored   // chevrons point the way the train is going
         // Distances run from the band's leading end, whichever side that is.
-        func span(_ from: CGFloat, _ width: CGFloat) -> CGFloat {
-            mirrored ? -(from + lead) : from + lead
-        }
         func centred(_ at: CGFloat, _ width: CGFloat) -> CGFloat {
             mirrored ? -(at + lead - width / 2) : at + lead - width / 2
         }
@@ -184,14 +179,13 @@ struct TsukubaExpressLCDView: View {
                     .frame(height: Self.bandHeight)
             }
 
-            // Everything behind the train, capped where the train stands.
+            // Everything behind the train, from where it stands to the rear edge.
             Rectangle()
                 .fill(LinearGradient(colors: [Self.bandPastTop, Self.bandPastBottom],
                                      startPoint: .top, endPoint: .bottom))
-                // Reach under the point, or its notch shows the run through.
-                .frame(width: max(0, runWidth - markerCenter + Self.trailTail),
-                       height: Self.bandHeight)
-                .offset(x: span(markerCenter, 0))
+                .frame(height: Self.bandHeight)
+                .padding(mirrored ? .trailing : .leading, markerCenter + lead)
+                .frame(maxWidth: .infinity, alignment: mirrored ? .leading : .trailing)
             TXChevron(pointsTrailing: ahead)
                 .fill(LinearGradient(colors: [Self.bandPastTop, Self.bandPastBottom],
                                      startPoint: .top, endPoint: .bottom))
