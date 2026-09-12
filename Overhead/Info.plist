@@ -2,21 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<!-- 流鉄 serves its 運行状況 page over HTTP only; its TLS certificate is
-		     issued for the hosting provider, not ryutetsu.jp. -->
-		<key>NSExceptionDomains</key>
-		<dict>
-			<key>ryutetsu.jp</key>
-			<dict>
-				<key>NSExceptionAllowsInsecureHTTPLoads</key>
-				<true/>
-				<key>NSIncludesSubdomains</key>
-				<true/>
-			</dict>
-		</dict>
-	</dict>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.tsubuzaki.Overhead.dataRefresh</string>
+	</array>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
@@ -44,6 +33,19 @@
 			</array>
 		</dict>
 	</array>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>ryutetsu.jp</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Hind-Light.ttf</string>
@@ -55,10 +57,6 @@
 		<string>BIZUDPGothic-Bold.ttf</string>
 		<string>DotGothic16-Regular.ttf</string>
 		<string>OvertrainPixel12.ttf</string>
-	</array>
-	<key>BGTaskSchedulerPermittedIdentifiers</key>
-	<array>
-		<string>com.tsubuzaki.Overhead.dataRefresh</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>

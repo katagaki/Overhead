@@ -181,16 +181,6 @@ extension TrainLCDLanguage {
         }
     }
 
-    /// 所要時間
-    var travelTimesLabel: String {
-        switch self {
-        case .ja: return "所要時間"
-        case .en: return "Travel Times"
-        case .zh: return "所需时间"
-        case .ko: return "소요 시간"
-        }
-    }
-
     /// 〜の次は〜にとまります。, split either side of the following stop.
     var nextStopConnector: String {
         switch self {

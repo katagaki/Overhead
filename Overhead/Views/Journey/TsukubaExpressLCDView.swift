@@ -14,7 +14,7 @@ struct TsukubaExpressLCDView: View {
     private static let designWidth: CGFloat = 360
     private static let designHeight: CGFloat = 76
     private static let maxUpcomingStops = 7
-    private static let gutter: CGFloat = 40
+    private static let gutter: CGFloat = 6
     /// Room on the band's leading end for the "min" cell.
     private static let leadIn: CGFloat = 27
     /// Slack past the last stop, where the band runs on to its cap.
@@ -28,6 +28,7 @@ struct TsukubaExpressLCDView: View {
     private static let passedSlate = Color(hex: "#A6AABB")
     private static let ink = Color(hex: "#2B3049")
     private static let markerYellow = Color(hex: "#F2C230")
+    private static let markerNavy = Color(hex: "#1B2B7A")
     private static let panel = Color(hex: "#EEEFF5")
 
     private static var allLines: [TrainLine] { StaticTrainData.trainLines() }
@@ -40,7 +41,7 @@ struct TsukubaExpressLCDView: View {
     }
 
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 1)) { context in
+        TimelineView(.periodic(from: .now, by: 0.5)) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
                 let language = LCDLanguageRotation.current(at: context.date)
@@ -56,6 +57,8 @@ struct TsukubaExpressLCDView: View {
 
     private func strip(now: Date, language: TrainLCDLanguage) -> some View {
         let (columns, markerSlot) = stops(now: now)
+        let markerTint = Int(now.timeIntervalSinceReferenceDate * 2) % 2 == 0
+            ? Self.markerYellow : Self.markerNavy
         let usable = Self.designWidth - Self.gutter - Self.leadIn - Self.trailTail - 8
         let colWidth = usable / CGFloat(max(columns.count, 1))
         let markerCenter = markerSlot * colWidth
@@ -94,7 +97,8 @@ struct TsukubaExpressLCDView: View {
             .frame(maxWidth: .infinity, alignment: mirrored ? .trailing : .leading)
 
             band(columns: columns, colWidth: colWidth,
-                 markerCenter: markerCenter, mirrored: mirrored, language: language)
+                 markerCenter: markerCenter, mirrored: mirrored, language: language,
+                 markerTint: markerTint)
 
             HStack(alignment: .top, spacing: 0) {
                 ForEach(columns) { col in
@@ -113,18 +117,6 @@ struct TsukubaExpressLCDView: View {
             LinearGradient(colors: [.white, Self.panel],
                            startPoint: .top, endPoint: .bottom)
         )
-        .overlay(alignment: .topLeading) { gutterLabels(language: language) }
-    }
-
-    private func gutterLabels(language: TrainLCDLanguage) -> some View {
-        Text(verbatim: language.travelTimesLabel)
-            .font(language.isLatin ? LCDFont.latin(size: 5.5)
-                          : LCDFont.gothic(size: 6))
-            .foregroundColor(Self.ink)
-            .lineLimit(1)
-            .fixedSize()
-            .frame(width: Self.gutter + 6, alignment: .trailing)
-            .offset(y: 2 + Self.nameRowHeight)
     }
 
     /// The Japanese face sets the stops vertically, reading beside them.
@@ -146,19 +138,22 @@ struct TsukubaExpressLCDView: View {
     }
 
     private func band(columns: [LCDStop], colWidth: CGFloat,
-                      markerCenter: CGFloat, mirrored: Bool, language: TrainLCDLanguage) -> some View {
+                      markerCenter: CGFloat, mirrored: Bool, language: TrainLCDLanguage,
+                      markerTint: Color) -> some View {
         colourBand(columns: columns, colWidth: colWidth, markerCenter: markerCenter,
-                   mirrored: mirrored, language: language)
+                   mirrored: mirrored, language: language, markerTint: markerTint)
     }
 
     /// The line's colour for what is left, grey for what is already run.
     private func colourBand(columns: [LCDStop], colWidth: CGFloat,
                             markerCenter: CGFloat, mirrored: Bool,
-                            language: TrainLCDLanguage) -> some View {
+                            language: TrainLCDLanguage, markerTint: Color) -> some View {
         let count = CGFloat(max(columns.count, 1))
         let runWidth = colWidth * count
         let lead = Self.leadIn
         let ahead = mirrored   // chevrons point the way the train is going
+        // The rear end runs off the panel edge rather than stopping short.
+        let rearBleed: CGFloat = mirrored ? Self.gutter : 8
         // Distances run from the band's leading end, whichever side that is.
         func span(_ from: CGFloat, _ width: CGFloat) -> CGFloat {
             mirrored ? -(from + lead) : from + lead
@@ -171,26 +166,21 @@ struct TsukubaExpressLCDView: View {
             SegmentedBand(
                 segments: LCDBandSegments.of(columns.map(\.station), fallback: lineColor,
                                              columnWidth: colWidth,
-                                             origin: mirrored ? Self.trailTail : lead,
+                                             origin: mirrored ? Self.trailTail + rearBleed : lead,
                                              travelsForward: mirrored),
                 fallback: lineColor
             ) { color in
-                TXBandShape(roundedOnTrailing: !mirrored)
+                TXBandShape(roundedOnLeading: !mirrored)
                     .fill(runGradient(color))
                     .frame(height: Self.bandHeight)
             }
 
             // Everything behind the train, capped where the train stands.
-            UnevenRoundedRectangle(
-                topLeadingRadius: mirrored ? Self.bandHeight / 2 : 0,
-                bottomLeadingRadius: mirrored ? Self.bandHeight / 2 : 0,
-                bottomTrailingRadius: mirrored ? 0 : Self.bandHeight / 2,
-                topTrailingRadius: mirrored ? 0 : Self.bandHeight / 2
-            )
+            Rectangle()
                 .fill(LinearGradient(colors: [Self.bandPastTop, Self.bandPastBottom],
                                      startPoint: .top, endPoint: .bottom))
                 // Reach under the point, or its notch shows the run through.
-                .frame(width: max(0, runWidth - markerCenter + Self.trailTail),
+                .frame(width: max(0, runWidth - markerCenter + Self.trailTail + rearBleed),
                        height: Self.bandHeight)
                 .offset(x: span(markerCenter, 0))
             TXChevron(pointsTrailing: ahead)
@@ -223,7 +213,7 @@ struct TsukubaExpressLCDView: View {
 
             TXChevron(pointsTrailing: ahead)
                 .fill(LinearGradient(
-                    colors: [Self.markerYellow, Self.markerYellow.opacity(0.78)],
+                    colors: [markerTint, markerTint.opacity(0.78)],
                     startPoint: .top, endPoint: .bottom
                 ))
                 .overlay(TXChevron(pointsTrailing: ahead)
@@ -231,6 +221,7 @@ struct TsukubaExpressLCDView: View {
                 .frame(width: 11, height: Self.bandHeight + 1.5)
                 .offset(x: centred(markerCenter, 11))
         }
+        .padding(mirrored ? .leading : .trailing, -rearBleed)
         .frame(height: Self.bandHeight)
     }
 
@@ -434,20 +425,21 @@ private struct AngledTXName: View {
 // MARK: - Shapes
 
 private struct TXBandShape: Shape {
-    var roundedOnTrailing = true
+    /// True when the leading (travel-direction) end is the left one.
+    var roundedOnLeading = true
 
     func path(in rect: CGRect) -> Path {
         let r = rect.height / 2
-        // The leading end is chisel-cut at 45°, tip on the bottom corner.
-        let cut = rect.height
+        // The leading end is capped round; the rear is cut square and runs
+        // on off the panel edge.
         var p = Path()
-        p.move(to: CGPoint(x: rect.minX + cut, y: rect.minY))
-        p.addLine(to: CGPoint(x: rect.maxX - r, y: rect.minY))
-        p.addArc(center: CGPoint(x: rect.maxX - r, y: rect.midY), radius: r,
-                 startAngle: .degrees(-90), endAngle: .degrees(90), clockwise: false)
-        p.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        p.move(to: CGPoint(x: rect.maxX, y: rect.minY))
+        p.addLine(to: CGPoint(x: rect.minX + r, y: rect.minY))
+        p.addArc(center: CGPoint(x: rect.minX + r, y: rect.midY), radius: r,
+                 startAngle: .degrees(-90), endAngle: .degrees(90), clockwise: true)
+        p.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
         p.closeSubpath()
-        return roundedOnTrailing ? p : p.mirroredHorizontally(in: rect)
+        return roundedOnLeading ? p : p.mirroredHorizontally(in: rect)
     }
 }
 

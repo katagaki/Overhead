@@ -34,7 +34,7 @@ enum TrainLCDStyle: String, CaseIterable, Identifiable {
         switch self {
         case .ledMatrix, .shinkansen, .tube, .neon: return 1.0 / 24.0
         case .galaxy: return 1.0 / 8.0
-        case .joban, .keihinTohoku, .tokyoMetro, .rinkai: return 0.5
+        case .joban, .keihinTohoku, .tokyoMetro, .rinkai, .tsukubaExpress: return 0.5
         default: return 1.0
         }
     }
