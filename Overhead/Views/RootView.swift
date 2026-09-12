@@ -7,6 +7,8 @@ struct RootView: View {
     @ObservedObject private var customStore = CustomLineStore.shared
     @ObservedObject private var lineDataInstaller = LineDataInstaller.shared
 
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
     @AppStorage(JourneyMode.storageKey) private var journeyMode = JourneyMode.hybrid
     @AppStorage("hasDismissedStartupNotice") private var hasDismissedStartupNotice = false
     @AppStorage(JourneyNotificationManager.enabledKey) private var notificationsEnabled = true
@@ -54,21 +56,17 @@ struct RootView: View {
     var body: some View {
         NavigationStack(path: $navigationPath) {
             ScrollViewReader { scrollProxy in
-                ScrollView {
-                    VStack(spacing: 24) {
-                        FavoritesSection(viewModel: viewModel)
-                        JourneyPlannerSection(viewModel: viewModel)
-                        NearbyStationsSection(viewModel: viewModel)
-                            .id("nearby")
-                        SearchSection(viewModel: viewModel) { destination in
-                            navigationPath.append(destination)
+                Group {
+                    if horizontalSizeClass == .regular {
+                        splitColumns
+                    } else {
+                        ScrollView {
+                            column {
+                                plannerSections
+                                catalogSections
+                            }
                         }
-                        .id("lines")
-                        CustomLinesSection(viewModel: viewModel)
-                            .id("custom")
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
                 }
 #if DEBUG
                 .onReceive(ScreenshotStaging.shared.$homeScrollTarget) { target in
@@ -260,6 +258,53 @@ struct RootView: View {
                 showStartupNotice = true
             }
         }
+    }
+
+    // MARK: - Layout
+
+    /// Wide windows read as two halves: what you are riding on the left,
+    /// what there is to browse on the right, each scrolling on its own.
+    private var splitColumns: some View {
+        HStack(alignment: .top, spacing: 0) {
+            ScrollView {
+                column { plannerSections }
+            }
+            .frame(maxWidth: .infinity)
+
+            Divider()
+                .ignoresSafeArea(edges: .bottom)
+
+            ScrollView {
+                column { catalogSections }
+            }
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    private func column<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        VStack(spacing: 24) {
+            content()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+    }
+
+    @ViewBuilder
+    private var plannerSections: some View {
+        FavoritesSection(viewModel: viewModel)
+        JourneyPlannerSection(viewModel: viewModel)
+    }
+
+    @ViewBuilder
+    private var catalogSections: some View {
+        NearbyStationsSection(viewModel: viewModel)
+            .id("nearby")
+        SearchSection(viewModel: viewModel) { destination in
+            navigationPath.append(destination)
+        }
+        .id("lines")
+        CustomLinesSection(viewModel: viewModel)
+            .id("custom")
     }
 
     // MARK: - Search Destinations
