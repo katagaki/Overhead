@@ -28,6 +28,7 @@ struct TsukubaExpressLCDView: View {
     private static let passedSlate = Color(hex: "#A6AABB")
     private static let ink = Color(hex: "#2B3049")
     private static let markerYellow = Color(hex: "#F2C230")
+    private static let markerNavy = Color(hex: "#1D2088")
     private static let panel = Color(hex: "#EEEFF5")
 
     private static var allLines: [TrainLine] { StaticTrainData.trainLines() }
@@ -40,7 +41,7 @@ struct TsukubaExpressLCDView: View {
     }
 
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 1)) { context in
+        TimelineView(.periodic(from: .now, by: 0.5)) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
                 let language = LCDLanguageRotation.current(at: context.date)
@@ -93,8 +94,8 @@ struct TsukubaExpressLCDView: View {
             .padding(mirrored ? .trailing : .leading, Self.leadIn)
             .frame(maxWidth: .infinity, alignment: mirrored ? .trailing : .leading)
 
-            band(columns: columns, colWidth: colWidth,
-                 markerCenter: markerCenter, mirrored: mirrored, language: language)
+            band(columns: columns, colWidth: colWidth, markerCenter: markerCenter,
+                 mirrored: mirrored, language: language, now: now)
 
             HStack(alignment: .top, spacing: 0) {
                 ForEach(columns) { col in
@@ -145,17 +146,20 @@ struct TsukubaExpressLCDView: View {
         .frame(height: Self.nameRowHeight, alignment: .bottom)
     }
 
-    private func band(columns: [LCDStop], colWidth: CGFloat,
-                      markerCenter: CGFloat, mirrored: Bool, language: TrainLCDLanguage) -> some View {
+    private func band(columns: [LCDStop], colWidth: CGFloat, markerCenter: CGFloat,
+                      mirrored: Bool, language: TrainLCDLanguage, now: Date) -> some View {
         colourBand(columns: columns, colWidth: colWidth, markerCenter: markerCenter,
-                   mirrored: mirrored, language: language)
+                   mirrored: mirrored, language: language, now: now)
     }
 
     /// The line's colour for what is left, grey for what is already run.
     private func colourBand(columns: [LCDStop], colWidth: CGFloat,
                             markerCenter: CGFloat, mirrored: Bool,
-                            language: TrainLCDLanguage) -> some View {
+                            language: TrainLCDLanguage, now: Date) -> some View {
         let count = CGFloat(max(columns.count, 1))
+        // Metro-style alternation: the marker flips colour twice a second.
+        let navyPhase = Int(now.timeIntervalSinceReferenceDate * 2) % 2 == 0
+        let markerTint = navyPhase ? Self.markerNavy : Self.markerYellow
         let runWidth = colWidth * count
         let lead = Self.leadIn
         let ahead = mirrored   // chevrons point the way the train is going
@@ -223,7 +227,7 @@ struct TsukubaExpressLCDView: View {
 
             TXChevron(pointsTrailing: ahead)
                 .fill(LinearGradient(
-                    colors: [Self.markerYellow, Self.markerYellow.opacity(0.78)],
+                    colors: [markerTint, markerTint.opacity(0.78)],
                     startPoint: .top, endPoint: .bottom
                 ))
                 .overlay(TXChevron(pointsTrailing: ahead)
