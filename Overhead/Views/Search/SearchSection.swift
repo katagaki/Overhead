@@ -10,8 +10,7 @@ struct SearchSection: View {
     @ObservedObject var viewModel: JourneyViewModel
     let onSelect: (SearchDestination) -> Void
 
-    @State private var showSearch = false
-    @State private var scope: SearchScope = .all
+    @State private var searchScope: SearchScope?
     @State private var pendingDestination: SearchDestination?
 
     var body: some View {
@@ -26,7 +25,7 @@ struct SearchSection: View {
                 chip(.stations)
             }
         }
-        .sheet(isPresented: $showSearch, onDismiss: pushPendingDestination) {
+        .sheet(item: $searchScope, onDismiss: pushPendingDestination) { scope in
             SearchSheet(lines: viewModel.availableLines, initialScope: scope) { destination in
                 pendingDestination = destination
             }
@@ -42,9 +41,11 @@ struct SearchSection: View {
         onSelect(destination)
     }
 
+    /// Presented by scope rather than a flag: the sheet body is built from the
+    /// item, so the chip's scope always reaches it and each scope gets its own
+    /// view identity.
     private func open(_ scope: SearchScope) {
-        self.scope = scope
-        showSearch = true
+        searchScope = scope
     }
 
     // MARK: - Field
