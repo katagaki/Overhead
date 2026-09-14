@@ -809,12 +809,22 @@ final class JourneyViewModel: ObservableObject {
         let compositeId = legs.map(\.line.id).joined(separator: "+")
 
         for (legIndex, leg) in legs.enumerated() {
-            guard let fromIdx = leg.line.stations.firstIndex(where: { $0.id == leg.fromStation.id }),
-                  let toIdx = leg.line.stations.firstIndex(where: { $0.id == leg.toStation.id })
-            else { return nil }
-            let slice: [Station] = fromIdx <= toIdx
-                ? Array(leg.line.stations[fromIdx...toIdx])
-                : Array(leg.line.stations[toIdx...fromIdx].reversed())
+            // estimatedRide takes a loop's short way round; index order alone
+            // would send a 有楽町→東京 leg the wrong way about the 山手線.
+            let slice: [Station]
+            if let staticLine = StaticTrainData.line(withId: leg.line.id),
+               let ride = StaticTrainData.estimatedRide(
+                   on: staticLine, fromStationId: leg.fromStation.id, toStationId: leg.toStation.id
+               ) {
+                slice = ride.stations
+            } else if let fromIdx = leg.line.stations.firstIndex(where: { $0.id == leg.fromStation.id }),
+                      let toIdx = leg.line.stations.firstIndex(where: { $0.id == leg.toStation.id }) {
+                slice = fromIdx <= toIdx
+                    ? Array(leg.line.stations[fromIdx...toIdx])
+                    : Array(leg.line.stations[toIdx...fromIdx].reversed())
+            } else {
+                return nil
+            }
 
             let entryByStationId = Dictionary(
                 leg.service.timetable.map { ($0.stationId, $0) },

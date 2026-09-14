@@ -941,6 +941,22 @@ public enum StaticTrainData {
     /// Time assumed for walking between platforms when changing trains.
     public static let transferBufferMinutes: Double = 5
 
+    /// What a change of trains costs beyond the clock: stairs, gates, the risk
+    /// of missing the connection. Without it the search sells a transfer for any
+    /// few-minute saving — and 歩く速さ・なし, which zeroes the walk buffer, would
+    /// make transfers nearly free and chain three of them to shave two minutes.
+    public static let transferAversionMinutes: Double = 5
+
+    /// The unlisted hop closing a loop, taken as the line's average hop.
+    /// nil when the line is not a usable loop.
+    static func loopSeamMinutes(_ line: StaticTrainLine) -> Double? {
+        let hops = line.hopTimesMinutes
+        guard line.isLoop, hops.count == line.stations.count - 1,
+              line.stations.count > 2, !hops.isEmpty
+        else { return nil }
+        return hops.reduce(0, +) / Double(hops.count)
+    }
+
     public static func estimatedRide(
         on line: StaticTrainLine,
         fromStationId: String,
@@ -959,13 +975,9 @@ public enum StaticTrainData {
             ? Array(stations[fromIdx...toIdx])
             : Array(stations[toIdx...fromIdx].reversed())
 
-        guard line.isLoop, hops.count == stations.count - 1, stations.count > 2 else {
-            return (directPath, directMinutes)
-        }
+        guard let seamHop = loopSeamMinutes(line) else { return (directPath, directMinutes) }
 
-        let total = hops.reduce(0, +)
-        let seamHop = total / Double(hops.count)
-        let wrapMinutes = total + seamHop - directMinutes
+        let wrapMinutes = hops.reduce(0, +) + seamHop - directMinutes
         guard wrapMinutes < directMinutes else { return (directPath, directMinutes) }
 
         let count = stations.count
@@ -1035,7 +1047,8 @@ public enum StaticTrainData {
         let lines = avoidingLineIds.isEmpty
             ? allLines
             : allLines.filter { !avoidingLineIds.contains($0.id) }
-        let transferPenalty = transferMinutes + 3  // walk + expected wait
+        // Walk + expected wait + the standing dislike of changing trains.
+        let transferPenalty = transferMinutes + 3 + transferAversionMinutes
 
         // Node = (line index, station index on that line)
         struct Node: Hashable {
@@ -1084,7 +1097,13 @@ public enum StaticTrainData {
             }
 
             func relax(_ next: Node, cost nextCost: Double, transfers: Int) {
-                if let existing = best[next], existing.cost <= nextCost { return }
+                if let existing = best[next] {
+                    // Ties go to the itinerary with fewer changes: cost alone
+                    // would let a settled three-transfer path block a one-.
+                    let faster = nextCost < existing.cost - 0.001
+                    let calmer = nextCost < existing.cost + 0.001 && transfers < existing.transfers
+                    guard faster || calmer else { return }
+                }
                 best[next] = Entry(cost: nextCost, transfers: transfers, parent: node)
                 frontier.append((nextCost, next))
             }
@@ -1099,6 +1118,19 @@ public enum StaticTrainData {
                 relax(Node(line: node.line, idx: node.idx + 1),
                       cost: cost + line.hopTimesMinutes[node.idx],
                       transfers: entry.transfers)
+            }
+
+            // A loop's two ends are one hop apart, not a whole circuit: without
+            // this edge 有楽町→東京 is charged the long way round the 山手線.
+            if line.isLoop, let seam = loopSeamMinutes(line) {
+                let last = line.stations.count - 1
+                if node.idx == 0 {
+                    relax(Node(line: node.line, idx: last),
+                          cost: cost + seam, transfers: entry.transfers)
+                } else if node.idx == last {
+                    relax(Node(line: node.line, idx: 0),
+                          cost: cost + seam, transfers: entry.transfers)
+                }
             }
 
             // Change to other lines at this station
