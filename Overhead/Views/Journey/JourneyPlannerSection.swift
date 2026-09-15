@@ -117,6 +117,15 @@ struct JourneyPlannerSection: View {
             persistSelections()
             invalidateResults()
         }
+        .onReceive(viewModel.$plannerToRequest) { hit in
+            guard let hit else { return }
+            viewModel.plannerToRequest = nil
+            withAnimation(.smooth(duration: 0.35)) {
+                toSelection = hit
+            }
+            persistSelections()
+            invalidateResults()
+        }
 #if DEBUG
         .onReceive(ScreenshotStaging.shared.$plannerCommand) { command in
             guard let command else { return }

@@ -23,6 +23,7 @@ final class JourneyViewModel: ObservableObject {
     @Published var isLoadingTimetable = false
     @Published var railDirections: [String: (ja: String, en: String)] = [:]
     @Published var plannerFromRequest: StationSearchHit?
+    @Published var plannerToRequest: StationSearchHit?
 
     private let locationTracker = LocationTracker()
     private var cancellables = Set<AnyCancellable>()

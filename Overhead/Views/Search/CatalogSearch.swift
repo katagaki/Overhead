@@ -4,7 +4,7 @@ import Backbone
 // MARK: - Search Destinations
 
 /// What tapping a search result opens on the root stack.
-enum SearchDestination: Hashable {
+enum SearchDestination: Hashable, Codable {
     case operatorLines(String)
     case line(String)
     case station(lineId: String, stationId: String)
@@ -12,7 +12,7 @@ enum SearchDestination: Hashable {
 
 // MARK: - Scope
 
-enum SearchScope: String, CaseIterable, Identifiable {
+enum SearchScope: String, CaseIterable, Identifiable, Codable {
     case all
     case operators
     case lines

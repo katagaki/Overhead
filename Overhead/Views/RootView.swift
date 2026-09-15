@@ -19,10 +19,15 @@ struct RootView: View {
     @State private var showStartupNotice = false
     @State private var showDisclaimer = false
     @State private var navigationPath = NavigationPath()
-    /// Measured width; toolbar items can't resolve `maxWidth: .infinity`.
-    @State private var barWidth: CGFloat = 0
-    /// Total inset either side, so the bar doesn't run to the screen edges.
-    private static let journeyBarInset: CGFloat = 48
+    @StateObject private var tabStore = AppTabStore()
+    @State private var showsTabOverview = false
+    @State private var tabZoomIsRunning = false
+    @State private var workspaceIsVisible = true
+    @State private var workspaceScale: CGFloat = 1
+    @State private var workspaceOffset = CGSize.zero
+    @State private var workspaceSize = CGSize.zero
+    @State private var tabCardFrames: [UUID: CGRect] = [:]
+    @FocusState private var browserSearchFocused: Bool
     @StateObject private var serviceStatusPresenter = ServiceStatusPresenter()
 #if DEBUG
     // Screenshot harness (overtrain:// deep links, see ScreenshotHarness.swift).
@@ -54,85 +59,39 @@ struct RootView: View {
     private static let updateCheckInterval: TimeInterval = 6 * 60 * 60
 
     var body: some View {
-        NavigationStack(path: $navigationPath) {
-            ScrollViewReader { scrollProxy in
-                Group {
-                    if horizontalSizeClass == .regular {
-                        splitColumns
-                    } else {
-                        ScrollView {
-                            column {
-                                plannerSections
-                                catalogSections
-                            }
-                        }
-                    }
-                }
-#if DEBUG
-                .onReceive(ScreenshotStaging.shared.$homeScrollTarget) { target in
-                    guard let target else { return }
-                    ScreenshotStaging.shared.homeScrollTarget = nil
-                    scrollProxy.scrollTo(target, anchor: .top)
-                }
-#endif
+        GeometryReader { rootProxy in
+            ZStack {
+                AppTabOverviewView(
+                    store: tabStore,
+                    viewModel: viewModel,
+                    hidesSelectedCard: tabZoomIsRunning,
+                    dismiss: dismissTabOverview
+                )
+                .opacity(showsTabOverview ? 1 : 0)
+                .allowsHitTesting(showsTabOverview && !tabZoomIsRunning)
+                .accessibilityHidden(!showsTabOverview)
+
+                workspace
+                    .id(tabStore.selectedTabID)
+                    .frame(width: rootProxy.size.width, height: rootProxy.size.height)
+                    .compositingGroup()
+                    .clipShape(RoundedRectangle(
+                        cornerRadius: workspaceScale == 1 ? 0 : 18,
+                        style: .continuous
+                    ))
+                    .scaleEffect(workspaceScale, anchor: .topLeading)
+                    .offset(workspaceOffset)
+                    .opacity(workspaceIsVisible ? 1 : 0)
+                    .allowsHitTesting(!showsTabOverview && !tabZoomIsRunning)
+                    .accessibilityHidden(showsTabOverview)
             }
-            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { barWidth = $0 }
-            .background(Color(.systemGroupedBackground))
-            .navigationTitle(Text("App.Name"))
-            .toolbarTitleDisplayMode(.inlineLarge)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    moreMenu
-                }
-            }
-            .toolbar {
-                if viewModel.activeJourney != nil {
-                    ToolbarItem(placement: .bottomBar) {
-                        JourneyToolbarAccessory(
-                            viewModel: viewModel,
-                            availableWidth: max(barWidth - Self.journeyBarInset, 200)
-                        ) {
-                            showJourneySheet = true
-                        }
-                        .frame(width: max(barWidth - Self.journeyBarInset, 200))
-                        .matchedTransitionSource(id: Self.journeyTransitionID, in: journeyZoom)
-                    }
-                }
-            }
-            .navigationDestination(for: Destination.self) { destination in
-                switch destination {
-                case .attributions:
-                    MoreAttributionsView()
-                case .lineData:
-                    LineDataManagerView()
-                }
-            }
-            .navigationDestination(for: SearchDestination.self) { destination in
-                searchDestinationView(destination)
-            }
-            .navigationDestination(for: CustomLineRoute.self) { route in
-                CustomLineEditorView(route: route)
-            }
-#if DEBUG
-            .navigationDestination(for: ScreenshotLineTarget.self) { target in
-                if let line = viewModel.availableLines.first(where: { $0.id == target.lineId }) {
-                    StationPickerView(line: line, viewModel: viewModel)
-                }
-            }
-#endif
-            .task {
-                await viewModel.loadLines()
-#if DEBUG
-                // Launch arguments, since simctl openurl needs a confirmation.
-                for argument in ProcessInfo.processInfo.arguments.dropFirst()
-                where argument.hasPrefix("overtrain://") {
-                    if let url = URL(string: argument) {
-                        await handleScreenshotURL(url)
-                    }
-                }
-#endif
-            }
+            .onAppear { workspaceSize = rootProxy.size }
+            .onChange(of: rootProxy.size) { _, size in workspaceSize = size }
+            .onPreferenceChange(TabCardFramePreferenceKey.self) { tabCardFrames = $0 }
         }
+        .coordinateSpace(name: TabCardFramePreferenceKey.coordinateSpace)
+        .background(Color(.systemGroupedBackground).ignoresSafeArea())
+        .animation(.smooth(duration: 0.3), value: tabStore.selectedTabID)
         .serviceStatusHost(serviceStatusPresenter)
         .task {
             if needsLineDataOnboarding { showLineDataOnboarding = true }
@@ -260,6 +219,236 @@ struct RootView: View {
         }
     }
 
+    private var workspace: some View {
+        NavigationStack(path: $navigationPath) {
+            Group {
+                switch tabStore.selectedTab.page {
+                case .home:
+                    homeContent
+                case .search:
+                    CatalogTabSearchView(
+                        lines: viewModel.availableLines,
+                        searchText: selectedSearchText,
+                        scope: selectedSearchScope,
+                        onOpen: openInSelectedTab,
+                        onRoute: routeFromNearest
+                    )
+                case .destination(let destination):
+                    searchDestinationView(destination)
+                }
+            }
+            .background(Color(.systemGroupedBackground))
+            .toolbar {
+                if tabStore.selectedTab.page != .home {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            openHome()
+                        } label: {
+                            Image(systemName: "house")
+                        }
+                        .accessibilityLabel("App.Name")
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    moreMenu
+                }
+
+                if viewModel.activeJourney != nil {
+                    ToolbarItem(placement: .bottomBar) {
+                        JourneyStationToolbarButton(viewModel: viewModel) {
+                            showJourneySheet = true
+                        }
+                        .matchedTransitionSource(id: Self.journeyTransitionID, in: journeyZoom)
+                    }
+
+                    ToolbarSpacer(.fixed, placement: .bottomBar)
+                }
+
+                ToolbarItem(placement: .bottomBar) {
+                    BrowserAddressToolbarItem(
+                        store: tabStore,
+                        isFocused: $browserSearchFocused,
+                        onOpenSearch: openSearch,
+                        onSwipe: switchTab
+                    )
+                }
+
+                ToolbarSpacer(.fixed, placement: .bottomBar)
+
+                ToolbarItem(placement: .bottomBar) {
+                    Button {
+                        browserSearchFocused = false
+                        showTabOverview()
+                    } label: {
+                        Image(systemName: "square.on.square")
+                    }
+                    .accessibilityLabel("Show tabs")
+                }
+            }
+            .navigationDestination(for: Destination.self) { destination in
+                switch destination {
+                case .attributions:
+                    MoreAttributionsView()
+                case .lineData:
+                    LineDataManagerView()
+                }
+            }
+            .navigationDestination(for: SearchDestination.self) { destination in
+                searchDestinationView(destination)
+            }
+            .navigationDestination(for: CustomLineRoute.self) { route in
+                CustomLineEditorView(route: route)
+            }
+#if DEBUG
+            .navigationDestination(for: ScreenshotLineTarget.self) { target in
+                if let line = viewModel.availableLines.first(where: { $0.id == target.lineId }) {
+                    StationPickerView(line: line, viewModel: viewModel)
+                }
+            }
+#endif
+            .task {
+                await viewModel.loadLines()
+#if DEBUG
+                // Launch arguments, since simctl openurl needs a confirmation.
+                for argument in ProcessInfo.processInfo.arguments.dropFirst()
+                where argument.hasPrefix("overtrain://") {
+                    if let url = URL(string: argument) {
+                        await handleScreenshotURL(url)
+                    }
+                }
+#endif
+            }
+        }
+    }
+
+    private var homeContent: some View {
+        ScrollViewReader { scrollProxy in
+            Group {
+                if horizontalSizeClass == .regular {
+                    splitColumns
+                } else {
+                    ScrollView {
+                        column {
+                            plannerSections
+                            catalogSections
+                        }
+                    }
+                }
+            }
+#if DEBUG
+            .onReceive(ScreenshotStaging.shared.$homeScrollTarget) { target in
+                guard let target else { return }
+                ScreenshotStaging.shared.homeScrollTarget = nil
+                scrollProxy.scrollTo(target, anchor: .top)
+            }
+#endif
+        }
+        .navigationTitle(Text("App.Name"))
+        .toolbarTitleDisplayMode(.inlineLarge)
+    }
+
+    private var selectedSearchText: Binding<String> {
+        Binding(
+            get: { tabStore.selectedTab.searchText },
+            set: { value in tabStore.updateSelected { $0.searchText = value } }
+        )
+    }
+
+    private var selectedSearchScope: Binding<SearchScope> {
+        Binding(
+            get: { tabStore.selectedTab.searchScope },
+            set: { value in tabStore.updateSelected { $0.searchScope = value } }
+        )
+    }
+
+    private func openSearch() {
+        navigationPath = NavigationPath()
+        tabStore.updateSelected { $0.page = .search }
+        Task { @MainActor in browserSearchFocused = true }
+    }
+
+    private func openHome() {
+        browserSearchFocused = false
+        navigationPath = NavigationPath()
+        tabStore.updateSelected { $0.page = .home }
+    }
+
+    private func openInSelectedTab(_ destination: SearchDestination) {
+        browserSearchFocused = false
+        navigationPath = NavigationPath()
+        tabStore.updateSelected { $0.page = .destination(destination) }
+    }
+
+    private func routeFromNearest(_ origin: StationSearchHit, _ destination: StationSearchHit) {
+        viewModel.plannerFromRequest = origin
+        viewModel.plannerToRequest = destination
+        openHome()
+    }
+
+    private func switchTab(_ delta: Int) {
+        browserSearchFocused = false
+        navigationPath = NavigationPath()
+        withAnimation(.smooth(duration: 0.3)) {
+            _ = tabStore.selectAdjacent(delta)
+        }
+    }
+
+    private func dismissTabOverview() {
+        navigationPath = NavigationPath()
+        zoomWorkspaceOutOfTabCard()
+    }
+
+    private func showTabOverview() {
+        guard let target = tabCardFrames[tabStore.selectedTabID],
+              let transform = tabTransform(to: target) else {
+            showsTabOverview = true
+            workspaceIsVisible = false
+            return
+        }
+
+        tabZoomIsRunning = true
+        showsTabOverview = true
+        workspaceIsVisible = true
+        withAnimation(.smooth(duration: 0.42)) {
+            workspaceScale = transform.scale
+            workspaceOffset = transform.offset
+        } completion: {
+            workspaceIsVisible = false
+            tabZoomIsRunning = false
+        }
+    }
+
+    private func zoomWorkspaceOutOfTabCard() {
+        guard let target = tabCardFrames[tabStore.selectedTabID],
+              let transform = tabTransform(to: target) else {
+            showsTabOverview = false
+            workspaceIsVisible = true
+            return
+        }
+
+        workspaceScale = transform.scale
+        workspaceOffset = transform.offset
+        workspaceIsVisible = true
+        tabZoomIsRunning = true
+        withAnimation(.smooth(duration: 0.42)) {
+            showsTabOverview = false
+            workspaceScale = 1
+            workspaceOffset = .zero
+        } completion: {
+            tabZoomIsRunning = false
+        }
+    }
+
+    private func tabTransform(to target: CGRect) -> (scale: CGFloat, offset: CGSize)? {
+        guard target.width > 0, target.height > 0 else { return nil }
+        guard workspaceSize.width > 0, workspaceSize.height > 0 else { return nil }
+        let scale = min(target.width / workspaceSize.width, target.height / workspaceSize.height)
+        return (
+            scale,
+            CGSize(width: target.minX, height: target.minY)
+        )
+    }
+
     // MARK: - Layout
 
     /// Wide windows read as two halves: what you are riding on the left,
@@ -300,7 +489,7 @@ struct RootView: View {
         NearbyStationsSection(viewModel: viewModel)
             .id("nearby")
         SearchSection(viewModel: viewModel) { destination in
-            navigationPath.append(destination)
+            openInSelectedTab(destination)
         }
         .id("lines")
         CustomLinesSection(viewModel: viewModel)
@@ -445,7 +634,7 @@ struct RootView: View {
         case .reset:
             viewModel.stopJourney()
             debugTimetableTarget = nil
-            navigationPath = NavigationPath()
+            openHome()
             UserDefaults.standard.removeObject(forKey: "journey.setup.stations")
             UserDefaults.standard.removeObject(forKey: "journey.avoidedLines")
         }
