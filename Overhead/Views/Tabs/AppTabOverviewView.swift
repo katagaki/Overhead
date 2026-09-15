@@ -2,33 +2,50 @@ import SwiftUI
 import Backbone
 
 struct AppTabOverviewView: View {
+    static let cardCornerRadius: CGFloat = 16
+
     @ObservedObject var store: AppTabStore
     @ObservedObject var viewModel: JourneyViewModel
     let hidesSelectedCard: Bool
     let dismiss: () -> Void
 
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-
-    private var columns: [GridItem] {
-        Array(
-            repeating: GridItem(.flexible(), spacing: 14),
-            count: horizontalSizeClass == .regular ? 3 : 2
-        )
-    }
+    private let columns = [GridItem(.adaptive(minimum: 150), spacing: 16)]
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                LazyVGrid(columns: columns, spacing: 18) {
+                LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(store.tabs) { tab in
-                        card(tab)
-                            .draggable(tab.id.uuidString)
-                            .dropDestination(for: String.self) { items, _ in
-                                guard let raw = items.first,
-                                      let source = UUID(uuidString: raw) else { return false }
-                                withAnimation(.smooth) { store.move(source, before: tab.id) }
-                                return true
+                        AppTabOverviewCard(
+                            title: title(for: tab),
+                            icon: icon(for: tab),
+                            accent: accent(for: tab),
+                            isSelected: tab.id == store.selectedTabID,
+                            canClose: store.canCloseTabs,
+                            isHidden: hidesSelectedCard && tab.id == store.selectedTabID,
+                            preview: preview(for: tab),
+                            onSelect: {
+                                store.select(tab.id)
+                                dismiss()
+                            },
+                            onClose: {
+                                withAnimation(.smooth.speed(1.5)) {
+                                    store.close(tab.id)
+                                }
                             }
+                        )
+                        .background {
+                            GeometryReader { proxy in
+                                Color.clear.preference(
+                                    key: TabCardFramePreferenceKey.self,
+                                    value: [
+                                        tab.id: proxy.frame(
+                                            in: .named(TabCardFramePreferenceKey.coordinateSpace)
+                                        )
+                                    ]
+                                )
+                            }
+                        }
                     }
                 }
                 .padding(16)
@@ -37,7 +54,19 @@ struct AppTabOverviewView: View {
             .navigationTitle("Tabs")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .bottomBar) {
+                ToolbarItem(placement: .topBarLeading) {
+                    Menu {
+                        Button("Close All Tabs", systemImage: "xmark.square.fill", role: .destructive) {
+                            withAnimation(.smooth.speed(1.5)) {
+                                store.closeAll()
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis")
+                    }
+                }
+
+                ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         _ = store.add()
                         dismiss()
@@ -57,74 +86,25 @@ struct AppTabOverviewView: View {
         }
     }
 
-    private func card(_ tab: AppTab) -> some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 8) {
-                Image(systemName: icon(for: tab))
-                    .foregroundStyle(accent(for: tab))
-                Text(title(for: tab))
-                    .font(.caption.weight(.semibold))
-                    .lineLimit(1)
-                Spacer(minLength: 0)
-                Button {
-                    withAnimation(.smooth) { store.close(tab.id) }
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.caption.bold())
-                        .frame(width: 26, height: 26)
-                        .background(.quaternary, in: Circle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Close \(title(for: tab))")
-            }
-            .padding(.horizontal, 10)
-            .frame(height: 42)
-
-            preview(for: tab)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .clipped()
-        }
-        // Keep the card close to the device viewport's aspect ratio so the
-        // live workspace can be uniformly scaled into it without relayout.
-        .aspectRatio(0.46, contentMode: .fit)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(
-                    tab.id == store.selectedTabID ? Color.accentColor : Color(.separator).opacity(0.4),
-                    lineWidth: tab.id == store.selectedTabID ? 3 : 1
-                )
-        }
-        .shadow(color: .black.opacity(0.1), radius: 10, y: 4)
-        .opacity(hidesSelectedCard && tab.id == store.selectedTabID ? 0 : 1)
-        .background {
+    @ViewBuilder
+    private func preview(for tab: AppTab) -> some View {
+        if let snapshot = store.snapshots[tab.id] {
             GeometryReader { proxy in
-                Color.clear.preference(
-                    key: TabCardFramePreferenceKey.self,
-                    value: [
-                        tab.id: proxy.frame(in: .named(TabCardFramePreferenceKey.coordinateSpace))
-                    ]
-                )
+                Image(uiImage: snapshot)
+                    .resizable()
+                    .frame(
+                        width: proxy.size.width,
+                        height: proxy.size.width / snapshotAspectRatio(snapshot)
+                    )
             }
-        }
-        .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .onTapGesture {
-            store.select(tab.id)
-            dismiss()
-        }
-        .contextMenu {
-            Button("Duplicate", systemImage: "plus.square.on.square") {
-                store.duplicate(tab.id)
-            }
-            Button("Close", systemImage: "xmark", role: .destructive) {
-                store.close(tab.id)
-            }
+        } else {
+            standIn(for: tab)
+                .padding(12)
         }
     }
 
     @ViewBuilder
-    private func preview(for tab: AppTab) -> some View {
+    private func standIn(for tab: AppTab) -> some View {
         switch tab.page {
         case .home:
             VStack(alignment: .leading, spacing: 12) {
@@ -137,7 +117,6 @@ struct AppTabOverviewView: View {
                 }
                 Spacer()
             }
-            .padding(16)
         case .search:
             VStack(alignment: .leading, spacing: 12) {
                 previewHeader(LocalizedStringKey("Search.Title"), icon: "magnifyingglass")
@@ -158,7 +137,6 @@ struct AppTabOverviewView: View {
                 }
                 Spacer()
             }
-            .padding(16)
         case .destination(let destination):
             VStack(alignment: .leading, spacing: 12) {
                 previewHeaderText(title(for: destination), icon: icon(for: destination))
@@ -168,8 +146,12 @@ struct AppTabOverviewView: View {
                 ForEach(0..<4, id: \.self) { _ in roundedLine(width: 0.9) }
                 Spacer()
             }
-            .padding(16)
         }
+    }
+
+    private func snapshotAspectRatio(_ snapshot: UIImage) -> CGFloat {
+        guard snapshot.size.height > 0 else { return 1 }
+        return snapshot.size.width / snapshot.size.height
     }
 
     private func previewHeader(_ title: LocalizedStringKey, icon: String) -> some View {
@@ -212,14 +194,14 @@ struct AppTabOverviewView: View {
 
     private func title(for destination: SearchDestination) -> String {
         switch destination {
-        case .operatorLines(let operatorId):
-            OperatorSections.title(for: operatorId)
-        case .line(let lineId):
-            viewModel.availableLines.first(where: { $0.id == lineId })?.localizedName
+        case .operatorLines(let operatorID):
+            OperatorSections.title(for: operatorID)
+        case .line(let lineID):
+            viewModel.availableLines.first(where: { $0.id == lineID })?.localizedName
                 ?? String(localized: "Search.Section.Lines")
-        case .station(let lineId, let stationId):
-            viewModel.availableLines.first(where: { $0.id == lineId })?
-                .stations.first(where: { $0.id == stationId })?.localizedName
+        case .station(let lineID, let stationID):
+            viewModel.availableLines.first(where: { $0.id == lineID })?
+                .stations.first(where: { $0.id == stationID })?.localizedName
                 ?? String(localized: "Search.Section.Stations")
         }
     }
@@ -243,6 +225,106 @@ struct AppTabOverviewView: View {
     private func accent(for tab: AppTab) -> Color {
         guard case .destination(.line(let lineID)) = tab.page else { return .accentColor }
         return viewModel.availableLines.first(where: { $0.id == lineID })?.color ?? .accentColor
+    }
+}
+
+private struct AppTabOverviewCard<Preview: View>: View {
+    private static var closeDistance: CGFloat { 90 }
+
+    let title: String
+    let icon: String
+    let accent: Color
+    let isSelected: Bool
+    let canClose: Bool
+    let isHidden: Bool
+    let preview: Preview
+    let onSelect: () -> Void
+    let onClose: () -> Void
+
+    @State private var dragOffset: CGFloat = 0
+
+    var body: some View {
+        Button(action: onSelect) {
+            VStack(spacing: 0) {
+                header
+                Color.clear
+                    .aspectRatio(0.75, contentMode: .fit)
+                    .overlay(alignment: .top) { preview }
+                    .clipped()
+            }
+            .background(
+                Color(.secondarySystemGroupedBackground),
+                in: RoundedRectangle(
+                    cornerRadius: AppTabOverviewView.cardCornerRadius,
+                    style: .continuous
+                )
+            )
+            .overlay {
+                RoundedRectangle(
+                    cornerRadius: AppTabOverviewView.cardCornerRadius,
+                    style: .continuous
+                )
+                .strokeBorder(isSelected ? accent : .clear, lineWidth: 2.5)
+            }
+            .contentShape(
+                RoundedRectangle(
+                    cornerRadius: AppTabOverviewView.cardCornerRadius,
+                    style: .continuous
+                )
+            )
+        }
+        .offset(x: dragOffset)
+        .opacity(isHidden ? 0 : closeProgress)
+        .highPriorityGesture(closeDragGesture)
+        .buttonStyle(.plain)
+    }
+
+    private var header: some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .foregroundStyle(accent)
+            Text(title)
+                .font(.caption.weight(.medium))
+                .lineLimit(1)
+            Spacer(minLength: 0)
+            if canClose {
+                Button(action: onClose) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 22, height: 22)
+                        .contentShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Close \(title)")
+            }
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+    }
+
+    private var closeProgress: Double {
+        1 - min(1, Double(-dragOffset / Self.closeDistance))
+    }
+
+    private var closeDragGesture: some Gesture {
+        DragGesture(minimumDistance: 16)
+            .onChanged { value in
+                guard abs(value.translation.width) > abs(value.translation.height) else { return }
+                dragOffset = min(0, value.translation.width)
+            }
+            .onEnded { value in
+                if canClose, value.translation.width < -Self.closeDistance {
+                    withAnimation(.smooth(duration: 0.2)) {
+                        dragOffset = -Self.closeDistance * 2
+                    }
+                    onClose()
+                } else {
+                    withAnimation(.smooth(duration: 0.2)) {
+                        dragOffset = 0
+                    }
+                }
+            }
     }
 }
 

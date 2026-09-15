@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import UIKit
 
 enum AppTabPage: Codable, Hashable {
     case home
@@ -25,6 +26,7 @@ private struct AppTabSession: Codable {
 final class AppTabStore: ObservableObject {
     @Published private(set) var tabs: [AppTab]
     @Published private(set) var selectedTabID: UUID
+    @Published private(set) var snapshots: [UUID: UIImage] = [:]
 
     private static let storageKey = "browser.tabs.v1"
 
@@ -70,6 +72,7 @@ final class AppTabStore: ObservableObject {
 
     func close(_ id: UUID) {
         guard let index = tabs.firstIndex(where: { $0.id == id }) else { return }
+        snapshots[id] = nil
         if tabs.count == 1 {
             let replacement = AppTab()
             tabs = [replacement]
@@ -83,12 +86,30 @@ final class AppTabStore: ObservableObject {
         save()
     }
 
+    var canCloseTabs: Bool {
+        tabs.count > 1
+    }
+
+    func closeAll() {
+        let replacement = AppTab()
+        tabs = [replacement]
+        selectedTabID = replacement.id
+        snapshots.removeAll()
+        save()
+    }
+
+    func captureSelectedTabSnapshot() {
+        guard let snapshot = AppTabSnapshotter.captureVisiblePage() else { return }
+        snapshots[selectedTabID] = snapshot
+    }
+
     func duplicate(_ id: UUID) {
         guard let index = tabs.firstIndex(where: { $0.id == id }) else { return }
         var copy = tabs[index]
         copy.id = UUID()
         copy.lastViewedAt = Date()
         tabs.insert(copy, at: index + 1)
+        snapshots[copy.id] = snapshots[id]
         selectedTabID = copy.id
         save()
     }

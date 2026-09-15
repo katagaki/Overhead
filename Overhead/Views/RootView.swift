@@ -23,8 +23,9 @@ struct RootView: View {
     @State private var showsTabOverview = false
     @State private var tabZoomIsRunning = false
     @State private var workspaceIsVisible = true
-    @State private var workspaceScale: CGFloat = 1
+    @State private var workspaceScale = CGSize(width: 1, height: 1)
     @State private var workspaceOffset = CGSize.zero
+    @State private var workspaceCornerRadius: CGFloat = 0
     @State private var workspaceSize = CGSize.zero
     @State private var tabCardFrames: [UUID: CGRect] = [:]
     @FocusState private var browserSearchFocused: Bool
@@ -76,10 +77,14 @@ struct RootView: View {
                     .frame(width: rootProxy.size.width, height: rootProxy.size.height)
                     .compositingGroup()
                     .clipShape(RoundedRectangle(
-                        cornerRadius: workspaceScale == 1 ? 0 : 18,
+                        cornerRadius: workspaceCornerRadius,
                         style: .continuous
                     ))
-                    .scaleEffect(workspaceScale, anchor: .topLeading)
+                    .scaleEffect(
+                        x: workspaceScale.width,
+                        y: workspaceScale.height,
+                        anchor: .topLeading
+                    )
                     .offset(workspaceOffset)
                     .opacity(workspaceIsVisible ? 1 : 0)
                     .allowsHitTesting(!showsTabOverview && !tabZoomIsRunning)
@@ -271,6 +276,7 @@ struct RootView: View {
                         onOpenSearch: openSearch,
                         onSwipe: switchTab
                     )
+                    .frame(width: browserAddressWidth)
                 }
 
                 ToolbarSpacer(.fixed, placement: .bottomBar)
@@ -354,6 +360,15 @@ struct RootView: View {
         )
     }
 
+    private var browserAddressWidth: CGFloat? {
+        guard workspaceSize.width > 0 else { return nil }
+        // Native toolbar items reserve their own padding in addition to the
+        // visible controls. Leave that space here so the address item expands
+        // without being moved into the toolbar's overflow menu.
+        let surroundingControlsWidth: CGFloat = viewModel.activeJourney == nil ? 86 : 140
+        return max(0, workspaceSize.width - 32 - surroundingControlsWidth)
+    }
+
     private var selectedSearchScope: Binding<SearchScope> {
         Binding(
             get: { tabStore.selectedTab.searchScope },
@@ -386,6 +401,7 @@ struct RootView: View {
     }
 
     private func switchTab(_ delta: Int) {
+        tabStore.captureSelectedTabSnapshot()
         browserSearchFocused = false
         navigationPath = NavigationPath()
         withAnimation(.smooth(duration: 0.3)) {
@@ -399,10 +415,14 @@ struct RootView: View {
     }
 
     private func showTabOverview() {
+        tabStore.captureSelectedTabSnapshot()
         guard let target = tabCardFrames[tabStore.selectedTabID],
               let transform = tabTransform(to: target) else {
             showsTabOverview = true
             workspaceIsVisible = false
+            workspaceScale = CGSize(width: 1, height: 1)
+            workspaceOffset = .zero
+            workspaceCornerRadius = 0
             return
         }
 
@@ -412,6 +432,7 @@ struct RootView: View {
         withAnimation(.smooth(duration: 0.42)) {
             workspaceScale = transform.scale
             workspaceOffset = transform.offset
+            workspaceCornerRadius = AppTabOverviewView.cardCornerRadius / transform.scale.width
         } completion: {
             workspaceIsVisible = false
             tabZoomIsRunning = false
@@ -423,6 +444,9 @@ struct RootView: View {
               let transform = tabTransform(to: target) else {
             showsTabOverview = false
             workspaceIsVisible = true
+            workspaceScale = CGSize(width: 1, height: 1)
+            workspaceOffset = .zero
+            workspaceCornerRadius = 0
             return
         }
 
@@ -432,19 +456,22 @@ struct RootView: View {
         tabZoomIsRunning = true
         withAnimation(.smooth(duration: 0.42)) {
             showsTabOverview = false
-            workspaceScale = 1
+            workspaceScale = CGSize(width: 1, height: 1)
             workspaceOffset = .zero
+            workspaceCornerRadius = 0
         } completion: {
             tabZoomIsRunning = false
         }
     }
 
-    private func tabTransform(to target: CGRect) -> (scale: CGFloat, offset: CGSize)? {
+    private func tabTransform(to target: CGRect) -> (scale: CGSize, offset: CGSize)? {
         guard target.width > 0, target.height > 0 else { return nil }
         guard workspaceSize.width > 0, workspaceSize.height > 0 else { return nil }
-        let scale = min(target.width / workspaceSize.width, target.height / workspaceSize.height)
         return (
-            scale,
+            CGSize(
+                width: target.width / workspaceSize.width,
+                height: target.height / workspaceSize.height
+            ),
             CGSize(width: target.minX, height: target.minY)
         )
     }
@@ -488,10 +515,6 @@ struct RootView: View {
     private var catalogSections: some View {
         NearbyStationsSection(viewModel: viewModel)
             .id("nearby")
-        SearchSection(viewModel: viewModel) { destination in
-            openInSelectedTab(destination)
-        }
-        .id("lines")
         CustomLinesSection(viewModel: viewModel)
             .id("custom")
     }
