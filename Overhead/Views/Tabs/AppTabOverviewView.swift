@@ -3,11 +3,15 @@ import Backbone
 
 struct AppTabOverviewView: View {
     static let cardCornerRadius: CGFloat = 16
+    static let previewAspectRatio: CGFloat = 0.75
+    static let transitionDuration: Double = 0.42
+    // A curve, not a spring: springs stop short of unit-scale targets,
+    // leaving the last few points to snap.
+    static let transitionAnimation: Animation = .timingCurve(0.2, 0.9, 0.3, 1, duration: transitionDuration)
 
     @ObservedObject var store: AppTabStore
     @ObservedObject var viewModel: JourneyViewModel
-    let hidesSelectedCard: Bool
-    let dismiss: () -> Void
+    let dismiss: (_ resetsNavigation: Bool) -> Void
 
     private let columns = [GridItem(.adaptive(minimum: 150), spacing: 16)]
 
@@ -17,16 +21,18 @@ struct AppTabOverviewView: View {
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(store.tabs) { tab in
                         AppTabOverviewCard(
+                            store: store,
+                            tabID: tab.id,
                             title: title(for: tab),
                             icon: icon(for: tab),
                             accent: accent(for: tab),
                             isSelected: tab.id == store.selectedTabID,
                             canClose: store.canCloseTabs,
-                            isHidden: hidesSelectedCard && tab.id == store.selectedTabID,
                             preview: preview(for: tab),
                             onSelect: {
+                                let changesTab = tab.id != store.selectedTabID
                                 store.select(tab.id)
-                                dismiss()
+                                Task { @MainActor in dismiss(changesTab) }
                             },
                             onClose: {
                                 withAnimation(.smooth.speed(1.5)) {
@@ -34,18 +40,6 @@ struct AppTabOverviewView: View {
                                 }
                             }
                         )
-                        .background {
-                            GeometryReader { proxy in
-                                Color.clear.preference(
-                                    key: TabCardFramePreferenceKey.self,
-                                    value: [
-                                        tab.id: proxy.frame(
-                                            in: .named(TabCardFramePreferenceKey.coordinateSpace)
-                                        )
-                                    ]
-                                )
-                            }
-                        }
                     }
                 }
                 .padding(16)
@@ -69,7 +63,7 @@ struct AppTabOverviewView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         _ = store.add()
-                        dismiss()
+                        Task { @MainActor in dismiss(true) }
                     } label: {
                         Image(systemName: "plus")
                     }
@@ -79,8 +73,7 @@ struct AppTabOverviewView: View {
                 ToolbarSpacer(.flexible, placement: .bottomBar)
 
                 ToolbarItem(placement: .bottomBar) {
-                    Button("Done", action: dismiss)
-                        .fontWeight(.semibold)
+                    Button(role: .confirm) { dismiss(false) }
                 }
             }
         }
@@ -230,13 +223,15 @@ struct AppTabOverviewView: View {
 
 private struct AppTabOverviewCard<Preview: View>: View {
     private static var closeDistance: CGFloat { 90 }
+    private static var selectionRingInset: CGFloat { 3 }
 
+    @ObservedObject var store: AppTabStore
+    let tabID: UUID
     let title: String
     let icon: String
     let accent: Color
     let isSelected: Bool
     let canClose: Bool
-    let isHidden: Bool
     let preview: Preview
     let onSelect: () -> Void
     let onClose: () -> Void
@@ -248,23 +243,25 @@ private struct AppTabOverviewCard<Preview: View>: View {
             VStack(spacing: 0) {
                 header
                 Color.clear
-                    .aspectRatio(0.75, contentMode: .fit)
+                    .aspectRatio(AppTabOverviewView.previewAspectRatio, contentMode: .fit)
                     .overlay(alignment: .top) { preview }
-                    .clipped()
             }
-            .background(
-                Color(.secondarySystemGroupedBackground),
-                in: RoundedRectangle(
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(
+                .rect(
                     cornerRadius: AppTabOverviewView.cardCornerRadius,
                     style: .continuous
                 )
             )
-            .overlay {
+            .shadow(color: .black.opacity(0.12), radius: 5, y: 2)
+            .background {
                 RoundedRectangle(
-                    cornerRadius: AppTabOverviewView.cardCornerRadius,
+                    cornerRadius: AppTabOverviewView.cardCornerRadius
+                        + Self.selectionRingInset,
                     style: .continuous
                 )
-                .strokeBorder(isSelected ? accent : .clear, lineWidth: 2.5)
+                .stroke(isSelected ? accent : .clear, lineWidth: 2.5)
+                .padding(-Self.selectionRingInset)
             }
             .contentShape(
                 RoundedRectangle(
@@ -272,9 +269,20 @@ private struct AppTabOverviewCard<Preview: View>: View {
                     style: .continuous
                 )
             )
+            .background {
+                GeometryReader { proxy in
+                    Color.clear
+                        .onChange(
+                            of: proxy.frame(in: .named(AppTabZoom.coordinateSpace)),
+                            initial: true
+                        ) { _, frame in
+                            store.setCardFrame(frame, for: tabID)
+                        }
+                }
+            }
         }
         .offset(x: dragOffset)
-        .opacity(isHidden ? 0 : closeProgress)
+        .opacity(closeProgress)
         .highPriorityGesture(closeDragGesture)
         .buttonStyle(.plain)
     }
@@ -325,14 +333,5 @@ private struct AppTabOverviewCard<Preview: View>: View {
                     }
                 }
             }
-    }
-}
-
-struct TabCardFramePreferenceKey: PreferenceKey {
-    static let coordinateSpace = "AppTabShell"
-    static var defaultValue: [UUID: CGRect] = [:]
-
-    static func reduce(value: inout [UUID: CGRect], nextValue: () -> [UUID: CGRect]) {
-        value.merge(nextValue(), uniquingKeysWith: { _, new in new })
     }
 }

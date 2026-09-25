@@ -21,13 +21,10 @@ struct RootView: View {
     @State private var navigationPath = NavigationPath()
     @StateObject private var tabStore = AppTabStore()
     @State private var showsTabOverview = false
-    @State private var tabZoomIsRunning = false
-    @State private var workspaceIsVisible = true
-    @State private var workspaceScale = CGSize(width: 1, height: 1)
-    @State private var workspaceOffset = CGSize.zero
-    @State private var workspaceCornerRadius: CGFloat = 0
-    @State private var workspaceSize = CGSize.zero
-    @State private var tabCardFrames: [UUID: CGRect] = [:]
+    @State private var workspaceIsCollapsed = false
+    @State private var workspaceIsSwappedForSnapshot = false
+    @State private var collapseTarget: CGRect?
+    @State private var showsBrowserSearchOverlay = false
     @FocusState private var browserSearchFocused: Bool
     @StateObject private var serviceStatusPresenter = ServiceStatusPresenter()
 #if DEBUG
@@ -65,38 +62,55 @@ struct RootView: View {
                 AppTabOverviewView(
                     store: tabStore,
                     viewModel: viewModel,
-                    hidesSelectedCard: tabZoomIsRunning,
-                    dismiss: dismissTabOverview
+                    dismiss: { resetsNavigation in
+                        dismissTabOverview(resetsNavigation: resetsNavigation)
+                    }
                 )
-                .opacity(showsTabOverview ? 1 : 0)
-                .allowsHitTesting(showsTabOverview && !tabZoomIsRunning)
+                .allowsHitTesting(showsTabOverview)
                 .accessibilityHidden(!showsTabOverview)
 
-                workspace
+                workspace(width: rootProxy.size.width)
                     .id(tabStore.selectedTabID)
+                    // Edge to edge: inset, the page jumps as the transform starts.
+                    .ignoresSafeArea(.container)
                     .frame(width: rootProxy.size.width, height: rootProxy.size.height)
+                    .background(Color(.systemGroupedBackground).ignoresSafeArea())
                     .compositingGroup()
-                    .clipShape(RoundedRectangle(
-                        cornerRadius: workspaceCornerRadius,
-                        style: .continuous
-                    ))
-                    .scaleEffect(
-                        x: workspaceScale.width,
-                        y: workspaceScale.height,
-                        anchor: .topLeading
+                    .scaleEffect(workspaceScale(in: rootProxy.size), anchor: .topLeading)
+                    .offset(workspaceOffset(in: rootProxy.size))
+                    .clipShape(
+                        AppTabPageClipShape(
+                            progress: workspaceIsCollapsed ? 1 : 0,
+                            expanded: expandedWorkspaceRect(in: rootProxy.size),
+                            collapsed: collapseTarget
+                                ?? expandedWorkspaceRect(in: rootProxy.size),
+                            expandedRadius: 0,
+                            collapsedRadius: AppTabOverviewView.cardCornerRadius
+                        )
                     )
-                    .offset(workspaceOffset)
-                    .opacity(workspaceIsVisible ? 1 : 0)
-                    .allowsHitTesting(!showsTabOverview && !tabZoomIsRunning)
+                    .animation(
+                        AppTabOverviewView.transitionAnimation,
+                        value: workspaceIsCollapsed
+                    )
+                    .opacity(workspaceIsSwappedForSnapshot ? 0 : 1)
+                    .allowsHitTesting(!showsTabOverview)
                     .accessibilityHidden(showsTabOverview)
             }
-            .onAppear { workspaceSize = rootProxy.size }
-            .onChange(of: rootProxy.size) { _, size in workspaceSize = size }
-            .onPreferenceChange(TabCardFramePreferenceKey.self) { tabCardFrames = $0 }
         }
-        .coordinateSpace(name: TabCardFramePreferenceKey.coordinateSpace)
+        .coordinateSpace(name: AppTabZoom.coordinateSpace)
+        .ignoresSafeArea(.container)
         .background(Color(.systemGroupedBackground).ignoresSafeArea())
-        .animation(.smooth(duration: 0.3), value: tabStore.selectedTabID)
+        .overlay {
+            if showsBrowserSearchOverlay, !showsTabOverview {
+                BrowserSearchOverlay(
+                    store: tabStore,
+                    isFocused: $browserSearchFocused,
+                    dismiss: dismissSearchOverlay
+                )
+                .transition(.opacity)
+            }
+        }
+        .animation(.smooth(duration: 0.2), value: showsBrowserSearchOverlay)
         .serviceStatusHost(serviceStatusPresenter)
         .task {
             if needsLineDataOnboarding { showLineDataOnboarding = true }
@@ -224,7 +238,7 @@ struct RootView: View {
         }
     }
 
-    private var workspace: some View {
+    private func workspace(width: CGFloat) -> some View {
         NavigationStack(path: $navigationPath) {
             Group {
                 switch tabStore.selectedTab.page {
@@ -258,37 +272,37 @@ struct RootView: View {
                     moreMenu
                 }
 
-                if viewModel.activeJourney != nil {
-                    ToolbarItem(placement: .bottomBar) {
-                        JourneyStationToolbarButton(viewModel: viewModel) {
-                            showJourneySheet = true
+                if !showsBrowserSearchOverlay {
+                    if viewModel.activeJourney != nil {
+                        ToolbarItem(placement: .bottomBar) {
+                            JourneyStationToolbarButton(viewModel: viewModel) {
+                                showJourneySheet = true
+                            }
+                            .matchedTransitionSource(id: Self.journeyTransitionID, in: journeyZoom)
                         }
-                        .matchedTransitionSource(id: Self.journeyTransitionID, in: journeyZoom)
+
+                        ToolbarSpacer(.fixed, placement: .bottomBar)
+                    }
+
+                    ToolbarItem(placement: .bottomBar) {
+                        BrowserAddressToolbarItem(
+                            store: tabStore,
+                            onOpenSearch: openSearch,
+                            onSwipe: switchTab
+                        )
+                        .frame(width: browserAddressWidth(in: width))
                     }
 
                     ToolbarSpacer(.fixed, placement: .bottomBar)
-                }
 
-                ToolbarItem(placement: .bottomBar) {
-                    BrowserAddressToolbarItem(
-                        store: tabStore,
-                        isFocused: $browserSearchFocused,
-                        onOpenSearch: openSearch,
-                        onSwipe: switchTab
-                    )
-                    .frame(width: browserAddressWidth)
-                }
-
-                ToolbarSpacer(.fixed, placement: .bottomBar)
-
-                ToolbarItem(placement: .bottomBar) {
-                    Button {
-                        browserSearchFocused = false
-                        showTabOverview()
-                    } label: {
-                        Image(systemName: "square.on.square")
+                    ToolbarItem(placement: .bottomBar) {
+                        Button {
+                            showTabOverview()
+                        } label: {
+                            Image(systemName: "square.on.square")
+                        }
+                        .accessibilityLabel("Show tabs")
                     }
-                    .accessibilityLabel("Show tabs")
                 }
             }
             .navigationDestination(for: Destination.self) { destination in
@@ -360,13 +374,9 @@ struct RootView: View {
         )
     }
 
-    private var browserAddressWidth: CGFloat? {
-        guard workspaceSize.width > 0 else { return nil }
-        // Native toolbar items reserve their own padding in addition to the
-        // visible controls. Leave that space here so the address item expands
-        // without being moved into the toolbar's overflow menu.
+    private func browserAddressWidth(in width: CGFloat) -> CGFloat {
         let surroundingControlsWidth: CGFloat = viewModel.activeJourney == nil ? 86 : 140
-        return max(0, workspaceSize.width - 32 - surroundingControlsWidth)
+        return max(0, width - 32 - surroundingControlsWidth)
     }
 
     private var selectedSearchScope: Binding<SearchScope> {
@@ -379,17 +389,26 @@ struct RootView: View {
     private func openSearch() {
         navigationPath = NavigationPath()
         tabStore.updateSelected { $0.page = .search }
-        Task { @MainActor in browserSearchFocused = true }
+        withAnimation(.smooth(duration: 0.2)) {
+            showsBrowserSearchOverlay = true
+        }
+    }
+
+    private func dismissSearchOverlay() {
+        browserSearchFocused = false
+        withAnimation(.smooth(duration: 0.2)) {
+            showsBrowserSearchOverlay = false
+        }
     }
 
     private func openHome() {
-        browserSearchFocused = false
+        dismissSearchOverlay()
         navigationPath = NavigationPath()
         tabStore.updateSelected { $0.page = .home }
     }
 
     private func openInSelectedTab(_ destination: SearchDestination) {
-        browserSearchFocused = false
+        dismissSearchOverlay()
         navigationPath = NavigationPath()
         tabStore.updateSelected { $0.page = .destination(destination) }
     }
@@ -402,78 +421,91 @@ struct RootView: View {
 
     private func switchTab(_ delta: Int) {
         tabStore.captureSelectedTabSnapshot()
-        browserSearchFocused = false
+        dismissSearchOverlay()
         navigationPath = NavigationPath()
         withAnimation(.smooth(duration: 0.3)) {
             _ = tabStore.selectAdjacent(delta)
         }
     }
 
-    private func dismissTabOverview() {
-        navigationPath = NavigationPath()
-        zoomWorkspaceOutOfTabCard()
+    private func dismissTabOverview(resetsNavigation: Bool) {
+        freezeCollapseTarget()
+        if resetsNavigation {
+            navigationPath = NavigationPath()
+        }
+        setShowsTabOverviewWithoutAnimation(false)
+        Task { @MainActor in
+            setWorkspaceSwappedWithoutAnimation(false)
+            withAnimation(AppTabOverviewView.transitionAnimation) {
+                workspaceIsCollapsed = false
+            }
+        }
     }
 
     private func showTabOverview() {
         tabStore.captureSelectedTabSnapshot()
-        guard let target = tabCardFrames[tabStore.selectedTabID],
-              let transform = tabTransform(to: target) else {
-            showsTabOverview = true
-            workspaceIsVisible = false
-            workspaceScale = CGSize(width: 1, height: 1)
-            workspaceOffset = .zero
-            workspaceCornerRadius = 0
-            return
-        }
-
-        tabZoomIsRunning = true
-        showsTabOverview = true
-        workspaceIsVisible = true
-        withAnimation(.smooth(duration: 0.42)) {
-            workspaceScale = transform.scale
-            workspaceOffset = transform.offset
-            workspaceCornerRadius = AppTabOverviewView.cardCornerRadius / transform.scale.width
+        freezeCollapseTarget()
+        setShowsTabOverviewWithoutAnimation(true)
+        withAnimation(
+            AppTabOverviewView.transitionAnimation,
+            completionCriteria: .removed
+        ) {
+            workspaceIsCollapsed = true
         } completion: {
-            workspaceIsVisible = false
-            tabZoomIsRunning = false
+            guard workspaceIsCollapsed else { return }
+            setWorkspaceSwappedWithoutAnimation(true)
         }
     }
 
-    private func zoomWorkspaceOutOfTabCard() {
-        guard let target = tabCardFrames[tabStore.selectedTabID],
-              let transform = tabTransform(to: target) else {
-            showsTabOverview = false
-            workspaceIsVisible = true
-            workspaceScale = CGSize(width: 1, height: 1)
-            workspaceOffset = .zero
-            workspaceCornerRadius = 0
-            return
-        }
-
-        workspaceScale = transform.scale
-        workspaceOffset = transform.offset
-        workspaceIsVisible = true
-        tabZoomIsRunning = true
-        withAnimation(.smooth(duration: 0.42)) {
-            showsTabOverview = false
-            workspaceScale = CGSize(width: 1, height: 1)
-            workspaceOffset = .zero
-            workspaceCornerRadius = 0
-        } completion: {
-            tabZoomIsRunning = false
+    private func setWorkspaceSwappedWithoutAnimation(_ isSwapped: Bool) {
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            workspaceIsSwappedForSnapshot = isSwapped
         }
     }
 
-    private func tabTransform(to target: CGRect) -> (scale: CGSize, offset: CGSize)? {
-        guard target.width > 0, target.height > 0 else { return nil }
-        guard workspaceSize.width > 0, workspaceSize.height > 0 else { return nil }
-        return (
-            CGSize(
-                width: target.width / workspaceSize.width,
-                height: target.height / workspaceSize.height
-            ),
-            CGSize(width: target.minX, height: target.minY)
+    private func setShowsTabOverviewWithoutAnimation(_ isShowing: Bool) {
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            showsTabOverview = isShowing
+        }
+    }
+
+    private func freezeCollapseTarget() {
+        guard let card = tabStore.cardFrames[tabStore.selectedTabID] else {
+            collapseTarget = nil
+            return
+        }
+        let previewHeight = card.width / AppTabOverviewView.previewAspectRatio
+        collapseTarget = CGRect(
+            x: card.minX,
+            y: card.maxY - previewHeight,
+            width: card.width,
+            height: previewHeight
         )
+    }
+
+    private var selectedTabPreviewFrame: CGRect? {
+        workspaceIsCollapsed ? collapseTarget : nil
+    }
+
+    private func workspaceScale(in size: CGSize) -> CGFloat {
+        guard let target = selectedTabPreviewFrame, size.width > 0 else { return 1 }
+        return target.width / size.width
+    }
+
+    private func workspaceOffset(in size: CGSize) -> CGSize {
+        guard let target = selectedTabPreviewFrame else { return .zero }
+        return CGSize(
+            width: target.minX,
+            height: target.minY
+        )
+    }
+
+    private func expandedWorkspaceRect(in size: CGSize) -> CGRect {
+        CGRect(origin: .zero, size: size)
     }
 
     // MARK: - Layout

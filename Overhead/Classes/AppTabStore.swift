@@ -27,6 +27,7 @@ final class AppTabStore: ObservableObject {
     @Published private(set) var tabs: [AppTab]
     @Published private(set) var selectedTabID: UUID
     @Published private(set) var snapshots: [UUID: UIImage] = [:]
+    private(set) var cardFrames: [UUID: CGRect] = [:]
 
     private static let storageKey = "browser.tabs.v1"
 
@@ -101,6 +102,11 @@ final class AppTabStore: ObservableObject {
     func captureSelectedTabSnapshot() {
         guard let snapshot = AppTabSnapshotter.captureVisiblePage() else { return }
         snapshots[selectedTabID] = snapshot
+    }
+
+    func setCardFrame(_ frame: CGRect, for tabID: UUID) {
+        guard cardFrames[tabID] != frame else { return }
+        cardFrames[tabID] = frame
     }
 
     func duplicate(_ id: UUID) {
