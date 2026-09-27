@@ -11,6 +11,7 @@ struct RouteSetupCard: View {
     @Binding var viaSelections: [StationSearchHit]
     @Binding var toSelection: StationSearchHit?
     @Binding var walkingSpeedRaw: String
+    @Binding var routePriorityRaw: String
     /// 始発優先 — float trains that start at the boarding station to the top.
     @Binding var preferOriginating: Bool
     @Binding var avoidedLineIds: Set<String>
@@ -56,6 +57,10 @@ struct RouteSetupCard: View {
 
     private var walkingSpeed: WalkingSpeed {
         WalkingSpeed(rawValue: walkingSpeedRaw) ?? .normal
+    }
+
+    private var routePriority: RoutePriority {
+        RoutePriority(rawValue: routePriorityRaw) ?? .balanced
     }
 
     var body: some View {
@@ -253,6 +258,7 @@ struct RouteSetupCard: View {
                 if let leadingItems {
                     leadingItems
                 }
+                routePriorityItem
                 walkingSpeedItem
                 preferOriginatingItem
                 avoidLinesItem
@@ -264,6 +270,32 @@ struct RouteSetupCard: View {
             .scrollTargetLayout()
         }
         .scrollTargetBehavior(.viewAligned(limitBehavior: .never))
+    }
+
+    private var routePriorityItem: some View {
+        Menu {
+            Picker("Setup.RoutePriority", selection: Binding(
+                get: { routePriority },
+                set: { routePriorityRaw = $0.rawValue }
+            )) {
+                ForEach(RoutePriority.allCases) { priority in
+                    Label {
+                        Text(priority.label)
+                        Text(priority.detail)
+                    } icon: {
+                        Image(systemName: priority.iconName)
+                    }
+                    .tag(priority)
+                }
+            }
+        } label: {
+            CustomizationItem(
+                icon: routePriority.iconName,
+                label: "Setup.RoutePriority",
+                active: routePriority != .balanced
+            )
+        }
+        .buttonStyle(.plain)
     }
 
     private var walkingSpeedItem: some View {

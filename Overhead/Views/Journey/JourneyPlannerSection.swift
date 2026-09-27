@@ -13,6 +13,7 @@ struct JourneyPlannerSection: View {
     @State private var timeMode: TimeMode = .now
     @State private var pinnedDate = Date()
     @AppStorage("journey.walkingSpeed") private var walkingSpeedRaw = WalkingSpeed.normal.rawValue
+    @AppStorage(RoutePriority.storageKey) private var routePriorityRaw = RoutePriority.balanced.rawValue
     @AppStorage("journey.preferOriginating") private var preferOriginating = false
     @AppStorage("journey.avoidedLines") private var avoidedLinesJSON = ""
     @AppStorage(JourneyMode.storageKey) private var journeyMode = JourneyMode.hybrid
@@ -47,6 +48,10 @@ struct JourneyPlannerSection: View {
 
     private var walkingSpeed: WalkingSpeed {
         WalkingSpeed(rawValue: walkingSpeedRaw) ?? .normal
+    }
+
+    private var routePriority: RoutePriority {
+        RoutePriority(rawValue: routePriorityRaw) ?? .balanced
     }
 
     private var ignoreTimetable: Bool { journeyMode.ignoresTimetable }
@@ -144,6 +149,7 @@ struct JourneyPlannerSection: View {
             viaSelections: $viaSelections,
             toSelection: $toSelection,
             walkingSpeedRaw: $walkingSpeedRaw,
+            routePriorityRaw: $routePriorityRaw,
             preferOriginating: $preferOriginating,
             avoidedLineIds: avoidedLineIdsBinding,
             onStationsChanged: {
@@ -166,6 +172,9 @@ struct JourneyPlannerSection: View {
             )
         }
         .onChange(of: walkingSpeedRaw) { _, _ in
+            invalidateResults()
+        }
+        .onChange(of: routePriorityRaw) { _, _ in
             invalidateResults()
         }
         .onChange(of: preferOriginating) { _, _ in
@@ -271,6 +280,7 @@ struct JourneyPlannerSection: View {
                 toStationId: to.station.id,
                 viaStationIds: viaSelections.map(\.station.id),
                 walkingSpeedRaw: walkingSpeedRaw,
+                routePriorityRaw: routePriorityRaw,
                 preferOriginating: preferOriginating,
                 avoidedLineIds: avoidedLineIds.sorted()
             ))
@@ -616,6 +626,7 @@ struct JourneyPlannerSection: View {
                 candidates = viewModel.searchRouteOptions(
                     stationNames: names,
                     transferMinutes: walkingSpeed.transferMinutes,
+                    priority: routePriority,
                     avoidingLineIds: avoided
                 )
                 hasSearched = true
@@ -648,6 +659,7 @@ struct JourneyPlannerSection: View {
                 stationNames: names,
                 anchor: anchor,
                 transferMinutes: walkingSpeed.transferMinutes,
+                priority: routePriority,
                 avoidingLineIds: avoided,
                 notDepartingBefore: earliestDeparture,
                 preferringOriginating: preferOriginating

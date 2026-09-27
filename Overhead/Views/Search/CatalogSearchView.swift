@@ -1,20 +1,23 @@
 import SwiftUI
 import Backbone
 
-/// Catalog results shown above the search field while its overlay is active.
-struct CatalogSearchResultsView: View {
+/// The catalog search surface, including its results and keyboard-aware field.
+struct CatalogSearchView: View {
     let lines: [TrainLine]
     @Binding var searchText: String
     @Binding var scope: SearchScope
+    let dismiss: () -> Void
     let onOpen: (SearchDestination) -> Void
     let onRoute: (_ from: StationSearchHit, _ to: StationSearchHit) -> Void
 
+    @FocusState private var isFieldFocused: Bool
     @State private var results = Results.empty
     @State private var pendingRouteDestination: StationSearchHit?
     @StateObject private var nearbyProvider = NearbyStationsProvider()
 
     private static let previewLimit = 6
     private static let scopeLimit = 100
+    private static let fieldHeight: CGFloat = 48
 
     private struct Results {
         var operators: [OperatorSearchHit] = []
@@ -22,14 +25,43 @@ struct CatalogSearchResultsView: View {
         var stations: [StationSearchHit] = []
 
         static let empty = Results()
-        var isEmpty: Bool { operators.isEmpty && lines.isEmpty && stations.isEmpty }
     }
 
     private var query: String {
         searchText.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    private var hasResultsForSelectedScope: Bool {
+        switch scope {
+        case .all:
+            !results.operators.isEmpty || !results.lines.isEmpty || !results.stations.isEmpty
+        case .operators:
+            !results.operators.isEmpty
+        case .lines:
+            !results.lines.isEmpty
+        case .stations:
+            !results.stations.isEmpty
+        }
+    }
+
     var body: some View {
+        ZStack(alignment: .bottom) {
+            resultsList
+                .ignoresSafeArea(.container, edges: .bottom)
+                .background {
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                        .ignoresSafeArea([.container, .keyboard])
+                }
+            searchField
+        }
+        .task {
+            try? await Task.sleep(for: .milliseconds(80))
+            isFieldFocused = true
+        }
+    }
+
+    private var resultsList: some View {
         List {
             Section {
                 Picker("Search.Title", selection: $scope) {
@@ -40,7 +72,6 @@ struct CatalogSearchResultsView: View {
                 .pickerStyle(.segmented)
             }
             .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets())
 
             if query.isEmpty {
                 browseContent
@@ -48,8 +79,9 @@ struct CatalogSearchResultsView: View {
                 resultsContent
             }
         }
-        .listStyle(.insetGrouped)
+        .listStyle(.plain)
         .scrollContentBackground(.hidden)
+        .contentMargins(.bottom, Self.fieldHeight + 24, for: .scrollContent)
         .scrollDismissesKeyboard(.interactively)
         .task(id: "\(query)|\(lines.count)") { await runSearch() }
         .task(id: lines.count) {
@@ -58,6 +90,52 @@ struct CatalogSearchResultsView: View {
         .onChange(of: nearbyProvider.nearestStations.map(\.id)) { _, _ in
             completePendingRouteIfPossible()
         }
+    }
+
+    private var searchField: some View {
+        GlassEffectContainer(spacing: 8) {
+            HStack(spacing: 8) {
+                HStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundStyle(.secondary)
+                    TextField("Search.Prompt", text: $searchText)
+                        .textFieldStyle(.plain)
+                        .autocorrectionDisabled()
+                        .submitLabel(.search)
+                        .focused($isFieldFocused)
+                        .onSubmit { isFieldFocused = false }
+                    if !searchText.isEmpty {
+                        Button {
+                            searchText = ""
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(.tertiary)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Button.Close")
+                    }
+                }
+                .padding(.horizontal, 14)
+                .frame(maxWidth: .infinity)
+                .frame(height: Self.fieldHeight)
+                .glassEffect(.regular.interactive(), in: .capsule)
+
+                Button {
+                    isFieldFocused = false
+                    dismiss()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 20, weight: .medium))
+                        .frame(width: Self.fieldHeight, height: Self.fieldHeight)
+                        .contentShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .glassEffect(.regular.interactive(), in: .circle)
+                .accessibilityLabel("Button.Close")
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.bottom, 8)
     }
 
     @MainActor
@@ -83,20 +161,27 @@ struct CatalogSearchResultsView: View {
 
     @ViewBuilder
     private var browseContent: some View {
-        if scope == .stations {
+        switch scope {
+        case .stations:
             hintRow("Search.Hint.Stations")
-        } else {
+        case .lines:
+            Section("Search.Section.Lines") {
+                ForEach(lines) { lineRow($0) }
+            }
+            .listRowBackground(Color.clear)
+        case .all, .operators:
             Section("Search.Section.Operators") {
                 ForEach(CatalogSearch.operators(in: lines, query: "")) { hit in
                     operatorRow(hit)
                 }
             }
+            .listRowBackground(Color.clear)
         }
     }
 
     @ViewBuilder
     private var resultsContent: some View {
-        if results.isEmpty {
+        if !hasResultsForSelectedScope {
             hintRow("Search.NoResults")
         } else {
             if scope == .all || scope == .operators, !results.operators.isEmpty {
@@ -104,18 +189,21 @@ struct CatalogSearchResultsView: View {
                     ForEach(limited(results.operators)) { operatorRow($0) }
                     moreRow(results.operators.count, scope: .operators)
                 }
+                .listRowBackground(Color.clear)
             }
             if scope == .all || scope == .lines, !results.lines.isEmpty {
                 Section("Search.Section.Lines") {
                     ForEach(limited(results.lines)) { lineRow($0) }
                     moreRow(results.lines.count, scope: .lines)
                 }
+                .listRowBackground(Color.clear)
             }
             if scope == .all || scope == .stations, !results.stations.isEmpty {
                 Section("Search.Section.Stations") {
                     ForEach(limited(results.stations)) { stationRow($0) }
                     moreRow(results.stations.count, scope: .stations)
                 }
+                .listRowBackground(Color.clear)
             }
         }
     }
@@ -237,5 +325,6 @@ struct CatalogSearchResultsView: View {
     private func hintRow(_ title: LocalizedStringKey) -> some View {
         Label(title, systemImage: "magnifyingglass")
             .foregroundStyle(.secondary)
+            .listRowBackground(Color.clear)
     }
 }

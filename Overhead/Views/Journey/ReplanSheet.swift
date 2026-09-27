@@ -11,6 +11,7 @@ struct ReplanSheet: View {
     var initialMode: Mode = .train
 
     @AppStorage("journey.walkingSpeed") private var walkingSpeedRaw = WalkingSpeed.normal.rawValue
+    @AppStorage(RoutePriority.storageKey) private var routePriorityRaw = RoutePriority.balanced.rawValue
     @Environment(\.dismiss) private var dismiss
 
     @State private var anchorIndex: Int?
@@ -412,7 +413,8 @@ struct ReplanSheet: View {
             candidates = viewModel.replanCandidates(
                 from: anchor,
                 to: destination,
-                transferMinutes: walkingSpeed.transferMinutes
+                transferMinutes: walkingSpeed.transferMinutes,
+                priority: RoutePriority(rawValue: routePriorityRaw) ?? .balanced
             )
             isSearching = false
         }

@@ -304,6 +304,7 @@ final class JourneyViewModel: ObservableObject {
         stationNames: [String],
         anchor: TimeAnchor,
         transferMinutes: Double = StaticTrainData.transferBufferMinutes,
+        priority: RoutePriority = .balanced,
         avoidingLineIds: Set<String> = [],
         notDepartingBefore earliest: Date? = nil,
         preferringOriginating: Bool = false,
@@ -330,22 +331,39 @@ final class JourneyViewModel: ObservableObject {
             }
         }
 
-        // Without midpoints, single-train routes (including 直通) win outright.
+        // Without midpoints, single-train routes (including 直通) win outright —
+        // unless time comes first, when a faster change has to be weighed too.
+        var direct: [TrainCandidate] = []
         if stationNames.count == 2 {
-            let direct = directCandidates(
+            direct = directCandidates(
                 fromName: fromName, toName: toName,
                 anchor: rideAnchor, floorSec: floorSec, calendar: calendar,
                 avoidingLineIds: avoidingLineIds,
                 preferringOriginating: preferringOriginating, limit: limit
             )
-            if !direct.isEmpty { return direct }
+            if !direct.isEmpty && priority != .time { return direct }
         }
 
         guard let plan = StaticTrainData.planTransferRoute(
             throughStationNames: stationNames,
             transferMinutes: transferMinutes,
+            transferAversionMinutes: priority.transferAversionMinutes,
             avoidingLineIds: avoidingLineIds
-        ) else { return [] }
+        ) else { return direct }
+
+        if !direct.isEmpty {
+            // A one-line plan is just the direct rides again.
+            guard plan.count > 1 else { return direct }
+            let transfers = candidates(
+                forPlan: plan,
+                anchor: rideAnchor, floorSec: floorSec, calendar: calendar,
+                transferMinutes: transferMinutes,
+                preferringOriginating: preferringOriginating, limit: 8
+            )
+            return Array(sorted(direct + transfers, anchor: rideAnchor,
+                                preferringOriginating: preferringOriginating,
+                                soonestArrival: true).prefix(limit))
+        }
 
         return candidates(
             forPlan: plan,
@@ -444,10 +462,17 @@ final class JourneyViewModel: ObservableObject {
     private func sorted(
         _ candidates: [TrainCandidate],
         anchor: RideAnchor,
-        preferringOriginating: Bool = false
+        preferringOriginating: Bool = false,
+        soonestArrival: Bool = false
     ) -> [TrainCandidate] {
         let byTime: (TrainCandidate, TrainCandidate) -> Bool
         switch anchor {
+        case .departAtOrAfter where soonestArrival:
+            byTime = {
+                $0.arrivalSeconds == $1.arrivalSeconds
+                    ? $0.departureSeconds > $1.departureSeconds
+                    : $0.arrivalSeconds < $1.arrivalSeconds
+            }
         case .departAtOrAfter:
             byTime = { $0.departureSeconds < $1.departureSeconds }
         case .arriveAtOrBefore:
@@ -470,6 +495,7 @@ final class JourneyViewModel: ObservableObject {
     func searchRouteOptions(
         stationNames: [String],
         transferMinutes: Double,
+        priority: RoutePriority = .balanced,
         avoidingLineIds: Set<String> = []
     ) -> [TrainCandidate] {
         guard stationNames.count >= 2,
@@ -502,6 +528,7 @@ final class JourneyViewModel: ObservableObject {
             guard let plan = StaticTrainData.planTransferRoute(
                 throughStationNames: stationNames,
                 transferMinutes: transferMinutes,
+                transferAversionMinutes: priority.transferAversionMinutes,
                 avoidingLineIds: avoid
             ) else { break }
             add(untimedCandidate(forPlan: plan, transferMinutes: transferMinutes))
@@ -510,7 +537,14 @@ final class JourneyViewModel: ObservableObject {
             avoid.formUnion(planLines)
         }
 
-        return results.sorted { $0.durationMinutes < $1.durationMinutes }
+        guard priority == .efficiency else {
+            return results.sorted { $0.durationMinutes < $1.durationMinutes }
+        }
+        return results.sorted {
+            $0.legs.count == $1.legs.count
+                ? $0.durationMinutes < $1.durationMinutes
+                : $0.legs.count < $1.legs.count
+        }
     }
 
     private func untimedRide(
@@ -1020,6 +1054,7 @@ final class JourneyViewModel: ObservableObject {
         from anchor: ReplanAnchor,
         to destinationName: String,
         transferMinutes: Double = StaticTrainData.transferBufferMinutes,
+        priority: RoutePriority = .balanced,
         avoidingLineIds: Set<String> = [],
         limit: Int = 8
     ) -> [TrainCandidate] {
@@ -1030,6 +1065,7 @@ final class JourneyViewModel: ObservableObject {
             stationNames: [anchor.station.name, destinationName],
             anchor: .departure(from.addingTimeInterval(Self.sameStationBufferMinutes * 60)),
             transferMinutes: transferMinutes,
+            priority: priority,
             avoidingLineIds: avoidingLineIds,
             limit: limit
         )

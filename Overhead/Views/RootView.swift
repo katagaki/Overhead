@@ -22,7 +22,6 @@ struct RootView: View {
     @State private var tabStore = AppTabSessionMigration.makeStore()
     @State private var searchStates = AppTabSearchStateStorage.load()
     @State private var showsBrowserSearchOverlay = false
-    @FocusState private var browserSearchFocused: Bool
     @StateObject private var serviceStatusPresenter = ServiceStatusPresenter()
 #if DEBUG
     // Screenshot harness (overtrain:// deep links, see ScreenshotHarness.swift).
@@ -71,11 +70,10 @@ struct RootView: View {
         .background(Color(.systemGroupedBackground).ignoresSafeArea())
         .overlay {
             if showsBrowserSearchOverlay, !tabStore.isShowingTabSwitcher {
-                BrowserSearchOverlay(
+                CatalogSearchView(
                     lines: viewModel.availableLines,
                     searchText: selectedSearchText,
-                    searchScope: searchScope(for: tabStore.selectedTabID),
-                    isFocused: $browserSearchFocused,
+                    scope: searchScope(for: tabStore.selectedTabID),
                     dismiss: dismissSearchOverlay,
                     onOpen: openInSelectedTab,
                     onRoute: routeFromNearest
@@ -371,16 +369,13 @@ struct RootView: View {
     private func browserBottomBar(for tab: AppNavigationStore.Tab) -> some View {
         GlassEffectContainer(spacing: TabBottomBarMetrics.itemSpacing) {
             HStack(spacing: TabBottomBarMetrics.itemSpacing) {
-                if viewModel.activeJourney != nil {
-                    JourneyStationToolbarButton(viewModel: viewModel) {
-                        showJourneySheet = true
-                    }
-                    .frame(width: TabBottomBarMetrics.itemHeight, height: TabBottomBarMetrics.itemHeight)
-                    .glassEffect(.regular.interactive(), in: .circle)
-                    .matchedTransitionSource(id: Self.journeyTransitionID, in: journeyZoom)
+                JourneyStationToolbarButton(viewModel: viewModel) {
+                    showJourneySheet = true
                 }
+                .matchedTransitionSource(id: Self.journeyTransitionID, in: journeyZoom)
 
                 BrowserAddressToolbarItem(
+                    viewModel: viewModel,
                     searchText: searchText(for: tab.id),
                     onOpenSearch: openSearch,
                     onSwipe: switchTab
@@ -411,7 +406,6 @@ struct RootView: View {
     }
 
     private func dismissSearchOverlay() {
-        browserSearchFocused = false
         withAnimation(.smooth(duration: 0.2)) { showsBrowserSearchOverlay = false }
     }
 

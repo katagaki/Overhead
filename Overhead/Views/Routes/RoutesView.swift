@@ -439,6 +439,7 @@ struct FavoritesSection: View {
             startCandidate(viewModel.searchRouteOptions(
                 stationNames: names,
                 transferMinutes: transferMinutes,
+                priority: place.routePriority,
                 avoidingLineIds: avoided
             ).first)
             return
@@ -457,11 +458,13 @@ struct FavoritesSection: View {
             stationNames: names,
             anchor: .departure(Date()),
             transferMinutes: transferMinutes,
+            priority: place.routePriority,
             avoidingLineIds: avoided,
             preferringOriginating: place.preferOriginating
         ).first ?? viewModel.searchRouteOptions(
             stationNames: names,
             transferMinutes: transferMinutes,
+            priority: place.routePriority,
             avoidingLineIds: avoided
         ).first)
     }

@@ -943,9 +943,8 @@ public enum StaticTrainData {
 
     /// What a change of trains costs beyond the clock: stairs, gates, the risk
     /// of missing the connection. Without it the search sells a transfer for any
-    /// few-minute saving — and 歩く速さ・なし, which zeroes the walk buffer, would
-    /// make transfers nearly free and chain three of them to shave two minutes.
-    public static let transferAversionMinutes: Double = 5
+    /// few-minute saving.
+    public static let defaultTransferAversionMinutes: Double = 5
 
     /// The unlisted hop closing a loop, taken as the line's average hop.
     /// nil when the line is not a usable loop.
@@ -995,6 +994,7 @@ public enum StaticTrainData {
         throughStationNames names: [String],
         maxTransfers: Int = 3,
         transferMinutes: Double = transferBufferMinutes,
+        transferAversionMinutes: Double = defaultTransferAversionMinutes,
         avoidingLineIds: Set<String> = []
     ) -> [TransferLeg]? {
         guard names.count >= 2 else { return nil }
@@ -1006,6 +1006,7 @@ public enum StaticTrainData {
                       toStationName: to,
                       maxTransfers: maxTransfers,
                       transferMinutes: transferMinutes,
+                      transferAversionMinutes: transferAversionMinutes,
                       avoidingLineIds: avoidingLineIds
                   )
             else { return nil }
@@ -1041,6 +1042,7 @@ public enum StaticTrainData {
         toStationName: String,
         maxTransfers: Int = 3,
         transferMinutes: Double = transferBufferMinutes,
+        transferAversionMinutes: Double = defaultTransferAversionMinutes,
         avoidingLineIds: Set<String> = []
     ) -> [TransferLeg]? {
         guard fromStationName != toStationName else { return nil }
@@ -1050,43 +1052,28 @@ public enum StaticTrainData {
         // Walk + expected wait + the standing dislike of changing trains.
         let transferPenalty = transferMinutes + 3 + transferAversionMinutes
 
-        // Node = (line index, station index on that line)
-        struct Node: Hashable {
-            let line: Int
-            let idx: Int
-        }
-        struct Entry {
-            var cost: Double
-            var transfers: Int
-            var parent: Node?
-        }
-
         // Stations grouped by name for transfer edges and start/goal lookup
-        var nodesByName: [String: [Node]] = [:]
+        var nodesByName: [String: [RouteNode]] = [:]
         for (li, line) in lines.enumerated() {
             for (si, station) in line.stations.enumerated() {
-                nodesByName[station.name, default: []].append(Node(line: li, idx: si))
+                nodesByName[station.name, default: []].append(RouteNode(line: li, idx: si, transfers: 0))
             }
         }
         guard let startNodes = nodesByName[fromStationName],
               nodesByName[toStationName] != nil
         else { return nil }
 
-        var best: [Node: Entry] = [:]
-        // Simple priority queue: linear extract-min is fine at this scale
-        var frontier: [(cost: Double, node: Node)] = []
+        // Each transfer count is its own layer, so a quick path that has spent
+        // its changes can't block a slower one that still has changes left.
+        var best: [RouteNode: (cost: Double, parent: RouteNode?)] = [:]
+        var frontier = RouteFrontier()
         for node in startNodes {
-            best[node] = Entry(cost: 0, transfers: 0, parent: nil)
-            frontier.append((0, node))
+            best[node] = (0, nil)
+            frontier.push(cost: 0, node: node)
         }
 
-        var goal: Node?
-        while !frontier.isEmpty {
-            var minIdx = 0
-            for i in 1..<frontier.count where frontier[i].cost < frontier[minIdx].cost {
-                minIdx = i
-            }
-            let (cost, node) = frontier.remove(at: minIdx)
+        var goal: RouteNode?
+        while let (cost, node) = frontier.pop() {
             guard let entry = best[node], entry.cost == cost else { continue }
 
             let line = lines[node.line]
@@ -1096,47 +1083,37 @@ public enum StaticTrainData {
                 break
             }
 
-            func relax(_ next: Node, cost nextCost: Double, transfers: Int) {
-                if let existing = best[next] {
-                    // Ties go to the itinerary with fewer changes: cost alone
-                    // would let a settled three-transfer path block a one-.
-                    let faster = nextCost < existing.cost - 0.001
-                    let calmer = nextCost < existing.cost + 0.001 && transfers < existing.transfers
-                    guard faster || calmer else { return }
-                }
-                best[next] = Entry(cost: nextCost, transfers: transfers, parent: node)
-                frontier.append((nextCost, next))
+            func relax(_ next: RouteNode, cost nextCost: Double) {
+                if let existing = best[next], existing.cost <= nextCost { return }
+                best[next] = (nextCost, node)
+                frontier.push(cost: nextCost, node: next)
+            }
+            func ride(to idx: Int, minutes: Double) {
+                relax(RouteNode(line: node.line, idx: idx, transfers: node.transfers),
+                      cost: cost + minutes)
             }
 
-            // Ride to adjacent stations on the same line
             if node.idx > 0 {
-                relax(Node(line: node.line, idx: node.idx - 1),
-                      cost: cost + line.hopTimesMinutes[node.idx - 1],
-                      transfers: entry.transfers)
+                ride(to: node.idx - 1, minutes: line.hopTimesMinutes[node.idx - 1])
             }
             if node.idx < line.stations.count - 1 {
-                relax(Node(line: node.line, idx: node.idx + 1),
-                      cost: cost + line.hopTimesMinutes[node.idx],
-                      transfers: entry.transfers)
+                ride(to: node.idx + 1, minutes: line.hopTimesMinutes[node.idx])
             }
 
-            // A loop's two ends are one hop apart, not a whole circuit: without
-            // this edge 有楽町→東京 is charged the long way round the 山手線.
-            if line.isLoop, let seam = loopSeamMinutes(line) {
+            // A loop's two ends are one hop apart, not a whole circuit.
+            if let seam = loopSeamMinutes(line) {
                 let last = line.stations.count - 1
                 if node.idx == 0 {
-                    relax(Node(line: node.line, idx: last),
-                          cost: cost + seam, transfers: entry.transfers)
+                    ride(to: last, minutes: seam)
                 } else if node.idx == last {
-                    relax(Node(line: node.line, idx: 0),
-                          cost: cost + seam, transfers: entry.transfers)
+                    ride(to: 0, minutes: seam)
                 }
             }
 
-            // Change to other lines at this station
-            if entry.transfers < maxTransfers, let siblings = nodesByName[station.name] {
+            if node.transfers < maxTransfers, let siblings = nodesByName[station.name] {
                 for sibling in siblings where sibling.line != node.line {
-                    relax(sibling, cost: cost + transferPenalty, transfers: entry.transfers + 1)
+                    relax(RouteNode(line: sibling.line, idx: sibling.idx, transfers: node.transfers + 1),
+                          cost: cost + transferPenalty)
                 }
             }
         }
@@ -1144,7 +1121,7 @@ public enum StaticTrainData {
         guard var cursor = goal else { return nil }
 
         // Walk parents back to the start, then compress into per-line legs
-        var path: [Node] = [cursor]
+        var path: [RouteNode] = [cursor]
         while let parent = best[cursor]?.parent {
             path.append(parent)
             cursor = parent
@@ -1176,6 +1153,51 @@ public enum StaticTrainData {
             ))
         }
         return legs.isEmpty ? nil : legs
+    }
+
+    private struct RouteNode: Hashable {
+        let line: Int
+        let idx: Int
+        let transfers: Int
+    }
+
+    /// Binary min-heap on cost; equal costs pop the fewer-transfer node first.
+    private struct RouteFrontier {
+        private var heap: [(cost: Double, node: RouteNode)] = []
+
+        private func precedes(_ a: Int, _ b: Int) -> Bool {
+            let x = heap[a], y = heap[b]
+            if abs(x.cost - y.cost) > 0.001 { return x.cost < y.cost }
+            return x.node.transfers < y.node.transfers
+        }
+
+        mutating func push(cost: Double, node: RouteNode) {
+            heap.append((cost, node))
+            var child = heap.count - 1
+            while child > 0 {
+                let parent = (child - 1) / 2
+                guard precedes(child, parent) else { break }
+                heap.swapAt(child, parent)
+                child = parent
+            }
+        }
+
+        mutating func pop() -> (Double, RouteNode)? {
+            guard !heap.isEmpty else { return nil }
+            heap.swapAt(0, heap.count - 1)
+            let top = heap.removeLast()
+            var parent = 0
+            while true {
+                let left = parent * 2 + 1, right = left + 1
+                var next = parent
+                if left < heap.count, precedes(left, next) { next = left }
+                if right < heap.count, precedes(right, next) { next = right }
+                guard next != parent else { break }
+                heap.swapAt(parent, next)
+                parent = next
+            }
+            return (top.cost, top.node)
+        }
     }
 
     public struct ResolvedJourneyLine {
