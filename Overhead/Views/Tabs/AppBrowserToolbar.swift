@@ -40,7 +40,7 @@ struct JourneyStationToolbarButton: View {
 }
 
 struct BrowserAddressToolbarItem: View {
-    @ObservedObject var store: AppTabStore
+    var searchText: Binding<String>
     let onOpenSearch: () -> Void
     let onSwipe: (Int) -> Void
 
@@ -67,9 +67,8 @@ struct BrowserAddressToolbarItem: View {
     }
 
     private var addressText: LocalizedStringKey {
-        if case .search = store.selectedTab.page,
-           !store.selectedTab.searchText.isEmpty {
-            return LocalizedStringKey(store.selectedTab.searchText)
+        if !searchText.wrappedValue.isEmpty {
+            return LocalizedStringKey(searchText.wrappedValue)
         }
         return "Search.Prompt"
     }
@@ -95,9 +94,13 @@ struct BrowserAddressToolbarItem: View {
 }
 
 struct BrowserSearchOverlay: View {
-    @ObservedObject var store: AppTabStore
+    let lines: [TrainLine]
+    var searchText: Binding<String>
+    var searchScope: Binding<SearchScope>
     var isFocused: FocusState<Bool>.Binding
     let dismiss: () -> Void
+    let onOpen: (SearchDestination) -> Void
+    let onRoute: (StationSearchHit, StationSearchHit) -> Void
 
     @State private var isKeyboardUp = false
 
@@ -105,49 +108,68 @@ struct BrowserSearchOverlay: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            Color.clear
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .ignoresSafeArea([.container, .keyboard])
                 .contentShape(Rectangle())
-                .allowsHitTesting(false)
+                .onTapGesture(perform: dismiss)
 
-            GlassEffectContainer(spacing: 8) {
-                HStack(spacing: 8) {
+            VStack(spacing: 0) {
+                Spacer(minLength: 0)
+                CatalogSearchResultsView(
+                    lines: lines,
+                    searchText: searchText,
+                    scope: searchScope,
+                    onOpen: onOpen,
+                    onRoute: onRoute
+                )
+                .frame(maxHeight: 420)
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 22))
+                .clipShape(RoundedRectangle(cornerRadius: 22))
+                .padding(.horizontal, 12)
+                .padding(.bottom, 8)
+
+                GlassEffectContainer(spacing: 8) {
                     HStack(spacing: 8) {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundStyle(.secondary)
-                        TextField("Search.Prompt", text: searchText)
-                            .textFieldStyle(.plain)
-                            .autocorrectionDisabled()
-                            .submitLabel(.search)
-                            .focused(isFocused)
-                        if !store.selectedTab.searchText.isEmpty {
-                            Button {
-                                store.updateSelected { $0.searchText = "" }
-                            } label: {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundStyle(.tertiary)
+                        HStack(spacing: 8) {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundStyle(.secondary)
+                            TextField("Search.Prompt", text: searchText)
+                                .textFieldStyle(.plain)
+                                .autocorrectionDisabled()
+                                .submitLabel(.search)
+                                .focused(isFocused)
+                                .onSubmit { isFocused.wrappedValue = false }
+                            if !searchText.wrappedValue.isEmpty {
+                                Button {
+                                    searchText.wrappedValue = ""
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundStyle(.tertiary)
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("Button.Close")
                             }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel("Button.Close")
                         }
-                    }
-                    .padding(.horizontal, 14)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: Self.fieldHeight)
-                    .glassEffect(.regular.interactive(), in: .capsule)
+                        .padding(.horizontal, 14)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: Self.fieldHeight)
+                        .glassEffect(.regular.interactive(), in: .capsule)
 
-                    Button(action: dismiss) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 20, weight: .medium))
-                            .frame(width: Self.fieldHeight, height: Self.fieldHeight)
-                            .contentShape(Circle())
+                        Button(action: dismiss) {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 20, weight: .medium))
+                                .frame(width: Self.fieldHeight, height: Self.fieldHeight)
+                                .contentShape(Circle())
+                        }
+                        .buttonStyle(.plain)
+                        .glassEffect(.regular.interactive(), in: .circle)
+                        .accessibilityLabel("Button.Close")
                     }
-                    .buttonStyle(.plain)
-                    .glassEffect(.regular.interactive(), in: .circle)
-                    .accessibilityLabel("Button.Close")
                 }
+                .padding(.horizontal, 16)
+                .padding(.bottom, bottomInset)
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, bottomInset)
         }
         .task {
             try? await Task.sleep(for: .milliseconds(80))
@@ -165,15 +187,11 @@ struct BrowserSearchOverlay: View {
         }
     }
 
-    private var searchText: Binding<String> {
-        Binding(
-            get: { store.selectedTab.searchText },
-            set: { value in store.updateSelected { $0.searchText = value } }
-        )
-    }
-
     private var bottomInset: CGFloat {
         if isKeyboardUp { return 8 }
-        return max(8, 28 - AppTabDeviceMetrics.safeAreaInsets.bottom)
+        let safeAreaBottom = UIApplication.shared.connectedScenes
+            .compactMap { ($0 as? UIWindowScene)?.keyWindow?.safeAreaInsets.bottom }
+            .first ?? 0
+        return min(8, 28 - safeAreaBottom)
     }
 }

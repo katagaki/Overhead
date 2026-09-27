@@ -69,6 +69,7 @@ enum StationSearch {
 struct StationPickerView: View {
     let line: TrainLine
     @ObservedObject var viewModel: JourneyViewModel
+    @Environment(\.appTabOpenDestination) private var openTabDestination
     @State private var selectedDirectionIndex = 0
     @State private var statusTarget: ServiceStatusTarget?
 
@@ -200,21 +201,41 @@ struct StationPickerView: View {
 
             VStack(spacing: 0) {
                 ForEach(Array(stations.enumerated()), id: \.element.id) { index, station in
-                    NavigationLink {
-                        StationTimetableView(
-                            station: station,
-                            line: line,
-                            preferredDirectionId: selectedDirection?.id,
-                            viewModel: viewModel
-                        )
-                    } label: {
-                        stationMapRow(
-                            station: station,
-                            isFirst: index == 0,
-                            isLast: index == stations.count - 1,
-                            continuesBelow: index == stations.count - 1 && !branches.isEmpty,
-                            next: nextArrivals[station.id]
-                        )
+                    Group {
+                        if let openTabDestination {
+                            Button {
+                                openTabDestination(.stationWithDirection(
+                                    lineId: line.id,
+                                    stationId: station.id,
+                                    directionId: selectedDirection?.id
+                                ))
+                            } label: {
+                                stationMapRow(
+                                    station: station,
+                                    isFirst: index == 0,
+                                    isLast: index == stations.count - 1,
+                                    continuesBelow: index == stations.count - 1 && !branches.isEmpty,
+                                    next: nextArrivals[station.id]
+                                )
+                            }
+                        } else {
+                            NavigationLink {
+                                StationTimetableView(
+                                    station: station,
+                                    line: line,
+                                    preferredDirectionId: selectedDirection?.id,
+                                    viewModel: viewModel
+                                )
+                            } label: {
+                                stationMapRow(
+                                    station: station,
+                                    isFirst: index == 0,
+                                    isLast: index == stations.count - 1,
+                                    continuesBelow: index == stations.count - 1 && !branches.isEmpty,
+                                    next: nextArrivals[station.id]
+                                )
+                            }
+                        }
                     }
                     .buttonStyle(.plain)
                 }
@@ -304,12 +325,21 @@ struct StationPickerView: View {
     @ViewBuilder
     private func throughBranchRow(through: ThroughService, isLast: Bool) -> some View {
         if let connecting = connectingLine(for: through) {
-            NavigationLink {
-                StationPickerView(line: connecting, viewModel: viewModel)
-            } label: {
-                throughBranchLabel(through: through, isLast: isLast, navigable: true)
+            if let openTabDestination {
+                Button {
+                    openTabDestination(.line(connecting.id))
+                } label: {
+                    throughBranchLabel(through: through, isLast: isLast, navigable: true)
+                }
+                .buttonStyle(.plain)
+            } else {
+                NavigationLink {
+                    StationPickerView(line: connecting, viewModel: viewModel)
+                } label: {
+                    throughBranchLabel(through: through, isLast: isLast, navigable: true)
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         } else {
             throughBranchLabel(through: through, isLast: isLast, navigable: false)
         }

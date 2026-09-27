@@ -1,6 +1,14 @@
 {
-  "originHash" : "4a8f02fd451faadc3a76a827d5f316e8ac8c630391e7c74d0609f08b9aa4ceeb",
+  "originHash" : "64eea9c7796e4dd49333768c187b9ca8bf6cdd0ec4c798e0faae37f87f5914ca",
   "pins" : [
+    {
+      "identity" : "enhancednavigation",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/katagaki/EnhancedNavigation.git",
+      "state" : {
+        "revision" : "a61e068aa5616bca289820b8c3afd16f6a576b92"
+      }
+    },
     {
       "identity" : "faviconfinder",
       "kind" : "remoteSourceControl",

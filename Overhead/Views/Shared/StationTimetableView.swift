@@ -4,6 +4,7 @@ import Backbone
 // MARK: - Station Timetable View
 
 struct StationTimetableView: View {
+    @Environment(\.appTabOpenDestination) private var openTabDestination
     let station: Station
     let line: TrainLine
     var preferredDirectionId: String? = nil
@@ -480,10 +481,19 @@ struct StationTimetableView: View {
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(throughs, id: \.self) { through in
                     if let connecting = connectingLine(for: through) {
-                        NavigationLink {
-                            StationPickerView(line: connecting, viewModel: viewModel)
-                        } label: {
-                            throughServiceLabel(through, color: connecting.color)
+                        if let openTabDestination {
+                            Button {
+                                openTabDestination(.line(connecting.id))
+                            } label: {
+                                throughServiceLabel(through, color: connecting.color)
+                            }
+                            .buttonStyle(.plain)
+                        } else {
+                            NavigationLink {
+                                StationPickerView(line: connecting, viewModel: viewModel)
+                            } label: {
+                                throughServiceLabel(through, color: connecting.color)
+                            }
                         }
                     } else {
                         throughServiceLabel(through, color: .secondary)

@@ -10,6 +10,7 @@ struct NearbyStationsSection: View {
     @ObservedObject var viewModel: JourneyViewModel
     @StateObject private var provider = NearbyStationsProvider()
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.appTabOpenDestination) private var openTabDestination
     @Environment(\.serviceStatusPresenter) private var serviceStatusPresenter
     @AppStorage("journey.walkingSpeed") private var walkingSpeedRaw = WalkingSpeed.normal.rawValue
     @AppStorage("nearby.collapsed") private var isCollapsed = false
@@ -272,7 +273,16 @@ struct NearbyStationsSection: View {
             }
             Section {
                 Button {
-                    timetableTarget = NearbyTimetableTarget(hit: hit, directionId: currentDirectionId(timetables, choiceKey: choiceKey))
+                    let directionID = currentDirectionId(timetables, choiceKey: choiceKey)
+                    if let openTabDestination {
+                        openTabDestination(.stationWithDirection(
+                            lineId: hit.line.id,
+                            stationId: hit.station.id,
+                            directionId: directionID
+                        ))
+                    } else {
+                        timetableTarget = NearbyTimetableTarget(hit: hit, directionId: directionID)
+                    }
                 } label: {
                     Label("Nearby.OpenTimetable", systemImage: "calendar")
                 }

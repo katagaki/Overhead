@@ -10,6 +10,7 @@
 		7B5E01DF2F76257300861ADF /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7B5E01DE2F76257200861ADF /* WidgetKit.framework */; };
 		7B5E01E12F76257300861ADF /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7B5E01E02F76257300861ADF /* SwiftUI.framework */; };
 		7B5E01EE2F76257500861ADF /* LCDExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 7B5E01DC2F76257200861ADF /* LCDExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E4A900033091000000000003 /* EnhancedNavigation in Frameworks */ = {isa = PBXBuildFile; productRef = E4A900023091000000000002 /* EnhancedNavigation */; };
 		E4993C143039BF5B00B1D0C4 /* FaviconFinder in Frameworks */ = {isa = PBXBuildFile; productRef = E4993C133039BF5B00B1D0C4 /* FaviconFinder */; };
 		E4D93A112FF7F7C6004D37D7 /* Backbone.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4D93A0B2FF7F7C6004D37D7 /* Backbone.framework */; };
 		E4D93A122FF7F7C6004D37D7 /* Backbone.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E4D93A0B2FF7F7C6004D37D7 /* Backbone.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -148,6 +149,7 @@
 			files = (
 				E4D93A112FF7F7C6004D37D7 /* Backbone.framework in Frameworks */,
 				E4993C143039BF5B00B1D0C4 /* FaviconFinder in Frameworks */,
+				E4A900033091000000000003 /* EnhancedNavigation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -368,6 +370,7 @@
 			name = Overhead;
 			packageProductDependencies = (
 				E4993C133039BF5B00B1D0C4 /* FaviconFinder */,
+				E4A900023091000000000002 /* EnhancedNavigation */,
 			);
 			productName = Overhead;
 			productReference = 7B5E01CA2F7624FC00861ADF /* Overhead.app */;
@@ -451,6 +454,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				E4993C123039BF5B00B1D0C4 /* XCRemoteSwiftPackageReference "FaviconFinder" */,
+				E4A900013091000000000001 /* XCRemoteSwiftPackageReference "EnhancedNavigation" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7B5E01CB2F7624FC00861ADF /* Products */;
@@ -1043,6 +1047,11 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		E4A900013091000000000001 /* XCRemoteSwiftPackageReference "EnhancedNavigation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/katagaki/EnhancedNavigation.git";
+			requirement = { kind = revision; revision = a61e068aa5616bca289820b8c3afd16f6a576b92; };
+		};
 		E4993C123039BF5B00B1D0C4 /* XCRemoteSwiftPackageReference "FaviconFinder" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/will-lumley/FaviconFinder";
@@ -1054,6 +1063,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		E4A900023091000000000002 /* EnhancedNavigation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E4A900013091000000000001 /* XCRemoteSwiftPackageReference "EnhancedNavigation" */;
+			productName = EnhancedNavigation;
+		};
 		E4993C133039BF5B00B1D0C4 /* FaviconFinder */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = E4993C123039BF5B00B1D0C4 /* XCRemoteSwiftPackageReference "FaviconFinder" */;

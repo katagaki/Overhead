@@ -1,13 +1,27 @@
 import Foundation
 import Backbone
+import SwiftUI
 
 // MARK: - Search Destinations
 
-/// What tapping a search result opens on the root stack.
-enum SearchDestination: Hashable, Codable {
+/// Catalog pages pushed onto a tab's navigation stack.
+nonisolated enum SearchDestination: Hashable, Codable {
     case operatorLines(String)
     case line(String)
     case station(lineId: String, stationId: String)
+    case stationWithDirection(lineId: String, stationId: String, directionId: String?)
+}
+
+private struct AppTabOpenDestinationKey: EnvironmentKey {
+    static let defaultValue: ((SearchDestination) -> Void)? = nil
+}
+
+extension EnvironmentValues {
+    /// Routes catalog links through the active tab when one owns this stack.
+    var appTabOpenDestination: ((SearchDestination) -> Void)? {
+        get { self[AppTabOpenDestinationKey.self] }
+        set { self[AppTabOpenDestinationKey.self] = newValue }
+    }
 }
 
 // MARK: - Scope

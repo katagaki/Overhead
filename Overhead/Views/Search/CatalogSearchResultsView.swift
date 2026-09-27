@@ -1,9 +1,8 @@
 import SwiftUI
 import Backbone
 
-/// Full-page catalog search used by a browser tab. The query itself lives in
-/// the native bottom toolbar, like Safari's address field.
-struct CatalogTabSearchView: View {
+/// Catalog results shown above the search field while its overlay is active.
+struct CatalogSearchResultsView: View {
     let lines: [TrainLine]
     @Binding var searchText: String
     @Binding var scope: SearchScope
@@ -50,9 +49,8 @@ struct CatalogTabSearchView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
         .scrollDismissesKeyboard(.interactively)
-        .navigationTitle("Search.Title")
-        .navigationBarTitleDisplayMode(.inline)
         .task(id: "\(query)|\(lines.count)") { await runSearch() }
         .task(id: lines.count) {
             nearbyProvider.refreshIfNeeded(lines: lines)

@@ -1,152 +1,138 @@
-import Combine
+import EnhancedNavigation
 import Foundation
-import UIKit
 
-enum AppTabPage: Codable, Hashable {
+nonisolated enum AppTabPage: Hashable, Codable, TabRoot {
+    // Keep former tab roots decodable when restoring saved sessions.
     case home
     case search
     case destination(SearchDestination)
+
+    static var newTabRoot: Self { .home }
+
+    var persistenceToken: String {
+        guard let data = try? JSONEncoder().encode(self) else { return "home" }
+        return data.base64EncodedString()
+    }
+
+    init?(persistenceToken: String) {
+        guard let data = Data(base64Encoded: persistenceToken),
+              let page = try? JSONDecoder().decode(Self.self, from: data) else { return nil }
+        self = page
+    }
 }
 
-struct AppTab: Codable, Hashable, Identifiable {
-    var id = UUID()
-    var page: AppTabPage = .home
-    var searchText = ""
-    var searchScope: SearchScope = .all
-    var lastViewedAt = Date()
-}
+nonisolated struct AppTabIdentity: TabPageIdentity {
+    var title: String
+    var symbolName: String
+    var pathToken: AppPathToken?
 
-private struct AppTabSession: Codable {
-    var version = 1
-    var selectedTabID: UUID
-    var tabs: [AppTab]
-}
+    private enum CodingKeys: String, CodingKey {
+        case title, symbolName, pathToken
+    }
 
-@MainActor
-final class AppTabStore: ObservableObject {
-    @Published private(set) var tabs: [AppTab]
-    @Published private(set) var selectedTabID: UUID
-    @Published private(set) var snapshots: [UUID: UIImage] = [:]
-    private(set) var cardFrames: [UUID: CGRect] = [:]
+    init(title: String, symbolName: String, pathToken: AppPathToken?) {
+        self.title = title
+        self.symbolName = symbolName
+        self.pathToken = pathToken
+    }
 
-    private static let storageKey = "browser.tabs.v1"
-
-    init() {
-        if let data = UserDefaults.standard.data(forKey: Self.storageKey),
-           let session = try? JSONDecoder().decode(AppTabSession.self, from: data),
-           session.version == 1,
-           !session.tabs.isEmpty {
-            tabs = session.tabs
-            selectedTabID = session.tabs.contains(where: { $0.id == session.selectedTabID })
-                ? session.selectedTabID
-                : session.tabs[0].id
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        title = try values.decode(String.self, forKey: .title)
+        symbolName = try values.decode(String.self, forKey: .symbolName)
+        if let token = try? values.decode(AppPathToken.self, forKey: .pathToken) {
+            pathToken = token
+        } else if let legacy = try? values.decode(SearchDestination.self, forKey: .pathToken) {
+            pathToken = .search(legacy)
         } else {
-            let tab = AppTab()
-            tabs = [tab]
-            selectedTabID = tab.id
+            pathToken = nil
         }
     }
 
-    var selectedTab: AppTab {
-        tabs.first(where: { $0.id == selectedTabID }) ?? tabs[0]
+    func names(_ other: Self) -> Bool {
+        if let pathToken, let otherToken = other.pathToken { return pathToken == otherToken }
+        return title == other.title
+    }
+}
+
+nonisolated enum AppPathToken: Hashable, Codable {
+    case search(SearchDestination)
+    case menu(AppMenuDestination)
+    case customLine(CustomLineRoute)
+}
+
+nonisolated enum AppMenuDestination: String, Hashable, Codable {
+    case attributions
+    case lineData
+}
+
+typealias AppNavigationStore = TabNavigationStore<AppTabPage, AppTabIdentity>
+
+struct AppTabSearchState: Codable {
+    var text = ""
+    var scope: SearchScope = .all
+}
+
+enum AppTabSessionMigration {
+    private struct LegacyTab: Decodable {
+        let id: UUID
+        let page: AppTabPage
+        let searchText: String
+        let searchScope: SearchScope
     }
 
-    var selectedIndex: Int {
-        tabs.firstIndex(where: { $0.id == selectedTabID }) ?? 0
+    private struct LegacySession: Decodable {
+        let selectedTabID: UUID
+        let tabs: [LegacyTab]
     }
 
-    func select(_ id: UUID) {
-        guard let index = tabs.firstIndex(where: { $0.id == id }) else { return }
-        tabs[index].lastViewedAt = Date()
-        selectedTabID = id
-        save()
-    }
-
-    @discardableResult
-    func add(page: AppTabPage = .home) -> UUID {
-        let tab = AppTab(page: page)
-        tabs.append(tab)
-        selectedTabID = tab.id
-        save()
-        return tab.id
-    }
-
-    func close(_ id: UUID) {
-        guard let index = tabs.firstIndex(where: { $0.id == id }) else { return }
-        snapshots[id] = nil
-        if tabs.count == 1 {
-            let replacement = AppTab()
-            tabs = [replacement]
-            selectedTabID = replacement.id
-        } else {
-            tabs.remove(at: index)
-            if selectedTabID == id {
-                selectedTabID = tabs[min(index, tabs.count - 1)].id
+    static func makeStore() -> AppNavigationStore {
+        let configuration = TabStoreConfiguration(
+            persistenceKeyPrefix: "Overhead.Navigation",
+            snapshotDirectoryName: "OverheadTabSnapshots"
+        )
+        if UserDefaults.standard.stringArray(forKey: "Overhead.Navigation.TabTokens") != nil {
+            let store = AppNavigationStore.restored(configuration: configuration)
+            let oldSearchTabs = store.tabs.filter { $0.root == .search }
+            for tab in oldSearchTabs {
+                store.updateTab(tab.id) { $0.root = .home }
             }
+            if !oldSearchTabs.isEmpty { store.persistTabs() }
+            return store
         }
-        save()
+        guard let data = UserDefaults.standard.data(forKey: "browser.tabs.v1"),
+              let session = try? JSONDecoder().decode(LegacySession.self, from: data),
+              !session.tabs.isEmpty else {
+            return .restored(configuration: configuration)
+        }
+        let tabs = session.tabs.map {
+            NavigationTab<AppTabPage, AppTabIdentity>(
+                id: $0.id,
+                root: $0.page == .search ? .home : $0.page
+            )
+        }
+        let searchStates = Dictionary(uniqueKeysWithValues: session.tabs.map {
+            ($0.id, AppTabSearchState(text: $0.searchText, scope: $0.searchScope))
+        })
+        AppTabSearchStateStorage.save(searchStates)
+        let store = AppNavigationStore(configuration: configuration, tabs: tabs, selectedTabID: session.selectedTabID)
+        store.persistTabs()
+        return store
+    }
+}
+
+enum AppTabSearchStateStorage {
+    private static let key = "Overhead.Navigation.SearchStates"
+
+    static func load() -> [UUID: AppTabSearchState] {
+        guard let data = UserDefaults.standard.data(forKey: key),
+              let states = try? JSONDecoder().decode([UUID: AppTabSearchState].self, from: data)
+        else { return [:] }
+        return states
     }
 
-    var canCloseTabs: Bool {
-        tabs.count > 1
-    }
-
-    func closeAll() {
-        let replacement = AppTab()
-        tabs = [replacement]
-        selectedTabID = replacement.id
-        snapshots.removeAll()
-        save()
-    }
-
-    func captureSelectedTabSnapshot() {
-        guard let snapshot = AppTabSnapshotter.captureVisiblePage() else { return }
-        snapshots[selectedTabID] = snapshot
-    }
-
-    func setCardFrame(_ frame: CGRect, for tabID: UUID) {
-        guard cardFrames[tabID] != frame else { return }
-        cardFrames[tabID] = frame
-    }
-
-    func duplicate(_ id: UUID) {
-        guard let index = tabs.firstIndex(where: { $0.id == id }) else { return }
-        var copy = tabs[index]
-        copy.id = UUID()
-        copy.lastViewedAt = Date()
-        tabs.insert(copy, at: index + 1)
-        snapshots[copy.id] = snapshots[id]
-        selectedTabID = copy.id
-        save()
-    }
-
-    func move(_ sourceID: UUID, before targetID: UUID) {
-        guard sourceID != targetID,
-              let source = tabs.firstIndex(where: { $0.id == sourceID }),
-              let target = tabs.firstIndex(where: { $0.id == targetID }) else { return }
-        let moved = tabs.remove(at: source)
-        tabs.insert(moved, at: source < target ? target - 1 : target)
-        save()
-    }
-
-    @discardableResult
-    func selectAdjacent(_ delta: Int) -> Bool {
-        let target = selectedIndex + delta
-        guard tabs.indices.contains(target) else { return false }
-        select(tabs[target].id)
-        return true
-    }
-
-    func updateSelected(_ mutation: (inout AppTab) -> Void) {
-        guard let index = tabs.firstIndex(where: { $0.id == selectedTabID }) else { return }
-        mutation(&tabs[index])
-        tabs[index].lastViewedAt = Date()
-        save()
-    }
-
-    private func save() {
-        let session = AppTabSession(selectedTabID: selectedTabID, tabs: tabs)
-        guard let data = try? JSONEncoder().encode(session) else { return }
-        UserDefaults.standard.set(data, forKey: Self.storageKey)
+    static func save(_ states: [UUID: AppTabSearchState]) {
+        guard let data = try? JSONEncoder().encode(states) else { return }
+        UserDefaults.standard.set(data, forKey: key)
     }
 }
