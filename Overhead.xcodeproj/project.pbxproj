@@ -1050,7 +1050,7 @@
 		E4A900013091000000000001 /* XCRemoteSwiftPackageReference "EnhancedNavigation" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/katagaki/EnhancedNavigation.git";
-			requirement = { kind = revision; revision = a61e068aa5616bca289820b8c3afd16f6a576b92; };
+			requirement = { kind = revision; revision = 04fae8aa0a4bcf4ee0e878c1642fb519cb960cf4; };
 		};
 		E4993C123039BF5B00B1D0C4 /* XCRemoteSwiftPackageReference "FaviconFinder" */ = {
 			isa = XCRemoteSwiftPackageReference;
