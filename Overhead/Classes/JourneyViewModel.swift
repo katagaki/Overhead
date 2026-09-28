@@ -1351,6 +1351,10 @@ final class JourneyViewModel: ObservableObject {
 
     /// Badge colour for the line ridden into a journey station.
     func badgeLineColor(arrivingAt stationId: String) -> Color {
+        // Matches the journey sheet; through-lines and untimed rides carry no legs.
+        if let owner = StaticTrainData.line(containingStationId: stationId) {
+            return owner.trainLine.color
+        }
         let fallback = activeJourney?.line.color ?? selectedLine?.color ?? .accentColor
         guard let journey = activeJourney, !journeyLegLines.isEmpty,
               let index = journey.journeyStations.firstIndex(where: { $0.id == stationId }),
