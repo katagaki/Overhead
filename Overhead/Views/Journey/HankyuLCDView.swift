@@ -25,7 +25,7 @@ struct HankyuLCDView: View {
     }
 
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 1.0)) { context in
+        LCDTimeline(every: 1.0) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
                 let phase = LCDPhase.of(journey: journey, state: state, now: context.date)

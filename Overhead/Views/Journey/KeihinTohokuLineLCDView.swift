@@ -21,10 +21,8 @@ struct KeihinTohokuLineLCDView: View {
     private static let markerGreenLight = Color(hex: "#58CB42")
     private static let markerGreenDark = Color(hex: "#1D981A")
 
-    private static var allLines: [TrainLine] { StaticTrainData.trainLines() }
-
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 0.5)) { context in
+        LCDTimeline(every: 0.5) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
                 let language = LCDLanguageRotation.current(at: context.date)
@@ -402,11 +400,8 @@ struct KeihinTohokuLineLCDView: View {
         guard !journey.line.isCustom else { return [] }
         let ridden = Set(journey.line.id.split(separator: "+").map(String.init))
         return Array(
-            Self.allLines
-                .filter { line in
-                    !ridden.contains(line.id)
-                        && line.stations.contains { $0.name == station.name }
-                }
+            StaticTrainData.trainLines(atStationNamed: station.name)
+                .filter { !ridden.contains($0.id) }
                 .prefix(3)
         )
     }

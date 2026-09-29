@@ -53,7 +53,7 @@ struct TubeLCDView: View {
     }
 
     private func onDots(_ pages: [TubePage]) -> some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { context in
+        LCDTimeline(animationInterval: 1.0 / 30.0) { context in
             Canvas { ctx, _ in
                 guard !pages.isEmpty else { return }
                 let (page, columnOffset) = frame(at: context.date, pages: pages)

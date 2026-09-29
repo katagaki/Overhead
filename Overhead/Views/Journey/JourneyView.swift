@@ -7,6 +7,7 @@ struct JourneyView: View {
     @ObservedObject var viewModel: JourneyViewModel
     @AppStorage(TrainLCDStyle.storageKey) private var lcdStyleRaw = TrainLCDStyle.joban.rawValue
     @AppStorage(TrainLCDOrientation.storageKey) private var lcdOrientationRaw = TrainLCDOrientation.left.rawValue
+    @Environment(\.scenePhase) private var scenePhase
 
     /// Carried with the presentation; `isPresented` would read a stale index.
     @State private var replanTarget: ReplanTarget?
@@ -74,6 +75,7 @@ struct JourneyView: View {
                             lineColor: lineColor,
                             orientation: TrainLCDOrientation(rawValue: lcdOrientationRaw) ?? .left
                         )
+                        .environment(\.lcdClockPaused, scenePhase == .background)
                         // PiP docks here so restoring animates into the LCD.
                         .overlay {
                             LCDPiPLayerHost()

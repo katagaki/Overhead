@@ -38,10 +38,8 @@ struct LoopLCDView: View {
         51.4 - 46.8 * pow(t, 1.15)
     }
 
-    private static var allLines: [TrainLine] { StaticTrainData.trainLines() }
-
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 1.0)) { context in
+        LCDTimeline(every: 1.0) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
                 let language = LCDLanguageRotation.current(at: context.date)
@@ -494,11 +492,8 @@ struct LoopLCDView: View {
         guard !journey.line.isCustom else { return [] }
         let ridden = Set(journey.line.id.split(separator: "+").map(String.init))
         return Array(
-            Self.allLines
-                .filter { line in
-                    !ridden.contains(line.id)
-                        && line.stations.contains { $0.name == station.name }
-                }
+            StaticTrainData.trainLines(atStationNamed: station.name)
+                .filter { !ridden.contains($0.id) }
                 .prefix(6)
         )
     }

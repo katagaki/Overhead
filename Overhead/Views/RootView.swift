@@ -31,7 +31,6 @@ struct RootView: View {
     @AppStorage("lineData.onboarded") private var lineDataOnboarded = false
     @State private var showLineDataOnboarding = false
 
-    private static let journeyTransitionID = "activeJourney"
     private static let feedbackURL = URL(string: "https://forms.gle/U91cFDFTufF12PeF7")!
 
     private var needsLineDataOnboarding: Bool {
@@ -127,7 +126,7 @@ struct RootView: View {
         }
         .sheet(isPresented: $showJourneySheet) {
             JourneySheetView(viewModel: viewModel)
-                .navigationTransition(.zoom(sourceID: Self.journeyTransitionID, in: journeyZoom))
+                .navigationTransition(.zoom(sourceID: tabStore.selectedTabID, in: journeyZoom))
         }
         .sheet(item: $customStore.incomingPackage) { package in
             CustomLineImportView(package: package)
@@ -372,7 +371,8 @@ struct RootView: View {
                 JourneyStationToolbarButton(viewModel: viewModel) {
                     showJourneySheet = true
                 }
-                .matchedTransitionSource(id: Self.journeyTransitionID, in: journeyZoom)
+                // Hidden tabs stay mounted, so each needs its own source.
+                .matchedTransitionSource(id: tab.id, in: journeyZoom)
 
                 BrowserAddressToolbarItem(
                     viewModel: viewModel,

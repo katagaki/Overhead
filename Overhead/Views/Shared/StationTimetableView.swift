@@ -738,7 +738,7 @@ private struct BoardMarquee: View {
 
     var body: some View {
         GeometryReader { geo in
-            TimelineView(.animation) { context in
+            TimelineView(.animation(minimumInterval: 1.0 / 60.0)) { context in
                 marqueeText
                     .offset(x: offsetX(at: context.date, containerWidth: geo.size.width))
                     .opacity(textWidth > 0 ? 1 : 0)

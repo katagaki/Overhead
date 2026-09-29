@@ -33,8 +33,6 @@ struct RinkaiLCDView: View {
     /// How far the run carries on past the last stop.
     private static let bandTail: CGFloat = 18
 
-    private static var allLines: [TrainLine] { StaticTrainData.trainLines() }
-
     // Chrome takes the line's own colour.
     private var railBlue: Color { lineColor.lcdTint(saturation: 1.3, brightness: 0.81) }
     private func bandGradient(_ base: Color) -> LinearGradient {
@@ -47,7 +45,7 @@ struct RinkaiLCDView: View {
     private var boardBackground: Color { lineColor.lcdTint(saturation: 0.045, brightness: 0.975) }
 
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 0.5)) { context in
+        LCDTimeline(every: 0.5) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
                 let language = LCDLanguageRotation.current(at: context.date)
@@ -452,11 +450,8 @@ struct RinkaiLCDView: View {
         guard !journey.line.isCustom else { return [] }
         let ridden = Set(journey.line.id.split(separator: "+").map(String.init))
         return Array(
-            Self.allLines
-                .filter { line in
-                    !ridden.contains(line.id)
-                        && line.stations.contains { $0.name == station.name }
-                }
+            StaticTrainData.trainLines(atStationNamed: station.name)
+                .filter { !ridden.contains($0.id) }
                 .prefix(3)
         )
     }

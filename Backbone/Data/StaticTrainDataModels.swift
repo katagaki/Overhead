@@ -624,7 +624,7 @@ public enum StaticTrainData {
         linesLock.unlock()
 
         // Derived views are cheap to rebuild and hold no file I/O.
-        displayLock.lock(); cachedTrainLines = nil; displayLock.unlock()
+        displayLock.lock(); cachedTrainLines = nil; cachedLinesByStationName = nil; displayLock.unlock()
         snapshotLock.lock(); snapshots.removeAll(); snapshotLock.unlock()
         BadgeStyles.invalidate()
         NotificationCenter.default.post(name: Self.didChangeNotification, object: nil)
@@ -634,7 +634,7 @@ public enum StaticTrainData {
     /// and every per-day snapshot built from them.
     public static func invalidate() {
         linesLock.lock(); cachedLines = nil; linesLock.unlock()
-        displayLock.lock(); cachedTrainLines = nil; displayLock.unlock()
+        displayLock.lock(); cachedTrainLines = nil; cachedLinesByStationName = nil; displayLock.unlock()
         snapshotLock.lock(); snapshots.removeAll(); snapshotLock.unlock()
         Catalog.reload()
         BadgeStyles.invalidate()
@@ -749,6 +749,28 @@ public enum StaticTrainData {
         let built = buildTrainLines()
         displayLock.lock(); cachedTrainLines = built; displayLock.unlock()
         return built
+    }
+
+    private static var cachedLinesByStationName: [String: [TrainLine]]?
+
+    /// Every line serving a station of this name, in `trainLines()` order.
+    /// Indexed: the journey LCDs look up transfers on every frame.
+    public static func trainLines(atStationNamed name: String) -> [TrainLine] {
+        displayLock.lock()
+        if let cachedLinesByStationName {
+            displayLock.unlock()
+            return cachedLinesByStationName[name] ?? []
+        }
+        displayLock.unlock()
+
+        var map: [String: [TrainLine]] = [:]
+        for line in trainLines() {
+            for stationName in Set(line.stations.map(\.name)) {
+                map[stationName, default: []].append(line)
+            }
+        }
+        displayLock.lock(); cachedLinesByStationName = map; displayLock.unlock()
+        return map[name] ?? []
     }
 
     private static func buildTrainLines() -> [TrainLine] {

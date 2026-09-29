@@ -18,7 +18,7 @@ nonisolated enum BoardSnapshotWriter {
         })
         Task.detached(priority: .utility) {
             let snapshot = build(places: places, titles: titles)
-            BoardSnapshotStore.save(snapshot)
+            guard BoardSnapshotStore.save(snapshot) else { return }
             WidgetCenter.shared.reloadAllTimelines()
         }
     }

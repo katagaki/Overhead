@@ -31,8 +31,6 @@ struct TsukubaExpressLCDView: View {
     private static let markerNavy = Color(hex: "#1B2B7A")
     private static let panel = Color(hex: "#EEEFF5")
 
-    private static var allLines: [TrainLine] { StaticTrainData.trainLines() }
-
     // The run still to come takes the line's own colour.
     private func runGradient(_ base: Color) -> LinearGradient {
         LinearGradient(colors: [base.lcdTint(saturation: 1.5, brightness: 0.90),
@@ -41,7 +39,7 @@ struct TsukubaExpressLCDView: View {
     }
 
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 0.5)) { context in
+        LCDTimeline(every: 0.5) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
                 let language = LCDLanguageRotation.current(at: context.date)
@@ -348,11 +346,8 @@ struct TsukubaExpressLCDView: View {
         guard !journey.line.isCustom else { return [] }
         let ridden = Set(journey.line.id.split(separator: "+").map(String.init))
         return Array(
-            Self.allLines
-                .filter { line in
-                    !ridden.contains(line.id)
-                        && line.stations.contains { $0.name == station.name }
-                }
+            StaticTrainData.trainLines(atStationNamed: station.name)
+                .filter { !ridden.contains($0.id) }
                 .prefix(1)
         )
     }

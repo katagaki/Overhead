@@ -31,8 +31,6 @@ struct KeiseiLCDView: View {
     private static let boardBackground = Color(hex: "#FDFDFF")
     private static let footerBackground = Color(hex: "#E7EEF8")
 
-    private static var allLines: [TrainLine] { StaticTrainData.trainLines() }
-
     /// The chrome takes the line's own hue, pushed to the display's deep blue.
     // Held to the luminance the Keisei blue lands at, so a yellow or orange
     // line darkens to the same weight instead of glaring or going muddy.
@@ -59,7 +57,7 @@ struct KeiseiLCDView: View {
     }
 
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 0.5)) { context in
+        LCDTimeline(every: 0.5) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
                 let language = LCDLanguageRotation.current(at: context.date)
@@ -458,11 +456,8 @@ struct KeiseiLCDView: View {
         guard !journey.line.isCustom else { return [] }
         let ridden = Set(journey.line.id.split(separator: "+").map(String.init))
         return Array(
-            Self.allLines
-                .filter { line in
-                    !ridden.contains(line.id)
-                        && line.stations.contains { $0.name == station.name }
-                }
+            StaticTrainData.trainLines(atStationNamed: station.name)
+                .filter { !ridden.contains($0.id) }
                 .prefix(3)
         )
     }
