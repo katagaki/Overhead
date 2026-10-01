@@ -417,9 +417,8 @@ struct NearbyStationsSection: View {
             var result: [String: [StationTimetableData]] = [:]
             let calendar = ScheduleCalendar.current()
             for target in targets {
-                guard let staticLine = StaticTrainData.line(withId: target.lineId) else { continue }
                 result[target.id] = StaticTimetableGenerator.stationTimetables(
-                    for: staticLine,
+                    forLineId: target.lineId,
                     stationId: target.stationId,
                     calendar: calendar
                 )

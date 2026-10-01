@@ -658,6 +658,7 @@ public enum StaticTrainData {
         let lines: [StaticTrainLine]
         let byId: [String: StaticTrainLine]
         let byStationId: [String: StaticTrainLine]
+        let services = ServiceMemo()
 
         init(_ lines: [StaticTrainLine]) {
             self.lines = lines
@@ -690,6 +691,14 @@ public enum StaticTrainData {
 
     private static func snapshot(on date: Date) -> Snapshot {
         snapshot(onDayKey: dayKey(for: date))
+    }
+
+    /// Today's catalog line with the memo its generated services live in, so
+    /// the memo goes whenever the snapshot does (install, invalidate, new day).
+    static func catalogLine(withId id: String) -> (line: StaticTrainLine, memo: ServiceMemo)? {
+        let snapshot = snapshot(on: Date())
+        guard let line = snapshot.byId[id] else { return nil }
+        return (line, snapshot.services)
     }
 
     /// Every line, with each announced 改正 applied once its `validFrom` arrives.
@@ -1587,6 +1596,36 @@ public enum StaticTrainData {
 
 // MARK: - Static Timetable Generator
 
+/// Generating a busy line's services takes tens of milliseconds, and boards,
+/// pickers and the widget keep asking for the same few lines.
+final class ServiceMemo: @unchecked Sendable {
+    private let lock = NSLock()
+    private var entries: [String: [TrainService]] = [:]
+    private var order: [String] = []
+    // A busy line's services run to several MB.
+    private let limit = 12
+
+    func value(_ key: String, _ build: () -> [TrainService]) -> [TrainService] {
+        lock.lock()
+        if let hit = entries[key] {
+            order.removeAll { $0 == key }
+            order.append(key)
+            lock.unlock()
+            return hit
+        }
+        lock.unlock()
+
+        let built = build()
+        lock.lock(); defer { lock.unlock() }
+        if entries[key] == nil {
+            entries[key] = built
+            order.append(key)
+            if order.count > limit { entries[order.removeFirst()] = nil }
+        }
+        return built
+    }
+}
+
 public enum StaticTimetableGenerator {
 
     // MARK: Train Services
@@ -1596,6 +1635,20 @@ public enum StaticTimetableGenerator {
             return timetableServices(line: line, runs: runs.filter { $0.calendar == calendar })
         }
         return line.directions.flatMap { services(for: line, direction: $0, calendar: calendar) }
+    }
+
+    /// Today's services for a catalog line, memoized; nil for ids outside the
+    /// catalog (composites). Lines read for another date go through `services(for:)`.
+    public static func services(forLineId id: String, calendar: ScheduleCalendar) -> [TrainService]? {
+        guard let (line, memo) = StaticTrainData.catalogLine(withId: id) else { return nil }
+        if line.timetableRuns != nil {
+            return memo.value("\(id)|\(calendar.rawValue)") { services(for: line, calendar: calendar) }
+        }
+        return line.directions.indices.flatMap { index in
+            memo.value("\(id)|\(calendar.rawValue)|\(index)") {
+                services(for: line, direction: line.directions[index], calendar: calendar)
+            }
+        }
     }
 
     private static func timetableServices(line: StaticTrainLine, runs: [TimetableRun]) -> [TrainService] {
@@ -1807,7 +1860,43 @@ public enum StaticTimetableGenerator {
         stationId: String,
         calendar: ScheduleCalendar
     ) -> [StationTimetableData] {
-        line.directions.compactMap { direction in
+        // Run-based lines generate both directions in one pass; build it once.
+        var runServices: [TrainService]?
+        return stationTimetables(for: line, stationId: stationId) { index in
+            guard line.timetableRuns != nil else {
+                return services(for: line, direction: line.directions[index], calendar: calendar)
+            }
+            if runServices == nil { runServices = services(for: line, calendar: calendar) }
+            return runServices ?? []
+        }
+    }
+
+    /// Today's station timetables for a catalog line, off the memoized services.
+    public static func stationTimetables(
+        forLineId id: String,
+        stationId: String,
+        calendar: ScheduleCalendar
+    ) -> [StationTimetableData] {
+        guard let (line, memo) = StaticTrainData.catalogLine(withId: id) else { return [] }
+        return stationTimetables(for: line, stationId: stationId) { index in
+            guard line.timetableRuns != nil else {
+                return memo.value("\(id)|\(calendar.rawValue)|\(index)") {
+                    services(for: line, direction: line.directions[index], calendar: calendar)
+                }
+            }
+            return memo.value("\(id)|\(calendar.rawValue)") { services(for: line, calendar: calendar) }
+        }
+    }
+
+    /// `servicesFor` returns the services for the direction at an index;
+    /// run-based lines may hand back both directions, filtered here.
+    private static func stationTimetables(
+        for line: StaticTrainLine,
+        stationId: String,
+        servicesFor: (Int) -> [TrainService]
+    ) -> [StationTimetableData] {
+        line.directions.indices.compactMap { index in
+            let direction = line.directions[index]
             let stations = orderedStations(line: line, direction: direction)
             guard stations.contains(where: { $0.id == stationId }),
                   stations.last?.id != stationId,  // no departures toward a direction from its terminus
@@ -1817,8 +1906,8 @@ public enum StaticTimetableGenerator {
             struct Row { let time: String; let type: TrainService.TrainType; let originatesHere: Bool; let destJa: String; let destEn: String }
             let stationsById = Dictionary(uniqueKeysWithValues: stations.map { ($0.id, $0) })
             let directionServices = line.timetableRuns != nil
-                ? services(for: line, calendar: calendar).filter { ($0.direction == .outbound) == direction.isAscending }
-                : services(for: line, direction: direction, calendar: calendar)
+                ? servicesFor(index).filter { ($0.direction == .outbound) == direction.isAscending }
+                : servicesFor(index)
             var byMinute: [Int: Row] = [:]
             for service in directionServices {
                 guard let idx = service.timetable.firstIndex(where: { $0.stationId == stationId }),

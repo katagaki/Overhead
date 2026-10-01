@@ -93,7 +93,9 @@ final class JourneyViewModel: ObservableObject {
     }
 
     private func bindLocationTracker() {
+        // Every observer re-renders on a publish; the 10s tick often repeats itself.
         locationTracker.$positionState
+            .removeDuplicates()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 guard let self, let state else { return }
@@ -102,6 +104,7 @@ final class JourneyViewModel: ObservableObject {
             .store(in: &cancellables)
 
         locationTracker.$trackingMode
+            .removeDuplicates()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] mode in
                 guard let self else { return }
@@ -110,6 +113,7 @@ final class JourneyViewModel: ObservableObject {
             .store(in: &cancellables)
 
         locationTracker.$locationError
+            .removeDuplicates()
             .receive(on: DispatchQueue.main)
             .assign(to: &$locationError)
 
@@ -1387,7 +1391,7 @@ final class JourneyViewModel: ObservableObject {
 
         if let staticLine = StaticTrainData.line(containingStationId: stationId) {
             stationTimetable = StaticTimetableGenerator.stationTimetables(
-                for: staticLine,
+                forLineId: staticLine.id,
                 stationId: stationId,
                 calendar: .current()
             )

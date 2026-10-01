@@ -72,6 +72,8 @@ struct StationPickerView: View {
     @Environment(\.appTabOpenDestination) private var openTabDestination
     @State private var selectedDirectionIndex = 0
     @State private var statusTarget: ServiceStatusTarget?
+    // Keyed by minute and direction so a direction flip never shows the other side's times.
+    @State private var nextArrivals: (key: String, byStation: [String: NextArrival])?
 
     private let trackWidth: CGFloat = 4
     private let dotColumnWidth: CGFloat = 24
@@ -196,7 +198,8 @@ struct StationPickerView: View {
     private var stationsCard: some View {
         TimelineView(.everyMinute) { context in
             let stations = orderedStations
-            let nextArrivals = nextArrivalsByStation(at: context.date)
+            let arrivalsKey = nextArrivalsKey(at: context.date)
+            let nextArrivals = nextArrivals(forKey: arrivalsKey)
             let branches = throughServicesForDirection
 
             VStack(spacing: 0) {
@@ -245,7 +248,28 @@ struct StationPickerView: View {
             }
             .background(Color(.secondarySystemGroupedBackground))
             .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+            .task(id: arrivalsKey) {
+                await loadNextArrivals(key: arrivalsKey, at: context.date)
+            }
         }
+    }
+
+    private func loadNextArrivals(key: String, at now: Date) async {
+        guard let ascending = selectedDirection?.isAscending else { return }
+        let lineId = line.id
+        let computed = await Task.detached(priority: .userInitiated) {
+            Self.nextArrivalsByStation(lineId: lineId, ascending: ascending, at: now)
+        }.value
+        nextArrivals = (key: key, byStation: computed)
+    }
+
+    private func nextArrivals(forKey key: String) -> [String: NextArrival] {
+        guard let nextArrivals, nextArrivals.key == key else { return [:] }
+        return nextArrivals.byStation
+    }
+
+    private func nextArrivalsKey(at date: Date) -> String {
+        "\(Int(date.timeIntervalSince1970 / 60))|\(selectedDirection?.isAscending ?? true)"
     }
 
     // MARK: - Station Row
@@ -379,7 +403,7 @@ struct StationPickerView: View {
 
     // MARK: - Next Arriving Train
 
-    private struct NextArrival {
+    nonisolated private struct NextArrival: Sendable {
         let time: String
         let trainType: TrainService.TrainType
         let minutes: Int
@@ -419,9 +443,11 @@ struct StationPickerView: View {
         }
     }
 
-    private func nextArrivalsByStation(at now: Date) -> [String: NextArrival] {
-        guard let staticLine, let direction = selectedDirection else { return [:] }
-
+    nonisolated private static func nextArrivalsByStation(
+        lineId: String,
+        ascending: Bool,
+        at now: Date
+    ) -> [String: NextArrival] {
         let calendar = ScheduleCalendar.current(at: now.addingTimeInterval(-3 * 3600))
         var jst = Calendar(identifier: .gregorian)
         jst.timeZone = TimeZone(identifier: "Asia/Tokyo")!
@@ -431,8 +457,8 @@ struct StationPickerView: View {
             nowMinutes += 24 * 60
         }
 
-        let services = StaticTimetableGenerator.services(for: staticLine, calendar: calendar)
-            .filter { ($0.direction == .outbound) == direction.isAscending }
+        let services = (StaticTimetableGenerator.services(forLineId: lineId, calendar: calendar) ?? [])
+            .filter { ($0.direction == .outbound) == ascending }
 
         var best: [String: NextArrival] = [:]
         for service in services {
@@ -456,8 +482,8 @@ struct StationPickerView: View {
         var tomorrowFirst: [String: NextArrival] = [:]
         let tomorrowServices = tomorrow == calendar
             ? services
-            : StaticTimetableGenerator.services(for: staticLine, calendar: tomorrow)
-                .filter { ($0.direction == .outbound) == direction.isAscending }
+            : (StaticTimetableGenerator.services(forLineId: lineId, calendar: tomorrow) ?? [])
+                .filter { ($0.direction == .outbound) == ascending }
         for service in tomorrowServices {
             let serviceOrigin = service.timetable.first?.stationId
             for entry in service.timetable {

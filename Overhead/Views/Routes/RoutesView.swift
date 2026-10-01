@@ -538,7 +538,7 @@ struct FavoritesSection: View {
         calendar: ScheduleCalendar
     ) -> StationTimetableData? {
         let timetables = StaticTimetableGenerator.stationTimetables(
-            for: line, stationId: fromId, calendar: calendar
+            forLineId: line.id, stationId: fromId, calendar: calendar
         )
         guard !timetables.isEmpty else { return nil }
 
