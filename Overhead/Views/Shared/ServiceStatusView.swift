@@ -3,65 +3,48 @@ import SwiftUI
 import WebKit
 import Backbone
 
-// MARK: - Service Status Sheet (運行情報)
+// MARK: - Service Status (運行情報)
 
-/// Medium sheet showing the operator's official status page, with X / Safari escapes.
-struct ServiceStatusSheet: View {
+/// The operator's official status page, pushed onto the tab, with X / Safari escapes.
+struct ServiceStatusView: View {
     let lineId: String
     let delayInfo: DelayCheckInfo
-    @ObservedObject var web: ServiceStatusWebController
-    @Environment(\.dismiss) private var dismiss
-    @State private var detent: PresentationDetent = .medium
+    @StateObject private var web: ServiceStatusWebController
+
+    init(lineId: String, delayInfo: DelayCheckInfo) {
+        self.lineId = lineId
+        self.delayInfo = delayInfo
+        _web = StateObject(wrappedValue: ServiceStatusWebController(delayInfo: delayInfo))
+    }
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if let webView = web.officialWebView {
-                    ServiceStatusWebView(webView: webView)
-                        .ignoresSafeArea(edges: .bottom)
-                }
+        Group {
+            if let webView = web.officialWebView {
+                ServiceStatusWebView(webView: webView)
+                    .ignoresSafeArea(edges: .bottom)
             }
-            .navigationTitle("StationTimetable.ServiceStatus")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItemGroup(placement: .topBarLeading) {
+        }
+        .navigationTitle("StationTimetable.ServiceStatus")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                if let xURL = web.xURL {
                     Button {
-                        openInSafari()
+                        UIApplication.shared.open(xURL)
                     } label: {
-                        Label("ServiceStatus.OpenInSafari", systemImage: "safari")
+                        Image("sns.twitter.x")
+                            .resizable()
+                            .scaleEffect(0.8)
                     }
-                    if let xURL = web.xURL {
-                        Button {
-                            UIApplication.shared.open(xURL)
-                        } label: {
-                            Image("sns.twitter.x")
-                                .resizable()
-                                .scaleEffect(0.8)
-                        }
-                        .accessibilityLabel("ServiceStatus.OpenInX")
-                    }
+                    .accessibilityLabel("ServiceStatus.OpenInX")
                 }
-
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Label("Button.Close", systemImage: "xmark")
-                    }
+                Button {
+                    openInSafari()
+                } label: {
+                    Label("ServiceStatus.OpenInSafari", systemImage: "safari")
                 }
             }
         }
-        .presentationDetents([.medium, .large], selection: $detent)
-        .presentationContentInteraction(.scrolls)
-        .presentationDragIndicator(.visible)
-#if DEBUG
-        .onAppear {
-            if ScreenshotStaging.shared.expandServiceStatus {
-                ScreenshotStaging.shared.expandServiceStatus = false
-                detent = .large
-            }
-        }
-#endif
     }
 
     private func openInSafari() {
@@ -73,23 +56,9 @@ struct ServiceStatusSheet: View {
 
 // MARK: - Toolbar Button
 
-/// The 運行情報 sheet's content; the web view preloads from the moment it is built.
-struct ServiceStatusTarget: Identifiable {
-    let lineId: String
-    let delayInfo: DelayCheckInfo
-    let web: ServiceStatusWebController
-    var id: String { lineId }
-
-    init(lineId: String, delayInfo: DelayCheckInfo) {
-        self.lineId = lineId
-        self.delayInfo = delayInfo
-        self.web = ServiceStatusWebController(delayInfo: delayInfo)
-    }
-}
-
 /// Centered 運行情報 bottom-bar button, shared by the line and timetable pages.
 private struct ServiceStatusToolbar: ViewModifier {
-    @Binding var target: ServiceStatusTarget?
+    @Environment(\.appTabOpenDestination) private var openTabDestination
     let lineId: String
     let delayInfo: DelayCheckInfo?
 
@@ -100,28 +69,20 @@ private struct ServiceStatusToolbar: ViewModifier {
 
                 ToolbarItem(placement: .bottomBar) {
                     Button {
-                        guard let delayInfo else { return }
-                        target = ServiceStatusTarget(lineId: lineId, delayInfo: delayInfo)
+                        openTabDestination?(.serviceStatus(lineId: lineId))
                     } label: {
                         Text("StationTimetable.ServiceStatus")
                     }
-                    .disabled(delayInfo == nil)
+                    .disabled(delayInfo == nil || openTabDestination == nil)
                 }
 
                 ToolbarSpacer(.flexible, placement: .bottomBar)
             }
-            .sheet(item: $target) { target in
-                ServiceStatusSheet(
-                    lineId: target.lineId,
-                    delayInfo: target.delayInfo,
-                    web: target.web
-                )
-            }
 #if DEBUG
             .onAppear {
-                if ScreenshotStaging.shared.expandServiceStatus, let delayInfo {
-                    // Left set so the sheet expands itself to .large on appear.
-                    target = ServiceStatusTarget(lineId: lineId, delayInfo: delayInfo)
+                if ScreenshotStaging.shared.expandServiceStatus, delayInfo != nil {
+                    ScreenshotStaging.shared.expandServiceStatus = false
+                    openTabDestination?(.serviceStatus(lineId: lineId))
                 }
             }
 #endif
@@ -129,87 +90,14 @@ private struct ServiceStatusToolbar: ViewModifier {
 }
 
 extension View {
-    func serviceStatusToolbar(
-        target: Binding<ServiceStatusTarget?>,
-        lineId: String,
-        delayInfo: DelayCheckInfo?
-    ) -> some View {
-        modifier(ServiceStatusToolbar(target: target, lineId: lineId, delayInfo: delayInfo))
-    }
-}
-
-// MARK: - Presenter
-
-/// Presents the 運行情報 sheet from places without their own sheet host.
-@MainActor
-final class ServiceStatusPresenter: ObservableObject {
-    struct Context {
-        let lineId: String
-        let delayInfo: DelayCheckInfo
-        let web: ServiceStatusWebController
-    }
-
-    @Published private(set) var context: Context?
-
-    func present(lineId: String, delayInfo: DelayCheckInfo?) {
-        guard let delayInfo else { return }
-        context = Context(
-            lineId: lineId,
-            delayInfo: delayInfo,
-            web: ServiceStatusWebController(delayInfo: delayInfo)
-        )
-    }
-
-    func dismiss() {
-        context = nil
-    }
-}
-
-private struct ServiceStatusPresenterKey: EnvironmentKey {
-    static let defaultValue: ServiceStatusPresenter? = nil
-}
-
-extension EnvironmentValues {
-    var serviceStatusPresenter: ServiceStatusPresenter? {
-        get { self[ServiceStatusPresenterKey.self] }
-        set { self[ServiceStatusPresenterKey.self] = newValue }
-    }
-}
-
-// MARK: - Host
-
-private struct ServiceStatusHost: ViewModifier {
-    @ObservedObject var presenter: ServiceStatusPresenter
-
-    func body(content: Content) -> some View {
-        content
-            .environment(\.serviceStatusPresenter, presenter)
-            .sheet(isPresented: Binding(
-                get: { presenter.context != nil },
-                set: { if !$0 { presenter.dismiss() } }
-            )) {
-                if let context = presenter.context {
-                    ServiceStatusSheet(
-                        lineId: context.lineId,
-                        delayInfo: context.delayInfo,
-                        web: context.web
-                    )
-                }
-            }
-    }
-}
-
-extension View {
-    /// Hosts the 運行情報 sheet for any line page pushed inside this hierarchy.
-    func serviceStatusHost(_ presenter: ServiceStatusPresenter) -> some View {
-        modifier(ServiceStatusHost(presenter: presenter))
+    func serviceStatusToolbar(lineId: String, delayInfo: DelayCheckInfo?) -> some View {
+        modifier(ServiceStatusToolbar(lineId: lineId, delayInfo: delayInfo))
     }
 }
 
 // MARK: - Web Controller
 
-/// Preloads the status page in a cookie-less web view, so the sheet has
-/// content by the time it is dragged up.
+/// Loads the status page in a cookie-less web view.
 @MainActor
 final class ServiceStatusWebController: ObservableObject {
     nonisolated let objectWillChange = ObservableObjectPublisher()

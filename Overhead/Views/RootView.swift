@@ -24,7 +24,6 @@ struct RootView: View {
     @State private var tabStore = AppTabSessionMigration.makeStore()
     @State private var searchStates = AppTabSearchStateStorage.load()
     @State private var showsBrowserSearchOverlay = false
-    @StateObject private var serviceStatusPresenter = ServiceStatusPresenter()
 #if DEBUG
     // Screenshot harness (overtrain:// deep links, see ScreenshotHarness.swift).
     @State private var debugTimetableTarget: ScreenshotTimetableTarget?
@@ -82,7 +81,6 @@ struct RootView: View {
             }
         }
         .animation(.smooth(duration: 0.2), value: showsBrowserSearchOverlay)
-        .serviceStatusHost(serviceStatusPresenter)
         .onChange(of: tabStore.tabs.map(\.id)) { _, tabIDs in
             let liveIDs = Set(tabIDs)
             searchStates = searchStates.filter { liveIDs.contains($0.key) }
@@ -546,6 +544,9 @@ struct RootView: View {
         switch destination {
         case .operatorLines(let id): OperatorSections.title(for: id)
         case .line(let id): viewModel.availableLines.first { $0.id == id }?.localizedName ?? String(localized: "Search.Section.Lines")
+        case .serviceStatus(let lineID):
+            viewModel.availableLines.first { $0.id == lineID }?.localizedName
+                ?? String(localized: "StationTimetable.ServiceStatus")
         case .station(let lineID, let stationID),
              .stationWithDirection(let lineID, let stationID, _):
             viewModel.availableLines.first { $0.id == lineID }?.stations.first { $0.id == stationID }?.localizedName
@@ -562,6 +563,7 @@ struct RootView: View {
             case .operatorLines: "building.2"
             case .line: "tram.fill"
             case .station, .stationWithDirection: "clock"
+            case .serviceStatus: "info.circle"
             }
         }
     }
@@ -626,6 +628,10 @@ struct RootView: View {
             if let line = viewModel.availableLines.first(where: { $0.id == lineId }),
                let station = line.stations.first(where: { $0.id == stationId }) {
                 StationTimetableView(station: station, line: line, viewModel: viewModel)
+            }
+        case .serviceStatus(let lineId):
+            if let delayInfo = viewModel.delayCheckInfo(for: lineId) {
+                ServiceStatusView(lineId: lineId, delayInfo: delayInfo)
             }
         case .stationWithDirection(let lineId, let stationId, let directionId):
             if let line = viewModel.availableLines.first(where: { $0.id == lineId }),

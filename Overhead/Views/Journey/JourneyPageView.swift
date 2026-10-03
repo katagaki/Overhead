@@ -7,12 +7,11 @@ struct JourneyPageView: View {
     @ObservedObject var viewModel: JourneyViewModel
     @ObservedObject var session: JourneySession
     @State private var shareImage: ShareableImage?
-    @State private var statusTarget: ServiceStatusTarget?
+    @Environment(\.appTabOpenDestination) private var openTabDestination
     @State private var showingStylePicker = false
     @AppStorage(TrainLCDStyle.storageKey) private var lcdStyleRaw = TrainLCDStyle.joban.rawValue
-    @Namespace private var statusZoom
+    @Namespace private var styleZoom
 
-    private static let statusTransitionID = "serviceStatus"
     private static let styleTransitionID = "lcdStyle"
 
     /// Journey lines with a status page; a through-service joins its legs with "+".
@@ -40,7 +39,7 @@ struct JourneyPageView: View {
                     } label: {
                         Label("Button.LCDStyle", systemImage: "gearshape")
                     }
-                    .matchedTransitionSource(id: Self.styleTransitionID, in: statusZoom)
+                    .matchedTransitionSource(id: Self.styleTransitionID, in: styleZoom)
                 }
             }
             .tabOmniboxAccessory {
@@ -53,18 +52,10 @@ struct JourneyPageView: View {
             }
             .sheet(isPresented: $showingStylePicker) {
                 LCDStylePickerSheet(styleRaw: $lcdStyleRaw)
-                    .navigationTransition(.zoom(sourceID: Self.styleTransitionID, in: statusZoom))
+                    .navigationTransition(.zoom(sourceID: Self.styleTransitionID, in: styleZoom))
             }
             .sheet(item: $shareImage) { shareable in
                 ActivityView(items: [shareable.image])
-            }
-            .sheet(item: $statusTarget) { target in
-                ServiceStatusSheet(
-                    lineId: target.lineId,
-                    delayInfo: target.delayInfo,
-                    web: target.web
-                )
-                .navigationTransition(.zoom(sourceID: Self.statusTransitionID, in: statusZoom))
             }
     }
 
@@ -93,11 +84,9 @@ struct JourneyPageView: View {
                 .disabled(lines.isEmpty)
             }
         }
-        .matchedTransitionSource(id: Self.statusTransitionID, in: statusZoom)
     }
 
     private func presentStatus(lineId: String) {
-        guard let delayInfo = viewModel.delayCheckInfo(for: lineId) else { return }
-        statusTarget = ServiceStatusTarget(lineId: lineId, delayInfo: delayInfo)
+        openTabDestination?(.serviceStatus(lineId: lineId))
     }
 }

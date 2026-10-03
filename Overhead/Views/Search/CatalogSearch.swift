@@ -10,6 +10,7 @@ nonisolated enum SearchDestination: Hashable, Codable {
     case line(String)
     case station(lineId: String, stationId: String)
     case stationWithDirection(lineId: String, stationId: String, directionId: String?)
+    case serviceStatus(lineId: String)
 }
 
 private struct AppTabOpenDestinationKey: EnvironmentKey {

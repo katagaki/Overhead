@@ -71,7 +71,6 @@ struct StationPickerView: View {
     @ObservedObject var viewModel: JourneyViewModel
     @Environment(\.appTabOpenDestination) private var openTabDestination
     @State private var selectedDirectionIndex = 0
-    @State private var statusTarget: ServiceStatusTarget?
     // Keyed by minute and direction so a direction flip never shows the other side's times.
     @State private var nextArrivals: (key: String, byStation: [String: NextArrival])?
 
@@ -140,7 +139,6 @@ struct StationPickerView: View {
             }
         }
         .serviceStatusToolbar(
-            target: $statusTarget,
             lineId: line.id,
             delayInfo: viewModel.delayCheckInfo(for: line.id)
         )

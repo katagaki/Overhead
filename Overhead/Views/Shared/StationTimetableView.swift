@@ -12,7 +12,6 @@ struct StationTimetableView: View {
 
     @State private var selectedDirection: String?
     @State private var detailDeparture: StationDeparture?
-    @State private var statusTarget: ServiceStatusTarget?
 
     var body: some View {
         Group {
@@ -27,7 +26,6 @@ struct StationTimetableView: View {
         .navigationTitle(station.localizedName)
         .navigationBarTitleDisplayMode(.inline)
         .serviceStatusToolbar(
-            target: $statusTarget,
             lineId: line.id,
             delayInfo: viewModel.delayCheckInfo(for: line.id)
         )

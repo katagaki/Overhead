@@ -11,7 +11,6 @@ struct NearbyStationsSection: View {
     @StateObject private var provider = NearbyStationsProvider()
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.appTabOpenDestination) private var openTabDestination
-    @Environment(\.serviceStatusPresenter) private var serviceStatusPresenter
     @AppStorage("journey.walkingSpeed") private var walkingSpeedRaw = WalkingSpeed.normal.rawValue
     @AppStorage("nearby.collapsed") private var isCollapsed = false
 
@@ -287,13 +286,11 @@ struct NearbyStationsSection: View {
                     Label("Nearby.OpenTimetable", systemImage: "calendar")
                 }
                 Button {
-                    serviceStatusPresenter?.present(
-                        lineId: hit.line.id,
-                        delayInfo: viewModel.delayCheckInfo(for: hit.line.id)
-                    )
+                    openTabDestination?(.serviceStatus(lineId: hit.line.id))
                 } label: {
                     Label("StationTimetable.ServiceStatus", systemImage: "info.circle")
                 }
+                .disabled(viewModel.delayCheckInfo(for: hit.line.id) == nil)
             }
             Section {
                 Button {
