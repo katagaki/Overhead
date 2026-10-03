@@ -26,9 +26,9 @@ struct PlaceEditorView: View {
 
                 RouteSetupCard(
                     lines: availableLines,
-                    fromSelection: $fromSelection,
+                    fromSelection: stationEndpoint($fromSelection),
                     viaSelections: $viaSelections,
-                    toSelection: $toSelection,
+                    toSelection: stationEndpoint($toSelection),
                     walkingSpeedRaw: $walkingSpeedRaw,
                     routePriorityRaw: $routePriorityRaw,
                     preferOriginating: $preferOriginating,
@@ -118,6 +118,14 @@ struct PlaceEditorView: View {
         .buttonStyle(.glassProminent)
         .buttonBorderShape(.capsule)
         .disabled(!canSave)
+    }
+
+    /// Favorites run between stations, so the card only ever hands back stations.
+    private func stationEndpoint(_ hit: Binding<StationSearchHit?>) -> Binding<RouteEndpoint?> {
+        Binding(
+            get: { hit.wrappedValue.map(RouteEndpoint.station) },
+            set: { hit.wrappedValue = $0?.hit }
+        )
     }
 
     // MARK: - Validation

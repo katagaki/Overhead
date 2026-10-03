@@ -1,4 +1,5 @@
 import SwiftUI
+import CoreLocation
 import Backbone
 
 // MARK: - Journey Planner Section (乗換案内-style)
@@ -6,8 +7,8 @@ import Backbone
 struct JourneyPlannerSection: View {
     @ObservedObject var viewModel: JourneyViewModel
 
-    @State private var fromSelection: StationSearchHit?
-    @State private var toSelection: StationSearchHit?
+    @State private var fromSelection: RouteEndpoint?
+    @State private var toSelection: RouteEndpoint?
     @State private var viaSelections: [StationSearchHit] = []
 
     @State private var timeMode: TimeMode = .now
@@ -28,6 +29,7 @@ struct JourneyPlannerSection: View {
     @State private var searchError: LocalizedStringKey?
     @State private var searchWalkMinutes: Int?
     @StateObject private var walkingEstimator = WalkingTimeEstimator()
+    @StateObject private var oneShotLocation = OneShotLocation()
 
     private struct StoredStation: Codable {
         var lineId: String
@@ -38,6 +40,10 @@ struct JourneyPlannerSection: View {
         var from: StoredStation?
         var vias: [StoredStation]
         var to: StoredStation?
+        var fromPlace: SearchedPlace?
+        var toPlace: SearchedPlace?
+        var fromCurrentLocation: Bool?
+        var toCurrentLocation: Bool?
     }
 
     enum TimeMode: Hashable {
@@ -119,7 +125,7 @@ struct JourneyPlannerSection: View {
             guard let hit else { return }
             viewModel.plannerFromRequest = nil
             withAnimation(.smooth(duration: 0.35)) {
-                fromSelection = hit
+                fromSelection = .station(hit)
             }
             persistSelections()
             invalidateResults()
@@ -128,7 +134,7 @@ struct JourneyPlannerSection: View {
             guard let hit else { return }
             viewModel.plannerToRequest = nil
             withAnimation(.smooth(duration: 0.35)) {
-                toSelection = hit
+                toSelection = .station(hit)
             }
             persistSelections()
             invalidateResults()
@@ -158,6 +164,7 @@ struct JourneyPlannerSection: View {
                 persistSelections()
                 invalidateResults()
             },
+            allowsPlaces: true,
             leadingItems: AnyView(departureTimeItem)
         )
         .sheet(isPresented: $showTimeSettingsSheet) {
@@ -249,14 +256,14 @@ struct JourneyPlannerSection: View {
         }
         .buttonStyle(.glass)
         .buttonBorderShape(.capsule)
-        .disabled(!canSearch)
+        .disabled(!canSearch || stationWaypoints == nil)
         .accessibilityLabel(isSaved ? "Button.RemoveFromFavorites" : "Button.AddToFavorites")
         .sensoryFeedback(.success, trigger: savedPlaceForSetup?.id)
     }
 
     /// The favorite whose route matches what's in the planner right now, if any.
     private var savedPlaceForSetup: SavedPlace? {
-        guard let from = fromSelection, let to = toSelection else { return nil }
+        guard let from = fromSelection?.hit, let to = toSelection?.hit else { return nil }
         let vias = viaSelections.map(\.station.id)
         return savedPlaces.first {
             $0.fromStationId == from.station.id
@@ -267,7 +274,7 @@ struct JourneyPlannerSection: View {
 
     /// Saves the planner's current route as-is, or unsaves it if it's already there.
     private func toggleFavorite() {
-        guard let from = fromSelection, let to = toSelection else { return }
+        guard let from = fromSelection?.hit, let to = toSelection?.hit else { return }
         var places = SavedPlaceStore.load()
 
         if let existing = savedPlaceForSetup {
@@ -294,13 +301,16 @@ struct JourneyPlannerSection: View {
         }
     }
 
-    private var waypoints: [Station]? {
-        guard let from = fromSelection, let to = toSelection else { return nil }
-        return [from.station] + viaSelections.map(\.station) + [to.station]
+    /// Only when both ends are stations; favorites can't hold places yet.
+    private var stationWaypoints: [Station]? {
+        guard let from = fromSelection?.station, let to = toSelection?.station else { return nil }
+        return [from] + viaSelections.map(\.station) + [to]
     }
 
     private var canSearch: Bool {
-        guard let waypoints else { return false }
+        guard let from = fromSelection, let to = toSelection else { return false }
+        if case .currentLocation = from, case .currentLocation = to { return false }
+        guard let waypoints = stationWaypoints else { return true }
         let links = StaticTrainData.stationLinks()
         return zip(waypoints, waypoints.dropFirst()).allSatisfy { !links.isSameStation($0.id, $1.id) }
     }
@@ -319,7 +329,7 @@ struct JourneyPlannerSection: View {
                 SectionHeader(title: ignoreTimetable ? "Setup.Routes" : "Setup.Candidates")
 
                 if let walkMinutes = searchWalkMinutes,
-                   let fromName = fromSelection?.station.localizedName {
+                   let fromName = fromSelection?.station?.localizedName {
                     noticeRow(icon: "figure.walk", text: "Setup.WalkEstimate \(fromName) \(walkMinutes)")
                 }
 
@@ -368,10 +378,14 @@ struct JourneyPlannerSection: View {
     @ViewBuilder
     private func untimedCandidateHeader(_ candidate: TrainCandidate) -> some View {
         HStack(alignment: .center, spacing: 8) {
-            Text("Candidate.EstimatedDuration \(candidate.durationMinutes)")
+            Text("Candidate.EstimatedDuration \(candidate.doorToDoorMinutes)")
                 .font(.system(size: 22, weight: .bold, design: .rounded))
                 .lineLimit(1)
                 .fixedSize()
+
+            if candidate.walksToPlace {
+                walkBadge(candidate)
+            }
 
             if candidate.transferCount > 0 {
                 Text("Candidate.Transfers \(candidate.transferCount)")
@@ -391,14 +405,14 @@ struct JourneyPlannerSection: View {
     private func scheduledCandidateHeader(_ candidate: TrainCandidate, waitMinutes: Int?) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             HStack(alignment: .center, spacing: 8) {
-                Text(displayTime(candidate.departureTime))
+                Text(displayTime(CandidateLeg.railTimeString(candidate.leaveSeconds)))
                     .font(.system(size: 22, weight: .bold, design: .rounded))
                     .lineLimit(1)
                     .fixedSize()
                 Image(systemName: "arrow.right")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(.secondary)
-                Text(displayTime(candidate.arrivalTime))
+                Text(displayTime(CandidateLeg.railTimeString(candidate.reachSeconds)))
                     .font(.system(size: 22, weight: .bold, design: .rounded))
                     .lineLimit(1)
                     .fixedSize()
@@ -415,9 +429,13 @@ struct JourneyPlannerSection: View {
             }
 
             HStack(spacing: 8) {
-                Text("Candidate.Duration \(candidate.durationMinutes)")
+                Text("Candidate.Duration \(candidate.doorToDoorMinutes)")
                     .font(.system(size: 12))
                     .foregroundColor(.secondary)
+
+                if candidate.walksToPlace {
+                    walkBadge(candidate)
+                }
 
                 if candidate.startsAtBoarding {
                     originatingBadge
@@ -445,6 +463,19 @@ struct JourneyPlannerSection: View {
                 }
             }
         }
+    }
+
+    /// Minutes on foot between the places and the stations.
+    private func walkBadge(_ candidate: TrainCandidate) -> some View {
+        Label("Candidate.Walk \((candidate.accessSeconds + candidate.egressSeconds) / 60)",
+              systemImage: "figure.walk")
+            .labelStyle(.titleAndIcon)
+            .font(.system(size: 11, weight: .semibold))
+            .foregroundColor(.secondary)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(Color(.tertiarySystemFill))
+            .clipShape(Capsule())
     }
 
     /// 始発 — you board where the train starts, so there is a seat waiting.
@@ -502,7 +533,7 @@ struct JourneyPlannerSection: View {
     /// The ride starts or ends at a nearby station (浜松町 → 大門), which the
     /// station-by-station summary makes plain.
     private func walksToOtherStation(_ candidate: TrainCandidate) -> Bool {
-        guard let from = fromSelection?.station, let to = toSelection?.station else { return false }
+        guard let from = fromSelection?.station, let to = toSelection?.station else { return true }
         return candidate.fromStation.name != from.name || candidate.toStation.name != to.name
     }
 
@@ -571,7 +602,7 @@ struct JourneyPlannerSection: View {
     }
 
     private func minutesUntilDeparture(_ candidate: TrainCandidate) -> Int? {
-        let interval = candidate.departureDate(reference: anchorDate).timeIntervalSinceNow
+        let interval = candidate.leaveDate(reference: anchorDate).timeIntervalSinceNow
         guard interval > -60 else { return nil }
         let minutes = Int(interval / 60)
         guard minutes < 100 else { return nil }
@@ -624,22 +655,37 @@ struct JourneyPlannerSection: View {
     }
 
     private func search() {
-        guard let waypoints, !isSearching else { return }
+        guard let from = fromSelection, let to = toSelection, !isSearching else { return }
         searchError = nil
         isSearching = true
 
         Task {
             let avoided = avoidedLineIds
 
+            guard let origin = await searchEndpoint(for: from),
+                  let destination = await searchEndpoint(for: to)
+            else {
+                isSearching = false
+                return
+            }
+            let endpoints = [origin] + viaSelections.map { .station($0.station) } + [destination]
+            let waypoints = endpoints.compactMap(\.nearestStation)
+
             if ignoreTimetable {
                 searchWalkMinutes = nil
+                let links = StaticTrainData.stationLinks()
                 candidates = await viewModel.searchRouteOptions(
                     stations: waypoints,
                     transferMinutes: walkingSpeed.transferMinutes,
                     walkPace: walkingSpeed.paceMultiplier,
                     priority: routePriority,
                     avoidingLineIds: avoided
-                )
+                ).map { candidate in
+                    var candidate = candidate
+                    candidate.accessSeconds = origin.walkSeconds(at: candidate.fromStation.id, links: links)
+                    candidate.egressSeconds = destination.walkSeconds(at: candidate.toStation.id, links: links)
+                    return candidate
+                }
                 hasSearched = true
                 isSearching = false
                 if candidates.isEmpty {
@@ -653,8 +699,9 @@ struct JourneyPlannerSection: View {
             var walkMinutes: Int?
             // 到着時刻 keeps its anchor, but trains you can't reach are out too.
             var earliestDeparture: Date? = timeMode == .arriveBy ? Date() : nil
+            // A place's walk is part of the search; a station's is added here.
             if timeMode != .departAt,
-               let station = fromSelection?.station,
+               let station = origin.station,
                let walkSeconds = await walkingEstimator.walkingSeconds(to: station, speed: walkingSpeed),
                walkSeconds <= 120 * 60 {
                 walkMinutes = max(1, Int((walkSeconds / 60).rounded(.up)))
@@ -667,7 +714,7 @@ struct JourneyPlannerSection: View {
             searchWalkMinutes = walkMinutes
 
             candidates = await viewModel.searchTrainCandidates(
-                stations: waypoints,
+                endpoints: endpoints,
                 anchor: anchor,
                 transferMinutes: walkingSpeed.transferMinutes,
                 walkPace: walkingSpeed.paceMultiplier,
@@ -686,6 +733,40 @@ struct JourneyPlannerSection: View {
         }
     }
 
+    /// Places resolve to the stations within walking distance; nil (with
+    /// the error set) when there is no fix or nothing nearby.
+    private func searchEndpoint(for endpoint: RouteEndpoint) async -> JourneyViewModel.SearchEndpoint? {
+        let location: CLLocation
+        switch endpoint {
+        case .station(let hit):
+            return .station(hit.station)
+        case .place(let place):
+            location = place.location
+        case .currentLocation:
+            guard let fix = await currentLocation() else {
+                searchError = "Setup.NoCurrentLocation"
+                return nil
+            }
+            location = fix
+        }
+        let access = PlaceAccess.stations(near: location, lines: viewModel.availableLines, speed: walkingSpeed)
+        guard !access.isEmpty else {
+            searchError = "Setup.NoStationsNearby"
+            return nil
+        }
+        return .walk(access)
+    }
+
+    private func currentLocation() async -> CLLocation? {
+        await withCheckedContinuation { continuation in
+            oneShotLocation.requestLocation { coordinate in
+                continuation.resume(returning: coordinate.map {
+                    CLLocation(latitude: $0.latitude, longitude: $0.longitude)
+                })
+            }
+        }
+    }
+
 #if DEBUG
     // MARK: - Screenshot Harness
 
@@ -695,8 +776,8 @@ struct JourneyPlannerSection: View {
               let from = line.stations.first(where: { $0.id == "Station:JR-East.JobanRapid.Tokyo" }),
               let to = line.stations.first(where: { $0.id == "Station:JR-East.JobanRapid.Toride" })
         else { return }
-        fromSelection = StationSearchHit(line: line, station: from)
-        toSelection = StationSearchHit(line: line, station: to)
+        fromSelection = .station(StationSearchHit(line: line, station: from))
+        toSelection = .station(StationSearchHit(line: line, station: to))
         viaSelections = []
         switch command {
         case .search:
@@ -724,10 +805,25 @@ struct JourneyPlannerSection: View {
     // MARK: - Selection Persistence
 
     private func persistSelections() {
+        func stored(_ hit: StationSearchHit) -> StoredStation {
+            StoredStation(lineId: hit.line.id, stationId: hit.station.id)
+        }
+        func place(_ endpoint: RouteEndpoint?) -> SearchedPlace? {
+            if case .place(let place) = endpoint { return place }
+            return nil
+        }
+        func isCurrentLocation(_ endpoint: RouteEndpoint?) -> Bool? {
+            if case .currentLocation = endpoint { return true }
+            return nil
+        }
         let setup = StoredSetup(
-            from: fromSelection.map { StoredStation(lineId: $0.line.id, stationId: $0.station.id) },
-            vias: viaSelections.map { StoredStation(lineId: $0.line.id, stationId: $0.station.id) },
-            to: toSelection.map { StoredStation(lineId: $0.line.id, stationId: $0.station.id) }
+            from: fromSelection?.hit.map(stored),
+            vias: viaSelections.map(stored),
+            to: toSelection?.hit.map(stored),
+            fromPlace: place(fromSelection),
+            toPlace: place(toSelection),
+            fromCurrentLocation: isCurrentLocation(fromSelection),
+            toCurrentLocation: isCurrentLocation(toSelection)
         )
         guard let data = try? JSONEncoder().encode(setup),
               let json = String(data: data, encoding: .utf8)
@@ -740,9 +836,17 @@ struct JourneyPlannerSection: View {
               let data = storedStationsJSON.data(using: .utf8),
               let setup = try? JSONDecoder().decode(StoredSetup.self, from: data)
         else { return }
-        fromSelection = hit(for: setup.from)
+        fromSelection = endpoint(station: setup.from, place: setup.fromPlace,
+                                 currentLocation: setup.fromCurrentLocation)
         viaSelections = setup.vias.compactMap { hit(for: $0) }
-        toSelection = hit(for: setup.to)
+        toSelection = endpoint(station: setup.to, place: setup.toPlace,
+                               currentLocation: setup.toCurrentLocation)
+    }
+
+    private func endpoint(station: StoredStation?, place: SearchedPlace?, currentLocation: Bool?) -> RouteEndpoint? {
+        if currentLocation == true { return .currentLocation }
+        if let place { return .place(place) }
+        return hit(for: station).map(RouteEndpoint.station)
     }
 
     private func hit(for stored: StoredStation?) -> StationSearchHit? {

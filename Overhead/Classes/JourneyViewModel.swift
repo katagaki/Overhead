@@ -228,6 +228,40 @@ final class JourneyViewModel: ObservableObject {
         case later
     }
 
+    /// A trip end for search: a station, or a place with the stations you could walk to.
+    enum SearchEndpoint {
+        case station(Station)
+        case walk([PlaceAccess])
+
+        var station: Station? {
+            if case .station(let station) = self { return station }
+            return nil
+        }
+
+        var routerEndpoint: TransitRouter.Endpoint {
+            switch self {
+            case .station(let station):
+                return .station(station.id)
+            case .walk(let access):
+                return .walk(access.map { TransitRouter.Access(stationId: $0.station.id, seconds: $0.seconds) })
+            }
+        }
+
+        /// The walk to or from `stationId`; 0 for a station end.
+        func walkSeconds(at stationId: String, links: StationLinks) -> Int {
+            guard case .walk(let access) = self else { return 0 }
+            return access.first { links.isSameStation($0.station.id, stationId) }?.seconds ?? 0
+        }
+
+        /// Stands in for a place where only a station will do.
+        var nearestStation: Station? {
+            switch self {
+            case .station(let station): return station
+            case .walk(let access): return access.first?.station
+            }
+        }
+    }
+
     func searchTrainCandidates(
         stations: [Station],
         anchor: TimeAnchor,
@@ -239,7 +273,27 @@ final class JourneyViewModel: ObservableObject {
         preferringOriginating: Bool = false,
         limit: Int = 12
     ) async -> [TrainCandidate] {
-        guard stations.count >= 2 else { return [] }
+        await searchTrainCandidates(
+            endpoints: stations.map(SearchEndpoint.station), anchor: anchor,
+            transferMinutes: transferMinutes, walkPace: walkPace, priority: priority,
+            avoidingLineIds: avoidingLineIds, notDepartingBefore: earliest,
+            preferringOriginating: preferringOriginating, limit: limit
+        )
+    }
+
+    /// For a place end, the anchor is when you leave or reach the place.
+    func searchTrainCandidates(
+        endpoints: [SearchEndpoint],
+        anchor: TimeAnchor,
+        transferMinutes: Double = StaticTrainData.transferBufferMinutes,
+        walkPace: Double = 1,
+        priority: RoutePriority = .balanced,
+        avoidingLineIds: Set<String> = [],
+        notDepartingBefore earliest: Date? = nil,
+        preferringOriginating: Bool = false,
+        limit: Int = 12
+    ) async -> [TrainCandidate] {
+        guard endpoints.count >= 2 else { return [] }
 
         let calendar = ScheduleCalendar.current(at: anchor.date)
         let targetSec = railSeconds(of: anchor.date)
@@ -259,16 +313,16 @@ final class JourneyViewModel: ObservableObject {
 
         // Every single-train ride, so slower trains and 始発 stay on the list.
         var direct: [TrainCandidate] = []
-        if stations.count == 2 {
+        if endpoints.count == 2, let from = endpoints[0].station, let to = endpoints[1].station {
             direct = directCandidates(
-                from: stations[0], to: stations[1],
+                from: from, to: to,
                 anchor: rideAnchor, floorSec: floorSec, calendar: calendar,
                 avoidingLineIds: avoidingLineIds,
                 preferringOriginating: preferringOriginating, limit: limit
             )
         }
 
-        let ids = stations.map(\.id)
+        let routerEndpoints = endpoints.map(\.routerEndpoint)
         let routerAnchor: TransitRouter.Anchor = anchor.isArrival
             ? .arriveAtOrBefore(targetSec)
             : .departAtOrAfter(targetSec)
@@ -280,10 +334,16 @@ final class JourneyViewModel: ObservableObject {
         )
         let date = anchor.date
         let itineraries = await Task.detached(priority: .userInitiated) {
-            TransitRouter.search(through: ids, anchor: routerAnchor, on: date,
+            TransitRouter.search(through: routerEndpoints, anchor: routerAnchor, on: date,
                                  preferences: preferences, notDepartingBefore: floorSec, limit: limit)
         }.value
-        let routed = itineraries.compactMap { candidate(for: $0, calendar: calendar) }
+        let links = StaticTrainData.stationLinks()
+        let routed = itineraries.compactMap { itinerary -> TrainCandidate? in
+            guard var candidate = candidate(for: itinerary, calendar: calendar) else { return nil }
+            candidate.accessSeconds = endpoints[0].walkSeconds(at: candidate.fromStation.id, links: links)
+            candidate.egressSeconds = endpoints[endpoints.count - 1].walkSeconds(at: candidate.toStation.id, links: links)
+            return candidate
+        }
 
         // Drop changes that don't earn their keep against a simpler option
         // leaving no earlier and arriving no later, give or take the aversion.
@@ -303,14 +363,14 @@ final class JourneyViewModel: ObservableObject {
                 guard other.transferCount < candidate.transferCount else { return false }
                 let slack = aversion * (candidate.transferCount - other.transferCount)
                 return anchor.isArrival
-                    ? other.arrivalSeconds <= candidate.arrivalSeconds
-                        && other.departureSeconds + slack >= candidate.departureSeconds
-                    : other.departureSeconds >= candidate.departureSeconds
-                        && other.arrivalSeconds <= candidate.arrivalSeconds + slack
+                    ? other.reachSeconds <= candidate.reachSeconds
+                        && other.leaveSeconds + slack >= candidate.leaveSeconds
+                    : other.leaveSeconds >= candidate.leaveSeconds
+                        && other.reachSeconds <= candidate.reachSeconds + slack
             }
         }
 
-        let mixesRoutes = kept.contains { $0.transferCount > 0 }
+        let mixesRoutes = kept.contains { $0.transferCount > 0 || $0.walksToPlace }
         return Array(sorted(kept, anchor: rideAnchor,
                             preferringOriginating: preferringOriginating,
                             soonestArrival: mixesRoutes).prefix(limit))
@@ -418,17 +478,17 @@ final class JourneyViewModel: ObservableObject {
         switch anchor {
         case .departAtOrAfter where soonestArrival:
             byTime = {
-                $0.arrivalSeconds == $1.arrivalSeconds
-                    ? $0.departureSeconds > $1.departureSeconds
-                    : $0.arrivalSeconds < $1.arrivalSeconds
+                $0.reachSeconds == $1.reachSeconds
+                    ? $0.leaveSeconds > $1.leaveSeconds
+                    : $0.reachSeconds < $1.reachSeconds
             }
         case .departAtOrAfter:
-            byTime = { $0.departureSeconds < $1.departureSeconds }
+            byTime = { $0.leaveSeconds < $1.leaveSeconds }
         case .arriveAtOrBefore:
             byTime = {
-                $0.arrivalSeconds == $1.arrivalSeconds
-                    ? $0.departureSeconds > $1.departureSeconds
-                    : $0.arrivalSeconds > $1.arrivalSeconds
+                $0.reachSeconds == $1.reachSeconds
+                    ? $0.leaveSeconds > $1.leaveSeconds
+                    : $0.reachSeconds > $1.reachSeconds
             }
         }
         guard preferringOriginating else { return candidates.sorted(by: byTime) }

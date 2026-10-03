@@ -35,6 +35,22 @@ public enum TransitRouter {
         var key: String { legs.flatMap { $0.rides.map(\.serviceId) }.joined(separator: "|") }
     }
 
+    /// A trip end: a station, or a place walked to from any of several.
+    public enum Endpoint: Sendable {
+        case station(String)
+        case walk([Access])
+    }
+
+    public struct Access: Sendable {
+        public let stationId: String
+        public let seconds: Int
+
+        public init(stationId: String, seconds: Int) {
+            self.stationId = stationId
+            self.seconds = seconds
+        }
+    }
+
     public enum Anchor: Sendable {
         case departAtOrAfter(Int)
         case arriveAtOrBefore(Int)
@@ -71,15 +87,28 @@ public enum TransitRouter {
         notDepartingBefore floor: Int? = nil,
         limit: Int
     ) -> [Itinerary] {
-        guard stationIds.count >= 2 else { return [] }
+        search(through: stationIds.map(Endpoint.station), anchor: anchor, on: date,
+               preferences: preferences, notDepartingBefore: floor, limit: limit)
+    }
+
+    /// As above, where a walking end's anchor is when you leave or reach the place.
+    public static func search(
+        through endpoints: [Endpoint],
+        anchor: Anchor,
+        on date: Date,
+        preferences: Preferences,
+        notDepartingBefore floor: Int? = nil,
+        limit: Int
+    ) -> [Itinerary] {
+        guard endpoints.count >= 2 else { return [] }
         let query = Query(net: network(on: date), preferences: preferences)
-        guard stationIds.allSatisfy({ !query.stops(at: $0).isEmpty }) else { return [] }
+        guard endpoints.allSatisfy({ !query.stops(at: $0).isEmpty }) else { return [] }
 
         switch anchor {
         case .departAtOrAfter(let time):
-            return query.forwardChain(stationIds, from: max(time, floor ?? time), limit: limit)
+            return query.forwardChain(endpoints, from: max(time, floor ?? time), limit: limit)
         case .arriveAtOrBefore(let time):
-            return query.backwardChain(stationIds, by: time, floor: floor, limit: limit)
+            return query.backwardChain(endpoints, by: time, floor: floor, limit: limit)
         }
     }
 
@@ -514,9 +543,24 @@ extension TransitRouter {
             return result.map { ($0.key, $0.value) }
         }
 
+        func stops(at endpoint: Endpoint) -> [(stop: Int32, seconds: Int32)] {
+            switch endpoint {
+            case .station(let stationId):
+                return stops(at: stationId)
+            case .walk(let access):
+                var result: [Int32: Int32] = [:]
+                for entry in access {
+                    for stop in net.links.sameStation(as: entry.stationId).compactMap({ net.stopIndex[$0] }) {
+                        result[stop] = min(result[stop] ?? .max, Int32(entry.seconds))
+                    }
+                }
+                return result.map { ($0.key, $0.value) }
+            }
+        }
+
         // MARK: Chains through via stations
 
-        func forwardChain(_ ids: [String], from start: Int, limit: Int) -> [Itinerary] {
+        func forwardChain(_ ids: [Endpoint], from start: Int, limit: Int) -> [Itinerary] {
             let first = trips(from: ids[0], to: ids[1], departingAtOrAfter: start, limit: limit)
             guard ids.count > 2 else { return first }
             return first.compactMap { head in
@@ -531,7 +575,7 @@ extension TransitRouter {
             }
         }
 
-        func backwardChain(_ ids: [String], by deadline: Int, floor: Int?, limit: Int) -> [Itinerary] {
+        func backwardChain(_ ids: [Endpoint], by deadline: Int, floor: Int?, limit: Int) -> [Itinerary] {
             let last = trips(from: ids[ids.count - 2], to: ids[ids.count - 1],
                              arrivingAtOrBefore: deadline, floor: ids.count == 2 ? floor : nil, limit: limit)
             guard ids.count > 2 else { return last }
@@ -565,7 +609,7 @@ extension TransitRouter {
         // MARK: Single segment
 
         /// `arrivedOn`: the leg that reached the origin, which can be stayed aboard.
-        func trips(from origin: String, to destination: String, departingAtOrAfter start: Int,
+        func trips(from origin: Endpoint, to destination: Endpoint, departingAtOrAfter start: Int,
                    limit: Int, arrivedOn: Leg? = nil) -> [Itinerary] {
             let sources = stops(at: origin)
             let targets = stops(at: destination)
@@ -587,7 +631,10 @@ extension TransitRouter {
                                    targets: sources, maxTrains: option.trains)
                     guard let tight = back.last else { continue }
                     let itinerary = itinerary(tight.legs, reversed: true)
-                    latestDeparture = min(latestDeparture, Int32(itinerary.departure))
+                    // When you set off for it, counting the walk to the first train.
+                    let lead = net.stopIndex[itinerary.legs[0].fromStationId]
+                        .flatMap { stop in sources.first { $0.stop == stop }?.seconds } ?? 0
+                    latestDeparture = min(latestDeparture, Int32(itinerary.departure) - lead)
                     if seen.insert(itinerary.key).inserted { results.append(itinerary) }
                 }
                 if results.count >= limit || latestDeparture == .max { break }
@@ -597,7 +644,7 @@ extension TransitRouter {
         }
 
         /// `leavingOn`: the leg departing the destination, which can be boarded early.
-        func trips(from origin: String, to destination: String, arrivingAtOrBefore deadline: Int,
+        func trips(from origin: Endpoint, to destination: Endpoint, arrivingAtOrBefore deadline: Int,
                    floor: Int?, limit: Int, leavingOn: Leg? = nil) -> [Itinerary] {
             let sources = stops(at: origin)
             let targets = stops(at: destination)
@@ -620,7 +667,9 @@ extension TransitRouter {
                                       targets: targets, maxTrains: option.trains)
                     guard let tight = forward.last else { continue }
                     let itinerary = itinerary(tight.legs, reversed: false)
-                    earliestArrival = max(earliestArrival, Int32(itinerary.arrival))
+                    let tail = net.stopIndex[itinerary.legs[itinerary.legs.count - 1].toStationId]
+                        .flatMap { stop in targets.first { $0.stop == stop }?.seconds } ?? 0
+                    earliestArrival = max(earliestArrival, Int32(itinerary.arrival) + tail)
                     if seen.insert(itinerary.key).inserted { results.append(itinerary) }
                 }
                 if results.count >= limit || earliestArrival == .min { break }

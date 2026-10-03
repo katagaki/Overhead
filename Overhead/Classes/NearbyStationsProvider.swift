@@ -127,13 +127,15 @@ final class NearbyStationsProvider: NSObject, ObservableObject, CLLocationManage
 
     // MARK: - Computation
 
-    private func compute(around location: CLLocation) {
-        // Keep only the closest entry per station name.
+    /// The closest entry per station name, nearest first.
+    static func nearest(to location: CLLocation, lines: [TrainLine], limit: Int,
+                        radiusMeters: Double = .infinity) -> [NearbyStation] {
         var bestByName: [String: NearbyStation] = [:]
         for line in lines {
             for station in line.stations {
                 guard let lat = station.latitude, let lon = station.longitude else { continue }
                 let distance = location.distance(from: CLLocation(latitude: lat, longitude: lon))
+                guard distance <= radiusMeters else { continue }
                 if let existing = bestByName[station.name], existing.distanceMeters <= distance {
                     continue
                 }
@@ -143,15 +145,17 @@ final class NearbyStationsProvider: NSObject, ObservableObject, CLLocationManage
                 )
             }
         }
-
-        let nearest = bestByName.values
+        return Array(bestByName.values
             .sorted { $0.distanceMeters < $1.distanceMeters }
-            .prefix(maxResults)
+            .prefix(limit))
+    }
 
-        let groups = groupedStations(nearest: Array(nearest))
+    private func compute(around location: CLLocation) {
+        let nearest = Self.nearest(to: location, lines: lines, limit: maxResults)
+        let groups = groupedStations(nearest: nearest)
 
         DispatchQueue.main.async {
-            self.nearestStations = Array(nearest)
+            self.nearestStations = nearest
             self.nearestGroups = groups
             self.isLocating = false
             self.lastUpdated = Date()
