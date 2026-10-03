@@ -298,12 +298,12 @@ struct LCDPiPLayerHost: UIViewRepresentable {
 
 // MARK: - LCD Frame Rendering
 
-extension JourneyViewModel {
+extension JourneySession {
     /// The current LCD as an image. The share sheet wants breathing room
     /// (padded, 3x); PiP wants the bare LCD (unpadded, 2x for cheap
     /// video-rate rendering).
     func renderLCDImage(scale: CGFloat = 3, padded: Bool = true) -> UIImage? {
-        guard let journey = activeJourney, let state = positionState else { return nil }
+        guard let state = positionState else { return nil }
         let defaults = UserDefaults.standard
         let lcd = StyledTrainLCDView(
             style: TrainLCDStyle(stored: defaults.string(forKey: TrainLCDStyle.storageKey) ?? ""),

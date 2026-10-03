@@ -9,73 +9,33 @@ import Backbone
 final class JourneyViewModel: ObservableObject {
 
     @Published var availableLines: [TrainLine] = []
-    @Published var selectedLine: TrainLine?
-    @Published var activeJourney: Journey?
-    @Published var positionState: TrainPositionState?
-    @Published var currentDelay: DelayInfo?
-    @Published var trackingMode: TrackingMode = .timetable
+    /// Every journey in progress, oldest first; each belongs to one tab.
+    @Published private(set) var sessions: [JourneySession] = []
+    /// The selected tab's journey: a new start there replaces it, and PiP follows it.
+    @Published var focusedSessionID: UUID? {
+        didSet { if focusedSessionID != oldValue { updatePiP() } }
+    }
     @Published var isLoading = false
     @Published var isStartingJourney = false
     @Published var showOverwriteConfirmation = false
     @Published var errorMessage: String?
-    @Published var locationError: String?
     @Published var stationTimetable: [StationTimetableData] = []
     @Published var isLoadingTimetable = false
     @Published var railDirections: [String: (ja: String, en: String)] = [:]
     @Published var plannerFromRequest: StationSearchHit?
     @Published var plannerToRequest: StationSearchHit?
 
-    private let locationTracker = LocationTracker()
     private var cancellables = Set<AnyCancellable>()
+    private var pipStatusObservation: AnyCancellable?
     private var timetableCache: [String: [TrainService]] = [:]
     private var linesLoaded = false
 
     private var pendingStart: (() -> Void)?
 
-    private var pendingActivityStart: (() -> Void)?
-
-    /// Transfer station ID → the line boarded there; kept so alerts can be rescheduled.
-    private var transferLines: [String: TrainLine] = [:]
-
-    typealias UpcomingTransfer = (station: Station, time: Date, line: TrainLine?)
-
-    /// Every 乗り換え still ahead of the train, in order, delay-adjusted.
-    var upcomingTransfers: [UpcomingTransfer] {
-        guard let journey = activeJourney, journey.hasSchedule,
-              let state = positionState, state.status != .arrived,
-              !journey.transferStationIds.isEmpty
-        else { return [] }
-
-        let stations = journey.journeyStations
-        let times = journey.scheduledStationTimes
-        guard stations.count == times.count else { return [] }
-
-        let current = min(state.currentStationIndex ?? state.segmentTo, max(0, stations.count - 1))
-        let transferIds = Set(journey.transferStationIds)
-        let delay = TimeInterval(state.delayMinutes * 60)
-
-        return stations.indices[current...]
-            .filter { transferIds.contains(stations[$0].id) }
-            .map { (stations[$0], times[$0].addingTimeInterval(delay), transferLines[stations[$0].id]) }
-    }
-
-    /// The next 乗り換え ahead of the train, with its delay-adjusted time.
-    var upcomingTransfer: UpcomingTransfer? { upcomingTransfers.first }
-
-    /// Live Activity leg markers, kept so a mid-journey change can reuse them.
-    private var journeyLegLines: [TrainJourneyAttributes.LegLine] = []
-
-    /// LCD colour per leg, `lcdOverrides` already applied.
-    private var journeyLegColors: [LegColor] = []
-
-    struct LegColor {
-        let stationIndex: Int
-        let color: Color
-    }
-
     init(previewMode: Bool = false) {
-        bindLocationTracker()
         bindLineData()
+        // Journeys do not outlive the app, so neither do their alerts.
+        JourneyNotificationManager.shared.cancelAll()
         if previewMode {
             loadPreviewData()
         }
@@ -92,40 +52,52 @@ final class JourneyViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    private func bindLocationTracker() {
-        // Every observer re-renders on a publish; the 10s tick often repeats itself.
-        locationTracker.$positionState
-            .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] state in
-                guard let self, let state else { return }
-                self.positionState = state
-            }
-            .store(in: &cancellables)
+    // MARK: - Sessions
 
-        locationTracker.$trackingMode
-            .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] mode in
-                guard let self else { return }
-                self.trackingMode = mode
-            }
-            .store(in: &cancellables)
+    var focusedSession: JourneySession? {
+        focusedSessionID.flatMap(session(id:))
+    }
 
-        locationTracker.$locationError
-            .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .assign(to: &$locationError)
+    func session(id: UUID) -> JourneySession? {
+        sessions.first { $0.id == id }
+    }
 
-        // Granting location mid-prompt releases a held-back Live Activity
-        locationTracker.$isLocationAuthorized
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] authorized in
-                guard let self, authorized else { return }
-                self.pendingActivityStart?()
-                self.pendingActivityStart = nil
+    /// Adds a journey; one started where another was focused takes its place.
+    private func begin(_ session: JourneySession) {
+        if let replaced = focusedSession { stopJourney(replaced) }
+        sessions.append(session)
+        errorMessage = nil
+        updatePiP()
+    }
+
+    func stopJourney(_ session: JourneySession) {
+        session.stop()
+        sessions.removeAll { $0.id == session.id }
+        updatePiP()
+    }
+
+    // MARK: - Picture in Picture
+
+    /// One PiP window: the focused journey's, or the newest one's.
+    var pipSession: JourneySession? {
+        focusedSession ?? sessions.last
+    }
+
+    private func updatePiP() {
+        guard let session = pipSession else {
+            pipStatusObservation = nil
+            LCDPiPManager.shared.teardown()
+            return
+        }
+        LCDPiPManager.shared.prepare { [weak self] in
+            self?.pipSession?.renderLCDImage(scale: 2, padded: false)
+        }
+        pipStatusObservation = session.$positionState
+            .map { $0?.status }
+            .removeDuplicates()
+            .sink { status in
+                LCDPiPManager.shared.setAutoStartAllowed(status != .arrived)
             }
-            .store(in: &cancellables)
     }
 
     // MARK: - Load Lines
@@ -151,7 +123,7 @@ final class JourneyViewModel: ObservableObject {
         from boardingStation: Station,
         to alightingStation: Station
     ) async {
-        if activeJourney != nil {
+        if focusedSession != nil {
             pendingStart = { [weak self] in
                 Task { await self?.performStartJourney(line: line, from: boardingStation, to: alightingStation) }
             }
@@ -215,56 +187,8 @@ final class JourneyViewModel: ObservableObject {
             startedAt: Date()
         )
 
-        activeJourney = journey
-        selectedLine = journeyLine
-        transferLines = [:]
-        journeyLegLines = []
-        journeyLegColors = []
-
-        // Start location-based tracking — this drives everything
-        locationTracker.startTracking(journey: journey, delay: nil)
-
-        // Compute initial position from timetable while GPS locks on
-        positionState = TrainPositionEngine.computePosition(
-            journey: journey, delay: nil
-        )
-
-        if let state = positionState {
-            startLiveActivity(
-                journey: journey,
-                positionState: state,
-                lineColorHex: line.colorHex
-            )
-        }
-        JourneyNotificationManager.shared.schedule(journey: journey)
-
+        begin(JourneySession(journey: journey, line: journeyLine))
         isStartingJourney = false
-    }
-
-    private func startLiveActivity(
-        journey: Journey,
-        positionState: TrainPositionState,
-        lineColorHex: String,
-        legLines: [TrainJourneyAttributes.LegLine] = []
-    ) {
-        guard locationTracker.isLocationAuthorized else {
-            pendingActivityStart = { [weak self] in
-                guard let self, self.activeJourney?.id == journey.id else { return }
-                LiveActivityManager.shared.startActivity(
-                    journey: journey,
-                    positionState: self.positionState ?? positionState,
-                    lineColorHex: lineColorHex,
-                    legLines: legLines
-                )
-            }
-            return
-        }
-        LiveActivityManager.shared.startActivity(
-            journey: journey,
-            positionState: positionState,
-            lineColorHex: lineColorHex,
-            legLines: legLines
-        )
     }
 
     // MARK: - Departure Search (乗換案内-style)
@@ -1007,70 +931,12 @@ final class JourneyViewModel: ObservableObject {
 
     /// Starts a journey on a specific itinerary chosen from the departure search.
     func startJourney(candidate: TrainCandidate) {
-        if activeJourney != nil {
-            pendingStart = { [weak self] in self?.performStartJourney(candidate: candidate) }
+        if focusedSession != nil {
+            pendingStart = { [weak self] in self?.begin(JourneySession(candidate: candidate)) }
             showOverwriteConfirmation = true
             return
         }
-        performStartJourney(candidate: candidate)
-    }
-
-    private func performStartJourney(candidate: TrainCandidate) {
-        LiveActivityManager.shared.endActivity()
-
-        let journey = Journey(
-            id: UUID(),
-            service: candidate.journeyService,
-            line: candidate.journeyLine,
-            boardingStationId: candidate.fromStation.id,
-            alightingStationId: candidate.toStation.id,
-            startedAt: Date(),
-            transferStationIds: candidate.transferStationIds,
-            hasSchedule: candidate.hasSchedule
-        )
-
-        activeJourney = journey
-        selectedLine = candidate.journeyLine
-        errorMessage = nil
-
-        locationTracker.startTracking(journey: journey, delay: nil)
-        positionState = candidate.hasSchedule
-            ? TrainPositionEngine.computePosition(journey: journey, delay: nil)
-            : locationTracker.positionState
-
-        let journeyStations = journey.journeyStations
-        var legLines: [TrainJourneyAttributes.LegLine] = []
-        var legColors: [LegColor] = []
-        transferLines = [:]
-        for (index, leg) in candidate.legs.enumerated() {
-            let stationIndex = index == 0
-                ? 0
-                : journeyStations.firstIndex { $0.id == candidate.legs[index - 1].toStation.id }
-            guard let stationIndex else { continue }
-            // Keyed by the previous leg's arrival station ID, per operator.
-            if index > 0 { transferLines[candidate.legs[index - 1].toStation.id] = leg.line }
-            legLines.append(.init(
-                stationIndex: stationIndex,
-                lineSymbol: leg.line.lineSymbol,
-                lineColorHex: leg.line.colorHex,
-                lineName: leg.line.name,
-                lineNameEn: leg.line.nameEn
-            ))
-            legColors.append(LegColor(stationIndex: stationIndex, color: Self.lcdColor(leg.line)))
-        }
-
-        journeyLegLines = legLines
-        journeyLegColors = legColors
-
-        if let state = positionState {
-            startLiveActivity(
-                journey: journey,
-                positionState: state,
-                lineColorHex: candidate.journeyLine.colorHex,
-                legLines: legLines
-            )
-        }
-        JourneyNotificationManager.shared.schedule(journey: journey, transferLines: transferLines)
+        begin(JourneySession(candidate: candidate))
     }
 
     // MARK: - Mid-Journey Replanning
@@ -1088,44 +954,6 @@ final class JourneyViewModel: ObservableObject {
 
     /// Less slack than a planned transfer — no concourse walk.
     static let sameStationBufferMinutes: Double = 1
-
-    /// Stops ahead of the train, destination excluded; past stops of the current
-    /// leg included so a rider who overshot can double back.
-    var replanAnchors: [ReplanAnchor] {
-        guard let journey = activeJourney, journey.hasSchedule,
-              let state = positionState, state.status != .arrived
-        else { return [] }
-
-        let stations = journey.journeyStations
-        let times = journey.scheduledStationTimes
-        guard stations.count > 1, stations.count == times.count else { return [] }
-
-        let current = min(state.currentStationIndex ?? state.segmentTo, stations.count - 1)
-        let delay = TimeInterval(state.delayMinutes * 60)
-        let transferIds = Set(journey.transferStationIds)
-
-        // Walk back to the 乗り換え this leg was boarded at, or the boarding stop.
-        var legStart = current
-        while legStart > 0, !transferIds.contains(stations[legStart].id) {
-            legStart -= 1
-        }
-
-        var anchors: [ReplanAnchor] = []
-        for index in legStart..<(stations.count - 1) {
-            anchors.append(ReplanAnchor(
-                stationIndex: index,
-                station: stations[index],
-                time: times[index].addingTimeInterval(delay),
-                isPast: index < current
-            ))
-        }
-        return anchors
-    }
-
-    /// Stops past `anchor` the train has yet to reach.
-    func onwardStops(from anchor: ReplanAnchor) -> [ReplanAnchor] {
-        replanAnchors.filter { $0.stationIndex > anchor.stationIndex && !$0.isPast }
-    }
 
     /// Alternative itineraries from `anchor` onward, soonest first.
     func replanCandidates(
@@ -1151,134 +979,21 @@ final class JourneyViewModel: ObservableObject {
         )
     }
 
-    /// Same train, shorter trip — boarding station and start time carry over.
-    func changeDestination(to anchor: ReplanAnchor) {
-        guard let journey = activeJourney else { return }
-        let stations = journey.journeyStations
-        guard anchor.stationIndex > 0, anchor.stationIndex < stations.count else { return }
-
-        let kept = Set(stations.prefix(anchor.stationIndex + 1).map(\.id))
-        let revised = Journey(
-            id: UUID(),
-            service: journey.service,
-            line: journey.line,
-            boardingStationId: journey.boardingStationId,
-            alightingStationId: stations[anchor.stationIndex].id,
-            startedAt: journey.startedAt,
-            transferStationIds: journey.transferStationIds.filter { kept.contains($0) },
-            hasSchedule: journey.hasSchedule
-        )
-
-        install(
-            journey: revised,
-            line: journey.line,
-            legLines: journeyLegLines.filter { $0.stationIndex <= anchor.stationIndex },
-            legColors: journeyLegColors.filter { $0.stationIndex <= anchor.stationIndex },
-            transferLines: transferLines.filter { kept.contains($0.key) }
-        )
-    }
-
-    /// Swaps the rest of the itinerary for `onward`, boarded at `anchor`.
-    func replan(from anchor: ReplanAnchor, to onward: TrainCandidate) {
-        performStartJourney(candidate: stitched(from: anchor, to: onward) ?? onward)
+    /// Swaps the rest of the session's itinerary for `onward`, boarded at `anchor`.
+    func replan(_ session: JourneySession, from anchor: ReplanAnchor, to onward: TrainCandidate) {
+        session.install(candidate: stitched(session, from: anchor, to: onward) ?? onward)
     }
 
     /// `onward` with the ride in progress prepended; nil if they can't join.
-    func stitched(from anchor: ReplanAnchor, to onward: TrainCandidate) -> TrainCandidate? {
-        guard let head = rideInProgressLegs(upTo: anchor) else { return nil }
+    func stitched(_ session: JourneySession, from anchor: ReplanAnchor, to onward: TrainCandidate) -> TrainCandidate? {
+        guard let head = session.rideInProgressLegs(upTo: anchor) else { return nil }
         return compositeCandidate(legs: head + onward.legs)
-    }
-
-    /// Boarding station → `anchor`, split back into one leg per train so an
-    /// anchor beyond a 乗り換え keeps it; nil at the boarding station.
-    private func rideInProgressLegs(upTo anchor: ReplanAnchor) -> [CandidateLeg]? {
-        guard let journey = activeJourney, anchor.stationIndex > 0 else { return nil }
-        let stations = journey.journeyStations
-        let timetable = journey.journeyTimetable
-        let transferIds = Set(journey.transferStationIds)
-
-        var splits = [0]
-        for index in 1..<anchor.stationIndex where transferIds.contains(stations[index].id) {
-            splits.append(index)
-        }
-        splits.append(anchor.stationIndex)
-
-        // A composite journey joins its leg line IDs with "+".
-        let lineIds = journey.line.id.components(separatedBy: "+")
-
-        var legs: [CandidateLeg] = []
-        for legIndex in 0..<(splits.count - 1) {
-            let boundary = stations[splits[legIndex]]
-            let toStation = stations[splits[legIndex + 1]]
-
-            var line = journey.line
-            if legIndex > 0, let boarded = transferLines[boundary.id] {
-                line = boarded
-            } else if lineIds.indices.contains(legIndex),
-                      let resolved = StaticTrainData.line(withId: lineIds[legIndex])?.trainLine {
-                line = resolved
-            }
-            // The journey keeps the arriving leg's station at a transfer; the
-            // boarding side lives on the next line under its own ID.
-            let fromStation = legIndex == 0
-                ? boundary
-                : (line.stations.first(where: { $0.name == boundary.name }) ?? boundary)
-
-            guard let depEntry = timetable.first(where: { $0.stationId == boundary.id }),
-                  let arrEntry = timetable.first(where: { $0.stationId == toStation.id }),
-                  let dep = depEntry.departureSeconds() ?? depEntry.arrivalSeconds(),
-                  let arr = arrEntry.arrivalSeconds() ?? arrEntry.departureSeconds()
-            else { return nil }
-
-            legs.append(CandidateLeg(
-                service: journey.service,
-                line: line,
-                fromStation: fromStation,
-                toStation: toStation,
-                departureSeconds: dep,
-                arrivalSeconds: arr
-            ))
-        }
-        return legs.isEmpty ? nil : legs
-    }
-
-    /// Replaces the active journey; the Live Activity restarts rather than updates.
-    private func install(
-        journey: Journey,
-        line: TrainLine,
-        legLines: [TrainJourneyAttributes.LegLine],
-        legColors: [LegColor],
-        transferLines: [String: TrainLine]
-    ) {
-        LiveActivityManager.shared.endActivity()
-
-        activeJourney = journey
-        selectedLine = line
-        errorMessage = nil
-        self.transferLines = transferLines
-        journeyLegLines = legLines
-        journeyLegColors = legColors
-
-        locationTracker.startTracking(journey: journey, delay: nil)
-        positionState = journey.hasSchedule
-            ? TrainPositionEngine.computePosition(journey: journey, delay: nil)
-            : locationTracker.positionState
-
-        if let state = positionState {
-            startLiveActivity(
-                journey: journey,
-                positionState: state,
-                lineColorHex: line.colorHex,
-                legLines: legLines
-            )
-        }
-        JourneyNotificationManager.shared.schedule(journey: journey, transferLines: transferLines)
     }
 
     // MARK: - Custom (DIY) Line Journeys
 
     func startCustomJourney(line: CustomLine, fromId: String, toId: String) {
-        if activeJourney != nil {
+        if focusedSession != nil {
             pendingStart = { [weak self] in self?.performStartCustomJourney(line: line, fromId: fromId, toId: toId) }
             showOverwriteConfirmation = true
             return
@@ -1287,8 +1002,6 @@ final class JourneyViewModel: ObservableObject {
     }
 
     private func performStartCustomJourney(line: CustomLine, fromId: String, toId: String) {
-        LiveActivityManager.shared.endActivity()
-
         let scheduled = CustomJourneyBuilder.scheduledService(line: line, fromId: fromId, toId: toId)
         guard let service = scheduled
             ?? CustomJourneyBuilder.untimedService(line: line, fromId: fromId, toId: toId)
@@ -1296,7 +1009,6 @@ final class JourneyViewModel: ObservableObject {
             errorMessage = "No matching train found for this time"
             return
         }
-        let hasSchedule = scheduled != nil
         let journeyLine = line.trainLine
 
         let journey = Journey(
@@ -1306,35 +1018,10 @@ final class JourneyViewModel: ObservableObject {
             boardingStationId: fromId,
             alightingStationId: toId,
             startedAt: Date(),
-            hasSchedule: hasSchedule
+            hasSchedule: scheduled != nil
         )
 
-        activeJourney = journey
-        selectedLine = journeyLine
-        errorMessage = nil
-        transferLines = [:]
-        journeyLegLines = []
-        journeyLegColors = []
-
-        locationTracker.startTracking(journey: journey, delay: nil)
-        positionState = hasSchedule
-            ? TrainPositionEngine.computePosition(journey: journey, delay: nil)
-            : locationTracker.positionState
-
-        if let state = positionState {
-            startLiveActivity(
-                journey: journey,
-                positionState: state,
-                lineColorHex: journeyLine.colorHex
-            )
-        }
-        JourneyNotificationManager.shared.schedule(journey: journey)
-    }
-
-    // MARK: - Manual Station Flipping (schedule-less journeys)
-
-    func stepManualStation(_ delta: Int) {
-        locationTracker.stepManualStation(delta)
+        begin(JourneySession(journey: journey, line: journeyLine))
     }
 
 #if DEBUG
@@ -1371,9 +1058,7 @@ final class JourneyViewModel: ObservableObject {
             }
         }
         guard let best else { return }
-        activeJourney = best.journey
-        selectedLine = staticLine.trainLine
-        positionState = best.state
+        begin(JourneySession(journey: best.journey, line: staticLine.trainLine, fixedState: best.state))
     }
 
 #endif
@@ -1392,57 +1077,14 @@ final class JourneyViewModel: ObservableObject {
         pendingStart = nil
     }
 
-    // MARK: - Stop Journey
-
-    func stopJourney() {
-        locationTracker.stopTracking()
-        LiveActivityManager.shared.endActivity()
-        JourneyNotificationManager.shared.cancelAll()
-        pendingActivityStart = nil
-        transferLines = [:]
-        journeyLegLines = []
-        journeyLegColors = []
-        activeJourney = nil
-        positionState = nil
-        currentDelay = nil
-    }
-
     // MARK: - Journey Notifications
 
-    /// Re-applies the alert settings to the journey in progress.
+    /// Re-applies the alert settings to every journey in progress.
     func rescheduleNotifications() {
-        guard let journey = activeJourney else {
-            JourneyNotificationManager.shared.cancelAll()
-            return
-        }
-        JourneyNotificationManager.shared.schedule(journey: journey, transferLines: transferLines)
+        sessions.forEach { $0.rescheduleNotifications() }
     }
 
     // MARK: - LCD Colour
-
-    /// The colour every LCD shows now; a new leg takes over once its train departs.
-    var currentLineColor: Color {
-        let fallback = selectedLine.map(Self.lcdColor) ?? .gray
-        guard !journeyLegColors.isEmpty else { return fallback }
-        let next = max(positionState?.status == .arrived ? Int.max : positionState?.segmentTo ?? Int.max, 1)
-        let leg = journeyLegColors.last { $0.stationIndex < next } ?? journeyLegColors.first
-        return leg?.color ?? fallback
-    }
-
-    /// Badge colour for the line ridden into a journey station.
-    func badgeLineColor(arrivingAt stationId: String) -> Color {
-        // Matches the journey sheet; through-lines and untimed rides carry no legs.
-        if let owner = StaticTrainData.line(containingStationId: stationId) {
-            return owner.trainLine.color
-        }
-        let fallback = activeJourney?.line.color ?? selectedLine?.color ?? .accentColor
-        guard let journey = activeJourney, !journeyLegLines.isEmpty,
-              let index = journey.journeyStations.firstIndex(where: { $0.id == stationId }),
-              let leg = journeyLegLines.last(where: { $0.stationIndex < max(index, 1) })
-                ?? journeyLegLines.first
-        else { return fallback }
-        return Color(hex: leg.lineColorHex)
-    }
 
     /// LCD-only line colour; a through-service takes its first component's.
     static func lcdColor(_ line: TrainLine) -> Color {
@@ -1454,9 +1096,7 @@ final class JourneyViewModel: ObservableObject {
     // MARK: - Force Refresh (from Live Activity button)
 
     func forceRefresh() {
-        guard activeJourney != nil else { return }
-        locationTracker.forceRefresh()
-        LiveActivityManager.shared.markDelayRefreshed()
+        sessions.forEach { $0.forceRefresh() }
     }
 
     // MARK: - Station Timetable
@@ -1579,13 +1219,11 @@ final class JourneyViewModel: ObservableObject {
             timetable: timetable, destinationStationId: "s8"
         )
 
-        selectedLine = line
-        activeJourney = Journey(
+        let journey = Journey(
             id: UUID(), service: service, line: line,
             boardingStationId: "s1", alightingStationId: "s8", startedAt: Date()
         )
-        currentDelay = DelayInfo(lineId: line.id, delayMinutes: 3, cause: "混雑のため", updatedAt: Date())
-        positionState = TrainPositionState(
+        let state = TrainPositionState(
             progress: 0.35, segmentFrom: 2, segmentTo: 3,
             segmentProgress: 0.6, currentStationIndex: nil,
             nextStationName: "阿佐ヶ谷", nextStationNameEn: "Asagaya",
@@ -1593,5 +1231,9 @@ final class JourneyViewModel: ObservableObject {
             status: .delayed,
             trackingModeRaw: "Timetable"
         )
+        sessions = [JourneySession(
+            journey: journey, line: line, fixedState: state,
+            delay: DelayInfo(lineId: line.id, delayMinutes: 3, cause: "混雑のため", updatedAt: Date())
+        )]
     }
 }

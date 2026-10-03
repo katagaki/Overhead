@@ -2,7 +2,7 @@ import SwiftUI
 import Backbone
 
 struct JourneyToolbarAccessory: View {
-    @ObservedObject var viewModel: JourneyViewModel
+    @ObservedObject var session: JourneySession
     let availableWidth: CGFloat
     let onTap: () -> Void
 
@@ -12,16 +12,17 @@ struct JourneyToolbarAccessory: View {
     private static let barHeight: CGFloat = 40
 
     private var lineColor: Color {
-        viewModel.selectedLine?.color ?? .accentColor
+        session.line.color
     }
 
     private var originStation: Station? {
-        viewModel.activeJourney?.journeyStations.first
+        session.journey.journeyStations.first
     }
 
     /// Nil at the alighting station, which 降車 already holds.
     private var nextStation: Station? {
-        guard let journey = viewModel.activeJourney, let state = viewModel.positionState else { return nil }
+        let journey = session.journey
+        guard let state = session.positionState else { return nil }
         let stations = journey.journeyStations
         guard !stations.isEmpty else { return nil }
         let index = state.currentStationIndex
@@ -31,12 +32,12 @@ struct JourneyToolbarAccessory: View {
     }
 
     private var finalStation: Station? {
-        viewModel.activeJourney?.journeyStations.last
+        session.journey.journeyStations.last
     }
 
     /// Once true, 乗車 gives up its slot to the changes ahead.
     private var hasLeftOrigin: Bool {
-        guard let state = viewModel.positionState else { return false }
+        guard let state = session.positionState else { return false }
         let index = state.currentStationIndex
             ?? (state.status == .notStarted ? state.segmentFrom : state.segmentTo)
         return index > 0
@@ -47,12 +48,12 @@ struct JourneyToolbarAccessory: View {
     }
 
     /// Three slots at most, one of which 降車 always holds.
-    private var shownTransfers: [JourneyViewModel.UpcomingTransfer] {
-        Array(viewModel.upcomingTransfers.prefix(showsOrigin ? 1 : 2))
+    private var shownTransfers: [JourneySession.UpcomingTransfer] {
+        Array(session.upcomingTransfers.prefix(showsOrigin ? 1 : 2))
     }
 
     private var hiddenTransferCount: Int {
-        max(0, viewModel.upcomingTransfers.count - shownTransfers.count)
+        max(0, session.upcomingTransfers.count - shownTransfers.count)
     }
 
     private var slotCount: Int {
@@ -101,7 +102,7 @@ struct JourneyToolbarAccessory: View {
     }
 
     private var stops: [Stop] {
-        guard viewModel.positionState != nil else { return [] }
+        guard session.positionState != nil else { return [] }
         var built: [Stop] = []
 
         // Boarding stop until it is behind, then the stop ahead — never nothing.
@@ -133,7 +134,8 @@ struct JourneyToolbarAccessory: View {
                         slot(stop.label, station: stop.station,
                              trailing: stop.trailing, trailingColor: stop.onwardColor)
                     }
-                } else if let journey = viewModel.activeJourney {
+                } else {
+                    let journey = session.journey
                     Circle()
                         .fill(lineColor)
                         .frame(width: 9, height: 9)
@@ -182,7 +184,7 @@ struct JourneyToolbarAccessory: View {
         let budget = nameBudget(badges: badges)
         return HStack(spacing: 7) {
             if !station.stationCode.isEmpty {
-                stationBadge(station, color: viewModel.badgeLineColor(arrivingAt: station.id),
+                stationBadge(station, color: session.badgeLineColor(arrivingAt: station.id),
                              dimension: 24)
             }
             VStack(alignment: .leading, spacing: 0) {
@@ -215,7 +217,7 @@ struct JourneyToolbarAccessory: View {
             color: color,
             size: .regular,
             stationName: station.name,
-            styleOverride: viewModel.activeJourney?.line.badgeStyleId
+            styleOverride: session.journey.line.badgeStyleId
         )
         .scaleEffect(dimension / 28)
         .frame(width: dimension, height: dimension)

@@ -112,10 +112,8 @@ struct TrainJourneyAttributes: ActivityAttributes {
 
 // MARK: - Live Activity Manager
 
+/// One per journey session; several activities can run at once.
 final class LiveActivityManager {
-
-    static let shared = LiveActivityManager()
-    private init() {}
 
     static let refreshURLScheme = "overhead://refresh-delay"
 

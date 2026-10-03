@@ -6,6 +6,7 @@ import Backbone
 /// Mid-journey course change: pick a stop still ahead, then a new train or destination.
 struct ReplanSheet: View {
     @ObservedObject var viewModel: JourneyViewModel
+    @ObservedObject var session: JourneySession
     /// Stop the rider tapped on the route strip; falls back to the next one.
     var initialAnchorIndex: Int?
     var initialMode: Mode = .train
@@ -35,7 +36,7 @@ struct ReplanSheet: View {
         case stop(Int)
     }
 
-    private var anchors: [JourneyViewModel.ReplanAnchor] { viewModel.replanAnchors }
+    private var anchors: [JourneyViewModel.ReplanAnchor] { session.replanAnchors }
 
     /// The default: stops behind the train are offered but never preselected.
     private var nextAnchor: JourneyViewModel.ReplanAnchor? {
@@ -52,12 +53,12 @@ struct ReplanSheet: View {
     }
 
     private var destination: Station? {
-        viewModel.activeJourney?.journeyStations.last
+        session.journey.journeyStations.last
     }
 
     /// The arrival the change is measured against.
     private var currentArrival: Date? {
-        viewModel.positionState?.estimatedArrival
+        session.positionState?.estimatedArrival
     }
 
     var body: some View {
@@ -142,10 +143,10 @@ struct ReplanSheet: View {
                             if !candidate.station.stationCode.isEmpty {
                                 StationNumberBadge(
                                     code: candidate.station.stationCode,
-                                    color: viewModel.currentLineColor,
+                                    color: session.currentLineColor,
                                     size: .regular,
                                     stationName: candidate.station.name,
-                                    styleOverride: viewModel.activeJourney?.line.badgeStyleId
+                                    styleOverride: session.journey.line.badgeStyleId
                                 )
                             }
                             VStack(alignment: .leading, spacing: 1) {
@@ -263,7 +264,7 @@ struct ReplanSheet: View {
     @ViewBuilder
     private var destinationSection: some View {
         if let anchor {
-            let onward = viewModel.onwardStops(from: anchor)
+            let onward = session.onwardStops(from: anchor)
 
             if !onward.isEmpty {
                 Section {
@@ -349,11 +350,11 @@ struct ReplanSheet: View {
         switch selection {
         case .candidate(let id):
             guard let candidate = candidates.first(where: { $0.id == id }) else { return nil }
-            return { viewModel.replan(from: anchor, to: candidate) }
+            return { viewModel.replan(session, from: anchor, to: candidate) }
         case .stop(let index):
-            guard let stop = viewModel.onwardStops(from: anchor).first(where: { $0.stationIndex == index })
+            guard let stop = session.onwardStops(from: anchor).first(where: { $0.stationIndex == index })
             else { return nil }
-            return { viewModel.changeDestination(to: stop) }
+            return { session.changeDestination(to: stop) }
         }
     }
 

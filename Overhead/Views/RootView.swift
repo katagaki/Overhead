@@ -15,7 +15,9 @@ struct RootView: View {
     @AppStorage(JourneyNotificationManager.enabledKey) private var notificationsEnabled = true
     @AppStorage(JourneyNotificationManager.leadMinutesKey)
     private var notificationLeadMinutes = JourneyNotificationManager.defaultLeadMinutes
-    @State private var showJourneySheet = false
+    /// Observable rather than `@State`: the tab bars are built in closures
+    /// the tab stack keeps, which would go on reading a stale copy.
+    @State private var journeyTabs = JourneyTabRegistry()
     @State private var showTimetableModeNotice = false
     @State private var showStartupNotice = false
     @State private var showDisclaimer = false
@@ -27,7 +29,6 @@ struct RootView: View {
     // Screenshot harness (overtrain:// deep links, see ScreenshotHarness.swift).
     @State private var debugTimetableTarget: ScreenshotTimetableTarget?
 #endif
-    @Namespace private var journeyZoom
     @AppStorage("lineData.onboarded") private var lineDataOnboarded = false
     @State private var showLineDataOnboarding = false
 
@@ -86,6 +87,11 @@ struct RootView: View {
             let liveIDs = Set(tabIDs)
             searchStates = searchStates.filter { liveIDs.contains($0.key) }
             AppTabSearchStateStorage.save(searchStates)
+            // A journey belongs to its tab, so closing the tab ends it.
+            for (tabID, sessionID) in journeyTabs.sessions where !liveIDs.contains(tabID) {
+                journeyTabs.sessions[tabID] = nil
+                if let session = viewModel.session(id: sessionID) { viewModel.stopJourney(session) }
+            }
         }
         .task {
             tabStore.loadPersistedSnapshots()
@@ -124,10 +130,6 @@ struct RootView: View {
         } content: {
             LineDataOnboardingView()
         }
-        .sheet(isPresented: $showJourneySheet) {
-            JourneySheetView(viewModel: viewModel)
-                .navigationTransition(.zoom(sourceID: tabStore.selectedTabID, in: journeyZoom))
-        }
         .sheet(item: $customStore.incomingPackage) { package in
             CustomLineImportView(package: package)
         }
@@ -144,35 +146,35 @@ struct RootView: View {
             }
         }
 #endif
-        // Keeps the PiP layer alive while the journey sheet is closed.
+        // Keeps the PiP layer alive while its journey's page is not mounted.
         .background {
-            if !showJourneySheet {
+            if !(viewModel.pipSession.map { journeyTabs.mountedPages.contains($0.id) } ?? false) {
                 LCDPiPLayerHost()
                     .frame(width: 1, height: 1)
             }
         }
-        .onChange(of: viewModel.activeJourney != nil) { _, hasJourney in
-            guard hasJourney else {
-                showJourneySheet = false
-                LCDPiPManager.shared.teardown()
-                return
+        .onChange(of: viewModel.sessions.map(\.id)) { old, new in
+            for sessionID in Set(old).subtracting(new) {
+                guard let tabID = journeyTabs.sessions.first(where: { $0.value == sessionID })?.key else { continue }
+                removeJourneyPage(sessionID, from: tabID)
+                journeyTabs.sessions[tabID] = nil
             }
-            LCDPiPManager.shared.prepare { [weak viewModel] in
-                viewModel?.renderLCDImage(scale: 2, padded: false)
+            let added = new.filter { !old.contains($0) }
+            syncFocusedJourney()
+            DispatchQueue.main.async {
+                for sessionID in added { attachJourney(sessionID, to: tabStore.selectedTabID) }
             }
-            DispatchQueue.main.async { showJourneySheet = true }
         }
-        .onChange(of: viewModel.positionState?.status) { _, status in
-            LCDPiPManager.shared.setAutoStartAllowed(status != .arrived)
+        .onChange(of: tabStore.selectedTabID) { _, _ in
+            syncFocusedJourney()
         }
-        // Overwriting keeps activeJourney non-nil, so onChange won't fire — open here.
+        // Starting where the selected tab already has a journey replaces it.
         .alert(
             "Journey.Overwrite.ConfirmTitle",
             isPresented: $viewModel.showOverwriteConfirmation
         ) {
             Button("Button.Overwrite", role: .destructive) {
                 viewModel.confirmOverwrite()
-                showJourneySheet = true
             }
             Button("Button.Cancel", role: .cancel) {
                 viewModel.cancelOverwrite()
@@ -250,7 +252,7 @@ struct RootView: View {
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    moreMenu
+                    moreMenu(for: tab.id)
                 }
             }
             .navigationDestination(for: AppMenuDestination.self) { destination in
@@ -284,6 +286,17 @@ struct RootView: View {
                             for: tab.id
                         )
                     }
+            }
+            .navigationDestination(for: JourneyDestination.self) { destination in
+                if let session = viewModel.session(id: destination.sessionID) {
+                    JourneyPageView(viewModel: viewModel, session: session)
+                        .tabPage(pathToken: AppPathToken.journey(session.id))
+                        .onAppear {
+                            journeyTabs.mountedPages.insert(session.id)
+                            tabStore.setPageIdentity(journeyIdentity(for: session), for: tab.id)
+                        }
+                        .onDisappear { journeyTabs.mountedPages.remove(session.id) }
+                }
             }
             .navigationDestination(for: CustomLineRoute.self) { route in
                 CustomLineEditorView(route: route)
@@ -368,14 +381,10 @@ struct RootView: View {
     private func browserBottomBar(for tab: AppNavigationStore.Tab) -> some View {
         GlassEffectContainer(spacing: TabBottomBarMetrics.itemSpacing) {
             HStack(spacing: TabBottomBarMetrics.itemSpacing) {
-                JourneyStationToolbarButton(viewModel: viewModel) {
-                    showJourneySheet = true
-                }
-                // Hidden tabs stay mounted, so each needs its own source.
-                .matchedTransitionSource(id: tab.id, in: journeyZoom)
+                journeyBarItem(for: tab)
 
                 BrowserAddressToolbarItem(
-                    viewModel: viewModel,
+                    isCrowded: journeyTabs.sessions[tab.id] != nil,
                     searchText: searchText(for: tab.id),
                     onOpenSearch: openSearch,
                     onSwipe: switchTab
@@ -399,6 +408,66 @@ struct RootView: View {
         .opacity(showsBrowserSearchOverlay ? 0 : 1)
         .allowsHitTesting(!showsBrowserSearchOverlay)
         .accessibilityHidden(showsBrowserSearchOverlay)
+    }
+
+    // MARK: - Journey
+
+    /// Ending the journey takes the place of opening it while it is showing.
+    @ViewBuilder
+    private func journeyBarItem(for tab: AppNavigationStore.Tab) -> some View {
+        if let session = journeyTabs.sessions[tab.id].flatMap(viewModel.session(id:)) {
+            if tabStore.displayedPathToken(for: tab.id) == .journey(session.id) {
+                JourneyEndButton {
+                    viewModel.stopJourney(session)
+                }
+            } else {
+                JourneyStationToolbarButton(session: session, action: openJourney)
+            }
+        }
+    }
+
+    private func journeyIdentity(for session: JourneySession) -> AppTabIdentity {
+        AppTabIdentity(
+            title: session.journey.line.localizedName,
+            symbolName: "train.side.front.car",
+            pathToken: .journey(session.id)
+        )
+    }
+
+    private func syncFocusedJourney() {
+        let focused = journeyTabs.sessions[tabStore.selectedTabID]
+        if viewModel.focusedSessionID != focused { viewModel.focusedSessionID = focused }
+    }
+
+    /// Where a journey's page sits in a tab's stack, if it is in it at all.
+    private func journeyDepth(_ sessionID: UUID, in tabID: UUID) -> Int? {
+        guard let tab = tabStore.tabs.first(where: { $0.id == tabID }) else { return nil }
+        let history = tabStore.pageHistories[tabID] ?? []
+        return history.prefix(tab.path.count + 1).lastIndex { $0.pathToken == .journey(sessionID) }
+    }
+
+    private func attachJourney(_ sessionID: UUID, to tabID: UUID) {
+        guard viewModel.session(id: sessionID) != nil else { return }
+        journeyTabs.sessions[tabID] = sessionID
+        syncFocusedJourney()
+        openJourney()
+    }
+
+    private func openJourney() {
+        guard let sessionID = journeyTabs.sessions[tabStore.selectedTabID] else { return }
+        dismissSearchOverlay()
+        if let depth = journeyDepth(sessionID, in: tabStore.selectedTabID) {
+            tabStore.popTo(depth: depth)
+        } else {
+            tabStore.push(JourneyDestination(sessionID: sessionID))
+        }
+    }
+
+    private func removeJourneyPage(_ sessionID: UUID, from tabID: UUID) {
+        guard let depth = journeyDepth(sessionID, in: tabID) else { return }
+        tabStore.updateTab(tabID) { $0.path.removeLast($0.path.count - depth + 1) }
+        tabStore.restoreIdentity(atDepth: depth - 1, for: tabID)
+        tabStore.persistTabs()
     }
 
     private func openSearch() {
@@ -443,6 +512,10 @@ struct RootView: View {
         case .search(let destination): path.append(destination)
         case .menu(let destination): path.append(destination)
         case .customLine(let route): path.append(route)
+        case .journey(let sessionID):
+            // Journeys do not outlive the app, so a restored stack ends here.
+            guard viewModel.session(id: sessionID) != nil else { return false }
+            path.append(JourneyDestination(sessionID: sessionID))
         }
         return true
     }
@@ -560,12 +633,12 @@ struct RootView: View {
 
     // MARK: - More Menu
 
-    private var moreMenu: some View {
+    private func moreMenu(for tabID: UUID) -> some View {
         Menu {
-            if viewModel.activeJourney != nil {
+            if let session = journeyTabs.sessions[tabID].flatMap(viewModel.session(id:)) {
                 Section("Settings.Section.CurrentJourney") {
                     Button(role: .destructive) {
-                        viewModel.stopJourney()
+                        viewModel.stopJourney(session)
                     } label: {
                         Label("Button.EndJourney", systemImage: "stop.circle.fill")
                     }
@@ -673,9 +746,10 @@ struct RootView: View {
             ScreenshotStaging.shared.placeEditorCommand = editFirst ? .editFirst : .new
         case .dismissSheet:
             try? await Task.sleep(for: .seconds(1.5))
-            showJourneySheet = false
+            let tabID = tabStore.selectedTabID
+            if let sessionID = journeyTabs.sessions[tabID] { removeJourneyPage(sessionID, from: tabID) }
         case .reset:
-            viewModel.stopJourney()
+            viewModel.sessions.forEach(viewModel.stopJourney)
             debugTimetableTarget = nil
             openHome()
             UserDefaults.standard.removeObject(forKey: "journey.setup.stations")
@@ -683,4 +757,38 @@ struct RootView: View {
         }
     }
 #endif
+}
+
+/// Which tab each journey belongs to, and which journey pages are mounted.
+@Observable
+final class JourneyTabRegistry {
+    /// Tab → the journey started from it, which no other tab shows.
+    var sessions: [UUID: UUID] = [:]
+    var mountedPages: Set<UUID> = []
+}
+
+private struct JourneyEndButton: View {
+    let onEnd: () -> Void
+    @State private var isConfirming = false
+
+    var body: some View {
+        Button {
+            isConfirming = true
+        } label: {
+            Image(systemName: "stop.fill")
+                .foregroundStyle(.red)
+                .frame(width: TabBottomBarMetrics.itemHeight, height: TabBottomBarMetrics.itemHeight)
+                .contentShape(Circle())
+        }
+        .accessibilityLabel("Button.EndJourney")
+        .glassEffect(.regular.interactive(), in: .circle)
+        .confirmationDialog(
+            "Journey.End.ConfirmTitle",
+            isPresented: $isConfirming,
+            titleVisibility: .visible
+        ) {
+            Button("Button.EndJourney", role: .destructive, action: onEnd)
+            Button("Button.KeepJourney", role: .cancel) {}
+        }
+    }
 }

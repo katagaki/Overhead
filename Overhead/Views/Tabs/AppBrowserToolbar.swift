@@ -3,12 +3,12 @@ import Backbone
 import EnhancedNavigation
 
 struct JourneyStationToolbarButton: View {
-    @ObservedObject var viewModel: JourneyViewModel
+    @ObservedObject var session: JourneySession
     let action: () -> Void
 
     private var nextStation: Station? {
-        guard let journey = viewModel.activeJourney,
-              let state = viewModel.positionState,
+        let journey = session.journey
+        guard let state = session.positionState,
               !journey.journeyStations.isEmpty else { return nil }
         let current = state.currentStationIndex
             ?? (state.status == .notStarted ? state.segmentFrom : state.segmentTo)
@@ -17,34 +17,33 @@ struct JourneyStationToolbarButton: View {
     }
 
     var body: some View {
-        if viewModel.activeJourney != nil {
-            Button(action: action) {
-                if let station = nextStation, !station.stationCode.isEmpty {
-                    StationNumberBadge(
-                        code: station.stationCode,
-                        color: viewModel.badgeLineColor(arrivingAt: station.id),
-                        size: .regular,
-                        stationName: station.name,
-                        styleOverride: viewModel.activeJourney?.line.badgeStyleId
-                    )
-                    .frame(width: 32, height: 32)
-                } else {
-                    Image(systemName: "tram.fill")
-                        .frame(width: 24, height: 24)
-                }
+        Button(action: action) {
+            if let station = nextStation, !station.stationCode.isEmpty {
+                StationNumberBadge(
+                    code: station.stationCode,
+                    color: session.badgeLineColor(arrivingAt: station.id),
+                    size: .regular,
+                    stationName: station.name,
+                    styleOverride: session.journey.line.badgeStyleId
+                )
+                .frame(width: 32, height: 32)
+            } else {
+                Image(systemName: "tram.fill")
+                    .frame(width: 24, height: 24)
             }
-            .frame(width: TabBottomBarMetrics.itemHeight, height: TabBottomBarMetrics.itemHeight)
-            .glassEffect(.regular.interactive(), in: .circle)
-            .accessibilityLabel(
-                nextStation.map { Text("Open journey, next stop \($0.localizedName)") }
-                    ?? Text("Open journey")
-            )
         }
+        .frame(width: TabBottomBarMetrics.itemHeight, height: TabBottomBarMetrics.itemHeight)
+        .glassEffect(.regular.interactive(), in: .circle)
+        .accessibilityLabel(
+            nextStation.map { Text("Open journey, next stop \($0.localizedName)") }
+                ?? Text("Open journey")
+        )
     }
 }
 
 struct BrowserAddressToolbarItem: View {
-    @ObservedObject var viewModel: JourneyViewModel
+    /// A journey button beside the field leaves room for the short prompt only.
+    let isCrowded: Bool
     var searchText: Binding<String>
     let onOpenSearch: () -> Void
     let onSwipe: (Int) -> Void
@@ -75,7 +74,7 @@ struct BrowserAddressToolbarItem: View {
         if !searchText.wrappedValue.isEmpty {
             Text(searchText.wrappedValue)
                 .lineLimit(1)
-        } else if viewModel.activeJourney != nil {
+        } else if isCrowded {
             Text("Search.Title")
         } else {
             ViewThatFits(in: .horizontal) {

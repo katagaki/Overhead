@@ -83,7 +83,10 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
     private var recentAccuracies: [Double] = []
     private let accuracyWindowSize = 5
 
-    override init() {
+    private let liveActivity: LiveActivityManager
+
+    init(liveActivity: LiveActivityManager) {
+        self.liveActivity = liveActivity
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
@@ -800,6 +803,6 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
 
     private func updateLiveActivity() {
         guard let state = positionState else { return }
-        LiveActivityManager.shared.updateActivity(positionState: state)
+        liveActivity.updateActivity(positionState: state)
     }
 }

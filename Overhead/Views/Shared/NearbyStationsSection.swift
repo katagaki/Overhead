@@ -60,7 +60,7 @@ struct NearbyStationsSection: View {
 
     private func refreshUnlessJourneyActive() {
         // Mid-journey the rail would reshuffle under the user; let it go stale.
-        guard viewModel.activeJourney == nil else { return }
+        guard viewModel.sessions.isEmpty else { return }
         provider.refreshIfNeeded(lines: viewModel.availableLines)
     }
 

@@ -59,6 +59,12 @@ nonisolated enum AppPathToken: Hashable, Codable {
     case search(SearchDestination)
     case menu(AppMenuDestination)
     case customLine(CustomLineRoute)
+    case journey(UUID)
+}
+
+/// The journey in progress, as a page in the tab that started it.
+nonisolated struct JourneyDestination: Hashable, Codable {
+    let sessionID: UUID
 }
 
 nonisolated enum AppMenuDestination: String, Hashable, Codable {
