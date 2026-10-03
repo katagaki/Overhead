@@ -44,6 +44,10 @@ struct JourneyStationToolbarButton: View {
 struct BrowserAddressToolbarItem: View {
     /// A journey button beside the field leaves room for the short prompt only.
     let isCrowded: Bool
+    /// The page on show, named in place of the prompt; nil on the home page.
+    let page: AppTabIdentity?
+    /// Controls the page on show put in the omnibox.
+    let items: TabBottomBarItems
     var searchText: Binding<String>
     let onOpenSearch: () -> Void
     let onSwipe: (Int) -> Void
@@ -52,26 +56,40 @@ struct BrowserAddressToolbarItem: View {
     @State private var suppressTap = false
 
     var body: some View {
-        Button {
-            guard !suppressTap else { return }
-            onOpenSearch()
-        } label: {
-            HStack(spacing: 7) {
-                Image(systemName: "magnifyingglass")
-                    .foregroundStyle(.secondary)
-                addressLabel
-                    .foregroundStyle(.secondary)
+        HStack(spacing: 0) {
+            Button {
+                guard !suppressTap else { return }
+                onOpenSearch()
+            } label: {
+                HStack(spacing: 7) {
+                    Image(systemName: page?.symbolName ?? "magnifyingglass")
+                        .foregroundStyle(.secondary)
+                    addressLabel
+                        .foregroundStyle(page == nil ? .secondary : .primary)
+                }
+                .padding(.horizontal, 17)
+                .frame(maxWidth: .infinity, minHeight: TabBottomBarMetrics.itemHeight, alignment: .leading)
+                .contentShape(.capsule)
             }
-            .contentShape(.capsule)
+            .accessibilityLabel("Search.Prompt")
+
+            if items.hasOmniboxAccessory {
+                items.omniboxAccessory
+                    .padding(.trailing, 17)
+            }
         }
-        .accessibilityLabel("Search.Prompt")
+        .animation(.smooth, value: page?.title)
         .offset(x: dragOffset * 0.1)
         .simultaneousGesture(swipeGesture)
     }
 
     @ViewBuilder
     private var addressLabel: some View {
-        if !searchText.wrappedValue.isEmpty {
+        if let page {
+            Text(page.title)
+                .lineLimit(1)
+                .contentTransition(.opacity)
+        } else if !searchText.wrappedValue.isEmpty {
             Text(searchText.wrappedValue)
                 .lineLimit(1)
         } else if isCrowded {

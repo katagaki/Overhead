@@ -1,5 +1,6 @@
 import SwiftUI
 import Backbone
+import EnhancedNavigation
 
 /// The journey, pushed onto the tab it was started from.
 struct JourneyPageView: View {
@@ -33,16 +34,7 @@ struct JourneyPageView: View {
 
                 ToolbarSpacer(.fixed, placement: .topBarTrailing)
 
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button {
-                        if let image = session.renderLCDImage() {
-                            shareImage = ShareableImage(image: image)
-                        }
-                    } label: {
-                        Label("Button.ShareImage", systemImage: "square.and.arrow.up")
-                    }
-                    .disabled(session.positionState == nil)
-
+                ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showingStylePicker = true
                     } label: {
@@ -50,6 +42,14 @@ struct JourneyPageView: View {
                     }
                     .matchedTransitionSource(id: Self.styleTransitionID, in: statusZoom)
                 }
+            }
+            .tabOmniboxAccessory {
+                Button("Button.ShareImage", systemImage: "square.and.arrow.up") {
+                    if let image = session.renderLCDImage() {
+                        shareImage = ShareableImage(image: image)
+                    }
+                }
+                .disabled(session.positionState == nil)
             }
             .sheet(isPresented: $showingStylePicker) {
                 LCDStylePickerSheet(styleRaw: $lcdStyleRaw)

@@ -321,8 +321,8 @@ struct RootView: View {
 #endif
         }
         .environment(\.appTabOpenDestination, { tabStore.push($0) })
-        .tabBottomBar {
-            browserBottomBar(for: tab)
+        .tabBottomBar(for: tab.id, in: tabStore) { items in
+            browserBottomBar(for: tab, items: items)
         }
         .onAppear { tabStore.setPageIdentity(identity(for: tab.root, tabID: tab.id), for: tab.id) }
         .onChange(of: tab.root) { _, root in
@@ -378,13 +378,15 @@ struct RootView: View {
         )
     }
 
-    private func browserBottomBar(for tab: AppNavigationStore.Tab) -> some View {
+    private func browserBottomBar(for tab: AppNavigationStore.Tab, items: TabBottomBarItems) -> some View {
         GlassEffectContainer(spacing: TabBottomBarMetrics.itemSpacing) {
             HStack(spacing: TabBottomBarMetrics.itemSpacing) {
                 journeyBarItem(for: tab)
 
                 BrowserAddressToolbarItem(
                     isCrowded: journeyTabs.sessions[tab.id] != nil,
+                    page: omniboxPage(for: tab.id),
+                    items: items,
                     searchText: searchText(for: tab.id),
                     onOpenSearch: openSearch,
                     onSwipe: switchTab
@@ -468,6 +470,13 @@ struct RootView: View {
         tabStore.updateTab(tabID) { $0.path.removeLast($0.path.count - depth + 1) }
         tabStore.restoreIdentity(atDepth: depth - 1, for: tabID)
         tabStore.persistTabs()
+    }
+
+    /// Home keeps the search prompt; any other page names itself.
+    private func omniboxPage(for tabID: UUID) -> AppTabIdentity? {
+        let tab = tabStore.displayedTab(for: tabID)
+        guard tab.canGoBack || tab.root != .home else { return nil }
+        return tab.pageIdentity
     }
 
     private func openSearch() {
