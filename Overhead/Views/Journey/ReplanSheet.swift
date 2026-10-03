@@ -55,9 +55,6 @@ struct ReplanSheet: View {
         viewModel.activeJourney?.journeyStations.last
     }
 
-    /// Searches match on the Japanese name; only the label is localized.
-    private var destinationName: String? { destination?.name }
-
     /// The arrival the change is measured against.
     private var currentArrival: Date? {
         viewModel.positionState?.estimatedArrival
@@ -90,7 +87,7 @@ struct ReplanSheet: View {
                     searchingStation = false
                     offRouteDestination = hit.station
                     selection = nil
-                    search(destination: hit.station.name)
+                    search(destination: hit.station)
                 }
             }
         }
@@ -393,27 +390,26 @@ struct ReplanSheet: View {
     private func searchIfNeeded() {
         switch mode {
         case .train:
-            guard let destinationName else { return }
-            search(destination: destinationName)
+            guard let destination else { return }
+            search(destination: destination)
         case .destination:
             if let offRouteDestination {
-                search(destination: offRouteDestination.name)
+                search(destination: offRouteDestination)
             } else {
                 candidates = []
             }
         }
     }
 
-    private func search(destination: String) {
+    private func search(destination: Station) {
         guard let anchor else { return }
         isSearching = true
-        // Sync and main-actor bound; yield so the spinner lands first.
         Task {
-            await Task.yield()
-            candidates = viewModel.replanCandidates(
+            candidates = await viewModel.replanCandidates(
                 from: anchor,
                 to: destination,
                 transferMinutes: walkingSpeed.transferMinutes,
+                walkPace: walkingSpeed.paceMultiplier,
                 priority: RoutePriority(rawValue: routePriorityRaw) ?? .balanced
             )
             isSearching = false

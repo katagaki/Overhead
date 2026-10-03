@@ -122,21 +122,14 @@ struct PlaceEditorView: View {
 
     // MARK: - Validation
 
-    private var waypointNames: [String]? {
+    private var waypoints: [Station]? {
         guard let from = fromSelection, let to = toSelection else { return nil }
-        return [from.station.name] + viaSelections.map(\.station.name) + [to.station.name]
+        return [from.station] + viaSelections.map(\.station) + [to.station]
     }
 
-    /// True when every hop is rideable: one train, 直通, or via transfers.
     private var routeAvailable: Bool {
-        guard let names = waypointNames else { return false }
-        return zip(names, names.dropFirst()).allSatisfy { from, to in
-            from != to
-                && (!StaticTrainData.directRoutes(fromStationName: from, toStationName: to,
-                                                  avoidingLineIds: avoidedLineIds).isEmpty
-                    || StaticTrainData.planTransferRoute(fromStationName: from, toStationName: to,
-                                                         avoidingLineIds: avoidedLineIds) != nil)
-        }
+        guard let waypoints else { return false }
+        return JourneyViewModel.routeExists(through: waypoints, avoidingLineIds: avoidedLineIds)
     }
 
     private var canSave: Bool {

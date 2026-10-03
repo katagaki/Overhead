@@ -625,7 +625,7 @@ public enum StaticTrainData {
 
         // Derived views are cheap to rebuild and hold no file I/O.
         displayLock.lock(); cachedTrainLines = nil; cachedLinesByStationName = nil; displayLock.unlock()
-        snapshotLock.lock(); snapshots.removeAll(); snapshotLock.unlock()
+        snapshotLock.lock(); snapshots.removeAll(); generation += 1; snapshotLock.unlock()
         BadgeStyles.invalidate()
         NotificationCenter.default.post(name: Self.didChangeNotification, object: nil)
     }
@@ -635,7 +635,7 @@ public enum StaticTrainData {
     public static func invalidate() {
         linesLock.lock(); cachedLines = nil; linesLock.unlock()
         displayLock.lock(); cachedTrainLines = nil; cachedLinesByStationName = nil; displayLock.unlock()
-        snapshotLock.lock(); snapshots.removeAll(); snapshotLock.unlock()
+        snapshotLock.lock(); snapshots.removeAll(); generation += 1; snapshotLock.unlock()
         Catalog.reload()
         BadgeStyles.invalidate()
         NotificationCenter.default.post(name: Self.didChangeNotification, object: nil)
@@ -659,6 +659,7 @@ public enum StaticTrainData {
         let byId: [String: StaticTrainLine]
         let byStationId: [String: StaticTrainLine]
         let services = ServiceMemo()
+        let links: LinksMemo
 
         init(_ lines: [StaticTrainLine]) {
             self.lines = lines
@@ -670,11 +671,36 @@ public enum StaticTrainData {
                 }
             }
             self.byStationId = stations
+            self.links = LinksMemo(lines)
+        }
+    }
+
+    /// Built on first use: only planning needs it.
+    final class LinksMemo: @unchecked Sendable {
+        private let lock = NSLock()
+        private let lines: [StaticTrainLine]
+        private var built: StationLinks?
+
+        init(_ lines: [StaticTrainLine]) { self.lines = lines }
+
+        var value: StationLinks {
+            lock.lock(); defer { lock.unlock() }
+            if let built { return built }
+            let links = StationLinks(lines: lines)
+            built = links
+            return links
         }
     }
 
     private static let snapshotLock = NSLock()
     private static var snapshots: [Int: Snapshot] = [:]
+    /// Bumped whenever line data changes, so caches built from it know to rebuild.
+    public private(set) static var generation = 0
+
+    /// Where passengers can change trains on `date`.
+    public static func stationLinks(on date: Date = Date()) -> StationLinks {
+        snapshot(on: date).links.value
+    }
 
     /// Most lines carry no revisions at all, so this is a cheap pass — but it is
     /// cached per day anyway, because the lookup maps are not.
@@ -912,12 +938,17 @@ public enum StaticTrainData {
         public var id: String { "\(staticLine.id)|\(fromStation.id)|\(toStation.id)" }
     }
 
+    /// Single-train rides, including 直通, between two stations or any
+    /// station that is the same place as either.
     public static func directRoutes(
-        fromStationName: String,
-        toStationName: String,
+        fromStationId: String,
+        toStationId: String,
         avoidingLineIds: Set<String> = []
     ) -> [DirectRouteOption] {
-        guard fromStationName != toStationName else { return [] }
+        let links = stationLinks()
+        let fromIds = Set(links.sameStation(as: fromStationId))
+        let toIds = Set(links.sameStation(as: toStationId))
+        guard fromIds.isDisjoint(with: toIds) else { return [] }
         func isAvoided(_ lineId: String) -> Bool {
             guard !avoidingLineIds.isEmpty else { return false }
             return lineId.split(separator: "+").contains { avoidingLineIds.contains(String($0)) }
@@ -925,9 +956,9 @@ public enum StaticTrainData {
         var options: [DirectRouteOption] = []
         for line in allLines {
             guard !isAvoided(line.id),
-                  let from = line.stations.first(where: { $0.name == fromStationName }) else { continue }
+                  let from = line.stations.first(where: { fromIds.contains($0.id) }) else { continue }
 
-            if let to = line.stations.first(where: { $0.name == toStationName }) {
+            if let to = line.stations.first(where: { toIds.contains($0.id) }) {
                 if let resolved = resolveJourneyLine(
                     lineId: line.id, fromStationId: from.id, toStationId: to.id
                 ) {
@@ -943,7 +974,7 @@ public enum StaticTrainData {
             }
 
             for group in throughDestinations(fromLineId: line.id, boardingStationId: from.id) {
-                guard let to = group.stations.first(where: { $0.name == toStationName }),
+                guard let to = group.stations.first(where: { toIds.contains($0.id) }),
                       let resolved = resolveJourneyLine(
                           lineId: line.id, fromStationId: from.id, toStationId: to.id
                       ),
@@ -1022,21 +1053,22 @@ public enum StaticTrainData {
     }
 
     public static func planTransferRoute(
-        throughStationNames names: [String],
+        throughStationIds ids: [String],
         maxTransfers: Int = 3,
         transferMinutes: Double = transferBufferMinutes,
+        walkPace: Double = 1,
         transferAversionMinutes: Double = defaultTransferAversionMinutes,
         avoidingLineIds: Set<String> = []
     ) -> [TransferLeg]? {
-        guard names.count >= 2 else { return nil }
+        guard ids.count >= 2 else { return nil }
         var plan: [TransferLeg] = []
-        for (from, to) in zip(names, names.dropFirst()) {
-            guard from != to,
-                  var segment = planTransferRoute(
-                      fromStationName: from,
-                      toStationName: to,
+        for (from, to) in zip(ids, ids.dropFirst()) {
+            guard var segment = planTransferRoute(
+                      fromStationId: from,
+                      toStationId: to,
                       maxTransfers: maxTransfers,
                       transferMinutes: transferMinutes,
+                      walkPace: walkPace,
                       transferAversionMinutes: transferAversionMinutes,
                       avoidingLineIds: avoidingLineIds
                   )
@@ -1068,39 +1100,56 @@ public enum StaticTrainData {
         return (aTo > aFrom) == (bTo > bFrom)
     }
 
+    /// Fewest-minutes route by hop times alone, for when the timetable is set aside.
     public static func planTransferRoute(
-        fromStationName: String,
-        toStationName: String,
+        fromStationId: String,
+        toStationId: String,
         maxTransfers: Int = 3,
         transferMinutes: Double = transferBufferMinutes,
+        walkPace: Double = 1,
         transferAversionMinutes: Double = defaultTransferAversionMinutes,
         avoidingLineIds: Set<String> = []
     ) -> [TransferLeg]? {
-        guard fromStationName != toStationName else { return nil }
+        let links = stationLinks()
+        let goalIds = Set(links.sameStation(as: toStationId))
+        let startIds = links.sameStation(as: fromStationId)
+        guard !goalIds.contains(fromStationId) else { return nil }
         let lines = avoidingLineIds.isEmpty
             ? allLines
             : allLines.filter { !avoidingLineIds.contains($0.id) }
-        // Walk + expected wait + the standing dislike of changing trains.
-        let transferPenalty = transferMinutes + 3 + transferAversionMinutes
+        // Expected wait plus the standing dislike of changing trains; the walk
+        // itself depends on how far apart the platforms are.
+        let changeMinutes = 3 + transferAversionMinutes
+        func walkMinutes(_ meters: Double) -> Double {
+            Double(StationLinks.transferSeconds(meters: meters, transferMinutes: transferMinutes,
+                                                walkPace: walkPace)) / 60
+        }
 
-        // Stations grouped by name for transfer edges and start/goal lookup
-        var nodesByName: [String: [RouteNode]] = [:]
+        var nodesById: [String: [RouteNode]] = [:]
         for (li, line) in lines.enumerated() {
             for (si, station) in line.stations.enumerated() {
-                nodesByName[station.name, default: []].append(RouteNode(line: li, idx: si, transfers: 0))
+                nodesById[station.id, default: []].append(RouteNode(line: li, idx: si, transfers: 0))
             }
         }
-        guard let startNodes = nodesByName[fromStationName],
-              nodesByName[toStationName] != nil
-        else { return nil }
+        // Stations a short walk from the start are a walk, not a change.
+        var startCosts: [RouteNode: Double] = [:]
+        for id in startIds {
+            for node in nodesById[id] ?? [] { startCosts[node] = 0 }
+            for link in links.links[id] ?? [] where !startIds.contains(link.stationId) {
+                for node in nodesById[link.stationId] ?? [] {
+                    startCosts[node] = min(startCosts[node] ?? .infinity, walkMinutes(link.meters))
+                }
+            }
+        }
+        guard !startCosts.isEmpty, goalIds.contains(where: { nodesById[$0] != nil }) else { return nil }
 
         // Each transfer count is its own layer, so a quick path that has spent
         // its changes can't block a slower one that still has changes left.
         var best: [RouteNode: (cost: Double, parent: RouteNode?)] = [:]
         var frontier = RouteFrontier()
-        for node in startNodes {
-            best[node] = (0, nil)
-            frontier.push(cost: 0, node: node)
+        for (node, cost) in startCosts {
+            best[node] = (cost, nil)
+            frontier.push(cost: cost, node: node)
         }
 
         var goal: RouteNode?
@@ -1109,7 +1158,7 @@ public enum StaticTrainData {
 
             let line = lines[node.line]
             let station = line.stations[node.idx]
-            if station.name == toStationName {
+            if goalIds.contains(station.id) {
                 goal = node
                 break
             }
@@ -1141,10 +1190,12 @@ public enum StaticTrainData {
                 }
             }
 
-            if node.transfers < maxTransfers, let siblings = nodesByName[station.name] {
-                for sibling in siblings where sibling.line != node.line {
-                    relax(RouteNode(line: sibling.line, idx: sibling.idx, transfers: node.transfers + 1),
-                          cost: cost + transferPenalty)
+            if node.transfers < maxTransfers {
+                for link in links.links[station.id] ?? [] {
+                    for sibling in nodesById[link.stationId] ?? [] where sibling.line != node.line {
+                        relax(RouteNode(line: sibling.line, idx: sibling.idx, transfers: node.transfers + 1),
+                              cost: cost + walkMinutes(link.meters) + changeMinutes)
+                    }
                 }
             }
         }

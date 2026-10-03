@@ -108,6 +108,8 @@ struct JourneyPlannerSection: View {
         .task {
             await viewModel.loadLines()
             restoreSelections()
+            // The day's network takes a moment; have it ready before the first search.
+            await Task.detached(priority: .utility) { TransitRouter.prepare(on: Date()) }.value
         }
         .onAppear { savedPlaces = SavedPlaceStore.load() }
         .onReceive(NotificationCenter.default.publisher(for: SavedPlaceStore.didChangeNotification)) { _ in
@@ -292,14 +294,15 @@ struct JourneyPlannerSection: View {
         }
     }
 
-    private var waypointNames: [String]? {
+    private var waypoints: [Station]? {
         guard let from = fromSelection, let to = toSelection else { return nil }
-        return [from.station.name] + viaSelections.map(\.station.name) + [to.station.name]
+        return [from.station] + viaSelections.map(\.station) + [to.station]
     }
 
     private var canSearch: Bool {
-        guard let names = waypointNames else { return false }
-        return zip(names, names.dropFirst()).allSatisfy { $0 != $1 }
+        guard let waypoints else { return false }
+        let links = StaticTrainData.stationLinks()
+        return zip(waypoints, waypoints.dropFirst()).allSatisfy { !links.isSameStation($0.id, $1.id) }
     }
 
     // MARK: - Candidate List
@@ -349,7 +352,7 @@ struct JourneyPlannerSection: View {
                     untimedCandidateHeader(candidate)
                 }
 
-                if candidate.legs.count == 1, let leg = candidate.legs.first {
+                if candidate.legs.count == 1, let leg = candidate.legs.first, !walksToOtherStation(candidate) {
                     singleLegSummary(candidate: candidate, leg: leg)
                 } else {
                     transferSummary(candidate)
@@ -496,6 +499,13 @@ struct JourneyPlannerSection: View {
         }
     }
 
+    /// The ride starts or ends at a nearby station (浜松町 → 大門), which the
+    /// station-by-station summary makes plain.
+    private func walksToOtherStation(_ candidate: TrainCandidate) -> Bool {
+        guard let from = fromSelection?.station, let to = toSelection?.station else { return false }
+        return candidate.fromStation.name != from.name || candidate.toStation.name != to.name
+    }
+
     @ViewBuilder
     private func transferSummary(_ candidate: TrainCandidate) -> some View {
         VStack(alignment: .leading, spacing: 5) {
@@ -614,7 +624,7 @@ struct JourneyPlannerSection: View {
     }
 
     private func search() {
-        guard let names = waypointNames, !isSearching else { return }
+        guard let waypoints, !isSearching else { return }
         searchError = nil
         isSearching = true
 
@@ -624,8 +634,9 @@ struct JourneyPlannerSection: View {
             if ignoreTimetable {
                 searchWalkMinutes = nil
                 candidates = viewModel.searchRouteOptions(
-                    stationNames: names,
+                    stations: waypoints,
                     transferMinutes: walkingSpeed.transferMinutes,
+                    walkPace: walkingSpeed.paceMultiplier,
                     priority: routePriority,
                     avoidingLineIds: avoided
                 )
@@ -655,10 +666,11 @@ struct JourneyPlannerSection: View {
             }
             searchWalkMinutes = walkMinutes
 
-            candidates = viewModel.searchTrainCandidates(
-                stationNames: names,
+            candidates = await viewModel.searchTrainCandidates(
+                stations: waypoints,
                 anchor: anchor,
                 transferMinutes: walkingSpeed.transferMinutes,
+                walkPace: walkingSpeed.paceMultiplier,
                 priority: routePriority,
                 avoidingLineIds: avoided,
                 notDepartingBefore: earliestDeparture,
@@ -667,7 +679,7 @@ struct JourneyPlannerSection: View {
             hasSearched = true
             isSearching = false
 
-            if candidates.isEmpty && !viewModel.routeExists(through: names, avoidingLineIds: avoided) {
+            if candidates.isEmpty && !viewModel.routeExists(through: waypoints, avoidingLineIds: avoided) {
                 hasSearched = false
                 searchError = "Setup.NoRoute"
             }

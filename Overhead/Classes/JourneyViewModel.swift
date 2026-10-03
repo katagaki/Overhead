@@ -305,19 +305,17 @@ final class JourneyViewModel: ObservableObject {
     }
 
     func searchTrainCandidates(
-        stationNames: [String],
+        stations: [Station],
         anchor: TimeAnchor,
         transferMinutes: Double = StaticTrainData.transferBufferMinutes,
+        walkPace: Double = 1,
         priority: RoutePriority = .balanced,
         avoidingLineIds: Set<String> = [],
         notDepartingBefore earliest: Date? = nil,
         preferringOriginating: Bool = false,
         limit: Int = 12
-    ) -> [TrainCandidate] {
-        guard stationNames.count >= 2,
-              let fromName = stationNames.first,
-              let toName = stationNames.last
-        else { return [] }
+    ) async -> [TrainCandidate] {
+        guard stations.count >= 2 else { return [] }
 
         let calendar = ScheduleCalendar.current(at: anchor.date)
         let targetSec = railSeconds(of: anchor.date)
@@ -335,46 +333,63 @@ final class JourneyViewModel: ObservableObject {
             }
         }
 
-        // Without midpoints, single-train routes (including 直通) win outright —
-        // unless time comes first, when a faster change has to be weighed too.
+        // Every single-train ride, so slower trains and 始発 stay on the list.
         var direct: [TrainCandidate] = []
-        if stationNames.count == 2 {
+        if stations.count == 2 {
             direct = directCandidates(
-                fromName: fromName, toName: toName,
+                from: stations[0], to: stations[1],
                 anchor: rideAnchor, floorSec: floorSec, calendar: calendar,
                 avoidingLineIds: avoidingLineIds,
                 preferringOriginating: preferringOriginating, limit: limit
             )
-            if !direct.isEmpty && priority != .time { return direct }
         }
 
-        guard let plan = StaticTrainData.planTransferRoute(
-            throughStationNames: stationNames,
+        let ids = stations.map(\.id)
+        let routerAnchor: TransitRouter.Anchor = anchor.isArrival
+            ? .arriveAtOrBefore(targetSec)
+            : .departAtOrAfter(targetSec)
+        let preferences = TransitRouter.Preferences(
             transferMinutes: transferMinutes,
+            walkPace: walkPace,
             transferAversionMinutes: priority.transferAversionMinutes,
             avoidingLineIds: avoidingLineIds
-        ) else { return direct }
+        )
+        let date = anchor.date
+        let itineraries = await Task.detached(priority: .userInitiated) {
+            TransitRouter.search(through: ids, anchor: routerAnchor, on: date,
+                                 preferences: preferences, notDepartingBefore: floorSec, limit: limit)
+        }.value
+        let routed = itineraries.compactMap { candidate(for: $0, calendar: calendar) }
 
-        if !direct.isEmpty {
-            // A one-line plan is just the direct rides again.
-            guard plan.count > 1 else { return direct }
-            let transfers = candidates(
-                forPlan: plan,
-                anchor: rideAnchor, floorSec: floorSec, calendar: calendar,
-                transferMinutes: transferMinutes,
-                preferringOriginating: preferringOriginating, limit: 8
-            )
-            return Array(sorted(direct + transfers, anchor: rideAnchor,
-                                preferringOriginating: preferringOriginating,
-                                soonestArrival: true).prefix(limit))
+        // Drop changes that don't earn their keep against a simpler option
+        // leaving no earlier and arriving no later, give or take the aversion.
+        let aversion = Int(priority.transferAversionMinutes * 60)
+        var merged: [TrainCandidate] = []
+        var seen = Set<String>()
+        for candidate in direct + routed {
+            // One train leaving one platform at one minute is the same ride,
+            // even when a 直通 composite times its arrival a minute apart.
+            let key = candidate.transferCount == 0
+                ? "\(candidate.departureSeconds)|\(candidate.legs[0].line.id)|\(candidate.fromStation.id)"
+                : "\(candidate.departureSeconds)|\(candidate.arrivalSeconds)|\(candidate.transferCount)"
+            if seen.insert(key).inserted { merged.append(candidate) }
+        }
+        let kept = merged.filter { candidate in
+            !merged.contains { other in
+                guard other.transferCount < candidate.transferCount else { return false }
+                let slack = aversion * (candidate.transferCount - other.transferCount)
+                return anchor.isArrival
+                    ? other.arrivalSeconds <= candidate.arrivalSeconds
+                        && other.departureSeconds + slack >= candidate.departureSeconds
+                    : other.departureSeconds >= candidate.departureSeconds
+                        && other.arrivalSeconds <= candidate.arrivalSeconds + slack
+            }
         }
 
-        return candidates(
-            forPlan: plan,
-            anchor: rideAnchor, floorSec: floorSec, calendar: calendar,
-            transferMinutes: transferMinutes,
-            preferringOriginating: preferringOriginating, limit: 8
-        )
+        let mixesRoutes = kept.contains { $0.transferCount > 0 }
+        return Array(sorted(kept, anchor: rideAnchor,
+                            preferringOriginating: preferringOriginating,
+                            soonestArrival: mixesRoutes).prefix(limit))
     }
 
     /// Seconds since the service day's midnight; hours past 24 for post-midnight trains.
@@ -403,20 +418,26 @@ final class JourneyViewModel: ObservableObject {
         return day < referenceDay ? .earlier : .later
     }
 
-    func routeExists(through stationNames: [String], avoidingLineIds: Set<String> = []) -> Bool {
-        guard stationNames.count >= 2 else { return false }
-        return zip(stationNames, stationNames.dropFirst()).allSatisfy { from, to in
-            from != to
-                && (!StaticTrainData.directRoutes(fromStationName: from, toStationName: to,
+    func routeExists(through stations: [Station], avoidingLineIds: Set<String> = []) -> Bool {
+        Self.routeExists(through: stations, avoidingLineIds: avoidingLineIds)
+    }
+
+    /// True when every hop is rideable: one train, 直通, or via transfers.
+    nonisolated static func routeExists(through stations: [Station], avoidingLineIds: Set<String> = []) -> Bool {
+        guard stations.count >= 2 else { return false }
+        let links = StaticTrainData.stationLinks()
+        return zip(stations, stations.dropFirst()).allSatisfy { from, to in
+            !links.isSameStation(from.id, to.id)
+                && (!StaticTrainData.directRoutes(fromStationId: from.id, toStationId: to.id,
                                                   avoidingLineIds: avoidingLineIds).isEmpty
-                    || StaticTrainData.planTransferRoute(fromStationName: from, toStationName: to,
+                    || StaticTrainData.planTransferRoute(fromStationId: from.id, toStationId: to.id,
                                                          avoidingLineIds: avoidingLineIds) != nil)
         }
     }
 
     private func directCandidates(
-        fromName: String,
-        toName: String,
+        from origin: Station,
+        to destination: Station,
         anchor: RideAnchor,
         floorSec: Int?,
         calendar: ScheduleCalendar,
@@ -425,8 +446,8 @@ final class JourneyViewModel: ObservableObject {
         limit: Int
     ) -> [TrainCandidate] {
         let routes = StaticTrainData.directRoutes(
-            fromStationName: fromName,
-            toStationName: toName,
+            fromStationId: origin.id,
+            toStationId: destination.id,
             avoidingLineIds: avoidingLineIds
         )
 
@@ -497,15 +518,13 @@ final class JourneyViewModel: ObservableObject {
     // MARK: - Timetable-less Route Search (時刻表無視)
 
     func searchRouteOptions(
-        stationNames: [String],
+        stations: [Station],
         transferMinutes: Double,
+        walkPace: Double = 1,
         priority: RoutePriority = .balanced,
         avoidingLineIds: Set<String> = []
     ) -> [TrainCandidate] {
-        guard stationNames.count >= 2,
-              let fromName = stationNames.first,
-              let toName = stationNames.last
-        else { return [] }
+        guard stations.count >= 2, let from = stations.first, let to = stations.last else { return [] }
 
         var results: [TrainCandidate] = []
         var seen = Set<String>()
@@ -517,9 +536,9 @@ final class JourneyViewModel: ObservableObject {
             if seen.insert(key).inserted { results.append(candidate) }
         }
 
-        if stationNames.count == 2 {
+        if stations.count == 2 {
             for route in StaticTrainData.directRoutes(
-                fromStationName: fromName, toStationName: toName,
+                fromStationId: from.id, toStationId: to.id,
                 avoidingLineIds: avoidingLineIds
             ) {
                 add(untimedCandidate(for: route))
@@ -530,8 +549,9 @@ final class JourneyViewModel: ObservableObject {
         var avoid = avoidingLineIds
         for _ in 0..<3 {
             guard let plan = StaticTrainData.planTransferRoute(
-                throughStationNames: stationNames,
+                throughStationIds: stations.map(\.id),
                 transferMinutes: transferMinutes,
+                walkPace: walkPace,
                 transferAversionMinutes: priority.transferAversionMinutes,
                 avoidingLineIds: avoid
             ) else { break }
@@ -693,107 +713,108 @@ final class JourneyViewModel: ObservableObject {
         )
     }
 
-    /// Builds boardable itineraries along a planned route (one or more legs).
-    private func candidates(
-        forPlan plan: [StaticTrainData.TransferLeg],
-        anchor: RideAnchor,
-        floorSec: Int?,
-        calendar: ScheduleCalendar,
-        transferMinutes: Double,
-        preferringOriginating: Bool,
-        limit: Int
-    ) -> [TrainCandidate] {
-        // Search the anchored end first, then chain away from it.
-        let anchoredLeg = anchor.isArrival ? plan.last : plan.first
-        guard let anchoredLeg else { return [] }
+    // MARK: - Routed Itineraries
 
-        let bufferSec = Int(transferMinutes * 60)
-        // The floor only binds the leg boarded first.
-        let anchorIsOrigin = !anchor.isArrival || plan.count == 1
-        let anchoredRides = rides(on: anchoredLeg.staticLine,
-                                  fromId: anchoredLeg.fromStation.id, toId: anchoredLeg.toStation.id,
-                                  anchor: anchor,
-                                  notDepartingBefore: anchorIsOrigin ? floorSec : nil,
-                                  calendar: calendar,
-                                  limit: limit)
+    /// A router itinerary as a candidate, with each leg's real service behind it.
+    private func candidate(for itinerary: TransitRouter.Itinerary, calendar: ScheduleCalendar) -> TrainCandidate? {
+        var legs: [CandidateLeg] = []
+        var through: StaticTrainData.ResolvedJourneyLine?
+        for routed in itinerary.legs {
+            guard let first = routed.rides.first,
+                  let boardingLine = StaticTrainData.line(withId: first.lineId),
+                  let fromStation = boardingLine.stations.first(where: { $0.id == routed.fromStationId })
+            else { return nil }
 
-        func leg(_ planLeg: StaticTrainData.TransferLeg,
-                 _ ride: (service: TrainService, departure: Int, arrival: Int)) -> CandidateLeg {
-            CandidateLeg(
-                service: ride.service,
-                line: planLeg.staticLine.trainLine,
-                fromStation: planLeg.fromStation,
-                toStation: planLeg.toStation,
-                departureSeconds: ride.departure,
-                arrivalSeconds: ride.arrival
-            )
+            var runs: [TrainService] = []
+            for ride in routed.rides {
+                guard let line = StaticTrainData.line(withId: ride.lineId),
+                      let run = services(on: line, calendar: calendar).first(where: { $0.id == ride.serviceId })
+                else { return nil }
+                runs.append(run)
+            }
+
+            let service: TrainService
+            let toStation: Station
+            if routed.rides.allSatisfy({ $0.lineId == first.lineId }) {
+                guard let station = boardingLine.stations.first(where: { $0.id == routed.toStationId })
+                else { return nil }
+                toStation = station
+                service = runs.count == 1
+                    ? runs[0]
+                    : Self.joinedService(runs, lineId: boardingLine.id, direction: runs[0].direction)
+            } else {
+                // 直通: the journey runs on the composite line the rides make up.
+                guard let resolved = StaticTrainData.resolveJourneyLine(
+                          lineId: first.lineId, fromStationId: routed.fromStationId, toStationId: routed.toStationId),
+                      resolved.isThrough,
+                      let station = resolved.staticLine.stations.first(where: { $0.id == routed.toStationId })
+                else { return nil }
+                toStation = station
+                service = Self.joinedService(runs, lineId: resolved.staticLine.id, direction: .outbound)
+                if itinerary.legs.count == 1 { through = resolved }
+            }
+
+            legs.append(CandidateLeg(
+                service: service,
+                line: boardingLine.trainLine,
+                fromStation: fromStation,
+                toStation: toStation,
+                departureSeconds: routed.departure,
+                arrivalSeconds: routed.arrival
+            ))
         }
 
-        // A plan that stayed on one line is plain direct rides — no composite.
-        if plan.count == 1 {
-            let single = anchoredRides.map { ride in
-                TrainCandidate(
-                    id: "\(ride.service.id)|\(anchoredLeg.staticLine.id)|\(anchoredLeg.fromStation.id)|\(anchoredLeg.toStation.id)",
-                    legs: [leg(anchoredLeg, ride)],
-                    isThrough: false,
-                    journeyLine: anchoredLeg.staticLine.trainLine,
-                    journeyService: ride.service,
-                    fromStation: anchoredLeg.fromStation,
-                    toStation: anchoredLeg.toStation
+        guard let only = legs.first, legs.count == 1 else { return compositeCandidate(legs: legs) }
+        let journeyLine = through?.staticLine.trainLine ?? only.line
+        return TrainCandidate(
+            id: "\(only.service.id)|\(journeyLine.id)|\(only.fromStation.id)|\(only.toStation.id)",
+            legs: legs,
+            isThrough: through != nil,
+            journeyLine: journeyLine,
+            journeyService: only.service,
+            fromStation: only.fromStation,
+            toStation: only.toStation
+        )
+    }
+
+    /// One train across consecutive runs: a loop's next circuit, or the
+    /// partner line's run it carries on as. The joining stop keeps the
+    /// first run's station ID, as composite lines do.
+    private static func joinedService(_ services: [TrainService], lineId: String,
+                                      direction: TrainService.Direction) -> TrainService {
+        var entries: [TimetableEntry] = []
+        for service in services {
+            var timetable = service.timetable[...]
+            if let last = entries.last, let joining = timetable.first {
+                entries[entries.count - 1] = TimetableEntry(
+                    id: last.id,
+                    stationId: last.stationId,
+                    arrivalTime: last.arrivalTime ?? last.departureTime,
+                    departureTime: joining.departureTime ?? joining.arrivalTime
                 )
+                timetable = timetable.dropFirst()
             }
-            return sorted(single, anchor: anchor, preferringOriginating: preferringOriginating)
+            entries.append(contentsOf: timetable)
         }
+        let first = services[0], last = services[services.count - 1]
+        return TrainService(
+            id: services.map(\.id).joined(separator: "+"),
+            lineId: lineId,
+            trainType: first.trainType,
+            direction: direction,
+            timetable: entries,
+            destinationStationId: entries.last?.stationId ?? last.destinationStationId,
+            originatesAtStart: first.originatesAtStart,
+            throughDestination: last.throughDestination
+        )
+    }
 
-        var candidates: [TrainCandidate] = []
-        for anchoredRide in anchoredRides {
-            var legs: [CandidateLeg] = [leg(anchoredLeg, anchoredRide)]
-            let remaining = anchor.isArrival
-                ? Array(plan.dropLast().reversed())
-                : Array(plan.dropFirst())
-            var cursor = anchor.isArrival
-                ? anchoredRide.departure - bufferSec
-                : anchoredRide.arrival + bufferSec
-            var complete = true
-
-            for (index, planLeg) in remaining.enumerated() {
-                let legAnchor: RideAnchor = anchor.isArrival
-                    ? .arriveAtOrBefore(cursor)
-                    : .departAtOrAfter(cursor)
-                let isOrigin = anchor.isArrival && index == remaining.count - 1
-                guard let ride = rides(on: planLeg.staticLine,
-                                       fromId: planLeg.fromStation.id, toId: planLeg.toStation.id,
-                                       anchor: legAnchor,
-                                       notDepartingBefore: isOrigin ? floorSec : nil,
-                                       calendar: calendar,
-                                       limit: 1).first
-                else { complete = false; break }
-                if anchor.isArrival {
-                    legs.insert(leg(planLeg, ride), at: 0)
-                    cursor = ride.departure - bufferSec
-                } else {
-                    legs.append(leg(planLeg, ride))
-                    cursor = ride.arrival + bufferSec
-                }
-            }
-            guard complete, let candidate = compositeCandidate(legs: legs) else { continue }
-            candidates.append(candidate)
-        }
-
-        // Keep the tightest connection per distinct set of chained trains.
-        var seen = Set<String>()
-        var unique: [TrainCandidate] = []
-        let ordered = anchor.isArrival
-            ? candidates.sorted { $0.arrivalSeconds < $1.arrivalSeconds }
-            : candidates.sorted { $0.departureSeconds > $1.departureSeconds }
-        for candidate in ordered {
-            let chained = anchor.isArrival ? candidate.legs.dropLast() : candidate.legs.dropFirst()
-            let key = chained.map { $0.service.id }.joined(separator: "|")
-            if seen.insert(key).inserted {
-                unique.append(candidate)
-            }
-        }
-        return sorted(unique, anchor: anchor, preferringOriginating: preferringOriginating)
+    private func services(on staticLine: StaticTrainLine, calendar: ScheduleCalendar) -> [TrainService] {
+        let cacheKey = "\(staticLine.id)|\(calendar.rawValue)"
+        if let cached = timetableCache[cacheKey] { return cached }
+        let built = StaticTimetableGenerator.services(for: staticLine, calendar: calendar)
+        timetableCache[cacheKey] = built
+        return built
     }
 
     /// Concrete services on a line between two of its stations.
@@ -806,16 +827,8 @@ final class JourneyViewModel: ObservableObject {
         calendar: ScheduleCalendar,
         limit: Int
     ) -> [(service: TrainService, departure: Int, arrival: Int)] {
-        let cacheKey = "\(staticLine.id)|\(calendar.rawValue)"
-        if timetableCache[cacheKey] == nil {
-            timetableCache[cacheKey] = StaticTimetableGenerator.services(
-                for: staticLine, calendar: calendar
-            )
-        }
-        guard let services = timetableCache[cacheKey] else { return [] }
-
         var result: [(TrainService, Int, Int)] = []
-        for service in services {
+        for service in services(on: staticLine, calendar: calendar) {
             let stationIds = service.timetable.map(\.stationId)
             guard let fromIdx = stationIds.firstIndex(of: fromId),
                   let toIdx = stationIds.firstIndex(of: toId),
@@ -840,6 +853,28 @@ final class JourneyViewModel: ObservableObject {
             : Array(result.sorted { $0.1 < $1.1 }.prefix(limit))
     }
 
+    /// A loop leg's stations in the direction its train actually runs.
+    private static func loopSlice(on line: StaticTrainLine, leg: CandidateLeg) -> [Station]? {
+        let stations = line.stations, count = stations.count
+        let timetable = leg.service.timetable
+        guard line.isLoop,
+              let fromIdx = stations.firstIndex(where: { $0.id == leg.fromStation.id }),
+              let toIdx = stations.firstIndex(where: { $0.id == leg.toStation.id }),
+              fromIdx != toIdx,
+              let entry = timetable.firstIndex(where: { $0.stationId == leg.fromStation.id }),
+              entry + 1 < timetable.count,
+              let nextIdx = stations.firstIndex(where: { $0.id == timetable[entry + 1].stationId })
+        else { return nil }
+        let step = (nextIdx - fromIdx + count) % count <= count / 2 ? 1 : -1
+        var path = [stations[fromIdx]]
+        var idx = fromIdx
+        while idx != toIdx {
+            idx = ((idx + step) % count + count) % count
+            path.append(stations[idx])
+        }
+        return path
+    }
+
     private func compositeCandidate(legs: [CandidateLeg]) -> TrainCandidate? {
         guard let first = legs.first, let last = legs.last else { return nil }
 
@@ -850,8 +885,12 @@ final class JourneyViewModel: ObservableObject {
         for (legIndex, leg) in legs.enumerated() {
             // estimatedRide takes a loop's short way round; index order alone
             // would send a 有楽町→東京 leg the wrong way about the 山手線.
+            // A train staying aboard past a loop's seam may take the long way.
+            let staticLine = StaticTrainData.line(withId: leg.line.id)
             let slice: [Station]
-            if let staticLine = StaticTrainData.line(withId: leg.line.id),
+            if let staticLine, let path = Self.loopSlice(on: staticLine, leg: leg) {
+                slice = path
+            } else if let staticLine,
                let ride = StaticTrainData.estimatedRide(
                    on: staticLine, fromStationId: leg.fromStation.id, toStationId: leg.toStation.id
                ) {
@@ -861,6 +900,14 @@ final class JourneyViewModel: ObservableObject {
                 slice = fromIdx <= toIdx
                     ? Array(leg.line.stations[fromIdx...toIdx])
                     : Array(leg.line.stations[toIdx...fromIdx].reversed())
+            } else if let composite = StaticTrainData.resolveJourneyLine(
+                          lineId: leg.line.id, fromStationId: leg.fromStation.id, toStationId: leg.toStation.id
+                      )?.staticLine,
+                      let fromIdx = composite.stations.firstIndex(where: { $0.id == leg.fromStation.id }),
+                      let toIdx = composite.stations.firstIndex(where: { $0.id == leg.toStation.id }),
+                      fromIdx < toIdx {
+                // A 直通 leg boards one line and leaves another.
+                slice = Array(composite.stations[fromIdx...toIdx])
             } else {
                 return nil
             }
@@ -1056,19 +1103,21 @@ final class JourneyViewModel: ObservableObject {
     /// Alternative itineraries from `anchor` onward, soonest first.
     func replanCandidates(
         from anchor: ReplanAnchor,
-        to destinationName: String,
+        to destination: Station,
         transferMinutes: Double = StaticTrainData.transferBufferMinutes,
+        walkPace: Double = 1,
         priority: RoutePriority = .balanced,
         avoidingLineIds: Set<String> = [],
         limit: Int = 8
-    ) -> [TrainCandidate] {
-        guard anchor.station.name != destinationName else { return [] }
+    ) async -> [TrainCandidate] {
+        guard !StaticTrainData.stationLinks().isSameStation(anchor.station.id, destination.id) else { return [] }
         // Past stops have a departure time behind us; search from now.
         let from = max(anchor.time, Date())
-        return searchTrainCandidates(
-            stationNames: [anchor.station.name, destinationName],
+        return await searchTrainCandidates(
+            stations: [anchor.station, destination],
             anchor: .departure(from.addingTimeInterval(Self.sameStationBufferMinutes * 60)),
             transferMinutes: transferMinutes,
+            walkPace: walkPace,
             priority: priority,
             avoidingLineIds: avoidingLineIds,
             limit: limit
