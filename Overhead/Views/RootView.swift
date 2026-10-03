@@ -397,11 +397,11 @@ struct RootView: View {
                 Button {
                     tabStore.showTabSwitcher()
                 } label: {
-                    Image(systemName: "square.on.square")
+                    TabCountLabel(count: tabStore.tabs.count)
                         .frame(width: TabBottomBarMetrics.itemHeight, height: TabBottomBarMetrics.itemHeight)
                         .contentShape(Circle())
                 }
-                .accessibilityLabel("Show tabs")
+                .accessibilityLabel(tabStore.tabs.count == 1 ? "1 Tab" : "\(tabStore.tabs.count) Tabs")
                 .glassEffect(.regular.interactive(), in: .circle)
             }
             .buttonStyle(.plain)

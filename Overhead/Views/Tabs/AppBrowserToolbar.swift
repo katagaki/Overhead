@@ -122,3 +122,22 @@ struct BrowserAddressToolbarItem: View {
             }
     }
 }
+
+/// The tabs button's glyph: a rounded square holding the tab count.
+struct TabCountLabel: View {
+    let count: Int
+
+    var body: some View {
+        Text(verbatim: count > 99 ? "∞" : "\(count)")
+            .font(.system(size: 13, weight: .bold))
+            .monospacedDigit()
+            .minimumScaleFactor(0.6)
+            .frame(width: 24, height: 24)
+            .overlay {
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .strokeBorder(lineWidth: 1.8)
+            }
+            .contentTransition(.numericText(value: Double(count)))
+            .animation(.smooth, value: count)
+    }
+}
