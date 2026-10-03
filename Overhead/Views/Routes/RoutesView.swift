@@ -436,7 +436,7 @@ struct FavoritesSection: View {
         let transferMinutes = place.walkingSpeed.transferMinutes
 
         if place.ignoreTimetable || JourneyMode.current.ignoresTimetable {
-            startCandidate(viewModel.searchRouteOptions(
+            startCandidate(await viewModel.searchRouteOptions(
                 stations: waypoints,
                 transferMinutes: transferMinutes,
                 walkPace: place.walkingSpeed.paceMultiplier,
@@ -455,7 +455,7 @@ struct FavoritesSection: View {
             return
         }
 
-        startCandidate(await viewModel.searchTrainCandidates(
+        if let timed = await viewModel.searchTrainCandidates(
             stations: waypoints,
             anchor: .departure(Date()),
             transferMinutes: transferMinutes,
@@ -463,7 +463,11 @@ struct FavoritesSection: View {
             priority: place.routePriority,
             avoidingLineIds: avoided,
             preferringOriginating: place.preferOriginating
-        ).first ?? viewModel.searchRouteOptions(
+        ).first {
+            startCandidate(timed)
+            return
+        }
+        startCandidate(await viewModel.searchRouteOptions(
             stations: waypoints,
             transferMinutes: transferMinutes,
             walkPace: place.walkingSpeed.paceMultiplier,

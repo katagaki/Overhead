@@ -995,9 +995,24 @@ public enum StaticTrainData {
     // MARK: Transfer Route Planning (乗り換え)
 
     public struct TransferLeg {
+        /// The composite line when the leg runs through a junction (直通).
         public let staticLine: StaticTrainLine
         public let fromStation: Station
         public let toStation: Station
+        /// The line boarded; differs from `staticLine` on a 直通 leg.
+        public var boardingLine: StaticTrainLine
+        public var isThrough: Bool { boardingLine.id != staticLine.id }
+        /// Riding time as planned, expresses included; nil when unknown.
+        public var minutes: Double?
+
+        init(staticLine: StaticTrainLine, fromStation: Station, toStation: Station,
+             boardingLine: StaticTrainLine? = nil, minutes: Double? = nil) {
+            self.staticLine = staticLine
+            self.fromStation = fromStation
+            self.toStation = toStation
+            self.boardingLine = boardingLine ?? staticLine
+            self.minutes = minutes
+        }
     }
 
     /// Time assumed for walking between platforms when changing trains.
@@ -1058,7 +1073,8 @@ public enum StaticTrainData {
         transferMinutes: Double = transferBufferMinutes,
         walkPace: Double = 1,
         transferAversionMinutes: Double = defaultTransferAversionMinutes,
-        avoidingLineIds: Set<String> = []
+        avoidingLineIds: Set<String> = [],
+        expressHops: TransitRouter.ExpressHops? = nil
     ) -> [TransferLeg]? {
         guard ids.count >= 2 else { return nil }
         var plan: [TransferLeg] = []
@@ -1070,11 +1086,13 @@ public enum StaticTrainData {
                       transferMinutes: transferMinutes,
                       walkPace: walkPace,
                       transferAversionMinutes: transferAversionMinutes,
-                      avoidingLineIds: avoidingLineIds
+                      avoidingLineIds: avoidingLineIds,
+                      expressHops: expressHops
                   )
             else { return nil }
 
             if let last = plan.last, let first = segment.first,
+               !last.isThrough, !first.isThrough,
                last.staticLine.id == first.staticLine.id,
                last.toStation.id == first.fromStation.id,
                continuesSameDirection(last, first) {
@@ -1082,7 +1100,8 @@ public enum StaticTrainData {
                 segment[0] = TransferLeg(
                     staticLine: first.staticLine,
                     fromStation: last.fromStation,
-                    toStation: first.toStation
+                    toStation: first.toStation,
+                    minutes: last.minutes.flatMap { a in first.minutes.map { a + $0 } }
                 )
             }
             plan.append(contentsOf: segment)
@@ -1108,7 +1127,8 @@ public enum StaticTrainData {
         transferMinutes: Double = transferBufferMinutes,
         walkPace: Double = 1,
         transferAversionMinutes: Double = defaultTransferAversionMinutes,
-        avoidingLineIds: Set<String> = []
+        avoidingLineIds: Set<String> = [],
+        expressHops: TransitRouter.ExpressHops? = nil
     ) -> [TransferLeg]? {
         let links = stationLinks()
         let goalIds = Set(links.sameStation(as: toStationId))
@@ -1123,6 +1143,27 @@ public enum StaticTrainData {
         func walkMinutes(_ meters: Double) -> Double {
             Double(StationLinks.transferSeconds(meters: meters, transferMinutes: transferMinutes,
                                                 walkPace: walkPace)) / 60
+        }
+
+        // 直通: riding on past a junction onto the partner line is no change.
+        let lineIndex = Dictionary(lines.enumerated().map { ($1.id, $0) }, uniquingKeysWith: { a, _ in a })
+        var throughEdges: [RouteNode: [(to: RouteNode, minutes: Double, ascending: Bool)]] = [:]
+        for (li, line) in lines.enumerated() {
+            for service in line.throughServices {
+                guard let jIdx = line.stations.firstIndex(where: { $0.id == service.junctionStationId }),
+                      let group = destinationGroup(for: service, on: line),
+                      let partner = lineIndex[group.connectingLine.id],
+                      let beyond = group.stations.first,
+                      let bIdx = group.connectingLine.stations.firstIndex(where: { $0.id == beyond.id }),
+                      let tIdx = group.connectingLine.stations.firstIndex(where: { $0.name == line.stations[jIdx].name })
+                else { continue }
+                let target = group.connectingLine
+                let hop = bIdx > tIdx
+                    ? target.hopTimesMinutes[tIdx]
+                    : (target.upHopTimesMinutes ?? target.hopTimesMinutes)[bIdx]
+                throughEdges[RouteNode(line: li, idx: jIdx, transfers: 0), default: []].append(
+                    (RouteNode(line: partner, idx: bIdx, transfers: 0), hop, service.end == .ascending))
+            }
         }
 
         var nodesById: [String: [RouteNode]] = [:]
@@ -1190,6 +1231,19 @@ public enum StaticTrainData {
                 }
             }
 
+            for hop in expressHops?.hops(onLine: line.id, from: node.idx) ?? [] {
+                ride(to: hop.to, minutes: hop.minutes)
+            }
+
+            if let parent = entry.parent, parent.line == node.line {
+                // Only trains heading for the junction's far side run through.
+                for edge in throughEdges[RouteNode(line: node.line, idx: node.idx, transfers: 0)] ?? []
+                where (parent.idx < node.idx) == edge.ascending {
+                    relax(RouteNode(line: edge.to.line, idx: edge.to.idx, transfers: node.transfers),
+                          cost: cost + edge.minutes)
+                }
+            }
+
             if node.transfers < maxTransfers {
                 for link in links.links[station.id] ?? [] {
                     for sibling in nodesById[link.stationId] ?? [] where sibling.line != node.line {
@@ -1210,30 +1264,45 @@ public enum StaticTrainData {
         }
         path.reverse()
 
+        // A change of line within one transfer layer is a 直通 hop, not a change.
         var legs: [TransferLeg] = []
-        var legStart = path[0]
-        for i in 1..<path.count {
-            let prev = path[i - 1]
-            let node = path[i]
-            if node.line != prev.line {
-                if legStart.idx != prev.idx {
-                    legs.append(TransferLeg(
-                        staticLine: lines[legStart.line],
-                        fromStation: lines[legStart.line].stations[legStart.idx],
-                        toStation: lines[prev.line].stations[prev.idx]
-                    ))
-                }
-                legStart = node
+        func plainLeg(_ start: RouteNode, _ end: RouteNode) {
+            let line = lines[start.line]
+            guard start.idx != end.idx else { return }
+            legs.append(TransferLeg(staticLine: line, fromStation: line.stations[start.idx],
+                                    toStation: line.stations[end.idx],
+                                    minutes: (best[end]?.cost ?? 0) - (best[start]?.cost ?? 0)))
+        }
+        func closeLeg(_ range: ClosedRange<Int>) {
+            let start = path[range.lowerBound], end = path[range.upperBound]
+            if start.line == end.line {
+                plainLeg(start, end)
+                return
             }
+            let boarding = lines[start.line]
+            let from = boarding.stations[start.idx]
+            let to = lines[end.line].stations[end.idx]
+            if let composite = resolveJourneyLine(lineId: boarding.id, fromStationId: from.id,
+                                                  toStationId: to.id)?.staticLine {
+                legs.append(TransferLeg(staticLine: composite, fromStation: from, toStation: to,
+                                        boardingLine: boarding,
+                                        minutes: (best[end]?.cost ?? 0) - (best[start]?.cost ?? 0)))
+                return
+            }
+            // No composite to ride on: fall back to one leg per line.
+            var pieceStart = range.lowerBound
+            for i in range.dropFirst() where path[i].line != path[i - 1].line {
+                plainLeg(path[pieceStart], path[i - 1])
+                pieceStart = i
+            }
+            plainLeg(path[pieceStart], end)
         }
-        let last = path[path.count - 1]
-        if legStart.idx != last.idx {
-            legs.append(TransferLeg(
-                staticLine: lines[legStart.line],
-                fromStation: lines[legStart.line].stations[legStart.idx],
-                toStation: lines[last.line].stations[last.idx]
-            ))
+        var legStart = 0
+        for i in 1..<path.count where path[i].transfers != path[i - 1].transfers {
+            closeLeg(legStart...(i - 1))
+            legStart = i
         }
+        closeLeg(legStart...(path.count - 1))
         return legs.isEmpty ? nil : legs
     }
 

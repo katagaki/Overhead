@@ -88,6 +88,21 @@ public enum TransitRouter {
         _ = network(on: date).reversed
     }
 
+    /// Rides that skip stations, timed by the day's fastest train making them,
+    /// so planning without a timetable still knows an 急行 beats a 各停.
+    public struct ExpressHops: Sendable {
+        /// Line ID → station index → (station index, minutes).
+        let byLine: [String: [Int: [(to: Int, minutes: Double)]]]
+
+        func hops(onLine lineId: String, from index: Int) -> [(to: Int, minutes: Double)] {
+            byLine[lineId]?[index] ?? []
+        }
+    }
+
+    public static func expressHops(on date: Date) -> ExpressHops {
+        network(on: date).expressHops
+    }
+
     // MARK: Network Cache
 
     private static let cacheLock = NSLock()
@@ -164,6 +179,33 @@ extension TransitRouter {
         let links: StationLinks
         private let reversedLock = NSLock()
         private var reversedNetwork: Network?
+        private let expressLock = NSLock()
+        private var builtExpressHops: ExpressHops?
+        private let stationIndex: [String: Int]
+
+        var expressHops: ExpressHops {
+            expressLock.lock(); defer { expressLock.unlock() }
+            if let builtExpressHops { return builtExpressHops }
+            var fastest: [String: [Int: [Int: Int32]]] = [:]
+            for route in routes {
+                for p in 0..<(route.stops.count - 1) where route.lines[p] == route.lines[p + 1] {
+                    guard let from = stationIndex[stopStation[Int(route.stops[p])]],
+                          let to = stationIndex[stopStation[Int(route.stops[p + 1])]],
+                          abs(to - from) > 1
+                    else { continue }
+                    let ride = route.trips.map { trips[Int($0)].arrivals[p + 1] - trips[Int($0)].departures[p] }.min() ?? 0
+                    guard ride > 0 else { continue }
+                    let lineId = lineIds[Int(route.lines[p])]
+                    let existing = fastest[lineId]?[from]?[to] ?? .max
+                    fastest[lineId, default: [:]][from, default: [:]][to] = min(existing, ride)
+                }
+            }
+            let hops = ExpressHops(byLine: fastest.mapValues { byFrom in
+                byFrom.mapValues { byTo in byTo.map { (to: $0.key, minutes: Double($0.value) / 60) } }
+            })
+            builtExpressHops = hops
+            return hops
+        }
 
         /// The same trains run backwards in negated time, for latest-departure searches.
         var reversed: Network {
@@ -365,14 +407,23 @@ extension TransitRouter {
                 }
             }
 
+            var stationIndex: [String: Int] = [:]
+            for line in lines {
+                for (i, station) in line.stations.enumerated() where stationIndex[station.id] == nil {
+                    stationIndex[station.id] = i
+                }
+            }
+
             self.init(lineIds: lines.map(\.id), serviceIds: runs.map(\.serviceId),
                       stopStation: stopStation, stopIndex: stopIndex,
-                      routes: routes, trips: trips, transfers: transfers, links: links)
+                      routes: routes, trips: trips, transfers: transfers, links: links,
+                      stationIndex: stationIndex)
         }
 
         private init(lineIds: [String], serviceIds: [String], stopStation: [String],
                      stopIndex: [String: Int32], routes: [Route], trips: [Trip],
-                     transfers: [[Transfer]], links: StationLinks) {
+                     transfers: [[Transfer]], links: StationLinks, stationIndex: [String: Int]) {
+            self.stationIndex = stationIndex
             self.lineIds = lineIds
             self.serviceIds = serviceIds
             self.stopStation = stopStation
@@ -408,7 +459,7 @@ extension TransitRouter {
             }
             self.init(lineIds: net.lineIds, serviceIds: net.serviceIds, stopStation: net.stopStation,
                       stopIndex: net.stopIndex, routes: routes, trips: trips,
-                      transfers: net.transfers, links: net.links)
+                      transfers: net.transfers, links: net.links, stationIndex: net.stationIndex)
         }
     }
 }

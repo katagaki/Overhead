@@ -523,8 +523,12 @@ final class JourneyViewModel: ObservableObject {
         walkPace: Double = 1,
         priority: RoutePriority = .balanced,
         avoidingLineIds: Set<String> = []
-    ) -> [TrainCandidate] {
+    ) async -> [TrainCandidate] {
         guard stations.count >= 2, let from = stations.first, let to = stations.last else { return [] }
+        // Expresses come from today's timetable, built off the main thread.
+        let expressHops = await Task.detached(priority: .userInitiated) {
+            TransitRouter.expressHops(on: Date())
+        }.value
 
         var results: [TrainCandidate] = []
         var seen = Set<String>()
@@ -541,7 +545,7 @@ final class JourneyViewModel: ObservableObject {
                 fromStationId: from.id, toStationId: to.id,
                 avoidingLineIds: avoidingLineIds
             ) {
-                add(untimedCandidate(for: route))
+                add(untimedCandidate(for: route, expressHops: expressHops))
             }
         }
 
@@ -553,10 +557,12 @@ final class JourneyViewModel: ObservableObject {
                 transferMinutes: transferMinutes,
                 walkPace: walkPace,
                 transferAversionMinutes: priority.transferAversionMinutes,
-                avoidingLineIds: avoid
+                avoidingLineIds: avoid,
+                expressHops: expressHops
             ) else { break }
             add(untimedCandidate(forPlan: plan, transferMinutes: transferMinutes))
-            let planLines = Set(plan.map(\.staticLine.id))
+            // A 直通 leg's composite ID joins its lines with "+".
+            let planLines = Set(plan.flatMap { $0.staticLine.id.split(separator: "+").map(String.init) })
             if planLines.isSubset(of: avoid) { break }
             avoid.formUnion(planLines)
         }
@@ -599,17 +605,32 @@ final class JourneyViewModel: ObservableObject {
         return (service, ride.stations, Int(ride.minutes.rounded(.up)))
     }
 
-    private func untimedCandidate(for route: StaticTrainData.DirectRouteOption) -> TrainCandidate? {
+    private func untimedCandidate(
+        for route: StaticTrainData.DirectRouteOption,
+        expressHops: TransitRouter.ExpressHops
+    ) -> TrainCandidate? {
         guard let ride = untimedRide(
             on: route.staticLine, from: route.fromStation, to: route.toStation
         ) else { return nil }
+        // Timed on the route's own lines alone, so its expresses count.
+        let ownLines = Set(route.staticLine.id.split(separator: "+").map(String.init))
+        let planned = StaticTrainData.planTransferRoute(
+            fromStationId: route.fromStation.id,
+            toStationId: route.toStation.id,
+            maxTransfers: 0,
+            avoidingLineIds: Set(availableLines.map(\.id)).subtracting(ownLines),
+            expressHops: expressHops
+        )
+        let minutes = planned?.count == 1
+            ? planned?[0].minutes.map { Int($0.rounded(.up)) } ?? ride.minutes
+            : ride.minutes
         let leg = CandidateLeg(
             service: ride.service,
             line: route.boardingLine.trainLine,
             fromStation: route.fromStation,
             toStation: route.toStation,
             departureSeconds: 0,
-            arrivalSeconds: ride.minutes * 60
+            arrivalSeconds: minutes * 60
         )
         return TrainCandidate(
             id: "untimed|\(route.id)",
@@ -629,22 +650,27 @@ final class JourneyViewModel: ObservableObject {
     ) -> TrainCandidate? {
         guard let firstLeg = plan.first, let lastLeg = plan.last else { return nil }
 
+        // Planned minutes know about expresses; hop sums assume every stop.
+        func minutes(_ planLeg: StaticTrainData.TransferLeg, _ fallback: Int) -> Int {
+            planLeg.minutes.map { Int($0.rounded(.up)) } ?? fallback
+        }
+
         if plan.count == 1 {
             guard let ride = untimedRide(
                 on: firstLeg.staticLine, from: firstLeg.fromStation, to: firstLeg.toStation
             ) else { return nil }
             let leg = CandidateLeg(
                 service: ride.service,
-                line: firstLeg.staticLine.trainLine,
+                line: firstLeg.boardingLine.trainLine,
                 fromStation: firstLeg.fromStation,
                 toStation: firstLeg.toStation,
                 departureSeconds: 0,
-                arrivalSeconds: ride.minutes * 60
+                arrivalSeconds: minutes(firstLeg, ride.minutes) * 60
             )
             return TrainCandidate(
                 id: "untimed|\(firstLeg.staticLine.id)|\(firstLeg.fromStation.id)|\(firstLeg.toStation.id)",
                 legs: [leg],
-                isThrough: false,
+                isThrough: firstLeg.isThrough,
                 journeyLine: firstLeg.staticLine.trainLine,
                 journeyService: ride.service,
                 fromStation: firstLeg.fromStation,
@@ -660,20 +686,21 @@ final class JourneyViewModel: ObservableObject {
             guard let ride = untimedRide(
                 on: planLeg.staticLine, from: planLeg.fromStation, to: planLeg.toStation
             ) else { return nil }
+            let rideMinutes = minutes(planLeg, ride.minutes)
             legs.append(CandidateLeg(
                 service: ride.service,
-                line: planLeg.staticLine.trainLine,
+                line: planLeg.boardingLine.trainLine,
                 fromStation: planLeg.fromStation,
                 toStation: planLeg.toStation,
                 departureSeconds: cursor,
-                arrivalSeconds: cursor + ride.minutes * 60
+                arrivalSeconds: cursor + rideMinutes * 60
             ))
-            cursor += ride.minutes * 60 + Int(transferMinutes * 60)
+            cursor += rideMinutes * 60 + Int(transferMinutes * 60)
             // The transfer station keeps the arriving leg's station ID.
             stations.append(contentsOf: index == 0 ? ride.stations : Array(ride.stations.dropFirst()))
         }
 
-        let compositeId = plan.map(\.staticLine.trainLine.id).joined(separator: "+")
+        let compositeId = plan.map(\.boardingLine.id).joined(separator: "+")
         let entries = stations.enumerated().map { i, station in
             TimetableEntry(
                 id: "untimed_\(compositeId)_\(i)",
@@ -687,8 +714,8 @@ final class JourneyViewModel: ObservableObject {
         let first = legs[0]
         let journeyLine = TrainLine(
             id: compositeId,
-            name: plan.map(\.staticLine.trainLine.name).joined(separator: "〜"),
-            nameEn: plan.map(\.staticLine.trainLine.nameEn).joined(separator: " – "),
+            name: plan.map(\.boardingLine.trainLine.name).joined(separator: "〜"),
+            nameEn: plan.map(\.boardingLine.trainLine.nameEn).joined(separator: " – "),
             operatorId: first.line.operatorId,
             stations: stations,
             colorHex: first.line.colorHex

@@ -633,7 +633,7 @@ struct JourneyPlannerSection: View {
 
             if ignoreTimetable {
                 searchWalkMinutes = nil
-                candidates = viewModel.searchRouteOptions(
+                candidates = await viewModel.searchRouteOptions(
                     stations: waypoints,
                     transferMinutes: walkingSpeed.transferMinutes,
                     walkPace: walkingSpeed.paceMultiplier,
