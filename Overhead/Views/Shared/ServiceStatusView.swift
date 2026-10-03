@@ -10,6 +10,8 @@ struct ServiceStatusView: View {
     let lineId: String
     let delayInfo: DelayCheckInfo
     @StateObject private var web: ServiceStatusWebController
+    /// The tab bar's inset, measured before the web view runs under it.
+    @State private var bottomInset: CGFloat = 0
 
     init(lineId: String, delayInfo: DelayCheckInfo) {
         self.lineId = lineId
@@ -20,9 +22,14 @@ struct ServiceStatusView: View {
     var body: some View {
         Group {
             if let webView = web.officialWebView {
-                ServiceStatusWebView(webView: webView)
+                ServiceStatusWebView(webView: webView, bottomInset: bottomInset)
                     .ignoresSafeArea(edges: .bottom)
             }
+        }
+        .onGeometryChange(for: CGFloat.self) { proxy in
+            proxy.safeAreaInsets.bottom
+        } action: { inset in
+            bottomInset = inset
         }
         .navigationTitle("StationTimetable.ServiceStatus")
         .navigationBarTitleDisplayMode(.inline)
@@ -328,12 +335,23 @@ private final class RestrictedWebDelegate: NSObject, WKNavigationDelegate, WKUID
 
 // MARK: - Web View Wrapper
 
+/// Runs under the tab bar, so the page is scrolled clear of it by hand: the
+/// bar's inset never reaches UIKit's safe area.
 private struct ServiceStatusWebView: UIViewRepresentable {
     let webView: WKWebView
+    let bottomInset: CGFloat
 
     func makeUIView(context: Context) -> WKWebView {
-        webView
+        webView.scrollView.contentInsetAdjustmentBehavior = .never
+        // Otherwise the home indicator's inset is added to the bar's, which already holds it.
+        webView.scrollView.automaticallyAdjustsScrollIndicatorInsets = false
+        return webView
     }
 
-    func updateUIView(_ uiView: WKWebView, context: Context) {}
+    func updateUIView(_ uiView: WKWebView, context: Context) {
+        let scrollView = uiView.scrollView
+        guard scrollView.contentInset.bottom != bottomInset else { return }
+        scrollView.contentInset.bottom = bottomInset
+        scrollView.verticalScrollIndicatorInsets.bottom = bottomInset
+    }
 }
