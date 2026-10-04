@@ -49,7 +49,12 @@ struct RootView: View {
         TabZoomContainer(store: tabStore, cardCornerRadius: TabSwitcherCardMetrics.cornerRadius) {
             TabSwitcher(
                 store: tabStore,
-                strings: TabSwitcherStrings(title: { $0 == 1 ? "1 Tab" : "\($0) Tabs" }),
+                strings: TabSwitcherStrings(
+                    title: { String(localized: "Tabs.Count \($0)") },
+                    closeAll: String(localized: "Tabs.CloseAll"),
+                    newTab: String(localized: "Tabs.New"),
+                    closeTab: String(localized: "Tabs.Close")
+                ),
                 placeholderIcon: .systemImage("tram.fill"),
                 rebuildingPath: rebuildPath
             ) { tab in
@@ -399,7 +404,7 @@ struct RootView: View {
                         .frame(width: TabBottomBarMetrics.itemHeight, height: TabBottomBarMetrics.itemHeight)
                         .contentShape(Circle())
                 }
-                .accessibilityLabel(tabStore.tabs.count == 1 ? "1 Tab" : "\(tabStore.tabs.count) Tabs")
+                .accessibilityLabel("Tabs.Count \(tabStore.tabs.count)")
                 .glassEffect(.regular.interactive(), in: .circle)
             }
             .buttonStyle(.plain)

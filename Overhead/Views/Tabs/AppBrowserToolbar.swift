@@ -35,8 +35,8 @@ struct JourneyStationToolbarButton: View {
         .frame(width: TabBottomBarMetrics.itemHeight, height: TabBottomBarMetrics.itemHeight)
         .glassEffect(.regular.interactive(), in: .circle)
         .accessibilityLabel(
-            nextStation.map { Text("Open journey, next stop \($0.localizedName)") }
-                ?? Text("Open journey")
+            nextStation.map { Text("Journey.Open.NextStop \($0.localizedName)") }
+                ?? Text("Journey.Open")
         )
     }
 }
