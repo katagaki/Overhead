@@ -50,17 +50,10 @@ struct BrowserAddressToolbarItem: View {
     let items: TabBottomBarItems
     var searchText: Binding<String>
     let onOpenSearch: () -> Void
-    let onSwipe: (Int) -> Void
-
-    @GestureState private var dragOffset: CGFloat = 0
-    @State private var suppressTap = false
 
     var body: some View {
         HStack(spacing: 0) {
-            Button {
-                guard !suppressTap else { return }
-                onOpenSearch()
-            } label: {
+            Button(action: onOpenSearch) {
                 HStack(spacing: 7) {
                     Image(systemName: page?.symbolName ?? "magnifyingglass")
                         .foregroundStyle(.secondary)
@@ -79,8 +72,6 @@ struct BrowserAddressToolbarItem: View {
             }
         }
         .animation(.smooth, value: page?.title)
-        .offset(x: dragOffset * 0.1)
-        .simultaneousGesture(swipeGesture)
     }
 
     @ViewBuilder
@@ -103,24 +94,6 @@ struct BrowserAddressToolbarItem: View {
         }
     }
 
-    private var swipeGesture: some Gesture {
-        DragGesture(minimumDistance: 12)
-            .updating($dragOffset) { value, state, _ in
-                guard abs(value.translation.width) > abs(value.translation.height) else { return }
-                state = value.translation.width
-            }
-            .onChanged { value in
-                if abs(value.translation.width) > abs(value.translation.height) * 1.25 {
-                    suppressTap = true
-                }
-            }
-            .onEnded { value in
-                defer { DispatchQueue.main.async { suppressTap = false } }
-                guard abs(value.translation.width) > abs(value.translation.height) * 1.25,
-                      abs(value.predictedEndTranslation.width) > 60 else { return }
-                onSwipe(value.predictedEndTranslation.width < 0 ? 1 : -1)
-            }
-    }
 }
 
 /// The tabs button's glyph: a rounded square holding the tab count.

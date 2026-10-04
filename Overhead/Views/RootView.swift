@@ -392,11 +392,11 @@ struct RootView: View {
                     page: omniboxPage(for: tab.id),
                     items: items,
                     searchText: searchText(for: tab.id),
-                    onOpenSearch: openSearch,
-                    onSwipe: switchTab
+                    onOpenSearch: openSearch
                 )
                 .frame(maxWidth: .infinity, minHeight: TabBottomBarMetrics.itemHeight)
                 .glassEffect(.regular.interactive(), in: .capsule)
+                .tabSwitchingGesture(for: tab.id, in: tabStore, isEnabled: !showsBrowserSearchOverlay)
 
                 Button {
                     tabStore.showTabSwitcher()
@@ -510,14 +510,6 @@ struct RootView: View {
         viewModel.plannerFromRequest = origin
         viewModel.plannerToRequest = destination
         openHome()
-    }
-
-    private func switchTab(_ delta: Int) {
-        let index = tabStore.tabs.firstIndex { $0.id == tabStore.selectedTabID } ?? 0
-        let target = index + delta
-        guard tabStore.tabs.indices.contains(target) else { return }
-        dismissSearchOverlay()
-        withAnimation(.smooth(duration: 0.3)) { tabStore.select(tabStore.tabs[target].id) }
     }
 
     private func rebuildPath(_ token: AppPathToken, _ path: inout NavigationPath) -> Bool {
