@@ -6,7 +6,7 @@
 
 import Foundation
 
-let udid = "571BCB64-DC54-4C4A-8985-E076E8E4EE08"  // "iPhone 4" (iPhone 17 Pro, iOS 27)
+let udid = "64D036E5-CA5A-4B70-BADC-B55A652F92D7"  // "App Store Screenshots" (iPhone 17 Pro, iOS 27)
 let bundleId = "com.tsubuzaki.Overhead"
 let scriptDir = URL(fileURLWithPath: CommandLine.arguments[0]).deletingLastPathComponent()
 let language = CommandLine.arguments.count > 2 ? CommandLine.arguments[2] : "ja"
@@ -33,7 +33,9 @@ func launchApp(urls: [String] = []) {
     sleep(2)
     xcrun(["simctl", "launch", udid, bundleId,
            "-hasDismissedStartupNotice", "YES",
-           "-AppleLanguages", "(\(language))"] + urls)
+           "-AppleLanguages", "(\(language))",
+           // Holds the LCDs on the capture's language instead of alternating.
+           "-journey.lcdLanguages", language] + urls)
     sleep(5)
 }
 
@@ -45,8 +47,20 @@ struct Shot {
 }
 
 let shots: [Shot] = [
-    Shot(name: "01-home", urls: [], waitSeconds: 2),
-    Shot(name: "02-planner", urls: ["overtrain://planner?action=search"], waitSeconds: 6),
+    Shot(name: "00-tabs", urls: [
+        "overtrain://lcd?style=joban",
+        "overtrain://journey?minutesAgo=55",
+        "overtrain://tab/new",
+        "overtrain://lcd?style=yamanote",
+        "overtrain://journey?minutesAgo=20&line=Railway:JR-East.Yamanote&from=Station:JR-East.Yamanote.Ikebukuro&to=Station:JR-East.Yamanote.Akihabara",
+        "overtrain://tab/new",
+        "overtrain://lcd?style=tokyoMetro",
+        "overtrain://journey?minutesAgo=40&line=Railway:TokyoMetro.Tozai&from=Station:TokyoMetro.Tozai.Nakano&to=Station:TokyoMetro.Tozai.NishiFunabashi",
+        "overtrain://tab/new",
+        "overtrain://tab/switcher",
+    ], waitSeconds: 30),
+    Shot(name: "01-home", urls: [], waitSeconds: 5),
+    Shot(name: "02-planner", urls: ["overtrain://planner?action=search"], waitSeconds: 10),
     Shot(name: "03-journey", urls: [
         "overtrain://lcd?style=joban",
         "overtrain://journey?minutesAgo=55",
@@ -100,8 +114,9 @@ launchApp(urls: ["overtrain://reset", "overtrain://seed/favorites", "overtrain:/
 
 // Extra arguments past the app path and language select a subset of shots.
 let onlyNames = Set(CommandLine.arguments.dropFirst(3))
+// Tabs and their journeys persist across launches, so each shot starts from a reset.
 for shot in shots where onlyNames.isEmpty || onlyNames.contains(shot.name) {
-    launchApp(urls: shot.urls)
+    launchApp(urls: ["overtrain://reset"] + shot.urls)
     sleep(shot.waitSeconds)
     let file = rawDir.appendingPathComponent("\(shot.name).png").path
     let capture = xcrun(["simctl", "io", udid, "screenshot", file])
