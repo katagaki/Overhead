@@ -768,8 +768,19 @@ struct RootView: View {
             try? await Task.sleep(for: .seconds(1.5))
             let tabID = tabStore.selectedTabID
             if let sessionID = journeyTabs.sessions[tabID] { removeJourneyPage(sessionID, from: tabID) }
+        case .newTab:
+            try? await Task.sleep(for: .seconds(3))
+            tabStore.captureSelectedTabSnapshot()
+            tabStore.openTab()
+            // The new tab names itself on appear, which must land before a journey does.
+            try? await Task.sleep(for: .seconds(1))
+        case .tabSwitcher:
+            try? await Task.sleep(for: .seconds(1.5))
+            tabStore.showTabSwitcher()
         case .reset:
             viewModel.sessions.forEach(viewModel.stopJourney)
+            tabStore.closeAll()
+            try? await Task.sleep(for: .seconds(1))
             debugTimetableTarget = nil
             openHome()
             UserDefaults.standard.removeObject(forKey: "journey.setup.stations")
