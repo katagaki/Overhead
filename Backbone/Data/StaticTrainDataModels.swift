@@ -1274,7 +1274,8 @@ public enum StaticTrainData {
                                     minutes: (best[end]?.cost ?? 0) - (best[start]?.cost ?? 0)))
         }
         func closeLeg(_ range: ClosedRange<Int>) {
-            let start = path[range.lowerBound], end = path[range.upperBound]
+            let start = path[range.lowerBound]
+            let end = path[range.upperBound]
             if start.line == end.line {
                 plainLeg(start, end)
                 return
@@ -1317,7 +1318,8 @@ public enum StaticTrainData {
         private var heap: [(cost: Double, node: RouteNode)] = []
 
         private func precedes(_ a: Int, _ b: Int) -> Bool {
-            let x = heap[a], y = heap[b]
+            let x = heap[a]
+            let y = heap[b]
             if abs(x.cost - y.cost) > 0.001 { return x.cost < y.cost }
             return x.node.transfers < y.node.transfers
         }
@@ -1339,7 +1341,8 @@ public enum StaticTrainData {
             let top = heap.removeLast()
             var parent = 0
             while true {
-                let left = parent * 2 + 1, right = left + 1
+                let left = parent * 2 + 1
+                let right = left + 1
                 var next = parent
                 if left < heap.count, precedes(left, next) { next = left }
                 if right < heap.count, precedes(right, next) { next = right }

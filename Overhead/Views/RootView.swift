@@ -819,7 +819,9 @@ private struct JourneyEndButton: View {
             titleVisibility: .visible
         ) {
             Button("Button.EndJourney", role: .destructive, action: onEnd)
-            Button("Button.KeepJourney", role: .cancel) {}
+            Button("Button.KeepJourney", role: .cancel) {
+                // Dismissal is handled by the dialog
+            }
         }
     }
 }

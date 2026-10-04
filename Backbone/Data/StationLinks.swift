@@ -62,7 +62,8 @@ public struct StationLinks: Sendable {
         for indices in byName.values where indices.count > 1 {
             for (n, i) in indices.enumerated() {
                 for j in indices[(n + 1)...] {
-                    let a = entries[i], b = entries[j]
+                    let a = entries[i]
+                    let b = entries[j]
                     let meters = Self.distance(a.lat, a.lon, b.lat, b.lon) ?? 0
                     guard meters <= Self.sameNameMeters else { continue }
                     union(i, j)

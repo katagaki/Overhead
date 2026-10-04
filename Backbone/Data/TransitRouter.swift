@@ -277,7 +277,9 @@ extension TransitRouter {
                 var built: [Run] = []
                 built.reserveCapacity(services.count)
                 for service in services {
-                    var stops: [Int32] = [], arrivals: [Int32] = [], departures: [Int32] = []
+                    var stops: [Int32] = []
+                    var arrivals: [Int32] = []
+                    var departures: [Int32] = []
                     for entry in service.timetable {
                         guard let stop = stopIndex[entry.stationId],
                               let a = entry.arrivalSeconds() ?? entry.departureSeconds(),
@@ -375,8 +377,10 @@ extension TransitRouter {
             var tripStops: [[Int32]] = []
             var tripLines: [[Int32]] = []
             func addTrip(_ chain: [Int]) {
-                var stops: [Int32] = [], lineOf: [Int32] = []
-                var arrivals: [Int32] = [], departures: [Int32] = []
+                var stops: [Int32] = []
+                var lineOf: [Int32] = []
+                var arrivals: [Int32] = []
+                var departures: [Int32] = []
                 var segments: [Segment] = []
                 for r in chain {
                     let run = runs[r]
@@ -705,7 +709,8 @@ extension TransitRouter {
                 let alight = reversed ? last - raw.board : raw.alight
                 let stops = net.routes[Int(trip.route)].stops
                 let rides = trip.segments.compactMap { segment -> Ride? in
-                    let from = max(board, segment.start), to = min(alight, segment.end)
+                    let from = max(board, segment.start)
+                    let to = min(alight, segment.end)
                     guard from < to else { return nil }
                     return Ride(
                         lineId: net.lineIds[Int(net.routes[Int(trip.route)].lines[Int(from)])],
@@ -787,7 +792,8 @@ extension TransitRouter {
                         guard ready != inf, position < route.stops.count - 1 else { continue }
                         if current >= 0, net.trips[Int(route.trips[current])].departures[position] < ready { continue }
                         // Earliest trip leaving here at or after `ready`.
-                        var lo = 0, hi = current >= 0 ? current : route.trips.count
+                        var lo = 0
+                        var hi = current >= 0 ? current : route.trips.count
                         while lo < hi {
                             let mid = (lo + hi) / 2
                             if net.trips[Int(route.trips[mid])].departures[position] < ready { lo = mid + 1 } else { hi = mid }

@@ -807,7 +807,8 @@ final class JourneyViewModel: ObservableObject {
             }
             entries.append(contentsOf: timetable)
         }
-        let first = services[0], last = services[services.count - 1]
+        let first = services[0]
+        let last = services[services.count - 1]
         return TrainService(
             id: services.map(\.id).joined(separator: "+"),
             lineId: lineId,
@@ -866,7 +867,8 @@ final class JourneyViewModel: ObservableObject {
 
     /// A loop leg's stations in the direction its train actually runs.
     private static func loopSlice(on line: StaticTrainLine, leg: CandidateLeg) -> [Station]? {
-        let stations = line.stations, count = stations.count
+        let stations = line.stations
+        let count = stations.count
         let timetable = leg.service.timetable
         guard line.isLoop,
               let fromIdx = stations.firstIndex(where: { $0.id == leg.fromStation.id }),

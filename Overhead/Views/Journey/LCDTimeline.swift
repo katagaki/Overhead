@@ -57,7 +57,7 @@ private struct PausablePeriodicSchedule: TimelineSchedule {
     let interval: TimeInterval
     let paused: Bool
 
-    func entries(from startDate: Date, mode: TimelineScheduleMode) -> AnyIterator<Date> {
+    func entries(from startDate: Date, mode _: TimelineScheduleMode) -> AnyIterator<Date> {
         var next: Date? = startDate
         return AnyIterator {
             defer { next = paused ? nil : next?.addingTimeInterval(interval) }
