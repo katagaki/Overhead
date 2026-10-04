@@ -104,6 +104,7 @@ enum AppTabSessionMigration {
                 store.updateTab(tab.id) { $0.root = .home }
             }
             if !oldSearchTabs.isEmpty { store.persistTabs() }
+            AppTabPlannerSetupStorage.migrateGlobalSetup(to: store.selectedTabID)
             return store
         }
         guard let data = UserDefaults.standard.data(forKey: "browser.tabs.v1"),
@@ -123,6 +124,7 @@ enum AppTabSessionMigration {
         AppTabSearchStateStorage.save(searchStates)
         let store = AppNavigationStore(configuration: configuration, tabs: tabs, selectedTabID: session.selectedTabID)
         store.persistTabs()
+        AppTabPlannerSetupStorage.migrateGlobalSetup(to: store.selectedTabID)
         return store
     }
 }
@@ -139,6 +141,52 @@ enum AppTabSearchStateStorage {
 
     static func save(_ states: [UUID: AppTabSearchState]) {
         guard let data = try? JSONEncoder().encode(states) else { return }
+        UserDefaults.standard.set(data, forKey: key)
+    }
+}
+
+/// Each tab keeps its own planner From/Via/To.
+enum AppTabPlannerSetupStorage {
+    private static let key = "Overhead.Navigation.PlannerSetups"
+    private static let globalKey = "journey.setup.stations"
+
+    static func load() -> [UUID: String] {
+        guard let data = UserDefaults.standard.data(forKey: key),
+              let setups = try? JSONDecoder().decode([UUID: String].self, from: data)
+        else { return [:] }
+        return setups
+    }
+
+    static func setup(for tabID: UUID) -> String? {
+        load()[tabID]
+    }
+
+    static func save(_ setup: String?, for tabID: UUID) {
+        var setups = load()
+        setups[tabID] = setup
+        write(setups)
+    }
+
+    static func prune(keeping tabIDs: Set<UUID>) {
+        let setups = load()
+        let kept = setups.filter { tabIDs.contains($0.key) }
+        if kept.count != setups.count { write(kept) }
+    }
+
+    static func removeAll() {
+        UserDefaults.standard.removeObject(forKey: key)
+        UserDefaults.standard.removeObject(forKey: globalKey)
+    }
+
+    /// The setup used to be shared by every tab; it goes to the tab in front.
+    static func migrateGlobalSetup(to tabID: UUID) {
+        guard let json = UserDefaults.standard.string(forKey: globalKey) else { return }
+        if !json.isEmpty, setup(for: tabID) == nil { save(json, for: tabID) }
+        UserDefaults.standard.removeObject(forKey: globalKey)
+    }
+
+    private static func write(_ setups: [UUID: String]) {
+        guard let data = try? JSONEncoder().encode(setups) else { return }
         UserDefaults.standard.set(data, forKey: key)
     }
 }

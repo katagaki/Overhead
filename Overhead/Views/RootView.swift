@@ -90,6 +90,7 @@ struct RootView: View {
             let liveIDs = Set(tabIDs)
             searchStates = searchStates.filter { liveIDs.contains($0.key) }
             AppTabSearchStateStorage.save(searchStates)
+            AppTabPlannerSetupStorage.prune(keeping: liveIDs)
             // A journey belongs to its tab, so closing the tab ends it.
             for (tabID, sessionID) in journeyTabs.sessions where !liveIDs.contains(tabID) {
                 journeyTabs.sessions[tabID] = nil
@@ -234,9 +235,9 @@ struct RootView: View {
             Group {
                 switch tab.root {
                 case .home:
-                    homeContent
+                    homeContent(tabID: tab.id)
                 case .search:
-                    homeContent // A saved search tab is normalized to Home on launch.
+                    homeContent(tabID: tab.id) // A saved search tab is normalized to Home on launch.
                 case .destination(let destination):
                     searchDestinationView(destination)
                 }
@@ -333,15 +334,15 @@ struct RootView: View {
         }
     }
 
-    private var homeContent: some View {
+    private func homeContent(tabID: UUID) -> some View {
         ScrollViewReader { scrollProxy in
             Group {
                 if horizontalSizeClass == .regular {
-                    splitColumns
+                    splitColumns(tabID: tabID)
                 } else {
                     ScrollView {
                         column {
-                            plannerSections
+                            plannerSections(tabID: tabID)
                             catalogSections
                         }
                     }
@@ -577,10 +578,10 @@ struct RootView: View {
 
     /// Wide windows read as two halves: what you are riding on the left,
     /// what there is to browse on the right, each scrolling on its own.
-    private var splitColumns: some View {
+    private func splitColumns(tabID: UUID) -> some View {
         HStack(alignment: .top, spacing: 0) {
             ScrollView {
-                column { plannerSections }
+                column { plannerSections(tabID: tabID) }
             }
             .frame(maxWidth: .infinity)
 
@@ -603,9 +604,11 @@ struct RootView: View {
     }
 
     @ViewBuilder
-    private var plannerSections: some View {
+    private func plannerSections(tabID: UUID) -> some View {
         FavoritesSection(viewModel: viewModel)
-        JourneyPlannerSection(viewModel: viewModel)
+        JourneyPlannerSection(viewModel: viewModel, tabID: tabID) { [tabStore] in
+            tabStore.selectedTabID == tabID
+        }
     }
 
     @ViewBuilder
@@ -783,7 +786,7 @@ struct RootView: View {
             try? await Task.sleep(for: .seconds(1))
             debugTimetableTarget = nil
             openHome()
-            UserDefaults.standard.removeObject(forKey: "journey.setup.stations")
+            AppTabPlannerSetupStorage.removeAll()
             UserDefaults.standard.removeObject(forKey: "journey.avoidedLines")
         }
     }

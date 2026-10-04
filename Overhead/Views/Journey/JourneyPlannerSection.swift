@@ -6,6 +6,9 @@ import Backbone
 
 struct JourneyPlannerSection: View {
     @ObservedObject var viewModel: JourneyViewModel
+    let tabID: UUID
+    /// Route requests are for the tab in front, not every mounted planner.
+    var isSelectedTab: () -> Bool = { true }
 
     @State private var fromSelection: RouteEndpoint?
     @State private var toSelection: RouteEndpoint?
@@ -18,7 +21,6 @@ struct JourneyPlannerSection: View {
     @AppStorage("journey.preferOriginating") private var preferOriginating = false
     @AppStorage("journey.avoidedLines") private var avoidedLinesJSON = ""
     @AppStorage(JourneyMode.storageKey) private var journeyMode = JourneyMode.hybrid
-    @AppStorage("journey.setup.stations") private var storedStationsJSON = ""
     @State private var showAvoidLinesSheet = false
     @State private var showTimeSettingsSheet = false
     @State private var savedPlaces: [SavedPlace] = []
@@ -122,7 +124,7 @@ struct JourneyPlannerSection: View {
             savedPlaces = SavedPlaceStore.load()
         }
         .onReceive(viewModel.$plannerFromRequest) { hit in
-            guard let hit else { return }
+            guard let hit, isSelectedTab() else { return }
             viewModel.plannerFromRequest = nil
             withAnimation(.smooth(duration: 0.35)) {
                 fromSelection = .station(hit)
@@ -131,7 +133,7 @@ struct JourneyPlannerSection: View {
             invalidateResults()
         }
         .onReceive(viewModel.$plannerToRequest) { hit in
-            guard let hit else { return }
+            guard let hit, isSelectedTab() else { return }
             viewModel.plannerToRequest = nil
             withAnimation(.smooth(duration: 0.35)) {
                 toSelection = .station(hit)
@@ -828,12 +830,12 @@ struct JourneyPlannerSection: View {
         guard let data = try? JSONEncoder().encode(setup),
               let json = String(data: data, encoding: .utf8)
         else { return }
-        storedStationsJSON = json
+        AppTabPlannerSetupStorage.save(json, for: tabID)
     }
 
     private func restoreSelections() {
         guard fromSelection == nil, toSelection == nil, viaSelections.isEmpty,
-              let data = storedStationsJSON.data(using: .utf8),
+              let data = AppTabPlannerSetupStorage.setup(for: tabID)?.data(using: .utf8),
               let setup = try? JSONDecoder().decode(StoredSetup.self, from: data)
         else { return }
         fromSelection = endpoint(station: setup.from, place: setup.fromPlace,
