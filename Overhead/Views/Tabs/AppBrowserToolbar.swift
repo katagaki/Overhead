@@ -128,16 +128,16 @@ struct TabCountLabel: View {
     let count: Int
 
     var body: some View {
-        Text(verbatim: count > 99 ? "∞" : "\(count)")
-            .font(.system(size: 13, weight: .bold))
-            .monospacedDigit()
-            .minimumScaleFactor(0.6)
-            .frame(width: 24, height: 24)
-            .overlay {
-                RoundedRectangle(cornerRadius: 6, style: .continuous)
-                    .strokeBorder(lineWidth: 1.8)
-            }
-            .contentTransition(.numericText(value: Double(count)))
-            .animation(.smooth, value: count)
+        ZStack {
+            RoundedRectangle(cornerRadius: 5, style: .continuous)
+                .strokeBorder(lineWidth: 1.5)
+                .frame(width: 19, height: 19)
+            Text(verbatim: count > 99 ? "∞" : "\(count)")
+                .font(.system(size: 11, weight: .semibold))
+                .monospacedDigit()
+                .contentTransition(.numericText(value: Double(count)))
+        }
+        .frame(width: 22, height: 22)
+        .animation(.smooth, value: count)
     }
 }
