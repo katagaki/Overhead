@@ -6,11 +6,13 @@ import Backbone
 /// Mid-journey course change: pick a stop still ahead, then a new train or destination.
 struct ReplanSheet: View {
     @ObservedObject var viewModel: JourneyViewModel
+    @ObservedObject var session: JourneySession
     /// Stop the rider tapped on the route strip; falls back to the next one.
     var initialAnchorIndex: Int?
     var initialMode: Mode = .train
 
     @AppStorage("journey.walkingSpeed") private var walkingSpeedRaw = WalkingSpeed.normal.rawValue
+    @AppStorage(RoutePriority.storageKey) private var routePriorityRaw = RoutePriority.balanced.rawValue
     @Environment(\.dismiss) private var dismiss
 
     @State private var anchorIndex: Int?
@@ -34,7 +36,7 @@ struct ReplanSheet: View {
         case stop(Int)
     }
 
-    private var anchors: [JourneyViewModel.ReplanAnchor] { viewModel.replanAnchors }
+    private var anchors: [JourneyViewModel.ReplanAnchor] { session.replanAnchors }
 
     /// The default: stops behind the train are offered but never preselected.
     private var nextAnchor: JourneyViewModel.ReplanAnchor? {
@@ -51,15 +53,12 @@ struct ReplanSheet: View {
     }
 
     private var destination: Station? {
-        viewModel.activeJourney?.journeyStations.last
+        session.journey.journeyStations.last
     }
-
-    /// Searches match on the Japanese name; only the label is localized.
-    private var destinationName: String? { destination?.name }
 
     /// The arrival the change is measured against.
     private var currentArrival: Date? {
-        viewModel.positionState?.estimatedArrival
+        session.positionState?.estimatedArrival
     }
 
     var body: some View {
@@ -89,7 +88,7 @@ struct ReplanSheet: View {
                     searchingStation = false
                     offRouteDestination = hit.station
                     selection = nil
-                    search(destination: hit.station.name)
+                    search(destination: hit.station)
                 }
             }
         }
@@ -144,10 +143,10 @@ struct ReplanSheet: View {
                             if !candidate.station.stationCode.isEmpty {
                                 StationNumberBadge(
                                     code: candidate.station.stationCode,
-                                    color: viewModel.currentLineColor,
+                                    color: session.currentLineColor,
                                     size: .regular,
                                     stationName: candidate.station.name,
-                                    styleOverride: viewModel.activeJourney?.line.badgeStyleId
+                                    styleOverride: session.journey.line.badgeStyleId
                                 )
                             }
                             VStack(alignment: .leading, spacing: 1) {
@@ -265,7 +264,7 @@ struct ReplanSheet: View {
     @ViewBuilder
     private var destinationSection: some View {
         if let anchor {
-            let onward = viewModel.onwardStops(from: anchor)
+            let onward = session.onwardStops(from: anchor)
 
             if !onward.isEmpty {
                 Section {
@@ -351,11 +350,11 @@ struct ReplanSheet: View {
         switch selection {
         case .candidate(let id):
             guard let candidate = candidates.first(where: { $0.id == id }) else { return nil }
-            return { viewModel.replan(from: anchor, to: candidate) }
+            return { viewModel.replan(session, from: anchor, to: candidate) }
         case .stop(let index):
-            guard let stop = viewModel.onwardStops(from: anchor).first(where: { $0.stationIndex == index })
+            guard let stop = session.onwardStops(from: anchor).first(where: { $0.stationIndex == index })
             else { return nil }
-            return { viewModel.changeDestination(to: stop) }
+            return { session.changeDestination(to: stop) }
         }
     }
 
@@ -392,27 +391,27 @@ struct ReplanSheet: View {
     private func searchIfNeeded() {
         switch mode {
         case .train:
-            guard let destinationName else { return }
-            search(destination: destinationName)
+            guard let destination else { return }
+            search(destination: destination)
         case .destination:
             if let offRouteDestination {
-                search(destination: offRouteDestination.name)
+                search(destination: offRouteDestination)
             } else {
                 candidates = []
             }
         }
     }
 
-    private func search(destination: String) {
+    private func search(destination: Station) {
         guard let anchor else { return }
         isSearching = true
-        // Sync and main-actor bound; yield so the spinner lands first.
         Task {
-            await Task.yield()
-            candidates = viewModel.replanCandidates(
+            candidates = await viewModel.replanCandidates(
                 from: anchor,
                 to: destination,
-                transferMinutes: walkingSpeed.transferMinutes
+                transferMinutes: walkingSpeed.transferMinutes,
+                walkPace: walkingSpeed.paceMultiplier,
+                priority: RoutePriority(rawValue: routePriorityRaw) ?? .balanced
             )
             isSearching = false
         }

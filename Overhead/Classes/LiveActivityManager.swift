@@ -112,10 +112,8 @@ struct TrainJourneyAttributes: ActivityAttributes {
 
 // MARK: - Live Activity Manager
 
+/// One per journey session; several activities can run at once.
 final class LiveActivityManager {
-
-    static let shared = LiveActivityManager()
-    private init() {}
 
     static let refreshURLScheme = "overhead://refresh-delay"
 
@@ -126,6 +124,9 @@ final class LiveActivityManager {
     private var scheduledArrival: Date?
     // Scheduled time per station (aligned with stationNames); drives the per-segment countdown.
     private var stationTimes: [Date] = []
+    private var stationCount = 0
+    // Last pushed state with progress snapped to stations; the bar itself is timer-driven.
+    private var lastSentKey: TrainJourneyAttributes.ContentState?
 
     var hasActiveActivity: Bool { currentActivity != nil }
 
@@ -162,6 +163,7 @@ final class LiveActivityManager {
         lastDelayFetchTime = Date()
         (scheduledDeparture, scheduledArrival) = journey.scheduledTimes
         stationTimes = journey.scheduledStationTimes
+        stationCount = stations.count
 
         let attributes = TrainJourneyAttributes(
             lineName: journey.line.name,
@@ -185,6 +187,7 @@ final class LiveActivityManager {
         )
 
         let state = contentState(from: positionState)
+        lastSentKey = dedupeKey(for: state)
 
         do {
             let content = ActivityContent(state: state, staleDate: staleDate(for: state))
@@ -201,11 +204,23 @@ final class LiveActivityManager {
     func updateActivity(positionState: TrainPositionState) {
         guard let activity = currentActivity else { return }
         let state = contentState(from: positionState)
+        let key = dedupeKey(for: state)
+        guard key != lastSentKey else { return }
+        lastSentKey = key
         let content = ActivityContent(state: state, staleDate: staleDate(for: state))
 
         Task {
             await activity.update(content)
         }
+    }
+
+    /// Views only read progress to mark passed stops, so sub-station changes
+    /// are not worth waking the widget extension for.
+    private func dedupeKey(for state: TrainJourneyAttributes.ContentState) -> TrainJourneyAttributes.ContentState {
+        var key = state
+        let segments = Double(max(stationCount - 1, 1))
+        key.progress = ((state.progress + 0.01) * segments).rounded(.down)
+        return key
     }
 
     // Timer-driven views self-advance, so it only goes stale well past arrival.
@@ -243,6 +258,8 @@ final class LiveActivityManager {
         scheduledDeparture = nil
         scheduledArrival = nil
         stationTimes = []
+        stationCount = 0
+        lastSentKey = nil
     }
 
     private func contentState(from state: TrainPositionState) -> TrainJourneyAttributes.ContentState {

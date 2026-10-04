@@ -100,9 +100,16 @@ nonisolated enum BoardSnapshotStore {
         return try? JSONDecoder().decode(StationBoardSnapshot.self, from: data)
     }
 
-    static func save(_ snapshot: StationBoardSnapshot) {
-        guard let url = fileURL, let data = try? JSONEncoder().encode(snapshot) else { return }
+    /// Returns false when the stored snapshot already matches, so callers can
+    /// skip spending widget reload budget.
+    @discardableResult
+    static func save(_ snapshot: StationBoardSnapshot) -> Bool {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
+        guard let url = fileURL, let data = try? encoder.encode(snapshot) else { return false }
+        if let existing = try? Data(contentsOf: url), existing == data { return false }
         try? data.write(to: url, options: .atomic)
+        return true
     }
 
     static func railDay(for date: Date = Date()) -> String {

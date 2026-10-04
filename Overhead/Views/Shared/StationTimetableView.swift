@@ -4,6 +4,7 @@ import Backbone
 // MARK: - Station Timetable View
 
 struct StationTimetableView: View {
+    @Environment(\.appTabOpenDestination) private var openTabDestination
     let station: Station
     let line: TrainLine
     var preferredDirectionId: String? = nil
@@ -11,7 +12,6 @@ struct StationTimetableView: View {
 
     @State private var selectedDirection: String?
     @State private var detailDeparture: StationDeparture?
-    @State private var statusTarget: ServiceStatusTarget?
 
     var body: some View {
         Group {
@@ -26,7 +26,6 @@ struct StationTimetableView: View {
         .navigationTitle(station.localizedName)
         .navigationBarTitleDisplayMode(.inline)
         .serviceStatusToolbar(
-            target: $statusTarget,
             lineId: line.id,
             delayInfo: viewModel.delayCheckInfo(for: line.id)
         )
@@ -480,10 +479,19 @@ struct StationTimetableView: View {
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(throughs, id: \.self) { through in
                     if let connecting = connectingLine(for: through) {
-                        NavigationLink {
-                            StationPickerView(line: connecting, viewModel: viewModel)
-                        } label: {
-                            throughServiceLabel(through, color: connecting.color)
+                        if let openTabDestination {
+                            Button {
+                                openTabDestination(.line(connecting.id))
+                            } label: {
+                                throughServiceLabel(through, color: connecting.color)
+                            }
+                            .buttonStyle(.plain)
+                        } else {
+                            NavigationLink {
+                                StationPickerView(line: connecting, viewModel: viewModel)
+                            } label: {
+                                throughServiceLabel(through, color: connecting.color)
+                            }
                         }
                     } else {
                         throughServiceLabel(through, color: .secondary)
@@ -728,7 +736,7 @@ private struct BoardMarquee: View {
 
     var body: some View {
         GeometryReader { geo in
-            TimelineView(.animation) { context in
+            TimelineView(.animation(minimumInterval: 1.0 / 60.0)) { context in
                 marqueeText
                     .offset(x: offsetX(at: context.date, containerWidth: geo.size.width))
                     .opacity(textWidth > 0 ? 1 : 0)

@@ -4,7 +4,7 @@ import Backbone
 
 // MARK: - Navigation route for the custom-line editor
 
-enum CustomLineRoute: Hashable {
+nonisolated enum CustomLineRoute: Hashable, Codable {
     case new
     case edit(String)   // line id
 }

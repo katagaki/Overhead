@@ -47,13 +47,13 @@ final class JourneyNotificationManager: NSObject, UNUserNotificationCenterDelega
 
     // MARK: - Scheduling
 
-    /// Replaces any pending alerts with ones for this journey.
+    /// Replaces the session's pending alerts with ones for this journey.
     /// `transferLines` maps a transfer station's ID to the line boarded there.
-    func schedule(journey: Journey, transferLines: [String: TrainLine] = [:]) {
-        let planned = plannedRequests(journey: journey, transferLines: transferLines)
+    func schedule(id: UUID, journey: Journey, transferLines: [String: TrainLine] = [:]) {
+        let planned = plannedRequests(id: id, journey: journey, transferLines: transferLines)
         // Ordered: identifiers are reused, so a late cancel would drop the new alerts.
         Task {
-            await cancelPending()
+            await cancelPending(prefix: Self.prefix(for: id))
             guard !planned.isEmpty, await requestAuthorization() else { return }
             for request in planned {
                 try? await center.add(request)
@@ -63,6 +63,7 @@ final class JourneyNotificationManager: NSObject, UNUserNotificationCenterDelega
 
     /// Empty when alerts are off or the journey has no usable schedule.
     private func plannedRequests(
+        id: UUID,
         journey: Journey,
         transferLines: [String: TrainLine]
     ) -> [UNNotificationRequest] {
@@ -70,22 +71,33 @@ final class JourneyNotificationManager: NSObject, UNUserNotificationCenterDelega
         let stations = journey.journeyStations
         let times = journey.scheduledStationTimes
         guard stations.count > 1, stations.count == times.count else { return [] }
-        return requests(stations: stations, times: times, journey: journey, transferLines: transferLines)
+        return requests(prefix: Self.prefix(for: id), stations: stations, times: times,
+                        journey: journey, transferLines: transferLines)
     }
 
     /// Awaits the pending list so the removal can't act on a stale snapshot.
-    private func cancelPending() async {
+    private func cancelPending(prefix: String) async {
         let pending = await center.pendingNotificationRequests()
-        let ids = pending.map(\.identifier).filter { $0.hasPrefix(Self.identifierPrefix) }
+        let ids = pending.map(\.identifier).filter { $0.hasPrefix(prefix) }
         guard !ids.isEmpty else { return }
         center.removePendingNotificationRequests(withIdentifiers: ids)
     }
 
+    func cancel(id: UUID) {
+        Task { await cancelPending(prefix: Self.prefix(for: id)) }
+    }
+
+    /// Alerts left over from a previous launch, whose journeys are gone.
     func cancelAll() {
-        Task { await cancelPending() }
+        Task { await cancelPending(prefix: Self.identifierPrefix) }
+    }
+
+    private static func prefix(for id: UUID) -> String {
+        "\(identifierPrefix)\(id.uuidString)."
     }
 
     private func requests(
+        prefix: String,
         stations: [Station],
         times: [Date],
         journey: Journey,
@@ -97,6 +109,7 @@ final class JourneyNotificationManager: NSObject, UNUserNotificationCenterDelega
         // Only lands when the user planned a departure ahead of time; otherwise it's already past.
         if let origin = stations.first, let departure = times.first {
             requests.append(contentsOf: request(
+                prefix: prefix,
                 id: "depart",
                 fireAt: departure.addingTimeInterval(-lead),
                 title: String(localized: "Notification.Departure.Title"),
@@ -125,6 +138,7 @@ final class JourneyNotificationManager: NSObject, UNUserNotificationCenterDelega
                 body = String(localized: "Notification.Transfer.BodyNoLine \(station.localizedName)")
             }
             requests.append(contentsOf: request(
+                prefix: prefix,
                 id: "transfer.\(index)",
                 fireAt: times[index].addingTimeInterval(-lead),
                 title: String(localized: "Notification.Transfer.Title"),
@@ -134,6 +148,7 @@ final class JourneyNotificationManager: NSObject, UNUserNotificationCenterDelega
 
         if let destination = stations.last, let arrival = times.last {
             requests.append(contentsOf: request(
+                prefix: prefix,
                 id: "alight",
                 fireAt: arrival.addingTimeInterval(-lead),
                 title: String(localized: "Notification.Alight.Title"),
@@ -155,7 +170,7 @@ final class JourneyNotificationManager: NSObject, UNUserNotificationCenterDelega
     }
 
     /// Empty when the moment has already passed.
-    private func request(id: String, fireAt: Date, title: String, body: String) -> [UNNotificationRequest] {
+    private func request(prefix: String, id: String, fireAt: Date, title: String, body: String) -> [UNNotificationRequest] {
         let interval = fireAt.timeIntervalSinceNow
         guard interval > 0 else { return [] }
 
@@ -165,7 +180,7 @@ final class JourneyNotificationManager: NSObject, UNUserNotificationCenterDelega
         content.sound = Self.alertSound
 
         return [UNNotificationRequest(
-            identifier: Self.identifierPrefix + id,
+            identifier: prefix + id,
             content: content,
             trigger: UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: false)
         )]

@@ -11,11 +11,15 @@ struct StationSearchSelectionView: View {
     var showsCloseButton: Bool = false
     /// Merges same-named stations into one row with every line's badge.
     var mergesStations: Bool = false
+    /// Set for 出発/到着: offers 現在地 and landmark search alongside stations.
+    var onSelectPlace: ((RouteEndpoint) -> Void)?
     let onSelect: (StationSearchHit) -> Void
 
     @State private var searchText = ""
     @FocusState private var searchFocused: Bool
     @StateObject private var nearbyProvider = NearbyStationsProvider()
+    @StateObject private var placeSearch = PlaceSearchModel()
+    @State private var stationsNearPlaces: [NearbyStation] = []
     @Environment(\.dismiss) private var dismiss
 
     private var trimmedQuery: String {
@@ -61,6 +65,28 @@ struct StationSearchSelectionView: View {
             nearbyProvider.refresh(lines: lines)
             searchFocused = true
         }
+        .onChange(of: trimmedQuery) { _, query in
+            guard onSelectPlace != nil else { return }
+            placeSearch.update(query: query)
+        }
+        .onChange(of: placeSearch.places) { _, places in
+            stationsNearPlaces = stations(near: places)
+        }
+    }
+
+    /// Stations within walking distance of any place result, nearest first.
+    private func stations(near places: [SearchedPlace]) -> [NearbyStation] {
+        var bestByName: [String: NearbyStation] = [:]
+        for place in places {
+            for nearby in NearbyStationsProvider.nearest(
+                to: place.location, lines: lines, limit: 3, radiusMeters: PlaceAccess.radiusMeters
+            ) where (bestByName[nearby.hit.station.name]?.distanceMeters ?? .infinity) > nearby.distanceMeters {
+                bestByName[nearby.hit.station.name] = nearby
+            }
+        }
+        return Array(bestByName.values
+            .sorted { $0.distanceMeters < $1.distanceMeters }
+            .prefix(PlaceSearchModel.maxResults))
     }
 
     // MARK: - Search Bar
@@ -78,7 +104,7 @@ struct StationSearchSelectionView: View {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.primary)
 
-            TextField("StationSearch.Prompt", text: $searchText)
+            TextField(onSelectPlace == nil ? "StationSearch.Prompt" : "StationSearch.Prompt.Places", text: $searchText)
                 .focused($searchFocused)
                 .autocorrectionDisabled()
                 .submitLabel(.search)
@@ -104,6 +130,12 @@ struct StationSearchSelectionView: View {
     @ViewBuilder
     private var emptyQueryContent: some View {
         let allHits = mergesStations ? hitsByName : [:]
+
+        if onSelectPlace != nil {
+            Section {
+                currentLocationRow
+            }
+        }
 
         if !nearbyProvider.nearestStations.isEmpty {
             Section("StationSearch.Nearby") {
@@ -133,6 +165,54 @@ struct StationSearchSelectionView: View {
     @ViewBuilder
     private var searchResultsContent: some View {
         let results = StationSearch.search(lines: lines, query: trimmedQuery)
+        if onSelectPlace != nil {
+            placeResultsContent(stationResults: results)
+        } else {
+            stationResultsContent(results)
+        }
+    }
+
+    @ViewBuilder
+    private func placeResultsContent(stationResults: [StationSearchHit]) -> some View {
+        let places = placeSearch.places
+        if places.isEmpty && stationResults.isEmpty {
+            noResultsRow
+        } else {
+            if !places.isEmpty {
+                Section("StationSearch.Places") {
+                    ForEach(places, id: \.id) { place in
+                        placeRow(place)
+                    }
+                }
+            }
+
+            if !stationsNearPlaces.isEmpty {
+                let allHits = mergesStations ? hitsByName : [:]
+                Section("StationSearch.NearPlaces") {
+                    ForEach(stationsNearPlaces) { nearby in
+                        nearbyRow(nearby, allHits: allHits)
+                    }
+                }
+            }
+
+            if !stationResults.isEmpty {
+                Section("StationSearch.Stations") {
+                    stationResultsContent(stationResults)
+                }
+            }
+        }
+    }
+
+    private var noResultsRow: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+            Text("StationSearch.NoResults")
+        }
+        .foregroundColor(.secondary)
+    }
+
+    @ViewBuilder
+    private func stationResultsContent(_ results: [StationSearchHit]) -> some View {
         if results.isEmpty {
             HStack {
                 Image(systemName: "magnifyingglass")
@@ -169,6 +249,53 @@ struct StationSearchSelectionView: View {
     }
 
     // MARK: - Rows
+
+    private var currentLocationRow: some View {
+        Button {
+            onSelectPlace?(.currentLocation)
+            dismiss()
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "location.fill")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(width: 32, height: 32)
+                    .background(Color.accentColor)
+                    .clipShape(Circle())
+                Text("StationSearch.CurrentLocation")
+                    .font(.system(size: 16, weight: .semibold))
+            }
+        }
+        .foregroundColor(.primary)
+    }
+
+    private func placeRow(_ place: SearchedPlace) -> some View {
+        Button {
+            onSelectPlace?(.place(place))
+            dismiss()
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "mappin")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(width: 32, height: 32)
+                    .background(Color.red)
+                    .clipShape(Circle())
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(place.name)
+                        .font(.system(size: 16, weight: .semibold))
+                        .lineLimit(1)
+                    if !place.address.isEmpty {
+                        Text(place.address)
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    }
+                }
+            }
+        }
+        .foregroundColor(.primary)
+    }
 
     private func selectionRow(hit: StationSearchHit) -> some View {
         Button {

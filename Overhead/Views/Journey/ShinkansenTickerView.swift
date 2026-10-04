@@ -48,7 +48,7 @@ struct ShinkansenTickerView: View {
 
     private var window: some View {
         let segments = self.segments
-        return TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { context in
+        return LCDTimeline(animationInterval: 1.0 / 30.0) { context in
             Canvas { ctx, size in
                 ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Color(hex: "#050505")))
                 let resolved = segments.map { segment in

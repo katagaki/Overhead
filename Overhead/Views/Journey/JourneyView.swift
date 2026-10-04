@@ -5,8 +5,10 @@ import Backbone
 
 struct JourneyView: View {
     @ObservedObject var viewModel: JourneyViewModel
+    @ObservedObject var session: JourneySession
     @AppStorage(TrainLCDStyle.storageKey) private var lcdStyleRaw = TrainLCDStyle.joban.rawValue
     @AppStorage(TrainLCDOrientation.storageKey) private var lcdOrientationRaw = TrainLCDOrientation.left.rawValue
+    @Environment(\.scenePhase) private var scenePhase
 
     /// Carried with the presentation; `isPresented` would read a stale index.
     @State private var replanTarget: ReplanTarget?
@@ -26,7 +28,7 @@ struct JourneyView: View {
     }
 
     private var lineColor: Color {
-        viewModel.currentLineColor
+        session.currentLineColor
     }
 
     var body: some View {
@@ -34,8 +36,8 @@ struct JourneyView: View {
             Color(.systemBackground)
                 .ignoresSafeArea()
 
-            if let journey = viewModel.activeJourney,
-               let state = viewModel.positionState {
+            if let state = session.positionState {
+                let journey = session.journey
 
                 ScrollViewReader { proxy in
                     ScrollView(.vertical, showsIndicators: false) {
@@ -50,7 +52,7 @@ struct JourneyView: View {
                                 journey: journey,
                                 state: state,
                                 lineColor: lineColor,
-                                selectableIndices: Set(viewModel.replanAnchors.map(\.stationIndex)),
+                                selectableIndices: Set(session.replanAnchors.map(\.stationIndex)),
                                 onSelectStation: { index in
                                     let stations = journey.journeyStations
                                     guard stations.indices.contains(index) else { return }
@@ -74,17 +76,20 @@ struct JourneyView: View {
                             lineColor: lineColor,
                             orientation: TrainLCDOrientation(rawValue: lcdOrientationRaw) ?? .left
                         )
+                        .environment(\.lcdClockPaused, scenePhase == .background)
                         // PiP docks here so restoring animates into the LCD.
                         .overlay {
-                            LCDPiPLayerHost()
-                                .frame(width: 1, height: 1)
-                                .allowsHitTesting(false)
+                            if viewModel.pipSession?.id == session.id {
+                                LCDPiPLayerHost()
+                                    .frame(width: 1, height: 1)
+                                    .allowsHitTesting(false)
+                            }
                         }
                         .padding(.horizontal, 12)
                         .padding(.bottom, 8)
                     }
                     .safeAreaInset(edge: .bottom) {
-                        if viewModel.trackingMode == .manual {
+                        if session.trackingMode == .manual {
                             manualStationControl(journey: journey, state: state)
                                 .padding(.vertical, 8)
                                 .frame(maxWidth: .infinity)
@@ -124,6 +129,7 @@ struct JourneyView: View {
         .sheet(item: $replanTarget) { target in
             ReplanSheet(
                 viewModel: viewModel,
+                session: session,
                 initialAnchorIndex: target.stationIndex,
                 initialMode: target.mode
             )
@@ -141,7 +147,7 @@ struct JourneyView: View {
                         .font(.system(size: 12))
                     Text("Journey.Delay.Banner \(state.delayMinutes)")
                         .font(.system(size: 14, weight: .bold))
-                    if let cause = viewModel.currentDelay?.cause {
+                    if let cause = session.currentDelay?.cause {
                         Text("(\(cause))")
                             .font(.system(size: 12))
                     }
@@ -167,7 +173,7 @@ struct JourneyView: View {
 
         let content = HStack(spacing: 14) {
             Button {
-                viewModel.stepManualStation(-1)
+                session.stepManualStation(-1)
             } label: {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 15, weight: .bold))
@@ -188,7 +194,7 @@ struct JourneyView: View {
             .frame(minWidth: 100)
 
             Button {
-                viewModel.stepManualStation(1)
+                session.stepManualStation(1)
             } label: {
                 Image(systemName: "chevron.right")
                     .font(.system(size: 15, weight: .bold))

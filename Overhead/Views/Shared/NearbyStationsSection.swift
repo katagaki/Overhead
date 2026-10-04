@@ -10,7 +10,7 @@ struct NearbyStationsSection: View {
     @ObservedObject var viewModel: JourneyViewModel
     @StateObject private var provider = NearbyStationsProvider()
     @Environment(\.scenePhase) private var scenePhase
-    @Environment(\.serviceStatusPresenter) private var serviceStatusPresenter
+    @Environment(\.appTabOpenDestination) private var openTabDestination
     @AppStorage("journey.walkingSpeed") private var walkingSpeedRaw = WalkingSpeed.normal.rawValue
     @AppStorage("nearby.collapsed") private var isCollapsed = false
 
@@ -59,7 +59,7 @@ struct NearbyStationsSection: View {
 
     private func refreshUnlessJourneyActive() {
         // Mid-journey the rail would reshuffle under the user; let it go stale.
-        guard viewModel.activeJourney == nil else { return }
+        guard viewModel.sessions.isEmpty else { return }
         provider.refreshIfNeeded(lines: viewModel.availableLines)
     }
 
@@ -272,18 +272,25 @@ struct NearbyStationsSection: View {
             }
             Section {
                 Button {
-                    timetableTarget = NearbyTimetableTarget(hit: hit, directionId: currentDirectionId(timetables, choiceKey: choiceKey))
+                    let directionID = currentDirectionId(timetables, choiceKey: choiceKey)
+                    if let openTabDestination {
+                        openTabDestination(.stationWithDirection(
+                            lineId: hit.line.id,
+                            stationId: hit.station.id,
+                            directionId: directionID
+                        ))
+                    } else {
+                        timetableTarget = NearbyTimetableTarget(hit: hit, directionId: directionID)
+                    }
                 } label: {
                     Label("Nearby.OpenTimetable", systemImage: "calendar")
                 }
                 Button {
-                    serviceStatusPresenter?.present(
-                        lineId: hit.line.id,
-                        delayInfo: viewModel.delayCheckInfo(for: hit.line.id)
-                    )
+                    openTabDestination?(.serviceStatus(lineId: hit.line.id))
                 } label: {
                     Label("StationTimetable.ServiceStatus", systemImage: "info.circle")
                 }
+                .disabled(viewModel.delayCheckInfo(for: hit.line.id) == nil)
             }
             Section {
                 Button {
@@ -407,9 +414,8 @@ struct NearbyStationsSection: View {
             var result: [String: [StationTimetableData]] = [:]
             let calendar = ScheduleCalendar.current()
             for target in targets {
-                guard let staticLine = StaticTrainData.line(withId: target.lineId) else { continue }
                 result[target.id] = StaticTimetableGenerator.stationTimetables(
-                    for: staticLine,
+                    forLineId: target.lineId,
                     stationId: target.stationId,
                     calendar: calendar
                 )

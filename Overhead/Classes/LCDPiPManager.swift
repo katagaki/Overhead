@@ -31,6 +31,22 @@ final class LCDPiPManager: NSObject, ObservableObject {
         // frames never paint on top of it.
         hostView.clipsToBounds = true
         hostView.layer.addSublayer(displayLayer)
+
+        // Backgrounded with no PiP window, nobody sees the frames.
+        let center = NotificationCenter.default
+        center.addObserver(
+            forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                guard let self, !self.isActive else { return }
+                self.stopTimer()
+            }
+        }
+        center.addObserver(
+            forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in self?.resumeFrames() }
+        }
     }
 
     /// Arms PiP: frames start flowing so the system can auto-start PiP on
@@ -99,6 +115,12 @@ final class LCDPiPManager: NSObject, ObservableObject {
                 self.scheduleNextFrame()
             }
         }
+    }
+
+    private func resumeFrames() {
+        guard frameProvider != nil else { return }
+        enqueueFrame()
+        scheduleNextFrame()
     }
 
     private func stopTimer() {
@@ -199,7 +221,10 @@ extension LCDPiPManager: AVPictureInPictureControllerDelegate {
     nonisolated func pictureInPictureControllerDidStartPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
-        Task { @MainActor in self.isActive = true }
+        Task { @MainActor in
+            self.isActive = true
+            self.resumeFrames()
+        }
     }
 
     // Frames keep flowing after PiP ends so it can auto-start again on the
@@ -207,7 +232,10 @@ extension LCDPiPManager: AVPictureInPictureControllerDelegate {
     nonisolated func pictureInPictureControllerDidStopPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
-        Task { @MainActor in self.isActive = false }
+        Task { @MainActor in
+            self.isActive = false
+            if UIApplication.shared.applicationState == .background { self.stopTimer() }
+        }
     }
 
     nonisolated func pictureInPictureController(
@@ -270,12 +298,12 @@ struct LCDPiPLayerHost: UIViewRepresentable {
 
 // MARK: - LCD Frame Rendering
 
-extension JourneyViewModel {
+extension JourneySession {
     /// The current LCD as an image. The share sheet wants breathing room
     /// (padded, 3x); PiP wants the bare LCD (unpadded, 2x for cheap
     /// video-rate rendering).
     func renderLCDImage(scale: CGFloat = 3, padded: Bool = true) -> UIImage? {
-        guard let journey = activeJourney, let state = positionState else { return nil }
+        guard let state = positionState else { return nil }
         let defaults = UserDefaults.standard
         let lcd = StyledTrainLCDView(
             style: TrainLCDStyle(stored: defaults.string(forKey: TrainLCDStyle.storageKey) ?? ""),

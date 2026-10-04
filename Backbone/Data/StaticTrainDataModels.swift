@@ -624,8 +624,8 @@ public enum StaticTrainData {
         linesLock.unlock()
 
         // Derived views are cheap to rebuild and hold no file I/O.
-        displayLock.lock(); cachedTrainLines = nil; displayLock.unlock()
-        snapshotLock.lock(); snapshots.removeAll(); snapshotLock.unlock()
+        displayLock.lock(); cachedTrainLines = nil; cachedLinesByStationName = nil; displayLock.unlock()
+        snapshotLock.lock(); snapshots.removeAll(); generation += 1; snapshotLock.unlock()
         BadgeStyles.invalidate()
         NotificationCenter.default.post(name: Self.didChangeNotification, object: nil)
     }
@@ -634,8 +634,8 @@ public enum StaticTrainData {
     /// and every per-day snapshot built from them.
     public static func invalidate() {
         linesLock.lock(); cachedLines = nil; linesLock.unlock()
-        displayLock.lock(); cachedTrainLines = nil; displayLock.unlock()
-        snapshotLock.lock(); snapshots.removeAll(); snapshotLock.unlock()
+        displayLock.lock(); cachedTrainLines = nil; cachedLinesByStationName = nil; displayLock.unlock()
+        snapshotLock.lock(); snapshots.removeAll(); generation += 1; snapshotLock.unlock()
         Catalog.reload()
         BadgeStyles.invalidate()
         NotificationCenter.default.post(name: Self.didChangeNotification, object: nil)
@@ -658,6 +658,8 @@ public enum StaticTrainData {
         let lines: [StaticTrainLine]
         let byId: [String: StaticTrainLine]
         let byStationId: [String: StaticTrainLine]
+        let services = ServiceMemo()
+        let links: LinksMemo
 
         init(_ lines: [StaticTrainLine]) {
             self.lines = lines
@@ -669,11 +671,36 @@ public enum StaticTrainData {
                 }
             }
             self.byStationId = stations
+            self.links = LinksMemo(lines)
+        }
+    }
+
+    /// Built on first use: only planning needs it.
+    final class LinksMemo: @unchecked Sendable {
+        private let lock = NSLock()
+        private let lines: [StaticTrainLine]
+        private var built: StationLinks?
+
+        init(_ lines: [StaticTrainLine]) { self.lines = lines }
+
+        var value: StationLinks {
+            lock.lock(); defer { lock.unlock() }
+            if let built { return built }
+            let links = StationLinks(lines: lines)
+            built = links
+            return links
         }
     }
 
     private static let snapshotLock = NSLock()
     private static var snapshots: [Int: Snapshot] = [:]
+    /// Bumped whenever line data changes, so caches built from it know to rebuild.
+    public private(set) static var generation = 0
+
+    /// Where passengers can change trains on `date`.
+    public static func stationLinks(on date: Date = Date()) -> StationLinks {
+        snapshot(on: date).links.value
+    }
 
     /// Most lines carry no revisions at all, so this is a cheap pass — but it is
     /// cached per day anyway, because the lookup maps are not.
@@ -690,6 +717,14 @@ public enum StaticTrainData {
 
     private static func snapshot(on date: Date) -> Snapshot {
         snapshot(onDayKey: dayKey(for: date))
+    }
+
+    /// Today's catalog line with the memo its generated services live in, so
+    /// the memo goes whenever the snapshot does (install, invalidate, new day).
+    static func catalogLine(withId id: String) -> (line: StaticTrainLine, memo: ServiceMemo)? {
+        let snapshot = snapshot(on: Date())
+        guard let line = snapshot.byId[id] else { return nil }
+        return (line, snapshot.services)
     }
 
     /// Every line, with each announced 改正 applied once its `validFrom` arrives.
@@ -749,6 +784,28 @@ public enum StaticTrainData {
         let built = buildTrainLines()
         displayLock.lock(); cachedTrainLines = built; displayLock.unlock()
         return built
+    }
+
+    private static var cachedLinesByStationName: [String: [TrainLine]]?
+
+    /// Every line serving a station of this name, in `trainLines()` order.
+    /// Indexed: the journey LCDs look up transfers on every frame.
+    public static func trainLines(atStationNamed name: String) -> [TrainLine] {
+        displayLock.lock()
+        if let cachedLinesByStationName {
+            displayLock.unlock()
+            return cachedLinesByStationName[name] ?? []
+        }
+        displayLock.unlock()
+
+        var map: [String: [TrainLine]] = [:]
+        for line in trainLines() {
+            for stationName in Set(line.stations.map(\.name)) {
+                map[stationName, default: []].append(line)
+            }
+        }
+        displayLock.lock(); cachedLinesByStationName = map; displayLock.unlock()
+        return map[name] ?? []
     }
 
     private static func buildTrainLines() -> [TrainLine] {
@@ -881,12 +938,17 @@ public enum StaticTrainData {
         public var id: String { "\(staticLine.id)|\(fromStation.id)|\(toStation.id)" }
     }
 
+    /// Single-train rides, including 直通, between two stations or any
+    /// station that is the same place as either.
     public static func directRoutes(
-        fromStationName: String,
-        toStationName: String,
+        fromStationId: String,
+        toStationId: String,
         avoidingLineIds: Set<String> = []
     ) -> [DirectRouteOption] {
-        guard fromStationName != toStationName else { return [] }
+        let links = stationLinks()
+        let fromIds = Set(links.sameStation(as: fromStationId))
+        let toIds = Set(links.sameStation(as: toStationId))
+        guard fromIds.isDisjoint(with: toIds) else { return [] }
         func isAvoided(_ lineId: String) -> Bool {
             guard !avoidingLineIds.isEmpty else { return false }
             return lineId.split(separator: "+").contains { avoidingLineIds.contains(String($0)) }
@@ -894,9 +956,9 @@ public enum StaticTrainData {
         var options: [DirectRouteOption] = []
         for line in allLines {
             guard !isAvoided(line.id),
-                  let from = line.stations.first(where: { $0.name == fromStationName }) else { continue }
+                  let from = line.stations.first(where: { fromIds.contains($0.id) }) else { continue }
 
-            if let to = line.stations.first(where: { $0.name == toStationName }) {
+            if let to = line.stations.first(where: { toIds.contains($0.id) }) {
                 if let resolved = resolveJourneyLine(
                     lineId: line.id, fromStationId: from.id, toStationId: to.id
                 ) {
@@ -912,7 +974,7 @@ public enum StaticTrainData {
             }
 
             for group in throughDestinations(fromLineId: line.id, boardingStationId: from.id) {
-                guard let to = group.stations.first(where: { $0.name == toStationName }),
+                guard let to = group.stations.first(where: { toIds.contains($0.id) }),
                       let resolved = resolveJourneyLine(
                           lineId: line.id, fromStationId: from.id, toStationId: to.id
                       ),
@@ -933,13 +995,43 @@ public enum StaticTrainData {
     // MARK: Transfer Route Planning (乗り換え)
 
     public struct TransferLeg {
+        /// The composite line when the leg runs through a junction (直通).
         public let staticLine: StaticTrainLine
         public let fromStation: Station
         public let toStation: Station
+        /// The line boarded; differs from `staticLine` on a 直通 leg.
+        public var boardingLine: StaticTrainLine
+        public var isThrough: Bool { boardingLine.id != staticLine.id }
+        /// Riding time as planned, expresses included; nil when unknown.
+        public var minutes: Double?
+
+        init(staticLine: StaticTrainLine, fromStation: Station, toStation: Station,
+             boardingLine: StaticTrainLine? = nil, minutes: Double? = nil) {
+            self.staticLine = staticLine
+            self.fromStation = fromStation
+            self.toStation = toStation
+            self.boardingLine = boardingLine ?? staticLine
+            self.minutes = minutes
+        }
     }
 
     /// Time assumed for walking between platforms when changing trains.
     public static let transferBufferMinutes: Double = 5
+
+    /// What a change of trains costs beyond the clock: stairs, gates, the risk
+    /// of missing the connection. Without it the search sells a transfer for any
+    /// few-minute saving.
+    public static let defaultTransferAversionMinutes: Double = 5
+
+    /// The unlisted hop closing a loop, taken as the line's average hop.
+    /// nil when the line is not a usable loop.
+    static func loopSeamMinutes(_ line: StaticTrainLine) -> Double? {
+        let hops = line.hopTimesMinutes
+        guard line.isLoop, hops.count == line.stations.count - 1,
+              line.stations.count > 2, !hops.isEmpty
+        else { return nil }
+        return hops.reduce(0, +) / Double(hops.count)
+    }
 
     public static func estimatedRide(
         on line: StaticTrainLine,
@@ -959,13 +1051,9 @@ public enum StaticTrainData {
             ? Array(stations[fromIdx...toIdx])
             : Array(stations[toIdx...fromIdx].reversed())
 
-        guard line.isLoop, hops.count == stations.count - 1, stations.count > 2 else {
-            return (directPath, directMinutes)
-        }
+        guard let seamHop = loopSeamMinutes(line) else { return (directPath, directMinutes) }
 
-        let total = hops.reduce(0, +)
-        let seamHop = total / Double(hops.count)
-        let wrapMinutes = total + seamHop - directMinutes
+        let wrapMinutes = hops.reduce(0, +) + seamHop - directMinutes
         guard wrapMinutes < directMinutes else { return (directPath, directMinutes) }
 
         let count = stations.count
@@ -980,25 +1068,31 @@ public enum StaticTrainData {
     }
 
     public static func planTransferRoute(
-        throughStationNames names: [String],
+        throughStationIds ids: [String],
         maxTransfers: Int = 3,
         transferMinutes: Double = transferBufferMinutes,
-        avoidingLineIds: Set<String> = []
+        walkPace: Double = 1,
+        transferAversionMinutes: Double = defaultTransferAversionMinutes,
+        avoidingLineIds: Set<String> = [],
+        expressHops: TransitRouter.ExpressHops? = nil
     ) -> [TransferLeg]? {
-        guard names.count >= 2 else { return nil }
+        guard ids.count >= 2 else { return nil }
         var plan: [TransferLeg] = []
-        for (from, to) in zip(names, names.dropFirst()) {
-            guard from != to,
-                  var segment = planTransferRoute(
-                      fromStationName: from,
-                      toStationName: to,
+        for (from, to) in zip(ids, ids.dropFirst()) {
+            guard var segment = planTransferRoute(
+                      fromStationId: from,
+                      toStationId: to,
                       maxTransfers: maxTransfers,
                       transferMinutes: transferMinutes,
-                      avoidingLineIds: avoidingLineIds
+                      walkPace: walkPace,
+                      transferAversionMinutes: transferAversionMinutes,
+                      avoidingLineIds: avoidingLineIds,
+                      expressHops: expressHops
                   )
             else { return nil }
 
             if let last = plan.last, let first = segment.first,
+               !last.isThrough, !first.isThrough,
                last.staticLine.id == first.staticLine.id,
                last.toStation.id == first.fromStation.id,
                continuesSameDirection(last, first) {
@@ -1006,7 +1100,8 @@ public enum StaticTrainData {
                 segment[0] = TransferLeg(
                     staticLine: first.staticLine,
                     fromStation: last.fromStation,
-                    toStation: first.toStation
+                    toStation: first.toStation,
+                    minutes: last.minutes.flatMap { a in first.minutes.map { a + $0 } }
                 )
             }
             plan.append(contentsOf: segment)
@@ -1024,87 +1119,137 @@ public enum StaticTrainData {
         return (aTo > aFrom) == (bTo > bFrom)
     }
 
+    /// Fewest-minutes route by hop times alone, for when the timetable is set aside.
     public static func planTransferRoute(
-        fromStationName: String,
-        toStationName: String,
+        fromStationId: String,
+        toStationId: String,
         maxTransfers: Int = 3,
         transferMinutes: Double = transferBufferMinutes,
-        avoidingLineIds: Set<String> = []
+        walkPace: Double = 1,
+        transferAversionMinutes: Double = defaultTransferAversionMinutes,
+        avoidingLineIds: Set<String> = [],
+        expressHops: TransitRouter.ExpressHops? = nil
     ) -> [TransferLeg]? {
-        guard fromStationName != toStationName else { return nil }
+        let links = stationLinks()
+        let goalIds = Set(links.sameStation(as: toStationId))
+        let startIds = links.sameStation(as: fromStationId)
+        guard !goalIds.contains(fromStationId) else { return nil }
         let lines = avoidingLineIds.isEmpty
             ? allLines
             : allLines.filter { !avoidingLineIds.contains($0.id) }
-        let transferPenalty = transferMinutes + 3  // walk + expected wait
-
-        // Node = (line index, station index on that line)
-        struct Node: Hashable {
-            let line: Int
-            let idx: Int
-        }
-        struct Entry {
-            var cost: Double
-            var transfers: Int
-            var parent: Node?
+        // Expected wait plus the standing dislike of changing trains; the walk
+        // itself depends on how far apart the platforms are.
+        let changeMinutes = 3 + transferAversionMinutes
+        func walkMinutes(_ meters: Double) -> Double {
+            Double(StationLinks.transferSeconds(meters: meters, transferMinutes: transferMinutes,
+                                                walkPace: walkPace)) / 60
         }
 
-        // Stations grouped by name for transfer edges and start/goal lookup
-        var nodesByName: [String: [Node]] = [:]
+        // 直通: riding on past a junction onto the partner line is no change.
+        let lineIndex = Dictionary(lines.enumerated().map { ($1.id, $0) }, uniquingKeysWith: { a, _ in a })
+        var throughEdges: [RouteNode: [(to: RouteNode, minutes: Double, ascending: Bool)]] = [:]
+        for (li, line) in lines.enumerated() {
+            for service in line.throughServices {
+                guard let jIdx = line.stations.firstIndex(where: { $0.id == service.junctionStationId }),
+                      let group = destinationGroup(for: service, on: line),
+                      let partner = lineIndex[group.connectingLine.id],
+                      let beyond = group.stations.first,
+                      let bIdx = group.connectingLine.stations.firstIndex(where: { $0.id == beyond.id }),
+                      let tIdx = group.connectingLine.stations.firstIndex(where: { $0.name == line.stations[jIdx].name })
+                else { continue }
+                let target = group.connectingLine
+                let hop = bIdx > tIdx
+                    ? target.hopTimesMinutes[tIdx]
+                    : (target.upHopTimesMinutes ?? target.hopTimesMinutes)[bIdx]
+                throughEdges[RouteNode(line: li, idx: jIdx, transfers: 0), default: []].append(
+                    (RouteNode(line: partner, idx: bIdx, transfers: 0), hop, service.end == .ascending))
+            }
+        }
+
+        var nodesById: [String: [RouteNode]] = [:]
         for (li, line) in lines.enumerated() {
             for (si, station) in line.stations.enumerated() {
-                nodesByName[station.name, default: []].append(Node(line: li, idx: si))
+                nodesById[station.id, default: []].append(RouteNode(line: li, idx: si, transfers: 0))
             }
         }
-        guard let startNodes = nodesByName[fromStationName],
-              nodesByName[toStationName] != nil
-        else { return nil }
+        // Stations a short walk from the start are a walk, not a change.
+        var startCosts: [RouteNode: Double] = [:]
+        for id in startIds {
+            for node in nodesById[id] ?? [] { startCosts[node] = 0 }
+            for link in links.links[id] ?? [] where !startIds.contains(link.stationId) {
+                for node in nodesById[link.stationId] ?? [] {
+                    startCosts[node] = min(startCosts[node] ?? .infinity, walkMinutes(link.meters))
+                }
+            }
+        }
+        guard !startCosts.isEmpty, goalIds.contains(where: { nodesById[$0] != nil }) else { return nil }
 
-        var best: [Node: Entry] = [:]
-        // Simple priority queue: linear extract-min is fine at this scale
-        var frontier: [(cost: Double, node: Node)] = []
-        for node in startNodes {
-            best[node] = Entry(cost: 0, transfers: 0, parent: nil)
-            frontier.append((0, node))
+        // Each transfer count is its own layer, so a quick path that has spent
+        // its changes can't block a slower one that still has changes left.
+        var best: [RouteNode: (cost: Double, parent: RouteNode?)] = [:]
+        var frontier = RouteFrontier()
+        for (node, cost) in startCosts {
+            best[node] = (cost, nil)
+            frontier.push(cost: cost, node: node)
         }
 
-        var goal: Node?
-        while !frontier.isEmpty {
-            var minIdx = 0
-            for i in 1..<frontier.count where frontier[i].cost < frontier[minIdx].cost {
-                minIdx = i
-            }
-            let (cost, node) = frontier.remove(at: minIdx)
+        var goal: RouteNode?
+        while let (cost, node) = frontier.pop() {
             guard let entry = best[node], entry.cost == cost else { continue }
 
             let line = lines[node.line]
             let station = line.stations[node.idx]
-            if station.name == toStationName {
+            if goalIds.contains(station.id) {
                 goal = node
                 break
             }
 
-            func relax(_ next: Node, cost nextCost: Double, transfers: Int) {
+            func relax(_ next: RouteNode, cost nextCost: Double) {
                 if let existing = best[next], existing.cost <= nextCost { return }
-                best[next] = Entry(cost: nextCost, transfers: transfers, parent: node)
-                frontier.append((nextCost, next))
+                best[next] = (nextCost, node)
+                frontier.push(cost: nextCost, node: next)
+            }
+            func ride(to idx: Int, minutes: Double) {
+                relax(RouteNode(line: node.line, idx: idx, transfers: node.transfers),
+                      cost: cost + minutes)
             }
 
-            // Ride to adjacent stations on the same line
             if node.idx > 0 {
-                relax(Node(line: node.line, idx: node.idx - 1),
-                      cost: cost + line.hopTimesMinutes[node.idx - 1],
-                      transfers: entry.transfers)
+                ride(to: node.idx - 1, minutes: line.hopTimesMinutes[node.idx - 1])
             }
             if node.idx < line.stations.count - 1 {
-                relax(Node(line: node.line, idx: node.idx + 1),
-                      cost: cost + line.hopTimesMinutes[node.idx],
-                      transfers: entry.transfers)
+                ride(to: node.idx + 1, minutes: line.hopTimesMinutes[node.idx])
             }
 
-            // Change to other lines at this station
-            if entry.transfers < maxTransfers, let siblings = nodesByName[station.name] {
-                for sibling in siblings where sibling.line != node.line {
-                    relax(sibling, cost: cost + transferPenalty, transfers: entry.transfers + 1)
+            // A loop's two ends are one hop apart, not a whole circuit.
+            if let seam = loopSeamMinutes(line) {
+                let last = line.stations.count - 1
+                if node.idx == 0 {
+                    ride(to: last, minutes: seam)
+                } else if node.idx == last {
+                    ride(to: 0, minutes: seam)
+                }
+            }
+
+            for hop in expressHops?.hops(onLine: line.id, from: node.idx) ?? [] {
+                ride(to: hop.to, minutes: hop.minutes)
+            }
+
+            if let parent = entry.parent, parent.line == node.line {
+                // Only trains heading for the junction's far side run through.
+                for edge in throughEdges[RouteNode(line: node.line, idx: node.idx, transfers: 0)] ?? []
+                where (parent.idx < node.idx) == edge.ascending {
+                    relax(RouteNode(line: edge.to.line, idx: edge.to.idx, transfers: node.transfers),
+                          cost: cost + edge.minutes)
+                }
+            }
+
+            if node.transfers < maxTransfers {
+                for link in links.links[station.id] ?? [] {
+                    for sibling in nodesById[link.stationId] ?? [] where sibling.line != node.line {
+                        relax(RouteNode(line: sibling.line, idx: sibling.idx, transfers: node.transfers + 1),
+                              cost: cost + walkMinutes(link.meters) + changeMinutes)
+                    }
                 }
             }
         }
@@ -1112,38 +1257,98 @@ public enum StaticTrainData {
         guard var cursor = goal else { return nil }
 
         // Walk parents back to the start, then compress into per-line legs
-        var path: [Node] = [cursor]
+        var path: [RouteNode] = [cursor]
         while let parent = best[cursor]?.parent {
             path.append(parent)
             cursor = parent
         }
         path.reverse()
 
+        // A change of line within one transfer layer is a 直通 hop, not a change.
         var legs: [TransferLeg] = []
-        var legStart = path[0]
-        for i in 1..<path.count {
-            let prev = path[i - 1]
-            let node = path[i]
-            if node.line != prev.line {
-                if legStart.idx != prev.idx {
-                    legs.append(TransferLeg(
-                        staticLine: lines[legStart.line],
-                        fromStation: lines[legStart.line].stations[legStart.idx],
-                        toStation: lines[prev.line].stations[prev.idx]
-                    ))
-                }
-                legStart = node
+        func plainLeg(_ start: RouteNode, _ end: RouteNode) {
+            let line = lines[start.line]
+            guard start.idx != end.idx else { return }
+            legs.append(TransferLeg(staticLine: line, fromStation: line.stations[start.idx],
+                                    toStation: line.stations[end.idx],
+                                    minutes: (best[end]?.cost ?? 0) - (best[start]?.cost ?? 0)))
+        }
+        func closeLeg(_ range: ClosedRange<Int>) {
+            let start = path[range.lowerBound], end = path[range.upperBound]
+            if start.line == end.line {
+                plainLeg(start, end)
+                return
+            }
+            let boarding = lines[start.line]
+            let from = boarding.stations[start.idx]
+            let to = lines[end.line].stations[end.idx]
+            if let composite = resolveJourneyLine(lineId: boarding.id, fromStationId: from.id,
+                                                  toStationId: to.id)?.staticLine {
+                legs.append(TransferLeg(staticLine: composite, fromStation: from, toStation: to,
+                                        boardingLine: boarding,
+                                        minutes: (best[end]?.cost ?? 0) - (best[start]?.cost ?? 0)))
+                return
+            }
+            // No composite to ride on: fall back to one leg per line.
+            var pieceStart = range.lowerBound
+            for i in range.dropFirst() where path[i].line != path[i - 1].line {
+                plainLeg(path[pieceStart], path[i - 1])
+                pieceStart = i
+            }
+            plainLeg(path[pieceStart], end)
+        }
+        var legStart = 0
+        for i in 1..<path.count where path[i].transfers != path[i - 1].transfers {
+            closeLeg(legStart...(i - 1))
+            legStart = i
+        }
+        closeLeg(legStart...(path.count - 1))
+        return legs.isEmpty ? nil : legs
+    }
+
+    private struct RouteNode: Hashable {
+        let line: Int
+        let idx: Int
+        let transfers: Int
+    }
+
+    /// Binary min-heap on cost; equal costs pop the fewer-transfer node first.
+    private struct RouteFrontier {
+        private var heap: [(cost: Double, node: RouteNode)] = []
+
+        private func precedes(_ a: Int, _ b: Int) -> Bool {
+            let x = heap[a], y = heap[b]
+            if abs(x.cost - y.cost) > 0.001 { return x.cost < y.cost }
+            return x.node.transfers < y.node.transfers
+        }
+
+        mutating func push(cost: Double, node: RouteNode) {
+            heap.append((cost, node))
+            var child = heap.count - 1
+            while child > 0 {
+                let parent = (child - 1) / 2
+                guard precedes(child, parent) else { break }
+                heap.swapAt(child, parent)
+                child = parent
             }
         }
-        let last = path[path.count - 1]
-        if legStart.idx != last.idx {
-            legs.append(TransferLeg(
-                staticLine: lines[legStart.line],
-                fromStation: lines[legStart.line].stations[legStart.idx],
-                toStation: lines[last.line].stations[last.idx]
-            ))
+
+        mutating func pop() -> (Double, RouteNode)? {
+            guard !heap.isEmpty else { return nil }
+            heap.swapAt(0, heap.count - 1)
+            let top = heap.removeLast()
+            var parent = 0
+            while true {
+                let left = parent * 2 + 1, right = left + 1
+                var next = parent
+                if left < heap.count, precedes(left, next) { next = left }
+                if right < heap.count, precedes(right, next) { next = right }
+                guard next != parent else { break }
+                heap.swapAt(parent, next)
+                parent = next
+            }
+            return (top.cost, top.node)
         }
-        return legs.isEmpty ? nil : legs
     }
 
     public struct ResolvedJourneyLine {
@@ -1511,6 +1716,36 @@ public enum StaticTrainData {
 
 // MARK: - Static Timetable Generator
 
+/// Generating a busy line's services takes tens of milliseconds, and boards,
+/// pickers and the widget keep asking for the same few lines.
+final class ServiceMemo: @unchecked Sendable {
+    private let lock = NSLock()
+    private var entries: [String: [TrainService]] = [:]
+    private var order: [String] = []
+    // A busy line's services run to several MB.
+    private let limit = 12
+
+    func value(_ key: String, _ build: () -> [TrainService]) -> [TrainService] {
+        lock.lock()
+        if let hit = entries[key] {
+            order.removeAll { $0 == key }
+            order.append(key)
+            lock.unlock()
+            return hit
+        }
+        lock.unlock()
+
+        let built = build()
+        lock.lock(); defer { lock.unlock() }
+        if entries[key] == nil {
+            entries[key] = built
+            order.append(key)
+            if order.count > limit { entries[order.removeFirst()] = nil }
+        }
+        return built
+    }
+}
+
 public enum StaticTimetableGenerator {
 
     // MARK: Train Services
@@ -1520,6 +1755,20 @@ public enum StaticTimetableGenerator {
             return timetableServices(line: line, runs: runs.filter { $0.calendar == calendar })
         }
         return line.directions.flatMap { services(for: line, direction: $0, calendar: calendar) }
+    }
+
+    /// Today's services for a catalog line, memoized; nil for ids outside the
+    /// catalog (composites). Lines read for another date go through `services(for:)`.
+    public static func services(forLineId id: String, calendar: ScheduleCalendar) -> [TrainService]? {
+        guard let (line, memo) = StaticTrainData.catalogLine(withId: id) else { return nil }
+        if line.timetableRuns != nil {
+            return memo.value("\(id)|\(calendar.rawValue)") { services(for: line, calendar: calendar) }
+        }
+        return line.directions.indices.flatMap { index in
+            memo.value("\(id)|\(calendar.rawValue)|\(index)") {
+                services(for: line, direction: line.directions[index], calendar: calendar)
+            }
+        }
     }
 
     private static func timetableServices(line: StaticTrainLine, runs: [TimetableRun]) -> [TrainService] {
@@ -1731,7 +1980,43 @@ public enum StaticTimetableGenerator {
         stationId: String,
         calendar: ScheduleCalendar
     ) -> [StationTimetableData] {
-        line.directions.compactMap { direction in
+        // Run-based lines generate both directions in one pass; build it once.
+        var runServices: [TrainService]?
+        return stationTimetables(for: line, stationId: stationId) { index in
+            guard line.timetableRuns != nil else {
+                return services(for: line, direction: line.directions[index], calendar: calendar)
+            }
+            if runServices == nil { runServices = services(for: line, calendar: calendar) }
+            return runServices ?? []
+        }
+    }
+
+    /// Today's station timetables for a catalog line, off the memoized services.
+    public static func stationTimetables(
+        forLineId id: String,
+        stationId: String,
+        calendar: ScheduleCalendar
+    ) -> [StationTimetableData] {
+        guard let (line, memo) = StaticTrainData.catalogLine(withId: id) else { return [] }
+        return stationTimetables(for: line, stationId: stationId) { index in
+            guard line.timetableRuns != nil else {
+                return memo.value("\(id)|\(calendar.rawValue)|\(index)") {
+                    services(for: line, direction: line.directions[index], calendar: calendar)
+                }
+            }
+            return memo.value("\(id)|\(calendar.rawValue)") { services(for: line, calendar: calendar) }
+        }
+    }
+
+    /// `servicesFor` returns the services for the direction at an index;
+    /// run-based lines may hand back both directions, filtered here.
+    private static func stationTimetables(
+        for line: StaticTrainLine,
+        stationId: String,
+        servicesFor: (Int) -> [TrainService]
+    ) -> [StationTimetableData] {
+        line.directions.indices.compactMap { index in
+            let direction = line.directions[index]
             let stations = orderedStations(line: line, direction: direction)
             guard stations.contains(where: { $0.id == stationId }),
                   stations.last?.id != stationId,  // no departures toward a direction from its terminus
@@ -1741,8 +2026,8 @@ public enum StaticTimetableGenerator {
             struct Row { let time: String; let type: TrainService.TrainType; let originatesHere: Bool; let destJa: String; let destEn: String }
             let stationsById = Dictionary(uniqueKeysWithValues: stations.map { ($0.id, $0) })
             let directionServices = line.timetableRuns != nil
-                ? services(for: line, calendar: calendar).filter { ($0.direction == .outbound) == direction.isAscending }
-                : services(for: line, direction: direction, calendar: calendar)
+                ? servicesFor(index).filter { ($0.direction == .outbound) == direction.isAscending }
+                : servicesFor(index)
             var byMinute: [Int: Row] = [:]
             for service in directionServices {
                 guard let idx = service.timetable.firstIndex(where: { $0.stationId == stationId }),
