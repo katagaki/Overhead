@@ -292,7 +292,7 @@ struct CatalogSearchView: View {
             Button {
                 route(to: hit)
             } label: {
-                Label("Route from nearest station", systemImage: "point.topleft.down.to.point.bottomright.curvepath")
+                Label("Search.RouteFromNearest", systemImage: "point.topleft.down.to.point.bottomright.curvepath")
             }
             Button {
                 onOpen(.station(lineId: hit.line.id, stationId: hit.station.id))
@@ -313,14 +313,11 @@ struct CatalogSearchView: View {
         } label: {
             HStack {
                 StationSearchRow(hit: hit)
-                Spacer(minLength: 8)
-                Image(systemName: "ellipsis.circle")
-                    .foregroundStyle(.secondary)
+                Spacer(minLength: 0)
             }
             .contentShape(Rectangle())
         }
         .foregroundStyle(.primary)
-        .accessibilityLabel("Actions for \(hit.station.localizedName)")
     }
 
     private func route(to destination: StationSearchHit) {
