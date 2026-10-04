@@ -1,5 +1,6 @@
 import SwiftUI
 import Backbone
+import EnhancedNavigation
 
 /// The catalog search surface, including its results and keyboard-aware field.
 struct CatalogSearchView: View {
@@ -13,11 +14,12 @@ struct CatalogSearchView: View {
     @FocusState private var isFieldFocused: Bool
     @State private var results = Results.empty
     @State private var pendingRouteDestination: StationSearchHit?
+    @State private var isKeyboardUp = false
     @StateObject private var nearbyProvider = NearbyStationsProvider()
 
     private static let previewLimit = 6
     private static let scopeLimit = 100
-    private static let fieldHeight: CGFloat = 48
+    private static let fieldHeight = TabBottomBarMetrics.itemHeight
 
     private struct Results {
         var operators: [OperatorSearchHit] = []
@@ -55,6 +57,11 @@ struct CatalogSearchView: View {
                 }
             searchField
         }
+        .onGeometryChange(for: Bool.self) { proxy in
+            proxy.safeAreaInsets.bottom > DisplayMetrics.safeAreaInsets.bottom + 1
+        } action: { isUp in
+            isKeyboardUp = isUp
+        }
         .task {
             try? await Task.sleep(for: .milliseconds(80))
             isFieldFocused = true
@@ -81,7 +88,7 @@ struct CatalogSearchView: View {
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
-        .contentMargins(.bottom, Self.fieldHeight + 24, for: .scrollContent)
+        .contentMargins(.bottom, fieldClearance, for: .scrollContent)
         .scrollDismissesKeyboard(.interactively)
         .task(id: "\(query)|\(lines.count)") { await runSearch() }
         .task(id: lines.count) {
@@ -92,9 +99,18 @@ struct CatalogSearchView: View {
         }
     }
 
+    /// The list runs under the home indicator, so it clears the field and
+    /// whatever lies beneath it.
+    private var fieldClearance: CGFloat {
+        let below = isKeyboardUp
+            ? 8
+            : DisplayMetrics.safeAreaInsets.bottom - TabBottomBarMetrics.safeAreaOverhang
+        return Self.fieldHeight + TabBottomBarMetrics.topInset + below
+    }
+
     private var searchField: some View {
-        GlassEffectContainer(spacing: 8) {
-            HStack(spacing: 8) {
+        GlassEffectContainer(spacing: TabBottomBarMetrics.itemSpacing) {
+            HStack(spacing: TabBottomBarMetrics.itemSpacing) {
                 HStack(spacing: 8) {
                     Image(systemName: "magnifyingglass")
                         .foregroundStyle(.secondary)
@@ -134,8 +150,9 @@ struct CatalogSearchView: View {
                 .accessibilityLabel("Button.Close")
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.bottom, 8)
+        // Where the omnibox sits, so the field opens in place.
+        .padding(.horizontal, TabBottomBarMetrics.horizontalInset)
+        .padding(.bottom, isKeyboardUp ? 8 : -TabBottomBarMetrics.safeAreaOverhang)
     }
 
     @MainActor
