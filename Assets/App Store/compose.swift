@@ -37,8 +37,23 @@ func color(_ hex: UInt32) -> NSColor {
 
 let screenshots: [Screenshot] = [
     Screenshot(
+        rawName: "00-tabs",
+        outName: "01-tabs",
+        copy: [
+            "ja": Copy(
+                header: "タブに対応",
+                caption: "いくつもの乗車を、かんたんに同時スタート"
+            ),
+            "en": Copy(
+                header: "Now with tabs",
+                caption: "Start multiple journeys with ease"
+            ),
+        ],
+        gradientTop: color(0x3D2470), gradientBottom: color(0x100A22)
+    ),
+    Screenshot(
         rawName: "02-planner",
-        outName: "01-planner",
+        outName: "02-planner",
         copy: [
             "ja": Copy(
                 header: "オフラインで動く時刻表",
@@ -53,7 +68,7 @@ let screenshots: [Screenshot] = [
     ),
     Screenshot(
         rawName: "03-journey",
-        outName: "02-journey",
+        outName: "03-journey",
         copy: [
             "ja": Copy(
                 header: "いま、どこを走ってる？",
@@ -68,7 +83,7 @@ let screenshots: [Screenshot] = [
     ),
     Screenshot(
         rawName: "05-lcd-yamanote",
-        outName: "03-lcd-yamanote",
+        outName: "04-lcd-yamanote",
         copy: [
             "ja": Copy(
                 header: "車内ディスプレイを再現",
@@ -83,7 +98,7 @@ let screenshots: [Screenshot] = [
     ),
     Screenshot(
         rawName: "04-lcd-metro",
-        outName: "04-lcd-metro",
+        outName: "05-lcd-metro",
         copy: [
             "ja": Copy(
                 header: "地下鉄でも、そのまま",
@@ -98,7 +113,7 @@ let screenshots: [Screenshot] = [
     ),
     Screenshot(
         rawName: "06-timetable",
-        outName: "05-timetable",
+        outName: "06-timetable",
         copy: [
             "ja": Copy(
                 header: "駅の時刻表も内蔵",
@@ -113,7 +128,7 @@ let screenshots: [Screenshot] = [
     ),
     Screenshot(
         rawName: "07-avoid",
-        outName: "06-customize",
+        outName: "07-customize",
         copy: [
             "ja": Copy(
                 header: "苦手な路線は避ける",
@@ -128,7 +143,7 @@ let screenshots: [Screenshot] = [
     ),
     Screenshot(
         rawName: "08-customline",
-        outName: "07-mylines",
+        outName: "08-mylines",
         copy: [
             "ja": Copy(
                 header: "マイ路線を作ろう",
@@ -143,7 +158,7 @@ let screenshots: [Screenshot] = [
     ),
     Screenshot(
         rawName: "01-home",
-        outName: "08-favorites",
+        outName: "09-favorites",
         copy: [
             "ja": Copy(
                 header: "お気に入りからワンタップ",
@@ -206,6 +221,21 @@ func drawLine(
         withAttributes: attrs
     )
     return lineSize.height
+}
+
+/// Vertical extent of the inked pixels, in AppKit coordinates.
+func inkRange(of bitmap: NSBitmapImageRep) -> ClosedRange<CGFloat>? {
+    var rows: [Int] = []
+    for y in 0..<bitmap.pixelsHigh {
+        for x in stride(from: 0, to: bitmap.pixelsWide, by: 2)
+        where (bitmap.colorAt(x: x, y: y)?.alphaComponent ?? 0) > 0.5 {
+            rows.append(y)
+            break
+        }
+    }
+    guard let first = rows.first, let last = rows.last else { return nil }
+    // Bitmap rows run top-down.
+    return CGFloat(bitmap.pixelsHigh - 1 - last)...CGFloat(bitmap.pixelsHigh - first)
 }
 
 // MARK: - Device frame
@@ -271,7 +301,16 @@ func compose(_ shot: Screenshot, language: String) -> Bool {
     NSGradient(starting: shot.gradientTop, ending: shot.gradientBottom)?
         .draw(in: NSRect(origin: .zero, size: canvasSize), angle: -90)
 
-    // One-line header and caption. AppKit's origin is bottom-left.
+    // One-line header and caption, drawn apart so their ink can be centered.
+    // AppKit's origin is bottom-left.
+    let text = NSBitmapImageRep(
+        bitmapDataPlanes: nil,
+        pixelsWide: Int(canvasSize.width), pixelsHigh: Int(canvasSize.height),
+        bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+        colorSpaceName: .calibratedRGB, bytesPerRow: 0, bitsPerPixel: 0
+    )!
+    NSGraphicsContext.saveGraphicsState()
+    NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: text)
     let textWidth = canvasSize.width - 96
     let headerTop = canvasSize.height - 84
     let headerHeight = drawLine(
@@ -283,6 +322,7 @@ func compose(_ shot: Screenshot, language: String) -> Bool {
         copy.caption, fontName: "Hind-Medium", size: 46, fallbackWeight: .medium,
         color: .white, top: captionTop, maxWidth: textWidth
     )
+    NSGraphicsContext.restoreGraphicsState()
 
     // Device: hardware frame below, display-masked capture above.
     let textBottom = captionTop - captionHeight
@@ -301,6 +341,16 @@ func compose(_ shot: Screenshot, language: String) -> Bool {
         width: deviceSize.width,
         height: deviceSize.height
     )
+
+    // The text's ink sits centered between the top edge and the device.
+    if let ink = inkRange(of: text) {
+        let offset = ((canvasSize.height + deviceRect.maxY) / 2 - (ink.lowerBound + ink.upperBound) / 2).rounded()
+        text.draw(
+            in: NSRect(origin: NSPoint(x: 0, y: offset), size: canvasSize),
+            from: .zero, operation: .sourceOver, fraction: 1,
+            respectFlipped: false, hints: nil
+        )
+    }
 
     NSGraphicsContext.current?.saveGraphicsState()
     let shadow = NSShadow()

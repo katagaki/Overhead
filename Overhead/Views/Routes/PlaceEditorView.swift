@@ -14,6 +14,7 @@ struct PlaceEditorView: View {
     @State private var viaSelections: [StationSearchHit] = []
     @State private var toSelection: StationSearchHit?
     @State private var walkingSpeedRaw = WalkingSpeed.normal.rawValue
+    @State private var routePriorityRaw = RoutePriority.balanced.rawValue
     @State private var preferOriginating = false
     @State private var avoidedLineIds: Set<String> = []
     @Environment(\.dismiss) private var dismiss
@@ -25,10 +26,11 @@ struct PlaceEditorView: View {
 
                 RouteSetupCard(
                     lines: availableLines,
-                    fromSelection: $fromSelection,
+                    fromSelection: stationEndpoint($fromSelection),
                     viaSelections: $viaSelections,
-                    toSelection: $toSelection,
+                    toSelection: stationEndpoint($toSelection),
                     walkingSpeedRaw: $walkingSpeedRaw,
+                    routePriorityRaw: $routePriorityRaw,
                     preferOriginating: $preferOriginating,
                     avoidedLineIds: $avoidedLineIds
                 )
@@ -118,23 +120,24 @@ struct PlaceEditorView: View {
         .disabled(!canSave)
     }
 
-    // MARK: - Validation
-
-    private var waypointNames: [String]? {
-        guard let from = fromSelection, let to = toSelection else { return nil }
-        return [from.station.name] + viaSelections.map(\.station.name) + [to.station.name]
+    /// Favorites run between stations, so the card only ever hands back stations.
+    private func stationEndpoint(_ hit: Binding<StationSearchHit?>) -> Binding<RouteEndpoint?> {
+        Binding(
+            get: { hit.wrappedValue.map(RouteEndpoint.station) },
+            set: { hit.wrappedValue = $0?.hit }
+        )
     }
 
-    /// True when every hop is rideable: one train, 直通, or via transfers.
+    // MARK: - Validation
+
+    private var waypoints: [Station]? {
+        guard let from = fromSelection, let to = toSelection else { return nil }
+        return [from.station] + viaSelections.map(\.station) + [to.station]
+    }
+
     private var routeAvailable: Bool {
-        guard let names = waypointNames else { return false }
-        return zip(names, names.dropFirst()).allSatisfy { from, to in
-            from != to
-                && (!StaticTrainData.directRoutes(fromStationName: from, toStationName: to,
-                                                  avoidingLineIds: avoidedLineIds).isEmpty
-                    || StaticTrainData.planTransferRoute(fromStationName: from, toStationName: to,
-                                                         avoidingLineIds: avoidedLineIds) != nil)
-        }
+        guard let waypoints else { return false }
+        return JourneyViewModel.routeExists(through: waypoints, avoidingLineIds: avoidedLineIds)
     }
 
     private var canSave: Bool {
@@ -151,6 +154,7 @@ struct PlaceEditorView: View {
         kind = existing.kind
         customName = existing.customName
         walkingSpeedRaw = existing.walkingSpeedRaw
+        routePriorityRaw = existing.routePriorityRaw
         preferOriginating = existing.preferOriginating
         avoidedLineIds = Set(existing.avoidedLineIds)
 
@@ -198,6 +202,7 @@ struct PlaceEditorView: View {
             toStationId: to.station.id,
             viaStationIds: viaSelections.map(\.station.id),
             walkingSpeedRaw: walkingSpeedRaw,
+            routePriorityRaw: routePriorityRaw,
             preferOriginating: preferOriginating,
             avoidedLineIds: avoidedLineIds.sorted(),
             ignoreTimetable: existingPlace?.ignoreTimetable ?? false

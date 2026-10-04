@@ -1,5 +1,6 @@
 import Foundation
 import CoreLocation
+import UIKit
 import Combine
 import Backbone
 
@@ -46,6 +47,13 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
     private let keepAliveAccuracy = kCLLocationAccuracyThreeKilometers
     private let keepAliveDistanceFilter: CLLocationDistance = 1000
 
+    // Backgrounded without PiP, only the Live Activity is visible and it moves
+    // per station, so Wi-Fi/cell-grade fixes do instead of GPS.
+    private let stationGradeAccuracy = kCLLocationAccuracyHundredMeters
+    private let stationGradeDistanceFilter: CLLocationDistance = 100
+    private var isBackgrounded = false
+    private var cancellables = Set<AnyCancellable>()
+
     // GPS accuracy thresholds (meters)
     private let excellentAccuracy: Double = 30      // Full GPS trust
     private let acceptableAccuracy: Double = 100    // Blend GPS + timetable
@@ -75,7 +83,10 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
     private var recentAccuracies: [Double] = []
     private let accuracyWindowSize = 5
 
-    override init() {
+    private let liveActivity: LiveActivityManager
+
+    init(liveActivity: LiveActivityManager) {
+        self.liveActivity = liveActivity
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
@@ -84,6 +95,27 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         locationManager.showsBackgroundLocationIndicator = true
         locationManager.pausesLocationUpdatesAutomatically = false
         locationManager.activityType = .otherNavigation
+
+        NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)
+            .sink { [weak self] _ in self?.setBackgrounded(true) }
+            .store(in: &cancellables)
+        NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
+            .sink { [weak self] _ in self?.setBackgrounded(false) }
+            .store(in: &cancellables)
+        LCDPiPManager.shared.$isActive
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self, self.gpsStarted else { return }
+                self.applyAccuracyProfile()
+            }
+            .store(in: &cancellables)
+    }
+
+    private func setBackgrounded(_ backgrounded: Bool) {
+        isBackgrounded = backgrounded
+        guard gpsStarted else { return }
+        applyAccuracyProfile()
     }
 
     // MARK: - Start / Stop
@@ -170,6 +202,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         timetableTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in
             self?.tickTimetable()
         }
+        timetableTimer?.tolerance = 2
     }
 
     private func tickTimetable() {
@@ -753,11 +786,15 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         locationError = nil
     }
 
-    /// Precise fixes when GPS drives; coarse fixes in timetable (keep-alive) mode.
+    /// Precise fixes when GPS drives and something on screen shows it; coarse
+    /// fixes in timetable (keep-alive) mode.
     private func applyAccuracyProfile() {
         if journeyMode == .timetable {
             locationManager.desiredAccuracy = keepAliveAccuracy
             locationManager.distanceFilter = keepAliveDistanceFilter
+        } else if isBackgrounded, !LCDPiPManager.shared.isActive {
+            locationManager.desiredAccuracy = stationGradeAccuracy
+            locationManager.distanceFilter = stationGradeDistanceFilter
         } else {
             locationManager.desiredAccuracy = kCLLocationAccuracyBest
             locationManager.distanceFilter = distanceFilter
@@ -766,6 +803,6 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
 
     private func updateLiveActivity() {
         guard let state = positionState else { return }
-        LiveActivityManager.shared.updateActivity(positionState: state)
+        liveActivity.updateActivity(positionState: state)
     }
 }

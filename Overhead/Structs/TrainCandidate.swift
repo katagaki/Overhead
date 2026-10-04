@@ -37,6 +37,10 @@ struct TrainCandidate: Identifiable {
     /// False for timetable-ignoring searches: leg seconds are hop-time
     /// estimates from 0, not clock times.
     var hasSchedule: Bool = true
+    /// Walk from the 出発 place to the first train, and from the last train
+    /// to the 到着 place; 0 when the trip starts or ends at a station.
+    var accessSeconds = 0
+    var egressSeconds = 0
 
     var transferCount: Int { legs.count - 1 }
 
@@ -57,6 +61,19 @@ struct TrainCandidate: Identifiable {
 
     var durationMinutes: Int {
         max(0, (arrivalSeconds - departureSeconds) / 60)
+    }
+
+    /// When you set off and get there, walks included.
+    var leaveSeconds: Int { departureSeconds - accessSeconds }
+    var reachSeconds: Int { arrivalSeconds + egressSeconds }
+    var walksToPlace: Bool { accessSeconds > 0 || egressSeconds > 0 }
+
+    var doorToDoorMinutes: Int {
+        max(0, (reachSeconds - leaveSeconds) / 60)
+    }
+
+    func leaveDate(reference: Date = Date()) -> Date {
+        Self.dateFromRailSeconds(leaveSeconds, reference: reference)
     }
 
     func departureDate(reference: Date = Date()) -> Date {

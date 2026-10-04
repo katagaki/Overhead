@@ -20,6 +20,8 @@ import Backbone
 /// - overtrain://home?scroll=lines
 /// - overtrain://place-editor[?edit=first]
 /// - overtrain://dismiss (closes the journey sheet to expose the home bottom bar)
+/// - overtrain://tab/new
+/// - overtrain://tab/switcher
 /// - overtrain://reset
 enum ScreenshotCommand {
     case seedFavorites
@@ -36,6 +38,8 @@ enum ScreenshotCommand {
     case homeScroll(String)
     case placeEditor(editFirst: Bool)
     case dismissSheet
+    case newTab
+    case tabSwitcher
     case reset
 
     init?(url: URL) {
@@ -93,6 +97,12 @@ enum ScreenshotCommand {
             self = .placeEditor(editFirst: params["edit"] == "first")
         case "dismiss":
             self = .dismissSheet
+        case "tab":
+            switch url.path {
+            case "/new": self = .newTab
+            case "/switcher": self = .tabSwitcher
+            default: return nil
+            }
         case "reset":
             self = .reset
         default:

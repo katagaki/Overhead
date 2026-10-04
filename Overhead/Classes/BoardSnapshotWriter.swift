@@ -18,7 +18,7 @@ nonisolated enum BoardSnapshotWriter {
         })
         Task.detached(priority: .utility) {
             let snapshot = build(places: places, titles: titles)
-            BoardSnapshotStore.save(snapshot)
+            guard BoardSnapshotStore.save(snapshot) else { return }
             WidgetCenter.shared.reloadAllTimelines()
         }
     }
@@ -61,7 +61,7 @@ nonisolated enum BoardSnapshotWriter {
             guard let station = line.stations.first(where: { $0.name == name }),
                   let staticLine = StaticTrainData.line(withId: line.id) else { continue }
             let timetables = StaticTimetableGenerator.stationTimetables(
-                for: staticLine, stationId: station.id, calendar: calendar
+                forLineId: staticLine.id, stationId: station.id, calendar: calendar
             )
             guard !timetables.isEmpty else { continue }
             displayName = station.localizedName

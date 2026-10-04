@@ -1,6 +1,6 @@
 import Foundation
 
-public struct TrainPositionState: Codable {
+public struct TrainPositionState: Codable, Equatable {
     public let progress: Double           // 0.0 ... 1.0 along the full journey
     public let segmentFrom: Int           // Index into journeyStations
     public let segmentTo: Int
@@ -35,7 +35,7 @@ public struct TrainPositionState: Codable {
         trackingModeRaw == "Blended"
     }
 
-    public enum Status: String, Codable {
+    public enum Status: String, Codable, Equatable {
         case onTime = "onTime"
         case delayed = "delayed"
         case arrived = "arrived"

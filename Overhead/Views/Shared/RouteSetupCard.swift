@@ -7,15 +7,18 @@ import Backbone
 /// shared by the journey planner and the favorite editor.
 struct RouteSetupCard: View {
     let lines: [TrainLine]
-    @Binding var fromSelection: StationSearchHit?
+    @Binding var fromSelection: RouteEndpoint?
     @Binding var viaSelections: [StationSearchHit]
-    @Binding var toSelection: StationSearchHit?
+    @Binding var toSelection: RouteEndpoint?
     @Binding var walkingSpeedRaw: String
+    @Binding var routePriorityRaw: String
     /// 始発優先 — float trains that start at the boarding station to the top.
     @Binding var preferOriginating: Bool
     @Binding var avoidedLineIds: Set<String>
     /// Runs after any station row changes (the planner persists + invalidates).
     var onStationsChanged: () -> Void = {}
+    /// 出発/到着 can be 現在地 or a landmark, not just a station.
+    var allowsPlaces = false
     /// Extra leading customization items (the planner's departure time).
     var leadingItems: AnyView?
 
@@ -45,10 +48,10 @@ struct RouteSetupCard: View {
             }
         }
 
-        var searchTitle: LocalizedStringKey {
+        func searchTitle(allowsPlaces: Bool) -> LocalizedStringKey {
             switch self {
-            case .from: return "StationSearch.Title.From"
-            case .to: return "StationSearch.Title.To"
+            case .from: return allowsPlaces ? "StationSearch.Title.From.Place" : "StationSearch.Title.From"
+            case .to: return allowsPlaces ? "StationSearch.Title.To.Place" : "StationSearch.Title.To"
             case .via, .addVia: return "StationSearch.Title.Via"
             }
         }
@@ -56,6 +59,10 @@ struct RouteSetupCard: View {
 
     private var walkingSpeed: WalkingSpeed {
         WalkingSpeed(rawValue: walkingSpeedRaw) ?? .normal
+    }
+
+    private var routePriority: RoutePriority {
+        RoutePriority(rawValue: routePriorityRaw) ?? .balanced
     }
 
     var body: some View {
@@ -72,15 +79,16 @@ struct RouteSetupCard: View {
             NavigationStack {
                 StationSearchSelectionView(
                     lines: lines,
-                    title: target.searchTitle,
+                    title: target.searchTitle(allowsPlaces: allowsPlaces),
                     showsCloseButton: true,
-                    mergesStations: true
+                    mergesStations: true,
+                    onSelectPlace: placeHandler(for: target)
                 ) { hit in
                     switch target {
                     case .from:
-                        fromSelection = hit
+                        fromSelection = .station(hit)
                     case .to:
-                        toSelection = hit
+                        toSelection = .station(hit)
                     case .via(let index):
                         if viaSelections.indices.contains(index) {
                             viaSelections[index] = hit
@@ -97,6 +105,18 @@ struct RouteSetupCard: View {
                 lines: lines,
                 avoidedLineIds: $avoidedLineIds
             )
+        }
+    }
+
+    private func placeHandler(for target: PickerTarget) -> ((RouteEndpoint) -> Void)? {
+        guard allowsPlaces else { return nil }
+        switch target {
+        case .from:
+            return { fromSelection = $0; onStationsChanged() }
+        case .to:
+            return { toSelection = $0; onStationsChanged() }
+        case .via, .addVia:
+            return nil
         }
     }
 
@@ -196,7 +216,7 @@ struct RouteSetupCard: View {
     @ViewBuilder
     private func stationField(
         label: LocalizedStringKey,
-        selection: StationSearchHit?,
+        selection: RouteEndpoint?,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
@@ -209,7 +229,7 @@ struct RouteSetupCard: View {
                     .clipShape(RoundedRectangle(cornerRadius: 6))
 
                 if let selection {
-                    Text(selection.station.localizedName)
+                    endpointLabel(selection)
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundColor(.primary)
                         .lineLimit(1)
@@ -227,6 +247,20 @@ struct RouteSetupCard: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+    }
+
+    @ViewBuilder
+    private func endpointLabel(_ endpoint: RouteEndpoint) -> some View {
+        switch endpoint {
+        case .station(let hit):
+            Text(hit.station.localizedName)
+        case .currentLocation:
+            Label("StationSearch.CurrentLocation", systemImage: "location.fill")
+                .labelStyle(EndpointLabelStyle())
+        case .place(let place):
+            Label(place.name, systemImage: "mappin")
+                .labelStyle(EndpointLabelStyle())
+        }
     }
 
     private var fieldDivider: some View {
@@ -253,6 +287,7 @@ struct RouteSetupCard: View {
                 if let leadingItems {
                     leadingItems
                 }
+                routePriorityItem
                 walkingSpeedItem
                 preferOriginatingItem
                 avoidLinesItem
@@ -264,6 +299,32 @@ struct RouteSetupCard: View {
             .scrollTargetLayout()
         }
         .scrollTargetBehavior(.viewAligned(limitBehavior: .never))
+    }
+
+    private var routePriorityItem: some View {
+        Menu {
+            Picker("Setup.RoutePriority", selection: Binding(
+                get: { routePriority },
+                set: { routePriorityRaw = $0.rawValue }
+            )) {
+                ForEach(RoutePriority.allCases) { priority in
+                    Label {
+                        Text(priority.label)
+                        Text(priority.detail)
+                    } icon: {
+                        Image(systemName: priority.iconName)
+                    }
+                    .tag(priority)
+                }
+            }
+        } label: {
+            CustomizationItem(
+                icon: routePriority.iconName,
+                label: "Setup.RoutePriority",
+                active: routePriority != .balanced
+            )
+        }
+        .buttonStyle(.plain)
     }
 
     private var walkingSpeedItem: some View {
@@ -409,6 +470,20 @@ struct RouteSetupCard: View {
             )
         }
         .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Endpoint Label Style
+
+/// A small tinted glyph marks an endpoint that isn't a station.
+private struct EndpointLabelStyle: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: 5) {
+            configuration.icon
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(.accentColor)
+            configuration.title
+        }
     }
 }
 

@@ -21,7 +21,6 @@ struct NeonLCDView: View {
     private static let rowBlue = Color(hex: "#9FB2D8")
     private static let glitchPeriod = 6.0
 
-    private static var allLines: [TrainLine] { StaticTrainData.trainLines() }
     private static let clockFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "H:mm:ss"
@@ -98,7 +97,7 @@ struct NeonLCDView: View {
     }
 
     private var scanBar: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 20.0)) { context in
+        LCDTimeline(animationInterval: 1.0 / 20.0) { context in
             let t = context.date.timeIntervalSinceReferenceDate
             let progress = (t / 7).truncatingRemainder(dividingBy: 1)
             LinearGradient(
@@ -145,7 +144,7 @@ struct NeonLCDView: View {
             chip("\(journey.line.lineSymbol)::\(typeNameEn.uppercased())", color: Self.cyan, border: Self.cyanDim)
             chip("DEST::\(journey.destinationNameJa)", color: Self.magenta, border: Color(hex: "#7C2C55"))
             Spacer()
-            TimelineView(.periodic(from: .now, by: 0.5)) { context in
+            LCDTimeline(every: 0.5) { context in
                 HStack(spacing: 1) {
                     Text(Self.clockFormatter.string(from: context.date))
                         .font(.system(size: 6.5, weight: .medium, design: .monospaced))
@@ -210,7 +209,7 @@ struct NeonLCDView: View {
     }
 
     private var glitchName: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 15.0)) { context in
+        LCDTimeline(animationInterval: 1.0 / 15.0) { context in
             let t = context.date.timeIntervalSinceReferenceDate
             let phase = t.truncatingRemainder(dividingBy: Self.glitchPeriod)
             let bursting = phase > Self.glitchPeriod - 0.35
@@ -298,7 +297,7 @@ struct NeonLCDView: View {
                 .minimumScaleFactor(0.6)
             Spacer(minLength: 2)
             if row.isCurrent {
-                TimelineView(.periodic(from: .now, by: 0.55)) { context in
+                LCDTimeline(every: 0.55) { context in
                     Text(verbatim: "NEXT")
                         .font(.system(size: 4.8, weight: .bold, design: .monospaced))
                         .foregroundColor(Self.magenta)
@@ -357,7 +356,7 @@ struct NeonLCDView: View {
             Rectangle()
                 .fill(Self.cyan.opacity(0.25))
                 .frame(height: 0.5)
-            TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { context in
+            LCDTimeline(animationInterval: 1.0 / 30.0) { context in
                 Canvas { ctx, size in
                     ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Color(hex: "#050912").opacity(0.85)))
                     let resolved = segments.map { segment in
@@ -493,11 +492,8 @@ struct NeonLCDView: View {
         guard !journey.line.isCustom else { return [] }
         let ridden = Set(journey.line.id.split(separator: "+").map(String.init))
         return Array(
-            Self.allLines
-                .filter { line in
-                    !ridden.contains(line.id)
-                        && line.stations.contains { $0.name == station.name }
-                }
+            StaticTrainData.trainLines(atStationNamed: station.name)
+                .filter { !ridden.contains($0.id) }
                 .prefix(1)
         )
     }

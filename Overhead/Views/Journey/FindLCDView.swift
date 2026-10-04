@@ -86,7 +86,7 @@ struct FindLCDView: View {
 
     private var strip: some View {
         let stops = upcomingStops
-        return TimelineView(.periodic(from: .now, by: 0.5)) { context in
+        return LCDTimeline(every: 0.5) { context in
             Canvas { ctx, size in
                 let blinkOn = Int(context.date.timeIntervalSinceReferenceDate * 2) % 2 == 0
                 let lineY = size.height - 58

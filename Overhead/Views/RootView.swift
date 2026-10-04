@@ -1,7 +1,8 @@
 import SwiftUI
 import Backbone
+import EnhancedNavigation
 
-/// The whole app on one scrolling surface: planner, favorites, and lines to browse.
+/// The app shell for persistent tabs, journey planning, and the catalog.
 struct RootView: View {
     @ObservedObject var viewModel: JourneyViewModel
     @ObservedObject private var customStore = CustomLineStore.shared
@@ -14,32 +15,23 @@ struct RootView: View {
     @AppStorage(JourneyNotificationManager.enabledKey) private var notificationsEnabled = true
     @AppStorage(JourneyNotificationManager.leadMinutesKey)
     private var notificationLeadMinutes = JourneyNotificationManager.defaultLeadMinutes
-    @State private var showJourneySheet = false
+    /// Observable rather than `@State`: the tab bars are built in closures
+    /// the tab stack keeps, which would go on reading a stale copy.
+    @State private var journeyTabs = JourneyTabRegistry()
     @State private var showTimetableModeNotice = false
     @State private var showStartupNotice = false
     @State private var showDisclaimer = false
-    @State private var navigationPath = NavigationPath()
-    /// Measured width; toolbar items can't resolve `maxWidth: .infinity`.
-    @State private var barWidth: CGFloat = 0
-    /// Total inset either side, so the bar doesn't run to the screen edges.
-    private static let journeyBarInset: CGFloat = 48
-    @StateObject private var serviceStatusPresenter = ServiceStatusPresenter()
+    @State private var tabStore = AppTabSessionMigration.makeStore()
+    @State private var searchStates = AppTabSearchStateStorage.load()
+    @State private var showsBrowserSearchOverlay = false
 #if DEBUG
     // Screenshot harness (overtrain:// deep links, see ScreenshotHarness.swift).
     @State private var debugTimetableTarget: ScreenshotTimetableTarget?
 #endif
-    @Namespace private var journeyZoom
     @AppStorage("lineData.onboarded") private var lineDataOnboarded = false
     @State private var showLineDataOnboarding = false
 
-    private static let journeyTransitionID = "activeJourney"
     private static let feedbackURL = URL(string: "https://forms.gle/U91cFDFTufF12PeF7")!
-
-    // Pushed screens reachable from the root.
-    private enum Destination: Hashable {
-        case attributions
-        case lineData
-    }
 
     private var needsLineDataOnboarding: Bool {
         // An app update that moved the schema on leaves the installed copy
@@ -54,87 +46,68 @@ struct RootView: View {
     private static let updateCheckInterval: TimeInterval = 6 * 60 * 60
 
     var body: some View {
-        NavigationStack(path: $navigationPath) {
-            ScrollViewReader { scrollProxy in
-                Group {
-                    if horizontalSizeClass == .regular {
-                        splitColumns
-                    } else {
-                        ScrollView {
-                            column {
-                                plannerSections
-                                catalogSections
-                            }
-                        }
-                    }
-                }
-#if DEBUG
-                .onReceive(ScreenshotStaging.shared.$homeScrollTarget) { target in
-                    guard let target else { return }
-                    ScreenshotStaging.shared.homeScrollTarget = nil
-                    scrollProxy.scrollTo(target, anchor: .top)
-                }
-#endif
+        TabZoomContainer(store: tabStore, cardCornerRadius: TabSwitcherCardMetrics.cornerRadius) {
+            TabSwitcher(
+                store: tabStore,
+                strings: TabSwitcherStrings(
+                    title: { String(localized: "Tabs.Count \($0)") },
+                    closeAll: String(localized: "Tabs.CloseAll"),
+                    newTab: String(localized: "Tabs.New"),
+                    closeTab: String(localized: "Tabs.Close")
+                ),
+                placeholderIcon: .systemImage("tram.fill"),
+                rebuildingPath: rebuildPath
+            ) { tab in
+                let identity = tab.pageIdentity ?? identity(for: tab.root, tabID: tab.id)
+                Label(identity.title, systemImage: identity.symbolName)
+                    .lineLimit(1)
             }
-            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { barWidth = $0 }
-            .background(Color(.systemGroupedBackground))
-            .navigationTitle(Text("App.Name"))
-            .toolbarTitleDisplayMode(.inlineLarge)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    moreMenu
-                }
+        } page: { width in
+            LiveTabStack(store: tabStore) { tab in
+                workspace(for: tab)
+                    .frame(width: width)
+                    .background(Color(.systemGroupedBackground).ignoresSafeArea())
             }
-            .toolbar {
-                if viewModel.activeJourney != nil {
-                    ToolbarItem(placement: .bottomBar) {
-                        JourneyToolbarAccessory(
-                            viewModel: viewModel,
-                            availableWidth: max(barWidth - Self.journeyBarInset, 200)
-                        ) {
-                            showJourneySheet = true
-                        }
-                        .frame(width: max(barWidth - Self.journeyBarInset, 200))
-                        .matchedTransitionSource(id: Self.journeyTransitionID, in: journeyZoom)
-                    }
-                }
-            }
-            .navigationDestination(for: Destination.self) { destination in
-                switch destination {
-                case .attributions:
-                    MoreAttributionsView()
-                case .lineData:
-                    LineDataManagerView()
-                }
-            }
-            .navigationDestination(for: SearchDestination.self) { destination in
-                searchDestinationView(destination)
-            }
-            .navigationDestination(for: CustomLineRoute.self) { route in
-                CustomLineEditorView(route: route)
-            }
-#if DEBUG
-            .navigationDestination(for: ScreenshotLineTarget.self) { target in
-                if let line = viewModel.availableLines.first(where: { $0.id == target.lineId }) {
-                    StationPickerView(line: line, viewModel: viewModel)
-                }
-            }
-#endif
-            .task {
-                await viewModel.loadLines()
-#if DEBUG
-                // Launch arguments, since simctl openurl needs a confirmation.
-                for argument in ProcessInfo.processInfo.arguments.dropFirst()
-                where argument.hasPrefix("overtrain://") {
-                    if let url = URL(string: argument) {
-                        await handleScreenshotURL(url)
-                    }
-                }
-#endif
+            .ignoresSafeArea(.container)
+        }
+        .ignoresSafeArea(.container)
+        .background(Color(.systemGroupedBackground).ignoresSafeArea())
+        .overlay {
+            if showsBrowserSearchOverlay, !tabStore.isShowingTabSwitcher {
+                CatalogSearchView(
+                    lines: viewModel.availableLines,
+                    searchText: selectedSearchText,
+                    scope: searchScope(for: tabStore.selectedTabID),
+                    dismiss: dismissSearchOverlay,
+                    onOpen: openInSelectedTab,
+                    onRoute: routeFromNearest
+                )
+                .transition(.opacity)
             }
         }
-        .serviceStatusHost(serviceStatusPresenter)
+        .animation(.smooth(duration: 0.2), value: showsBrowserSearchOverlay)
+        .onChange(of: tabStore.tabs.map(\.id)) { _, tabIDs in
+            let liveIDs = Set(tabIDs)
+            searchStates = searchStates.filter { liveIDs.contains($0.key) }
+            AppTabSearchStateStorage.save(searchStates)
+            // A journey belongs to its tab, so closing the tab ends it.
+            for (tabID, sessionID) in journeyTabs.sessions where !liveIDs.contains(tabID) {
+                journeyTabs.sessions[tabID] = nil
+                if let session = viewModel.session(id: sessionID) { viewModel.stopJourney(session) }
+            }
+        }
         .task {
+            tabStore.loadPersistedSnapshots()
+            await viewModel.loadLines()
+#if DEBUG
+            // Launch arguments let the screenshot harness open deep links directly.
+            for argument in ProcessInfo.processInfo.arguments.dropFirst()
+            where argument.hasPrefix("overtrain://") {
+                if let url = URL(string: argument) {
+                    await handleScreenshotURL(url)
+                }
+            }
+#endif
             if needsLineDataOnboarding { showLineDataOnboarding = true }
             await checkForLineDataUpdates()
         }
@@ -145,7 +118,7 @@ struct RootView: View {
             // The wipe itself is the trigger: clearing a flag that is already
             // clear says nothing, and a second wipe has to bring the sheet
             // back too.
-            navigationPath = NavigationPath()
+            tabStore.updateSelectedTab { $0.path = NavigationPath() }
             Task { @MainActor in
                 // A sheet raised in the same turn as the pop is swallowed by
                 // the transition, leaving the app on an empty catalog.
@@ -159,10 +132,6 @@ struct RootView: View {
             if !hasDismissedStartupNotice { showStartupNotice = true }
         } content: {
             LineDataOnboardingView()
-        }
-        .sheet(isPresented: $showJourneySheet) {
-            JourneySheetView(viewModel: viewModel)
-                .navigationTransition(.zoom(sourceID: Self.journeyTransitionID, in: journeyZoom))
         }
         .sheet(item: $customStore.incomingPackage) { package in
             CustomLineImportView(package: package)
@@ -180,35 +149,35 @@ struct RootView: View {
             }
         }
 #endif
-        // Keeps the PiP layer alive while the journey sheet is closed.
+        // Keeps the PiP layer alive while its journey's page is not mounted.
         .background {
-            if !showJourneySheet {
+            if !(viewModel.pipSession.map { journeyTabs.mountedPages.contains($0.id) } ?? false) {
                 LCDPiPLayerHost()
                     .frame(width: 1, height: 1)
             }
         }
-        .onChange(of: viewModel.activeJourney != nil) { _, hasJourney in
-            guard hasJourney else {
-                showJourneySheet = false
-                LCDPiPManager.shared.teardown()
-                return
+        .onChange(of: viewModel.sessions.map(\.id)) { old, new in
+            for sessionID in Set(old).subtracting(new) {
+                guard let tabID = journeyTabs.sessions.first(where: { $0.value == sessionID })?.key else { continue }
+                removeJourneyPage(sessionID, from: tabID)
+                journeyTabs.sessions[tabID] = nil
             }
-            LCDPiPManager.shared.prepare { [weak viewModel] in
-                viewModel?.renderLCDImage(scale: 2, padded: false)
+            let added = new.filter { !old.contains($0) }
+            syncFocusedJourney()
+            DispatchQueue.main.async {
+                for sessionID in added { attachJourney(sessionID, to: tabStore.selectedTabID) }
             }
-            DispatchQueue.main.async { showJourneySheet = true }
         }
-        .onChange(of: viewModel.positionState?.status) { _, status in
-            LCDPiPManager.shared.setAutoStartAllowed(status != .arrived)
+        .onChange(of: tabStore.selectedTabID) { _, _ in
+            syncFocusedJourney()
         }
-        // Overwriting keeps activeJourney non-nil, so onChange won't fire — open here.
+        // Starting where the selected tab already has a journey replaces it.
         .alert(
             "Journey.Overwrite.ConfirmTitle",
             isPresented: $viewModel.showOverwriteConfirmation
         ) {
             Button("Button.Overwrite", role: .destructive) {
                 viewModel.confirmOverwrite()
-                showJourneySheet = true
             }
             Button("Button.Cancel", role: .cancel) {
                 viewModel.cancelOverwrite()
@@ -260,6 +229,350 @@ struct RootView: View {
         }
     }
 
+    private func workspace(for tab: AppNavigationStore.Tab) -> some View {
+        NavigationStack(path: tabStore.pathBinding(for: tab.id)) {
+            Group {
+                switch tab.root {
+                case .home:
+                    homeContent
+                case .search:
+                    homeContent // A saved search tab is normalized to Home on launch.
+                case .destination(let destination):
+                    searchDestinationView(destination)
+                }
+            }
+            .background(Color(.systemGroupedBackground))
+            .tabPage(pathToken: Optional<AppPathToken>.none)
+            .toolbar {
+                if tab.root != .home && tab.root != .search {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            openHome()
+                        } label: {
+                            Image(systemName: "house")
+                        }
+                        .accessibilityLabel("App.Name")
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    moreMenu(for: tab.id)
+                }
+            }
+            .navigationDestination(for: AppMenuDestination.self) { destination in
+                Group {
+                    switch destination {
+                    case .attributions:
+                        MoreAttributionsView()
+                    case .lineData:
+                        LineDataManagerView()
+                    }
+                }
+                .tabPage(pathToken: AppPathToken.menu(destination))
+                .onAppear {
+                    tabStore.setPageIdentity(
+                        AppTabIdentity(
+                            title: destination == .attributions
+                                ? String(localized: "More.Attributions") : String(localized: "LineData.Title"),
+                            symbolName: destination == .attributions ? "info.circle" : "cylinder.split.1x2",
+                            pathToken: .menu(destination)
+                        ),
+                        for: tab.id
+                    )
+                }
+            }
+            .navigationDestination(for: SearchDestination.self) { destination in
+                searchDestinationView(destination)
+                    .tabPage(pathToken: AppPathToken.search(destination))
+                    .onAppear {
+                        tabStore.setPageIdentity(
+                            AppTabIdentity(title: title(for: destination), symbolName: icon(for: .destination(destination)), pathToken: .search(destination)),
+                            for: tab.id
+                        )
+                    }
+            }
+            .navigationDestination(for: JourneyDestination.self) { destination in
+                if let session = viewModel.session(id: destination.sessionID) {
+                    JourneyPageView(viewModel: viewModel, session: session)
+                        .tabPage(pathToken: AppPathToken.journey(session.id))
+                        .onAppear {
+                            journeyTabs.mountedPages.insert(session.id)
+                            tabStore.setPageIdentity(journeyIdentity(for: session), for: tab.id)
+                        }
+                        .onDisappear { journeyTabs.mountedPages.remove(session.id) }
+                }
+            }
+            .navigationDestination(for: CustomLineRoute.self) { route in
+                CustomLineEditorView(route: route)
+                    .tabPage(pathToken: AppPathToken.customLine(route))
+                    .onAppear {
+                        tabStore.setPageIdentity(
+                            AppTabIdentity(
+                                title: String(localized: "CustomLine.Section"),
+                                symbolName: "tram.fill",
+                                pathToken: .customLine(route)
+                            ),
+                            for: tab.id
+                        )
+                    }
+            }
+#if DEBUG
+            .navigationDestination(for: ScreenshotLineTarget.self) { target in
+                if let line = viewModel.availableLines.first(where: { $0.id == target.lineId }) {
+                    StationPickerView(line: line, viewModel: viewModel)
+                }
+            }
+#endif
+        }
+        .environment(\.appTabOpenDestination, { tabStore.push($0) })
+        .tabBottomBar(for: tab.id, in: tabStore) { items in
+            browserBottomBar(for: tab, items: items)
+        }
+        .onAppear { tabStore.setPageIdentity(identity(for: tab.root, tabID: tab.id), for: tab.id) }
+        .onChange(of: tab.root) { _, root in
+            tabStore.setPageIdentity(identity(for: root, tabID: tab.id), for: tab.id)
+        }
+    }
+
+    private var homeContent: some View {
+        ScrollViewReader { scrollProxy in
+            Group {
+                if horizontalSizeClass == .regular {
+                    splitColumns
+                } else {
+                    ScrollView {
+                        column {
+                            plannerSections
+                            catalogSections
+                        }
+                    }
+                }
+            }
+#if DEBUG
+            .onReceive(ScreenshotStaging.shared.$homeScrollTarget) { target in
+                guard let target else { return }
+                ScreenshotStaging.shared.homeScrollTarget = nil
+                scrollProxy.scrollTo(target, anchor: .top)
+            }
+#endif
+        }
+        .navigationTitle(Text("App.Name"))
+        .toolbarTitleDisplayMode(.inlineLarge)
+    }
+
+    private var selectedSearchText: Binding<String> { searchText(for: tabStore.selectedTabID) }
+
+    private func searchText(for tabID: UUID) -> Binding<String> {
+        Binding(
+            get: { searchStates[tabID]?.text ?? "" },
+            set: { value in
+                searchStates[tabID, default: AppTabSearchState()].text = value
+                AppTabSearchStateStorage.save(searchStates)
+            }
+        )
+    }
+
+    private func searchScope(for tabID: UUID) -> Binding<SearchScope> {
+        Binding(
+            get: { searchStates[tabID]?.scope ?? .all },
+            set: { value in
+                searchStates[tabID, default: AppTabSearchState()].scope = value
+                AppTabSearchStateStorage.save(searchStates)
+            }
+        )
+    }
+
+    private func browserBottomBar(for tab: AppNavigationStore.Tab, items: TabBottomBarItems) -> some View {
+        GlassEffectContainer(spacing: TabBottomBarMetrics.itemSpacing) {
+            HStack(spacing: TabBottomBarMetrics.itemSpacing) {
+                journeyBarItem(for: tab)
+
+                BrowserAddressToolbarItem(
+                    isCrowded: journeyTabs.sessions[tab.id] != nil,
+                    page: omniboxPage(for: tab.id),
+                    items: items,
+                    searchText: searchText(for: tab.id),
+                    onOpenSearch: openSearch,
+                    onSwipe: switchTab
+                )
+                .frame(maxWidth: .infinity, minHeight: TabBottomBarMetrics.itemHeight)
+                .glassEffect(.regular.interactive(), in: .capsule)
+
+                Button {
+                    tabStore.showTabSwitcher()
+                } label: {
+                    TabCountLabel(count: tabStore.tabs.count)
+                        .frame(width: TabBottomBarMetrics.itemHeight, height: TabBottomBarMetrics.itemHeight)
+                        .contentShape(Circle())
+                }
+                .accessibilityLabel("Tabs.Count \(tabStore.tabs.count)")
+                .glassEffect(.regular.interactive(), in: .circle)
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(.primary)
+        }
+        .opacity(showsBrowserSearchOverlay ? 0 : 1)
+        .allowsHitTesting(!showsBrowserSearchOverlay)
+        .accessibilityHidden(showsBrowserSearchOverlay)
+    }
+
+    // MARK: - Journey
+
+    /// Ending the journey takes the place of opening it while it is showing.
+    @ViewBuilder
+    private func journeyBarItem(for tab: AppNavigationStore.Tab) -> some View {
+        if let session = journeyTabs.sessions[tab.id].flatMap(viewModel.session(id:)) {
+            if tabStore.displayedPathToken(for: tab.id) == .journey(session.id) {
+                JourneyEndButton {
+                    viewModel.stopJourney(session)
+                }
+            } else {
+                JourneyStationToolbarButton(session: session, action: openJourney)
+            }
+        }
+    }
+
+    private func journeyIdentity(for session: JourneySession) -> AppTabIdentity {
+        AppTabIdentity(
+            title: session.journey.line.localizedName,
+            symbolName: "train.side.front.car",
+            pathToken: .journey(session.id)
+        )
+    }
+
+    private func syncFocusedJourney() {
+        let focused = journeyTabs.sessions[tabStore.selectedTabID]
+        if viewModel.focusedSessionID != focused { viewModel.focusedSessionID = focused }
+    }
+
+    /// Where a journey's page sits in a tab's stack, if it is in it at all.
+    private func journeyDepth(_ sessionID: UUID, in tabID: UUID) -> Int? {
+        guard let tab = tabStore.tabs.first(where: { $0.id == tabID }) else { return nil }
+        let history = tabStore.pageHistories[tabID] ?? []
+        return history.prefix(tab.path.count + 1).lastIndex { $0.pathToken == .journey(sessionID) }
+    }
+
+    private func attachJourney(_ sessionID: UUID, to tabID: UUID) {
+        guard viewModel.session(id: sessionID) != nil else { return }
+        journeyTabs.sessions[tabID] = sessionID
+        syncFocusedJourney()
+        openJourney()
+    }
+
+    private func openJourney() {
+        guard let sessionID = journeyTabs.sessions[tabStore.selectedTabID] else { return }
+        dismissSearchOverlay()
+        if let depth = journeyDepth(sessionID, in: tabStore.selectedTabID) {
+            tabStore.popTo(depth: depth)
+        } else {
+            tabStore.push(JourneyDestination(sessionID: sessionID))
+        }
+    }
+
+    private func removeJourneyPage(_ sessionID: UUID, from tabID: UUID) {
+        guard let depth = journeyDepth(sessionID, in: tabID) else { return }
+        tabStore.updateTab(tabID) { $0.path.removeLast($0.path.count - depth + 1) }
+        tabStore.restoreIdentity(atDepth: depth - 1, for: tabID)
+        tabStore.persistTabs()
+    }
+
+    /// Home keeps the search prompt; any other page names itself.
+    private func omniboxPage(for tabID: UUID) -> AppTabIdentity? {
+        let tab = tabStore.displayedTab(for: tabID)
+        guard tab.canGoBack || tab.root != .home else { return nil }
+        return tab.pageIdentity
+    }
+
+    private func openSearch() {
+        withAnimation(.smooth(duration: 0.2)) { showsBrowserSearchOverlay = true }
+    }
+
+    private func dismissSearchOverlay() {
+        withAnimation(.smooth(duration: 0.2)) { showsBrowserSearchOverlay = false }
+    }
+
+    private func openHome() {
+        dismissSearchOverlay()
+        tabStore.updateSelectedTab { tab in
+            tab.path = NavigationPath()
+            tab.root = .home
+        }
+        tabStore.setPageIdentity(identity(for: .home, tabID: tabStore.selectedTabID), for: tabStore.selectedTabID)
+        tabStore.persistTabs()
+    }
+
+    private func openInSelectedTab(_ destination: SearchDestination) {
+        dismissSearchOverlay()
+        tabStore.push(destination)
+    }
+
+    private func routeFromNearest(_ origin: StationSearchHit, _ destination: StationSearchHit) {
+        viewModel.plannerFromRequest = origin
+        viewModel.plannerToRequest = destination
+        openHome()
+    }
+
+    private func switchTab(_ delta: Int) {
+        let index = tabStore.tabs.firstIndex { $0.id == tabStore.selectedTabID } ?? 0
+        let target = index + delta
+        guard tabStore.tabs.indices.contains(target) else { return }
+        dismissSearchOverlay()
+        withAnimation(.smooth(duration: 0.3)) { tabStore.select(tabStore.tabs[target].id) }
+    }
+
+    private func rebuildPath(_ token: AppPathToken, _ path: inout NavigationPath) -> Bool {
+        switch token {
+        case .search(let destination): path.append(destination)
+        case .menu(let destination): path.append(destination)
+        case .customLine(let route): path.append(route)
+        case .journey(let sessionID):
+            // Journeys do not outlive the app, so a restored stack ends here.
+            guard viewModel.session(id: sessionID) != nil else { return false }
+            path.append(JourneyDestination(sessionID: sessionID))
+        }
+        return true
+    }
+
+    private func identity(for page: AppTabPage, tabID: UUID) -> AppTabIdentity {
+        AppTabIdentity(title: title(for: page, searchText: searchStates[tabID]?.text),
+                       symbolName: icon(for: page), pathToken: nil)
+    }
+
+    private func title(for page: AppTabPage, searchText: String?) -> String {
+        switch page {
+        case .home: String(localized: "App.Name")
+        case .search: searchText.flatMap { $0.isEmpty ? nil : $0 } ?? String(localized: "Search.Title")
+        case .destination(let destination): title(for: destination)
+        }
+    }
+
+    private func title(for destination: SearchDestination) -> String {
+        switch destination {
+        case .operatorLines(let id): OperatorSections.title(for: id)
+        case .line(let id): viewModel.availableLines.first { $0.id == id }?.localizedName ?? String(localized: "Search.Section.Lines")
+        case .serviceStatus(let lineID):
+            viewModel.availableLines.first { $0.id == lineID }?.localizedName
+                ?? String(localized: "StationTimetable.ServiceStatus")
+        case .station(let lineID, let stationID),
+             .stationWithDirection(let lineID, let stationID, _):
+            viewModel.availableLines.first { $0.id == lineID }?.stations.first { $0.id == stationID }?.localizedName
+                ?? String(localized: "Search.Section.Stations")
+        }
+    }
+
+    private func icon(for page: AppTabPage) -> String {
+        switch page {
+        case .home: "house"
+        case .search: "magnifyingglass"
+        case .destination(let destination):
+            switch destination {
+            case .operatorLines: "building.2"
+            case .line: "tram.fill"
+            case .station, .stationWithDirection: "clock"
+            case .serviceStatus: "info.circle"
+            }
+        }
+    }
+
     // MARK: - Layout
 
     /// Wide windows read as two halves: what you are riding on the left,
@@ -299,10 +612,6 @@ struct RootView: View {
     private var catalogSections: some View {
         NearbyStationsSection(viewModel: viewModel)
             .id("nearby")
-        SearchSection(viewModel: viewModel) { destination in
-            navigationPath.append(destination)
-        }
-        .id("lines")
         CustomLinesSection(viewModel: viewModel)
             .id("custom")
     }
@@ -313,7 +622,9 @@ struct RootView: View {
     private func searchDestinationView(_ destination: SearchDestination) -> some View {
         switch destination {
         case .operatorLines(let operatorId):
-            OperatorLinesView(operatorId: operatorId, viewModel: viewModel)
+            OperatorLinesView(operatorId: operatorId, viewModel: viewModel) { lineID in
+                tabStore.push(SearchDestination.line(lineID))
+            }
         case .line(let lineId):
             if let line = viewModel.availableLines.first(where: { $0.id == lineId }) {
                 StationPickerView(line: line, viewModel: viewModel)
@@ -323,17 +634,31 @@ struct RootView: View {
                let station = line.stations.first(where: { $0.id == stationId }) {
                 StationTimetableView(station: station, line: line, viewModel: viewModel)
             }
+        case .serviceStatus(let lineId):
+            if let delayInfo = viewModel.delayCheckInfo(for: lineId) {
+                ServiceStatusView(lineId: lineId, delayInfo: delayInfo)
+            }
+        case .stationWithDirection(let lineId, let stationId, let directionId):
+            if let line = viewModel.availableLines.first(where: { $0.id == lineId }),
+               let station = line.stations.first(where: { $0.id == stationId }) {
+                StationTimetableView(
+                    station: station,
+                    line: line,
+                    preferredDirectionId: directionId,
+                    viewModel: viewModel
+                )
+            }
         }
     }
 
     // MARK: - More Menu
 
-    private var moreMenu: some View {
+    private func moreMenu(for tabID: UUID) -> some View {
         Menu {
-            if viewModel.activeJourney != nil {
+            if let session = journeyTabs.sessions[tabID].flatMap(viewModel.session(id:)) {
                 Section("Settings.Section.CurrentJourney") {
                     Button(role: .destructive) {
-                        viewModel.stopJourney()
+                        viewModel.stopJourney(session)
                     } label: {
                         Label("Button.EndJourney", systemImage: "stop.circle.fill")
                     }
@@ -342,7 +667,7 @@ struct RootView: View {
 
             Section {
                 Button {
-                    navigationPath.append(Destination.lineData)
+                    tabStore.push(AppMenuDestination.lineData)
                 } label: {
                     Label {
                         Text("LineData.Title")
@@ -363,7 +688,7 @@ struct RootView: View {
                     Label("More.GitHub", systemImage: "chevron.left.forwardslash.chevron.right")
                 }
                 Button("More.Attributions") {
-                    navigationPath.append(Destination.attributions)
+                    tabStore.push(AppMenuDestination.attributions)
                 }
                 Button("More.Disclaimer") {
                     showDisclaimer = true
@@ -428,11 +753,11 @@ struct RootView: View {
             debugTimetableTarget = target
         case .linePage(let target):
             ScreenshotStaging.shared.expandServiceStatus = target.expandStatus
-            navigationPath.append(target)
+            tabStore.push(target)
         case .customLineEditor:
             ScreenshotSeeder.seedCustomLine()
             try? await Task.sleep(for: .seconds(0.5))
-            navigationPath.append(CustomLineRoute.edit(ScreenshotSeeder.customLineId))
+            tabStore.push(CustomLineRoute.edit(ScreenshotSeeder.customLineId))
         case .homeScroll(let anchor):
             try? await Task.sleep(for: .seconds(1))
             ScreenshotStaging.shared.homeScrollTarget = anchor
@@ -441,14 +766,62 @@ struct RootView: View {
             ScreenshotStaging.shared.placeEditorCommand = editFirst ? .editFirst : .new
         case .dismissSheet:
             try? await Task.sleep(for: .seconds(1.5))
-            showJourneySheet = false
+            let tabID = tabStore.selectedTabID
+            if let sessionID = journeyTabs.sessions[tabID] { removeJourneyPage(sessionID, from: tabID) }
+        case .newTab:
+            try? await Task.sleep(for: .seconds(3))
+            tabStore.captureSelectedTabSnapshot()
+            tabStore.openTab()
+            // The new tab names itself on appear, which must land before a journey does.
+            try? await Task.sleep(for: .seconds(1))
+        case .tabSwitcher:
+            try? await Task.sleep(for: .seconds(1.5))
+            tabStore.showTabSwitcher()
         case .reset:
-            viewModel.stopJourney()
+            viewModel.sessions.forEach(viewModel.stopJourney)
+            tabStore.closeAll()
+            try? await Task.sleep(for: .seconds(1))
             debugTimetableTarget = nil
-            navigationPath = NavigationPath()
+            openHome()
             UserDefaults.standard.removeObject(forKey: "journey.setup.stations")
             UserDefaults.standard.removeObject(forKey: "journey.avoidedLines")
         }
     }
 #endif
+}
+
+/// Which tab each journey belongs to, and which journey pages are mounted.
+@Observable
+final class JourneyTabRegistry {
+    /// Tab → the journey started from it, which no other tab shows.
+    var sessions: [UUID: UUID] = [:]
+    var mountedPages: Set<UUID> = []
+}
+
+private struct JourneyEndButton: View {
+    let onEnd: () -> Void
+    @State private var isConfirming = false
+
+    var body: some View {
+        Button {
+            isConfirming = true
+        } label: {
+            Image(systemName: "stop.fill")
+                .foregroundStyle(.red)
+                .frame(width: TabBottomBarMetrics.itemHeight, height: TabBottomBarMetrics.itemHeight)
+                .contentShape(Circle())
+        }
+        .accessibilityLabel("Button.EndJourney")
+        .glassEffect(.regular.interactive(), in: .circle)
+        .confirmationDialog(
+            "Journey.End.ConfirmTitle",
+            isPresented: $isConfirming,
+            titleVisibility: .visible
+        ) {
+            Button("Button.EndJourney", role: .destructive, action: onEnd)
+            Button("Button.KeepJourney", role: .cancel) {
+                // Dismissal is handled by the dialog
+            }
+        }
+    }
 }

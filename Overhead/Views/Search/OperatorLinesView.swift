@@ -7,8 +7,7 @@ import Backbone
 struct OperatorLinesView: View {
     let operatorId: String
     @ObservedObject var viewModel: JourneyViewModel
-
-    @State private var selectedLine: TrainLine?
+    let onOpenLine: (String) -> Void
 
     private var groups: [(id: String, title: String?, lines: [TrainLine])] {
         OperatorSections.groups(forOperator: operatorId, lines: viewModel.availableLines)
@@ -26,7 +25,7 @@ struct OperatorLinesView: View {
                                 .padding(.horizontal, 6)
                         }
                         LineGrid(lines: group.lines) { line in
-                            selectedLine = line
+                            onOpenLine(line.id)
                         }
                     }
                 }
@@ -37,8 +36,5 @@ struct OperatorLinesView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle(OperatorSections.title(for: operatorId))
         .navigationBarTitleDisplayMode(.inline)
-        .navigationDestination(item: $selectedLine) { line in
-            StationPickerView(line: line, viewModel: viewModel)
-        }
     }
 }

@@ -51,7 +51,7 @@ struct GalaxyLCDView: View {
     // MARK: - Atmosphere
 
     private var starfield: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 8.0)) { context in
+        LCDTimeline(animationInterval: 1.0 / 8.0) { context in
             Canvas { ctx, size in
                 let t = context.date.timeIntervalSinceReferenceDate
                 for i in 0..<70 {
