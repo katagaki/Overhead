@@ -320,6 +320,7 @@ struct RootView: View {
             .navigationDestination(for: ScreenshotLineTarget.self) { target in
                 if let line = viewModel.availableLines.first(where: { $0.id == target.lineId }) {
                     StationPickerView(line: line, viewModel: viewModel)
+                        .tabPage(pathToken: AppPathToken.search(.line(target.lineId)))
                 }
             }
 #endif
