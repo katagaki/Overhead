@@ -110,6 +110,12 @@ struct TrainJourneyAttributes: ActivityAttributes {
         return legLines.last { $0.stationIndex < next } ?? legLines.first
     }
 
+    /// Scheduled time at a journey station, delay applied.
+    func stationTime(at index: Int, delayMinutes: Int) -> Date? {
+        guard stationTimes.indices.contains(index) else { return nil }
+        return Date(timeIntervalSince1970: stationTimes[index] + Double(delayMinutes * 60))
+    }
+
     /// Nil for the rest of a straight (one-seat) ride.
     func upcomingTransfer(nextIndex: Int?) -> LegLine? {
         guard let next = nextIndex else { return nil }

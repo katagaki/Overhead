@@ -19,30 +19,22 @@ struct TrainJourneyLiveActivity: Widget {
             let legColor = Color(hex: leg?.lineColorHex ?? attrs.lineColorHex)
 
             return DynamicIsland {
-                // Keep badges clear of the island's clipping rounded corners.
+                // Beside the camera, inset clear of the island's rounded corners.
                 DynamicIslandExpandedRegion(.leading) {
-                    if !legSymbol.isEmpty {
-                        LCDLineSymbolBadge(symbol: legSymbol, color: legColor)
-                            .sized(22)
-                            .padding(.leading, 8)
-                            .padding(.top, 6)
-                    }
+                    IslandCornerTime(attributes: attrs, state: state, side: .leading)
+                        .padding(.leading, 26)
+                        .padding(.top, 12)
                 }
 
                 DynamicIslandExpandedRegion(.trailing) {
-                    IslandRideAheadBadge(attributes: attrs, state: state)
-                        .padding(.trailing, 8)
-                        .padding(.top, 6)
+                    IslandCornerTime(attributes: attrs, state: state, side: .trailing)
+                        .padding(.trailing, 26)
+                        .padding(.top, 12)
                 }
 
-                DynamicIslandExpandedRegion(.center) {
-                    ExpandedIslandLineView(attributes: attrs, state: state)
-                        .padding(.horizontal, 4)
-                        .padding(.top, 10)
-                }
-
+                // Full width; .center would be squeezed between the corner times.
                 DynamicIslandExpandedRegion(.bottom) {
-                    ExpandedIslandBottomView(attributes: attrs, state: state)
+                    ExpandedIslandView(attributes: attrs, state: state)
                 }
 
             } compactLeading: {
@@ -94,6 +86,8 @@ struct TrainJourneyLiveActivity: Widget {
                 .progressViewStyle(.circular)
                 .tint(legColor)
             }
+            // Insets above are measured from the island's edge.
+            .contentMargins(.all, 0, for: .expanded)
         }
         // Lets the lock screen's two bands run to the container's edges.
         .contentMarginsDisabled()
@@ -167,6 +161,12 @@ struct WatchLiveActivityView: View {
         return attributes.stationNames[transfer.stationIndex]
     }
 
+    /// Arrival at the next 乗換 when there is one, otherwise at the destination.
+    private var displayedTime: Date {
+        transfer.flatMap { attributes.stationTime(at: $0.stationIndex, delayMinutes: state.delayMinutes) }
+            ?? state.estimatedArrival
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             topBand
@@ -234,7 +234,7 @@ struct WatchLiveActivityView: View {
                     .foregroundColor(Self.darkInkSecondary)
             }
             Spacer(minLength: 4)
-            Text(ExpandedIslandBottomView.formatTime(state.estimatedArrival))
+            Text(displayedTime.lcdTime)
                 .font(.system(size: 15, weight: .bold, design: .rounded))
                 .foregroundColor(Self.darkInk)
         }
@@ -245,174 +245,99 @@ struct WatchLiveActivityView: View {
     }
 }
 
-// MARK: - Expanded Island Bottom View
+// MARK: - Time Formatting
 
-struct ExpandedIslandBottomView: View {
-    let attributes: TrainJourneyAttributes
-    let state: TrainJourneyAttributes.ContentState
-
-    private var leg: TrainJourneyAttributes.LegLine? {
-        attributes.currentLeg(nextIndex: state.nextStationIndex)
-    }
-
-    private var legColor: Color {
-        Color(hex: leg?.lineColorHex ?? attributes.lineColorHex)
-    }
-
-    private var nextStationCode: String {
-        guard let idx = state.nextStationIndex,
-              attributes.stationCodes.indices.contains(idx) else { return "" }
-        return attributes.stationCodes[idx]
-    }
-
-    private var nextStationColor: Color {
-        Color(hex: attributes.stationColorHex(at: state.nextStationIndex))
-    }
-
-    private static let sideColumnWidth: CGFloat = 92
-
-    var body: some View {
-        ZStack {
-            HStack(alignment: .center, spacing: 8) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(leg?.lineName ?? attributes.lineName)
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(legColor)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-
-                    Text("Destination.Suffix \(attributes.trainType) \(attributes.destinationName)")
-                        .font(.system(size: 9, weight: .medium))
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-
-                    trackingModeBadge
-                }
-                .frame(width: Self.sideColumnWidth, alignment: .leading)
-
-                Spacer(minLength: 0)
-
-                HStack(alignment: .firstTextBaseline, spacing: 4) {
-                    Text("Label.EstimatedArrival")
-                        .font(.system(size: 8))
-                        .foregroundColor(.secondary)
-                    Text(Self.formatTime(state.estimatedArrival))
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundColor(.primary)
-                }
-                .frame(width: Self.sideColumnWidth, alignment: .trailing)
-            }
-
-            nextStationDisplay
-        }
-        .padding(.horizontal, 8)
-        .padding(.top, 2)
-    }
-
-    private var nextStationDisplay: some View {
-        VStack(spacing: 1) {
-            HStack(spacing: 5) {
-                if !nextStationCode.isEmpty {
-                    LCDStationNumberBadge(code: nextStationCode, color: nextStationColor, dimension: 22)
-                }
-                Text(state.nextStationName)
-                    .font(.system(size: 21, weight: .bold))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.5)
-            }
-            Text(state.nextStationNameEn)
-                .font(.system(size: 8))
-                .foregroundColor(.secondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-        }
-        .padding(.horizontal, Self.sideColumnWidth + 2)
-    }
-
-    // MARK: - Tracking Mode Badge
-
-    @ViewBuilder
-    private var trackingModeBadge: some View {
-        let mode = state.trackingModeRaw
-        if mode == "Timetable" {
-            islandModeBadge("clock.fill", "Badge.Timetable", .orange)
-        } else if mode == "GPS" {
-            islandModeBadge("location.fill", "Badge.GPS", .green)
-        } else {
-            islandModeBadge("location.fill", "Badge.GPSPlusTimetable", .blue)
-        }
-    }
-
-    private func islandModeBadge(_ icon: String, _ key: LocalizedStringKey,
-                                 _ color: Color) -> some View {
-        HStack(spacing: 2) {
-            Image(systemName: icon)
-                .font(.system(size: 7))
-            Text(key)
-                .font(.system(size: 8, weight: .bold))
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-        }
-        .foregroundColor(color)
-        .padding(.horizontal, 5)
-        .padding(.vertical, 2)
-        .background(color.opacity(0.15))
-        .clipShape(Capsule())
-    }
-
-    static func formatTime(_ date: Date) -> String {
+extension Date {
+    private static let lcdFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "HH:mm"
         f.timeZone = TimeZone(identifier: "Asia/Tokyo")
-        return f.string(from: date)
+        return f
+    }()
+
+    var lcdTime: String { Self.lcdFormatter.string(from: self) }
+}
+
+// MARK: - Island Corner Time
+
+/// Beside the camera: when the rider next boards, changes or gets off on the
+/// left, the final arrival on the right.
+struct IslandCornerTime: View {
+    enum Side { case leading, trailing }
+
+    let attributes: TrainJourneyAttributes
+    let state: TrainJourneyAttributes.ContentState
+    let side: Side
+
+    private var content: (caption: LocalizedStringKey, time: Date) {
+        guard side == .leading else { return ("Label.ArrivalTime", state.estimatedArrival) }
+        if state.status == .notStarted {
+            return ("Label.BoardingTime", state.departure)
+        }
+        if let transfer = attributes.upcomingTransfer(nextIndex: state.nextStationIndex),
+           let time = attributes.stationTime(at: transfer.stationIndex, delayMinutes: state.delayMinutes) {
+            return ("Label.NextTransfer", time)
+        }
+        return ("Label.GetOffTime", state.estimatedArrival)
+    }
+
+    var body: some View {
+        let content = content
+        VStack(alignment: side == .leading ? .leading : .trailing, spacing: 0) {
+            Text(content.caption)
+                .font(.system(size: 8, weight: .semibold))
+                .foregroundColor(Color(white: 0.6))
+            Text(content.time.lcdTime)
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+        }
+        .lineLimit(1)
     }
 }
 
-// MARK: - Island Ride-Ahead Badge
+// MARK: - Expanded Island View
 
-struct IslandRideAheadBadge: View {
+struct ExpandedIslandView: View {
     let attributes: TrainJourneyAttributes
     let state: TrainJourneyAttributes.ContentState
 
-    var body: some View {
-        let nextIndex = state.nextStationIndex
+    private var nextIndex: Int {
+        min(state.nextStationIndex ?? attributes.stationCount - 1, attributes.stationCount - 1)
+    }
 
-        if let transfer = attributes.upcomingTransfer(nextIndex: nextIndex),
-           !transfer.lineSymbol.isEmpty {
-            VStack(spacing: 2) {
-                LCDLineSymbolBadge(symbol: transfer.lineSymbol,
-                                   color: Color(hex: transfer.lineColorHex))
-                    .sized(22)
-                Text("Label.Transfer")
+    private var nextStationCode: String {
+        attributes.stationCodes.indices.contains(nextIndex) ? attributes.stationCodes[nextIndex] : ""
+    }
+
+    var body: some View {
+        VStack(spacing: 6) {
+            VStack(spacing: 0) {
+                HStack(spacing: 5) {
+                    Text("Label.Next")
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundColor(.secondary)
+                    if !nextStationCode.isEmpty {
+                        LCDStationNumberBadge(code: nextStationCode,
+                                              color: Color(hex: attributes.stationColorHex(at: nextIndex)),
+                                              dimension: 22)
+                    }
+                    Text(state.nextStationName)
+                        .font(.system(size: 21, weight: .bold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                }
+                Text(state.nextStationNameEn)
                     .font(.system(size: 8))
                     .foregroundColor(.secondary)
-                    .lineLimit(1)
-            }
-        } else if !attributes.destinationCode.isEmpty {
-            VStack(spacing: 2) {
-                LCDStationNumberBadge(
-                    code: attributes.destinationCode,
-                    color: Color(hex: attributes.destinationColorHex),
-                    dimension: 22
-                )
-                Text("Label.GetOffAt")
-                    .font(.system(size: 8))
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-            }
-        } else {
-            VStack(spacing: 2) {
-                Text(attributes.destinationName)
-                    .font(.system(size: 11, weight: .bold))
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
-                Text("Label.GetOffAt")
-                    .font(.system(size: 8))
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
             }
+
+            IslandRouteLine(attributes: attributes, state: state)
         }
+        .padding(.horizontal, 20)
+        .padding(.top, 6)
+        .padding(.bottom, 16)
     }
 }
 
@@ -533,7 +458,7 @@ struct LockScreenLiveActivityView: View {
                 if let transfer = transferAtNextStop {
                     transferCue(transfer)
                 } else if state.status == .notStarted {
-                    Text("LiveActivity.DepartsAt \(ExpandedIslandBottomView.formatTime(state.departure))")
+                    Text("LiveActivity.DepartsAt \(state.departure.lcdTime)")
                         .font(.system(size: 10, weight: .semibold, design: .rounded))
                         .foregroundColor(Self.darkInk)
                 }
@@ -543,7 +468,7 @@ struct LockScreenLiveActivityView: View {
                 Text("Label.EstimatedArrival")
                     .font(.system(size: 9))
                     .foregroundColor(Self.darkInkSecondary)
-                Text(ExpandedIslandBottomView.formatTime(state.estimatedArrival))
+                Text(state.estimatedArrival.lcdTime)
                     .font(.system(size: 19, weight: .bold, design: .rounded))
                     .foregroundColor(Self.darkInk)
             }
@@ -876,166 +801,271 @@ struct LCDLineView: View {
     }
 }
 
-// MARK: - Expanded Island Line View
+// MARK: - Island Route Line
 
-struct ExpandedIslandLineView: View {
+/// The current leg across most of the width with the next leg squeezed after
+/// it; finished legs drop off the left.
+struct IslandRouteLine: View {
     let attributes: TrainJourneyAttributes
     let state: TrainJourneyAttributes.ContentState
 
-    private var lineColor: Color { Color(hex: attributes.lineColorHex) }
+    private let pad: CGFloat = 12
+    private let trackY: CGFloat = 8
+    private let trackHeight: CGFloat = 3
+    /// Width the current leg keeps while a 乗換 is ahead.
+    private let legShare: CGFloat = 0.64
 
-    private var nextStationIndex: Int? {
-        if let next = state.nextStationIndex,
-           next < attributes.stationCount { return next }
-        guard let current = state.currentStationIndex,
-              current + 1 < attributes.stationCount else { return nil }
-        return current + 1
+    private var count: Int { attributes.stationCount }
+    private var transfers: [Int] { attributes.legLines.dropFirst().map(\.stationIndex) }
+    private var next: Int { min(state.nextStationIndex ?? count - 1, count - 1) }
+    /// Where this leg was boarded.
+    private var start: Int { transfers.last { $0 < next } ?? 0 }
+    /// The 乗換 ending this leg.
+    private var transfer: Int? { attributes.upcomingTransfer(nextIndex: state.nextStationIndex)?.stationIndex }
+    /// The next leg's far end, or the destination.
+    private var end: Int { transfer.flatMap { t in transfers.first { $0 > t } } ?? count - 1 }
+
+    /// Last stop the train has left or is standing at.
+    private var from: Int {
+        if let current = state.currentStationIndex { return current }
+        let stops = attributes.stationStops
+        return (start..<next).last { stops.indices.contains($0) ? stops[$0] : true } ?? max(next - 1, 0)
     }
 
-    private var transferIndices: [Int] {
-        attributes.legLines.dropFirst().map(\.stationIndex)
+    private func color(_ i: Int) -> Color {
+        attributes.stationColors.indices.contains(i)
+            ? Color(hex: attributes.stationColors[i]) : Color(hex: attributes.lineColorHex)
     }
 
-    /// The station's own line colour; through-services put more than one on
-    /// the same journey.
-    private func color(at index: Int) -> Color {
-        attributes.stationColors.indices.contains(index)
-            ? Color(hex: attributes.stationColors[index]) : lineColor
-    }
-
-    /// Last station on the outgoing line at each colour change.
-    private var junctionIndices: [Int] {
-        let colors = attributes.stationColors
-        guard colors.count == attributes.stationCount else { return [] }
-        return (0..<max(attributes.stationCount - 1, 0)).filter { colors[$0] != colors[$0 + 1] }
-    }
-
-    /// Riders stay aboard through a 直通 junction; a 乗り換え they don't.
-    private func isChangeStop(_ index: Int) -> Bool {
-        transferIndices.contains(index) || transferIndices.contains(index + 1)
+    private func x(_ i: Int, in w: CGFloat) -> CGFloat {
+        let tw = w - pad * 2
+        guard let t = transfer else {
+            return pad + tw * CGFloat(i - start) / CGFloat(max(end - start, 1))
+        }
+        let legEnd = pad + tw * legShare
+        if i <= t {
+            return pad + (legEnd - pad) * CGFloat(i - start) / CGFloat(max(t - start, 1))
+        }
+        return legEnd + (w - pad - legEnd) * CGFloat(i - t) / CGFloat(max(end - t, 1))
     }
 
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
-            let count = attributes.stationCount
-            let emphR: CGFloat = 5
-            let pad: CGFloat = emphR + 2
-            let trackHeight: CGFloat = 1.5
-
-            ZStack(alignment: .leading) {
-                Capsule()
-                    .fill(Color(white: 0.3))
-                    .frame(width: w - pad * 2, height: trackHeight)
-                    .offset(x: pad)
-
-                // One fill per line ridden, masked to its stretch of track.
-                let trackWidth = w - pad * 2
-                let junctions = junctionIndices
-                let bounds: [CGFloat] = junctions.map {
-                    trackWidth * CGFloat($0) / CGFloat(max(count - 1, 1))
+            ZStack(alignment: .topLeading) {
+                track(in: w)
+                ForEach(start...end, id: \.self) { i in
+                    dot(i).position(x: x(i, in: w), y: trackY)
                 }
-                ZStack(alignment: .leading) {
-                    ForEach(0...junctions.count, id: \.self) { run in
-                        let start = run == 0 ? 0 : bounds[run - 1]
-                        let end = run == junctions.count ? nil : bounds[run]
-                        ProgressView(timerInterval: state.journeyInterval, countsDown: false) {
-                        } currentValueLabel: {
-                        }
-                        .progressViewStyle(.linear)
-                        .tint(color(at: run == 0 ? 0 : junctions[run - 1] + 1))
-                        .frame(width: trackWidth, height: trackHeight)
-                        .clipped()
-                        .mask(alignment: .leading) {
-                            HStack(spacing: 0) {
-                                Color.clear.frame(width: max(0, start))
-                                if let end {
-                                    Color.black.frame(width: max(0, end - start))
-                                    Color.clear.frame(maxWidth: .infinity)
-                                } else {
-                                    Color.black.frame(maxWidth: .infinity)
-                                }
-                            }
-                        }
+                IslandLabelRow {
+                    IslandLegInfo(attributes: attributes, state: state)
+                        .fixedSize()
+                        .layoutValue(key: IslandLabelAnchor.self, value: .init(x: pad - 6, align: .leading))
+                    if let transfer {
+                        IslandNextLegLabel(attributes: attributes, transferIndex: transfer)
+                            .fixedSize()
+                            .layoutValue(key: IslandLabelAnchor.self,
+                                         value: .init(x: (x(transfer, in: w) + x(end, in: w)) / 2, align: .center))
+                    } else {
+                        IslandDestinationLabel(attributes: attributes)
+                            .fixedSize()
+                            .layoutValue(key: IslandLabelAnchor.self, value: .init(x: w, align: .trailing))
                     }
                 }
-                .frame(width: trackWidth, height: trackHeight)
-                .position(x: pad + trackWidth / 2, y: 6)
-
-                ForEach(0..<count, id: \.self) { i in
-                    let frac = count > 1 ? Double(i) / Double(count - 1) : 0
-                    let x = pad + (w - pad * 2) * frac
-                    let isPast = frac <= state.progress + 0.01
-                    let isNext = nextStationIndex == i
-                    let isTerminal = i == 0 || i == count - 1
-                    let isTransfer = transferIndices.contains(i)
-                    let r = emphR
-                    let isJunction = junctionIndices.contains(i) && !isNext
-                    let nextColor = color(at: min(i + 1, count - 1))
-
-                    if isJunction, !isChangeStop(i) {
-                        HStack(spacing: 0) {
-                            color(at: i)
-                            nextColor
-                        }
-                        .frame(width: r * 2, height: r * 2)
-                        .clipShape(Circle())
-                        .position(x: x, y: 6)
-                    }
-
-                    if isJunction, isChangeStop(i) {
-                        // Two rings with the track cut between them: the rider
-                        // steps off one line and onto the other.
-                        ForEach([-1.0, 1.0], id: \.self) { side in
-                            Circle()
-                                .fill(Color.black)
-                                .blendMode(.destinationOut)
-                                .frame(width: r * 2, height: r * 2)
-                                .position(x: x + side * (r + 0.5), y: 6)
-                        }
-                        Rectangle()
-                            .fill(Color.black)
-                            .blendMode(.destinationOut)
-                            .frame(width: 4, height: trackHeight + 1)
-                            .position(x: x, y: 6)
-                        Circle()
-                            .strokeBorder(color(at: i), lineWidth: 1.5)
-                            .frame(width: r * 2, height: r * 2)
-                            .position(x: x - r - 0.5, y: 6)
-                        Circle()
-                            .strokeBorder(nextColor, lineWidth: 1.5)
-                            .frame(width: r * 2, height: r * 2)
-                            .position(x: x + r + 0.5, y: 6)
-                    }
-
-                    if isNext || isTerminal || isTransfer, !isJunction {
-                        ZStack {
-                            Circle()
-                                .fill(isPast ? color(at: i) : Color(white: 0.4))
-                                .frame(width: r * 2, height: r * 2)
-
-                            if isTerminal || isTransfer {
-                                Circle()
-                                    .strokeBorder(isPast ? color(at: i) : Color(white: 0.4), lineWidth: 1.5)
-                                    .frame(width: r * 2 + 3, height: r * 2 + 3)
-                            }
-
-                            if isNext {
-                                Circle()
-                                    .fill(Color.white)
-                                    .frame(width: r, height: r)
-                                Circle()
-                                    .strokeBorder(color(at: i), lineWidth: 1)
-                                    .frame(width: r * 2 + 3, height: r * 2 + 3)
-                            }
-                        }
-                        .position(x: x, y: 6)
-                    }
-                }
+                .frame(width: w)
+                .offset(y: trackY + 10)
             }
-            .compositingGroup()
-            .frame(height: 12)
         }
-        .frame(height: 12)
+        .frame(height: 52)
+    }
+
+    // MARK: Track
+
+    @ViewBuilder
+    private func track(in w: CGFloat) -> some View {
+        // A 乗換's two rings sit in a gap in the track.
+        let gap: (Int) -> CGFloat = { transfers.contains($0) ? 10 : 0 }
+        ForEach(start..<end, id: \.self) { i in
+            let left = x(i, in: w) + gap(i)
+            let right = x(i + 1, in: w) - (transfers.contains(i + 1) ? 5 : 0)
+            Rectangle()
+                .fill(color(i + 1).opacity(i < from ? 1 : 0.3))
+                .frame(width: max(0, right - left), height: trackHeight)
+                .offset(x: left, y: trackY - trackHeight / 2)
+        }
+        // The current hop fills by itself while the app is suspended.
+        if from < next, state.status != .notStarted {
+            let left = x(from, in: w) + gap(from)
+            let width = max(0, x(next, in: w) - left)
+            ProgressView(timerInterval: state.segmentInterval, countsDown: false) {
+            } currentValueLabel: {
+            }
+            .progressViewStyle(.linear)
+            .tint(color(next))
+            .frame(width: width, height: trackHeight)
+            .clipped()
+            .position(x: left + width / 2, y: trackY)
+        }
+    }
+
+    // MARK: Stops
+
+    @ViewBuilder
+    private func dot(_ i: Int) -> some View {
+        let isPassed = i <= from && state.status != .notStarted
+        let isStop = attributes.stationStops.indices.contains(i) ? attributes.stationStops[i] : true
+        if transfers.contains(i) {
+            HStack(spacing: 1) {
+                ring(color(i))
+                ring(color(min(i + 1, count - 1)))
+            }
+        } else if i == next {
+            Circle()
+                .fill(Color.white)
+                .overlay(Circle().strokeBorder(color(i), lineWidth: 3))
+                .frame(width: 13, height: 13)
+        } else if i == start || i == count - 1 {
+            ring(isPassed ? color(i) : Color(white: 0.55))
+        } else if i + 1 < count, color(i) != color(i + 1) {
+            // 直通 junction: one stop shared by both lines.
+            HStack(spacing: 0) {
+                color(i)
+                color(i + 1)
+            }
+            .frame(width: 6, height: 6)
+            .clipShape(Circle())
+        } else {
+            let size: CGFloat = isStop ? 6 : 4
+            Circle()
+                .fill(isPassed ? color(i) : Color(white: isStop ? 0.45 : 0.3))
+                .frame(width: size, height: size)
+        }
+    }
+
+    private func ring(_ color: Color) -> some View {
+        Circle()
+            .strokeBorder(color, lineWidth: 2)
+            .background(Circle().fill(Color.black))
+            .frame(width: 11, height: 11)
+    }
+}
+
+// MARK: - Island Route Labels
+
+/// The leg being ridden: its line and where the train is bound.
+struct IslandLegInfo: View {
+    let attributes: TrainJourneyAttributes
+    let state: TrainJourneyAttributes.ContentState
+
+    var body: some View {
+        let leg = attributes.currentLeg(nextIndex: state.nextStationIndex)
+        let color = Color(hex: leg?.lineColorHex ?? attributes.lineColorHex)
+        HStack(spacing: 6) {
+            if let symbol = leg?.lineSymbol, !symbol.isEmpty {
+                LCDLineSymbolBadge(symbol: symbol, color: color).sized(26)
+            }
+            VStack(alignment: .leading, spacing: 1) {
+                Text(leg?.lineName ?? attributes.lineName)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(color)
+                Text("Destination.Suffix \(attributes.trainType) \(attributes.destinationName)")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+}
+
+/// 乗換 onto the next leg: which line, and where.
+struct IslandNextLegLabel: View {
+    let attributes: TrainJourneyAttributes
+    let transferIndex: Int
+
+    var body: some View {
+        let leg = attributes.legLines.first { $0.stationIndex == transferIndex }
+        let color = Color(hex: leg?.lineColorHex ?? attributes.lineColorHex)
+        HStack(spacing: 6) {
+            Text("Label.Transfer")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(Color(white: 0.6))
+            if let symbol = leg?.lineSymbol, !symbol.isEmpty {
+                LCDLineSymbolBadge(symbol: symbol, color: color).sized(26)
+            }
+            VStack(alignment: .leading, spacing: 1) {
+                Text(leg?.lineName ?? "")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(color)
+                Text(attributes.stationNames.indices.contains(transferIndex)
+                     ? attributes.stationNames[transferIndex] : "")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(.white)
+            }
+        }
+    }
+}
+
+/// 下車 at the destination, on the last leg.
+struct IslandDestinationLabel: View {
+    let attributes: TrainJourneyAttributes
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Text("Label.GetOffAt")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(Color(white: 0.6))
+            if !attributes.destinationCode.isEmpty {
+                LCDStationNumberBadge(code: attributes.destinationCode,
+                                      color: Color(hex: attributes.destinationColorHex),
+                                      dimension: 26)
+            }
+            VStack(alignment: .leading, spacing: 1) {
+                Text(attributes.destinationName)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.white)
+                Text(attributes.destinationNameEn)
+                    .font(.system(size: 9))
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+}
+
+struct IslandLabelAnchor: LayoutValueKey {
+    enum Align { case leading, center, trailing }
+    let x: CGFloat
+    let align: Align
+    static let defaultValue = IslandLabelAnchor(x: 0, align: .center)
+}
+
+/// Labels sit at their anchor, then shuffle apart rather than overlap.
+struct IslandLabelRow: Layout {
+    var gap: CGFloat = 6
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        CGSize(width: proposal.width ?? 0,
+               height: subviews.map { $0.sizeThatFits(.unspecified).height }.max() ?? 0)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let sizes = subviews.map { $0.sizeThatFits(.unspecified) }
+        var minX: [CGFloat] = subviews.indices.map { i in
+            let anchor = subviews[i][IslandLabelAnchor.self]
+            let w = sizes[i].width
+            let raw: CGFloat = switch anchor.align {
+            case .leading: anchor.x
+            case .center: anchor.x - w / 2
+            case .trailing: anchor.x - w
+            }
+            return min(max(raw, 0), bounds.width - w)
+        }
+        for i in stride(from: minX.count - 2, through: 0, by: -1) {
+            minX[i] = min(minX[i], minX[i + 1] - gap - sizes[i].width)
+        }
+        for i in minX.indices.dropFirst() {
+            minX[i] = max(minX[i], minX[i - 1] + sizes[i - 1].width + gap)
+        }
+        for i in subviews.indices {
+            subviews[i].place(at: CGPoint(x: bounds.minX + minX[i], y: bounds.minY), proposal: .unspecified)
+        }
     }
 }
