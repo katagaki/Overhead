@@ -17,6 +17,8 @@ final class JourneySession: ObservableObject, Identifiable {
     @Published private(set) var positionState: TrainPositionState?
     @Published private(set) var currentDelay: DelayInfo?
     @Published private(set) var trackingMode: TrackingMode = .timetable
+    /// Tracking, Live Activity and PiP wind down once the destination is reached.
+    @Published private(set) var hasArrived = false
 
     private let liveActivity = LiveActivityManager()
     private lazy var locationTracker = LocationTracker(liveActivity: liveActivity)
@@ -77,6 +79,10 @@ final class JourneySession: ObservableObject, Identifiable {
             .sink { [weak self] state in
                 guard let self, let state else { return }
                 self.positionState = state
+                // Manual stepping can overshoot and step back, so it never auto-finishes.
+                if state.status == .arrived, state.trackingModeRaw != TrackingMode.manual.rawValue {
+                    self.finishOnArrival()
+                }
             }
             .store(in: &cancellables)
 
@@ -109,6 +115,7 @@ final class JourneySession: ObservableObject, Identifiable {
     ) {
         liveActivity.endActivity()
         pendingActivityStart = nil
+        hasArrived = false
 
         self.journey = journey
         self.line = line
@@ -206,6 +213,18 @@ final class JourneySession: ObservableObject, Identifiable {
         liveActivity.endActivity()
         JourneyNotificationManager.shared.cancel(id: id)
         pendingActivityStart = nil
+    }
+
+    private func finishOnArrival() {
+        guard isTracking else { return }
+        locationTracker.stopTracking()
+        isTracking = false
+        liveActivity.endActivity()
+        pendingActivityStart = nil
+        hasArrived = true
+        if let destination = journey.journeyStations.last {
+            JourneyNotificationManager.shared.notifyArrival(id: id, destination: destination)
+        }
     }
 
     // MARK: - Controls

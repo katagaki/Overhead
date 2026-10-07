@@ -78,9 +78,10 @@ final class JourneyViewModel: ObservableObject {
 
     // MARK: - Picture in Picture
 
-    /// One PiP window: the focused journey's, or the newest one's.
+    /// One PiP window: the focused journey's, or the newest one's, while still under way.
     var pipSession: JourneySession? {
-        focusedSession ?? sessions.last
+        if let focused = focusedSession, !focused.hasArrived { return focused }
+        return sessions.last { !$0.hasArrived }
     }
 
     private func updatePiP() {
@@ -92,12 +93,10 @@ final class JourneyViewModel: ObservableObject {
         LCDPiPManager.shared.prepare { [weak self] in
             self?.pipSession?.renderLCDImage(scale: 2, padded: false)
         }
-        pipStatusObservation = session.$positionState
-            .map { $0?.status }
-            .removeDuplicates()
-            .sink { status in
-                LCDPiPManager.shared.setAutoStartAllowed(status != .arrived)
-            }
+        pipStatusObservation = session.$hasArrived
+            .filter { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.updatePiP() }
     }
 
     // MARK: - Load Lines

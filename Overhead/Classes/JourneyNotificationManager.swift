@@ -83,6 +83,21 @@ final class JourneyNotificationManager: NSObject, UNUserNotificationCenterDelega
         center.removePendingNotificationRequests(withIdentifiers: ids)
     }
 
+    /// Fires straight away; anything still pending for the session is now moot.
+    func notifyArrival(id: UUID, destination: Station) {
+        let prefix = Self.prefix(for: id)
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "Notification.Arrived.Title")
+        content.body = String(localized: "Notification.Arrived.Body \(destination.localizedName)")
+        content.sound = Self.alertSound
+        let request = UNNotificationRequest(identifier: prefix + "arrived", content: content, trigger: nil)
+        Task {
+            await cancelPending(prefix: prefix)
+            guard isEnabled, await requestAuthorization() else { return }
+            try? await center.add(request)
+        }
+    }
+
     func cancel(id: UUID) {
         Task { await cancelPending(prefix: Self.prefix(for: id)) }
     }

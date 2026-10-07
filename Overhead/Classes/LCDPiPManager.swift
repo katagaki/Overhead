@@ -75,12 +75,6 @@ final class LCDPiPManager: NSObject, ObservableObject {
         scheduleNextFrame()
     }
 
-    /// Blocks auto-start once the journey has arrived; an already-visible
-    /// PiP window is left alone.
-    func setAutoStartAllowed(_ allowed: Bool) {
-        controller?.canStartPictureInPictureAutomaticallyFromInline = allowed
-    }
-
     /// Disarms PiP (journey ended). The controller must be disarmed AND
     /// released — a live controller with a retained frame auto-starts PiP
     /// on the next backgrounding even with no journey.
