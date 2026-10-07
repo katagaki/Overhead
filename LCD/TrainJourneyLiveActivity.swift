@@ -41,7 +41,7 @@ struct TrainJourneyLiveActivity: Widget {
                 if !legSymbol.isEmpty {
                     LCDLineSymbolBadge(symbol: legSymbol, color: legColor)
                         .sized(23)
-                        .padding(.leading, 1)
+                        .padding(.leading, 6)
                 } else {
                     HStack(spacing: 3) {
                         Circle()
@@ -63,12 +63,12 @@ struct TrainJourneyLiveActivity: Widget {
                     LCDLineSymbolBadge(symbol: transfer.lineSymbol,
                                        color: Color(hex: transfer.lineColorHex))
                         .sized(23)
-                        .padding(.trailing, 1)
+                        .padding(.trailing, 6)
                 } else if !attrs.destinationCode.isEmpty {
                     LCDStationNumberBadge(code: attrs.destinationCode,
                                           color: Color(hex: attrs.destinationColorHex),
                                           dimension: 23)
-                        .padding(.trailing, 1)
+                        .padding(.trailing, 6)
                 } else {
                     Text(attrs.destinationName.prefix(3))
                         .font(.system(size: 12, weight: .bold))
