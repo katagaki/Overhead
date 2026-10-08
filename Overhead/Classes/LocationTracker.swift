@@ -565,7 +565,8 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
 
         let delayMins = delay?.delayMinutes ?? 0
         let status: TrainPositionState.Status
-        if snapResult.progress >= 0.99 {
+        // A long train can stop short of the station's point, so being at it counts too.
+        if snapResult.progress >= 0.99 || currentStationIdx == stations.count - 1 {
             status = .arrived
         } else if delayMins > 0 {
             status = .delayed

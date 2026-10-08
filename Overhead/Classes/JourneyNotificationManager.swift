@@ -83,28 +83,43 @@ final class JourneyNotificationManager: NSObject, UNUserNotificationCenterDelega
         center.removePendingNotificationRequests(withIdentifiers: ids)
     }
 
-    /// Fires straight away; anything still pending for the session is now moot.
-    func notifyArrival(id: UUID, destination: Station) {
+    /// Earlier alerts in Notification Center, keeping `kept`.
+    private func removeDelivered(prefix: String, keeping kept: String? = nil) async {
+        let delivered = await center.deliveredNotifications()
+        let ids = delivered.map(\.request.identifier).filter { $0.hasPrefix(prefix) && $0 != kept }
+        guard !ids.isEmpty else { return }
+        center.removeDeliveredNotifications(withIdentifiers: ids)
+    }
+
+    /// Fires straight away and replaces the session's earlier alerts.
+    func notifyArrival(id: UUID, destination: Station) async {
         let prefix = Self.prefix(for: id)
+        await cancelPending(prefix: prefix)
+        await removeDelivered(prefix: prefix)
+        guard isEnabled, await requestAuthorization() else { return }
         let content = UNMutableNotificationContent()
         content.title = String(localized: "Notification.Arrived.Title")
         content.body = String(localized: "Notification.Arrived.Body \(destination.localizedName)")
         content.sound = Self.alertSound
         let request = UNNotificationRequest(identifier: prefix + "arrived", content: content, trigger: nil)
-        Task {
-            await cancelPending(prefix: prefix)
-            guard isEnabled, await requestAuthorization() else { return }
-            try? await center.add(request)
-        }
+        try? await center.add(request)
     }
 
+    /// Ended journeys leave nothing behind, delivered alerts included.
     func cancel(id: UUID) {
-        Task { await cancelPending(prefix: Self.prefix(for: id)) }
+        let prefix = Self.prefix(for: id)
+        Task {
+            await cancelPending(prefix: prefix)
+            await removeDelivered(prefix: prefix)
+        }
     }
 
     /// Alerts left over from a previous launch, whose journeys are gone.
     func cancelAll() {
-        Task { await cancelPending(prefix: Self.identifierPrefix) }
+        Task {
+            await cancelPending(prefix: Self.identifierPrefix)
+            await removeDelivered(prefix: Self.identifierPrefix)
+        }
     }
 
     private static func prefix(for id: UUID) -> String {

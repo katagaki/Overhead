@@ -232,8 +232,10 @@ final class LiveActivityManager {
         lastDelayFetchTime = Date()
     }
 
-    func endActivity() {
-        guard let activity = currentActivity else { return }
+    /// The returned task finishes once the system has taken the end.
+    @discardableResult
+    func endActivity() -> Task<Void, Never>? {
+        guard let activity = currentActivity else { return nil }
         let finalState = TrainJourneyAttributes.ContentState(
             progress: 1.0,
             currentStationIndex: nil,
@@ -250,7 +252,7 @@ final class LiveActivityManager {
             nextStationArrivalTimestamp: Date().timeIntervalSince1970
         )
         let content = ActivityContent(state: finalState, staleDate: nil)
-        Task {
+        let ending = Task {
             // Remove immediately rather than leaving the arrived state on the lock screen.
             await activity.end(content, dismissalPolicy: .immediate)
         }
@@ -260,6 +262,7 @@ final class LiveActivityManager {
         stationTimes = []
         stationCount = 0
         lastSentKey = nil
+        return ending
     }
 
     private func contentState(from state: TrainPositionState) -> TrainJourneyAttributes.ContentState {

@@ -217,13 +217,24 @@ final class JourneySession: ObservableObject, Identifiable {
 
     private func finishOnArrival() {
         guard isTracking else { return }
+        // Location was keeping a backgrounded app alive; hold on until the
+        // Live Activity has ended and the alert has been posted.
+        let app = UIApplication.shared
+        var backgroundTask = UIBackgroundTaskIdentifier.invalid
+        backgroundTask = app.beginBackgroundTask { app.endBackgroundTask(backgroundTask) }
+
         locationTracker.stopTracking()
         isTracking = false
-        liveActivity.endActivity()
+        let ending = liveActivity.endActivity()
         pendingActivityStart = nil
         hasArrived = true
-        if let destination = journey.journeyStations.last {
-            JourneyNotificationManager.shared.notifyArrival(id: id, destination: destination)
+        let destination = journey.journeyStations.last
+        Task {
+            await ending?.value
+            if let destination {
+                await JourneyNotificationManager.shared.notifyArrival(id: id, destination: destination)
+            }
+            app.endBackgroundTask(backgroundTask)
         }
     }
 

@@ -403,6 +403,7 @@
       }
     },
     "Label.EstimatedArrival" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
