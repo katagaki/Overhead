@@ -164,9 +164,10 @@ struct LEDMatrixView: View {
             .init(text: "\(type) \(journey.destinationNameJa)ゆき", color: .orange),
             .init(text: "です。", color: .green),
         ], scrolls: true))
+        let isMetro = journey.line.operatorId == "Operator:TokyoMetro"
         bottom.append(LEDPage(segments: [
-            .init(text: "This is the ", color: .green),
-            .init(text: typeNameEn, color: .orange),
+            .init(text: isMetro ? "This is a " : "This is the ", color: .green),
+            .init(text: serviceNameEn, color: .orange),
             .init(text: " train bound for ", color: .green),
             .init(text: journey.destinationNameEn, color: .orange),
             .init(text: ".", color: .green),
@@ -203,13 +204,33 @@ struct LEDMatrixView: View {
         return component
     }
 
-    /// "SemiExpress" → "Semi Express"; raw values are already English.
-    private var typeNameEn: String {
-        journey.service.trainType.rawValue
-            .replacingOccurrences(
-                of: "([a-z])([A-Z])", with: "$1 $2",
-                options: .regularExpression
-            )
+    /// Announcement form: "Chuo Line Rapid Service", "Chuo-Sobu Line local",
+    /// plain "Keihin-Tohoku Line" for locals.
+    private var serviceNameEn: String {
+        let component = journey.line.nameEn
+            .components(separatedBy: " & ").first?
+            .components(separatedBy: " – ").first ?? journey.line.nameEn
+        var line = component
+            .replacingOccurrences(of: #"\s*\(.*\)$"#, with: "", options: .regularExpression)
+        let isLocalLine = line.hasSuffix(" Local Line")
+        for qualifier in [" Rapid Line", " Local Line"] where line.hasSuffix(qualifier) {
+            line = String(line.dropLast(qualifier.count)) + " Line"
+        }
+        let service: String
+        switch journey.service.trainType {
+        case .local: service = isLocalLine ? "local" : ""
+        case .rapid: service = "Rapid Service"
+        case .commuterRapid: service = "Commuter Rapid Service"
+        case .specialRapid: service = "Special Rapid Service"
+        case .sectionRapid: service = "Section Rapid Service"
+        case .sectionSemiExpress: service = "Section Semi Express"
+        case .commuterExpress: service = "Commuter Express"
+        case .commuterSemiExpress: service = "Commuter Semi Express"
+        case .rapidLimitedExpress: service = "Rapid Limited Express"
+        case .commuterLimitedExpress: service = "Commuter Limited Express"
+        default: service = journey.service.trainType.displayNameEn
+        }
+        return service.isEmpty ? line : "\(line) \(service)"
     }
 }
 
