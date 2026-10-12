@@ -70,8 +70,15 @@ final class JourneyViewModel: ObservableObject {
 
     /// Starts tracking a previewed journey.
     func start(_ session: JourneySession) {
+        // Menus asking whether anything is under way read this, not the session.
+        objectWillChange.send()
         session.start()
         updatePiP()
+    }
+
+    /// Ends every started journey, whichever tab it belongs to.
+    func stopAllJourneys() {
+        sessions.filter(\.isStarted).forEach(stopJourney)
     }
 
     func stopJourney(_ session: JourneySession) {

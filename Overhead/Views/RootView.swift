@@ -653,12 +653,13 @@ struct RootView: View {
 
     private func moreMenu(for tabID: UUID) -> some View {
         Menu {
-            if let session = journeyTabs.sessions[tabID].flatMap(viewModel.session(id:)) {
-                Section("Settings.Section.CurrentJourney") {
+            // Every tab's journey, not just this one's; previews are left open.
+            if viewModel.sessions.contains(where: \.isStarted) {
+                Section {
                     Button(role: .destructive) {
-                        viewModel.stopJourney(session)
+                        viewModel.stopAllJourneys()
                     } label: {
-                        Label("Button.EndJourney", systemImage: "stop.circle.fill")
+                        Label("Button.EndAllJourneys", systemImage: "stop.circle.fill")
                     }
                 }
             }
