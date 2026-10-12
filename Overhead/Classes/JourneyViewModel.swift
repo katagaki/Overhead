@@ -19,8 +19,6 @@ final class JourneyViewModel: ObservableObject {
     @Published var isStartingJourney = false
     @Published var showOverwriteConfirmation = false
     @Published var errorMessage: String?
-    @Published var stationTimetable: [StationTimetableData] = []
-    @Published var isLoadingTimetable = false
     @Published var railDirections: [String: (ja: String, en: String)] = [:]
     @Published var plannerFromRequest: StationSearchHit?
     @Published var plannerToRequest: StationSearchHit?
@@ -1162,19 +1160,13 @@ final class JourneyViewModel: ObservableObject {
 
     // MARK: - Station Timetable
 
-    func loadStationTimetable(stationId: String) {
-        isLoadingTimetable = true
-        stationTimetable = []
-
-        if let staticLine = StaticTrainData.line(containingStationId: stationId) {
-            stationTimetable = StaticTimetableGenerator.stationTimetables(
-                forLineId: staticLine.id,
-                stationId: stationId,
-                calendar: .current()
-            )
-        }
-
-        isLoadingTimetable = false
+    func stationTimetables(stationId: String) -> [StationTimetableData] {
+        guard let staticLine = StaticTrainData.line(containingStationId: stationId) else { return [] }
+        return StaticTimetableGenerator.stationTimetables(
+            forLineId: staticLine.id,
+            stationId: stationId,
+            calendar: .current()
+        )
     }
 
     // MARK: - Rail Directions

@@ -10,14 +10,16 @@ struct StationTimetableView: View {
     var preferredDirectionId: String? = nil
     @ObservedObject var viewModel: JourneyViewModel
 
+    /// Held per view so each tab keeps its own station's timetable.
+    @State private var timetables: [StationTimetableData]?
     @State private var selectedDirection: String?
     @State private var detailDeparture: StationDeparture?
 
     var body: some View {
         Group {
-            if viewModel.isLoadingTimetable {
+            if timetables == nil {
                 ProgressView("StationTimetable.Loading")
-            } else if viewModel.stationTimetable.isEmpty {
+            } else if timetables?.isEmpty ?? true {
                 noDataView
             } else {
                 timetableContent
@@ -29,15 +31,15 @@ struct StationTimetableView: View {
             lineId: line.id,
             delayInfo: viewModel.delayCheckInfo(for: line.id)
         )
-        .onAppear {
-            viewModel.loadStationTimetable(stationId: station.id)
+        .task(id: station.id) {
+            timetables = viewModel.stationTimetables(stationId: station.id)
         }
     }
 
     // MARK: - Content
 
     private var currentTimetable: StationTimetableData? {
-        let timetables = viewModel.stationTimetable
+        let timetables = self.timetables ?? []
         if let selectedDirection,
            let match = timetables.first(where: { $0.railDirection == selectedDirection }) {
             return match
@@ -79,7 +81,7 @@ struct StationTimetableView: View {
 
     private func header(nowMinutes: Int) -> some View {
         VStack(spacing: 10) {
-            if viewModel.stationTimetable.count > 1 {
+            if (timetables?.count ?? 0) > 1 {
                 directionPicker
                     .glassEffect(.regular, in: .capsule)
             }
@@ -102,7 +104,7 @@ struct StationTimetableView: View {
 
     private var directionPicker: some View {
         Picker("StationTimetable.Direction", selection: directionBinding) {
-            ForEach(viewModel.stationTimetable, id: \.railDirection) { timetable in
+            ForEach(timetables ?? [], id: \.railDirection) { timetable in
                 Text(timetable.localizedDirectionName)
                     .tag(timetable.railDirection)
             }
