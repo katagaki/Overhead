@@ -419,14 +419,16 @@ struct RootView: View {
 
     // MARK: - Journey
 
-    /// Ending the journey takes the place of opening it while it is showing.
+    /// Starting or ending the journey takes the place of opening it while it is showing.
     @ViewBuilder
     private func journeyBarItem(for tab: AppNavigationStore.Tab) -> some View {
         if let session = journeyTabs.sessions[tab.id].flatMap(viewModel.session(id:)) {
             if tabStore.displayedPathToken(for: tab.id) == .journey(session.id) {
-                JourneyEndButton {
-                    viewModel.stopJourney(session)
-                }
+                JourneyControlButton(
+                    session: session,
+                    onStart: { viewModel.start(session) },
+                    onEnd: { viewModel.stopJourney(session) }
+                )
             } else {
                 JourneyStationToolbarButton(session: session, action: openJourney)
             }
@@ -791,6 +793,41 @@ final class JourneyTabRegistry {
     /// Tab → the journey started from it, which no other tab shows.
     var sessions: [UUID: UUID] = [:]
     var mountedPages: Set<UUID> = []
+}
+
+/// Play while the journey is a preview, stop once it is under way.
+private struct JourneyControlButton: View {
+    @ObservedObject var session: JourneySession
+    let onStart: () -> Void
+    let onEnd: () -> Void
+
+    var body: some View {
+        Group {
+            if session.isStarted {
+                JourneyEndButton(onEnd: onEnd)
+                    .transition(.scale.combined(with: .opacity))
+            } else {
+                JourneyStartButton(onStart: onStart)
+                    .transition(.scale.combined(with: .opacity))
+            }
+        }
+        .animation(.smooth(duration: 0.2), value: session.isStarted)
+    }
+}
+
+private struct JourneyStartButton: View {
+    let onStart: () -> Void
+
+    var body: some View {
+        Button(action: onStart) {
+            Image(systemName: "play.fill")
+                .foregroundStyle(.green)
+                .frame(width: TabBottomBarMetrics.itemHeight, height: TabBottomBarMetrics.itemHeight)
+                .contentShape(Circle())
+        }
+        .accessibilityLabel("Button.StartJourney")
+        .glassEffect(.regular.interactive(), in: .circle)
+    }
 }
 
 private struct JourneyEndButton: View {

@@ -5,8 +5,8 @@ import Backbone
 
 // MARK: - Journey Session
 
-/// One journey in progress, with its own tracking, Live Activity and alerts,
-/// so several can run side by side.
+/// One journey, with its own tracking, Live Activity and alerts, so several
+/// can run side by side. It opens as a preview; nothing runs until `start()`.
 @MainActor
 final class JourneySession: ObservableObject, Identifiable {
 
@@ -19,12 +19,17 @@ final class JourneySession: ObservableObject, Identifiable {
     @Published private(set) var trackingMode: TrackingMode = .timetable
     /// Tracking, Live Activity and PiP wind down once the destination is reached.
     @Published private(set) var hasArrived = false
+    /// A previewed journey only follows the timetable on screen.
+    @Published private(set) var isStarted = false
+
+    var isUnderWay: Bool { isStarted && !hasArrived }
 
     private let liveActivity = LiveActivityManager()
     private lazy var locationTracker = LocationTracker(liveActivity: liveActivity)
     private var cancellables = Set<AnyCancellable>()
     private var pendingActivityStart: (() -> Void)?
     private var isTracking = false
+    private var previewTimer: Timer?
 
     /// Transfer station ID → the line boarded there; kept so alerts can be rescheduled.
     private(set) var transferLines: [String: TrainLine] = [:]
@@ -69,6 +74,7 @@ final class JourneySession: ObservableObject, Identifiable {
         self.line = line
         positionState = fixedState
         currentDelay = delay
+        isStarted = true
     }
 
     private func bindLocationTracker() {
@@ -123,16 +129,11 @@ final class JourneySession: ObservableObject, Identifiable {
         self.legLines = legLines
         self.legColors = legColors
 
-        isTracking = true
-        locationTracker.startTracking(journey: journey, delay: nil)
-        positionState = journey.hasSchedule
-            ? TrainPositionEngine.computePosition(journey: journey, delay: nil)
-            : locationTracker.positionState
-
-        if let state = positionState {
-            startLiveActivity(state: state)
+        if isStarted {
+            beginTracking()
+        } else {
+            startPreview()
         }
-        JourneyNotificationManager.shared.schedule(id: id, journey: journey, transferLines: transferLines)
     }
 
     func install(candidate: TrainCandidate) {
@@ -181,6 +182,50 @@ final class JourneySession: ObservableObject, Identifiable {
         return (journey, legLines, legColors, transferLines)
     }
 
+    // MARK: - Start
+
+    /// Begins tracking, the Live Activity and alerts for a previewed journey.
+    func start() {
+        guard !isStarted else { return }
+        isStarted = true
+        beginTracking()
+    }
+
+    private func beginTracking() {
+        stopPreview()
+        isTracking = true
+        locationTracker.startTracking(journey: journey, delay: nil)
+        positionState = journey.hasSchedule
+            ? TrainPositionEngine.computePosition(journey: journey, delay: nil)
+            : locationTracker.positionState
+
+        if let state = positionState {
+            startLiveActivity(state: state)
+        }
+        JourneyNotificationManager.shared.schedule(id: id, journey: journey, transferLines: transferLines)
+    }
+
+    /// The timetable alone moves the preview, on the tracker's 10s beat.
+    private func startPreview() {
+        refreshPreview()
+        guard previewTimer == nil, journey.hasSchedule else { return }
+        // Scheduled on the main run loop, so the tick is already on the main actor.
+        previewTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.refreshPreview() }
+        }
+        previewTimer?.tolerance = 2
+    }
+
+    private func refreshPreview() {
+        let state = TrainPositionEngine.computePosition(journey: journey, delay: nil)
+        if state != positionState { positionState = state }
+    }
+
+    private func stopPreview() {
+        previewTimer?.invalidate()
+        previewTimer = nil
+    }
+
     private func startLiveActivity(state: TrainPositionState) {
         let journey = journey
         let lineColorHex = line.colorHex
@@ -208,6 +253,7 @@ final class JourneySession: ObservableObject, Identifiable {
     // MARK: - Stop
 
     func stop() {
+        stopPreview()
         if isTracking { locationTracker.stopTracking() }
         isTracking = false
         liveActivity.endActivity()
@@ -252,6 +298,7 @@ final class JourneySession: ObservableObject, Identifiable {
 
     /// Re-applies the alert settings to this journey.
     func rescheduleNotifications() {
+        guard isStarted else { return }
         JourneyNotificationManager.shared.schedule(id: id, journey: journey, transferLines: transferLines)
     }
 

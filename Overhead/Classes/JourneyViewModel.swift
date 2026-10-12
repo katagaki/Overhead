@@ -60,11 +60,17 @@ final class JourneyViewModel: ObservableObject {
         sessions.first { $0.id == id }
     }
 
-    /// Adds a journey; one started where another was focused takes its place.
+    /// Adds a journey as a preview; one opened where another was focused takes its place.
     private func begin(_ session: JourneySession) {
         if let replaced = focusedSession { stopJourney(replaced) }
         sessions.append(session)
         errorMessage = nil
+        updatePiP()
+    }
+
+    /// Starts tracking a previewed journey.
+    func start(_ session: JourneySession) {
+        session.start()
         updatePiP()
     }
 
@@ -78,8 +84,8 @@ final class JourneyViewModel: ObservableObject {
 
     /// One PiP window: the focused journey's, or the newest one's, while still under way.
     var pipSession: JourneySession? {
-        if let focused = focusedSession, !focused.hasArrived { return focused }
-        return sessions.last { !$0.hasArrived }
+        if let focused = focusedSession, focused.isUnderWay { return focused }
+        return sessions.last(where: \.isUnderWay)
     }
 
     private func updatePiP() {
@@ -120,7 +126,7 @@ final class JourneyViewModel: ObservableObject {
         from boardingStation: Station,
         to alightingStation: Station
     ) async {
-        if focusedSession != nil {
+        if focusedSession?.isStarted == true {
             pendingStart = { [weak self] in
                 Task { await self?.performStartJourney(line: line, from: boardingStation, to: alightingStation) }
             }
@@ -990,7 +996,7 @@ final class JourneyViewModel: ObservableObject {
 
     /// Starts a journey on a specific itinerary chosen from the departure search.
     func startJourney(candidate: TrainCandidate) {
-        if focusedSession != nil {
+        if focusedSession?.isStarted == true {
             pendingStart = { [weak self] in self?.begin(JourneySession(candidate: candidate)) }
             showOverwriteConfirmation = true
             return
@@ -1052,7 +1058,7 @@ final class JourneyViewModel: ObservableObject {
     // MARK: - Custom (DIY) Line Journeys
 
     func startCustomJourney(line: CustomLine, fromId: String, toId: String) {
-        if focusedSession != nil {
+        if focusedSession?.isStarted == true {
             pendingStart = { [weak self] in self?.performStartCustomJourney(line: line, fromId: fromId, toId: toId) }
             showOverwriteConfirmation = true
             return
