@@ -169,7 +169,7 @@ struct RootView: View {
                 for sessionID in added { attachJourney(sessionID, to: tabStore.selectedTabID) }
             }
         }
-        .onChange(of: tabStore.selectedTabID) { _, _ in
+        .onTabSelectionChange(in: tabStore) { _, _ in
             syncFocusedJourney()
         }
         // Starting where the selected tab already has a journey replaces it.
