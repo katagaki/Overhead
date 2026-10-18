@@ -88,8 +88,6 @@ struct TrainJourneyAttributes: ActivityAttributes {
     // Each station keeps its own line's color (through-services differ).
     let stationColors: [String]
     let legLines: [LegLine]
-    let refreshURLString: String
-
     var destinationCode: String { stationCodes.last ?? "" }
 
     /// The next station's own line color, for its station-number badge.

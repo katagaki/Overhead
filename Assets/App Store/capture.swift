@@ -1,7 +1,7 @@
 #!/usr/bin/env swift
 // Captures raw App Store screenshots from the simulator.
 // Usage: swift capture.swift <path-to-Overhead.app> <ja|en> [shot names...]
-// Stages each screen through the DEBUG-only overtrain:// deep-link harness
+// Stages each screen through the DEBUG-only overhead:// deep-link harness
 // (see Overhead/Classes/ScreenshotHarness.swift).
 
 import Foundation
@@ -26,7 +26,7 @@ func xcrun(_ args: [String]) -> (status: Int32, output: String) {
     return (process.terminationStatus, String(data: data, encoding: .utf8) ?? "")
 }
 
-// The overtrain:// staging URLs ride along as launch arguments: the DEBUG
+// The overhead:// staging URLs ride along as launch arguments: the DEBUG
 // harness consumes them at startup, and no system open-URL prompt appears.
 func launchApp(urls: [String] = []) {
     xcrun(["simctl", "terminate", udid, bundleId])
@@ -41,43 +41,43 @@ func launchApp(urls: [String] = []) {
 
 struct Shot {
     let name: String
-    /// overtrain:// staging URLs, sent in order after a clean launch.
+    /// overhead:// staging URLs, sent in order after a clean launch.
     let urls: [String]
     let waitSeconds: UInt32
 }
 
 let shots: [Shot] = [
     Shot(name: "00-tabs", urls: [
-        "overtrain://lcd?style=joban",
-        "overtrain://journey?minutesAgo=55",
-        "overtrain://tab/new",
-        "overtrain://lcd?style=yamanote",
-        "overtrain://journey?minutesAgo=20&line=Railway:JR-East.Yamanote&from=Station:JR-East.Yamanote.Ikebukuro&to=Station:JR-East.Yamanote.Akihabara",
-        "overtrain://tab/new",
-        "overtrain://lcd?style=tokyoMetro",
-        "overtrain://journey?minutesAgo=40&line=Railway:TokyoMetro.Tozai&from=Station:TokyoMetro.Tozai.Nakano&to=Station:TokyoMetro.Tozai.NishiFunabashi",
-        "overtrain://tab/new",
-        "overtrain://tab/switcher",
+        "overhead://lcd?style=joban",
+        "overhead://journey?minutesAgo=55",
+        "overhead://tab/new",
+        "overhead://lcd?style=yamanote",
+        "overhead://journey?minutesAgo=20&line=Railway:JR-East.Yamanote&from=Station:JR-East.Yamanote.Ikebukuro&to=Station:JR-East.Yamanote.Akihabara",
+        "overhead://tab/new",
+        "overhead://lcd?style=tokyoMetro",
+        "overhead://journey?minutesAgo=40&line=Railway:TokyoMetro.Tozai&from=Station:TokyoMetro.Tozai.Nakano&to=Station:TokyoMetro.Tozai.NishiFunabashi",
+        "overhead://tab/new",
+        "overhead://tab/switcher",
     ], waitSeconds: 30),
     Shot(name: "01-home", urls: [], waitSeconds: 5),
-    Shot(name: "02-planner", urls: ["overtrain://planner?action=search"], waitSeconds: 10),
+    Shot(name: "02-planner", urls: ["overhead://planner?action=search"], waitSeconds: 10),
     Shot(name: "03-journey", urls: [
-        "overtrain://lcd?style=joban",
-        "overtrain://journey?minutesAgo=55",
+        "overhead://lcd?style=joban",
+        "overhead://journey?minutesAgo=55",
     ], waitSeconds: 5),
     Shot(name: "04-lcd-metro", urls: [
-        "overtrain://lcd?style=tokyoMetro",
-        "overtrain://journey?minutesAgo=40&line=Railway:TokyoMetro.Tozai&from=Station:TokyoMetro.Tozai.Nakano&to=Station:TokyoMetro.Tozai.NishiFunabashi",
+        "overhead://lcd?style=tokyoMetro",
+        "overhead://journey?minutesAgo=40&line=Railway:TokyoMetro.Tozai&from=Station:TokyoMetro.Tozai.Nakano&to=Station:TokyoMetro.Tozai.NishiFunabashi",
     ], waitSeconds: 5),
     Shot(name: "05-lcd-yamanote", urls: [
-        "overtrain://lcd?style=yamanote",
-        "overtrain://journey?minutesAgo=20&line=Railway:JR-East.Yamanote&from=Station:JR-East.Yamanote.Ikebukuro&to=Station:JR-East.Yamanote.Akihabara",
+        "overhead://lcd?style=yamanote",
+        "overhead://journey?minutesAgo=20&line=Railway:JR-East.Yamanote&from=Station:JR-East.Yamanote.Ikebukuro&to=Station:JR-East.Yamanote.Akihabara",
     ], waitSeconds: 5),
-    Shot(name: "06-timetable", urls: ["overtrain://timetable"], waitSeconds: 5),
-    Shot(name: "07-avoid", urls: ["overtrain://planner?action=avoid"], waitSeconds: 5),
+    Shot(name: "06-timetable", urls: ["overhead://timetable"], waitSeconds: 5),
+    Shot(name: "07-avoid", urls: ["overhead://planner?action=avoid"], waitSeconds: 5),
     Shot(name: "08-customline", urls: [
-        "overtrain://lcd?style=kivotos",
-        "overtrain://custom-line",
+        "overhead://lcd?style=kivotos",
+        "overhead://custom-line",
     ], waitSeconds: 5),
 ]
 
@@ -110,13 +110,13 @@ if CommandLine.arguments.count > 1 {
 // Seeding pass: reset clears leftover planner state (vias, avoided lines);
 // favorites and the sample custom line persist across launches, but the
 // home screen only shows them from the next launch on.
-launchApp(urls: ["overtrain://reset", "overtrain://seed/favorites", "overtrain://seed/custom-line"])
+launchApp(urls: ["overhead://reset", "overhead://seed/favorites", "overhead://seed/custom-line"])
 
 // Extra arguments past the app path and language select a subset of shots.
 let onlyNames = Set(CommandLine.arguments.dropFirst(3))
 // Tabs and their journeys persist across launches, so each shot starts from a reset.
 for shot in shots where onlyNames.isEmpty || onlyNames.contains(shot.name) {
-    launchApp(urls: ["overtrain://reset"] + shot.urls)
+    launchApp(urls: ["overhead://reset"] + shot.urls)
     sleep(shot.waitSeconds)
     let file = rawDir.appendingPathComponent("\(shot.name).png").path
     let capture = xcrun(["simctl", "io", udid, "screenshot", file])

@@ -29,7 +29,6 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>overhead</string>
-				<string>overtrain</string>
 			</array>
 		</dict>
 	</array>

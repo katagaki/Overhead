@@ -85,7 +85,6 @@ struct TrainJourneyAttributes: ActivityAttributes {
     let stationCodes: [String]  // empty where a station has no code
     let stationColors: [String]  // through-service stops keep their own line's color
     let legLines: [LegLine]
-    let refreshURLString: String
 
     var destinationCode: String { stationCodes.last ?? "" }
 
@@ -114,8 +113,6 @@ struct TrainJourneyAttributes: ActivityAttributes {
 
 /// One per journey session; several activities can run at once.
 final class LiveActivityManager {
-
-    static let refreshURLScheme = "overhead://refresh-delay"
 
     private(set) var currentActivity: Activity<TrainJourneyAttributes>?
     private var lastDelayFetchTime = Date()
@@ -182,8 +179,7 @@ final class LiveActivityManager {
             stationTimes: stationTimes.map(\.timeIntervalSince1970),
             stationCodes: stations.map(\.stationCode),
             stationColors: stationColors,
-            legLines: resolvedLegLines,
-            refreshURLString: Self.refreshURLScheme
+            legLines: resolvedLegLines
         )
 
         let state = contentState(from: positionState)

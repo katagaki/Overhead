@@ -6,23 +6,23 @@ import Backbone
 
 // MARK: - Screenshot Harness (DEBUG only)
 
-/// App Store screenshot staging, driven over `overtrain://` deep links.
+/// App Store screenshot staging, driven over `overhead://` deep links.
 /// RootView handles the URLs; Assets/App Store/capture.swift is the driver.
 ///
-/// - overtrain://seed/favorites
-/// - overtrain://seed/custom-line
-/// - overtrain://lcd?style=<TrainLCDStyle raw value>
-/// - overtrain://journey?minutesAgo=45[&line=…&from=…&to=…]
-/// - overtrain://planner?action=search|avoid|departure|arrival
-/// - overtrain://timetable[?line=…&station=…&hidePast=0&popover=<train type>]
-/// - overtrain://line[?line=…&status=expanded]
-/// - overtrain://custom-line (seeds the sample line and opens its editor)
-/// - overtrain://home?scroll=lines
-/// - overtrain://place-editor[?edit=first]
-/// - overtrain://dismiss (closes the journey sheet to expose the home bottom bar)
-/// - overtrain://tab/new
-/// - overtrain://tab/switcher
-/// - overtrain://reset
+/// - overhead://seed/favorites
+/// - overhead://seed/custom-line
+/// - overhead://lcd?style=<TrainLCDStyle raw value>
+/// - overhead://journey?minutesAgo=45[&line=…&from=…&to=…]
+/// - overhead://planner?action=search|avoid|departure|arrival
+/// - overhead://timetable[?line=…&station=…&hidePast=0&popover=<train type>]
+/// - overhead://line[?line=…&status=expanded]
+/// - overhead://custom-line (seeds the sample line and opens its editor)
+/// - overhead://home?scroll=lines
+/// - overhead://place-editor[?edit=first]
+/// - overhead://dismiss (closes the journey sheet to expose the home bottom bar)
+/// - overhead://tab/new
+/// - overhead://tab/switcher
+/// - overhead://reset
 enum ScreenshotCommand {
     case seedFavorites
     case seedCustomLine
@@ -43,7 +43,7 @@ enum ScreenshotCommand {
     case reset
 
     init?(url: URL) {
-        guard url.scheme == "overtrain" else { return nil }
+        guard url.scheme == "overhead" else { return nil }
         let params = URLComponents(url: url, resolvingAgainstBaseURL: false)?
             .queryItems?
             .reduce(into: [String: String]()) { $0[$1.name] = $1.value } ?? [:]

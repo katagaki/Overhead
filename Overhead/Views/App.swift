@@ -70,8 +70,6 @@ struct OverheadApp: App {
 
         // Foundation may normalise the host's case; match on the lowered form.
         switch url.host?.lowercased() {
-        case "refresh-delay":
-            viewModel.forceRefresh()
         case "trackchange":
             branchField = LineDataInstaller.branch
             showBranchAlert = true

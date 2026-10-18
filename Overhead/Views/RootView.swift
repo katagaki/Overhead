@@ -25,7 +25,7 @@ struct RootView: View {
     @State private var searchStates = AppTabSearchStateStorage.load()
     @State private var showsBrowserSearchOverlay = false
 #if DEBUG
-    // Screenshot harness (overtrain:// deep links, see ScreenshotHarness.swift).
+    // Screenshot harness (overhead:// deep links, see ScreenshotHarness.swift).
     @State private var debugTimetableTarget: ScreenshotTimetableTarget?
 #endif
     @AppStorage("lineData.onboarded") private var lineDataOnboarded = false
@@ -103,7 +103,7 @@ struct RootView: View {
 #if DEBUG
             // Launch arguments let the screenshot harness open deep links directly.
             for argument in ProcessInfo.processInfo.arguments.dropFirst()
-            where argument.hasPrefix("overtrain://") {
+            where argument.hasPrefix("overhead://") {
                 if let url = URL(string: argument) {
                     await handleScreenshotURL(url)
                 }
@@ -720,7 +720,7 @@ struct RootView: View {
     }
 
 #if DEBUG
-    // MARK: - Screenshot Harness (overtrain://)
+    // MARK: - Screenshot Harness (overhead://)
 
     private func handleScreenshotURL(_ url: URL) async {
         guard let command = ScreenshotCommand(url: url) else { return }
