@@ -29,7 +29,8 @@ struct StationTimetableView: View {
         .navigationBarTitleDisplayMode(.inline)
         .serviceStatusToolbar(
             lineId: line.id,
-            delayInfo: viewModel.delayCheckInfo(for: line.id)
+            delayInfo: viewModel.delayCheckInfo(for: line.id),
+            inTopBar: true
         )
         .task(id: station.id) {
             timetables = viewModel.stationTimetables(stationId: station.id)

@@ -63,27 +63,29 @@ struct ServiceStatusView: View {
 
 // MARK: - Toolbar Button
 
-/// Centered 運行情報 bottom-bar button, shared by the line and timetable pages.
+/// 運行情報 toolbar button, shared by the line and timetable pages.
 private struct ServiceStatusToolbar: ViewModifier {
     @Environment(\.appTabOpenDestination) private var openTabDestination
     let lineId: String
     let delayInfo: DelayCheckInfo?
+    let inTopBar: Bool
 
     func body(content: Content) -> some View {
         content
             .toolbar {
-                ToolbarSpacer(.flexible, placement: .bottomBar)
-
-                ToolbarItem(placement: .bottomBar) {
-                    Button {
-                        openTabDestination?(.serviceStatus(lineId: lineId))
-                    } label: {
-                        Text("StationTimetable.ServiceStatus")
+                if inTopBar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        button
                     }
-                    .disabled(delayInfo == nil || openTabDestination == nil)
-                }
+                } else {
+                    ToolbarSpacer(.flexible, placement: .bottomBar)
 
-                ToolbarSpacer(.flexible, placement: .bottomBar)
+                    ToolbarItem(placement: .bottomBar) {
+                        button
+                    }
+
+                    ToolbarSpacer(.flexible, placement: .bottomBar)
+                }
             }
 #if DEBUG
             .onAppear {
@@ -94,11 +96,20 @@ private struct ServiceStatusToolbar: ViewModifier {
             }
 #endif
     }
+
+    private var button: some View {
+        Button {
+            openTabDestination?(.serviceStatus(lineId: lineId))
+        } label: {
+            Text("StationTimetable.ServiceStatus")
+        }
+        .disabled(delayInfo == nil || openTabDestination == nil)
+    }
 }
 
 extension View {
-    func serviceStatusToolbar(lineId: String, delayInfo: DelayCheckInfo?) -> some View {
-        modifier(ServiceStatusToolbar(lineId: lineId, delayInfo: delayInfo))
+    func serviceStatusToolbar(lineId: String, delayInfo: DelayCheckInfo?, inTopBar: Bool = false) -> some View {
+        modifier(ServiceStatusToolbar(lineId: lineId, delayInfo: delayInfo, inTopBar: inTopBar))
     }
 }
 
