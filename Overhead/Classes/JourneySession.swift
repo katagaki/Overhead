@@ -261,6 +261,15 @@ final class JourneySession: ObservableObject, Identifiable {
         pendingActivityStart = nil
     }
 
+    /// Back to a preview, so the journey can be started again.
+    func end() {
+        guard isStarted else { return }
+        stop()
+        isStarted = false
+        hasArrived = false
+        startPreview()
+    }
+
     private func finishOnArrival() {
         guard isTracking else { return }
         // Location was keeping a backgrounded app alive; hold on until the

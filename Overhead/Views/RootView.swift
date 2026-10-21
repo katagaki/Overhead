@@ -427,7 +427,7 @@ struct RootView: View {
                 JourneyControlButton(
                     session: session,
                     onStart: { viewModel.start(session) },
-                    onEnd: { viewModel.stopJourney(session) }
+                    onEnd: { viewModel.endJourney(session) }
                 )
             } else {
                 JourneyStationToolbarButton(session: session, action: openJourney)
@@ -796,7 +796,7 @@ final class JourneyTabRegistry {
     var mountedPages: Set<UUID> = []
 }
 
-/// Play while the journey is a preview, stop once it is under way.
+/// 出発 while the journey is a preview, 停止 once it is under way.
 private struct JourneyControlButton: View {
     @ObservedObject var session: JourneySession
     let onStart: () -> Void
@@ -821,13 +821,15 @@ private struct JourneyStartButton: View {
 
     var body: some View {
         Button(action: onStart) {
-            Image(systemName: "play.fill")
-                .foregroundStyle(.green)
-                .frame(width: TabBottomBarMetrics.itemHeight, height: TabBottomBarMetrics.itemHeight)
-                .contentShape(Circle())
+            Text("Journey.Control.Start")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(Color.accentColor)
+                .padding(.horizontal, 14)
+                .frame(minHeight: TabBottomBarMetrics.itemHeight)
+                .contentShape(Capsule())
         }
         .accessibilityLabel("Button.StartJourney")
-        .glassEffect(.regular.interactive(), in: .circle)
+        .glassEffect(.regular.interactive(), in: .capsule)
     }
 }
 
@@ -839,13 +841,15 @@ private struct JourneyEndButton: View {
         Button {
             isConfirming = true
         } label: {
-            Image(systemName: "stop.fill")
-                .foregroundStyle(.red)
-                .frame(width: TabBottomBarMetrics.itemHeight, height: TabBottomBarMetrics.itemHeight)
-                .contentShape(Circle())
+            Text("Journey.Control.Stop")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(Color.accentColor)
+                .padding(.horizontal, 14)
+                .frame(minHeight: TabBottomBarMetrics.itemHeight)
+                .contentShape(Capsule())
         }
         .accessibilityLabel("Button.EndJourney")
-        .glassEffect(.regular.interactive(), in: .circle)
+        .glassEffect(.regular.interactive(), in: .capsule)
         .confirmationDialog(
             "Journey.End.ConfirmTitle",
             isPresented: $isConfirming,

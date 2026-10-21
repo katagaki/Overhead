@@ -68,23 +68,17 @@ private struct ServiceStatusToolbar: ViewModifier {
     @Environment(\.appTabOpenDestination) private var openTabDestination
     let lineId: String
     let delayInfo: DelayCheckInfo?
-    let inTopBar: Bool
 
     func body(content: Content) -> some View {
         content
             .toolbar {
-                if inTopBar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        button
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        openTabDestination?(.serviceStatus(lineId: lineId))
+                    } label: {
+                        Text("StationTimetable.ServiceStatus")
                     }
-                } else {
-                    ToolbarSpacer(.flexible, placement: .bottomBar)
-
-                    ToolbarItem(placement: .bottomBar) {
-                        button
-                    }
-
-                    ToolbarSpacer(.flexible, placement: .bottomBar)
+                    .disabled(delayInfo == nil || openTabDestination == nil)
                 }
             }
 #if DEBUG
@@ -96,20 +90,11 @@ private struct ServiceStatusToolbar: ViewModifier {
             }
 #endif
     }
-
-    private var button: some View {
-        Button {
-            openTabDestination?(.serviceStatus(lineId: lineId))
-        } label: {
-            Text("StationTimetable.ServiceStatus")
-        }
-        .disabled(delayInfo == nil || openTabDestination == nil)
-    }
 }
 
 extension View {
-    func serviceStatusToolbar(lineId: String, delayInfo: DelayCheckInfo?, inTopBar: Bool = false) -> some View {
-        modifier(ServiceStatusToolbar(lineId: lineId, delayInfo: delayInfo, inTopBar: inTopBar))
+    func serviceStatusToolbar(lineId: String, delayInfo: DelayCheckInfo?) -> some View {
+        modifier(ServiceStatusToolbar(lineId: lineId, delayInfo: delayInfo))
     }
 }
 

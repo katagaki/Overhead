@@ -78,7 +78,13 @@ final class JourneyViewModel: ObservableObject {
 
     /// Ends every started journey, whichever tab it belongs to.
     func stopAllJourneys() {
-        sessions.filter(\.isStarted).forEach(stopJourney)
+        sessions.filter(\.isStarted).forEach(endJourney)
+    }
+
+    /// Ends tracking but keeps the journey's page, back as a preview.
+    func endJourney(_ session: JourneySession) {
+        session.end()
+        updatePiP()
     }
 
     func stopJourney(_ session: JourneySession) {
