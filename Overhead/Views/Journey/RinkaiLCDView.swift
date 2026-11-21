@@ -391,7 +391,7 @@ struct RinkaiLCDView: View {
         )
         let dwellIndex = state.currentStationIndex.map { max(0, min($0, stations.count - 1)) }
         let ref = dwellIndex ?? max(0, min(state.segmentFrom, stations.count - 1))
-        let nowSec = LCDPhase.railSeconds(at: now)
+        let nowSec = journey.railSeconds(at: now)
         let delaySec = state.delayMinutes * 60
 
         let upcoming = stations[(ref + 1)...]

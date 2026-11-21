@@ -247,7 +247,7 @@ struct StationPickerView: View {
             .background(Color(.secondarySystemGroupedBackground))
             .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
             .task(id: arrivalsKey) {
-                await loadNextArrivals(key: arrivalsKey, at: context.date)
+                await loadNextArrivals(key: arrivalsKey, at: RailClock.adjusted(context.date))
             }
         }
     }
@@ -446,14 +446,9 @@ struct StationPickerView: View {
         ascending: Bool,
         at now: Date
     ) -> [String: NextArrival] {
-        let calendar = ScheduleCalendar.current(at: now.addingTimeInterval(-3 * 3600))
-        var jst = Calendar(identifier: .gregorian)
-        jst.timeZone = TimeZone(identifier: "Asia/Tokyo")!
-        let comps = jst.dateComponents([.hour, .minute], from: now)
-        var nowMinutes = (comps.hour ?? 0) * 60 + (comps.minute ?? 0)
-        if nowMinutes < 3 * 60 {
-            nowMinutes += 24 * 60
-        }
+        let day = ServiceDay(containing: now)
+        let calendar = day.scheduleCalendar
+        let nowMinutes = day.railSeconds(at: now) / 60
 
         let services = (StaticTimetableGenerator.services(forLineId: lineId, calendar: calendar) ?? [])
             .filter { ($0.direction == .outbound) == ascending }
@@ -476,7 +471,7 @@ struct StationPickerView: View {
             }
         }
 
-        let tomorrow = ScheduleCalendar.current(at: now.addingTimeInterval(21 * 3600))
+        let tomorrow = day.adding(days: 1).scheduleCalendar
         var tomorrowFirst: [String: NextArrival] = [:]
         let tomorrowServices = tomorrow == calendar
             ? services

@@ -201,7 +201,7 @@ final class JourneyNotificationManager: NSObject, UNUserNotificationCenterDelega
 
     /// Empty when the moment has already passed.
     private func request(prefix: String, id: String, fireAt: Date, title: String, body: String) -> [UNNotificationRequest] {
-        let interval = fireAt.timeIntervalSinceNow
+        let interval = fireAt.timeIntervalSince(RailClock.now)
         guard interval > 0 else { return [] }
 
         let content = UNMutableNotificationContent()

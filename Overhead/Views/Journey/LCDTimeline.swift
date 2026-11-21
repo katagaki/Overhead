@@ -1,4 +1,5 @@
 import SwiftUI
+import Backbone
 
 private struct LCDClockPausedKey: EnvironmentKey {
     static let defaultValue = false
@@ -43,11 +44,11 @@ struct LCDTimeline<Content: View>: View {
     var body: some View {
         if animated {
             TimelineView(.animation(minimumInterval: interval, paused: paused)) { context in
-                content(LCDTimelineContext(date: context.date))
+                content(LCDTimelineContext(date: RailClock.adjusted(context.date)))
             }
         } else {
             TimelineView(PausablePeriodicSchedule(interval: interval, paused: paused)) { context in
-                content(LCDTimelineContext(date: context.date))
+                content(LCDTimelineContext(date: RailClock.adjusted(context.date)))
             }
         }
     }

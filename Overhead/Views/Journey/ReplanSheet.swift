@@ -222,7 +222,7 @@ struct ReplanSheet: View {
                     HStack(spacing: 8) {
                         Text("\(displayTime(candidate.departureTime)) → \(displayTime(candidate.arrivalTime))")
                             .font(.system(size: 16, weight: .bold, design: .rounded))
-                        deltaPill(for: candidate.arrivalDate())
+                        deltaPill(for: candidate.arrivalDate)
                     }
 
                     HStack(spacing: 6) {

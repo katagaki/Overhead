@@ -291,7 +291,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
             nextStationName: next.name,
             nextStationNameEn: next.nameEn,
             delayMinutes: 0,
-            estimatedArrival: Date(),
+            estimatedArrival: RailClock.now,
             status: idx >= last ? .arrived : .onTime,
             trackingModeRaw: TrackingMode.manual.rawValue
         )
@@ -702,34 +702,17 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
 
         if let lastEntry = timetable.last,
            let arrSec = lastEntry.arrivalSeconds() ?? lastEntry.departureSeconds() {
-            return dateFromRailSeconds(arrSec + delaySeconds)
+            return journey.railDate(arrSec + delaySeconds)
         }
 
         if let firstDep = timetable.first?.departureSeconds(),
            let lastArr = timetable.last?.arrivalSeconds() {
             let totalDuration = Double(lastArr - firstDep)
             let remaining = totalDuration * (1.0 - currentProgress)
-            return Date().addingTimeInterval(remaining + Double(delaySeconds))
+            return RailClock.now.addingTimeInterval(remaining + Double(delaySeconds))
         }
 
-        return Date().addingTimeInterval(600)
-    }
-
-    private func dateFromRailSeconds(_ seconds: Int) -> Date {
-        let tz = TimeZone(identifier: "Asia/Tokyo")!
-        var cal = Calendar(identifier: .gregorian)
-        cal.timeZone = tz
-        var comps = cal.dateComponents([.year, .month, .day], from: Date())
-        comps.hour = seconds / 3600
-        comps.minute = (seconds % 3600) / 60
-        comps.second = seconds % 60
-        if comps.hour! >= 24 {
-            comps.hour! -= 24
-            if let d = cal.date(from: comps) {
-                return cal.date(byAdding: .day, value: 1, to: d) ?? d
-            }
-        }
-        return cal.date(from: comps) ?? Date()
+        return RailClock.now.addingTimeInterval(600)
     }
 
     // MARK: - Station Coordinates Builder

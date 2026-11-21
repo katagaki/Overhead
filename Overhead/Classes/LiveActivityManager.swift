@@ -176,7 +176,7 @@ final class LiveActivityManager {
             stationNamesEn: stations.map(\.nameEn),
             stationCount: stations.count,
             stationStops: stationStops,
-            stationTimes: stationTimes.map(\.timeIntervalSince1970),
+            stationTimes: stationTimes.map(Self.timestamp),
             stationCodes: stations.map(\.stationCode),
             stationColors: stationColors,
             legLines: resolvedLegLines
@@ -243,7 +243,7 @@ final class LiveActivityManager {
             statusRaw: TrainPositionState.Status.arrived.rawValue,
             trackingModeRaw: "Timetable",
             lastRefreshTimestamp: Date().timeIntervalSince1970,
-            departureTimestamp: (scheduledDeparture ?? Date()).timeIntervalSince1970,
+            departureTimestamp: scheduledDeparture.map(Self.timestamp) ?? Date().timeIntervalSince1970,
             segmentStartTimestamp: Date().timeIntervalSince1970,
             nextStationArrivalTimestamp: Date().timeIntervalSince1970
         )
@@ -261,13 +261,18 @@ final class LiveActivityManager {
         return ending
     }
 
+    /// The widget runs on the system clock, not the rail clock.
+    private static func timestamp(_ date: Date) -> TimeInterval {
+        RailClock.real(date).timeIntervalSince1970
+    }
+
     private func contentState(from state: TrainPositionState) -> TrainJourneyAttributes.ContentState {
         let delaySeconds = TimeInterval(state.delayMinutes * 60)
-        let departure = (scheduledDeparture ?? Date()).addingTimeInterval(delaySeconds)
+        let departure = (scheduledDeparture ?? RailClock.now).addingTimeInterval(delaySeconds)
 
         // Delay-adjusted segment window; the next-station countdown runs off these fixed dates.
         var segmentStart = departure
-        var nextArrival = (scheduledArrival ?? Date()).addingTimeInterval(delaySeconds)
+        var nextArrival = (scheduledArrival ?? RailClock.now).addingTimeInterval(delaySeconds)
         if stationTimes.indices.contains(state.segmentFrom),
            stationTimes.indices.contains(state.segmentTo) {
             segmentStart = stationTimes[state.segmentFrom].addingTimeInterval(delaySeconds)
@@ -281,13 +286,13 @@ final class LiveActivityManager {
             nextStationName: state.nextStationName,
             nextStationNameEn: state.nextStationNameEn,
             delayMinutes: state.delayMinutes,
-            estimatedArrivalTimestamp: state.estimatedArrival.timeIntervalSince1970,
+            estimatedArrivalTimestamp: Self.timestamp(state.estimatedArrival),
             statusRaw: state.status.rawValue,
             trackingModeRaw: state.trackingModeRaw,
             lastRefreshTimestamp: lastDelayFetchTime.timeIntervalSince1970,
-            departureTimestamp: departure.timeIntervalSince1970,
-            segmentStartTimestamp: segmentStart.timeIntervalSince1970,
-            nextStationArrivalTimestamp: nextArrival.timeIntervalSince1970
+            departureTimestamp: Self.timestamp(departure),
+            segmentStartTimestamp: Self.timestamp(segmentStart),
+            nextStationArrivalTimestamp: Self.timestamp(nextArrival)
         )
     }
 

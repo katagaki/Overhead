@@ -9,10 +9,11 @@ import Backbone
 /// App Store screenshot staging, driven over `overhead://` deep links.
 /// RootView handles the URLs; Assets/App Store/capture.swift is the driver.
 ///
-/// - overhead://seed/favorites
+/// - overhead://seed/favorites[?line=…&from=…&to=…] (the 自宅 favorite's ride)
 /// - overhead://seed/custom-line
 /// - overhead://lcd?style=<TrainLCDStyle raw value>
 /// - overhead://journey?minutesAgo=45[&line=…&from=…&to=…]
+/// - overhead://ride?from=…&to=…[&at=<ISO 8601>&arrive=1&dep=HH:mm] (opens a search result as a preview)
 /// - overhead://planner?action=search|avoid|departure|arrival
 /// - overhead://timetable[?line=…&station=…&hidePast=0&popover=<train type>]
 /// - overhead://line[?line=…&status=expanded]
@@ -24,10 +25,11 @@ import Backbone
 /// - overhead://tab/switcher
 /// - overhead://reset
 enum ScreenshotCommand {
-    case seedFavorites
+    case seedFavorites(lineId: String?, fromId: String?, toId: String?)
     case seedCustomLine
     case lcdStyle(String)
     case journey(lineId: String, fromId: String, toId: String, minutesAgo: Double)
+    case ride(fromId: String, toId: String, at: Date?, arrive: Bool, departure: String?)
     case plannerSearch
     case plannerAvoid
     case plannerDeparture
@@ -51,7 +53,7 @@ enum ScreenshotCommand {
         switch url.host {
         case "seed":
             switch url.path {
-            case "/favorites": self = .seedFavorites
+            case "/favorites": self = .seedFavorites(lineId: params["line"], fromId: params["from"], toId: params["to"])
             case "/custom-line": self = .seedCustomLine
             default: return nil
             }
@@ -64,6 +66,14 @@ enum ScreenshotCommand {
                 fromId: params["from"] ?? "Station:JR-East.JobanRapid.Tokyo",
                 toId: params["to"] ?? "Station:JR-East.JobanRapid.Toride",
                 minutesAgo: params["minutesAgo"].flatMap(Double.init) ?? 45
+            )
+        case "ride":
+            guard let from = params["from"], let to = params["to"] else { return nil }
+            self = .ride(
+                fromId: from, toId: to,
+                at: params["at"].flatMap { ISO8601DateFormatter().date(from: $0) },
+                arrive: params["arrive"] == "1",
+                departure: params["dep"]
             )
         case "planner":
             switch params["action"] {
@@ -160,13 +170,13 @@ final class ScreenshotStaging: ObservableObject {
 enum ScreenshotSeeder {
     static let customLineId = "Custom:Line.KivotosM"
 
-    static func seedFavorites() {
+    static func seedFavorites(lineId: String? = nil, fromId: String? = nil, toId: String? = nil) {
         SavedPlaceStore.save([
             SavedPlace(
                 id: UUID(), kind: .home,
-                lineId: "Railway:JR-East.JobanRapid",
-                fromStationId: "Station:JR-East.JobanRapid.Tokyo",
-                toStationId: "Station:JR-East.JobanRapid.Toride"
+                lineId: lineId ?? "Railway:JR-East.JobanRapid",
+                fromStationId: fromId ?? "Station:JR-East.JobanRapid.Tokyo",
+                toStationId: toId ?? "Station:JR-East.JobanRapid.Toride"
             ),
             SavedPlace(
                 id: UUID(), kind: .work,

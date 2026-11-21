@@ -41,6 +41,8 @@ struct TrainCandidate: Identifiable {
     /// to the 到着 place; 0 when the trip starts or ends at a station.
     var accessSeconds = 0
     var egressSeconds = 0
+    /// The day the legs' rail seconds count from: the search anchor's.
+    var serviceDay: ServiceDay = .today
 
     var transferCount: Int { legs.count - 1 }
 
@@ -72,31 +74,7 @@ struct TrainCandidate: Identifiable {
         max(0, (reachSeconds - leaveSeconds) / 60)
     }
 
-    func leaveDate(reference: Date = Date()) -> Date {
-        Self.dateFromRailSeconds(leaveSeconds, reference: reference)
-    }
-
-    func departureDate(reference: Date = Date()) -> Date {
-        Self.dateFromRailSeconds(departureSeconds, reference: reference)
-    }
-
-    func arrivalDate(reference: Date = Date()) -> Date {
-        Self.dateFromRailSeconds(arrivalSeconds, reference: reference)
-    }
-
-    private static func dateFromRailSeconds(_ seconds: Int, reference: Date) -> Date {
-        var cal = Calendar(identifier: .gregorian)
-        cal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
-        var comps = cal.dateComponents([.year, .month, .day], from: reference)
-        comps.hour = seconds / 3600
-        comps.minute = (seconds % 3600) / 60
-        comps.second = 0
-        if comps.hour! >= 24 {
-            comps.hour! -= 24
-            if let d = cal.date(from: comps) {
-                return cal.date(byAdding: .day, value: 1, to: d) ?? d
-            }
-        }
-        return cal.date(from: comps) ?? reference
-    }
+    var leaveDate: Date { serviceDay.date(atRailSeconds: leaveSeconds) }
+    var departureDate: Date { serviceDay.date(atRailSeconds: departureSeconds) }
+    var arrivalDate: Date { serviceDay.date(atRailSeconds: arrivalSeconds) }
 }

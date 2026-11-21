@@ -168,10 +168,12 @@ final class JourneyViewModel: ObservableObject {
 
         let journeyStaticLine = resolved.staticLine
         let journeyLine = journeyStaticLine.trainLine
+        let now = RailClock.now
+        let day = ServiceDay(containing: now)
 
         if timetableCache[journeyStaticLine.id] == nil {
             timetableCache[journeyStaticLine.id] = StaticTimetableGenerator.services(
-                for: journeyStaticLine, calendar: .current()
+                for: journeyStaticLine, calendar: day.scheduleCalendar
             )
         }
 
@@ -185,7 +187,8 @@ final class JourneyViewModel: ObservableObject {
             services: services,
             from: boardingStation.id,
             to: alightingStation.id,
-            at: Date()
+            at: now,
+            on: day
         )
 
         guard let service else {
@@ -200,7 +203,8 @@ final class JourneyViewModel: ObservableObject {
             line: journeyLine,
             boardingStationId: boardingStation.id,
             alightingStationId: alightingStation.id,
-            startedAt: Date()
+            startedAt: now,
+            serviceDay: day
         )
 
         begin(JourneySession(journey: journey, line: journeyLine))
@@ -235,13 +239,6 @@ final class JourneyViewModel: ObservableObject {
             if case .arriveAtOrBefore = self { return true }
             return false
         }
-    }
-
-    /// Where a wall-clock date falls relative to another date's service day.
-    private enum ServiceDayPosition {
-        case earlier
-        case same(Int)
-        case later
     }
 
     /// A trip end for search: a station, or a place with the stations you could walk to.
@@ -311,8 +308,9 @@ final class JourneyViewModel: ObservableObject {
     ) async -> [TrainCandidate] {
         guard endpoints.count >= 2 else { return [] }
 
-        let calendar = ScheduleCalendar.current(at: anchor.date)
-        let targetSec = railSeconds(of: anchor.date)
+        let day = ServiceDay(containing: anchor.date)
+        let calendar = day.scheduleCalendar
+        let targetSec = Self.minuteSeconds(day.railSeconds(at: anchor.date))
         let rideAnchor: RideAnchor = anchor.isArrival
             ? .arriveAtOrBefore(targetSec)
             : .departAtOrAfter(targetSec)
@@ -320,11 +318,9 @@ final class JourneyViewModel: ObservableObject {
         // Trains that have already left — or that you couldn't walk to in time.
         var floorSec: Int?
         if let earliest {
-            switch position(of: earliest, onServiceDayOf: anchor.date) {
-            case .same(let sec): floorSec = sec
-            case .earlier: break
-            case .later: return []
-            }
+            let earliestDay = ServiceDay(containing: earliest)
+            if earliestDay > day { return [] }
+            if earliestDay == day { floorSec = Self.minuteSeconds(day.railSeconds(at: earliest)) }
         }
 
         // Every single-train ride, so slower trains and 始発 stay on the list.
@@ -387,35 +383,18 @@ final class JourneyViewModel: ObservableObject {
         }
 
         let mixesRoutes = kept.contains { $0.transferCount > 0 || $0.walksToPlace }
-        return Array(sorted(kept, anchor: rideAnchor,
-                            preferringOriginating: preferringOriginating,
-                            soonestArrival: mixesRoutes).prefix(limit))
-    }
-
-    /// Seconds since the service day's midnight; hours past 24 for post-midnight trains.
-    private func railSeconds(of date: Date) -> Int {
-        var jstCal = Calendar(identifier: .gregorian)
-        jstCal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
-        let comps = jstCal.dateComponents([.hour, .minute], from: date)
-        let sec = (comps.hour ?? 0) * 3600 + (comps.minute ?? 0) * 60
-        return sec < 4 * 3600 ? sec + 24 * 3600 : sec
-    }
-
-    private func position(of date: Date, onServiceDayOf reference: Date) -> ServiceDayPosition {
-        var jstCal = Calendar(identifier: .gregorian)
-        jstCal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
-
-        // The service day rolls over at 04:00, so early hours belong to the day before.
-        func serviceDay(_ date: Date) -> Date {
-            let day = jstCal.startOfDay(for: date)
-            guard railSeconds(of: date) >= 24 * 3600 else { return day }
-            return jstCal.date(byAdding: .day, value: -1, to: day) ?? day
+        return sorted(kept, anchor: rideAnchor,
+                      preferringOriginating: preferringOriginating,
+                      soonestArrival: mixesRoutes).prefix(limit).map { candidate in
+            var candidate = candidate
+            candidate.serviceDay = day
+            return candidate
         }
+    }
 
-        let day = serviceDay(date)
-        let referenceDay = serviceDay(reference)
-        if day == referenceDay { return .same(railSeconds(of: date)) }
-        return day < referenceDay ? .earlier : .later
+    /// Rail seconds floored to the minute, the resolution timetables are kept in.
+    private static func minuteSeconds(_ seconds: Int) -> Int {
+        Int((Double(seconds) / 60).rounded(.down)) * 60
     }
 
     func routeExists(through stations: [Station], avoidingLineIds: Set<String> = []) -> Bool {
@@ -527,7 +506,7 @@ final class JourneyViewModel: ObservableObject {
         guard stations.count >= 2, let from = stations.first, let to = stations.last else { return [] }
         // Expresses come from today's timetable, built off the main thread.
         let expressHops = await Task.detached(priority: .userInitiated) {
-            TransitRouter.expressHops(on: Date())
+            TransitRouter.expressHops(on: RailClock.now)
         }.value
 
         var results: [TrainCandidate] = []
@@ -1045,7 +1024,7 @@ final class JourneyViewModel: ObservableObject {
     ) async -> [TrainCandidate] {
         guard !StaticTrainData.stationLinks().isSameStation(anchor.station.id, destination.id) else { return [] }
         // Past stops have a departure time behind us; search from now.
-        let from = max(anchor.time, Date())
+        let from = max(anchor.time, RailClock.now)
         return await searchTrainCandidates(
             stations: [anchor.station, destination],
             anchor: .departure(from.addingTimeInterval(Self.sameStationBufferMinutes * 60)),
@@ -1064,8 +1043,11 @@ final class JourneyViewModel: ObservableObject {
 
     /// `onward` with the ride in progress prepended; nil if they can't join.
     func stitched(_ session: JourneySession, from anchor: ReplanAnchor, to onward: TrainCandidate) -> TrainCandidate? {
-        guard let head = session.rideInProgressLegs(upTo: anchor) else { return nil }
-        return compositeCandidate(legs: head + onward.legs)
+        guard let head = session.rideInProgressLegs(upTo: anchor),
+              var candidate = compositeCandidate(legs: head + onward.legs)
+        else { return nil }
+        candidate.serviceDay = session.journey.serviceDay
+        return candidate
     }
 
     // MARK: - Custom (DIY) Line Journeys
@@ -1095,7 +1077,8 @@ final class JourneyViewModel: ObservableObject {
             line: journeyLine,
             boardingStationId: fromId,
             alightingStationId: toId,
-            startedAt: Date(),
+            startedAt: RailClock.now,
+            serviceDay: .today,
             hasSchedule: scheduled != nil
         )
 
@@ -1111,15 +1094,16 @@ final class JourneyViewModel: ObservableObject {
         let staticLine = resolved.staticLine
         if timetableCache[staticLine.id] == nil {
             timetableCache[staticLine.id] = StaticTimetableGenerator.services(
-                for: staticLine, calendar: .current()
+                for: staticLine, calendar: ServiceDay.today.scheduleCalendar
             )
         }
         guard let services = timetableCache[staticLine.id] else { return }
         // Keep the ride whose progress lands closest to mid-journey.
         var best: (journey: Journey, state: TrainPositionState, score: Double)?
         for offset in stride(from: minutesAgo, through: 5, by: -2.5) {
-            let boarded = Date().addingTimeInterval(-offset * 60)
-            guard let service = findBestService(services: services, from: fromId, to: toId, at: boarded)
+            let boarded = RailClock.now.addingTimeInterval(-offset * 60)
+            let day = ServiceDay(containing: boarded)
+            guard let service = findBestService(services: services, from: fromId, to: toId, at: boarded, on: day)
             else { continue }
             let journey = Journey(
                 id: UUID(),
@@ -1127,7 +1111,8 @@ final class JourneyViewModel: ObservableObject {
                 line: staticLine.trainLine,
                 boardingStationId: fromId,
                 alightingStationId: toId,
-                startedAt: boarded
+                startedAt: boarded,
+                serviceDay: day
             )
             let state = TrainPositionEngine.computePosition(journey: journey, delay: nil)
             let score = abs(state.progress - 0.55)
@@ -1137,6 +1122,27 @@ final class JourneyViewModel: ObservableObject {
         }
         guard let best else { return }
         begin(JourneySession(journey: best.journey, line: staticLine.trainLine, fixedState: best.state))
+    }
+
+    /// Staging: the planner's search for `at`, opening the result leaving at `departure` (or the first).
+    func debugOpenRide(fromId: String, toId: String, at: Date?, arrive: Bool, departure: String?) async {
+        let date = at ?? RailClock.now
+        guard let from = StaticTrainData.line(containingStationId: fromId, on: date)?
+                .trainLine.stations.first(where: { $0.id == fromId }),
+              let to = StaticTrainData.line(containingStationId: toId, on: date)?
+                .trainLine.stations.first(where: { $0.id == toId })
+        else { return }
+        let candidates = await searchTrainCandidates(
+            stations: [from, to],
+            anchor: arrive ? .arrival(date) : .departure(date)
+        )
+        guard let candidate = departure.flatMap({ time in candidates.first { $0.departureTime == time } })
+                ?? candidates.first
+        else {
+            errorMessage = "No matching train found for this time"
+            return
+        }
+        startJourney(candidate: candidate)
     }
 
 #endif
@@ -1218,14 +1224,14 @@ final class JourneyViewModel: ObservableObject {
 
     // MARK: - Train Matching
 
+    /// The next train from `from` to `to` on `day`; nil once the day's last one has gone.
     private func findBestService(
         services: [TrainService],
         from: String, to: String,
-        at date: Date
+        at date: Date,
+        on day: ServiceDay
     ) -> TrainService? {
-        let cal = Calendar(identifier: .gregorian)
-        let comps = cal.dateComponents(in: TimeZone(identifier: "Asia/Tokyo")!, from: date)
-        let nowSec = (comps.hour ?? 0) * 3600 + (comps.minute ?? 0) * 60
+        let nowSec = Self.minuteSeconds(day.railSeconds(at: date))
 
         let candidates = services.filter { svc in
             let stationIds = svc.timetable.map(\.stationId)
@@ -1235,13 +1241,13 @@ final class JourneyViewModel: ObservableObject {
             return true
         }
 
-        let sorted = candidates.compactMap { svc -> (TrainService, Int)? in
+        return candidates.compactMap { svc -> (TrainService, Int)? in
             guard let entry = svc.timetable.first(where: { $0.stationId == from }),
                   let dep = entry.departureSeconds() else { return nil }
             return (svc, dep)
-        }.sorted { $0.1 < $1.1 }
-
-        return sorted.first(where: { $0.1 >= nowSec })?.0 ?? sorted.first?.0
+        }
+        .filter { $0.1 >= nowSec }
+        .min { $0.1 < $1.1 }?.0
     }
 
     // MARK: - Preview Data
@@ -1293,7 +1299,8 @@ final class JourneyViewModel: ObservableObject {
 
         let journey = Journey(
             id: UUID(), service: service, line: line,
-            boardingStationId: "s1", alightingStationId: "s8", startedAt: Date()
+            boardingStationId: "s1", alightingStationId: "s8", startedAt: Date(),
+            serviceDay: .today
         )
         let state = TrainPositionState(
             progress: 0.35, segmentFrom: 2, segmentTo: 3,

@@ -254,7 +254,7 @@ enum LCDStyleSample {
         return Journey(
             id: UUID(), service: service, line: line.trainLine,
             boardingStationId: stations[0].id, alightingStationId: stations[3].id,
-            startedAt: Date(), hasSchedule: false
+            startedAt: Date(), serviceDay: .today, hasSchedule: false
         )
     }()
 

@@ -25,7 +25,7 @@ enum CustomJourneyBuilder {
     }
 
     static func scheduledService(
-        line: CustomLine, fromId: String, toId: String, at date: Date = Date()
+        line: CustomLine, fromId: String, toId: String, at date: Date = RailClock.now
     ) -> TrainService? {
         guard let timetable = line.timetable,
               let plan = travelPlan(line: line, fromId: fromId, toId: toId)
@@ -108,11 +108,6 @@ enum CustomJourneyBuilder {
     }
 
     private static func jstMinutes(from date: Date) -> Int {
-        var cal = Calendar(identifier: .gregorian)
-        cal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
-        let comps = cal.dateComponents([.hour, .minute], from: date)
-        let raw = (comps.hour ?? 0) * 60 + (comps.minute ?? 0)
-        // Trains published as 24:00+ belong to the previous service day.
-        return raw < 4 * 60 ? raw + 24 * 60 : raw
+        ServiceDay.railSeconds(at: date) / 60
     }
 }

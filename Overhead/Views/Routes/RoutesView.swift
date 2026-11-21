@@ -457,7 +457,7 @@ struct FavoritesSection: View {
 
         if let timed = await viewModel.searchTrainCandidates(
             stations: waypoints,
-            anchor: .departure(Date()),
+            anchor: .departure(RailClock.now),
             transferMinutes: transferMinutes,
             walkPace: place.walkingSpeed.paceMultiplier,
             priority: place.routePriority,
@@ -512,7 +512,9 @@ struct FavoritesSection: View {
             (id: place.id,
              lineId: place.lineId,
              fromId: place.fromStationId,
-             towardId: place.viaStationIds.first ?? place.toStationId)
+             toId: place.toStationId,
+             towardId: place.viaStationIds.first ?? place.toStationId,
+             isOneRide: place.viaStationIds.isEmpty)
         }
         guard !targets.isEmpty else {
             departuresByPlace = [:]
@@ -522,6 +524,13 @@ struct FavoritesSection: View {
             var result: [UUID: [Int]] = [:]
             let calendar = ScheduleCalendar.current()
             for target in targets {
+                if target.isOneRide,
+                   let departures = Self.departuresReaching(
+                       lineId: target.lineId, fromId: target.fromId, toId: target.toId, calendar: calendar
+                   ) {
+                    result[target.id] = departures
+                    continue
+                }
                 guard let line = StaticTrainData.line(withId: target.lineId),
                       let timetable = Self.timetable(
                           line: line,
@@ -536,6 +545,28 @@ struct FavoritesSection: View {
             }
             return result
         }.value
+    }
+
+    /// Only trains that reach the favorite's destination, matching what tapping it can start.
+    private static func departuresReaching(
+        lineId: String,
+        fromId: String,
+        toId: String,
+        calendar: ScheduleCalendar
+    ) -> [Int]? {
+        guard let resolved = StaticTrainData.resolveJourneyLine(
+            lineId: lineId, fromStationId: fromId, toStationId: toId
+        ) else { return nil }
+        return StaticTimetableGenerator.services(for: resolved.staticLine, calendar: calendar)
+            .compactMap { service -> Int? in
+                let stationIds = service.timetable.map(\.stationId)
+                guard let fromIndex = stationIds.firstIndex(of: fromId),
+                      let toIndex = stationIds.firstIndex(of: toId),
+                      fromIndex < toIndex
+                else { return nil }
+                return service.timetable[fromIndex].departureSeconds()
+            }
+            .sorted()
     }
 
     private static func timetable(
@@ -570,13 +601,8 @@ struct FavoritesSection: View {
         return timetables.count == 1 ? timetables.first : nil
     }
 
-    /// Before 03:00 the clock reads as 24+ so post-midnight departures compare correctly.
     private static func railNowSeconds(at date: Date) -> Int {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(identifier: "Asia/Tokyo")!
-        let parts = calendar.dateComponents([.hour, .minute, .second], from: date)
-        let seconds = (parts.hour ?? 0) * 3600 + (parts.minute ?? 0) * 60 + (parts.second ?? 0)
-        return seconds < 3 * 3600 ? seconds + 24 * 3600 : seconds
+        ServiceDay.railSeconds(at: RailClock.adjusted(date))
     }
 
     private func upsert(_ place: SavedPlace) {

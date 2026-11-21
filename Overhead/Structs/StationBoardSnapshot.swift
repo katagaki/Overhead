@@ -22,7 +22,7 @@ nonisolated struct BoardDeparture: Codable {
         guard parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]) else { return nil }
         let minutes = h * 60 + m
         // Same rail-day basis as railNowMinutes, so post-midnight trains stay upcoming.
-        return minutes < 180 ? minutes + 1440 : minutes
+        return minutes < BoardSnapshotStore.rolloverMinutes ? minutes + 1440 : minutes
     }
 }
 
@@ -112,10 +112,13 @@ nonisolated enum BoardSnapshotStore {
         return true
     }
 
+    /// The widget can't link Backbone; keep in step with `ServiceDay.rolloverHour`.
+    static let rolloverMinutes = 4 * 60
+
     static func railDay(for date: Date = Date()) -> String {
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
-        let anchored = date.addingTimeInterval(-3 * 3600)
+        let anchored = date.addingTimeInterval(-TimeInterval(rolloverMinutes * 60))
         let c = cal.dateComponents([.year, .month, .day], from: anchored)
         return String(format: "%04d%02d%02d", c.year ?? 0, c.month ?? 0, c.day ?? 0)
     }
@@ -125,6 +128,6 @@ nonisolated enum BoardSnapshotStore {
         cal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
         let c = cal.dateComponents([.hour, .minute], from: date)
         let minutes = (c.hour ?? 0) * 60 + (c.minute ?? 0)
-        return minutes < 180 ? minutes + 1440 : minutes
+        return minutes < rolloverMinutes ? minutes + 1440 : minutes
     }
 }

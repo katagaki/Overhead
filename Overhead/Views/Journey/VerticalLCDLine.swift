@@ -606,7 +606,7 @@ struct VerticalLCDLine: View {
             .first { $0.stationId == station.id }?.departureTime
         return line.boardingPlatform(atStationId: station.id, nextStationId: next.id,
                                      departure: departure,
-                                     calendar: .current(at: journey.startedAt))
+                                     calendar: journey.serviceDay.scheduleCalendar)
     }
 
     // MARK: - Helpers
