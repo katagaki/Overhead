@@ -32,7 +32,7 @@ struct RouteSetupCard: View {
     @State private var pickerTarget: PickerTarget?
     @ScaledMetric(relativeTo: .caption2) private var tagWidth: CGFloat = 44
     @ScaledMetric(relativeTo: .caption2) private var tagHeight: CGFloat = 22
-    @ScaledMetric(relativeTo: .subheadline) private var roundButtonSize: CGFloat = 36
+    @ScaledMetric(relativeTo: .subheadline) private var roundButtonSize: CGFloat = 44
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var notificationsDenied = false
     @Environment(\.scenePhase) private var scenePhase
@@ -178,7 +178,7 @@ struct RouteSetupCard: View {
             onStationsChanged()
         } label: {
             Image(systemName: "arrow.up.arrow.down")
-                .scaledFont(size: 15, weight: .semibold)
+                .scaledFont(size: 18, weight: .semibold)
                 .foregroundColor(fromSelection != nil || toSelection != nil ? .accentColor : .secondary)
                 .frame(width: roundButtonSize, height: roundButtonSize)
                 .background(Color(.tertiarySystemFill))
@@ -193,7 +193,7 @@ struct RouteSetupCard: View {
             pickerTarget = .addVia
         } label: {
             Image(systemName: "plus")
-                .scaledFont(size: 15, weight: .semibold)
+                .scaledFont(size: 18, weight: .semibold)
                 .foregroundColor(viaSelections.count < Self.maxViaCount ? .accentColor : .secondary)
                 .frame(width: roundButtonSize, height: roundButtonSize)
                 .background(Color(.tertiarySystemFill))
