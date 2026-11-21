@@ -23,7 +23,12 @@ struct NearbyStationsSection: View {
 
     private static let directionChoicesKey = "nearby.directionChoices"
     /// All cards share one height (3 visible rows); longer lists scroll inside it.
-    private static let cardHeight: CGFloat = 182
+    @ScaledMetric(relativeTo: .body) private var cardHeight: CGFloat = 182
+    @ScaledMetric(relativeTo: .body) private var scaledCardWidth: CGFloat = 196
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    /// Grows with the text but always leaves the next card peeking in.
+    private var cardWidth: CGFloat { min(scaledCardWidth, 320) }
 
     var body: some View {
         Group {
@@ -71,7 +76,7 @@ struct NearbyStationsSection: View {
             header
             if !isCollapsed {
                 content()
-                    .frame(height: Self.cardHeight, alignment: .top)
+                    .frame(height: cardHeight, alignment: .top)
                     .transition(
                         .scale(0.96, anchor: .top)
                             .combined(with: .opacity)
@@ -132,11 +137,11 @@ struct NearbyStationsSection: View {
     private var deniedRow: some View {
         HStack(spacing: 6) {
             Text("Nearby.Denied")
-                .font(.system(size: 12.5))
+                .scaledFont(size: 12.5)
                 .foregroundStyle(.secondary)
             if let url = URL(string: UIApplication.openSettingsURLString) {
                 Link("Nearby.Settings", destination: url)
-                    .font(.system(size: 12.5, weight: .semibold))
+                    .scaledFont(size: 12.5, weight: .semibold)
             }
             Spacer()
         }
@@ -168,7 +173,7 @@ struct NearbyStationsSection: View {
         VStack(spacing: 12) {
             ProgressView()
             Text("Nearby.Locating")
-                .font(.system(size: 13))
+                .scaledFont(size: 13)
                 .foregroundStyle(.secondary)
         }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -188,11 +193,11 @@ struct NearbyStationsSection: View {
     private func unavailableCard(title: LocalizedStringKey, icon: String) -> some View {
         VStack(spacing: 5) {
             Image(systemName: icon)
-                .font(.system(size: 26, weight: .medium))
+                .scaledFont(size: 26, weight: .medium)
                 .foregroundStyle(.secondary)
                 .padding(.bottom, 5)
             Text(title)
-                .font(.system(size: 15, weight: .semibold))
+                .scaledFont(size: 15, weight: .semibold)
         }
         .multilineTextAlignment(.center)
         .padding(.horizontal, 16)
@@ -207,7 +212,7 @@ struct NearbyStationsSection: View {
         VStack(alignment: .leading, spacing: 9) {
             HStack(alignment: .firstTextBaseline) {
                 Text(group.station.localizedName)
-                    .font(.system(size: 17, weight: .bold))
+                    .scaledFont(size: 17, weight: .bold)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
                 Spacer()
@@ -228,11 +233,11 @@ struct NearbyStationsSection: View {
             }
             // Breathing room at the end of the list, not mid-scroll.
             .contentMargins(.bottom, 10, for: .scrollContent)
-            .scrollDisabled(group.hits.count <= 3)
+            .scrollDisabled(group.hits.count <= 3 && dynamicTypeSize <= .large)
         }
         // No bottom inset: rows emerge from under the rounded corner.
         .padding(EdgeInsets(top: 13, leading: 13, bottom: 0, trailing: 13))
-        .frame(width: 196, height: Self.cardHeight, alignment: .topLeading)
+        .frame(width: cardWidth, height: cardHeight, alignment: .topLeading)
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
@@ -249,7 +254,7 @@ struct NearbyStationsSection: View {
                     : String(format: "%.1fkm", meters / 1000))
             }
         }
-        .font(.system(size: 13))
+        .scaledFont(size: 13)
         .foregroundStyle(.secondary)
         .monospacedDigit()
     }
@@ -312,26 +317,26 @@ struct NearbyStationsSection: View {
                 }
                 if let next {
                     Text(next.departureTime)
-                        .font(.system(size: 14.5, weight: .semibold))
+                        .scaledFont(size: 14.5, weight: .semibold)
                         .monospacedDigit()
                         .contentTransition(.numericText())
                     Spacer(minLength: 4)
                     Text(destinationLabel(for: hit, timetable: current, departure: next))
-                        .font(.system(size: 14.5))
+                        .scaledFont(size: 14.5)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.75)
                         .contentTransition(.opacity)
                 } else if current != nil {
                     Text("StationTimetable.NoMoreTrains")
-                        .font(.system(size: 10.5))
+                        .scaledFont(size: 10.5)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                     Spacer(minLength: 4)
                 } else {
                     // Timetable still computing.
                     Text(verbatim: "--:--")
-                        .font(.system(size: 14.5, weight: .semibold))
+                        .scaledFont(size: 14.5, weight: .semibold)
                         .foregroundStyle(.tertiary)
                         .monospacedDigit()
                     Spacer(minLength: 4)
