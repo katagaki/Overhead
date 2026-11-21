@@ -75,6 +75,32 @@ struct StyledTrainLCDView: View {
     let orientation: TrainLCDOrientation
 
     var body: some View {
+        display
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text(verbatim: accessibilitySummary))
+    }
+
+    private var accessibilitySummary: String {
+        let lineName = journey.line.localizedName
+        let type = journey.service.trainType.localizedDisplayName
+        let destination = journey.destinationNames.localized
+        let service = String(localized: "LCD.A11y.Service \(lineName) \(type) \(destination)")
+        let stations = journey.journeyStations
+        let position: String
+        if state.status == .arrived, let last = stations.last {
+            position = String(localized: "LCD.A11y.Arrived \(last.localizedName)")
+        } else if let index = state.currentStationIndex, stations.indices.contains(index) {
+            position = String(localized: "LCD.A11y.NowAt \(stations[index].localizedName)")
+        } else if stations.indices.contains(state.segmentTo) {
+            position = String(localized: "LCD.A11y.Next \(stations[state.segmentTo].localizedName)")
+        } else {
+            return service
+        }
+        return String(localized: "LCD.A11y.Summary \(service) \(position)")
+    }
+
+    @ViewBuilder
+    private var display: some View {
         switch style {
         case .joban:
             TrainLCDView(journey: journey, state: state, lineColor: lineColor, orientation: orientation)
