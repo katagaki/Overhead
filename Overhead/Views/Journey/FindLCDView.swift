@@ -88,7 +88,7 @@ struct FindLCDView: View {
         let stops = upcomingStops
         return LCDTimeline(every: 0.5) { context in
             Canvas { ctx, size in
-                let blinkOn = Int(context.date.timeIntervalSinceReferenceDate * 2) % 2 == 0
+                let blinkOn = context.isLit(period: 0.5)
                 let lineY = size.height - 58
                 let mirrored = orientation == .left
                 let leadInset: CGFloat = mirrored ? 30 : 13

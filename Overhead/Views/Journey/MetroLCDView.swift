@@ -12,6 +12,8 @@ struct MetroLCDView: View {
     let lineColor: Color
     let orientation: TrainLCDOrientation
 
+    @Environment(\.motionReduced) private var reduceMotion
+
     private static let designWidth: CGFloat = 360
     private static let designHeight: CGFloat = designWidth * 9 / 16
     private static let destStripHeight: CGFloat = 25
@@ -30,7 +32,7 @@ struct MetroLCDView: View {
         LCDTimeline(every: 0.5) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
-                let language = LCDLanguageRotation.current(at: context.date)
+                let language = context.language
                 let phase = LCDPhase.of(journey: journey, state: state, now: context.date)
                 VStack(spacing: 0) {
                     destinationStrip(language: language)
@@ -184,7 +186,7 @@ struct MetroLCDView: View {
 
     private func progression(now: Date, language: TrainLCDLanguage) -> some View {
         let (builtCols, builtSlot) = columns(now: now)
-        let blinkRed = Int(now.timeIntervalSinceReferenceDate * 2) % 2 == 0
+        let blinkRed = reduceMotion || Int(now.timeIntervalSinceReferenceDate * 2) % 2 == 0
         let mirrored = orientation == .left
         let cols = mirrored ? Array(builtCols.reversed()) : builtCols
         let markerSlot = mirrored ? CGFloat(builtCols.count) - builtSlot : builtSlot

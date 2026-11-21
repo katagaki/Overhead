@@ -58,18 +58,18 @@ struct LEDMatrixView: View {
     private func onDots(_ pages: LEDPanelPages) -> some View {
         LCDTimeline(animationInterval: 1.0 / 30.0) { context in
             Canvas { ctx, _ in
-                drawLine(ctx, pages: pages.top, at: context.date, rowBase: 0)
-                drawLine(ctx, pages: pages.bottom, at: context.date, rowBase: Self.lineRows + Self.lineGap)
+                drawLine(ctx, pages: pages.top, at: context, rowBase: 0)
+                drawLine(ctx, pages: pages.bottom, at: context, rowBase: Self.lineRows + Self.lineGap)
             }
         }
     }
 
-    private func drawLine(_ ctx: GraphicsContext, pages: [LEDPage], at date: Date, rowBase: Int) {
+    private func drawLine(_ ctx: GraphicsContext, pages: [LEDPage], at context: LCDTimelineContext, rowBase: Int) {
         guard !pages.isEmpty else { return }
-        let (page, columnOffset) = frame(at: date, pages: pages)
+        let (page, columnOffset, shown) = frame(at: context.date, pages: pages, reduceMotion: context.reduceMotion)
         for col in 0..<Self.gridColumns {
             let sourceColumn = col + columnOffset
-            guard sourceColumn >= 0, sourceColumn < page.raster.width else { continue }
+            guard shown.contains(sourceColumn) else { continue }
             for row in 0..<Self.lineRows {
                 let colorIndex = page.raster.dot(column: sourceColumn, row: row)
                 guard colorIndex > 0 else { continue }
@@ -95,27 +95,40 @@ struct LEDMatrixView: View {
 
     // MARK: - Page Cycle
 
-    private func frame(at date: Date, pages: [LEDPage]) -> (LEDPage, Int) {
-        let cycle = pages.reduce(0) { $0 + duration(of: $1) }
+    private func frame(at date: Date, pages: [LEDPage], reduceMotion: Bool) -> (LEDPage, Int, Range<Int>) {
+        let cycle = pages.reduce(0) { $0 + duration(of: $1, reduceMotion: reduceMotion) }
         var t = date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: cycle)
         for page in pages {
-            let d = duration(of: page)
+            let d = duration(of: page, reduceMotion: reduceMotion)
             if t < d {
+                let all = 0..<page.raster.width
+                if page.scrolls && reduceMotion {
+                    let windows = staticWindows(of: page)
+                    let window = windows[min(Int(t / Self.staticPageSeconds), windows.count - 1)]
+                    return (page, window.lowerBound - (Self.gridColumns - window.count) / 2, window)
+                }
                 if page.scrolls {
                     let travelled = Int(t * Self.scrollDotsPerSecond)
-                    return (page, travelled - Self.gridColumns)
+                    return (page, travelled - Self.gridColumns, all)
                 }
-                return (page, -(Self.gridColumns - page.raster.width) / 2)
+                return (page, -(Self.gridColumns - page.raster.width) / 2, all)
             }
             t -= d
         }
-        return (pages[0], 0)
+        return (pages[0], 0, 0..<pages[0].raster.width)
     }
 
-    private func duration(of page: LEDPage) -> Double {
-        page.scrolls
-            ? Double(page.raster.width + Self.gridColumns) / Self.scrollDotsPerSecond
-            : Self.staticPageSeconds
+    private func duration(of page: LEDPage, reduceMotion: Bool) -> Double {
+        guard page.scrolls else { return Self.staticPageSeconds }
+        return reduceMotion
+            ? Double(staticWindows(of: page).count) * Self.staticPageSeconds
+            : Double(page.raster.width + Self.gridColumns) / Self.scrollDotsPerSecond
+    }
+
+    private func staticWindows(of page: LEDPage) -> [Range<Int>] {
+        LCDRasterPaging.windows(width: page.raster.width, visible: Self.gridColumns) { column in
+            (0..<Self.lineRows).allSatisfy { page.raster.dot(column: column, row: $0) == 0 }
+        }
     }
 
     // MARK: - Messages

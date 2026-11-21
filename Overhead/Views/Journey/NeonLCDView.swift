@@ -106,6 +106,7 @@ struct NeonLCDView: View {
             )
             .frame(height: 30)
             .offset(y: -30 + (Self.designHeight + 30) * progress)
+            .opacity(context.reduceMotion ? 0 : 1)
         }
         .allowsHitTesting(false)
     }
@@ -152,7 +153,7 @@ struct NeonLCDView: View {
                     Text(verbatim: "_")
                         .font(.system(size: 6.5, weight: .bold, design: .monospaced))
                         .foregroundColor(Self.cyan)
-                        .opacity(Int(context.date.timeIntervalSinceReferenceDate * 2) % 2 == 0 ? 1 : 0)
+                        .opacity(context.isLit(period: 0.5) ? 1 : 0)
                 }
             }
         }
@@ -212,7 +213,7 @@ struct NeonLCDView: View {
         LCDTimeline(animationInterval: 1.0 / 15.0) { context in
             let t = context.date.timeIntervalSinceReferenceDate
             let phase = t.truncatingRemainder(dividingBy: Self.glitchPeriod)
-            let bursting = phase > Self.glitchPeriod - 0.35
+            let bursting = !context.reduceMotion && phase > Self.glitchPeriod - 0.35
             let jitterX = bursting ? sin(t * 91) * 3.5 : 0
             let jitterY = bursting ? cos(t * 73) * 1.4 : 0
             let name = headlineStation?.name ?? ""
@@ -301,7 +302,7 @@ struct NeonLCDView: View {
                     Text(verbatim: "NEXT")
                         .font(.system(size: 4.8, weight: .bold, design: .monospaced))
                         .foregroundColor(Self.magenta)
-                        .opacity(Int(context.date.timeIntervalSinceReferenceDate / 0.55) % 2 == 0 ? 1 : 0.15)
+                        .opacity(context.isLit(period: 0.55) ? 1 : 0.15)
                 }
             } else if row.isPassed {
                 Text(verbatim: "PASS")
@@ -359,6 +360,10 @@ struct NeonLCDView: View {
             LCDTimeline(animationInterval: 1.0 / 30.0) { context in
                 Canvas { ctx, size in
                     ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Color(hex: "#050912").opacity(0.85)))
+                    if context.reduceMotion {
+                        drawStaticTickerPage(ctx, size: size, segments: segments, at: context.date)
+                        return
+                    }
                     let resolved = segments.map { segment in
                         ctx.resolve(
                             Text(verbatim: segment.0)
@@ -386,6 +391,31 @@ struct NeonLCDView: View {
                 }
                 .frame(height: 15.5)
             }
+        }
+    }
+
+    private func drawStaticTickerPage(
+        _ ctx: GraphicsContext, size: CGSize, segments: [(String, Color)], at date: Date
+    ) {
+        func resolve(_ run: LCDTextPaging.Run) -> GraphicsContext.ResolvedText {
+            ctx.resolve(
+                Text(verbatim: run.text)
+                    .font(.system(size: 6.5, weight: .medium, design: .monospaced))
+                    .kerning(1.2)
+                    .foregroundColor(segments[run.style].1)
+            )
+        }
+        let runs = segments.enumerated().map { LCDTextPaging.Run(text: $0.element.0, style: $0.offset) }
+        let pages = LCDTextPaging.pages(runs, width: size.width - 12) {
+            resolve($0).measure(in: CGSize(width: .greatestFiniteMagnitude, height: size.height)).width
+        }
+        guard !pages.isEmpty else { return }
+        let index = Int(date.timeIntervalSinceReferenceDate / LCDTextPaging.pageSeconds) % pages.count
+        var x: CGFloat = 6
+        for run in pages[index] {
+            let text = resolve(run)
+            ctx.draw(text, at: CGPoint(x: x, y: size.height / 2), anchor: .leading)
+            x += text.measure(in: CGSize(width: .greatestFiniteMagnitude, height: size.height)).width
         }
     }
 

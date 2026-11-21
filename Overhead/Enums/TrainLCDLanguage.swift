@@ -224,12 +224,17 @@ enum LCDLanguageRotation {
         defaults.set(ordered.map(\.rawValue).joined(separator: ","), forKey: storageKey)
     }
 
+    /// Reduce Motion holds each language twice as long.
+    static let reducedMotionFlipSeconds = 8.0
+
     /// The language on screen at `date`. A single selection never flips.
     static func current(at date: Date,
+                        reduceMotion: Bool = false,
                         defaults: UserDefaults = .standard) -> TrainLCDLanguage {
         let languages = selected(defaults)
         guard languages.count > 1 else { return languages[0] }
-        let step = Int(date.timeIntervalSinceReferenceDate / flipSeconds)
+        let seconds = reduceMotion ? reducedMotionFlipSeconds : flipSeconds
+        let step = Int(date.timeIntervalSinceReferenceDate / seconds)
         return languages[((step % languages.count) + languages.count) % languages.count]
     }
 }

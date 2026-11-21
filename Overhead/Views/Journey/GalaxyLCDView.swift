@@ -53,7 +53,7 @@ struct GalaxyLCDView: View {
     private var starfield: some View {
         LCDTimeline(animationInterval: 1.0 / 8.0) { context in
             Canvas { ctx, size in
-                let t = context.date.timeIntervalSinceReferenceDate
+                let t = context.reduceMotion ? 0 : context.date.timeIntervalSinceReferenceDate
                 for i in 0..<70 {
                     let x = CGFloat((i * 97 + 31) % 360)
                     let y = CGFloat((i * 61 + 17) % 190)
