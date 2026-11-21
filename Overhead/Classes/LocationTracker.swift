@@ -83,6 +83,11 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
 
     private var lastGoodGPSTime: Date?
 
+    // One stray fix near the destination must not end the journey.
+    private let arrivalFixesRequired = 2
+    private var arrivalFixCount = 0
+    private var lastArrivalFixTime: Date?
+
     // Station the user last confirmed (or GPS last established) on a
     // schedule-less journey; the prev/next buttons move it.
     private var manualStationIndex = 0
@@ -133,6 +138,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         self.recentAccuracies = []
         self.lastGoodGPSTime = nil
         self.manualStationIndex = 0
+        resetArrivalConfirmation()
 
         stationCoordinates = buildStationCoordinates(for: journey)
 
@@ -162,6 +168,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         stationCoordinates = []
         recentAccuracies = []
         lastGoodGPSTime = nil
+        resetArrivalConfirmation()
     }
 
     private func requestGPSIfAuthorized() {
@@ -240,24 +247,20 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
             positionState = timetableState
             updateLiveActivity()
 
-        case .gps:
-            // GPS drives once a fix exists — the timetable only bootstraps
-            if currentLocation == nil {
-                positionState = timetableState
-                updateLiveActivity()
-            }
-
-        case .hybrid, .manual:
-            // If GPS is stale, the timetable becomes the source of truth
+        case .gps, .hybrid, .manual:
+            // Fresh GPS (or a blend of it) drives via the location delegate path
             let gpsFresh = isGPSFresh()
             if !gpsFresh || trackingMode == .timetable {
-                if gpsFresh == false && trackingMode == .gps {
+                if !gpsFresh, trackingMode != .timetable {
                     trackingMode = .timetable
+                    resetArrivalConfirmation()
+                    trackingLog("tick: GPS stale, timetable takes over")
                 }
                 positionState = timetableState
                 updateLiveActivity()
+            } else {
+                trackingLog("tick: GPS fresh, keeping \(trackingMode.rawValue)")
             }
-            // If GPS is active and fresh, the GPS path handles updates — don't override
         }
     }
 
@@ -329,7 +332,8 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let location = locations.last, journey != nil else { return }
+        guard let fix = locations.last, journey != nil else { return }
+        let location = debugAdjusted(fix)
 
         // Timetable mode's coarse fixes are keep-alive only, never a position
         guard journeyMode != .timetable else { return }
@@ -385,12 +389,12 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
             if confidence >= 0.5, snapResult.distance <= offRouteDistance {
                 trackingMode = .gps
                 lastGoodGPSTime = Date()
-                let gpsState = buildGPSState(
+                let gpsState = confirmArrival(buildGPSState(
                     snapResult: snapResult,
                     location: location.coordinate,
                     journey: journey,
                     stations: stations
-                )
+                ), fix: location)
                 // Keep the manual index in sync so flipping resumes from the
                 // last known station when the signal drops.
                 manualStationIndex = gpsState.currentStationIndex ?? snapResult.segmentFrom
@@ -398,22 +402,33 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
             } else {
                 trackingMode = .manual
                 lastGoodGPSTime = nil
+                resetArrivalConfirmation()
                 positionState = manualPositionState(journey: journey)
             }
             updateLiveActivity()
             return
         }
 
-        // GPS-only mode trusts the fix outright — no blending, no fallback
+        // GPS-only mode doesn't blend, but an unusable fix still yields to the timetable
         if journeyMode == .gps {
+            if location.horizontalAccuracy < 0
+                || location.horizontalAccuracy > poorAccuracy
+                || snapResult.distance > offRouteDistance {
+                trackingLog(String(format: "fix unusable (acc %.0f m, %.0f m off line), timetable takes over",
+                                   location.horizontalAccuracy, snapResult.distance))
+                fallBackToTimetable(timetableState)
+                return
+            }
             trackingMode = .gps
             lastGoodGPSTime = Date()
-            positionState = buildGPSState(
+            positionState = confirmArrival(buildGPSState(
                 snapResult: snapResult,
                 location: location.coordinate,
                 journey: journey,
                 stations: stations
-            )
+            ), fix: location)
+            trackingLog(String(format: "fix used (acc %.0f m, %.0f m off line), mode GPS",
+                               location.horizontalAccuracy, snapResult.distance))
             updateLiveActivity()
             return
         }
@@ -421,10 +436,8 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         // Off-route: accurate fix far from the line — fall back to timetable instead of blending.
         if location.horizontalAccuracy <= acceptableAccuracy,
            snapResult.distance > offRouteDistance {
-            trackingMode = .timetable
-            lastGoodGPSTime = nil
-            positionState = timetableState
-            updateLiveActivity()
+            trackingLog(String(format: "fix off route (%.0f m off line), timetable takes over", snapResult.distance))
+            fallBackToTimetable(timetableState)
             return
         }
 
@@ -434,21 +447,26 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
             age: -location.timestamp.timeIntervalSinceNow
         )
 
+        trackingLog(String(format: "fix acc %.0f m, %.0f m off line, confidence %.2f",
+                           location.horizontalAccuracy, snapResult.distance, gpsConfidence))
+
         if gpsConfidence >= 0.7 {
             trackingMode = .gps
             lastGoodGPSTime = Date()
 
-            let gpsState = buildGPSState(
+            let gpsState = confirmArrival(buildGPSState(
                 snapResult: snapResult,
                 location: location.coordinate,
                 journey: journey,
                 stations: stations
-            )
+            ), fix: location)
             positionState = gpsState
             updateLiveActivity()
 
         } else if gpsConfidence >= 0.3 {
             trackingMode = .blended
+            lastGoodGPSTime = Date()
+            resetArrivalConfirmation()
 
             let gpsState = buildGPSState(
                 snapResult: snapResult,
@@ -482,10 +500,68 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
             updateLiveActivity()
 
         } else {
-            trackingMode = .timetable
-            positionState = timetableState
-            updateLiveActivity()
+            fallBackToTimetable(timetableState)
         }
+    }
+
+    private func fallBackToTimetable(_ timetableState: TrainPositionState) {
+        trackingMode = .timetable
+        lastGoodGPSTime = nil
+        resetArrivalConfirmation()
+        positionState = timetableState
+        updateLiveActivity()
+    }
+
+    // MARK: - Arrival Confirmation
+
+    private func confirmArrival(_ state: TrainPositionState, fix: CLLocation) -> TrainPositionState {
+        guard state.status == .arrived else {
+            resetArrivalConfirmation()
+            return state
+        }
+        if lastArrivalFixTime != fix.timestamp {
+            lastArrivalFixTime = fix.timestamp
+            arrivalFixCount += 1
+        }
+        trackingLog("arrival fix \(arrivalFixCount)/\(arrivalFixesRequired)")
+        guard arrivalFixCount < arrivalFixesRequired else { return state }
+        return TrainPositionState(
+            progress: min(state.progress, 0.99),
+            segmentFrom: state.segmentFrom,
+            segmentTo: state.segmentTo,
+            segmentProgress: state.segmentProgress,
+            currentStationIndex: state.currentStationIndex,
+            nextStationName: state.nextStationName,
+            nextStationNameEn: state.nextStationNameEn,
+            delayMinutes: state.delayMinutes,
+            estimatedArrival: state.estimatedArrival,
+            status: state.delayMinutes > 0 ? .delayed : .onTime,
+            trackingModeRaw: state.trackingModeRaw
+        )
+    }
+
+    private func resetArrivalConfirmation() {
+        arrivalFixCount = 0
+        lastArrivalFixTime = nil
+    }
+
+    // `-debugFixAccuracy <m>` stands in for real-world fix quality on the simulator.
+    private func debugAdjusted(_ fix: CLLocation) -> CLLocation {
+        #if DEBUG
+        let accuracy = UserDefaults.standard.double(forKey: "debugFixAccuracy")
+        if accuracy > 0 {
+            return CLLocation(coordinate: fix.coordinate, altitude: fix.altitude,
+                              horizontalAccuracy: accuracy, verticalAccuracy: fix.verticalAccuracy,
+                              timestamp: fix.timestamp)
+        }
+        #endif
+        return fix
+    }
+
+    private func trackingLog(_ message: @autoclosure () -> String) {
+        #if DEBUG
+        NSLog("[OverheadTracking] %@", message())
+        #endif
     }
 
     // MARK: - GPS Confidence Scoring

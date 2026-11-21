@@ -59,7 +59,7 @@ final class JourneyViewModel: ObservableObject {
     private var timetableCache: [TimetableKey: [TrainService]] = [:]
     private var timetableCacheOrder: [TimetableKey] = []
     private static let timetableCacheLimit = 16
-    private var linesLoaded = false
+    @Published private(set) var linesLoaded = false
 
     private var pendingStart: (() -> Void)?
 
@@ -1111,7 +1111,14 @@ final class JourneyViewModel: ObservableObject {
     }
 
     private func performStartCustomJourney(line: CustomLine, fromId: String, toId: String) {
-        let scheduled = CustomJourneyBuilder.scheduledService(line: line, fromId: fromId, toId: toId)
+        var scheduled: TrainService?
+        switch CustomJourneyBuilder.scheduledService(line: line, fromId: fromId, toId: toId) {
+        case .service(let service): scheduled = service
+        case .noMoreTrainsToday:
+            startFailure = .noMoreTrainsToday
+            return
+        case .unscheduled: scheduled = nil
+        }
         guard let service = scheduled
             ?? CustomJourneyBuilder.untimedService(line: line, fromId: fromId, toId: toId)
         else {

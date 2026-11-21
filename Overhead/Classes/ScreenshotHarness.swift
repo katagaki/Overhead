@@ -11,6 +11,7 @@ import Backbone
 ///
 /// - overhead://seed/favorites[?line=…&from=…&to=…] (the 自宅 favorite's ride)
 /// - overhead://seed/custom-line
+/// - overhead://import?file=<name in Documents, or absolute path> (opens a .ohl as if from Files)
 /// - overhead://lcd?style=<TrainLCDStyle raw value>
 /// - overhead://journey?minutesAgo=45[&line=…&from=…&to=…]
 /// - overhead://ride?from=…&to=…[&at=<ISO 8601>&arrive=1&dep=HH:mm] (opens a search result as a preview)
@@ -27,6 +28,7 @@ import Backbone
 enum ScreenshotCommand {
     case seedFavorites(lineId: String?, fromId: String?, toId: String?)
     case seedCustomLine
+    case importFile(String)
     case lcdStyle(String)
     case journey(lineId: String, fromId: String, toId: String, minutesAgo: Double)
     case ride(fromId: String, toId: String, at: Date?, arrive: Bool, departure: String?)
@@ -58,6 +60,9 @@ enum ScreenshotCommand {
             case "/custom-line": self = .seedCustomLine
             default: return nil
             }
+        case "import":
+            guard let file = params["file"] else { return nil }
+            self = .importFile(file)
         case "lcd":
             guard let style = params["style"] else { return nil }
             self = .lcdStyle(style)

@@ -20,10 +20,31 @@ struct ServiceStatusView: View {
     }
 
     var body: some View {
-        Group {
+        ZStack {
             if let webView = web.officialWebView {
                 ServiceStatusWebView(webView: webView, bottomInset: bottomInset)
                     .ignoresSafeArea(edges: .bottom)
+                    .opacity(web.loadState.isFailed ? 0 : 1)
+            }
+            switch web.loadState {
+            case .loading:
+                ProgressView()
+            case .failed(let offline):
+                ContentUnavailableView {
+                    Label("ServiceStatus.Failed.Title",
+                          systemImage: offline ? "wifi.slash" : "exclamationmark.triangle")
+                } description: {
+                    Text(offline ? "ServiceStatus.Failed.Offline" : "ServiceStatus.Failed.Message")
+                } actions: {
+                    if web.officialWebView != nil {
+                        Button("ServiceStatus.Reload") {
+                            web.reload()
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                }
+            case .loaded:
+                EmptyView()
             }
         }
         .onGeometryChange(for: CGFloat.self) { proxy in
@@ -100,6 +121,17 @@ extension View {
 
 // MARK: - Web Controller
 
+enum ServiceStatusLoadState: Equatable {
+    case loading
+    case loaded
+    case failed(offline: Bool)
+
+    var isFailed: Bool {
+        if case .failed = self { return true }
+        return false
+    }
+}
+
 /// Loads the status page in a cookie-less web view.
 @MainActor
 final class ServiceStatusWebController: ObservableObject {
@@ -109,18 +141,27 @@ final class ServiceStatusWebController: ObservableObject {
     /// The operator's X timeline, opened externally rather than embedded.
     let xURL: URL?
 
+    private(set) var loadState: ServiceStatusLoadState {
+        willSet { objectWillChange.send() }
+    }
+
     private let officialDelegate: RestrictedWebDelegate?
+    private let statusURL: URL?
 
     init(delayInfo: DelayCheckInfo?) {
         if let delayInfo, let statusURL = URL(string: delayInfo.localizedStatusPageURL) {
             let delegate = RestrictedWebDelegate(
                 allowedDomains: Self.registrableDomain(of: statusURL).map { [$0] } ?? []
             )
+            self.statusURL = statusURL
             self.officialDelegate = delegate
             self.officialWebView = Self.makeWebView(delegate: delegate, url: statusURL)
+            self.loadState = .loading
         } else {
+            self.statusURL = nil
             self.officialDelegate = nil
             self.officialWebView = nil
+            self.loadState = .failed(offline: false)
         }
 
         if let account = delayInfo?.xAccount {
@@ -128,7 +169,47 @@ final class ServiceStatusWebController: ObservableObject {
         } else {
             self.xURL = nil
         }
+
+        officialDelegate?.onLoadStateChange = { [weak self] state in
+            self?.setLoadState(state)
+        }
     }
+
+    private func setLoadState(_ state: ServiceStatusLoadState) {
+        #if DEBUG
+        guard !debugHoldingFailure else { return }
+        if state == .loading, Self.debugFailuresLeft > 0 {
+            Self.debugFailuresLeft -= 1
+            debugHoldingFailure = true
+            officialWebView?.stopLoading()
+            NSLog("[ServiceStatusWeb] forcing an offline failure")
+            loadState = .failed(offline: true)
+            return
+        }
+        NSLog("[ServiceStatusWeb] state %@", String(describing: state))
+        #endif
+        guard loadState != state else { return }
+        loadState = state
+    }
+
+    func reload() {
+        guard let officialWebView, let statusURL else { return }
+        #if DEBUG
+        debugHoldingFailure = false
+        #endif
+        loadState = .loading
+        if officialWebView.backForwardList.currentItem == nil {
+            officialWebView.load(URLRequest(url: statusURL))
+        } else {
+            officialWebView.reload()
+        }
+    }
+
+    #if DEBUG
+    /// `-debugServiceStatusFailures <n>` fails the next n page loads as if offline.
+    private static var debugFailuresLeft = UserDefaults.standard.integer(forKey: "debugServiceStatusFailures")
+    private var debugHoldingFailure = false
+    #endif
 
     private static func makeWebView(delegate: RestrictedWebDelegate, url: URL) -> WKWebView {
         let configuration = WKWebViewConfiguration()
@@ -251,6 +332,7 @@ enum CookieBanners {
 /// Keeps top-level navigation on the operator's domain; anything else goes to Safari.
 private final class RestrictedWebDelegate: NSObject, WKNavigationDelegate, WKUIDelegate {
     private let allowedDomains: Set<String>
+    var onLoadStateChange: ((ServiceStatusLoadState) -> Void)?
 
     init(allowedDomains: some Sequence<String>) {
         self.allowedDomains = Set(allowedDomains)
@@ -314,19 +396,55 @@ private final class RestrictedWebDelegate: NSObject, WKNavigationDelegate, WKUID
             || navigationAction.navigationType == .formSubmitted
     }
 
-#if DEBUG
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        onLoadStateChange?(.loading)
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        onLoadStateChange?(.loaded)
+    }
+
     func webView(
         _ webView: WKWebView,
         didFailProvisionalNavigation navigation: WKNavigation!,
         withError error: Error
     ) {
+#if DEBUG
         NSLog("[ServiceStatusWeb] didFailProvisional %@", (error as NSError).description)
+#endif
+        reportFailure(error, in: webView)
+    }
+
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+#if DEBUG
+        NSLog("[ServiceStatusWeb] didFail %@", (error as NSError).description)
+#endif
+        reportFailure(error, in: webView)
     }
 
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+#if DEBUG
         NSLog("[ServiceStatusWeb] content process terminated %@", webView.url?.absoluteString ?? "-")
-    }
 #endif
+        onLoadStateChange?(.failed(offline: false))
+    }
+
+    private func reportFailure(_ error: Error, in webView: WKWebView) {
+        let nsError = error as NSError
+        // Our own cancelled redirects and superseded loads aren't failures.
+        let isCancellation = (nsError.domain == NSURLErrorDomain && nsError.code == NSURLErrorCancelled)
+            || (nsError.domain == "WebKitErrorDomain" && nsError.code == 102)
+        if isCancellation {
+            if !webView.isLoading {
+                onLoadStateChange?(webView.backForwardList.currentItem == nil ? .failed(offline: false) : .loaded)
+            }
+            return
+        }
+        let offlineCodes = [NSURLErrorNotConnectedToInternet, NSURLErrorNetworkConnectionLost,
+                            NSURLErrorDataNotAllowed, NSURLErrorInternationalRoamingOff,
+                            NSURLErrorCannotFindHost, NSURLErrorCannotConnectToHost, NSURLErrorTimedOut]
+        onLoadStateChange?(.failed(offline: nsError.domain == NSURLErrorDomain && offlineCodes.contains(nsError.code)))
+    }
 }
 
 // MARK: - Web View Wrapper

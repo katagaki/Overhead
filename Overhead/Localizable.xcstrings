@@ -2672,31 +2672,31 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld lines already exist and will be replaced."
+            "value" : "%lld lines already exist. The imported lines will be added as separate lines."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld件の路線が既にあり、置き換えられます。"
+            "value" : "%lld件の路線が既にあります。取り込む路線は別の路線として追加されます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "노선 %lld개가 이미 있어 대체됩니다."
+            "value" : "노선 %lld개가 이미 있습니다. 가져온 노선은 별도의 노선으로 추가됩니다."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld条线路已存在，将被替换。"
+            "value" : "%lld条线路已存在。导入的线路将作为单独的线路添加。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld條路線已存在，將被取代。"
+            "value" : "%lld條路線已存在。匯入的路線將作為另一條路線加入。"
           }
         }
       }
@@ -2707,31 +2707,31 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\"%@\" already exists and will be replaced."
+            "value" : "\"%@\" already exists. The imported line will be added as a separate line."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "「%@」は既にあります。取り込むと置き換えられます。"
+            "value" : "「%@」は既にあります。取り込む路線は別の路線として追加されます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\"%@\"은(는) 이미 있습니다. 가져오면 대체됩니다."
+            "value" : "\"%@\"은(는) 이미 있습니다. 가져온 노선은 별도의 노선으로 추가됩니다."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\"%@\"已存在，导入后将被替换。"
+            "value" : "\"%@\"已存在。导入的线路将作为单独的线路添加。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "「%@」已存在，匯入後將被取代。"
+            "value" : "「%@」已存在。匯入的路線將作為另一條路線加入。"
           }
         }
       }
@@ -2872,6 +2872,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "匯入 .ohl 檔案"
+          }
+        }
+      }
+    },
+    "CustomLine.ImportInvalid" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This file has values Overhead can't use, such as an invalid time or travel time."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この書類には、無効な時刻や所要時間など、使用できない値が含まれています。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 파일에 잘못된 시각이나 소요 시간 등 사용할 수 없는 값이 있습니다."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此文件包含无法使用的值，例如无效的时间或所需时间。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此檔案包含無法使用的值，例如無效的時間或所需時間。"
           }
         }
       }
@@ -6484,6 +6519,111 @@
         }
       }
     },
+    "LineUnavailable.Description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This line's data isn't installed. Download it again in Timetable Data."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この路線のデータはインストールされていません。「路線データ」から再度ダウンロードしてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 노선의 데이터가 설치되어 있지 않습니다. '노선 데이터'에서 다시 다운로드하십시오."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未安装此线路的数据。请在“线路数据”中重新下载。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未安裝此路線的資料。請在「路線資料」中重新下載。"
+          }
+        }
+      }
+    },
+    "LineUnavailable.OpenLineData" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Timetable Data"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "路線データを開く"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "노선 데이터 열기"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开线路数据"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開啟路線資料"
+          }
+        }
+      }
+    },
+    "LineUnavailable.Title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Line Not Available"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "路線データがありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "노선 데이터가 없습니다"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有线路数据"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "沒有路線資料"
+          }
+        }
+      }
+    },
     "LiveActivity.Delay.Badge %lld" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9821,6 +9961,111 @@
         }
       }
     },
+    "ServiceStatus.Failed.Message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The operator's page couldn't be shown. Try again, or open it in Safari."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "事業者のページを表示できませんでした。もう一度試すか、Safariで開いてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "운영사 페이지를 표시할 수 없습니다. 다시 시도하거나 Safari에서 여십시오."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法显示运营商的页面。请重试，或在 Safari 中打开。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法顯示營運商的頁面。請再試一次，或在 Safari 中開啟。"
+          }
+        }
+      }
+    },
+    "ServiceStatus.Failed.Offline" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check your internet connection and try again."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インターネット接続を確認して、もう一度お試しください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "인터넷 연결을 확인한 후 다시 시도하십시오."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请检查互联网连接，然后重试。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請檢查網際網路連線，然後再試一次。"
+          }
+        }
+      }
+    },
+    "ServiceStatus.Failed.Title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't Load Service Status"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "運行情報を読み込めませんでした"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "운행 정보를 불러올 수 없습니다"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法载入运行信息"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法載入運行資訊"
+          }
+        }
+      }
+    },
     "ServiceStatus.OpenInSafari" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9887,6 +10132,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在 X 中開啟"
+          }
+        }
+      }
+    },
+    "ServiceStatus.Reload" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reload"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再読み込み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 불러오기"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新载入"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新載入"
           }
         }
       }

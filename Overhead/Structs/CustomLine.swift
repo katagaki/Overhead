@@ -128,6 +128,68 @@ struct CustomLine: Identifiable, Codable, Hashable {
     }
 }
 
+// MARK: - Import validation
+
+extension CustomLine {
+    static let hopMinutesRange: ClosedRange<Double> = 0...720
+    static let headwayRange = 1...720
+    static let maxStations = 500
+
+    static func isValidHop(_ minutes: Double) -> Bool {
+        minutes.isFinite && hopMinutesRange.contains(minutes)
+    }
+
+    /// "H:mm" rail time up to 47:59, in minutes; nil when malformed or out of range.
+    static func railMinutes(_ hhmm: String) -> Int? {
+        let parts = hhmm.trimmingCharacters(in: .whitespaces).split(separator: ":", omittingEmptySubsequences: false)
+        guard parts.count == 2, (1...2).contains(parts[0].count), parts[1].count == 2,
+              let hour = Int(parts[0]), let minute = Int(parts[1]),
+              (0...47).contains(hour), (0...59).contains(minute)
+        else { return nil }
+        return hour * 60 + minute
+    }
+
+    var isImportable: Bool {
+        guard stations.count <= Self.maxStations,
+              hopMinutes.count <= Self.maxStations,
+              hopMinutes.allSatisfy(Self.isValidHop),
+              stations.allSatisfy(\.hasValidCoordinates)
+        else { return false }
+        guard let timetable else { return true }
+        return [timetable.weekday, timetable.saturdayHoliday].allSatisfy { pattern in
+            Self.railMinutes(pattern.firstDeparture) != nil
+                && Self.railMinutes(pattern.lastDeparture) != nil
+                && Self.headwayRange.contains(pattern.headwayMinutes)
+        }
+    }
+
+    static let idPrefix = "Custom:"
+}
+
+extension CustomStation {
+    var hasValidCoordinates: Bool {
+        switch (latitude, longitude) {
+        case (nil, nil): true
+        case let (lat?, lon?): lat.isFinite && lon.isFinite && abs(lat) <= 90 && abs(lon) <= 180
+        default: false
+        }
+    }
+}
+
+struct CustomLineImportError: LocalizedError {
+    var errorDescription: String? { String(localized: "CustomLine.ImportInvalid") }
+}
+
+extension CustomLinePackage {
+    static func decodeValidated(from data: Data) throws -> CustomLinePackage {
+        let package = try JSONDecoder().decode(CustomLinePackage.self, from: data)
+        guard !package.lines.isEmpty, package.lines.allSatisfy(\.isImportable) else {
+            throw CustomLineImportError()
+        }
+        return package
+    }
+}
+
 // MARK: - Color palette
 
 enum CustomLinePalette {
@@ -160,6 +222,7 @@ final class CustomLineStore: ObservableObject {
 
     @Published private(set) var lines: [CustomLine]
     @Published var incomingPackage: CustomLinePackage?
+    @Published var incomingError: String?
 
     private static let storageKey = "customLines"
 
@@ -200,9 +263,23 @@ final class CustomLineStore: ObservableObject {
         persist()
     }
 
-    /// Adds imported lines, replacing any with a matching id.
+    /// Adds imported lines; one whose id is taken (or isn't a custom id) is added as a new line, never replacing the user's.
     func importLines(_ imported: [CustomLine]) {
-        for line in imported { upsert(line) }
+        for var line in imported {
+            let takenStationIds = Set(lines.flatMap { $0.stations.map(\.id) })
+            if !line.id.hasPrefix(CustomLine.idPrefix) || lines.contains(where: { $0.id == line.id }) {
+                line.id = CustomLine.new().id
+                for index in line.stations.indices {
+                    line.stations[index].id = CustomStation.new().id
+                }
+            }
+            for index in line.stations.indices
+            where !line.stations[index].id.hasPrefix(CustomLine.idPrefix)
+                || takenStationIds.contains(line.stations[index].id) {
+                line.stations[index].id = CustomStation.new().id
+            }
+            upsert(line)
+        }
     }
 
     // MARK: Export / import documents
@@ -220,10 +297,12 @@ final class CustomLineStore: ObservableObject {
     func receiveFile(at url: URL) -> Bool {
         let scoped = url.startAccessingSecurityScopedResource()
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-        guard let data = try? Data(contentsOf: url),
-              let package = try? JSONDecoder().decode(CustomLinePackage.self, from: data)
-        else { return false }
-        incomingPackage = package
-        return true
+        do {
+            incomingPackage = try CustomLinePackage.decodeValidated(from: Data(contentsOf: url))
+            return true
+        } catch {
+            incomingError = error.localizedDescription
+            return false
+        }
     }
 }
