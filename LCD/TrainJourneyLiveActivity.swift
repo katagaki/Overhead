@@ -7,12 +7,15 @@ import ActivityKit
 struct TrainJourneyLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: TrainJourneyAttributes.self) { context in
-            LiveActivityContentView(attributes: context.attributes, state: context.state)
+            LiveActivityContentView(attributes: context.attributes, state: context.state,
+                                    isStale: context.isStale)
                 .containerBackground(.clear, for: .widget)
 
         } dynamicIsland: { context in
             let attrs = context.attributes
             let state = context.state
+            let isStale = context.isStale
+            let stalePresence = isStale ? 0.4 : 1
             let nextIndex = state.nextStationIndex
             let leg = attrs.currentLeg(nextIndex: nextIndex)
             let legSymbol = leg?.lineSymbol ?? attrs.lineSymbol
@@ -22,58 +25,66 @@ struct TrainJourneyLiveActivity: Widget {
                 // Beside the camera, inset clear of the island's rounded corners.
                 DynamicIslandExpandedRegion(.leading) {
                     IslandCornerTime(attributes: attrs, state: state, side: .leading)
+                        .opacity(stalePresence)
                         .padding(.leading, 26)
                         .padding(.top, 12)
                 }
 
                 DynamicIslandExpandedRegion(.trailing) {
                     IslandCornerTime(attributes: attrs, state: state, side: .trailing)
+                        .opacity(stalePresence)
                         .padding(.trailing, 26)
                         .padding(.top, 12)
                 }
 
                 // Full width; .center would be squeezed between the corner times.
                 DynamicIslandExpandedRegion(.bottom) {
-                    ExpandedIslandView(attributes: attrs, state: state)
+                    ExpandedIslandView(attributes: attrs, state: state, isStale: isStale)
                 }
 
             } compactLeading: {
-                if !legSymbol.isEmpty {
-                    LCDLineSymbolBadge(symbol: legSymbol, color: legColor)
-                        .sized(23)
-                        .padding(.leading, 6)
-                } else {
-                    HStack(spacing: 3) {
-                        Circle()
-                            .fill(legColor)
-                            .frame(width: 8, height: 8)
-                        Text(state.nextStationName.prefix(3))
+                Group {
+                    if !legSymbol.isEmpty {
+                        LCDLineSymbolBadge(symbol: legSymbol, color: legColor)
+                            .sized(23)
+                            .padding(.leading, 6)
+                    } else {
+                        HStack(spacing: 3) {
+                            Circle()
+                                .fill(legColor)
+                                .frame(width: 8, height: 8)
+                            Text(state.nextStationName.prefix(3))
+                                .font(.system(size: 12, weight: .bold))
+                                .lineLimit(1)
+                        }
+                    }
+                }
+                .opacity(stalePresence)
+
+            } compactTrailing: {
+                Group {
+                    if state.isDelayed {
+                        Text("+\(state.delayMinutes)")
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                            .foregroundColor(.red)
+                    } else if let transfer = attrs.upcomingTransfer(nextIndex: nextIndex),
+                              !transfer.lineSymbol.isEmpty {
+                        LCDLineSymbolBadge(symbol: transfer.lineSymbol,
+                                           color: Color(hex: transfer.lineColorHex))
+                            .sized(23)
+                            .padding(.trailing, 6)
+                    } else if !attrs.destinationCode.isEmpty {
+                        LCDStationNumberBadge(code: attrs.destinationCode,
+                                              color: Color(hex: attrs.destinationColorHex),
+                                              dimension: 23)
+                            .padding(.trailing, 6)
+                    } else {
+                        Text(attrs.destinationName.prefix(3))
                             .font(.system(size: 12, weight: .bold))
                             .lineLimit(1)
                     }
                 }
-
-            } compactTrailing: {
-                if state.isDelayed {
-                    Text("+\(state.delayMinutes)")
-                        .font(.system(size: 12, weight: .bold, design: .rounded))
-                        .foregroundColor(.red)
-                } else if let transfer = attrs.upcomingTransfer(nextIndex: nextIndex),
-                          !transfer.lineSymbol.isEmpty {
-                    LCDLineSymbolBadge(symbol: transfer.lineSymbol,
-                                       color: Color(hex: transfer.lineColorHex))
-                        .sized(23)
-                        .padding(.trailing, 6)
-                } else if !attrs.destinationCode.isEmpty {
-                    LCDStationNumberBadge(code: attrs.destinationCode,
-                                          color: Color(hex: attrs.destinationColorHex),
-                                          dimension: 23)
-                        .padding(.trailing, 6)
-                } else {
-                    Text(attrs.destinationName.prefix(3))
-                        .font(.system(size: 12, weight: .bold))
-                        .lineLimit(1)
-                }
+                .opacity(stalePresence)
 
             } minimal: {
                 // Timer-driven ring keeps filling while the app is suspended.
@@ -85,6 +96,7 @@ struct TrainJourneyLiveActivity: Widget {
                 }
                 .progressViewStyle(.circular)
                 .tint(legColor)
+                .opacity(stalePresence)
             }
             // Insets above are measured from the island's edge.
             .contentMargins(.all, 0, for: .expanded)
@@ -105,13 +117,14 @@ struct LiveActivityContentView: View {
 
     let attributes: TrainJourneyAttributes
     let state: TrainJourneyAttributes.ContentState
+    var isStale = false
 
     var body: some View {
         switch family {
         case .small:
-            WatchLiveActivityView(attributes: attributes, state: state)
+            WatchLiveActivityView(attributes: attributes, state: state, isStale: isStale)
         default:
-            LockScreenLiveActivityView(attributes: attributes, state: state)
+            LockScreenLiveActivityView(attributes: attributes, state: state, isStale: isStale)
         }
     }
 }
@@ -123,6 +136,7 @@ struct LiveActivityContentView: View {
 struct WatchLiveActivityView: View {
     let attributes: TrainJourneyAttributes
     let state: TrainJourneyAttributes.ContentState
+    var isStale = false
 
     private static let darkInk = Color.black.opacity(0.9)
     private static let darkInkSecondary = Color.black.opacity(0.65)
@@ -180,7 +194,7 @@ struct WatchLiveActivityView: View {
                 LCDStationNumberBadge(code: headlineCode, color: headlineColor, dimension: 26)
             }
             VStack(alignment: .leading, spacing: 0) {
-                Text(dwellingIndex != nil ? "Label.NowAt" : "Label.Next")
+                Text(isStale ? "LiveActivity.UpdatesPaused" : dwellingIndex != nil ? "Label.NowAt" : "Label.Next")
                     .font(.system(size: 9, weight: .bold))
                     .foregroundColor(.white.opacity(0.65))
                 Text(headlineName)
@@ -188,6 +202,7 @@ struct WatchLiveActivityView: View {
                     .foregroundColor(.white)
                     .lineLimit(1)
                     .minimumScaleFactor(0.5)
+                    .opacity(isStale ? 0.4 : 1)
             }
             Spacer(minLength: 0)
             if state.isDelayed {
@@ -238,6 +253,7 @@ struct WatchLiveActivityView: View {
                 .font(.system(size: 15, weight: .bold, design: .rounded))
                 .foregroundColor(Self.darkInk)
         }
+        .opacity(isStale ? 0.4 : 1)
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
         .frame(maxWidth: .infinity)
@@ -300,6 +316,7 @@ struct IslandCornerTime: View {
 struct ExpandedIslandView: View {
     let attributes: TrainJourneyAttributes
     let state: TrainJourneyAttributes.ContentState
+    var isStale = false
 
     private var nextIndex: Int {
         min(state.nextStationIndex ?? attributes.stationCount - 1, attributes.stationCount - 1)
@@ -326,14 +343,23 @@ struct ExpandedIslandView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
                 }
-                Text(state.nextStationNameEn)
-                    .font(.system(size: 8))
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                .opacity(isStale ? 0.4 : 1)
+                if isStale {
+                    Text("LiveActivity.UpdatesPaused")
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                } else {
+                    Text(state.nextStationNameEn)
+                        .font(.system(size: 8))
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
             }
 
             IslandRouteLine(attributes: attributes, state: state)
+                .opacity(isStale ? 0.4 : 1)
         }
         .padding(.horizontal, 20)
         .padding(.top, 6)
@@ -348,6 +374,7 @@ struct ExpandedIslandView: View {
 struct LockScreenLiveActivityView: View {
     let attributes: TrainJourneyAttributes
     let state: TrainJourneyAttributes.ContentState
+    var isStale = false
 
     private static let sideColumnWidth: CGFloat = 80
 
@@ -369,6 +396,7 @@ struct LockScreenLiveActivityView: View {
                     IslandCornerTime(attributes: attributes, state: state, side: .trailing)
                         .frame(width: Self.sideColumnWidth, alignment: .trailing)
                 }
+                .opacity(isStale ? 0.4 : 1)
                 VStack(spacing: 1) {
                     HStack(spacing: 6) {
                         if !nextStationCode.isEmpty {
@@ -382,11 +410,19 @@ struct LockScreenLiveActivityView: View {
                             .lineLimit(1)
                             .minimumScaleFactor(0.5)
                     }
-                    Text(state.nextStationNameEn)
-                        .font(.system(size: 9))
-                        .foregroundColor(.white.opacity(0.65))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
+                    .opacity(isStale ? 0.4 : 1)
+                    if isStale {
+                        Text("LiveActivity.UpdatesPaused")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(.white.opacity(0.65))
+                            .lineLimit(1)
+                    } else {
+                        Text(state.nextStationNameEn)
+                            .font(.system(size: 9))
+                            .foregroundColor(.white.opacity(0.65))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                    }
                 }
                 .padding(.horizontal, Self.sideColumnWidth + 4)
             }
@@ -396,6 +432,7 @@ struct LockScreenLiveActivityView: View {
             .background(Color.black)
 
             IslandRouteLine(attributes: attributes, state: state, onLight: true)
+                .opacity(isStale ? 0.4 : 1)
                 .padding(.horizontal, 8)
                 .padding(.top, 10)
                 .padding(.bottom, 8)
