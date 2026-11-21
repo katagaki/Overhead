@@ -30,6 +30,10 @@ struct RouteSetupCard: View {
     private var notificationLeadMinutes = JourneyNotificationManager.defaultLeadMinutes
     @AppStorage(NotificationSound.storageKey) private var notificationSound = NotificationSound.system
     @State private var pickerTarget: PickerTarget?
+    @ScaledMetric(relativeTo: .caption2) private var tagWidth: CGFloat = 44
+    @ScaledMetric(relativeTo: .caption2) private var tagHeight: CGFloat = 22
+    @ScaledMetric(relativeTo: .subheadline) private var roundButtonSize: CGFloat = 36
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var notificationsDenied = false
     @Environment(\.scenePhase) private var scenePhase
     @State private var showAvoidLinesSheet = false
@@ -151,9 +155,9 @@ struct RouteSetupCard: View {
                     onStationsChanged()
                 } label: {
                     Image(systemName: "arrow.up.arrow.down")
-                        .font(.system(size: 15, weight: .semibold))
+                        .scaledFont(size: 15, weight: .semibold)
                         .foregroundColor(fromSelection != nil || toSelection != nil ? .accentColor : .secondary)
-                        .frame(width: 36, height: 36)
+                        .frame(width: roundButtonSize, height: roundButtonSize)
                         .background(Color(.tertiarySystemFill))
                         .clipShape(Circle())
                 }
@@ -164,9 +168,9 @@ struct RouteSetupCard: View {
                     pickerTarget = .addVia
                 } label: {
                     Image(systemName: "plus")
-                        .font(.system(size: 15, weight: .semibold))
+                        .scaledFont(size: 15, weight: .semibold)
                         .foregroundColor(viaSelections.count < Self.maxViaCount ? .accentColor : .secondary)
-                        .frame(width: 36, height: 36)
+                        .frame(width: roundButtonSize, height: roundButtonSize)
                         .background(Color(.tertiarySystemFill))
                         .clipShape(Circle())
                 }
@@ -185,16 +189,16 @@ struct RouteSetupCard: View {
             } label: {
                 HStack(spacing: 10) {
                     Text("Setup.Via")
-                        .font(.system(size: 11, weight: .medium))
+                        .scaledFont(size: 11, weight: .medium)
                         .foregroundColor(.secondary)
-                        .frame(width: 44, height: 22)
+                        .frame(width: tagWidth, height: tagHeight)
                         .background(Color(.tertiarySystemFill))
                         .clipShape(RoundedRectangle(cornerRadius: 6))
 
                     Text(selection.station.localizedName)
-                        .font(.system(size: 17, weight: .semibold))
+                        .scaledFont(size: 17, weight: .semibold)
                         .foregroundColor(.primary)
-                        .lineLimit(1)
+                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? 2 : 1)
 
                     Spacer(minLength: 0)
                 }
@@ -208,7 +212,7 @@ struct RouteSetupCard: View {
                 onStationsChanged()
             } label: {
                 Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 18))
+                    .scaledFont(size: 18)
                     .foregroundColor(Color(.tertiaryLabel))
             }
             .buttonStyle(.plain)
@@ -225,22 +229,22 @@ struct RouteSetupCard: View {
         Button(action: action) {
             HStack(spacing: 10) {
                 Text(label)
-                    .font(.system(size: 11, weight: .medium))
+                    .scaledFont(size: 11, weight: .medium)
                     .foregroundColor(.secondary)
-                    .frame(width: 44, height: 22)
+                    .frame(width: tagWidth, height: tagHeight)
                     .background(Color(.tertiarySystemFill))
                     .clipShape(RoundedRectangle(cornerRadius: 6))
 
                 if let selection {
                     endpointLabel(selection)
-                        .font(.system(size: 17, weight: .semibold))
+                        .scaledFont(size: 17, weight: .semibold)
                         .foregroundColor(.primary)
-                        .lineLimit(1)
+                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? 2 : 1)
                         .id(selection.id)
                         .transition(.scale(0.9, anchor: .leading).combined(with: .blurReplace))
                 } else {
                     Text("Setup.SelectStation")
-                        .font(.system(size: 16))
+                        .scaledFont(size: 16)
                         .foregroundColor(Color(.tertiaryLabel))
                 }
 
@@ -275,7 +279,7 @@ struct RouteSetupCard: View {
                         .frame(width: 2.5, height: 2.5)
                 }
             }
-            .frame(width: 44)
+            .frame(width: tagWidth)
 
             VStack { Divider() }
         }
@@ -497,7 +501,7 @@ private struct EndpointLabelStyle: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack(spacing: 5) {
             configuration.icon
-                .font(.system(size: 13, weight: .semibold))
+                .scaledFont(size: 13, weight: .semibold)
                 .foregroundColor(.accentColor)
             configuration.title
         }
@@ -516,6 +520,10 @@ struct CustomizationItem: View {
     static let rowInset: CGFloat = 20
     static let minWidth: CGFloat = 64
     static let maxWidth: CGFloat = 82
+    private static let circleSize: CGFloat = 56
+
+    @ScaledMetric(relativeTo: .title3) private var circleSize: CGFloat = Self.circleSize
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     enum IconSource {
         case system
@@ -530,25 +538,26 @@ struct CustomizationItem: View {
                 switch iconSource {
                 case .system:
                     Image(systemName: icon)
-                        .font(.system(size: 20, weight: .semibold))
+                        .scaledFont(size: 20, weight: .semibold)
                 case .asset:
                     Image(icon)
-                        .font(.system(size: 20, weight: .semibold))
+                        .scaledFont(size: 20, weight: .semibold)
                 }
             }
             .foregroundColor(active ? .white : .primary)
-            .frame(width: 56, height: 56)
+            .frame(width: circleSize, height: circleSize)
 
             Text(label)
-                .font(.system(size: 11, weight: .medium))
+                .scaledFont(size: 11, weight: .medium)
                 .foregroundColor(.secondary)
-                .lineLimit(2)
+                .lineLimit(dynamicTypeSize.isAccessibilitySize ? 3 : 2)
                 .multilineTextAlignment(.center)
         }
-        // Sized so a 5th item peeks in when the row overflows.
+        // Sized so a 5th item peeks in when the row overflows; grows with the text.
         .containerRelativeFrame(.horizontal) { length, _ in
+            let growth = circleSize / Self.circleSize
             let usable = length - Self.rowInset - Self.spacing * 4
-            return min(Self.maxWidth, max(Self.minWidth, usable / 4.5))
+            return min(Self.maxWidth * growth, max(Self.minWidth * growth, usable / 4.5))
         }
         .contentShape(Rectangle())
     }
