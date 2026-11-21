@@ -9,8 +9,8 @@ struct CustomLineImportView: View {
     @ObservedObject private var store = CustomLineStore.shared
 
     private var conflicts: [String] {
-        let existing = Set(store.lines.map(\.id))
-        return package.lines.filter { existing.contains($0.id) }.map { $0.localizedName }
+        let existing = Dictionary(store.lines.map { ($0.id, $0.localizedName) }, uniquingKeysWith: { a, _ in a })
+        return package.lines.compactMap { existing[$0.id] }
     }
 
     var body: some View {
