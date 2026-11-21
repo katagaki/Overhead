@@ -159,7 +159,9 @@ struct FavoritesSection: View {
         }
         .buttonStyle(.plain)
         .matchedTransitionSource(id: EditorTarget.edit(place).id, in: editorZoom)
-        .accessibilityLabel("Button.StartJourney")
+        .accessibilityLabel(Text(verbatim: "\(displayName(of: place)), \(spokenRoute(resolved))"))
+        .accessibilityValue(countdownAccessibilityValue(for: place, at: date))
+        .accessibilityHint(Text("Favorites.A11y.StartHint"))
         .contextMenu {
             editButton(for: place)
             deleteButton(for: place)
@@ -231,6 +233,26 @@ struct FavoritesSection: View {
         }
     }
 
+    private func spokenRoute(_ resolved: ResolvedPlace) -> String {
+        let from = resolved.from.localizedName
+        let to = resolved.to.localizedName
+        guard !resolved.vias.isEmpty else {
+            return String(localized: "Favorites.A11y.Route \(from) \(to)")
+        }
+        let vias = ListFormatter.localizedString(byJoining: resolved.vias.map(\.localizedName))
+        return String(localized: "Favorites.A11y.RouteVia \(from) \(to) \(vias)")
+    }
+
+    private func countdownAccessibilityValue(for place: SavedPlace, at date: Date) -> Text {
+        guard let departures = departuresByPlace[place.id] else { return Text(verbatim: "") }
+        let now = Self.railNowSeconds(at: date)
+        guard let next = departures.first(where: { $0 >= now }) else {
+            return Text("Favorites.NoMoreTrains")
+        }
+        let minutes = (next - now) / 60
+        return minutes < 1 ? Text("Favorites.A11y.DepartsNow") : Text("Candidate.DepartsIn \(minutes)")
+    }
+
     /// The favourite is fine — its line data just is not on the device.
     private func missingDataCard(place: SavedPlace) -> some View {
         let missing = SavedPlaceLineData.missingLines(for: place)
@@ -287,7 +309,9 @@ struct FavoritesSection: View {
         .contextMenu {
             deleteButton(for: place)
         }
-        .accessibilityLabel(Text("Place.NeedsDownload"))
+        .accessibilityLabel(Text(verbatim: displayName(of: place)))
+        .accessibilityValue(Text(downloading ? "Place.Downloading" : "Place.NeedsDownload"))
+        .accessibilityHint(downloading ? Text(verbatim: "") : Text("LineData.DownloadNow"))
     }
 
     private func brokenPlaceCard(place: SavedPlace) -> some View {
@@ -313,6 +337,7 @@ struct FavoritesSection: View {
         .padding(EdgeInsets(top: 12, leading: 12, bottom: 11, trailing: 12))
         .frame(width: cardWidth, height: Self.cardHeight, alignment: .topLeading)
         .glassEffect(.regular, in: Self.cardShape)
+        .accessibilityElement(children: .combine)
         .matchedTransitionSource(id: EditorTarget.edit(place).id, in: editorZoom)
         .contextMenu {
             deleteButton(for: place)
