@@ -74,6 +74,8 @@ final class LineDataAutoUpdater {
                 let updater = LineDataAutoUpdater.shared
                 let outcome = await updater.run()
                 updater.notify(outcome)
+                // The home-screen board otherwise waits for the app to be opened.
+                await BoardSnapshotWriter.rebuild()
                 updater.schedule()
                 task.setTaskCompleted(success: outcome != .deferred && !Task.isCancelled)
             }
