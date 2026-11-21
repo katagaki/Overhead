@@ -210,14 +210,26 @@ struct NearbyStationsSection: View {
 
     private func stationCard(_ group: NearbyStationGroup) -> some View {
         VStack(alignment: .leading, spacing: 9) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(group.station.localizedName)
-                    .scaledFont(size: 17, weight: .bold)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                Spacer()
-                if !provider.isReducedAccuracy {
-                    walkLabel(meters: group.distanceMeters)
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(group.station.localizedName)
+                        .scaledFont(size: 17, weight: .bold)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.7)
+                    if !provider.isReducedAccuracy {
+                        walkLabel(meters: group.distanceMeters)
+                    }
+                }
+            } else {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(group.station.localizedName)
+                        .scaledFont(size: 17, weight: .bold)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                    Spacer()
+                    if !provider.isReducedAccuracy {
+                        walkLabel(meters: group.distanceMeters)
+                    }
                 }
             }
             // Every line is reachable by scrolling within the fixed card height.
@@ -315,7 +327,21 @@ struct NearbyStationsSection: View {
                         .frame(width: 5, height: 20)
                         .frame(width: 26, height: 26)
                 }
-                if let next {
+                if let next, dynamicTypeSize.isAccessibilitySize {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(next.departureTime)
+                            .scaledFont(size: 14.5, weight: .semibold)
+                            .monospacedDigit()
+                            .contentTransition(.numericText())
+                        Text(destinationLabel(for: hit, timetable: current, departure: next))
+                            .scaledFont(size: 14.5)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.75)
+                            .contentTransition(.opacity)
+                    }
+                    Spacer(minLength: 0)
+                } else if let next {
                     Text(next.departureTime)
                         .scaledFont(size: 14.5, weight: .semibold)
                         .monospacedDigit()
@@ -331,7 +357,7 @@ struct NearbyStationsSection: View {
                     Text("StationTimetable.NoMoreTrains")
                         .scaledFont(size: 10.5)
                         .foregroundStyle(.secondary)
-                        .lineLimit(1)
+                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? 2 : 1)
                     Spacer(minLength: 4)
                 } else {
                     // Timetable still computing.
