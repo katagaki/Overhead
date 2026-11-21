@@ -605,7 +605,7 @@ extension TransitRouter {
                     result[transfer.stop] = min(result[transfer.stop] ?? .max, transferSeconds(transfer))
                 }
             }
-            return result.map { ($0.key, $0.value) }
+            return result.sorted(by: { $0.key < $1.key }).map { ($0.key, $0.value) }
         }
 
         func stops(at endpoint: Endpoint) -> [(stop: Int32, seconds: Int32)] {
@@ -619,7 +619,7 @@ extension TransitRouter {
                         result[stop] = min(result[stop] ?? .max, Int32(entry.seconds))
                     }
                 }
-                return result.map { ($0.key, $0.value) }
+                return result.sorted(by: { $0.key < $1.key }).map { ($0.key, $0.value) }
             }
         }
 
@@ -827,7 +827,7 @@ extension TransitRouter {
                 }
 
                 var improved: [Int32] = []
-                for (r, start) in routeStart {
+                for (r, start) in routeStart.sorted(by: { $0.key < $1.key }) {
                     let route = net.routes[Int(r)]
                     var current = -1          // index into route.trips
                     var board: Int32 = -1
