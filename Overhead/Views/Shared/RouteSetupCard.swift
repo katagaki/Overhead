@@ -298,7 +298,17 @@ struct RouteSetupCard: View {
         }
     }
 
+    @ViewBuilder
     private var fieldDivider: some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            Divider()
+                .padding(.vertical, 4)
+        } else {
+            dottedDivider
+        }
+    }
+
+    private var dottedDivider: some View {
         HStack(spacing: 10) {
             VStack(spacing: 2) {
                 ForEach(0..<3, id: \.self) { _ in
@@ -569,6 +579,7 @@ struct CustomizationItem: View {
             content(labelLines: 1)
                 .fixedSize()
                 .frame(minWidth: shownCircleSize)
+                .padding(.horizontal, 6)
                 .contentShape(Rectangle())
                 .dynamicTypeSize(...DynamicTypeSize.accessibility1)
         } else {
