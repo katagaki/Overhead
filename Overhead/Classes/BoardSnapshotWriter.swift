@@ -25,7 +25,9 @@ nonisolated enum BoardSnapshotWriter {
 
     private static func build(places: [SavedPlace], titles: [UUID: String]) -> StationBoardSnapshot {
         let lines = StaticTrainData.trainLines().filter { !$0.id.hasPrefix("Custom:") }
-        let calendar = ScheduleCalendar.current()
+        // The widget reads the system clock, so the snapshot does too.
+        let now = Date()
+        let calendar = ScheduleCalendar.current(at: now)
         let choices = (UserDefaults.standard.dictionary(forKey: directionChoicesKey)
             as? [String: String]) ?? [:]
 
@@ -43,7 +45,7 @@ nonisolated enum BoardSnapshotWriter {
             boardStation(named: name, lines: lines, calendar: calendar, choices: choices)
         }
         return StationBoardSnapshot(
-            railDay: BoardSnapshotStore.railDay(),
+            railDay: BoardSnapshotStore.railDay(for: now),
             stations: stations,
             places: places.compactMap { boardPlace($0, lines: lines, titles: titles) }
         )

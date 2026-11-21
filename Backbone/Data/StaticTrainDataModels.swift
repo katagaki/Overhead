@@ -8,16 +8,8 @@ public enum ScheduleCalendar: String, Codable, CaseIterable, Sendable {
     case weekday = "Weekday"
     case saturdayHoliday = "SaturdayHoliday"
 
-    public static func current(at date: Date = Date()) -> ScheduleCalendar {
-        var cal = Calendar(identifier: .gregorian)
-        cal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
-        let weekday = cal.component(.weekday, from: date)
-        // 1 = Sunday, 7 = Saturday
-        if weekday == 1 || weekday == 7 { return .saturdayHoliday }
-        let c = cal.dateComponents([.year, .month, .day], from: date)
-        guard let year = c.year, let month = c.month, let day = c.day else { return .weekday }
-        return runsOnHolidaySchedule(year: year, month: month, day: day)
-            ? .saturdayHoliday : .weekday
+    public static func current(at date: Date = RailClock.now) -> ScheduleCalendar {
+        ServiceDay(containing: date).scheduleCalendar
     }
 
     // MARK: Japanese National Holidays
@@ -541,19 +533,16 @@ public struct StaticTrainLine: Codable, Hashable {
         return forward != 0 && forward <= stations.count / 2
     }
 
-    /// The "HH:mm" a departure could be filed under, with the service day each
-    /// reading belongs to — the plain clock first, then the 24-hour-plus form
-    /// the previous service day would have used.
+    /// The "HH:mm" a departure could be filed under, with the timetable each
+    /// reading belongs to — the service day's 24-hour-plus form first, then the plain clock.
     static func railTimes(at date: Date) -> [(String, ScheduleCalendar)] {
-        var japan = Calendar(identifier: .gregorian)
-        japan.timeZone = TimeZone(identifier: "Asia/Tokyo")!
-        let parts = japan.dateComponents([.hour, .minute], from: date)
-        guard let hour = parts.hour, let minute = parts.minute else { return [] }
-        var readings = [(String(format: "%02d:%02d", hour, minute), ScheduleCalendar.current(at: date))]
-        if hour < 4 {
-            let yesterday = date.addingTimeInterval(-4 * 3600)
-            readings.append((String(format: "%02d:%02d", hour + 24, minute),
-                             ScheduleCalendar.current(at: yesterday)))
+        let day = ServiceDay(containing: date)
+        let seconds = day.railSeconds(at: date)
+        let hour = seconds / 3600, minute = (seconds % 3600) / 60
+        var readings = [(String(format: "%02d:%02d", hour, minute), day.scheduleCalendar)]
+        if hour >= 24 {
+            readings.append((String(format: "%02d:%02d", hour - 24, minute),
+                             day.adding(days: 1).scheduleCalendar))
         }
         return readings
     }
@@ -643,14 +632,9 @@ public enum StaticTrainData {
 
     public static let didChangeNotification = Notification.Name("StaticTrainDataDidChange")
 
-    /// The day number (yyyyMMdd, JST) a date falls on. Matches `ScheduleCalendar`,
-    /// which also splits on the calendar day rather than the service day — a 24:30
-    /// train therefore switches to a new revision one service day early.
+    /// The service day (yyyyMMdd, JST) a date falls on.
     public static func dayKey(for date: Date) -> Int {
-        var cal = Calendar(identifier: .gregorian)
-        cal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
-        let c = cal.dateComponents([.year, .month, .day], from: date)
-        return (c.year ?? 1970) * 10000 + (c.month ?? 1) * 100 + (c.day ?? 1)
+        ServiceDay(containing: date).key
     }
 
     /// Lines resolved for one service day, plus the lookup maps built from them.
@@ -698,7 +682,7 @@ public enum StaticTrainData {
     public private(set) static var generation = 0
 
     /// Where passengers can change trains on `date`.
-    public static func stationLinks(on date: Date = Date()) -> StationLinks {
+    public static func stationLinks(on date: Date = RailClock.now) -> StationLinks {
         snapshot(on: date).links.value
     }
 
@@ -722,13 +706,13 @@ public enum StaticTrainData {
     /// Today's catalog line with the memo its generated services live in, so
     /// the memo goes whenever the snapshot does (install, invalidate, new day).
     static func catalogLine(withId id: String) -> (line: StaticTrainLine, memo: ServiceMemo)? {
-        let snapshot = snapshot(on: Date())
+        let snapshot = snapshot(on: RailClock.now)
         guard let line = snapshot.byId[id] else { return nil }
         return (line, snapshot.services)
     }
 
     /// Every line, with each announced 改正 applied once its `validFrom` arrives.
-    static var allLines: [StaticTrainLine] { snapshot(on: Date()).lines }
+    static var allLines: [StaticTrainLine] { snapshot(on: RailClock.now).lines }
 
     /// The same lines as they will read on `date` — for planning across a 改正.
     public static func lines(on date: Date) -> [StaticTrainLine] {
@@ -736,7 +720,7 @@ public enum StaticTrainData {
     }
 
     public static func line(withId id: String) -> StaticTrainLine? {
-        snapshot(on: Date()).byId[id]
+        snapshot(on: RailClock.now).byId[id]
     }
 
     public static func line(withId id: String, on date: Date) -> StaticTrainLine? {
@@ -744,7 +728,7 @@ public enum StaticTrainData {
     }
 
     public static func line(containingStationId stationId: String) -> StaticTrainLine? {
-        snapshot(on: Date()).byStationId[stationId]
+        snapshot(on: RailClock.now).byStationId[stationId]
     }
 
     public static func line(containingStationId stationId: String, on date: Date) -> StaticTrainLine? {
@@ -753,7 +737,7 @@ public enum StaticTrainData {
 
     /// Revisions announced for `lineId` but not yet in force on `date`.
     public static func upcomingRevisions(forLineId lineId: String,
-                                         on date: Date = Date()) -> [ScheduleRevision] {
+                                         on date: Date = RailClock.now) -> [ScheduleRevision] {
         let today = dayKey(for: date)
         return (loadedLines.first { $0.id == lineId }?.scheduleRevisions ?? [])
             .filter { ($0.validFromDayKey ?? .max) > today }
@@ -761,7 +745,7 @@ public enum StaticTrainData {
     }
 
     public static func delayCheckInfo(forLineId lineId: String) -> DelayCheckInfo? {
-        snapshot(on: Date()).byId[lineId]?.delayInfo
+        snapshot(on: RailClock.now).byId[lineId]?.delayInfo
     }
 
     /// The line's own colour, straight from the data (no 改正 resolution needed).

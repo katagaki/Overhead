@@ -552,14 +552,8 @@ struct StationTimetableView: View {
 
     // MARK: - Helpers
 
-    /// Before 03:00 the clock reads as 24+ so post-midnight departures compare correctly.
     private func railNowMinutes(at date: Date) -> Int {
-        let tz = TimeZone(identifier: "Asia/Tokyo")!
-        var cal = Calendar(identifier: .gregorian)
-        cal.timeZone = tz
-        let comps = cal.dateComponents([.hour, .minute], from: date)
-        let nowMinutes = (comps.hour ?? 0) * 60 + (comps.minute ?? 0)
-        return TimetableEntry.railMinutes(fromMinutes: nowMinutes)
+        ServiceDay.railSeconds(at: RailClock.adjusted(date)) / 60
     }
 
     private func isPast(_ departure: StationDeparture, nowMinutes: Int) -> Bool {

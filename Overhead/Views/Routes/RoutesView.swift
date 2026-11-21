@@ -457,7 +457,7 @@ struct FavoritesSection: View {
 
         if let timed = await viewModel.searchTrainCandidates(
             stations: waypoints,
-            anchor: .departure(Date()),
+            anchor: .departure(RailClock.now),
             transferMinutes: transferMinutes,
             walkPace: place.walkingSpeed.paceMultiplier,
             priority: place.routePriority,
@@ -570,13 +570,8 @@ struct FavoritesSection: View {
         return timetables.count == 1 ? timetables.first : nil
     }
 
-    /// Before 03:00 the clock reads as 24+ so post-midnight departures compare correctly.
     private static func railNowSeconds(at date: Date) -> Int {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(identifier: "Asia/Tokyo")!
-        let parts = calendar.dateComponents([.hour, .minute, .second], from: date)
-        let seconds = (parts.hour ?? 0) * 3600 + (parts.minute ?? 0) * 60 + (parts.second ?? 0)
-        return seconds < 3 * 3600 ? seconds + 24 * 3600 : seconds
+        ServiceDay.railSeconds(at: RailClock.adjusted(date))
     }
 
     private func upsert(_ place: SavedPlace) {

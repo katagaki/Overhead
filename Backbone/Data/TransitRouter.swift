@@ -139,8 +139,9 @@ public enum TransitRouter {
     private static let buildLock = NSLock()
 
     static func network(on date: Date) -> Network {
-        let calendar = ScheduleCalendar.current(at: date)
-        let key = "\(StaticTrainData.dayKey(for: date))|\(calendar.rawValue)|\(StaticTrainData.generation)"
+        let day = ServiceDay(containing: date)
+        let calendar = day.scheduleCalendar
+        let key = "\(day.key)|\(calendar.rawValue)|\(StaticTrainData.generation)"
         if let hit = cached(key) { return hit }
         // One build at a time; a second caller waits and takes the result.
         buildLock.lock(); defer { buildLock.unlock() }
