@@ -251,7 +251,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
             // If GPS is stale, the timetable becomes the source of truth
             let gpsFresh = isGPSFresh()
             if !gpsFresh || trackingMode == .timetable {
-                if gpsFresh == false && trackingMode == .gps {
+                if !gpsFresh, trackingMode != .timetable {
                     trackingMode = .timetable
                 }
                 positionState = timetableState
@@ -449,6 +449,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
 
         } else if gpsConfidence >= 0.3 {
             trackingMode = .blended
+            lastGoodGPSTime = Date()
 
             let gpsState = buildGPSState(
                 snapResult: snapResult,
