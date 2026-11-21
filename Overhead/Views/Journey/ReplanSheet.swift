@@ -18,6 +18,7 @@ struct ReplanSheet: View {
     @State private var anchorIndex: Int?
     @State private var candidates: [TrainCandidate] = []
     @State private var isSearching = false
+    @State private var searchTask: Task<Void, Never>?
     @State private var selection: Selection?
     @State private var searchingStation = false
     /// Set when the destination tab searched for a station off the current route.
@@ -389,6 +390,9 @@ struct ReplanSheet: View {
     // MARK: - Search
 
     private func searchIfNeeded() {
+        searchTask?.cancel()
+        searchTask = nil
+        isSearching = false
         switch mode {
         case .train:
             guard let destination else { return }
@@ -403,16 +407,23 @@ struct ReplanSheet: View {
     }
 
     private func search(destination: Station) {
+        searchTask?.cancel()
         guard let anchor else { return }
+        candidates = []
         isSearching = true
-        Task {
-            candidates = await viewModel.replanCandidates(
+        searchTask = Task {
+            let found = await viewModel.replanCandidates(
                 from: anchor,
                 to: destination,
                 transferMinutes: walkingSpeed.transferMinutes,
                 walkPace: walkingSpeed.paceMultiplier,
                 priority: RoutePriority(rawValue: routePriorityRaw) ?? .balanced
             )
+            #if DEBUG
+            await ScreenshotStaging.holdSearchResults("replan")
+            #endif
+            guard !Task.isCancelled else { return }
+            candidates = found
             isSearching = false
         }
     }

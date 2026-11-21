@@ -759,6 +759,8 @@ struct RootView: View {
             ScreenshotStaging.shared.plannerCommand = .departure
         case .plannerArrival:
             ScreenshotStaging.shared.plannerCommand = .arrival
+        case .plannerRace:
+            ScreenshotStaging.shared.plannerCommand = .race
         case .timetable(let target, let hidePast, let popoverType):
             ScreenshotStaging.shared.hidePastDepartures = hidePast
             ScreenshotStaging.shared.timetablePopoverType = popoverType

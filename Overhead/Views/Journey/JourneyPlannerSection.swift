@@ -30,6 +30,7 @@ struct JourneyPlannerSection: View {
     @State private var isSearching = false
     @State private var searchError: LocalizedStringKey?
     @State private var searchWalkMinutes: Int?
+    @State private var searchTask: Task<Void, Never>?
     @StateObject private var walkingEstimator = WalkingTimeEstimator()
     @StateObject private var oneShotLocation = OneShotLocation()
 
@@ -650,6 +651,9 @@ struct JourneyPlannerSection: View {
     // MARK: - Actions
 
     private func invalidateResults() {
+        searchTask?.cancel()
+        searchTask = nil
+        isSearching = false
         candidates = []
         hasSearched = false
         searchError = nil
@@ -661,12 +665,13 @@ struct JourneyPlannerSection: View {
         searchError = nil
         isSearching = true
 
-        Task {
+        searchTask = Task {
             let avoided = avoidedLineIds
 
-            guard let origin = await searchEndpoint(for: from),
-                  let destination = await searchEndpoint(for: to)
-            else {
+            let origin = await searchEndpoint(for: from)
+            let destination = origin == nil ? nil : await searchEndpoint(for: to)
+            guard !Task.isCancelled else { return }
+            guard let origin, let destination else {
                 isSearching = false
                 return
             }
@@ -676,7 +681,7 @@ struct JourneyPlannerSection: View {
             if ignoreTimetable {
                 searchWalkMinutes = nil
                 let links = StaticTrainData.stationLinks()
-                candidates = await viewModel.searchRouteOptions(
+                let options = await viewModel.searchRouteOptions(
                     stations: waypoints,
                     transferMinutes: walkingSpeed.transferMinutes,
                     walkPace: walkingSpeed.paceMultiplier,
@@ -688,6 +693,11 @@ struct JourneyPlannerSection: View {
                     candidate.egressSeconds = destination.walkSeconds(at: candidate.toStation.id, links: links)
                     return candidate
                 }
+                #if DEBUG
+                await ScreenshotStaging.holdSearchResults("planner")
+                #endif
+                guard !Task.isCancelled else { return }
+                candidates = options
                 hasSearched = true
                 isSearching = false
                 if candidates.isEmpty {
@@ -713,9 +723,10 @@ struct JourneyPlannerSection: View {
                     anchor = .departure(anchorDate.addingTimeInterval(walkSeconds))
                 }
             }
+            guard !Task.isCancelled else { return }
             searchWalkMinutes = walkMinutes
 
-            candidates = await viewModel.searchTrainCandidates(
+            let found = await viewModel.searchTrainCandidates(
                 endpoints: endpoints,
                 anchor: anchor,
                 transferMinutes: walkingSpeed.transferMinutes,
@@ -725,6 +736,11 @@ struct JourneyPlannerSection: View {
                 notDepartingBefore: earliestDeparture,
                 preferringOriginating: preferOriginating
             )
+            #if DEBUG
+            await ScreenshotStaging.holdSearchResults("planner")
+            #endif
+            guard !Task.isCancelled else { return }
+            candidates = found
             hasSearched = true
             isSearching = false
 
@@ -745,7 +761,9 @@ struct JourneyPlannerSection: View {
         case .place(let place):
             location = place.location
         case .currentLocation:
-            guard let fix = await currentLocation() else {
+            let fix = await currentLocation()
+            guard !Task.isCancelled else { return nil }
+            guard let fix else {
                 searchError = "Setup.NoCurrentLocation"
                 return nil
             }
@@ -800,6 +818,14 @@ struct JourneyPlannerSection: View {
             pinnedDate = Calendar.current.date(bySettingHour: 18, minute: 0, second: 0, of: RailClock.now) ?? RailClock.now
             try? await Task.sleep(for: .seconds(1))
             search()
+        case .race:
+            search()
+            try? await Task.sleep(for: .seconds(1))
+            if let kashiwa = line.stations.first(where: { $0.id == "Station:JR-East.JobanRapid.Kashiwa" }) {
+                toSelection = .station(StationSearchHit(line: line, station: kashiwa))
+            }
+            persistSelections()
+            invalidateResults()
         }
     }
 #endif

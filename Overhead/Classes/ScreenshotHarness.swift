@@ -14,7 +14,7 @@ import Backbone
 /// - overhead://lcd?style=<TrainLCDStyle raw value>
 /// - overhead://journey?minutesAgo=45[&line=…&from=…&to=…]
 /// - overhead://ride?from=…&to=…[&at=<ISO 8601>&arrive=1&dep=HH:mm] (opens a search result as a preview)
-/// - overhead://planner?action=search|avoid|departure|arrival
+/// - overhead://planner?action=search|avoid|departure|arrival|race (race: search, then change To mid-search)
 /// - overhead://timetable[?line=…&station=…&hidePast=0&popover=<train type>]
 /// - overhead://line[?line=…&status=expanded]
 /// - overhead://custom-line (seeds the sample line and opens its editor)
@@ -34,6 +34,7 @@ enum ScreenshotCommand {
     case plannerAvoid
     case plannerDeparture
     case plannerArrival
+    case plannerRace
     case timetable(ScreenshotTimetableTarget, hidePast: Bool, popoverType: String?)
     case linePage(ScreenshotLineTarget)
     case customLineEditor
@@ -80,6 +81,7 @@ enum ScreenshotCommand {
             case "avoid": self = .plannerAvoid
             case "departure": self = .plannerDeparture
             case "arrival": self = .plannerArrival
+            case "race": self = .plannerRace
             default: self = .plannerSearch
             }
         case "timetable":
@@ -156,6 +158,14 @@ final class ScreenshotStaging: ObservableObject {
         case avoid
         case departure
         case arrival
+        case race
+    }
+
+    /// `-debugSearchDelay <seconds>` holds planner and replan results back so a search can be overtaken.
+    static func holdSearchResults(_ label: String) async {
+        let delay = UserDefaults.standard.double(forKey: "debugSearchDelay")
+        if delay > 0 { try? await Task.sleep(for: .seconds(delay)) }
+        NSLog("[OverheadSearch] %@ %@", label, Task.isCancelled ? "cancelled, results dropped" : "results applied")
     }
 
     enum PlaceEditorCommand {
