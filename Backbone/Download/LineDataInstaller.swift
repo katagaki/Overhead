@@ -183,7 +183,7 @@ public final class LineDataInstaller: ObservableObject {
         defer { isChecking = false }
 
         var request = URLRequest(url: catalogURL)
-        if !force, hasLocalCatalog {
+        if !force, hasLocalCatalog, catalogAssetsPresent {
             if let etag = defaults.string(forKey: etagKey) {
                 request.setValue(etag, forHTTPHeaderField: "If-None-Match")
             } else if let modified = defaults.string(forKey: modifiedKey) {
@@ -217,7 +217,7 @@ public final class LineDataInstaller: ObservableObject {
                                                 withIntermediateDirectories: true)
         try data.write(to: LineDataStore.installedRoot.appendingPathComponent("catalog.json"),
                        options: .atomic)
-        storeValidator(from: http)
+        clearValidator()
         Catalog.reload()
         StaticTrainData.invalidate()
         defer {
@@ -225,8 +225,11 @@ public final class LineDataInstaller: ObservableObject {
             NotificationCenter.default.post(name: StaticTrainData.didChangeNotification,
                                             object: nil)
         }
-        try await refreshBadgeStyles(styles: catalog.styles, base: Self.baseURL)
-        try await refreshOperatorIcons(icons: catalog.operatorIcons ?? [], base: Self.baseURL)
+        let stylesLanded = try await refreshBadgeStyles(styles: catalog.styles, base: Self.baseURL)
+        let iconsLanded = try await refreshOperatorIcons(icons: catalog.operatorIcons ?? [],
+                                                         base: Self.baseURL)
+        // A 304 would otherwise hide the missing files until the catalog itself changes.
+        if stylesLanded && iconsLanded { storeValidator(from: http) }
         await recomputePending()
         return true
     }
@@ -246,7 +249,7 @@ public final class LineDataInstaller: ObservableObject {
                                                 withIntermediateDirectories: true)
         try data.write(to: LineDataStore.installedRoot.appendingPathComponent("catalog.json"),
                        options: .atomic)
-        storeValidator(from: http)
+        clearValidator()
         Catalog.reload()
         StaticTrainData.invalidate()
         defer {
@@ -254,8 +257,11 @@ public final class LineDataInstaller: ObservableObject {
             NotificationCenter.default.post(name: StaticTrainData.didChangeNotification,
                                             object: nil)
         }
-        try await refreshBadgeStyles(styles: catalog.styles, base: Self.baseURL)
-        try await refreshOperatorIcons(icons: catalog.operatorIcons ?? [], base: Self.baseURL)
+        let stylesLanded = try await refreshBadgeStyles(styles: catalog.styles, base: Self.baseURL)
+        let iconsLanded = try await refreshOperatorIcons(icons: catalog.operatorIcons ?? [],
+                                                         base: Self.baseURL)
+        // A 304 would otherwise hide the missing files until the catalog itself changes.
+        if stylesLanded && iconsLanded { storeValidator(from: http) }
         await recomputePending()
         return true
     }
@@ -277,6 +283,25 @@ public final class LineDataInstaller: ObservableObject {
             atPath: LineDataStore.installedRoot.appendingPathComponent("catalog.json").path)
     }
 
+    private var catalogAssetsPresent: Bool {
+        let catalog = Catalog.current
+        let root = LineDataStore.installedRoot
+        let files = catalog.styles.map { "BadgeStyles/\($0).json" }
+            + (catalog.operatorIcons ?? []).map { "OperatorIcons/\($0).png" }
+        let missing = files.filter {
+            !FileManager.default.fileExists(atPath: root.appendingPathComponent($0).path)
+        }
+        #if DEBUG
+        if !missing.isEmpty { NSLog("[OverheadData] missing catalog assets: %@", missing.joined(separator: ", ")) }
+        #endif
+        return missing.isEmpty
+    }
+
+    private func clearValidator() {
+        defaults.removeObject(forKey: etagKey)
+        defaults.removeObject(forKey: modifiedKey)
+    }
+
     private func storeValidator(from http: HTTPURLResponse) {
         if let etag = http.value(forHTTPHeaderField: "Etag") {
             defaults.set(etag, forKey: etagKey)
@@ -286,9 +311,10 @@ public final class LineDataInstaller: ObservableObject {
     }
 
     /// Styles ship with the data, so a new operator needs no app release.
-    private func refreshBadgeStyles(styles: [String], base: URL) async throws {
+    private func refreshBadgeStyles(styles: [String], base: URL) async throws -> Bool {
         let dir = LineDataStore.installedRoot.appendingPathComponent("BadgeStyles", isDirectory: true)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        var complete = true
         for batch in styles.chunked(into: Self.parallelism) {
             let fetched = await withTaskGroup(of: (String, Data?).self) { group in
                 for style in batch {
@@ -303,19 +329,21 @@ public final class LineDataInstaller: ObservableObject {
                 return out
             }
             for (style, data) in fetched {
-                guard let data else { continue }
+                guard let data else { complete = false; continue }
                 try data.write(to: dir.appendingPathComponent("\(style).json"), options: .atomic)
             }
         }
+        return complete
     }
 
     /// The curated operator marks, for the operators whose own sites serve no
     /// usable favicon. Data, like the styles, so a new mark needs no release.
-    private func refreshOperatorIcons(icons: [String], base: URL) async throws {
-        guard !icons.isEmpty else { return }
+    private func refreshOperatorIcons(icons: [String], base: URL) async throws -> Bool {
+        guard !icons.isEmpty else { return true }
         let dir = LineDataStore.installedRoot.appendingPathComponent("OperatorIcons",
                                                                     isDirectory: true)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        var complete = true
         for batch in icons.chunked(into: Self.parallelism) {
             let fetched = await withTaskGroup(of: (String, Data?).self) { group in
                 for icon in batch {
@@ -330,10 +358,11 @@ public final class LineDataInstaller: ObservableObject {
                 return out
             }
             for (icon, data) in fetched {
-                guard let data else { continue }
+                guard let data else { complete = false; continue }
                 try data.write(to: dir.appendingPathComponent("\(icon).png"), options: .atomic)
             }
         }
+        return complete
     }
 
     // MARK: - Pending work
