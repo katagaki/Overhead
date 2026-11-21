@@ -26,6 +26,7 @@ import Backbone
 /// - overhead://tab/root?line=… (roots the selected tab at a line page instead of Home)
 /// - overhead://pending-depart?place=first|<uuid> (stages the Control Center control's departure; consumed at launch or on activation)
 /// - overhead://tab/switcher
+/// - overhead://onboarding (shows the line data sheet over installed data)
 /// - overhead://reset
 enum ScreenshotCommand {
     case seedFavorites(lineId: String?, fromId: String?, toId: String?)
@@ -49,6 +50,7 @@ enum ScreenshotCommand {
     case tabSwitcher
     case tabRoot(lineId: String)
     case pendingDeparture(String)
+    case lineDataOnboarding
     case reset
 
     init?(url: URL) {
@@ -127,6 +129,8 @@ enum ScreenshotCommand {
             }
         case "pending-depart":
             self = .pendingDeparture(params["place"] ?? "first")
+        case "onboarding":
+            self = .lineDataOnboarding
         case "reset":
             self = .reset
         default:
