@@ -222,6 +222,9 @@ struct FavoritesSection: View {
                 }
                 .scaledFont(size: 20, weight: .bold, design: .rounded)
                 .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .foregroundStyle(remaining <= 3 * 60 ? Color.red : Color.accentColor)
                 .contentTransition(.numericText(countsDown: true))
                 .animation(.default, value: remaining)
@@ -229,6 +232,8 @@ struct FavoritesSection: View {
                 Text("Favorites.NoMoreTrains")
                     .scaledFont(size: 14.5)
                     .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
             }
         } else {
             Text(verbatim: "--:--")
