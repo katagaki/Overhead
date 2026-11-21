@@ -127,6 +127,19 @@ final class LiveActivityManager {
 
     var hasActiveActivity: Bool { currentActivity != nil }
 
+    // Journeys do not survive a relaunch, so activities from a killed run have nothing behind them.
+    static func endLeftoverActivities() {
+        let leftovers = Activity<TrainJourneyAttributes>.activities
+        #if DEBUG
+        NSLog("[OverheadLA] ending %d leftover activities", leftovers.count)
+        #endif
+        for activity in leftovers {
+            Task {
+                await activity.end(nil, dismissalPolicy: .immediate)
+            }
+        }
+    }
+
     func startActivity(
         journey: Journey,
         positionState: TrainPositionState,

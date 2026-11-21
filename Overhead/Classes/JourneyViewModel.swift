@@ -59,6 +59,7 @@ final class JourneyViewModel: ObservableObject {
         bindLineData()
         // Journeys do not outlive the app, so neither do their alerts.
         JourneyNotificationManager.shared.cancelAll()
+        LiveActivityManager.endLeftoverActivities()
         if previewMode {
             loadPreviewData()
         }
