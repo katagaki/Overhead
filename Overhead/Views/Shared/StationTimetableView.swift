@@ -14,6 +14,8 @@ struct StationTimetableView: View {
     @State private var timetables: [StationTimetableData]?
     @State private var selectedDirection: String?
     @State private var detailDeparture: StationDeparture?
+    @ScaledMetric(relativeTo: .body) private var hourColumnWidth: CGFloat = 38
+    @ScaledMetric(relativeTo: .body) private var minuteCellWidth: CGFloat = 30
 
     var body: some View {
         Group {
@@ -66,7 +68,7 @@ struct StationTimetableView: View {
                             Spacer()
                             Text("StationTimetable.NoMoreTrains")
                                 .foregroundColor(.secondary)
-                                .font(.system(size: 14))
+                                .scaledFont(size: 14)
                             Spacer()
                         }
                     } else {
@@ -193,7 +195,7 @@ struct StationTimetableView: View {
                             )
                             .id(row.hour)
                             if row.hour != rows.last?.hour {
-                                Divider().padding(.leading, 40)
+                                Divider().padding(.leading, hourColumnWidth + 2)
                             }
                         }
                     }
@@ -257,11 +259,11 @@ struct StationTimetableView: View {
     ) -> some View {
         HStack(alignment: .top, spacing: 0) {
             Text("\(row.hour % 24)")
-                .font(.system(size: 17, weight: .bold))
+                .scaledFont(size: 17, weight: .bold)
                 .monospacedDigit()
                 .foregroundColor(.white)
                 .padding(.top, 8)
-                .frame(width: 38)
+                .frame(width: hourColumnWidth)
                 .frame(maxHeight: .infinity, alignment: .top)
                 .background(row.hour == nowHour ? line.color.mix(with: .black, by: 0.25) : line.color)
                 .accessibilityLabel(Text("StationTimetable.A11y.Hour \(row.hour % 24)"))
@@ -304,18 +306,18 @@ struct StationTimetableView: View {
         } label: {
             VStack(spacing: 0) {
                 Text(minute)
-                    .font(.system(size: 17, weight: minuteWeight(departure, baseType: baseType)))
+                    .scaledFont(size: 17, weight: minuteWeight(departure, baseType: baseType))
                     .monospacedDigit()
                     .foregroundColor(minuteColor(departure, isPast: isPast, baseType: baseType))
                 // Unmarked rows skip the annotation line to stay symmetric.
                 if showAnnotationLine {
                     (Text(departure.isFirst ? "StationTimetable.FirstMark" : "").foregroundColor(.green)
                         + Text(annotation.isEmpty && !departure.isFirst ? " " : annotation).foregroundColor(.gray))
-                        .font(.system(size: 9, weight: .bold))
+                        .scaledFont(size: 9, weight: .bold)
                         .opacity(isPast ? 0.4 : 1)
                 }
             }
-            .frame(minWidth: 30)
+            .frame(minWidth: minuteCellWidth)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(Text(verbatim: departure.spokenSummary))
@@ -395,21 +397,21 @@ struct StationTimetableView: View {
             VStack(alignment: .leading, spacing: 2) {
                 if let platform = currentTimetable.flatMap({ platform(for: departure, in: $0) }) {
                     Text("Journey.Platform \(platform)")
-                        .font(.system(size: 13, weight: .semibold))
+                        .scaledFont(size: 13, weight: .semibold)
                         .foregroundColor(.secondary)
                 }
                 HStack(alignment: .firstTextBaseline, spacing: 3) {
                     Text(departure.departureTime)
-                        .font(.system(size: 32, weight: .bold))
+                        .scaledFont(size: 32, weight: .bold)
                         .monospacedDigit()
                     Text("StationTimetable.DepartureSuffix")
-                        .font(.system(size: 15, weight: .semibold))
+                        .scaledFont(size: 15, weight: .semibold)
                         .foregroundColor(.secondary)
                 }
             }
             HStack(spacing: 8) {
                 Text(departure.trainType.localizedDisplayName)
-                    .font(.system(size: 13, weight: .bold))
+                    .scaledFont(size: 13, weight: .bold)
                     .foregroundColor(.white)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 3)
@@ -418,7 +420,7 @@ struct StationTimetableView: View {
                     .fixedSize()
                 if !departure.localizedDestination.isEmpty {
                     Text("\(departure.localizedDestination) 行")
-                        .font(.system(size: 17, weight: .semibold))
+                        .scaledFont(size: 17, weight: .semibold)
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
                 }
@@ -440,7 +442,7 @@ struct StationTimetableView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .font(.system(size: 13, weight: .medium))
+            .scaledFont(size: 13, weight: .medium)
         }
         .padding(16)
         .presentationCompactAdaptation(.popover)
@@ -470,7 +472,7 @@ struct StationTimetableView: View {
 
     private func detailTag(_ key: LocalizedStringKey, color: Color) -> some View {
         Text(key)
-            .font(.system(size: 11, weight: .bold))
+            .scaledFont(size: 11, weight: .bold)
             .foregroundColor(.white)
             .padding(.horizontal, 8)
             .padding(.vertical, 2)
@@ -521,10 +523,10 @@ struct StationTimetableView: View {
     private func throughServiceLabel(_ through: ThroughService, color: Color) -> some View {
         HStack(alignment: .top, spacing: 8) {
             Image(systemName: "arrow.triangle.branch")
-                .font(.system(size: 12))
+                .scaledFont(size: 12)
                 .foregroundColor(color)
             Text("StationTimetable.ThroughService \(junctionName(for: through)) \(through.localizedLineName) \(through.localizedToward)")
-                .font(.system(size: 12))
+                .scaledFont(size: 12)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.leading)
         }
@@ -556,10 +558,10 @@ struct StationTimetableView: View {
     private var noDataView: some View {
         VStack(spacing: 12) {
             Image(systemName: "clock.badge.questionmark")
-                .font(.system(size: 40))
+                .scaledFont(size: 40)
                 .foregroundColor(.secondary)
             Text("StationTimetable.NoData")
-                .font(.system(size: 14))
+                .scaledFont(size: 14)
                 .foregroundColor(.secondary)
         }
     }
