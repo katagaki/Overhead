@@ -465,7 +465,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Through service beyond %1$@ to the %2$@ for %3$@."
+            "value" : "Through service beyond %1$@ to the %2$@ %3$@."
           }
         },
         "ja" : {
@@ -477,19 +477,19 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@에서 %2$@ %3$@ 방면으로 직통 운행합니다."
+            "value" : "%1$@에서 %2$@ %3$@으로 직통 운행합니다."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "从%1$@直通运行至%2$@%3$@方向。"
+            "value" : "从%1$@直通运行至%2$@%3$@。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "從%1$@直通運行至%2$@%3$@方向。"
+            "value" : "從%1$@直通運行至%2$@%3$@。"
           }
         }
       }
@@ -5891,9 +5891,21 @@
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld lines"
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld line"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld lines"
+                }
+              }
+            }
           }
         },
         "ja" : {
@@ -6415,9 +6427,21 @@
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld lines · %@"
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%1$lld line · %2$@"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%1$lld lines · %2$@"
+                }
+              }
+            }
           }
         },
         "ja" : {
@@ -6450,9 +6474,21 @@
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+%lld more lines"
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "+%lld more line"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "+%lld more lines"
+                }
+              }
+            }
           }
         },
         "ja" : {
@@ -9207,9 +9243,21 @@
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld lines"
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld line"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld lines"
+                }
+              }
+            }
           }
         },
         "ja" : {
