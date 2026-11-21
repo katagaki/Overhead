@@ -447,11 +447,7 @@ struct NeonLCDView: View {
         )
         guard let entry = entries[stations[state.segmentTo].id],
               let arr = entry.arrivalSeconds() ?? entry.departureSeconds() else { return nil }
-        var cal = Calendar(identifier: .gregorian)
-        cal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
-        let c = cal.dateComponents([.hour, .minute, .second], from: Date())
-        var nowSec = (c.hour ?? 0) * 3600 + (c.minute ?? 0) * 60 + (c.second ?? 0)
-        if nowSec < 4 * 3600 { nowSec += 24 * 3600 }
+        let nowSec = journey.railSeconds(at: RailClock.now)
         return max(0, (arr + state.delayMinutes * 60 - nowSec + 59) / 60)
     }
 

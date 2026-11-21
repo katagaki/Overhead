@@ -359,7 +359,7 @@ struct MetroLCDView: View {
         )
         let dwellIndex = state.currentStationIndex.map { max(0, min($0, stations.count - 1)) }
         let ref = dwellIndex ?? max(0, min(state.segmentFrom, stations.count - 1))
-        let nowSec = Self.railSeconds(at: now)
+        let nowSec = journey.railSeconds(at: now)
         let delaySec = state.delayMinutes * 60
 
         let previous = stations.indices
@@ -470,15 +470,6 @@ struct MetroLCDView: View {
         )
         .scaleEffect(dimension / 28)
         .frame(width: dimension, height: dimension)
-    }
-
-    private static func railSeconds(at date: Date) -> Int {
-        var cal = Calendar(identifier: .gregorian)
-        cal.timeZone = TimeZone(identifier: "Asia/Tokyo")!
-        let c = cal.dateComponents([.hour, .minute, .second], from: date)
-        var s = (c.hour ?? 0) * 3600 + (c.minute ?? 0) * 60 + (c.second ?? 0)
-        if s < 4 * 3600 { s += 24 * 3600 }
-        return s
     }
 }
 
