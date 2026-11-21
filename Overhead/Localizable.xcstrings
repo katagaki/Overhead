@@ -477,19 +477,19 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@에서 %2$@ %3$@ 방면으로 직통 운행합니다."
+            "value" : "%1$@에서 %2$@ %3$@으로 직통 운행합니다."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "从%1$@直通运行至%2$@%3$@方向。"
+            "value" : "从%1$@直通运行至%2$@%3$@。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "從%1$@直通運行至%2$@%3$@方向。"
+            "value" : "從%1$@直通運行至%2$@%3$@。"
           }
         }
       }

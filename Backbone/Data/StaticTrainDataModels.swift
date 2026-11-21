@@ -265,15 +265,9 @@ public struct ThroughService: Codable, Hashable {
         self.connectingLineId = connectingLineId
     }
 
-    public var localizedLineName: String {
-        let lang = Locale.current.language.languageCode?.identifier ?? "ja"
-        return lang == "ja" ? lineNameJa : lineNameEn
-    }
+    public var localizedLineName: String { lineName.localized }
 
-    public var localizedToward: String {
-        let lang = Locale.current.language.languageCode?.identifier ?? "ja"
-        return lang == "ja" ? towardJa : towardEn
-    }
+    public var localizedToward: String { toward.localized }
 }
 
 // MARK: - Timetable Run
