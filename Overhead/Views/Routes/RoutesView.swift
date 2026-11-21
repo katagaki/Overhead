@@ -485,8 +485,11 @@ struct FavoritesSection: View {
         Task {
             await viewModel.loadLines()
             let current = SavedPlaceStore.load()
-            guard let place = current.first(where: { $0.id == id }),
-                  let resolved = resolve(place) else { return }
+            guard let place = current.first(where: { $0.id == id }) else { return }
+            guard let resolved = resolve(place) else {
+                viewModel.startFailure = .noRoute
+                return
+            }
             await start(place, resolved: resolved)
         }
     }
@@ -495,7 +498,7 @@ struct FavoritesSection: View {
         if let candidate {
             viewModel.startJourney(candidate: candidate)
         } else {
-            viewModel.errorMessage = String(localized: "Setup.NoRoute")
+            viewModel.startFailure = .noRoute
         }
     }
 
