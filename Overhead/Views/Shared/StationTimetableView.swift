@@ -264,6 +264,8 @@ struct StationTimetableView: View {
                 .frame(width: 38)
                 .frame(maxHeight: .infinity, alignment: .top)
                 .background(row.hour == nowHour ? line.color.mix(with: .black, by: 0.25) : line.color)
+                .accessibilityLabel(Text("StationTimetable.A11y.Hour \(row.hour % 24)"))
+                .accessibilityAddTraits(.isHeader)
             let rowHasAnnotations = row.departures.contains {
                 $0.isFirst || $0.localizedDestination != primaryDest
             }
@@ -316,6 +318,8 @@ struct StationTimetableView: View {
             .frame(minWidth: 30)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(Text(verbatim: departure.spokenSummary))
+        .accessibilityValue(Text(verbatim: cellAccessibilityValue(departure, isPast: isPast)))
         .popover(
             isPresented: Binding(
                 get: { detailDeparture?.id == departure.id },
@@ -324,6 +328,14 @@ struct StationTimetableView: View {
         ) {
             departureDetail(departure)
         }
+    }
+
+    private func cellAccessibilityValue(_ departure: StationDeparture, isPast: Bool) -> String {
+        var parts: [String] = []
+        if isPast { parts.append(String(localized: "StationTimetable.Departed")) }
+        if departure.isFirst { parts.append(String(localized: "StationTimetable.StartsHere")) }
+        if departure.isLast { parts.append(String(localized: "StationTimetable.LastTrain")) }
+        return parts.joined(separator: ", ")
     }
 
     private func minuteWeight(_ departure: StationDeparture, baseType: TrainService.TrainType) -> Font.Weight {
@@ -652,6 +664,7 @@ private struct DepartureBoardView: View {
         .overlay(alignment: .bottom) {
             Rectangle().fill(Color.white.opacity(0.08)).frame(height: 1)
         }
+        .accessibilityHidden(true)
     }
 
     private func boardRow(_ departure: StationDeparture, ordinal: String) -> some View {
@@ -682,6 +695,16 @@ private struct DepartureBoardView: View {
                 .frame(width: 56, alignment: .trailing)
         }
         .padding(.vertical, 7)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: "\(ordinal), \(departure.spokenSummary)"))
+        .accessibilityValue(Text(verbatim: boardRowValue(departure)))
+    }
+
+    private func boardRowValue(_ departure: StationDeparture) -> String {
+        if showsPlatform, let platform = platform(departure) {
+            return String(localized: "Journey.Platform \(platform)")
+        }
+        return countdownText(departure)
     }
 
     @ViewBuilder
@@ -742,6 +765,8 @@ private struct BoardMarquee: View {
         }
         .frame(height: 18)
         .clipped()
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: text))
     }
 
     private var marqueeText: some View {
@@ -804,5 +829,19 @@ private struct FlowLayout: Layout {
             x += size.width + spacing
             rowHeight = max(rowHeight, size.height)
         }
+    }
+}
+
+private extension StationDeparture {
+    var spokenSummary: String {
+        let parts = departureTime.split(separator: ":").compactMap { Int($0) }
+        let time = parts.count >= 2
+            ? String(format: "%d:%02d", parts[0] % 24, parts[1])
+            : departureTime
+        let type = trainType.localizedDisplayName
+        let destination = localizedDestination
+        return destination.isEmpty
+            ? String(localized: "StationTimetable.A11y.TrainNoDestination \(time) \(type)")
+            : String(localized: "StationTimetable.A11y.Train \(time) \(type) \(destination)")
     }
 }
