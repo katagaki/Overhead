@@ -1124,6 +1124,27 @@ final class JourneyViewModel: ObservableObject {
         begin(JourneySession(journey: best.journey, line: staticLine.trainLine, fixedState: best.state))
     }
 
+    /// Staging: the planner's search for `at`, opening the result leaving at `departure` (or the first).
+    func debugOpenRide(fromId: String, toId: String, at: Date?, arrive: Bool, departure: String?) async {
+        let date = at ?? RailClock.now
+        guard let from = StaticTrainData.line(containingStationId: fromId, on: date)?
+                .trainLine.stations.first(where: { $0.id == fromId }),
+              let to = StaticTrainData.line(containingStationId: toId, on: date)?
+                .trainLine.stations.first(where: { $0.id == toId })
+        else { return }
+        let candidates = await searchTrainCandidates(
+            stations: [from, to],
+            anchor: arrive ? .arrival(date) : .departure(date)
+        )
+        guard let candidate = departure.flatMap({ time in candidates.first { $0.departureTime == time } })
+                ?? candidates.first
+        else {
+            errorMessage = "No matching train found for this time"
+            return
+        }
+        startJourney(candidate: candidate)
+    }
+
 #endif
 
     // MARK: - Overwrite Confirmation

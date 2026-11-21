@@ -726,8 +726,8 @@ struct RootView: View {
         guard let command = ScreenshotCommand(url: url) else { return }
         await viewModel.loadLines()
         switch command {
-        case .seedFavorites:
-            ScreenshotSeeder.seedFavorites()
+        case .seedFavorites(let lineId, let fromId, let toId):
+            ScreenshotSeeder.seedFavorites(lineId: lineId, fromId: fromId, toId: toId)
         case .seedCustomLine:
             ScreenshotSeeder.seedCustomLine()
         case .lcdStyle(let style):
@@ -736,6 +736,9 @@ struct RootView: View {
             await viewModel.debugStartJourney(
                 lineId: lineId, fromId: fromId, toId: toId, minutesAgo: minutesAgo
             )
+        case .ride(let fromId, let toId, let at, let arrive, let departure):
+            await viewModel.debugOpenRide(fromId: fromId, toId: toId, at: at,
+                                          arrive: arrive, departure: departure)
         case .plannerSearch:
             ScreenshotStaging.shared.plannerCommand = .search
         case .plannerAvoid:
