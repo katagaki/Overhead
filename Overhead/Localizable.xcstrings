@@ -2876,6 +2876,41 @@
         }
       }
     },
+    "CustomLine.ImportInvalid" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This file has values Overhead can't use, such as an invalid time or travel time."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この書類には、無効な時刻や所要時間など、使用できない値が含まれています。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 파일에 잘못된 시각이나 소요 시간 등 사용할 수 없는 값이 있습니다."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此文件包含无法使用的值，例如无效的时间或所需时间。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此檔案包含無法使用的值，例如無效的時間或所需時間。"
+          }
+        }
+      }
+    },
     "CustomLine.LastDeparture" : {
       "extractionState" : "manual",
       "localizations" : {

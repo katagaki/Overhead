@@ -162,8 +162,7 @@ struct CustomLinesSection: View {
             let needsScope = url.startAccessingSecurityScopedResource()
             defer { if needsScope { url.stopAccessingSecurityScopedResource() } }
             do {
-                let data = try Data(contentsOf: url)
-                pendingImport = try JSONDecoder().decode(CustomLinePackage.self, from: data)
+                pendingImport = try CustomLinePackage.decodeValidated(from: Data(contentsOf: url))
             } catch {
                 importError = error.localizedDescription
             }

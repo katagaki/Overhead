@@ -137,6 +137,17 @@ struct RootView: View {
         .sheet(item: $customStore.incomingPackage) { package in
             CustomLineImportView(package: package)
         }
+        .alert(
+            Text("CustomLine.ImportFailed"),
+            isPresented: Binding(
+                get: { customStore.incomingError != nil },
+                set: { if !$0 { customStore.incomingError = nil } }
+            )
+        ) {
+            Button("Button.OK", role: .cancel) {}
+        } message: {
+            Text(verbatim: customStore.incomingError ?? "")
+        }
 #if DEBUG
         .onOpenURL { url in
             Task { await handleScreenshotURL(url) }
@@ -742,6 +753,12 @@ struct RootView: View {
             ScreenshotSeeder.seedFavorites(lineId: lineId, fromId: fromId, toId: toId)
         case .seedCustomLine:
             ScreenshotSeeder.seedCustomLine()
+        case .importFile(let file):
+            let url = file.hasPrefix("/")
+                ? URL(filePath: file)
+                : URL.documentsDirectory.appending(path: file)
+            let accepted = customStore.receiveFile(at: url)
+            NSLog("[OverheadImport] %@ %@", url.path, accepted ? "accepted" : "rejected: \(customStore.incomingError ?? "-")")
         case .lcdStyle(let style):
             UserDefaults.standard.set(style, forKey: TrainLCDStyle.storageKey)
         case .journey(let lineId, let fromId, let toId, let minutesAgo):
