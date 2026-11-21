@@ -205,6 +205,9 @@ struct FavoritesSection: View {
             .foregroundStyle(.tertiary)
     }
 
+    /// Only accessibility sizes can outgrow the card; elsewhere the countdown keeps its full size.
+    private var fitsCountdown: Bool { dynamicTypeSize.isAccessibilitySize }
+
     /// Time to the next departure: m:ss inside 10 minutes, あとX分 beyond it.
     @ViewBuilder
     private func countdownLabel(for place: SavedPlace, at date: Date) -> some View {
@@ -222,9 +225,9 @@ struct FavoritesSection: View {
                 }
                 .scaledFont(size: 20, weight: .bold, design: .rounded)
                 .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.5)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .lineLimit(fitsCountdown ? 1 : nil)
+                .minimumScaleFactor(fitsCountdown ? 0.5 : 1)
+                .frame(maxWidth: fitsCountdown ? .infinity : nil, alignment: .leading)
                 .foregroundStyle(remaining <= 3 * 60 ? Color.red : Color.accentColor)
                 .contentTransition(.numericText(countsDown: true))
                 .animation(.default, value: remaining)
@@ -232,8 +235,8 @@ struct FavoritesSection: View {
                 Text("Favorites.NoMoreTrains")
                     .scaledFont(size: 14.5)
                     .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
+                    .lineLimit(fitsCountdown ? 1 : nil)
+                    .minimumScaleFactor(fitsCountdown ? 0.6 : 1)
             }
         } else {
             Text(verbatim: "--:--")
