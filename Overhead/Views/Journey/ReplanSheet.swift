@@ -228,7 +228,7 @@ struct ReplanSheet: View {
 
                     HStack(spacing: 6) {
                         if let leg = candidate.legs.first {
-                            Text(leg.service.trainType.displayNameJa)
+                            Text(leg.service.trainType.localizedDisplayName)
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 6)

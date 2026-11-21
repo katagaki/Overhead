@@ -425,7 +425,7 @@ struct StationPickerView: View {
                             .background(Color.green)
                             .clipShape(Capsule())
                     }
-                    Text(next.trainType.displayNameJa)
+                    Text(next.trainType.localizedDisplayName)
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(.white)
                         .padding(.horizontal, 7)

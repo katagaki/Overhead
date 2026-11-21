@@ -503,7 +503,7 @@ struct JourneyPlannerSection: View {
                 .lineLimit(1)
 
             if candidate.hasSchedule {
-                Text(leg.service.trainType.displayNameJa)
+                Text(leg.service.trainType.localizedDisplayName)
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.white)
                     .padding(.horizontal, 6)
