@@ -413,43 +413,43 @@ struct StationPickerView: View {
     @ViewBuilder
     private func nextArrivalView(_ next: NextArrival?) -> some View {
         if let next {
+            // The day pill rides with the time, so the second line never holds more than two.
             VStack(alignment: .trailing, spacing: 3) {
-                Text(next.time)
-                    .font(.system(size: 15, weight: .semibold, design: .rounded))
-                    .foregroundColor(.primary)
                 HStack(spacing: 4) {
                     if let departure = next.nextDayDeparture {
-                        Text(NextDayLabel.key(departing: departure))
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal, 7)
-                            .padding(.vertical, 2)
-                            .background(Color(.tertiarySystemFill))
-                            .clipShape(Capsule())
+                        pill(Text(NextDayLabel.key(departing: departure)),
+                             foreground: .secondary, background: Color(.tertiarySystemFill))
                     }
+                    Text(next.time)
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundColor(.primary)
+                        .fixedSize()
+                }
+                HStack(spacing: 4) {
                     if next.isFirstTrain {
-                        Text("StationTimetable.FirstTrain")
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 7)
-                            .padding(.vertical, 2)
-                            .background(Color.green)
-                            .clipShape(Capsule())
+                        pill(Text("StationTimetable.FirstTrain"), foreground: .white, background: .green)
                     }
-                    Text(next.trainType.localizedDisplayName)
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 7)
-                        .padding(.vertical, 2)
-                        .background(line.color)
-                        .clipShape(Capsule())
+                    pill(Text(next.trainType.localizedDisplayName), foreground: .white, background: line.color)
                 }
             }
+            .fixedSize()
         } else {
             Text(verbatim: "–")
                 .font(.system(size: 15, weight: .semibold, design: .rounded))
                 .foregroundColor(Color(.tertiaryLabel))
         }
+    }
+
+    private func pill(_ text: Text, foreground: Color, background: Color) -> some View {
+        text
+            .font(.system(size: 10, weight: .bold))
+            .foregroundColor(foreground)
+            .lineLimit(1)
+            .fixedSize()
+            .padding(.horizontal, 7)
+            .padding(.vertical, 2)
+            .background(background)
+            .clipShape(Capsule())
     }
 
     nonisolated private static func nextArrivalsByStation(
