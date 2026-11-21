@@ -11,6 +11,8 @@ struct JourneyPlannerSection: View {
     var isSelectedTab: () -> Bool = { true }
 
     @State private var fromSelection: RouteEndpoint?
+    @ScaledMetric(relativeTo: .callout) private var favoriteIconWidth: CGFloat = 24
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var toSelection: RouteEndpoint?
     @State private var viaSelections: [StationSearchHit] = []
 
@@ -228,10 +230,10 @@ struct JourneyPlannerSection: View {
                     .controlSize(.small)
             } else {
                 Image(systemName: "magnifyingglass")
-                    .font(.system(size: 15, weight: .semibold))
+                    .scaledFont(size: 15, weight: .semibold)
             }
             Text(hasSearched ? "Setup.SearchAgain" : "Setup.SearchTrains")
-                .font(.system(size: 16, weight: .bold))
+                .scaledFont(size: 16, weight: .bold)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
@@ -254,8 +256,8 @@ struct JourneyPlannerSection: View {
             toggleFavorite()
         } label: {
             Image(systemName: isSaved ? "star.fill" : "star")
-                .font(.system(size: 16, weight: .semibold))
-                .frame(width: 24)
+                .scaledFont(size: 16, weight: .semibold)
+                .frame(width: favoriteIconWidth)
                 .padding(.vertical, 8)
                 .contentTransition(.symbolEffect(.replace))
         }
@@ -386,9 +388,9 @@ struct JourneyPlannerSection: View {
 
     @ViewBuilder
     private func untimedCandidateHeader(_ candidate: TrainCandidate) -> some View {
-        HStack(alignment: .center, spacing: 8) {
+        WrappingRow(spacing: 8) {
             Text("Candidate.EstimatedDuration \(candidate.doorToDoorMinutes)")
-                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .scaledFont(size: 22, weight: .bold, design: .rounded)
                 .lineLimit(1)
                 .fixedSize()
 
@@ -398,49 +400,37 @@ struct JourneyPlannerSection: View {
 
             if candidate.transferCount > 0 {
                 Text("Candidate.Transfers \(candidate.transferCount)")
-                    .font(.system(size: 11, weight: .semibold))
+                    .scaledFont(size: 11, weight: .semibold)
                     .foregroundColor(.secondary)
+                    .lineLimit(1)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
                     .background(Color(.tertiarySystemFill))
                     .clipShape(Capsule())
             }
-
-            Spacer()
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     @ViewBuilder
     private func scheduledCandidateHeader(_ candidate: TrainCandidate, waitMinutes: Int?) -> some View {
         VStack(alignment: .leading, spacing: 3) {
-            HStack(alignment: .center, spacing: 8) {
-                Text(displayTime(CandidateLeg.railTimeString(candidate.leaveSeconds)))
-                    .font(.system(size: 22, weight: .bold, design: .rounded))
-                    .lineLimit(1)
-                    .fixedSize()
-                Image(systemName: "arrow.right")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.secondary)
-                Text(displayTime(CandidateLeg.railTimeString(candidate.reachSeconds)))
-                    .font(.system(size: 22, weight: .bold, design: .rounded))
-                    .lineLimit(1)
-                    .fixedSize()
-
-                Spacer()
-
-                if let waitMinutes {
-                    Text(waitMinutes == 0
-                         ? "Candidate.DepartsNow"
-                         : "Candidate.DepartsIn \(waitMinutes)")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(waitMinutes <= (searchWalkMinutes ?? 0) + 3 ? .red : .green)
+            if dynamicTypeSize <= .large {
+                timesRow(candidate, waitMinutes: waitMinutes)
+            } else {
+                ViewThatFits(in: .horizontal) {
+                    timesRow(candidate, waitMinutes: waitMinutes)
+                    VStack(alignment: .leading, spacing: 3) {
+                        candidateTimes(candidate)
+                        departsInLabel(waitMinutes)
+                    }
                 }
             }
 
-            HStack(spacing: 8) {
+            WrappingRow(spacing: 8) {
                 if isNextDay(candidate) {
                     Text(NextDayLabel.key(departing: candidate.leaveDate))
-                        .font(.system(size: 11, weight: .semibold))
+                        .scaledFont(size: 11, weight: .semibold)
                         .foregroundColor(.secondary)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
@@ -449,7 +439,7 @@ struct JourneyPlannerSection: View {
                 }
 
                 Text("Candidate.Duration \(candidate.doorToDoorMinutes)")
-                    .font(.system(size: 12))
+                    .scaledFont(size: 12)
                     .foregroundColor(.secondary)
 
                 if candidate.walksToPlace {
@@ -463,7 +453,7 @@ struct JourneyPlannerSection: View {
                 if candidate.legs.count == 1,
                    let platform = boardingPlatform(for: candidate.legs.first, on: candidate.serviceDay) {
                     Text("Candidate.Platform \(platform)")
-                        .font(.system(size: 11, weight: .semibold))
+                        .scaledFont(size: 11, weight: .semibold)
                         .foregroundColor(.secondary)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
@@ -473,7 +463,7 @@ struct JourneyPlannerSection: View {
 
                 if candidate.transferCount > 0 {
                     Text("Candidate.Transfers \(candidate.transferCount)")
-                        .font(.system(size: 11, weight: .semibold))
+                        .scaledFont(size: 11, weight: .semibold)
                         .foregroundColor(.secondary)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
@@ -481,6 +471,42 @@ struct JourneyPlannerSection: View {
                         .clipShape(Capsule())
                 }
             }
+        }
+    }
+
+    private func timesRow(_ candidate: TrainCandidate, waitMinutes: Int?) -> some View {
+        HStack(alignment: .center, spacing: 8) {
+            candidateTimes(candidate)
+            Spacer()
+            departsInLabel(waitMinutes)
+        }
+    }
+
+    @ViewBuilder
+    private func candidateTimes(_ candidate: TrainCandidate) -> some View {
+        HStack(alignment: .center, spacing: 8) {
+            Text(displayTime(CandidateLeg.railTimeString(candidate.leaveSeconds)))
+                .scaledFont(size: 22, weight: .bold, design: .rounded)
+                .lineLimit(1)
+                .fixedSize()
+            Image(systemName: "arrow.right")
+                .scaledFont(size: 12, weight: .semibold)
+                .foregroundColor(.secondary)
+            Text(displayTime(CandidateLeg.railTimeString(candidate.reachSeconds)))
+                .scaledFont(size: 22, weight: .bold, design: .rounded)
+                .lineLimit(1)
+                .fixedSize()
+        }
+    }
+
+    @ViewBuilder
+    private func departsInLabel(_ waitMinutes: Int?) -> some View {
+        if let waitMinutes {
+            Text(waitMinutes == 0
+                 ? "Candidate.DepartsNow"
+                 : "Candidate.DepartsIn \(waitMinutes)")
+                .scaledFont(size: 12, weight: .bold)
+                .foregroundColor(waitMinutes <= (searchWalkMinutes ?? 0) + 3 ? .red : .green)
         }
     }
 
@@ -494,7 +520,7 @@ struct JourneyPlannerSection: View {
         Label("Candidate.Walk \((candidate.accessSeconds + candidate.egressSeconds) / 60)",
               systemImage: "figure.walk")
             .labelStyle(.titleAndIcon)
-            .font(.system(size: 11, weight: .semibold))
+            .scaledFont(size: 11, weight: .semibold)
             .foregroundColor(.secondary)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
@@ -505,7 +531,7 @@ struct JourneyPlannerSection: View {
     /// 始発 — you board where the train starts, so there is a seat waiting.
     private var originatingBadge: some View {
         Text("Candidate.Originating")
-            .font(.system(size: 11, weight: .bold))
+            .scaledFont(size: 11, weight: .bold)
             .foregroundColor(.white)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
@@ -516,40 +542,42 @@ struct JourneyPlannerSection: View {
     @ViewBuilder
     private func singleLegSummary(candidate: TrainCandidate, leg: CandidateLeg) -> some View {
         HStack(spacing: 6) {
-            LineLeadingBadge(line: leg.line, dimension: 18)
+            WrappingRow(spacing: 6, lineSpacing: 4) {
+                LineLeadingBadge(line: leg.line, dimension: 18)
 
-            Text(leg.line.localizedName)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(leg.line.color)
-                .lineLimit(1)
+                Text(leg.line.localizedName)
+                    .scaledFont(size: 13, weight: .semibold)
+                    .foregroundColor(leg.line.color)
+                    .lineLimit(1)
 
-            if candidate.hasSchedule {
-                Text(leg.service.trainType.localizedDisplayName)
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(leg.line.color)
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                if candidate.hasSchedule {
+                    Text(leg.service.trainType.localizedDisplayName)
+                        .scaledFont(size: 11, weight: .bold)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(leg.line.color)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
 
-                if let destination = destinationName(of: candidate) {
-                    Text("Candidate.For \(destination)")
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                }
+                    if let destination = destinationName(of: candidate) {
+                        Text("Candidate.For \(destination)")
+                            .scaledFont(size: 12)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    }
             }
 
             if candidate.isThrough {
                 Image(systemName: "arrow.triangle.branch")
-                    .font(.system(size: 11))
+                    .scaledFont(size: 11)
                     .foregroundColor(.secondary)
+            }
             }
 
             Spacer()
 
             Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .semibold))
+                .scaledFont(size: 12, weight: .semibold)
                 .foregroundColor(Color(.tertiaryLabel))
         }
     }
@@ -566,52 +594,54 @@ struct JourneyPlannerSection: View {
         VStack(alignment: .leading, spacing: 5) {
             ForEach(Array(candidate.legs.enumerated()), id: \.offset) { index, leg in
                 HStack(spacing: 5) {
-                    LineLeadingBadge(line: leg.line, dimension: 16)
+                    WrappingRow(spacing: 5, lineSpacing: 3) {
+                        LineLeadingBadge(line: leg.line, dimension: 16)
 
-                    Text(leg.line.localizedName)
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(leg.line.color)
-                        .lineLimit(1)
-                        .layoutPriority(1)
+                        Text(leg.line.localizedName)
+                            .scaledFont(size: 12, weight: .semibold)
+                            .foregroundColor(leg.line.color)
+                            .lineLimit(1)
+                            .layoutPriority(1)
 
-                    Text(leg.fromStation.localizedName)
-                        .font(.system(size: 12))
-                        .lineLimit(1)
-                    if let platform = boardingPlatform(for: leg, on: candidate.serviceDay) {
-                        Text("Candidate.Platform \(platform)")
-                            .font(.system(size: 10, weight: .semibold))
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 1)
-                            .background(Color(.tertiarySystemFill))
-                            .clipShape(Capsule())
-                            .fixedSize()
+                        Text(leg.fromStation.localizedName)
+                            .scaledFont(size: 12)
+                            .lineLimit(1)
+                        if let platform = boardingPlatform(for: leg, on: candidate.serviceDay) {
+                            Text("Candidate.Platform \(platform)")
+                                .scaledFont(size: 10, weight: .semibold)
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal, 4)
+                                .padding(.vertical, 1)
+                                .background(Color(.tertiarySystemFill))
+                                .clipShape(Capsule())
+                                .fixedSize()
                     }
                     if candidate.hasSchedule {
                         Text(displayTime(leg.departureTime))
-                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .scaledFont(size: 12, weight: .semibold, design: .rounded)
                             .fixedSize()
                     }
 
                     Image(systemName: "arrow.right")
-                        .font(.system(size: 9, weight: .semibold))
+                        .scaledFont(size: 9, weight: .semibold)
                         .foregroundColor(.secondary)
 
                     Text(leg.toStation.localizedName)
-                        .font(.system(size: 12))
+                        .scaledFont(size: 12)
                         .lineLimit(1)
                     if candidate.hasSchedule {
                         Text(displayTime(leg.arrivalTime))
-                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .scaledFont(size: 12, weight: .semibold, design: .rounded)
                             .foregroundColor(.secondary)
                             .fixedSize()
+                    }
                     }
 
                     Spacer(minLength: 0)
 
                     if index == 0 {
                         Image(systemName: "chevron.right")
-                            .font(.system(size: 12, weight: .semibold))
+                            .scaledFont(size: 12, weight: .semibold)
                             .foregroundColor(Color(.tertiaryLabel))
                     }
                 }
@@ -660,7 +690,7 @@ struct JourneyPlannerSection: View {
         HStack(spacing: 8) {
             Image(systemName: icon)
             Text(text)
-                .font(.system(size: 14))
+                .scaledFont(size: 14)
         }
         .foregroundColor(.secondary)
         .frame(maxWidth: .infinity, alignment: .leading)
