@@ -9,6 +9,7 @@ struct RootView: View {
     @ObservedObject private var lineDataInstaller = LineDataInstaller.shared
 
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.scenePhase) private var scenePhase
 
     @AppStorage(JourneyMode.storageKey) private var journeyMode = JourneyMode.hybrid
     @AppStorage("hasDismissedStartupNotice") private var hasDismissedStartupNotice = false
@@ -109,6 +110,7 @@ struct RootView: View {
                 }
             }
 #endif
+            FavoriteDeparture.consumePending(viewModel: viewModel)
             if needsLineDataOnboarding { showLineDataOnboarding = true }
             await checkForLineDataUpdates()
         }
@@ -182,6 +184,10 @@ struct RootView: View {
         }
         .onTabSelectionChange(in: tabStore) { _, _ in
             syncFocusedJourney()
+        }
+        // The Control Center control stages a favorite and opens the app on whatever tab is in front.
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { FavoriteDeparture.consumePending(viewModel: viewModel) }
         }
         // Starting where the selected tab already has a journey replaces it.
         .alert(
@@ -813,6 +819,16 @@ struct RootView: View {
         case .linePage(let target):
             ScreenshotStaging.shared.expandServiceStatus = target.expandStatus
             tabStore.push(target)
+        case .tabRoot(let lineId):
+            tabStore.updateSelectedTab { tab in
+                tab.path = NavigationPath()
+                tab.root = .destination(.line(lineId))
+            }
+            tabStore.persistTabs()
+        case .pendingDeparture(let place):
+            let id = place == "first" ? SavedPlaceStore.load().first?.id.uuidString : place
+            if let id { AppGroup.defaults.set(id, forKey: BoardSnapshotStore.pendingPlaceKey) }
+            NSLog("[OverheadDepart] staged pending departure %@", id ?? "-")
         case .customLineEditor:
             ScreenshotSeeder.seedCustomLine()
             try? await Task.sleep(for: .seconds(0.5))

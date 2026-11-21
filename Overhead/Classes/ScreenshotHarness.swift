@@ -23,6 +23,8 @@ import Backbone
 /// - overhead://place-editor[?edit=first]
 /// - overhead://dismiss (closes the journey sheet to expose the home bottom bar)
 /// - overhead://tab/new
+/// - overhead://tab/root?line=… (roots the selected tab at a line page instead of Home)
+/// - overhead://pending-depart?place=first|<uuid> (stages the Control Center control's departure; consumed at launch or on activation)
 /// - overhead://tab/switcher
 /// - overhead://reset
 enum ScreenshotCommand {
@@ -45,6 +47,8 @@ enum ScreenshotCommand {
     case dismissSheet
     case newTab
     case tabSwitcher
+    case tabRoot(lineId: String)
+    case pendingDeparture(String)
     case reset
 
     init?(url: URL) {
@@ -118,8 +122,11 @@ enum ScreenshotCommand {
             switch url.path {
             case "/new": self = .newTab
             case "/switcher": self = .tabSwitcher
+            case "/root": self = .tabRoot(lineId: params["line"] ?? "Railway:JR-East.JobanRapid")
             default: return nil
             }
+        case "pending-depart":
+            self = .pendingDeparture(params["place"] ?? "first")
         case "reset":
             self = .reset
         default:
