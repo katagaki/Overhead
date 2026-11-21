@@ -1580,6 +1580,41 @@
         }
       }
     },
+    "Candidate.NextDay" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next day"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "翌日"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다음 날"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次日"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "翌日"
+          }
+        }
+      }
+    },
     "Candidate.Originating" : {
       "comment" : "Badge on a result whose first train starts at the boarding station.",
       "extractionState" : "manual",
@@ -1647,6 +1682,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@號月台"
+          }
+        }
+      }
+    },
+    "Candidate.Tomorrow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tomorrow"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "明日"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "내일"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "明天"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "明天"
           }
         }
       }
@@ -11113,6 +11183,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "出發"
+          }
+        }
+      }
+    },
+    "Setup.NextDayNotice" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No more trains that day. These start from the next day's first trains."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この日の運行は終了しました。翌日の始発からの候補です。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이날 운행이 종료되었습니다. 다음 날 첫차부터의 경로입니다."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当天的运营已结束。以下为次日首班车起的路线。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "當天的營運已結束。以下為翌日首班車起的路線。"
           }
         }
       }

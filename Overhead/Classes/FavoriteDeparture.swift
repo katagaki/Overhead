@@ -45,6 +45,8 @@ enum FavoriteDeparture {
         return nil
     }
 
+    /// One-train favorites report no more trains today; with changes, past the last train
+    /// the next day's first itinerary is started, and the untimed plan only when none is found.
     static func start(_ place: SavedPlace, resolved: Resolved, viewModel: JourneyViewModel) async {
         let waypoints = [resolved.from] + resolved.vias + [resolved.to]
         let avoided = Set(place.avoidedLineIds)
@@ -85,7 +87,8 @@ enum FavoriteDeparture {
             walkPace: place.walkingSpeed.paceMultiplier,
             priority: place.routePriority,
             avoidingLineIds: avoided,
-            preferringOriginating: place.preferOriginating
+            preferringOriginating: place.preferOriginating,
+            rollingOverToNextDay: true
         ).first {
             startCandidate(timed)
             return

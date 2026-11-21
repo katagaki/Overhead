@@ -303,17 +303,21 @@ final class JourneyViewModel: ObservableObject {
         avoidingLineIds: Set<String> = [],
         notDepartingBefore earliest: Date? = nil,
         preferringOriginating: Bool = false,
+        rollingOverToNextDay: Bool = false,
         limit: Int = 12
     ) async -> [TrainCandidate] {
         await searchTrainCandidates(
             endpoints: stations.map(SearchEndpoint.station), anchor: anchor,
             transferMinutes: transferMinutes, walkPace: walkPace, priority: priority,
             avoidingLineIds: avoidingLineIds, notDepartingBefore: earliest,
-            preferringOriginating: preferringOriginating, limit: limit
+            preferringOriginating: preferringOriginating,
+            rollingOverToNextDay: rollingOverToNextDay, limit: limit
         )
     }
 
     /// For a place end, the anchor is when you leave or reach the place.
+    /// `rollingOverToNextDay`: a departure search past the day's last train returns
+    /// the next service day's first trains instead, carrying that day.
     func searchTrainCandidates(
         endpoints: [SearchEndpoint],
         anchor: TimeAnchor,
@@ -323,6 +327,7 @@ final class JourneyViewModel: ObservableObject {
         avoidingLineIds: Set<String> = [],
         notDepartingBefore earliest: Date? = nil,
         preferringOriginating: Bool = false,
+        rollingOverToNextDay: Bool = false,
         limit: Int = 12
     ) async -> [TrainCandidate] {
         let search = Task.detached(priority: .userInitiated) { [self] in
@@ -333,12 +338,27 @@ final class JourneyViewModel: ObservableObject {
                       Date().timeIntervalSince(started) * 1000, Thread.isMainThread ? " on main" : " off main")
             }
             #endif
-            return self.findCandidates(
+            let found = self.findCandidates(
                 endpoints: endpoints, anchor: anchor,
                 transferMinutes: transferMinutes, walkPace: walkPace, priority: priority,
                 avoidingLineIds: avoidingLineIds, notDepartingBefore: earliest,
                 preferringOriginating: preferringOriginating, limit: limit
             )
+            guard found.isEmpty, rollingOverToNextDay, !anchor.isArrival, !Task.isCancelled else { return found }
+            let anchorDay = ServiceDay(containing: anchor.date)
+            let nextDay = anchorDay.adding(days: 1)
+            let firstTrains = self.findCandidates(
+                endpoints: endpoints,
+                anchor: .departure(nextDay.date(atRailSeconds: ServiceDay.rolloverHour * 3600)),
+                transferMinutes: transferMinutes, walkPace: walkPace, priority: priority,
+                avoidingLineIds: avoidingLineIds, notDepartingBefore: nil,
+                preferringOriginating: preferringOriginating, limit: limit
+            )
+            #if DEBUG
+            NSLog("[OverheadSearch] no trains left on %d; %d first trains on %d", anchorDay.key,
+                  firstTrains.count, nextDay.key)
+            #endif
+            return firstTrains
         }
         return await withTaskCancellationHandler {
             await search.value
@@ -484,7 +504,11 @@ final class JourneyViewModel: ObservableObject {
 
         var candidates: [TrainCandidate] = []
         for route in routes {
-            for ride in rides(on: route.staticLine,
+            // A 改正 can take effect on the searched day; composites are built from today's lines.
+            let timedLine = route.isThrough
+                ? route.staticLine
+                : StaticTrainData.line(withId: route.staticLine.id, on: day.midday) ?? route.staticLine
+            for ride in rides(on: timedLine,
                               fromId: route.fromStation.id, toId: route.toStation.id,
                               anchor: anchor, notDepartingBefore: floorSec, day: day,
                               limit: limit) {
@@ -805,7 +829,8 @@ final class JourneyViewModel: ObservableObject {
 
             var runs: [TrainService] = []
             for ride in routed.rides {
-                guard let line = StaticTrainData.line(withId: ride.lineId),
+                // The router's services come from the searched day's network.
+                guard let line = StaticTrainData.line(withId: ride.lineId, on: day.midday),
                       let run = services(on: line, day: day).first(where: { $0.id == ride.serviceId })
                 else { return nil }
                 runs.append(run)
@@ -1204,7 +1229,8 @@ final class JourneyViewModel: ObservableObject {
         else { return }
         let candidates = await searchTrainCandidates(
             stations: [from, to],
-            anchor: arrive ? .arrival(date) : .departure(date)
+            anchor: arrive ? .arrival(date) : .departure(date),
+            rollingOverToNextDay: !arrive
         )
         guard let candidate = departure.flatMap({ time in candidates.first { $0.departureTime == time } })
                 ?? candidates.first
@@ -1212,6 +1238,7 @@ final class JourneyViewModel: ObservableObject {
             startFailure = .noTrain
             return
         }
+        NSLog("[OverheadSearch] staged ride %@ on service day %d", candidate.departureTime, candidate.serviceDay.key)
         startJourney(candidate: candidate)
     }
 

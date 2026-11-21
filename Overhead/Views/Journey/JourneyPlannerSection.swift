@@ -30,6 +30,8 @@ struct JourneyPlannerSection: View {
     @State private var isSearching = false
     @State private var searchError: LocalizedStringKey?
     @State private var searchWalkMinutes: Int?
+    /// The service day the search was anchored on; later results are the next day's first trains.
+    @State private var searchedDay: ServiceDay?
     @State private var searchTask: Task<Void, Never>?
     @StateObject private var walkingEstimator = WalkingTimeEstimator()
     @StateObject private var oneShotLocation = OneShotLocation()
@@ -336,6 +338,10 @@ struct JourneyPlannerSection: View {
                     noticeRow(icon: "figure.walk", text: "Setup.WalkEstimate \(fromName) \(walkMinutes)")
                 }
 
+                if candidates.contains(where: isNextDay) {
+                    noticeRow(icon: "moon.stars", text: "Setup.NextDayNotice")
+                }
+
                 VStack(spacing: 0) {
                     ForEach(Array(candidates.enumerated()), id: \.element.id) { index, candidate in
                         candidateRow(candidate)
@@ -432,6 +438,16 @@ struct JourneyPlannerSection: View {
             }
 
             HStack(spacing: 8) {
+                if isNextDay(candidate) {
+                    Text(NextDayLabel.key(departing: candidate.leaveDate))
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color(.tertiarySystemFill))
+                        .clipShape(Capsule())
+                }
+
                 Text("Candidate.Duration \(candidate.doorToDoorMinutes)")
                     .font(.system(size: 12))
                     .foregroundColor(.secondary)
@@ -445,7 +461,7 @@ struct JourneyPlannerSection: View {
                 }
 
                 if candidate.legs.count == 1,
-                   let platform = boardingPlatform(for: candidate.legs.first) {
+                   let platform = boardingPlatform(for: candidate.legs.first, on: candidate.serviceDay) {
                     Text("Candidate.Platform \(platform)")
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(.secondary)
@@ -466,6 +482,11 @@ struct JourneyPlannerSection: View {
                 }
             }
         }
+    }
+
+    private func isNextDay(_ candidate: TrainCandidate) -> Bool {
+        guard candidate.hasSchedule, let searchedDay else { return false }
+        return candidate.serviceDay > searchedDay
     }
 
     /// Minutes on foot between the places and the stations.
@@ -556,7 +577,7 @@ struct JourneyPlannerSection: View {
                     Text(leg.fromStation.localizedName)
                         .font(.system(size: 12))
                         .lineLimit(1)
-                    if let platform = boardingPlatform(for: leg) {
+                    if let platform = boardingPlatform(for: leg, on: candidate.serviceDay) {
                         Text("Candidate.Platform \(platform)")
                             .font(.system(size: 10, weight: .semibold))
                             .foregroundColor(.secondary)
@@ -614,7 +635,7 @@ struct JourneyPlannerSection: View {
 
     /// 番線 the first leg boards at. Absent for most stations, and for every
     /// station where the platform depends on which train turns up.
-    private func boardingPlatform(for leg: CandidateLeg?) -> String? {
+    private func boardingPlatform(for leg: CandidateLeg?, on day: ServiceDay) -> String? {
         guard let leg,
               let line = StaticTrainData.line(containingStationId: leg.fromStation.id),
               let index = leg.service.timetable.firstIndex(where: { $0.stationId == leg.fromStation.id }),
@@ -623,7 +644,7 @@ struct JourneyPlannerSection: View {
         return line.boardingPlatform(atStationId: leg.fromStation.id,
                                      nextStationId: leg.service.timetable[index + 1].stationId,
                                      departure: leg.service.timetable[index].departureTime,
-                                     calendar: .current(at: anchorDate))
+                                     calendar: day.scheduleCalendar)
     }
 
     private func displayTime(_ railTime: String) -> String {
@@ -734,12 +755,14 @@ struct JourneyPlannerSection: View {
                 priority: routePriority,
                 avoidingLineIds: avoided,
                 notDepartingBefore: earliestDeparture,
-                preferringOriginating: preferOriginating
+                preferringOriginating: preferOriginating,
+                rollingOverToNextDay: timeMode != .arriveBy
             )
             #if DEBUG
             await ScreenshotStaging.holdSearchResults("planner")
             #endif
             guard !Task.isCancelled else { return }
+            searchedDay = ServiceDay(containing: anchor.date)
             candidates = found
             hasSearched = true
             isSearching = false
