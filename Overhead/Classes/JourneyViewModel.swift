@@ -1203,6 +1203,7 @@ final class JourneyViewModel: ObservableObject {
 
     // MARK: - Train Matching
 
+    /// The next train from `from` to `to` on `day`; nil once the day's last one has gone.
     private func findBestService(
         services: [TrainService],
         from: String, to: String,
@@ -1219,13 +1220,13 @@ final class JourneyViewModel: ObservableObject {
             return true
         }
 
-        let sorted = candidates.compactMap { svc -> (TrainService, Int)? in
+        return candidates.compactMap { svc -> (TrainService, Int)? in
             guard let entry = svc.timetable.first(where: { $0.stationId == from }),
                   let dep = entry.departureSeconds() else { return nil }
             return (svc, dep)
-        }.sorted { $0.1 < $1.1 }
-
-        return sorted.first(where: { $0.1 >= nowSec })?.0 ?? sorted.first?.0
+        }
+        .filter { $0.1 >= nowSec }
+        .min { $0.1 < $1.1 }?.0
     }
 
     // MARK: - Preview Data
