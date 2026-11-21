@@ -752,10 +752,24 @@ private struct BoardMarquee: View {
 
     @State private var textWidth: CGFloat = 0
     @State private var startDate: Date?
+    @Environment(\.motionReduced) private var reduceMotion
 
     private let speed: CGFloat = 60
 
     var body: some View {
+        if reduceMotion {
+            Text(text)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(color)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 12)
+        } else {
+            marquee
+        }
+    }
+
+    private var marquee: some View {
         GeometryReader { geo in
             TimelineView(.animation(minimumInterval: 1.0 / 60.0)) { context in
                 marqueeText
