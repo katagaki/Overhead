@@ -73,10 +73,31 @@ nonisolated struct BoardPlace: Codable, Identifiable {
     let colorHex: String
 }
 
+nonisolated enum BoardDayKind: String, Codable {
+    case same, alternate
+}
+
 nonisolated struct StationBoardSnapshot: Codable {
     let railDay: String
     let stations: [BoardStation]
     let places: [BoardPlace]
+    /// Later rail days this snapshot still covers, so the board survives the day change unopened.
+    var laterDays: [String: BoardDayKind]? = nil
+    /// The other calendar's board, written only when the next rail day runs it.
+    var alternateStations: [BoardStation]? = nil
+
+    /// The board as it reads on `day`; nil when the snapshot does not cover it.
+    func resolved(forRailDay day: String) -> StationBoardSnapshot? {
+        if day == railDay { return self }
+        let board: [BoardStation]?
+        switch laterDays?[day] {
+        case .same: board = stations
+        case .alternate: board = alternateStations
+        case nil: board = nil
+        }
+        guard let board else { return nil }
+        return StationBoardSnapshot(railDay: day, stations: board, places: places)
+    }
 }
 
 // MARK: - App Group Store

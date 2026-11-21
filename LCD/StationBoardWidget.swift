@@ -262,14 +262,14 @@ nonisolated func boardTimeline(
     lineId: String? = nil,
     directionId: String? = nil
 ) -> Timeline<BoardEntry> {
-    let snapshot = (base?.railDay == BoardSnapshotStore.railDay()) ? base : nil
     let reason = boardEmptyReason(for: base)
     let now = Date()
     let start = Date(timeIntervalSince1970: (now.timeIntervalSince1970 / 60).rounded(.down) * 60)
     let entries = (0..<60).map { offset in
-        BoardEntry(
-            date: start.addingTimeInterval(TimeInterval(offset * 60)),
-            snapshot: snapshot,
+        let date = start.addingTimeInterval(TimeInterval(offset * 60))
+        return BoardEntry(
+            date: date,
+            snapshot: base?.resolved(forRailDay: BoardSnapshotStore.railDay(for: date)),
             stationName: stationName,
             lineId: lineId,
             directionId: directionId,

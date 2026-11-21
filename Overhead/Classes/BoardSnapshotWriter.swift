@@ -8,19 +8,34 @@ nonisolated enum BoardSnapshotWriter {
 
     private static let directionChoicesKey = "nearby.directionChoices"
 
+    /// How far ahead the snapshot covers when the app stays closed.
+    private static let coveredDays = 7
+
     @MainActor
     static func refresh() {
+        Task { await rebuild() }
+    }
+
+    @MainActor
+    static func rebuild() async {
         let places = SavedPlaceStore.load()
         let titles = Dictionary(uniqueKeysWithValues: places.map { place in
             (place.id, place.customName.isEmpty
                 ? String(localized: String.LocalizationValue(place.kind.localizationKey))
                 : place.customName)
         })
-        Task.detached(priority: .utility) {
+        await Task.detached(priority: .utility) {
             let snapshot = build(places: places, titles: titles)
+            #if DEBUG
+            NSLog("[OverheadBoard] snapshot %@ later days %@ alternate %@",
+                  snapshot.railDay,
+                  (snapshot.laterDays ?? [:]).sorted { $0.key < $1.key }
+                      .map { "\($0.key)=\($0.value.rawValue)" }.joined(separator: ","),
+                  snapshot.alternateStations == nil ? "no" : "yes")
+            #endif
             guard BoardSnapshotStore.save(snapshot) else { return }
             WidgetCenter.shared.reloadAllTimelines()
-        }
+        }.value
     }
 
     private static func build(places: [SavedPlace], titles: [UUID: String]) -> StationBoardSnapshot {
@@ -44,10 +59,43 @@ nonisolated enum BoardSnapshotWriter {
         let stations = stationNames.compactMap { name in
             boardStation(named: name, lines: lines, calendar: calendar, choices: choices)
         }
+
+        // Tomorrow's board is the only one worth a second copy; later days reuse whichever matches.
+        let nextCalendar = ScheduleCalendar.current(at: now.addingTimeInterval(86400))
+        let alternateCalendar = nextCalendar == calendar ? nil : nextCalendar
+        let boardLineIds = Set(stations.flatMap { $0.lines.map(\.lineId) })
+        let firstRevisionDay = boardLineIds
+            .flatMap { StaticTrainData.upcomingRevisions(forLineId: $0, on: now) }
+            .compactMap(\.validFromDayKey)
+            .min()
+        var laterDays: [String: BoardDayKind] = [:]
+        for offset in 1...coveredDays {
+            let date = now.addingTimeInterval(TimeInterval(offset) * 86400)
+            let day = BoardSnapshotStore.railDay(for: date)
+            if let firstRevisionDay, let key = Int(day), key >= firstRevisionDay { break }
+            let dayCalendar = ScheduleCalendar.current(at: date)
+            if dayCalendar == calendar {
+                laterDays[day] = .same
+            } else if dayCalendar == alternateCalendar {
+                laterDays[day] = .alternate
+            } else {
+                break
+            }
+        }
+        let alternateStations = alternateCalendar.flatMap { alternate in
+            laterDays.values.contains(.alternate)
+                ? stationNames.compactMap { name in
+                    boardStation(named: name, lines: lines, calendar: alternate, choices: choices)
+                }
+                : nil
+        }
+
         return StationBoardSnapshot(
             railDay: BoardSnapshotStore.railDay(for: now),
             stations: stations,
-            places: places.compactMap { boardPlace($0, lines: lines, titles: titles) }
+            places: places.compactMap { boardPlace($0, lines: lines, titles: titles) },
+            laterDays: laterDays.isEmpty ? nil : laterDays,
+            alternateStations: alternateStations
         )
     }
 
