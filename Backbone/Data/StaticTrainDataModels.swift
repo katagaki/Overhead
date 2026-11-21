@@ -591,11 +591,19 @@ public enum StaticTrainData {
     private static let linesLock = NSLock()
     private static var cachedLines: [StaticTrainLine]?
 
+    private static var linesVersion = 0
+
+    /// Decoded outside the lock, so a reader never waits behind another thread's decode.
     private static var loadedLines: [StaticTrainLine] {
+        linesLock.lock()
+        if let cachedLines { linesLock.unlock(); return cachedLines }
+        let version = linesVersion
+        linesLock.unlock()
+
+        let built = lineFolders.flatMap { LineStore.lines($0) }
         linesLock.lock(); defer { linesLock.unlock() }
         if let cachedLines { return cachedLines }
-        let built = lineFolders.flatMap { LineStore.lines($0) }
-        cachedLines = built
+        if version == linesVersion { cachedLines = built }
         return built
     }
 
@@ -616,6 +624,7 @@ public enum StaticTrainData {
             cached.append(contentsOf: lines)
             cachedLines = cached
         }
+        linesVersion += 1
         linesLock.unlock()
 
         // Derived views are cheap to rebuild and hold no file I/O.
@@ -628,7 +637,7 @@ public enum StaticTrainData {
     /// Call after installing or removing line data. Clears the decoded lines
     /// and every per-day snapshot built from them.
     public static func invalidate() {
-        linesLock.lock(); cachedLines = nil; linesLock.unlock()
+        linesLock.lock(); cachedLines = nil; linesVersion += 1; linesLock.unlock()
         displayLock.lock(); cachedTrainLines = nil; cachedLinesByStationName = nil; displayLock.unlock()
         snapshotLock.lock(); snapshots.removeAll(); generation += 1; snapshotLock.unlock()
         Catalog.reload()
@@ -674,9 +683,12 @@ public enum StaticTrainData {
         init(_ lines: [StaticTrainLine]) { self.lines = lines }
 
         var value: StationLinks {
+            lock.lock()
+            if let built { lock.unlock(); return built }
+            lock.unlock()
+            let links = StationLinks(lines: lines)
             lock.lock(); defer { lock.unlock() }
             if let built { return built }
-            let links = StationLinks(lines: lines)
             built = links
             return links
         }
@@ -696,9 +708,16 @@ public enum StaticTrainData {
     /// cached per day anyway, because the lookup maps are not.
     private static func snapshot(onDayKey key: Int) -> Snapshot {
         snapshotLock.lock()
+        if let cached = snapshots[key] { snapshotLock.unlock(); return cached }
+        let builtFrom = generation
+        snapshotLock.unlock()
+
+        // Built outside the lock: a search building tomorrow's must not hold up today's readers.
+        let built = Snapshot(loadedLines.map { $0.applyingRevisions(onDayKey: key) })
+        snapshotLock.lock()
         defer { snapshotLock.unlock() }
         if let cached = snapshots[key] { return cached }
-        let built = Snapshot(loadedLines.map { $0.applyingRevisions(onDayKey: key) })
+        guard builtFrom == generation else { return built }
         // Only today and whatever date the user is planning for stay warm.
         if snapshots.count >= 4 { snapshots.removeAll() }
         snapshots[key] = built
