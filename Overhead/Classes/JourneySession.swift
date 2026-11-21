@@ -21,6 +21,7 @@ final class JourneySession: ObservableObject, Identifiable {
     @Published private(set) var hasArrived = false
     /// A previewed journey only follows the timetable on screen.
     @Published private(set) var isStarted = false
+    @Published private(set) var locationAccess: LocationAccess = .undetermined
 
     var isUnderWay: Bool { isStarted && !hasArrived }
 
@@ -90,6 +91,12 @@ final class JourneySession: ObservableObject, Identifiable {
                     self.finishOnArrival()
                 }
             }
+            .store(in: &cancellables)
+
+        locationTracker.$locationAccess
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] access in self?.locationAccess = access }
             .store(in: &cancellables)
 
         locationTracker.$trackingMode
@@ -181,6 +188,10 @@ final class JourneySession: ObservableObject, Identifiable {
             legColors.append(LegColor(stationIndex: stationIndex, color: JourneyViewModel.lcdColor(leg.line)))
         }
         return (journey, legLines, legColors, transferLines)
+    }
+
+    func requestFullAccuracy() {
+        locationTracker.requestFullAccuracy()
     }
 
     // MARK: - Start

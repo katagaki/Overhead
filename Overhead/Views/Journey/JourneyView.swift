@@ -8,6 +8,7 @@ struct JourneyView: View {
     @ObservedObject var session: JourneySession
     @AppStorage(TrainLCDStyle.storageKey) private var lcdStyleRaw = TrainLCDStyle.joban.rawValue
     @AppStorage(TrainLCDOrientation.storageKey) private var lcdOrientationRaw = TrainLCDOrientation.left.rawValue
+    @AppStorage(JourneyMode.storageKey) private var journeyMode = JourneyMode.hybrid
     @Environment(\.scenePhase) private var scenePhase
 
     /// Carried with the presentation; `isPresented` would read a stale index.
@@ -46,6 +47,12 @@ struct JourneyView: View {
                                 journeyHeader(state: state)
                                     .padding(.top, 12)
                                     .padding(.bottom, 20)
+                            }
+
+                            if session.isUnderWay {
+                                locationNotice
+                                    .padding(.horizontal)
+                                    .padding(.top, 12)
                             }
 
                             VerticalLCDLine(
@@ -160,6 +167,65 @@ struct JourneyView: View {
                 .padding(.horizontal, 24)
             }
         }
+    }
+
+    // MARK: - Location Notice
+
+    @ViewBuilder
+    private var locationNotice: some View {
+        let usesGPS = journeyMode == .gps || journeyMode == .hybrid
+        switch session.locationAccess {
+        case .denied:
+            noticeCard(
+                icon: "location.slash",
+                title: "Journey.Location.Denied.Title",
+                message: "Journey.Location.Denied.Message"
+            ) {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    Link("Button.OpenSettings", destination: url)
+                }
+            }
+        case .reduced where usesGPS:
+            noticeCard(
+                icon: "location.circle",
+                title: "Journey.Location.Reduced.Title",
+                message: "Journey.Location.Reduced.Message"
+            ) {
+                Button("Journey.Location.Reduced.Button") {
+                    session.requestFullAccuracy()
+                }
+            }
+        default:
+            EmptyView()
+        }
+    }
+
+    private func noticeCard(
+        icon: String,
+        title: LocalizedStringKey,
+        message: LocalizedStringKey,
+        @ViewBuilder action: () -> some View
+    ) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(.secondary)
+                .frame(width: 22)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                Text(message)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                action()
+                    .font(.footnote.weight(.semibold))
+                    .padding(.top, 2)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(14)
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     // MARK: - Manual Station Flipper (schedule-less journeys)

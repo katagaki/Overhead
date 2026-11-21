@@ -186,6 +186,18 @@ struct RootView: View {
         } message: {
             Text("Journey.Overwrite.ConfirmMessage")
         }
+        .alert(
+            viewModel.startFailure?.title ?? "",
+            isPresented: Binding(
+                get: { viewModel.startFailure != nil },
+                set: { if !$0 { viewModel.startFailure = nil } }
+            ),
+            presenting: viewModel.startFailure
+        ) { _ in
+            Button("Button.OK", role: .cancel) {}
+        } message: { failure in
+            Text(failure.message)
+        }
         .onChange(of: notificationsEnabled) { _, _ in
             viewModel.rescheduleNotifications()
         }

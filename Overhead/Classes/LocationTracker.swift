@@ -13,6 +13,13 @@ enum TrackingMode: String, Codable {
     case manual = "Manual"               // No schedule and no usable GPS — user flips stations
 }
 
+enum LocationAccess {
+    case undetermined
+    case denied
+    case reduced
+    case full
+}
+
 // MARK: - Location-Based Train Tracker
 
 final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelegate {
@@ -23,7 +30,7 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
     @Published var positionState: TrainPositionState?
     @Published var trackingMode: TrackingMode = .timetable
     @Published var isTracking = false
-    @Published var locationError: String?
+    @Published private(set) var locationAccess: LocationAccess = .undetermined
     // Live Activity updates depend on location keeping the app alive in the
     // background, so activity starts are gated on this.
     @Published var isLocationAuthorized = false
@@ -164,9 +171,15 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         case .authorizedWhenInUse, .authorizedAlways:
             beginGPSUpdates()
         default:
-            locationError = "\(String(localized: "LocationError.NotAuthorized"))"
             trackingMode = .timetable
         }
+    }
+
+    private static let fullAccuracyPurposeKey = "JourneyTracking"
+    private static var didRequestFullAccuracy = false
+
+    func requestFullAccuracy() {
+        locationManager.requestTemporaryFullAccuracyAuthorization(withPurposeKey: Self.fullAccuracyPurposeKey)
     }
 
     /// Syncs the location session to the journey mode; never stops in timetable mode, only drops to the keep-alive profile.
@@ -303,13 +316,15 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         switch manager.authorizationStatus {
         case .authorizedWhenInUse, .authorizedAlways:
             isLocationAuthorized = true
-            if journey != nil { beginGPSUpdates() }
+            locationAccess = manager.accuracyAuthorization == .reducedAccuracy ? .reduced : .full
+            if journey != nil, !gpsStarted { beginGPSUpdates() }
         case .denied, .restricted:
             isLocationAuthorized = false
-            locationError = "\(String(localized: "LocationError.NotAuthorized"))"
+            locationAccess = .denied
             trackingMode = .timetable
         default:
             isLocationAuthorized = false
+            locationAccess = .undetermined
         }
     }
 
@@ -329,7 +344,6 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         if let clError = error as? CLError, clError.code == .denied {
-            locationError = "\(String(localized: "LocationError.Denied"))"
             trackingMode = .timetable
         }
     }
@@ -767,7 +781,12 @@ final class LocationTracker: NSObject, ObservableObject, CLLocationManagerDelega
         applyAccuracyProfile()
         locationManager.startUpdatingLocation()
         gpsStarted = true
-        locationError = nil
+        if locationManager.accuracyAuthorization == .reducedAccuracy,
+           journeyMode == .gps || journeyMode == .hybrid,
+           !Self.didRequestFullAccuracy {
+            Self.didRequestFullAccuracy = true
+            requestFullAccuracy()
+        }
     }
 
     /// Precise fixes when GPS drives and something on screen shows it; coarse

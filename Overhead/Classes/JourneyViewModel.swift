@@ -5,6 +5,31 @@ import Backbone
 
 // MARK: - Journey View Model (Location-Driven)
 
+enum StartFailure: Equatable {
+    case noTimetable
+    case noTrain
+    case noMoreTrainsToday
+    case noRoute
+
+    var title: LocalizedStringKey {
+        switch self {
+        case .noTimetable: "Journey.StartFailed.NoTimetable.Title"
+        case .noTrain: "Journey.StartFailed.NoTrain.Title"
+        case .noMoreTrainsToday: "Journey.StartFailed.NoMoreTrains.Title"
+        case .noRoute: "Journey.StartFailed.NoRoute.Title"
+        }
+    }
+
+    var message: LocalizedStringKey {
+        switch self {
+        case .noTimetable: "Journey.StartFailed.NoTimetable.Message"
+        case .noTrain: "Journey.StartFailed.NoTrain.Message"
+        case .noMoreTrainsToday: "Journey.StartFailed.NoMoreTrains.Message"
+        case .noRoute: "Journey.StartFailed.NoRoute.Message"
+        }
+    }
+}
+
 @MainActor
 final class JourneyViewModel: ObservableObject {
 
@@ -18,7 +43,7 @@ final class JourneyViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var isStartingJourney = false
     @Published var showOverwriteConfirmation = false
-    @Published var errorMessage: String?
+    @Published var startFailure: StartFailure?
     @Published var railDirections: [String: (ja: String, en: String)] = [:]
     @Published var plannerFromRequest: StationSearchHit?
     @Published var plannerToRequest: StationSearchHit?
@@ -64,7 +89,7 @@ final class JourneyViewModel: ObservableObject {
     private func begin(_ session: JourneySession) {
         if let replaced = focusedSession { stopJourney(replaced) }
         sessions.append(session)
-        errorMessage = nil
+        startFailure = nil
         updatePiP()
     }
 
@@ -123,7 +148,6 @@ final class JourneyViewModel: ObservableObject {
 
         availableLines = StaticTrainData.trainLines()
         linesLoaded = true
-        errorMessage = nil
         loadRailDirections()
     }
 
@@ -161,7 +185,7 @@ final class JourneyViewModel: ObservableObject {
             fromStationId: boardingStation.id,
             toStationId: alightingStation.id
         ) else {
-            errorMessage = "No timetable data available"
+            startFailure = .noTimetable
             isStartingJourney = false
             return
         }
@@ -178,7 +202,7 @@ final class JourneyViewModel: ObservableObject {
         }
 
         guard let services = timetableCache[journeyStaticLine.id] else {
-            errorMessage = "No timetable data available"
+            startFailure = .noTimetable
             isStartingJourney = false
             return
         }
@@ -192,7 +216,8 @@ final class JourneyViewModel: ObservableObject {
         )
 
         guard let service else {
-            errorMessage = "No matching train found for this time"
+            let runsToday = !Self.services(services, from: boardingStation.id, to: alightingStation.id).isEmpty
+            startFailure = runsToday ? .noMoreTrainsToday : .noTrain
             isStartingJourney = false
             return
         }
@@ -1066,7 +1091,7 @@ final class JourneyViewModel: ObservableObject {
         guard let service = scheduled
             ?? CustomJourneyBuilder.untimedService(line: line, fromId: fromId, toId: toId)
         else {
-            errorMessage = "No matching train found for this time"
+            startFailure = .noTrain
             return
         }
         let journeyLine = line.trainLine
@@ -1139,7 +1164,7 @@ final class JourneyViewModel: ObservableObject {
         guard let candidate = departure.flatMap({ time in candidates.first { $0.departureTime == time } })
                 ?? candidates.first
         else {
-            errorMessage = "No matching train found for this time"
+            startFailure = .noTrain
             return
         }
         startJourney(candidate: candidate)
@@ -1224,6 +1249,15 @@ final class JourneyViewModel: ObservableObject {
 
     // MARK: - Train Matching
 
+    private static func services(_ services: [TrainService], from: String, to: String) -> [TrainService] {
+        services.filter { svc in
+            let stationIds = svc.timetable.map(\.stationId)
+            guard let fromIdx = stationIds.firstIndex(of: from),
+                  let toIdx = stationIds.firstIndex(of: to) else { return false }
+            return fromIdx < toIdx
+        }
+    }
+
     /// The next train from `from` to `to` on `day`; nil once the day's last one has gone.
     private func findBestService(
         services: [TrainService],
@@ -1233,15 +1267,7 @@ final class JourneyViewModel: ObservableObject {
     ) -> TrainService? {
         let nowSec = Self.minuteSeconds(day.railSeconds(at: date))
 
-        let candidates = services.filter { svc in
-            let stationIds = svc.timetable.map(\.stationId)
-            guard let fromIdx = stationIds.firstIndex(of: from),
-                  let toIdx = stationIds.firstIndex(of: to),
-                  fromIdx < toIdx else { return false }
-            return true
-        }
-
-        return candidates.compactMap { svc -> (TrainService, Int)? in
+        return Self.services(services, from: from, to: to).compactMap { svc -> (TrainService, Int)? in
             guard let entry = svc.timetable.first(where: { $0.stationId == from }),
                   let dep = entry.departureSeconds() else { return nil }
             return (svc, dep)

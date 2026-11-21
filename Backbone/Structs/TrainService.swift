@@ -55,6 +55,13 @@ public struct TrainService: Identifiable, Codable {
         case rapidLimitedExpress = "RapidLimitedExpress"
         case limitedExpress = "LimitedExpress"
         case commuterLimitedExpress = "CommuterLimitedExpress"
+        case other = "Other"
+
+        // A type added to the data after this build must not fail the whole line.
+        public init(from decoder: Decoder) throws {
+            let raw = try decoder.singleValueContainer().decode(String.self)
+            self = TrainType(rawValue: raw) ?? .other
+        }
 
         public var displayName: String { rawValue }
         public var displayNameJa: String {
@@ -75,6 +82,7 @@ public struct TrainService: Identifiable, Codable {
             case .rapidLimitedExpress: return "快特"
             case .limitedExpress: return "特急"
             case .commuterLimitedExpress: return "通勤特急"
+            case .other: return "列車"
             }
         }
 
@@ -96,6 +104,7 @@ public struct TrainService: Identifiable, Codable {
             case .rapidLimitedExpress: return "Rapid Ltd. Exp."
             case .limitedExpress: return "Limited Express"
             case .commuterLimitedExpress: return "Commuter Ltd. Exp."
+            case .other: return "Train"
             }
         }
 

@@ -599,6 +599,12 @@ public enum StaticTrainData {
         return built
     }
 
+    /// Downloaded folders whose Line.json this build cannot decode.
+    public static func undecodableFolders() -> Set<String> {
+        _ = loadedLines
+        return LineStore.failedFolders
+    }
+
     /// Folds freshly installed lines into the cache instead of dropping it, so
     /// installing one line does not re-read and re-decode every other one.
     public static func absorb(_ lines: [StaticTrainLine]) {
