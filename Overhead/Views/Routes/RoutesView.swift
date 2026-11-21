@@ -59,7 +59,6 @@ struct FavoritesSection: View {
 
     var body: some View {
         rail
-            .frame(height: places.isEmpty ? nil : cardHeight, alignment: .top)
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { railWidth = $0 }
             // Trim the 24pt section gap down to the planner's tighter rhythm.
             .padding(.bottom, -12)
@@ -122,6 +121,8 @@ struct FavoritesSection: View {
                         }
                         addTile
                     }
+                    // Equal-height cards that grow to fit their content.
+                    .fixedSize(horizontal: false, vertical: true)
                 }
             }
             .scrollClipDisabled()
@@ -158,7 +159,8 @@ struct FavoritesSection: View {
                 countdownLabel(for: place, at: date)
             }
             .padding(EdgeInsets(top: 12, leading: 12, bottom: 11, trailing: 12))
-            .frame(width: cardWidth, height: cardHeight, alignment: .topLeading)
+            .frame(width: cardWidth, alignment: .topLeading)
+            .frame(minHeight: cardHeight, maxHeight: .infinity, alignment: .topLeading)
             .glassEffect(.regular.interactive(), in: Self.cardShape)
             .contentShape(Rectangle())
         }
@@ -313,7 +315,8 @@ struct FavoritesSection: View {
                 .foregroundStyle(Color.accentColor)
             }
             .padding(EdgeInsets(top: 12, leading: 12, bottom: 11, trailing: 12))
-            .frame(width: cardWidth, height: cardHeight, alignment: .topLeading)
+            .frame(width: cardWidth, alignment: .topLeading)
+            .frame(minHeight: cardHeight, maxHeight: .infinity, alignment: .topLeading)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -348,7 +351,8 @@ struct FavoritesSection: View {
             Spacer(minLength: 0)
         }
         .padding(EdgeInsets(top: 12, leading: 12, bottom: 11, trailing: 12))
-        .frame(width: cardWidth, height: cardHeight, alignment: .topLeading)
+        .frame(width: cardWidth, alignment: .topLeading)
+        .frame(minHeight: cardHeight, maxHeight: .infinity, alignment: .topLeading)
         .glassEffect(.regular, in: Self.cardShape)
         .accessibilityElement(children: .combine)
         .matchedTransitionSource(id: EditorTarget.edit(place).id, in: editorZoom)
@@ -364,7 +368,8 @@ struct FavoritesSection: View {
             Image(systemName: "plus")
                 .scaledFont(size: 20, weight: .medium)
                 .foregroundStyle(.secondary)
-                .frame(width: cardWidth, height: cardHeight)
+                .frame(width: cardWidth)
+                .frame(minHeight: cardHeight, maxHeight: .infinity)
                 .background(dashedOutline)
                 .contentShape(Rectangle())
         }
