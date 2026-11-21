@@ -649,15 +649,21 @@ struct RootView: View {
         case .line(let lineId):
             if let line = viewModel.availableLines.first(where: { $0.id == lineId }) {
                 StationPickerView(line: line, viewModel: viewModel)
+            } else {
+                lineUnavailableView
             }
         case .station(let lineId, let stationId):
             if let line = viewModel.availableLines.first(where: { $0.id == lineId }),
                let station = line.stations.first(where: { $0.id == stationId }) {
                 StationTimetableView(station: station, line: line, viewModel: viewModel)
+            } else {
+                lineUnavailableView
             }
         case .serviceStatus(let lineId):
             if let delayInfo = viewModel.delayCheckInfo(for: lineId) {
                 ServiceStatusView(lineId: lineId, delayInfo: delayInfo)
+            } else {
+                lineUnavailableView
             }
         case .stationWithDirection(let lineId, let stationId, let directionId):
             if let line = viewModel.availableLines.first(where: { $0.id == lineId }),
@@ -668,7 +674,28 @@ struct RootView: View {
                     preferredDirectionId: directionId,
                     viewModel: viewModel
                 )
+            } else {
+                lineUnavailableView
             }
+        }
+    }
+
+    @ViewBuilder
+    private var lineUnavailableView: some View {
+        if viewModel.linesLoaded {
+            ContentUnavailableView {
+                Label("LineUnavailable.Title", systemImage: "tram")
+            } description: {
+                Text("LineUnavailable.Description")
+            } actions: {
+                Button("LineUnavailable.OpenLineData") {
+                    tabStore.push(AppMenuDestination.lineData)
+                }
+                .buttonStyle(.borderedProminent)
+            }
+        } else {
+            ProgressView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 

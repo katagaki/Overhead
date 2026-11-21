@@ -59,7 +59,7 @@ final class JourneyViewModel: ObservableObject {
     private var timetableCache: [TimetableKey: [TrainService]] = [:]
     private var timetableCacheOrder: [TimetableKey] = []
     private static let timetableCacheLimit = 16
-    private var linesLoaded = false
+    @Published private(set) var linesLoaded = false
 
     private var pendingStart: (() -> Void)?
 
