@@ -263,9 +263,23 @@ final class CustomLineStore: ObservableObject {
         persist()
     }
 
-    /// Adds imported lines, replacing any with a matching id.
+    /// Adds imported lines; one whose id is taken (or isn't a custom id) is added as a new line, never replacing the user's.
     func importLines(_ imported: [CustomLine]) {
-        for line in imported { upsert(line) }
+        for var line in imported {
+            let takenStationIds = Set(lines.flatMap { $0.stations.map(\.id) })
+            if !line.id.hasPrefix(CustomLine.idPrefix) || lines.contains(where: { $0.id == line.id }) {
+                line.id = CustomLine.new().id
+                for index in line.stations.indices {
+                    line.stations[index].id = CustomStation.new().id
+                }
+            }
+            for index in line.stations.indices
+            where !line.stations[index].id.hasPrefix(CustomLine.idPrefix)
+                || takenStationIds.contains(line.stations[index].id) {
+                line.stations[index].id = CustomStation.new().id
+            }
+            upsert(line)
+        }
     }
 
     // MARK: Export / import documents

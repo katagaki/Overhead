@@ -2672,31 +2672,31 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld lines already exist and will be replaced."
+            "value" : "%lld lines already exist. The imported lines will be added as separate lines."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld件の路線が既にあり、置き換えられます。"
+            "value" : "%lld件の路線が既にあります。取り込む路線は別の路線として追加されます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "노선 %lld개가 이미 있어 대체됩니다."
+            "value" : "노선 %lld개가 이미 있습니다. 가져온 노선은 별도의 노선으로 추가됩니다."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld条线路已存在，将被替换。"
+            "value" : "%lld条线路已存在。导入的线路将作为单独的线路添加。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld條路線已存在，將被取代。"
+            "value" : "%lld條路線已存在。匯入的路線將作為另一條路線加入。"
           }
         }
       }
@@ -2707,31 +2707,31 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\"%@\" already exists and will be replaced."
+            "value" : "\"%@\" already exists. The imported line will be added as a separate line."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "「%@」は既にあります。取り込むと置き換えられます。"
+            "value" : "「%@」は既にあります。取り込む路線は別の路線として追加されます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\"%@\"은(는) 이미 있습니다. 가져오면 대체됩니다."
+            "value" : "\"%@\"은(는) 이미 있습니다. 가져온 노선은 별도의 노선으로 추가됩니다."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\"%@\"已存在，导入后将被替换。"
+            "value" : "\"%@\"已存在。导入的线路将作为单独的线路添加。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "「%@」已存在，匯入後將被取代。"
+            "value" : "「%@」已存在。匯入的路線將作為另一條路線加入。"
           }
         }
       }
