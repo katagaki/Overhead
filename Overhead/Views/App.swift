@@ -19,6 +19,7 @@ struct OverheadApp: App {
     var body: some Scene {
         WindowGroup {
             RootView(viewModel: viewModel)
+                .reducedMotionRoot()
                 .onOpenURL { url in
                     handleDeepLink(url)
                 }

@@ -11,6 +11,8 @@ struct TsukubaExpressLCDView: View {
     let lineColor: Color
     let orientation: TrainLCDOrientation
 
+    @Environment(\.motionReduced) private var reduceMotion
+
     private static let designWidth: CGFloat = 360
     private static let designHeight: CGFloat = 76
     private static let maxUpcomingStops = 7
@@ -42,7 +44,7 @@ struct TsukubaExpressLCDView: View {
         LCDTimeline(every: 0.5) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
-                let language = LCDLanguageRotation.current(at: context.date)
+                let language = context.language
                 strip(now: context.date, language: language)
                     .frame(width: Self.designWidth, height: Self.designHeight)
                     .scaleEffect(scale, anchor: .topLeading)
@@ -55,7 +57,7 @@ struct TsukubaExpressLCDView: View {
 
     private func strip(now: Date, language: TrainLCDLanguage) -> some View {
         let (columns, markerSlot) = stops(now: now)
-        let markerTint = Int(now.timeIntervalSinceReferenceDate * 2) % 2 == 0
+        let markerTint = reduceMotion || Int(now.timeIntervalSinceReferenceDate * 2) % 2 == 0
             ? Self.markerYellow : Self.markerNavy
         let usable = Self.designWidth - Self.gutter - Self.leadIn - Self.trailTail - 8
         let colWidth = usable / CGFloat(max(columns.count, 1))

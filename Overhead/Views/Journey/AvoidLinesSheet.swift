@@ -2,7 +2,7 @@ import SwiftUI
 import Backbone
 
 /// Sheet for the 路線を避ける customization: tick the lines the route search must not use.
-/// Browsing, searching and the row plates follow `SearchSheet`, minus stations.
+/// Browsing, searching and the row plates follow `CatalogSearchView`, minus stations.
 struct AvoidLinesSheet: View {
     let lines: [TrainLine]
     @Binding var avoidedLineIds: Set<String>

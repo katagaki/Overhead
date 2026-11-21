@@ -30,6 +30,10 @@ struct RouteSetupCard: View {
     private var notificationLeadMinutes = JourneyNotificationManager.defaultLeadMinutes
     @AppStorage(NotificationSound.storageKey) private var notificationSound = NotificationSound.system
     @State private var pickerTarget: PickerTarget?
+    @ScaledMetric(relativeTo: .caption2) private var tagWidth: CGFloat = 44
+    @ScaledMetric(relativeTo: .caption2) private var tagHeight: CGFloat = 22
+    @ScaledMetric(relativeTo: .subheadline) private var roundButtonSize: CGFloat = 36
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var notificationsDenied = false
     @Environment(\.scenePhase) private var scenePhase
     @State private var showAvoidLinesSheet = false
@@ -123,58 +127,80 @@ struct RouteSetupCard: View {
         }
     }
 
+    @ViewBuilder
     private var stationRows: some View {
-        HStack(spacing: 12) {
-            VStack(spacing: 0) {
-                stationField(label: "Setup.From", selection: fromSelection) {
-                    pickerTarget = .from
-                }
-
-                ForEach(Array(viaSelections.enumerated()), id: \.offset) { index, via in
-                    fieldDivider
-                    viaField(index: index, selection: via)
-                }
-
-                fieldDivider
-
-                stationField(label: "Setup.To", selection: toSelection) {
-                    pickerTarget = .to
+        if dynamicTypeSize.isAccessibilitySize {
+            VStack(alignment: .trailing, spacing: 10) {
+                stationFields
+                HStack(spacing: 10) {
+                    swapButton
+                    addViaButton
                 }
             }
-
-            VStack(spacing: 10) {
-                Button {
-                    let from = fromSelection
-                    fromSelection = toSelection
-                    toSelection = from
-                    viaSelections.reverse()
-                    onStationsChanged()
-                } label: {
-                    Image(systemName: "arrow.up.arrow.down")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(fromSelection != nil || toSelection != nil ? .accentColor : .secondary)
-                        .frame(width: 36, height: 36)
-                        .background(Color(.tertiarySystemFill))
-                        .clipShape(Circle())
+            .padding(14)
+        } else {
+            HStack(spacing: 12) {
+                stationFields
+                VStack(spacing: 10) {
+                    swapButton
+                    addViaButton
                 }
-                .accessibilityLabel("Setup.Swap")
-                .disabled(fromSelection == nil && toSelection == nil)
+            }
+            .padding(14)
+        }
+    }
 
-                Button {
-                    pickerTarget = .addVia
-                } label: {
-                    Image(systemName: "plus")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(viaSelections.count < Self.maxViaCount ? .accentColor : .secondary)
-                        .frame(width: 36, height: 36)
-                        .background(Color(.tertiarySystemFill))
-                        .clipShape(Circle())
-                }
-                .accessibilityLabel("Setup.AddVia")
-                .disabled(viaSelections.count >= Self.maxViaCount)
+    private var stationFields: some View {
+        VStack(spacing: 0) {
+            stationField(label: "Setup.From", selection: fromSelection) {
+                pickerTarget = .from
+            }
+
+            ForEach(Array(viaSelections.enumerated()), id: \.offset) { index, via in
+                fieldDivider
+                viaField(index: index, selection: via)
+            }
+
+            fieldDivider
+
+            stationField(label: "Setup.To", selection: toSelection) {
+                pickerTarget = .to
             }
         }
-        .padding(14)
+    }
+
+    private var swapButton: some View {
+        Button {
+            let from = fromSelection
+            fromSelection = toSelection
+            toSelection = from
+            viaSelections.reverse()
+            onStationsChanged()
+        } label: {
+            Image(systemName: "arrow.up.arrow.down")
+                .scaledFont(size: 15, weight: .semibold)
+                .foregroundColor(fromSelection != nil || toSelection != nil ? .accentColor : .secondary)
+                .frame(width: roundButtonSize, height: roundButtonSize)
+                .background(Color(.tertiarySystemFill))
+                .clipShape(Circle())
+        }
+        .accessibilityLabel("Setup.Swap")
+        .disabled(fromSelection == nil && toSelection == nil)
+    }
+
+    private var addViaButton: some View {
+        Button {
+            pickerTarget = .addVia
+        } label: {
+            Image(systemName: "plus")
+                .scaledFont(size: 15, weight: .semibold)
+                .foregroundColor(viaSelections.count < Self.maxViaCount ? .accentColor : .secondary)
+                .frame(width: roundButtonSize, height: roundButtonSize)
+                .background(Color(.tertiarySystemFill))
+                .clipShape(Circle())
+        }
+        .accessibilityLabel("Setup.AddVia")
+        .disabled(viaSelections.count >= Self.maxViaCount)
     }
 
     @ViewBuilder
@@ -183,20 +209,11 @@ struct RouteSetupCard: View {
             Button {
                 pickerTarget = .via(index)
             } label: {
-                HStack(spacing: 10) {
-                    Text("Setup.Via")
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.secondary)
-                        .frame(width: 44, height: 22)
-                        .background(Color(.tertiarySystemFill))
-                        .clipShape(RoundedRectangle(cornerRadius: 6))
-
+                fieldRow(label: "Setup.Via") {
                     Text(selection.station.localizedName)
-                        .font(.system(size: 17, weight: .semibold))
+                        .scaledFont(size: 17, weight: .semibold)
                         .foregroundColor(.primary)
-                        .lineLimit(1)
-
-                    Spacer(minLength: 0)
+                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? 2 : 1)
                 }
                 .padding(.vertical, 10)
                 .contentShape(Rectangle())
@@ -208,7 +225,7 @@ struct RouteSetupCard: View {
                 onStationsChanged()
             } label: {
                 Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 18))
+                    .scaledFont(size: 18)
                     .foregroundColor(Color(.tertiaryLabel))
             }
             .buttonStyle(.plain)
@@ -223,33 +240,48 @@ struct RouteSetupCard: View {
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
-            HStack(spacing: 10) {
-                Text(label)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.secondary)
-                    .frame(width: 44, height: 22)
-                    .background(Color(.tertiarySystemFill))
-                    .clipShape(RoundedRectangle(cornerRadius: 6))
-
+            fieldRow(label: label) {
                 if let selection {
                     endpointLabel(selection)
-                        .font(.system(size: 17, weight: .semibold))
+                        .scaledFont(size: 17, weight: .semibold)
                         .foregroundColor(.primary)
-                        .lineLimit(1)
+                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? 2 : 1)
                         .id(selection.id)
                         .transition(.scale(0.9, anchor: .leading).combined(with: .blurReplace))
                 } else {
                     Text("Setup.SelectStation")
-                        .font(.system(size: 16))
+                        .scaledFont(size: 16)
                         .foregroundColor(Color(.tertiaryLabel))
                 }
-
-                Spacer(minLength: 0)
             }
             .padding(.vertical, 10)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+    }
+
+    /// Label chip beside the value; above it at accessibility sizes so the value keeps the full row.
+    @ViewBuilder
+    private func fieldRow(label: LocalizedStringKey, @ViewBuilder value: () -> some View) -> some View {
+        let chip = Text(label)
+            .scaledFont(size: 11, weight: .medium)
+            .foregroundColor(.secondary)
+            .frame(width: tagWidth, height: tagHeight)
+            .background(Color(.tertiarySystemFill))
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+        if dynamicTypeSize.isAccessibilitySize {
+            VStack(alignment: .leading, spacing: 6) {
+                chip
+                value()
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        } else {
+            HStack(spacing: 10) {
+                chip
+                value()
+                Spacer(minLength: 0)
+            }
+        }
     }
 
     @ViewBuilder
@@ -266,7 +298,17 @@ struct RouteSetupCard: View {
         }
     }
 
+    @ViewBuilder
     private var fieldDivider: some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            Divider()
+                .padding(.vertical, 4)
+        } else {
+            dottedDivider
+        }
+    }
+
+    private var dottedDivider: some View {
         HStack(spacing: 10) {
             VStack(spacing: 2) {
                 ForEach(0..<3, id: \.self) { _ in
@@ -275,7 +317,7 @@ struct RouteSetupCard: View {
                         .frame(width: 2.5, height: 2.5)
                 }
             }
-            .frame(width: 44)
+            .frame(width: tagWidth)
 
             VStack { Divider() }
         }
@@ -497,7 +539,7 @@ private struct EndpointLabelStyle: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack(spacing: 5) {
             configuration.icon
-                .font(.system(size: 13, weight: .semibold))
+                .scaledFont(size: 13, weight: .semibold)
                 .foregroundColor(.accentColor)
             configuration.title
         }
@@ -516,6 +558,15 @@ struct CustomizationItem: View {
     static let rowInset: CGFloat = 20
     static let minWidth: CGFloat = 64
     static let maxWidth: CGFloat = 82
+    private static let circleSize: CGFloat = 56
+
+    @ScaledMetric(relativeTo: .title3) private var circleSize: CGFloat = Self.circleSize
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    /// Capped at accessibility sizes, like the label, so the row stays a row.
+    private var shownCircleSize: CGFloat {
+        dynamicTypeSize.isAccessibilitySize ? min(circleSize, Self.circleSize * 1.7) : circleSize
+    }
 
     enum IconSource {
         case system
@@ -523,6 +574,27 @@ struct CustomizationItem: View {
     }
 
     var body: some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            // One unbroken line per label; the row scrolls, so the item widens instead.
+            content(labelLines: 1)
+                .fixedSize()
+                .frame(minWidth: shownCircleSize)
+                .padding(.horizontal, 6)
+                .contentShape(Rectangle())
+                .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+        } else {
+            content(labelLines: 2)
+                // Sized so a 5th item peeks in when the row overflows; grows with the text.
+                .containerRelativeFrame(.horizontal) { length, _ in
+                    let growth = circleSize / Self.circleSize
+                    let usable = length - Self.rowInset - Self.spacing * 4
+                    return min(Self.maxWidth * growth, max(Self.minWidth * growth, usable / 4.5))
+                }
+                .contentShape(Rectangle())
+        }
+    }
+
+    private func content(labelLines: Int) -> some View {
         VStack(spacing: 6) {
             ZStack {
                 Circle()
@@ -530,26 +602,20 @@ struct CustomizationItem: View {
                 switch iconSource {
                 case .system:
                     Image(systemName: icon)
-                        .font(.system(size: 20, weight: .semibold))
+                        .scaledFont(size: 20, weight: .semibold)
                 case .asset:
                     Image(icon)
-                        .font(.system(size: 20, weight: .semibold))
+                        .scaledFont(size: 20, weight: .semibold)
                 }
             }
             .foregroundColor(active ? .white : .primary)
-            .frame(width: 56, height: 56)
+            .frame(width: shownCircleSize, height: shownCircleSize)
 
             Text(label)
-                .font(.system(size: 11, weight: .medium))
+                .scaledFont(size: 11, weight: .medium)
                 .foregroundColor(.secondary)
-                .lineLimit(2)
+                .lineLimit(labelLines)
                 .multilineTextAlignment(.center)
         }
-        // Sized so a 5th item peeks in when the row overflows.
-        .containerRelativeFrame(.horizontal) { length, _ in
-            let usable = length - Self.rowInset - Self.spacing * 4
-            return min(Self.maxWidth, max(Self.minWidth, usable / 4.5))
-        }
-        .contentShape(Rectangle())
     }
 }

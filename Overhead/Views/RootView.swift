@@ -839,6 +839,9 @@ struct RootView: View {
         case .placeEditor(let editFirst):
             try? await Task.sleep(for: .seconds(0.5))
             ScreenshotStaging.shared.placeEditorCommand = editFirst ? .editFirst : .new
+        case .lineDataOnboarding:
+            try? await Task.sleep(for: .seconds(1))
+            showLineDataOnboarding = true
         case .dismissSheet:
             try? await Task.sleep(for: .seconds(1.5))
             let tabID = tabStore.selectedTabID

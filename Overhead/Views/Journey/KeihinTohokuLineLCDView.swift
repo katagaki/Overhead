@@ -25,7 +25,7 @@ struct KeihinTohokuLineLCDView: View {
         LCDTimeline(every: 0.5) { context in
             GeometryReader { geo in
                 let scale = geo.size.width / Self.designWidth
-                let language = LCDLanguageRotation.current(at: context.date)
+                let language = context.language
                 VStack(spacing: 0) {
                     header(language: language)
                         .frame(height: Self.headerHeight)

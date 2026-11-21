@@ -51,6 +51,10 @@ struct ShinkansenTickerView: View {
         return LCDTimeline(animationInterval: 1.0 / 30.0) { context in
             Canvas { ctx, size in
                 ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Color(hex: "#050505")))
+                if context.reduceMotion {
+                    drawStaticPage(ctx, size: size, segments: segments, at: context.date)
+                    return
+                }
                 let resolved = segments.map { segment in
                     ctx.resolve(
                         Text(verbatim: segment.text)
@@ -78,6 +82,28 @@ struct ShinkansenTickerView: View {
                 .strokeBorder(Color(hex: "#43474D"), lineWidth: 2)
         )
         .clipShape(RoundedRectangle(cornerRadius: 4))
+    }
+
+    private func drawStaticPage(_ ctx: GraphicsContext, size: CGSize, segments: [Segment], at date: Date) {
+        func resolve(_ run: LCDTextPaging.Run) -> GraphicsContext.ResolvedText {
+            ctx.resolve(
+                Text(verbatim: run.text)
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(segments[run.style].color)
+            )
+        }
+        let runs = segments.enumerated().map { LCDTextPaging.Run(text: $0.element.text, style: $0.offset) }
+        let pages = LCDTextPaging.pages(runs, width: size.width - 8) {
+            resolve($0).measure(in: CGSize(width: .greatestFiniteMagnitude, height: size.height)).width
+        }
+        guard !pages.isEmpty else { return }
+        let index = Int(date.timeIntervalSinceReferenceDate / LCDTextPaging.pageSeconds) % pages.count
+        var x: CGFloat = 4
+        for run in pages[index] {
+            let text = resolve(run)
+            ctx.draw(text, at: CGPoint(x: x, y: size.height / 2), anchor: .leading)
+            x += text.measure(in: CGSize(width: .greatestFiniteMagnitude, height: size.height)).width
+        }
     }
 
     // MARK: - Message

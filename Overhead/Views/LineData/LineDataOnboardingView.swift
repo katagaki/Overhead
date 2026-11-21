@@ -104,6 +104,7 @@ struct LineDataBadgeWall: View {
     /// Where a hidden plate sits: left before it comes in, right after it
     /// leaves, so the wall reads as one pass across the panel.
     @State private var hiddenOffset: CGFloat = -travel
+    @Environment(\.motionReduced) private var reduceMotion
 
     /// Station guide-sign yellow, the ground these plates hang on.
     private static let panelYellow = Color(hex: "#FFD400")
@@ -188,9 +189,9 @@ struct LineDataBadgeWall: View {
                         }
                         // Not quite zero: a fully clear layer is skipped
                         // outright, and the work lands on the first frame in.
-                        .opacity(revealed ? 1 : 0.01)
-                        .offset(x: revealed ? 0 : hiddenOffset)
-                        .animation(.easeOut(duration: revealed ? Self.fadeIn : Self.fadeOut)
+                        .opacity(revealed || reduceMotion ? 1 : 0.01)
+                        .offset(x: revealed || reduceMotion ? 0 : hiddenOffset)
+                        .animation(reduceMotion ? nil : .easeOut(duration: revealed ? Self.fadeIn : Self.fadeOut)
                             .delay(Self.delay(slot: index)),
                                    value: revealed)
                     }
@@ -199,14 +200,14 @@ struct LineDataBadgeWall: View {
                 .padding(.horizontal, 20)
             }
         }
-        .animation(.easeInOut(duration: 0.25), value: lines.isEmpty)
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.25), value: lines.isEmpty)
         .frame(maxWidth: .infinity)
         .frame(height: panelHeight)
         // The plates are drawn for signage: the panel behind them stays the
         // same yellow in either theme, and runs to both edges of the sheet.
         .background(Self.panelYellow)
         .accessibilityHidden(true)
-        .task(id: styleCount) { await rotate() }
+        .task(id: "\(styleCount)|\(reduceMotion)") { await rotate() }
     }
 
     /// Deal a wall, hold it, sweep it out, deal the next one. The deal always
@@ -215,6 +216,10 @@ struct LineDataBadgeWall: View {
     private func rotate() async {
         let out = Self.sweep(Self.fadeOut)
         lines = Self.sample()
+        guard !reduceMotion else {
+            revealed = true
+            return
+        }
         hiddenOffset = -Self.travel
         try? await Task.sleep(for: Self.warmup)
         guard !Task.isCancelled else { return }

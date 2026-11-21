@@ -56,10 +56,11 @@ struct TubeLCDView: View {
         LCDTimeline(animationInterval: 1.0 / 30.0) { context in
             Canvas { ctx, _ in
                 guard !pages.isEmpty else { return }
-                let (page, columnOffset) = frame(at: context.date, pages: pages)
+                let (page, columnOffset, shown) = frame(at: context.date, pages: pages,
+                                                        reduceMotion: context.reduceMotion)
                 for col in 0..<Self.gridColumns {
                     let sourceColumn = col + columnOffset
-                    guard sourceColumn >= 0, sourceColumn < page.raster.width else { continue }
+                    guard shown.contains(sourceColumn) else { continue }
                     for row in 0..<Self.gridRows where page.raster.isOn(column: sourceColumn, row: row) {
                         ctx.fill(
                             Path(ellipseIn: Self.dotRect(col: col, row: row)),
@@ -81,27 +82,40 @@ struct TubeLCDView: View {
 
     // MARK: - Page Cycle
 
-    private func frame(at date: Date, pages: [TubePage]) -> (TubePage, Int) {
-        let cycle = pages.reduce(0) { $0 + duration(of: $1) }
+    private func frame(at date: Date, pages: [TubePage], reduceMotion: Bool) -> (TubePage, Int, Range<Int>) {
+        let cycle = pages.reduce(0) { $0 + duration(of: $1, reduceMotion: reduceMotion) }
         var t = date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: cycle)
         for page in pages {
-            let d = duration(of: page)
+            let d = duration(of: page, reduceMotion: reduceMotion)
             if t < d {
+                let all = 0..<page.raster.width
+                if page.scrolls && reduceMotion {
+                    let windows = staticWindows(of: page)
+                    let window = windows[min(Int(t / Self.staticPageSeconds), windows.count - 1)]
+                    return (page, window.lowerBound - (Self.gridColumns - window.count) / 2, window)
+                }
                 if page.scrolls {
                     let travelled = Int(t * Self.scrollDotsPerSecond)
-                    return (page, travelled - Self.gridColumns)
+                    return (page, travelled - Self.gridColumns, all)
                 }
-                return (page, -(Self.gridColumns - page.raster.width) / 2)
+                return (page, -(Self.gridColumns - page.raster.width) / 2, all)
             }
             t -= d
         }
-        return (pages[0], 0)
+        return (pages[0], 0, 0..<pages[0].raster.width)
     }
 
-    private func duration(of page: TubePage) -> Double {
-        page.scrolls
-            ? Double(page.raster.width + Self.gridColumns) / Self.scrollDotsPerSecond
-            : Self.staticPageSeconds
+    private func duration(of page: TubePage, reduceMotion: Bool) -> Double {
+        guard page.scrolls else { return Self.staticPageSeconds }
+        return reduceMotion
+            ? Double(staticWindows(of: page).count) * Self.staticPageSeconds
+            : Double(page.raster.width + Self.gridColumns) / Self.scrollDotsPerSecond
+    }
+
+    private func staticWindows(of page: TubePage) -> [Range<Int>] {
+        LCDRasterPaging.windows(width: page.raster.width, visible: Self.gridColumns) { column in
+            (0..<Self.gridRows).allSatisfy { !page.raster.isOn(column: column, row: $0) }
+        }
     }
 
     // MARK: - Messages

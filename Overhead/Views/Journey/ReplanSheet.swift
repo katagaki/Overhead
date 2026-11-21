@@ -152,7 +152,7 @@ struct ReplanSheet: View {
                             }
                             VStack(alignment: .leading, spacing: 1) {
                                 Text(candidate.station.localizedName)
-                                    .font(.system(size: 15, weight: .bold))
+                                    .scaledFont(size: 15, weight: .bold)
                                     .lineLimit(1)
                                 Group {
                                     if candidate.isPast {
@@ -163,7 +163,7 @@ struct ReplanSheet: View {
                                         Text(verbatim: timeString(candidate.time))
                                     }
                                 }
-                                .font(.system(size: 11, weight: .semibold))
+                                .scaledFont(size: 11, weight: .semibold)
                                 .foregroundStyle(isSelected ? .white.opacity(0.8) : .secondary)
                             }
                         }
@@ -193,12 +193,12 @@ struct ReplanSheet: View {
                 HStack {
                     ProgressView()
                     Text("Replan.Searching")
-                        .font(.system(size: 13))
+                        .scaledFont(size: 13)
                         .foregroundStyle(.secondary)
                 }
             } else if candidates.isEmpty {
                 Text("Replan.NoAlternatives")
-                    .font(.system(size: 13))
+                    .scaledFont(size: 13)
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(candidates) { candidate in
@@ -220,21 +220,22 @@ struct ReplanSheet: View {
         } label: {
             HStack(spacing: 10) {
                 VStack(alignment: .leading, spacing: 3) {
-                    HStack(spacing: 8) {
+                    WrappingRow(spacing: 8) {
                         Text("\(displayTime(candidate.departureTime)) → \(displayTime(candidate.arrivalTime))")
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .scaledFont(size: 16, weight: .bold, design: .rounded)
                         deltaPill(for: candidate.arrivalDate)
                     }
 
-                    HStack(spacing: 6) {
+                    WrappingRow(spacing: 6) {
                         if let leg = candidate.legs.first {
                             Text(leg.service.trainType.localizedDisplayName)
-                                .font(.system(size: 10, weight: .bold))
+                                .scaledFont(size: 10, weight: .bold)
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
                                 .background(leg.line.color)
                                 .clipShape(RoundedRectangle(cornerRadius: 4))
+                                .fixedSize()
                         }
                         Group {
                             Text("Candidate.Duration \(candidate.durationMinutes)")
@@ -242,7 +243,7 @@ struct ReplanSheet: View {
                                 Text("Candidate.Transfers \(candidate.transferCount)")
                             }
                         }
-                        .font(.system(size: 11))
+                        .scaledFont(size: 11)
                         .foregroundStyle(.secondary)
                     }
                 }
@@ -251,7 +252,7 @@ struct ReplanSheet: View {
 
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 24))
+                        .scaledFont(size: 24)
                         .foregroundStyle(Color.accentColor)
                 }
             }
@@ -291,12 +292,12 @@ struct ReplanSheet: View {
                         HStack {
                             ProgressView()
                             Text("Replan.Searching")
-                                .font(.system(size: 13))
+                                .scaledFont(size: 13)
                                 .foregroundStyle(.secondary)
                         }
                     } else if candidates.isEmpty {
                         Text("Replan.NoRoute \(offRouteDestination.localizedName)")
-                            .font(.system(size: 13))
+                            .scaledFont(size: 13)
                             .foregroundStyle(.secondary)
                     } else {
                         ForEach(candidates) { candidate in
@@ -320,13 +321,13 @@ struct ReplanSheet: View {
         } label: {
             HStack(spacing: 10) {
                 VStack(alignment: .leading, spacing: 3) {
-                    HStack(spacing: 8) {
+                    WrappingRow(spacing: 8) {
                         Text(stop.station.localizedName)
-                            .font(.system(size: 16, weight: .semibold))
+                            .scaledFont(size: 16, weight: .semibold)
                         deltaPill(for: stop.time)
                     }
                     Text(verbatim: timeString(stop.time))
-                        .font(.system(size: 11, design: .rounded))
+                        .scaledFont(size: 11, design: .rounded)
                         .foregroundStyle(.secondary)
                 }
 
@@ -334,7 +335,7 @@ struct ReplanSheet: View {
 
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 24))
+                        .scaledFont(size: 24)
                         .foregroundStyle(Color.accentColor)
                 }
             }
@@ -366,7 +367,7 @@ struct ReplanSheet: View {
             dismiss()
         } label: {
             Text("Replan.Apply")
-                .font(.system(size: 16, weight: .bold))
+                .scaledFont(size: 16, weight: .bold)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
         }
@@ -447,11 +448,12 @@ struct ReplanSheet: View {
                 Text("Replan.Delta.Same")
             }
         }
-        .font(.system(size: 11, weight: .bold, design: .rounded))
+        .scaledFont(size: 11, weight: .bold, design: .rounded)
         .foregroundStyle(deltaColor(delta))
         .padding(.horizontal, 7)
         .padding(.vertical, 2)
         .background(deltaColor(delta).opacity(0.15), in: Capsule())
+        .fixedSize()
     }
 
     private func deltaColor(_ minutes: Int) -> Color {
