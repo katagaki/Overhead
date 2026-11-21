@@ -5,13 +5,20 @@ import Backbone
 
 enum CustomJourneyBuilder {
 
+    enum ScheduledLookup {
+        case service(TrainService)
+        case noMoreTrainsToday
+        case unscheduled
+    }
+
     private static func travelPlan(
         line: CustomLine, fromId: String, toId: String
     ) -> (stations: [Station], hops: [Double])? {
         let stations = line.backboneStations()
         guard let fromIdx = stations.firstIndex(where: { $0.id == fromId }),
               let toIdx = stations.firstIndex(where: { $0.id == toId }),
-              fromIdx != toIdx else { return nil }
+              fromIdx != toIdx,
+              line.hopMinutes.count >= max(fromIdx, toIdx) else { return nil }
 
         if fromIdx < toIdx {
             let slice = Array(stations[fromIdx...toIdx])
@@ -26,23 +33,25 @@ enum CustomJourneyBuilder {
 
     static func scheduledService(
         line: CustomLine, fromId: String, toId: String, at date: Date = RailClock.now
-    ) -> TrainService? {
+    ) -> ScheduledLookup {
         guard let timetable = line.timetable,
-              let plan = travelPlan(line: line, fromId: fromId, toId: toId)
-        else { return nil }
+              let plan = travelPlan(line: line, fromId: fromId, toId: toId),
+              plan.hops.allSatisfy(CustomLine.isValidHop)
+        else { return .unscheduled }
 
         let calendar = ScheduleCalendar.current(at: date)
         let pattern = timetable.pattern(for: calendar)
-        guard let first = parseMinutes(pattern.firstDeparture),
-              let last = parseMinutes(pattern.lastDeparture),
-              pattern.headwayMinutes > 0
-        else { return nil }
+        guard let first = CustomLine.railMinutes(pattern.firstDeparture),
+              let last = CustomLine.railMinutes(pattern.lastDeparture),
+              CustomLine.headwayRange.contains(pattern.headwayMinutes)
+        else { return .unscheduled }
 
         let nowMin = jstMinutes(from: date)
         var departure = first
         if nowMin > first {
             let steps = Int(ceil(Double(nowMin - first) / Double(pattern.headwayMinutes)))
-            departure = min(first + steps * pattern.headwayMinutes, last)
+            departure = first + steps * pattern.headwayMinutes
+            guard departure <= last else { return .noMoreTrainsToday }
         }
 
         var offsets: [Int] = [0]
@@ -64,14 +73,14 @@ enum CustomJourneyBuilder {
             )
         }
 
-        return TrainService(
+        return .service(TrainService(
             id: serviceId,
             lineId: line.id,
             trainType: .local,
             direction: .outbound,
             timetable: entries,
             destinationStationId: toId
-        )
+        ))
     }
 
     static func untimedService(line: CustomLine, fromId: String, toId: String) -> TrainService? {
@@ -96,12 +105,6 @@ enum CustomJourneyBuilder {
     }
 
     // MARK: Helpers
-
-    private static func parseMinutes(_ hhmm: String) -> Int? {
-        let parts = hhmm.split(separator: ":")
-        guard parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]) else { return nil }
-        return h * 60 + m
-    }
 
     private static func railTimeString(_ minutes: Int) -> String {
         String(format: "%02d:%02d", minutes / 60, minutes % 60)

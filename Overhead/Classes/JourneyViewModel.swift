@@ -1111,7 +1111,14 @@ final class JourneyViewModel: ObservableObject {
     }
 
     private func performStartCustomJourney(line: CustomLine, fromId: String, toId: String) {
-        let scheduled = CustomJourneyBuilder.scheduledService(line: line, fromId: fromId, toId: toId)
+        var scheduled: TrainService?
+        switch CustomJourneyBuilder.scheduledService(line: line, fromId: fromId, toId: toId) {
+        case .service(let service): scheduled = service
+        case .noMoreTrainsToday:
+            startFailure = .noMoreTrainsToday
+            return
+        case .unscheduled: scheduled = nil
+        }
         guard let service = scheduled
             ?? CustomJourneyBuilder.untimedService(line: line, fromId: fromId, toId: toId)
         else {
