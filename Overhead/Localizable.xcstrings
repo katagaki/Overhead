@@ -465,7 +465,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Through service beyond %1$@ to the %2$@ for %3$@."
+            "value" : "Through service beyond %1$@ to the %2$@ %3$@."
           }
         },
         "ja" : {
