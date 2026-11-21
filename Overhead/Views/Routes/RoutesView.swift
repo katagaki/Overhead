@@ -17,10 +17,14 @@ struct FavoritesSection: View {
 
     /// Matches the 12pt vertical gap down to the planner card.
     private static let cardSpacing: CGFloat = 12
-    /// A half-card peeks at the trailing edge to say the rail scrolls.
-    private static let visibleCards: CGFloat = 2.3
-    private static let cardHeight: CGFloat = 92
-    private static let sectionHeight: CGFloat = 92
+    /// A part card peeks at the trailing edge to say the rail scrolls.
+    private var visibleCards: CGFloat {
+        if dynamicTypeSize.isAccessibilitySize { return 1.15 }
+        return dynamicTypeSize > .large ? 1.8 : 2.3
+    }
+    @ScaledMetric(relativeTo: .body) private var cardHeight: CGFloat = 92
+    @ScaledMetric(relativeTo: .body) private var kindIconSize: CGFloat = 22
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     private static let cardShape = RoundedRectangle(cornerRadius: 20, style: .continuous)
 
     /// Keeps the add tiles reading as placeholders next to the glass cards.
@@ -31,10 +35,11 @@ struct FavoritesSection: View {
         )
     }
 
-    /// 2.3 cards and the 2 gaps between them, whatever the screen is.
+    /// The visible cards and the gaps between them, whatever the screen is.
     private var cardWidth: CGFloat {
         guard railWidth > 0 else { return 176 }
-        return ((railWidth - Self.cardSpacing * 2) / Self.visibleCards).rounded()
+        let gaps = visibleCards.rounded(.down)
+        return ((railWidth - Self.cardSpacing * gaps) / visibleCards).rounded()
     }
 
     private enum EditorTarget: Identifiable {
@@ -54,7 +59,7 @@ struct FavoritesSection: View {
 
     var body: some View {
         rail
-            .frame(height: Self.sectionHeight, alignment: .top)
+            .frame(height: places.isEmpty ? nil : cardHeight, alignment: .top)
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { railWidth = $0 }
             // Trim the 24pt section gap down to the planner's tighter rhythm.
             .padding(.bottom, -12)
@@ -134,12 +139,12 @@ struct FavoritesSection: View {
             VStack(alignment: .leading, spacing: 5) {
                 HStack(alignment: .firstTextBaseline, spacing: 7) {
                     Image(systemName: place.kind.iconName)
-                        .font(.system(size: 11, weight: .semibold))
+                        .scaledFont(size: 11, weight: .semibold)
                         .foregroundStyle(.white)
-                        .frame(width: 22, height: 22)
+                        .frame(width: kindIconSize, height: kindIconSize)
                         .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 7))
                     Text(displayName(of: place))
-                        .font(.system(size: 17, weight: .bold))
+                        .scaledFont(size: 17, weight: .bold)
                         .foregroundColor(.primary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
@@ -153,7 +158,7 @@ struct FavoritesSection: View {
                 countdownLabel(for: place, at: date)
             }
             .padding(EdgeInsets(top: 12, leading: 12, bottom: 11, trailing: 12))
-            .frame(width: cardWidth, height: Self.cardHeight, alignment: .topLeading)
+            .frame(width: cardWidth, height: cardHeight, alignment: .topLeading)
             .glassEffect(.regular.interactive(), in: Self.cardShape)
             .contentShape(Rectangle())
         }
@@ -188,7 +193,7 @@ struct FavoritesSection: View {
                 Text(resolved.to.localizedName)
             }
         }
-        .font(.system(size: 13))
+        .scaledFont(size: 13)
         .foregroundStyle(.secondary)
         .lineLimit(1)
         .minimumScaleFactor(0.75)
@@ -196,7 +201,7 @@ struct FavoritesSection: View {
 
     private func routeArrow(mode: RouteMode) -> some View {
         Image(systemName: mode == .through ? "arrow.triangle.branch" : "arrow.right")
-            .font(.system(size: 9, weight: .semibold))
+            .scaledFont(size: 9, weight: .semibold)
             .foregroundStyle(.tertiary)
     }
 
@@ -215,19 +220,19 @@ struct FavoritesSection: View {
                         Text("Candidate.DepartsIn \(remaining / 60)")
                     }
                 }
-                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .scaledFont(size: 20, weight: .bold, design: .rounded)
                 .monospacedDigit()
                 .foregroundStyle(remaining <= 3 * 60 ? Color.red : Color.accentColor)
                 .contentTransition(.numericText(countsDown: true))
                 .animation(.default, value: remaining)
             } else {
                 Text("Favorites.NoMoreTrains")
-                    .font(.system(size: 14.5))
+                    .scaledFont(size: 14.5)
                     .foregroundStyle(.secondary)
             }
         } else {
             Text(verbatim: "--:--")
-                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .scaledFont(size: 20, weight: .bold, design: .rounded)
                 .foregroundStyle(.tertiary)
                 .monospacedDigit()
         }
@@ -264,12 +269,12 @@ struct FavoritesSection: View {
             VStack(alignment: .leading, spacing: 5) {
                 HStack(alignment: .firstTextBaseline, spacing: 7) {
                     Image(systemName: place.kind.iconName)
-                        .font(.system(size: 11, weight: .semibold))
+                        .scaledFont(size: 11, weight: .semibold)
                         .foregroundStyle(.white)
-                        .frame(width: 22, height: 22)
+                        .frame(width: kindIconSize, height: kindIconSize)
                         .background(Color(.systemGray3), in: RoundedRectangle(cornerRadius: 7))
                     Text(displayName(of: place))
-                        .font(.system(size: 17, weight: .bold))
+                        .scaledFont(size: 17, weight: .bold)
                         .foregroundColor(.primary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
@@ -283,7 +288,7 @@ struct FavoritesSection: View {
                     }
                     if missing.count > 3 {
                         Text("+\(missing.count - 3)")
-                            .font(.system(size: 11)).foregroundStyle(.secondary)
+                            .scaledFont(size: 11).foregroundStyle(.secondary)
                     }
                 }
                 Spacer(minLength: 0)
@@ -296,11 +301,11 @@ struct FavoritesSection: View {
                         Text(LineDataModel.formatted(bytes: installer.pendingBytes))
                     }
                 }
-                .font(.system(size: 12, weight: .medium))
+                .scaledFont(size: 12, weight: .medium)
                 .foregroundStyle(Color.accentColor)
             }
             .padding(EdgeInsets(top: 12, leading: 12, bottom: 11, trailing: 12))
-            .frame(width: cardWidth, height: Self.cardHeight, alignment: .topLeading)
+            .frame(width: cardWidth, height: cardHeight, alignment: .topLeading)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -318,24 +323,24 @@ struct FavoritesSection: View {
         VStack(alignment: .leading, spacing: 5) {
             HStack(alignment: .firstTextBaseline, spacing: 7) {
                 Image(systemName: place.kind.iconName)
-                    .font(.system(size: 11, weight: .semibold))
+                    .scaledFont(size: 11, weight: .semibold)
                     .foregroundStyle(.white)
-                    .frame(width: 22, height: 22)
+                    .frame(width: kindIconSize, height: kindIconSize)
                     .background(Color(.systemGray3), in: RoundedRectangle(cornerRadius: 7))
                 Text(displayName(of: place))
-                    .font(.system(size: 17, weight: .bold))
+                    .scaledFont(size: 17, weight: .bold)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
                 Spacer(minLength: 0)
             }
             Text("Place.Unresolvable")
-                .font(.system(size: 13))
+                .scaledFont(size: 13)
                 .foregroundStyle(.secondary)
                 .lineLimit(2)
             Spacer(minLength: 0)
         }
         .padding(EdgeInsets(top: 12, leading: 12, bottom: 11, trailing: 12))
-        .frame(width: cardWidth, height: Self.cardHeight, alignment: .topLeading)
+        .frame(width: cardWidth, height: cardHeight, alignment: .topLeading)
         .glassEffect(.regular, in: Self.cardShape)
         .accessibilityElement(children: .combine)
         .matchedTransitionSource(id: EditorTarget.edit(place).id, in: editorZoom)
@@ -349,9 +354,9 @@ struct FavoritesSection: View {
             editorTarget = .new
         } label: {
             Image(systemName: "plus")
-                .font(.system(size: 20, weight: .medium))
+                .scaledFont(size: 20, weight: .medium)
                 .foregroundStyle(.secondary)
-                .frame(width: cardWidth, height: Self.cardHeight)
+                .frame(width: cardWidth, height: cardHeight)
                 .background(dashedOutline)
                 .contentShape(Rectangle())
         }
@@ -376,7 +381,7 @@ struct FavoritesSection: View {
             .multilineTextAlignment(.center)
             .padding(.horizontal, 16)
             .frame(maxWidth: .infinity)
-            .frame(height: Self.cardHeight)
+            .frame(minHeight: cardHeight)
             .background(dashedOutline)
             .contentShape(Rectangle())
         }
