@@ -1,4 +1,5 @@
 import SwiftUI
+import Backbone
 
 /// Sheet for the 時刻設定 customization: leave now, or pin a 出発時刻 / 到着時刻.
 struct TimeSettingsSheet: View {
@@ -36,7 +37,7 @@ struct TimeSettingsSheet: View {
                         DatePicker(
                             timeMode == .arriveBy ? "Setup.ArrivalTime" : "Setup.DepartureTime",
                             selection: $pinnedDate,
-                            in: Date().addingTimeInterval(-7 * 86400)...Date().addingTimeInterval(7 * 86400),
+                            in: RailClock.now.addingTimeInterval(-7 * 86400)...RailClock.now.addingTimeInterval(7 * 86400),
                             displayedComponents: [.date, .hourAndMinute]
                         )
                         .datePickerStyle(.wheel)

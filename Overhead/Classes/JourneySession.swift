@@ -154,7 +154,8 @@ final class JourneySession: ObservableObject, Identifiable {
             line: candidate.journeyLine,
             boardingStationId: candidate.fromStation.id,
             alightingStationId: candidate.toStation.id,
-            startedAt: Date(),
+            startedAt: RailClock.now,
+            serviceDay: candidate.serviceDay,
             transferStationIds: candidate.transferStationIds,
             hasSchedule: candidate.hasSchedule
         )
@@ -389,6 +390,7 @@ final class JourneySession: ObservableObject, Identifiable {
             boardingStationId: journey.boardingStationId,
             alightingStationId: stations[anchor.stationIndex].id,
             startedAt: journey.startedAt,
+            serviceDay: journey.serviceDay,
             transferStationIds: journey.transferStationIds.filter { kept.contains($0) },
             hasSchedule: journey.hasSchedule
         )

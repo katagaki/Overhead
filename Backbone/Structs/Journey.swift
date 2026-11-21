@@ -11,8 +11,10 @@ public struct Journey: Identifiable, Codable {
     public let transferStationIds: [String]
     /// False when the timetable was ignored — position comes from GPS/manual flipping.
     public let hasSchedule: Bool
+    /// The day the timetable's rail seconds count from.
+    public let serviceDay: ServiceDay
 
-    public init(id: UUID, service: TrainService, line: TrainLine, boardingStationId: String, alightingStationId: String, startedAt: Date, transferStationIds: [String] = [], hasSchedule: Bool = true) {
+    public init(id: UUID, service: TrainService, line: TrainLine, boardingStationId: String, alightingStationId: String, startedAt: Date, serviceDay: ServiceDay, transferStationIds: [String] = [], hasSchedule: Bool = true) {
         self.id = id
         self.service = service
         self.line = line
@@ -21,6 +23,7 @@ public struct Journey: Identifiable, Codable {
         self.startedAt = startedAt
         self.transferStationIds = transferStationIds
         self.hasSchedule = hasSchedule
+        self.serviceDay = serviceDay
     }
 
     /// 行き先 as riders see it — an off-line through destination wins over the

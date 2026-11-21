@@ -236,7 +236,7 @@ struct CustomLinePreview: View {
         return Journey(
             id: UUID(), service: service, line: line.trainLine,
             boardingStationId: first.id, alightingStationId: last.id,
-            startedAt: Date(), hasSchedule: false
+            startedAt: Date(), serviceDay: .today, hasSchedule: false
         )
     }
 

@@ -5,7 +5,8 @@ enum TrainPositionEngine {
 
     static func computePosition(
         journey: Journey,
-        delay: DelayInfo?
+        delay: DelayInfo?,
+        at now: Date = RailClock.now
     ) -> TrainPositionState {
         let stations = journey.journeyStations
         let timetable = journey.journeyTimetable
@@ -13,14 +14,10 @@ enum TrainPositionEngine {
         let delaySec = delayMinutes * 60
 
         guard stations.count >= 2, !timetable.isEmpty else {
-            return defaultState(stations: stations, delayMinutes: delayMinutes)
+            return defaultState(stations: stations, delayMinutes: delayMinutes, now: now)
         }
 
-        let tz = TimeZone(identifier: "Asia/Tokyo")!
-        var cal = Calendar(identifier: .gregorian)
-        cal.timeZone = tz
-        let comps = cal.dateComponents([.hour, .minute, .second], from: Date())
-        let nowSec = (comps.hour ?? 0) * 3600 + (comps.minute ?? 0) * 60 + (comps.second ?? 0)
+        let nowSec = journey.railSeconds(at: now)
 
         var stationTimes: [(index: Int, seconds: Int)] = []
         for (i, station) in stations.enumerated() {
@@ -31,7 +28,7 @@ enum TrainPositionEngine {
         }
 
         guard stationTimes.count >= 2 else {
-            return defaultState(stations: stations, delayMinutes: delayMinutes)
+            return defaultState(stations: stations, delayMinutes: delayMinutes, now: now)
         }
 
         let firstTime = stationTimes.first!.seconds
@@ -39,7 +36,7 @@ enum TrainPositionEngine {
 
         if nowSec < firstTime {
             let nextStation = stations[0]
-            let eta = dateFromRailSeconds(lastTime)
+            let eta = journey.railDate(lastTime)
             return TrainPositionState(
                 progress: 0.0,
                 segmentFrom: 0, segmentTo: 1,
@@ -64,7 +61,7 @@ enum TrainPositionEngine {
                 nextStationName: lastStation.name,
                 nextStationNameEn: lastStation.nameEn,
                 delayMinutes: delayMinutes,
-                estimatedArrival: dateFromRailSeconds(lastTime),
+                estimatedArrival: journey.railDate(lastTime),
                 status: .arrived,
                 trackingModeRaw: TrackingMode.timetable.rawValue
             )
@@ -104,17 +101,17 @@ enum TrainPositionEngine {
                     nextStationName: nextStation.name,
                     nextStationNameEn: nextStation.nameEn,
                     delayMinutes: delayMinutes,
-                    estimatedArrival: dateFromRailSeconds(lastTime),
+                    estimatedArrival: journey.railDate(lastTime),
                     status: status,
                     trackingModeRaw: TrackingMode.timetable.rawValue
                 )
             }
         }
 
-        return defaultState(stations: stations, delayMinutes: delayMinutes)
+        return defaultState(stations: stations, delayMinutes: delayMinutes, now: now)
     }
 
-    private static func defaultState(stations: [Station], delayMinutes: Int) -> TrainPositionState {
+    private static func defaultState(stations: [Station], delayMinutes: Int, now: Date) -> TrainPositionState {
         let nextStation = stations.first ?? Station(
             id: "", name: "", nameEn: "", stationCode: "",
             latitude: nil, longitude: nil
@@ -127,26 +124,9 @@ enum TrainPositionEngine {
             nextStationName: nextStation.name,
             nextStationNameEn: nextStation.nameEn,
             delayMinutes: delayMinutes,
-            estimatedArrival: Date().addingTimeInterval(600),
+            estimatedArrival: now.addingTimeInterval(600),
             status: .notStarted,
             trackingModeRaw: TrackingMode.timetable.rawValue
         )
-    }
-
-    private static func dateFromRailSeconds(_ seconds: Int) -> Date {
-        let tz = TimeZone(identifier: "Asia/Tokyo")!
-        var cal = Calendar(identifier: .gregorian)
-        cal.timeZone = tz
-        var comps = cal.dateComponents([.year, .month, .day], from: Date())
-        comps.hour = seconds / 3600
-        comps.minute = (seconds % 3600) / 60
-        comps.second = seconds % 60
-        if comps.hour! >= 24 {
-            comps.hour! -= 24
-            if let d = cal.date(from: comps) {
-                return cal.date(byAdding: .day, value: 1, to: d) ?? d
-            }
-        }
-        return cal.date(from: comps) ?? Date()
     }
 }

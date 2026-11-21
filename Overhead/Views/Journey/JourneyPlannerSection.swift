@@ -15,7 +15,7 @@ struct JourneyPlannerSection: View {
     @State private var viaSelections: [StationSearchHit] = []
 
     @State private var timeMode: TimeMode = .now
-    @State private var pinnedDate = Date()
+    @State private var pinnedDate = RailClock.now
     @AppStorage("journey.walkingSpeed") private var walkingSpeedRaw = WalkingSpeed.normal.rawValue
     @AppStorage(RoutePriority.storageKey) private var routePriorityRaw = RoutePriority.balanced.rawValue
     @AppStorage("journey.preferOriginating") private var preferOriginating = false
@@ -84,7 +84,7 @@ struct JourneyPlannerSection: View {
     }
 
     private var anchorDate: Date {
-        timeMode == .now ? Date() : pinnedDate
+        timeMode == .now ? RailClock.now : pinnedDate
     }
 
     private var searchAnchor: JourneyViewModel.TimeAnchor {
@@ -117,7 +117,7 @@ struct JourneyPlannerSection: View {
             await viewModel.loadLines()
             restoreSelections()
             // The day's network takes a moment; have it ready before the first search.
-            await Task.detached(priority: .utility) { TransitRouter.prepare(on: Date()) }.value
+            await Task.detached(priority: .utility) { TransitRouter.prepare(on: RailClock.now) }.value
         }
         .onAppear { savedPlaces = SavedPlaceStore.load() }
         .onReceive(NotificationCenter.default.publisher(for: SavedPlaceStore.didChangeNotification)) { _ in
@@ -604,7 +604,7 @@ struct JourneyPlannerSection: View {
     }
 
     private func minutesUntilDeparture(_ candidate: TrainCandidate) -> Int? {
-        let interval = candidate.leaveDate(reference: anchorDate).timeIntervalSinceNow
+        let interval = candidate.leaveDate.timeIntervalSince(RailClock.now)
         guard interval > -60 else { return nil }
         let minutes = Int(interval / 60)
         guard minutes < 100 else { return nil }
@@ -700,7 +700,7 @@ struct JourneyPlannerSection: View {
             var anchor = searchAnchor
             var walkMinutes: Int?
             // 到着時刻 keeps its anchor, but trains you can't reach are out too.
-            var earliestDeparture: Date? = timeMode == .arriveBy ? Date() : nil
+            var earliestDeparture: Date? = timeMode == .arriveBy ? RailClock.now : nil
             // A place's walk is part of the search; a station's is added here.
             if timeMode != .departAt,
                let station = origin.station,
@@ -708,7 +708,7 @@ struct JourneyPlannerSection: View {
                walkSeconds <= 120 * 60 {
                 walkMinutes = max(1, Int((walkSeconds / 60).rounded(.up)))
                 if timeMode == .arriveBy {
-                    earliestDeparture = Date().addingTimeInterval(walkSeconds)
+                    earliestDeparture = RailClock.now.addingTimeInterval(walkSeconds)
                 } else {
                     anchor = .departure(anchorDate.addingTimeInterval(walkSeconds))
                 }
@@ -797,7 +797,7 @@ struct JourneyPlannerSection: View {
             showTimeSettingsSheet = true
         case .arrival:
             timeMode = .arriveBy
-            pinnedDate = Calendar.current.date(bySettingHour: 18, minute: 0, second: 0, of: Date()) ?? Date()
+            pinnedDate = Calendar.current.date(bySettingHour: 18, minute: 0, second: 0, of: RailClock.now) ?? RailClock.now
             try? await Task.sleep(for: .seconds(1))
             search()
         }
