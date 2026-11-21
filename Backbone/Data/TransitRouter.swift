@@ -212,6 +212,66 @@ extension TransitRouter {
         private let expressLock = NSLock()
         private var builtExpressHops: ExpressHops?
         private let stationIndex: [String: Int]
+        private let scratchLock = NSLock()
+        private var scratchPool: [Scratch] = []
+
+        /// RAPTOR's per-round working arrays, kept between runs.
+        struct Scratch {
+            let stops: Int
+            private(set) var rounds = 0
+            var arrival: [Int32] = []
+            var boardable: [Int32] = []
+            var boardableFrom: [Int32] = []
+            var rideTrip: [Int32] = []
+            var rideBoard: [Int32] = []
+            var rideAlight: [Int32] = []
+            var bestArrival: [Int32]
+            var bestBoardable: [Int32]
+
+            init(stops: Int) {
+                self.stops = stops
+                bestArrival = [Int32](repeating: .max, count: stops)
+                bestBoardable = [Int32](repeating: .max, count: stops)
+            }
+
+            mutating func reserve(rounds needed: Int) {
+                guard needed > rounds else { return }
+                let count = needed * stops
+                arrival = [Int32](repeating: .max, count: count)
+                boardable = [Int32](repeating: .max, count: count)
+                boardableFrom = [Int32](repeating: -1, count: count)
+                rideTrip = [Int32](repeating: -1, count: count)
+                rideBoard = [Int32](repeating: -1, count: count)
+                rideAlight = [Int32](repeating: -1, count: count)
+                rounds = needed
+            }
+
+            /// A run reaches most of the network, so a straight fill beats chasing the stops it wrote.
+            mutating func reset() {
+                for i in arrival.indices { arrival[i] = .max }
+                for i in boardable.indices { boardable[i] = .max }
+                for i in boardableFrom.indices { boardableFrom[i] = -1 }
+                for i in rideTrip.indices { rideTrip[i] = -1 }
+                for i in rideBoard.indices { rideBoard[i] = -1 }
+                for i in rideAlight.indices { rideAlight[i] = -1 }
+                for i in bestArrival.indices { bestArrival[i] = .max }
+                for i in bestBoardable.indices { bestBoardable[i] = .max }
+            }
+        }
+
+        /// Concurrent searches each take their own buffers.
+        func withScratch<Result>(rounds: Int, _ body: (inout Scratch) -> Result) -> Result {
+            scratchLock.lock()
+            var scratch = scratchPool.popLast() ?? Scratch(stops: stopStation.count)
+            scratchLock.unlock()
+            scratch.reserve(rounds: rounds)
+            let result = body(&scratch)
+            scratch.reset()
+            scratchLock.lock()
+            if scratchPool.count < 2 { scratchPool.append(scratch) }
+            scratchLock.unlock()
+            return result
+        }
 
         var expressHops: ExpressHops {
             expressLock.lock(); defer { expressLock.unlock() }
@@ -731,31 +791,32 @@ extension TransitRouter {
         /// Best arrival for each number of trains that improves on fewer.
         private func run(_ net: Network, sources: [(Int32, Int32)],
                          targets: [(stop: Int32, seconds: Int32)], maxTrains: Int) -> [Option] {
+            net.withScratch(rounds: maxTrains + 1) { scratch in
+                run(net, sources: sources, targets: targets, maxTrains: maxTrains, scratch: &scratch)
+            }
+        }
+
+        private func run(_ net: Network, sources: [(Int32, Int32)],
+                         targets: [(stop: Int32, seconds: Int32)], maxTrains: Int,
+                         scratch: inout Network.Scratch) -> [Option] {
             let n = net.stopStation.count
             let rounds = maxTrains + 1
             let inf = Int32.max
 
-            // Round k: arrival by train, and the earliest moment a train can be boarded.
-            var arrival = [[Int32]](repeating: [Int32](repeating: inf, count: n), count: rounds)
-            var boardable = [[Int32]](repeating: [Int32](repeating: inf, count: n), count: rounds)
-            var boardableFrom = [[Int32]](repeating: [Int32](repeating: -1, count: n), count: rounds)
-            var rideTrip = [[Int32]](repeating: [Int32](repeating: -1, count: n), count: rounds)
-            var rideBoard = [[Int32]](repeating: [Int32](repeating: -1, count: n), count: rounds)
-            var rideAlight = [[Int32]](repeating: [Int32](repeating: -1, count: n), count: rounds)
-            var bestArrival = [Int32](repeating: inf, count: n)
-            var bestBoardable = [Int32](repeating: inf, count: n)
-
+            // Round k at k * n: arrival by train, and the earliest moment a train can be boarded.
             var marked: [Int32] = []
-            for (stop, time) in sources where time < boardable[0][Int(stop)] {
-                if boardable[0][Int(stop)] == inf { marked.append(stop) }
-                boardable[0][Int(stop)] = time
-                bestBoardable[Int(stop)] = time
+            for (stop, time) in sources where time < scratch.boardable[Int(stop)] {
+                if scratch.boardable[Int(stop)] == inf { marked.append(stop) }
+                scratch.boardable[Int(stop)] = time
+                scratch.bestBoardable[Int(stop)] = time
             }
 
             var targetBound = inf
             var options: [Option] = []
 
             for k in 1..<rounds {
+                let row = k * n
+                let previousRow = (k - 1) * n
                 // Earliest marked position per route.
                 var routeStart: [Int32: Int32] = [:]
                 for stop in marked {
@@ -780,16 +841,16 @@ extension TransitRouter {
                         if current >= 0 {
                             let t = route.trips[current]
                             let time = net.trips[Int(t)].arrivals[position]
-                            if time < bestArrival[s], time < targetBound {
-                                if arrival[k][s] == inf { improved.append(stop) }
-                                arrival[k][s] = time
-                                bestArrival[s] = time
-                                rideTrip[k][s] = t
-                                rideBoard[k][s] = board
-                                rideAlight[k][s] = Int32(position)
+                            if time < scratch.bestArrival[s], time < targetBound {
+                                if scratch.arrival[row + s] == inf { improved.append(stop) }
+                                scratch.arrival[row + s] = time
+                                scratch.bestArrival[s] = time
+                                scratch.rideTrip[row + s] = t
+                                scratch.rideBoard[row + s] = board
+                                scratch.rideAlight[row + s] = Int32(position)
                             }
                         }
-                        let ready = boardable[k - 1][s]
+                        let ready = scratch.boardable[previousRow + s]
                         guard ready != inf, position < route.stops.count - 1 else { continue }
                         if current >= 0, net.trips[Int(route.trips[current])].departures[position] < ready { continue }
                         // Earliest trip leaving here at or after `ready`.
@@ -808,28 +869,26 @@ extension TransitRouter {
                 }
 
                 if let best = targets.compactMap({ target -> (Int32, Int32)? in
-                    let a = arrival[k][Int(target.stop)]
+                    let a = scratch.arrival[row + Int(target.stop)]
                     return a == inf ? nil : (target.stop, a + target.seconds)
                 }).min(by: { $0.1 < $1.1 }), options.last.map({ best.1 < $0.arrival }) ?? true {
                     targetBound = min(targetBound, best.1)
                     options.append(Option(trains: k, arrival: best.1,
-                                          legs: reconstruct(round: k, at: best.0, boardableFrom: boardableFrom,
-                                                            rideTrip: rideTrip, rideBoard: rideBoard,
-                                                            rideAlight: rideAlight, in: net)))
+                                          legs: reconstruct(round: k, at: best.0, scratch: scratch, in: net)))
                 }
 
                 // Changes of train, ready for the next round.
                 marked = []
                 for stop in improved {
                     let s = Int(stop)
-                    let time = arrival[k][s]
+                    let time = scratch.arrival[row + s]
                     func offer(_ to: Int32, _ ready: Int32) {
                         let i = Int(to)
-                        guard ready < bestBoardable[i], ready < targetBound else { return }
-                        if boardable[k][i] == inf { marked.append(to) }
-                        boardable[k][i] = ready
-                        bestBoardable[i] = ready
-                        boardableFrom[k][i] = stop
+                        guard ready < scratch.bestBoardable[i], ready < targetBound else { return }
+                        if scratch.boardable[row + i] == inf { marked.append(to) }
+                        scratch.boardable[row + i] = ready
+                        scratch.bestBoardable[i] = ready
+                        scratch.boardableFrom[row + i] = stop
                     }
                     offer(stop, time + sameStopSeconds)
                     for transfer in net.transfers[s] {
@@ -841,22 +900,22 @@ extension TransitRouter {
             return options
         }
 
-        private func reconstruct(round: Int, at target: Int32, boardableFrom: [[Int32]],
-                                 rideTrip: [[Int32]], rideBoard: [[Int32]], rideAlight: [[Int32]],
+        private func reconstruct(round: Int, at target: Int32, scratch: Network.Scratch,
                                  in net: Network) -> [RawLeg] {
+            let n = net.stopStation.count
             var legs: [RawLeg] = []
             var stop = target
             var k = round
             while k > 0 {
-                let s = Int(stop)
-                let trip = rideTrip[k][s]
+                let i = k * n + Int(stop)
+                let trip = scratch.rideTrip[i]
                 guard trip >= 0 else { break }
-                let board = rideBoard[k][s]
-                legs.insert(RawLeg(trip: trip, board: board, alight: rideAlight[k][s]), at: 0)
+                let board = scratch.rideBoard[i]
+                legs.insert(RawLeg(trip: trip, board: board, alight: scratch.rideAlight[i]), at: 0)
                 k -= 1
                 guard k > 0 else { break }
                 let boardStop = net.routes[Int(net.trips[Int(trip)].route)].stops[Int(board)]
-                stop = boardableFrom[k][Int(boardStop)]
+                stop = scratch.boardableFrom[k * n + Int(boardStop)]
                 guard stop >= 0 else { break }
             }
             return legs
