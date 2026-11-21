@@ -744,7 +744,9 @@ struct JourneyPlannerSection: View {
             hasSearched = true
             isSearching = false
 
-            if candidates.isEmpty && !viewModel.routeExists(through: waypoints, avoidingLineIds: avoided) {
+            if candidates.isEmpty {
+                let exists = await viewModel.routeExists(through: waypoints, avoidingLineIds: avoided)
+                guard !Task.isCancelled, !exists else { return }
                 hasSearched = false
                 searchError = "Setup.NoRoute"
             }

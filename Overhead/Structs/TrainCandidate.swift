@@ -3,7 +3,7 @@ import Backbone
 
 // MARK: - Candidate Leg
 
-struct CandidateLeg {
+nonisolated struct CandidateLeg {
     let service: TrainService
     let line: TrainLine
     let fromStation: Station
@@ -26,7 +26,7 @@ struct CandidateLeg {
 
 // MARK: - Train Candidate
 
-struct TrainCandidate: Identifiable {
+nonisolated struct TrainCandidate: Identifiable {
     let id: String
     let legs: [CandidateLeg]
     let isThrough: Bool

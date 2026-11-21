@@ -43,7 +43,7 @@ struct SearchedPlace: Codable, Hashable {
 // MARK: - Place Access
 
 /// A station you can walk to from a place, and how long the walk takes.
-struct PlaceAccess {
+nonisolated struct PlaceAccess {
     let station: Station
     let seconds: Int
 
@@ -52,7 +52,7 @@ struct PlaceAccess {
     static let maxStations = 8
 
     /// Nearby stations by estimated walk, whole minutes so times line up on the clock.
-    static func stations(near location: CLLocation, lines: [TrainLine], speed: WalkingSpeed) -> [PlaceAccess] {
+    @MainActor static func stations(near location: CLLocation, lines: [TrainLine], speed: WalkingSpeed) -> [PlaceAccess] {
         // Ignoring walking still has to walk somewhere; assume the usual pace.
         let pace = speed.paceMetersPerMinute ?? WalkingSpeed.normal.paceMetersPerMinute ?? 80
         let accessMinutes = speed == .none ? WalkingSpeed.normal.stationAccessMinutes : speed.stationAccessMinutes

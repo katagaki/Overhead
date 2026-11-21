@@ -50,15 +50,7 @@ final class JourneyViewModel: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
     private var pipStatusObservation: AnyCancellable?
-    private struct TimetableKey: Hashable {
-        let lineId: String
-        let calendar: ScheduleCalendar
-        let dayKey: Int
-        let generation: Int
-    }
-    private var timetableCache: [TimetableKey: [TrainService]] = [:]
-    private var timetableCacheOrder: [TimetableKey] = []
-    private static let timetableCacheLimit = 16
+    private let timetableCache = TimetableCache()
     @Published private(set) var linesLoaded = false
 
     private var pendingStart: (() -> Void)?
@@ -80,7 +72,7 @@ final class JourneyViewModel: ObservableObject {
             .debounce(for: .seconds(0.75), scheduler: DispatchQueue.main)
             .sink { [weak self] _ in
                 Task { @MainActor in
-                    self?.clearTimetableCache()
+                    self?.timetableCache.clear()
                     await self?.forceRefreshLines()
                 }
             }
@@ -241,7 +233,7 @@ final class JourneyViewModel: ObservableObject {
     // MARK: - Departure Search (乗換案内-style)
 
     /// Which end of the itinerary the user pinned to a clock time.
-    enum TimeAnchor {
+    nonisolated enum TimeAnchor {
         case departure(Date)
         case arrival(Date)
 
@@ -258,7 +250,7 @@ final class JourneyViewModel: ObservableObject {
     }
 
     /// A ride constraint in rail seconds, in whichever direction the search runs.
-    fileprivate enum RideAnchor {
+    nonisolated fileprivate enum RideAnchor {
         case departAtOrAfter(Int)
         case arriveAtOrBefore(Int)
 
@@ -269,7 +261,7 @@ final class JourneyViewModel: ObservableObject {
     }
 
     /// A trip end for search: a station, or a place with the stations you could walk to.
-    enum SearchEndpoint {
+    nonisolated enum SearchEndpoint {
         case station(Station)
         case walk([PlaceAccess])
 
@@ -333,6 +325,39 @@ final class JourneyViewModel: ObservableObject {
         preferringOriginating: Bool = false,
         limit: Int = 12
     ) async -> [TrainCandidate] {
+        let search = Task.detached(priority: .userInitiated) { [self] in
+            #if DEBUG
+            let started = Date()
+            defer {
+                NSLog("[OverheadSearch] candidate search took %.0f ms%@",
+                      Date().timeIntervalSince(started) * 1000, Thread.isMainThread ? " on main" : " off main")
+            }
+            #endif
+            return self.findCandidates(
+                endpoints: endpoints, anchor: anchor,
+                transferMinutes: transferMinutes, walkPace: walkPace, priority: priority,
+                avoidingLineIds: avoidingLineIds, notDepartingBefore: earliest,
+                preferringOriginating: preferringOriginating, limit: limit
+            )
+        }
+        return await withTaskCancellationHandler {
+            await search.value
+        } onCancel: {
+            search.cancel()
+        }
+    }
+
+    nonisolated private func findCandidates(
+        endpoints: [SearchEndpoint],
+        anchor: TimeAnchor,
+        transferMinutes: Double,
+        walkPace: Double,
+        priority: RoutePriority,
+        avoidingLineIds: Set<String>,
+        notDepartingBefore earliest: Date?,
+        preferringOriginating: Bool,
+        limit: Int
+    ) -> [TrainCandidate] {
         guard endpoints.count >= 2 else { return [] }
 
         let day = ServiceDay(containing: anchor.date)
@@ -370,11 +395,10 @@ final class JourneyViewModel: ObservableObject {
             transferAversionMinutes: priority.transferAversionMinutes,
             avoidingLineIds: avoidingLineIds
         )
-        let date = anchor.date
-        let itineraries = await Task.detached(priority: .userInitiated) {
-            TransitRouter.search(through: routerEndpoints, anchor: routerAnchor, on: date,
-                                 preferences: preferences, notDepartingBefore: floorSec, limit: limit)
-        }.value
+        guard !Task.isCancelled else { return [] }
+        let itineraries = TransitRouter.search(through: routerEndpoints, anchor: routerAnchor, on: anchor.date,
+                                               preferences: preferences, notDepartingBefore: floorSec, limit: limit)
+        guard !Task.isCancelled else { return [] }
         let links = StaticTrainData.stationLinks()
         let routed = itineraries.compactMap { itinerary -> TrainCandidate? in
             guard var candidate = candidate(for: itinerary, day: day) else { return nil }
@@ -419,12 +443,14 @@ final class JourneyViewModel: ObservableObject {
     }
 
     /// Rail seconds floored to the minute, the resolution timetables are kept in.
-    private static func minuteSeconds(_ seconds: Int) -> Int {
+    nonisolated private static func minuteSeconds(_ seconds: Int) -> Int {
         Int((Double(seconds) / 60).rounded(.down)) * 60
     }
 
-    func routeExists(through stations: [Station], avoidingLineIds: Set<String> = []) -> Bool {
-        Self.routeExists(through: stations, avoidingLineIds: avoidingLineIds)
+    func routeExists(through stations: [Station], avoidingLineIds: Set<String> = []) async -> Bool {
+        await Task.detached(priority: .userInitiated) {
+            Self.routeExists(through: stations, avoidingLineIds: avoidingLineIds)
+        }.value
     }
 
     /// True when every hop is rideable: one train, 直通, or via transfers.
@@ -440,7 +466,7 @@ final class JourneyViewModel: ObservableObject {
         }
     }
 
-    private func directCandidates(
+    nonisolated private func directCandidates(
         from origin: Station,
         to destination: Station,
         anchor: RideAnchor,
@@ -489,7 +515,7 @@ final class JourneyViewModel: ObservableObject {
 
     /// 到着時刻 searches lead with the latest itinerary that still makes it.
     /// 始発優先 outranks the clock: a seat is worth waiting for.
-    private func sorted(
+    nonisolated private func sorted(
         _ candidates: [TrainCandidate],
         anchor: RideAnchor,
         preferringOriginating: Bool = false,
@@ -529,11 +555,30 @@ final class JourneyViewModel: ObservableObject {
         priority: RoutePriority = .balanced,
         avoidingLineIds: Set<String> = []
     ) async -> [TrainCandidate] {
+        let allLineIds = Set(availableLines.map(\.id))
+        let search = Task.detached(priority: .userInitiated) { [self] in
+            self.findRouteOptions(stations: stations, transferMinutes: transferMinutes, walkPace: walkPace,
+                                  priority: priority, avoidingLineIds: avoidingLineIds, allLineIds: allLineIds)
+        }
+        return await withTaskCancellationHandler {
+            await search.value
+        } onCancel: {
+            search.cancel()
+        }
+    }
+
+    nonisolated private func findRouteOptions(
+        stations: [Station],
+        transferMinutes: Double,
+        walkPace: Double,
+        priority: RoutePriority,
+        avoidingLineIds: Set<String>,
+        allLineIds: Set<String>
+    ) -> [TrainCandidate] {
         guard stations.count >= 2, let from = stations.first, let to = stations.last else { return [] }
-        // Expresses come from today's timetable, built off the main thread.
-        let expressHops = await Task.detached(priority: .userInitiated) {
-            TransitRouter.expressHops(on: RailClock.now)
-        }.value
+        // Expresses come from today's timetable.
+        let expressHops = TransitRouter.expressHops(on: RailClock.now)
+        guard !Task.isCancelled else { return [] }
 
         var results: [TrainCandidate] = []
         var seen = Set<String>()
@@ -550,7 +595,7 @@ final class JourneyViewModel: ObservableObject {
                 fromStationId: from.id, toStationId: to.id,
                 avoidingLineIds: avoidingLineIds
             ) {
-                add(untimedCandidate(for: route, expressHops: expressHops))
+                add(untimedCandidate(for: route, expressHops: expressHops, allLineIds: allLineIds))
             }
         }
 
@@ -582,7 +627,7 @@ final class JourneyViewModel: ObservableObject {
         }
     }
 
-    private func untimedRide(
+    nonisolated private func untimedRide(
         on staticLine: StaticTrainLine,
         from: Station,
         to: Station
@@ -610,9 +655,10 @@ final class JourneyViewModel: ObservableObject {
         return (service, ride.stations, Int(ride.minutes.rounded(.up)))
     }
 
-    private func untimedCandidate(
+    nonisolated private func untimedCandidate(
         for route: StaticTrainData.DirectRouteOption,
-        expressHops: TransitRouter.ExpressHops
+        expressHops: TransitRouter.ExpressHops,
+        allLineIds: Set<String>
     ) -> TrainCandidate? {
         guard let ride = untimedRide(
             on: route.staticLine, from: route.fromStation, to: route.toStation
@@ -623,7 +669,7 @@ final class JourneyViewModel: ObservableObject {
             fromStationId: route.fromStation.id,
             toStationId: route.toStation.id,
             maxTransfers: 0,
-            avoidingLineIds: Set(availableLines.map(\.id)).subtracting(ownLines),
+            avoidingLineIds: allLineIds.subtracting(ownLines),
             expressHops: expressHops
         )
         let minutes = planned?.count == 1
@@ -649,7 +695,7 @@ final class JourneyViewModel: ObservableObject {
         )
     }
 
-    private func untimedCandidate(
+    nonisolated private func untimedCandidate(
         forPlan plan: [StaticTrainData.TransferLeg],
         transferMinutes: Double
     ) -> TrainCandidate? {
@@ -748,7 +794,7 @@ final class JourneyViewModel: ObservableObject {
     // MARK: - Routed Itineraries
 
     /// A router itinerary as a candidate, with each leg's real service behind it.
-    private func candidate(for itinerary: TransitRouter.Itinerary, day: ServiceDay) -> TrainCandidate? {
+    nonisolated private func candidate(for itinerary: TransitRouter.Itinerary, day: ServiceDay) -> TrainCandidate? {
         var legs: [CandidateLeg] = []
         var through: StaticTrainData.ResolvedJourneyLine?
         for routed in itinerary.legs {
@@ -812,7 +858,7 @@ final class JourneyViewModel: ObservableObject {
     /// One train across consecutive runs: a loop's next circuit, or the
     /// partner line's run it carries on as. The joining stop keeps the
     /// first run's station ID, as composite lines do.
-    private static func joinedService(_ services: [TrainService], lineId: String,
+    nonisolated private static func joinedService(_ services: [TrainService], lineId: String,
                                       direction: TrainService.Direction) -> TrainService {
         var entries: [TimetableEntry] = []
         for service in services {
@@ -842,39 +888,12 @@ final class JourneyViewModel: ObservableObject {
         )
     }
 
-    private func services(on staticLine: StaticTrainLine, day: ServiceDay) -> [TrainService] {
-        let key = TimetableKey(lineId: staticLine.id, calendar: day.scheduleCalendar,
-                               dayKey: day.key, generation: StaticTrainData.generation)
-        if let cached = timetableCache[key] {
-            if timetableCacheOrder.last != key {
-                timetableCacheOrder.removeAll { $0 == key }
-                timetableCacheOrder.append(key)
-            }
-            return cached
-        }
-        if timetableCacheOrder.contains(where: { $0.generation != key.generation }) {
-            clearTimetableCache()
-        }
-        let built = StaticTimetableGenerator.services(for: staticLine, calendar: key.calendar)
-        #if DEBUG
-        NSLog("[OverheadTimetable] built %@ %@ day %d gen %d (%d services)",
-              key.lineId, key.calendar.rawValue, key.dayKey, key.generation, built.count)
-        #endif
-        timetableCache[key] = built
-        timetableCacheOrder.append(key)
-        while timetableCacheOrder.count > Self.timetableCacheLimit {
-            timetableCache[timetableCacheOrder.removeFirst()] = nil
-        }
-        return built
-    }
-
-    private func clearTimetableCache() {
-        timetableCache.removeAll()
-        timetableCacheOrder.removeAll()
+    nonisolated private func services(on staticLine: StaticTrainLine, day: ServiceDay) -> [TrainService] {
+        timetableCache.services(on: staticLine, day: day)
     }
 
     /// Concrete services on a line between two of its stations.
-    private func rides(
+    nonisolated private func rides(
         on staticLine: StaticTrainLine,
         fromId: String,
         toId: String,
@@ -910,7 +929,7 @@ final class JourneyViewModel: ObservableObject {
     }
 
     /// A loop leg's stations in the direction its train actually runs.
-    private static func loopSlice(on line: StaticTrainLine, leg: CandidateLeg) -> [Station]? {
+    nonisolated private static func loopSlice(on line: StaticTrainLine, leg: CandidateLeg) -> [Station]? {
         let stations = line.stations
         let count = stations.count
         let timetable = leg.service.timetable
@@ -932,7 +951,7 @@ final class JourneyViewModel: ObservableObject {
         return path
     }
 
-    private func compositeCandidate(legs: [CandidateLeg]) -> TrainCandidate? {
+    nonisolated private func compositeCandidate(legs: [CandidateLeg]) -> TrainCandidate? {
         guard let first = legs.first, let last = legs.last else { return nil }
 
         var stations: [Station] = []
@@ -1236,13 +1255,18 @@ final class JourneyViewModel: ObservableObject {
 
     // MARK: - Station Timetable
 
-    func stationTimetables(stationId: String) -> [StationTimetableData] {
-        guard let staticLine = StaticTrainData.line(containingStationId: stationId) else { return [] }
-        return StaticTimetableGenerator.stationTimetables(
-            forLineId: staticLine.id,
-            stationId: stationId,
-            calendar: .current()
-        )
+    func stationTimetables(stationId: String) async -> [StationTimetableData] {
+        await Task.detached(priority: .userInitiated) {
+            #if DEBUG
+            NSLog("[OverheadTimetable] station timetables for %@%@", stationId, Thread.isMainThread ? " on main" : " off main")
+            #endif
+            guard let staticLine = StaticTrainData.line(containingStationId: stationId) else { return [] }
+            return StaticTimetableGenerator.stationTimetables(
+                forLineId: staticLine.id,
+                stationId: stationId,
+                calendar: .current()
+            )
+        }.value
     }
 
     // MARK: - Rail Directions
@@ -1275,7 +1299,7 @@ final class JourneyViewModel: ObservableObject {
 
     // MARK: - Train Matching
 
-    private static func services(_ services: [TrainService], from: String, to: String) -> [TrainService] {
+    nonisolated private static func services(_ services: [TrainService], from: String, to: String) -> [TrainService] {
         services.filter { svc in
             let stationIds = svc.timetable.map(\.stationId)
             guard let fromIdx = stationIds.firstIndex(of: from),
@@ -1366,5 +1390,64 @@ final class JourneyViewModel: ObservableObject {
             journey: journey, line: line, fixedState: state,
             delay: DelayInfo(lineId: line.id, delayMinutes: 3, cause: "混雑のため", updatedAt: Date())
         )]
+    }
+}
+
+/// Generated services keyed by line, calendar, service day and data generation; searches read it off the main actor.
+nonisolated private final class TimetableCache: @unchecked Sendable {
+    private struct Key: Hashable {
+        let lineId: String
+        let calendar: ScheduleCalendar
+        let dayKey: Int
+        let generation: Int
+    }
+
+    private static let limit = 16
+    private let lock = NSLock()
+    private var entries: [Key: [TrainService]] = [:]
+    private var order: [Key] = []
+
+    func services(on staticLine: StaticTrainLine, day: ServiceDay) -> [TrainService] {
+        let key = Key(lineId: staticLine.id, calendar: day.scheduleCalendar,
+                      dayKey: day.key, generation: StaticTrainData.generation)
+        lock.lock()
+        if let cached = entries[key] {
+            if order.last != key {
+                order.removeAll { $0 == key }
+                order.append(key)
+            }
+            lock.unlock()
+            return cached
+        }
+        lock.unlock()
+
+        // Built outside the lock so a reader never waits behind another line's build.
+        let built = StaticTimetableGenerator.services(for: staticLine, calendar: key.calendar)
+        #if DEBUG
+        NSLog("[OverheadTimetable] built %@ %@ day %d gen %d (%d services)%@",
+              key.lineId, key.calendar.rawValue, key.dayKey, key.generation, built.count,
+              Thread.isMainThread ? " on main" : "")
+        #endif
+
+        lock.lock()
+        defer { lock.unlock() }
+        if let raced = entries[key] { return raced }
+        if order.contains(where: { $0.generation != key.generation }) {
+            entries.removeAll()
+            order.removeAll()
+        }
+        entries[key] = built
+        order.append(key)
+        while order.count > Self.limit {
+            entries[order.removeFirst()] = nil
+        }
+        return built
+    }
+
+    func clear() {
+        lock.lock()
+        entries.removeAll()
+        order.removeAll()
+        lock.unlock()
     }
 }

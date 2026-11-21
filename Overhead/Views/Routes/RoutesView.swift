@@ -439,7 +439,7 @@ struct FavoritesSection: View {
     }
 
     /// Only trains that reach the favorite's destination, matching what tapping it can start.
-    private static func departuresReaching(
+    nonisolated private static func departuresReaching(
         lineId: String,
         fromId: String,
         toId: String,
@@ -460,7 +460,7 @@ struct FavoritesSection: View {
             .sorted()
     }
 
-    private static func timetable(
+    nonisolated private static func timetable(
         line: StaticTrainLine,
         fromId: String,
         towardId: String,
