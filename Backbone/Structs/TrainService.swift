@@ -108,9 +108,83 @@ public struct TrainService: Identifiable, Codable {
             }
         }
 
+        public var displayNameKo: String {
+            switch self {
+            case .local: return "각역정차"
+            case .semiExpress: return "준급"
+            case .sectionSemiExpress: return "구간준급"
+            case .rapid: return "쾌속"
+            case .sectionRapid: return "구간쾌속"
+            case .commuterRapid: return "통근쾌속"
+            case .specialRapid: return "특별쾌속"
+            case .express: return "급행"
+            case .sectionExpress: return "구간급행"
+            case .rapidExpress: return "쾌속급행"
+            case .commuterExpress: return "통근급행"
+            case .commuterSemiExpress: return "통근준급"
+            case .liner: return "라이너"
+            case .rapidLimitedExpress: return "쾌특"
+            case .limitedExpress: return "특급"
+            case .commuterLimitedExpress: return "통근특급"
+            case .other: return "열차"
+            }
+        }
+
+        public var displayNameZhHans: String {
+            switch self {
+            case .local: return "各站停车"
+            case .semiExpress: return "准急"
+            case .sectionSemiExpress: return "区间准急"
+            case .rapid: return "快速"
+            case .sectionRapid: return "区间快速"
+            case .commuterRapid: return "通勤快速"
+            case .specialRapid: return "特别快速"
+            case .express: return "急行"
+            case .sectionExpress: return "区间急行"
+            case .rapidExpress: return "快速急行"
+            case .commuterExpress: return "通勤急行"
+            case .commuterSemiExpress: return "通勤准急"
+            case .liner: return "Liner"
+            case .rapidLimitedExpress: return "快特"
+            case .limitedExpress: return "特急"
+            case .commuterLimitedExpress: return "通勤特急"
+            case .other: return "列车"
+            }
+        }
+
+        public var displayNameZhHant: String {
+            switch self {
+            case .local: return "各站停車"
+            case .semiExpress: return "準急"
+            case .sectionSemiExpress: return "區間準急"
+            case .rapid: return "快速"
+            case .sectionRapid: return "區間快速"
+            case .commuterRapid: return "通勤快速"
+            case .specialRapid: return "特別快速"
+            case .express: return "急行"
+            case .sectionExpress: return "區間急行"
+            case .rapidExpress: return "快速急行"
+            case .commuterExpress: return "通勤急行"
+            case .commuterSemiExpress: return "通勤準急"
+            case .liner: return "Liner"
+            case .rapidLimitedExpress: return "快特"
+            case .limitedExpress: return "特急"
+            case .commuterLimitedExpress: return "通勤特急"
+            case .other: return "列車"
+            }
+        }
+
         public var localizedDisplayName: String {
-            let lang = Locale.current.language.languageCode?.identifier ?? "ja"
-            return lang == "en" ? displayNameEn : displayNameJa
+            let language = Locale.current.language
+            switch language.languageCode?.identifier {
+            case "en": return displayNameEn
+            case "ko": return displayNameKo
+            case "zh":
+                let traditional = language.script?.identifier == "Hant"
+                    || ["TW", "HK", "MO"].contains(language.region?.identifier ?? "")
+                return traditional ? displayNameZhHant : displayNameZhHans
+            default: return displayNameJa
+            }
         }
 
         public var skipsStations: Bool { self != .local }

@@ -502,12 +502,15 @@ nonisolated enum BoardEmptyReason {
     case noFavorites
     case stale
     case serviceEnded
+    /// The configured station, line or direction is no longer in the snapshot.
+    case missing
 
     var symbol: String {
         switch self {
         case .noFavorites: return "star"
         case .stale: return "tram.fill"
         case .serviceEnded: return "moon.stars.fill"
+        case .missing: return "questionmark.circle"
         }
     }
 
@@ -516,6 +519,7 @@ nonisolated enum BoardEmptyReason {
         case .noFavorites: return "アプリを開いてお気に入りを追加"
         case .stale: return "アプリを開いて更新"
         case .serviceEnded: return "本日の運行は終了しました"
+        case .missing: return "選んだ駅が見つかりません。ウィジェットを編集してください"
         }
     }
 
@@ -525,6 +529,7 @@ nonisolated enum BoardEmptyReason {
         case .noFavorites: return "お気に入りを追加"
         case .stale: return "発車情報なし"
         case .serviceEnded: return "本日の運行は終了"
+        case .missing: return "ウィジェットを編集"
         }
     }
 }
@@ -557,9 +562,15 @@ struct StationBoardView: View {
     private var station: BoardStation? {
         guard let snapshot = entry.snapshot else { return nil }
         if let name = entry.stationName {
-            return snapshot.stations.first { $0.name == name } ?? snapshot.stations.first
+            return snapshot.stations.first { $0.name == name }
         }
         return snapshot.stations.first
+    }
+
+    private var emptyReason: BoardEmptyReason {
+        guard let snapshot = entry.snapshot, entry.stationName != nil, !snapshot.stations.isEmpty
+        else { return entry.emptyReason }
+        return .missing
     }
 
     var body: some View {
@@ -567,7 +578,7 @@ struct StationBoardView: View {
             if let station {
                 board(for: station)
             } else {
-                BoardEmptyView(reason: entry.emptyReason)
+                BoardEmptyView(reason: emptyReason)
             }
         }
         .padding(13)
@@ -673,18 +684,16 @@ struct LineBoardView: View {
 
     private var target: (station: BoardStation, line: BoardLine, direction: BoardDirection)? {
         guard let snapshot = entry.snapshot else { return nil }
-        let station = entry.stationName
-            .flatMap { name in snapshot.stations.first { $0.name == name } }
+        // Only an unconfigured widget falls back to the first of each.
+        let station = entry.stationName.map { name in snapshot.stations.first { $0.name == name } }
             ?? snapshot.stations.first
         guard let station else { return nil }
 
-        let line = entry.lineId
-            .flatMap { id in station.lines.first { $0.lineId == id } }
+        let line = entry.lineId.map { id in station.lines.first { $0.lineId == id } }
             ?? station.lines.first
         guard let line else { return nil }
 
-        let direction = entry.directionId
-            .flatMap { id in line.directions.first { $0.directionId == id } }
+        let direction = entry.directionId.map { id in line.directions.first { $0.directionId == id } }
             ?? line.directions.first(where: \.isPrimary)
             ?? line.directions.first
         guard let direction else { return nil }
@@ -692,9 +701,16 @@ struct LineBoardView: View {
         return (station, line, direction)
     }
 
+    private var emptyReason: BoardEmptyReason {
+        guard let snapshot = entry.snapshot, !snapshot.stations.isEmpty,
+              entry.stationName != nil || entry.lineId != nil || entry.directionId != nil
+        else { return entry.emptyReason }
+        return .missing
+    }
+
     /// A configured target with nothing left today means service ended, not a stale snapshot.
     private var accessoryReason: BoardEmptyReason {
-        target == nil ? entry.emptyReason : .serviceEnded
+        target == nil ? emptyReason : .serviceEnded
     }
 
     private var upcoming: [BoardDeparture] {
@@ -769,7 +785,7 @@ struct LineBoardView: View {
             } else if target != nil {
                 BoardEmptyView(reason: .serviceEnded)
             } else {
-                BoardEmptyView(reason: entry.emptyReason)
+                BoardEmptyView(reason: emptyReason)
             }
         }
     }

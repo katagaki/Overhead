@@ -17,6 +17,8 @@ struct PlaceEditorView: View {
     @State private var routePriorityRaw = RoutePriority.balanced.rawValue
     @State private var preferOriginating = false
     @State private var avoidedLineIds: Set<String> = []
+    /// nil while the check runs off the main thread.
+    @State private var routeAvailable: Bool?
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -35,7 +37,7 @@ struct PlaceEditorView: View {
                     avoidedLineIds: $avoidedLineIds
                 )
 
-                if fromSelection != nil, toSelection != nil, !routeAvailable {
+                if fromSelection != nil, toSelection != nil, routeAvailable == false {
                     noRouteNotice
                 }
 
@@ -55,6 +57,16 @@ struct PlaceEditorView: View {
             }
         }
         .onAppear(perform: restore)
+        .task(id: routeSignature) {
+            routeAvailable = nil
+            guard let waypoints else { return }
+            let avoided = avoidedLineIds
+            let available = await Task.detached(priority: .userInitiated) {
+                JourneyViewModel.routeExists(through: waypoints, avoidingLineIds: avoided)
+            }.value
+            guard !Task.isCancelled else { return }
+            routeAvailable = available
+        }
     }
 
     // MARK: - Cards
@@ -135,16 +147,15 @@ struct PlaceEditorView: View {
         return [from.station] + viaSelections.map(\.station) + [to.station]
     }
 
-    private var routeAvailable: Bool {
-        guard let waypoints else { return false }
-        return JourneyViewModel.routeExists(through: waypoints, avoidingLineIds: avoidedLineIds)
+    private var routeSignature: [String] {
+        (waypoints ?? []).map(\.id) + ["|"] + avoidedLineIds.sorted()
     }
 
     private var canSave: Bool {
         if kind == .custom && customName.trimmingCharacters(in: .whitespaces).isEmpty {
             return false
         }
-        return routeAvailable
+        return routeAvailable == true
     }
 
     // MARK: - State

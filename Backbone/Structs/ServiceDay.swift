@@ -76,6 +76,9 @@ public struct ServiceDay: Hashable, Comparable, Codable, Sendable {
         start.addingTimeInterval(TimeInterval(seconds))
     }
 
+    /// A moment well inside the day, for lookups that resolve by date.
+    public var midday: Date { date(atRailSeconds: 12 * 3600) }
+
     /// Negative before this day starts, 86400+ once the clock passes midnight.
     public func railSeconds(at date: Date) -> Int {
         Int(date.timeIntervalSince(start).rounded(.down))

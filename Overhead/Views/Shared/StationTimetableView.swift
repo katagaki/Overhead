@@ -32,7 +32,9 @@ struct StationTimetableView: View {
             delayInfo: viewModel.delayCheckInfo(for: line.id)
         )
         .task(id: station.id) {
-            timetables = viewModel.stationTimetables(stationId: station.id)
+            let built = await viewModel.stationTimetables(stationId: station.id)
+            guard !Task.isCancelled else { return }
+            timetables = built
         }
     }
 

@@ -2,7 +2,7 @@ import SwiftUI
 import Backbone
 
 /// How the planner trades travel time against changes of train.
-enum RoutePriority: String, CaseIterable, Identifiable {
+nonisolated enum RoutePriority: String, CaseIterable, Identifiable {
     case balanced
     case time
     case efficiency

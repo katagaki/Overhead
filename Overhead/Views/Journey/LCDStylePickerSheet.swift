@@ -13,6 +13,8 @@ struct LCDStylePickerSheet: View {
     private var languagesRaw = LCDLanguageRotation.default.map(\.rawValue).joined(separator: ",")
     @Environment(\.dismiss) private var dismiss
 
+    private var selectedStyle: TrainLCDStyle { TrainLCDStyle(stored: styleRaw) }
+
     private var orientation: TrainLCDOrientation {
         TrainLCDOrientation(rawValue: orientationRaw) ?? .left
     }
@@ -89,17 +91,23 @@ struct LCDStylePickerSheet: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Menu {
-                        ForEach(TrainLCDLanguage.allCases) { language in
-                            Button {
-                                toggle(language)
-                            } label: {
-                                Label {
-                                    Text(verbatim: language.label)
-                                } icon: {
-                                    if languages.contains(language) {
-                                        Image(systemName: "checkmark")
+                        Section {
+                            ForEach(TrainLCDLanguage.allCases) { language in
+                                Button {
+                                    toggle(language)
+                                } label: {
+                                    Label {
+                                        Text(verbatim: language.label)
+                                    } icon: {
+                                        if languages.contains(language) {
+                                            Image(systemName: "checkmark")
+                                        }
                                     }
                                 }
+                            }
+                        } header: {
+                            if !selectedStyle.followsLanguageSelection {
+                                Text("LCD.Languages.FixedStyle \(selectedStyle.label)")
                             }
                         }
                     } label: {

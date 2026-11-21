@@ -5,7 +5,6 @@ import Backbone
 
 struct FavoritesSection: View {
     @ObservedObject var viewModel: JourneyViewModel
-    @Environment(\.scenePhase) private var scenePhase
     @State private var places: [SavedPlace] = []
     @ObservedObject private var installer = LineDataInstaller.shared
     @State private var editorTarget: EditorTarget?
@@ -50,14 +49,8 @@ struct FavoritesSection: View {
         }
     }
 
-    /// How the saved pair is rideable: one train, 直通, or with transfers.
-    private enum RouteMode {
-        case direct
-        case through
-        case transfer
-    }
-
-    private typealias ResolvedPlace = (line: TrainLine, from: Station, to: Station, vias: [Station], mode: RouteMode)
+    private typealias RouteMode = FavoriteDeparture.RouteMode
+    private typealias ResolvedPlace = FavoriteDeparture.Resolved
 
     var body: some View {
         rail
@@ -73,13 +66,9 @@ struct FavoritesSection: View {
         }
         .onAppear {
             places = SavedPlaceStore.load()
-            consumePendingDeparture()
         }
         .onReceive(NotificationCenter.default.publisher(for: SavedPlaceStore.didChangeNotification)) { _ in
             places = SavedPlaceStore.load()
-        }
-        .onChange(of: scenePhase) { _, phase in
-            if phase == .active { consumePendingDeparture() }
         }
 #if DEBUG
         .onReceive(ScreenshotStaging.shared.$placeEditorCommand) { command in
@@ -140,7 +129,7 @@ struct FavoritesSection: View {
         at date: Date
     ) -> some View {
         Button {
-            Task { await start(place, resolved: resolved) }
+            Task { await FavoriteDeparture.start(place, resolved: resolved, viewModel: viewModel) }
         } label: {
             VStack(alignment: .leading, spacing: 5) {
                 HStack(alignment: .firstTextBaseline, spacing: 7) {
@@ -398,108 +387,7 @@ struct FavoritesSection: View {
     }
 
     private func resolve(_ place: SavedPlace) -> ResolvedPlace? {
-        guard let line = viewModel.availableLines.first(where: { $0.id == place.lineId }),
-              let from = line.stations.first(where: { $0.id == place.fromStationId })
-        else { return nil }
-
-        let vias = place.viaStationIds.compactMap(station(withId:))
-        guard vias.count == place.viaStationIds.count else { return nil }
-
-        if let to = line.stations.first(where: { $0.id == place.toStationId }) {
-            return (line, from, to, vias, vias.isEmpty ? .direct : .transfer)
-        }
-
-        for group in StaticTrainData.throughDestinations(fromLineId: line.id, boardingStationId: from.id) {
-            if let to = group.stations.first(where: { $0.id == place.toStationId }) {
-                return (line, from, to, vias, vias.isEmpty ? .through : .transfer)
-            }
-        }
-
-        if let to = station(withId: place.toStationId) {
-            return (line, from, to, vias, .transfer)
-        }
-        return nil
-    }
-
-    private func station(withId id: String) -> Station? {
-        for line in viewModel.availableLines {
-            if let station = line.stations.first(where: { $0.id == id }) {
-                return station
-            }
-        }
-        return nil
-    }
-
-    private func start(_ place: SavedPlace, resolved: ResolvedPlace) async {
-        let waypoints = [resolved.from] + resolved.vias + [resolved.to]
-        let avoided = Set(place.avoidedLineIds)
-        let transferMinutes = place.walkingSpeed.transferMinutes
-
-        if place.ignoreTimetable || JourneyMode.current.ignoresTimetable {
-            startCandidate(await viewModel.searchRouteOptions(
-                stations: waypoints,
-                transferMinutes: transferMinutes,
-                walkPace: place.walkingSpeed.paceMultiplier,
-                priority: place.routePriority,
-                avoidingLineIds: avoided
-            ).first)
-            return
-        }
-
-        if resolved.mode != .transfer {
-            await viewModel.startJourney(
-                line: resolved.line,
-                from: resolved.from,
-                to: resolved.to
-            )
-            return
-        }
-
-        if let timed = await viewModel.searchTrainCandidates(
-            stations: waypoints,
-            anchor: .departure(RailClock.now),
-            transferMinutes: transferMinutes,
-            walkPace: place.walkingSpeed.paceMultiplier,
-            priority: place.routePriority,
-            avoidingLineIds: avoided,
-            preferringOriginating: place.preferOriginating
-        ).first {
-            startCandidate(timed)
-            return
-        }
-        startCandidate(await viewModel.searchRouteOptions(
-            stations: waypoints,
-            transferMinutes: transferMinutes,
-            walkPace: place.walkingSpeed.paceMultiplier,
-            priority: place.routePriority,
-            avoidingLineIds: avoided
-        ).first)
-    }
-
-    /// Rides the place id the control widget staged, exactly once.
-    private func consumePendingDeparture() {
-        let defaults = AppGroup.defaults
-        guard let idString = defaults.string(forKey: BoardSnapshotStore.pendingPlaceKey) else { return }
-        defaults.removeObject(forKey: BoardSnapshotStore.pendingPlaceKey)
-        guard let id = UUID(uuidString: idString) else { return }
-        Task {
-            await viewModel.loadLines()
-            let current = SavedPlaceStore.load()
-            guard let place = current.first(where: { $0.id == id }) else { return }
-            guard let resolved = resolve(place) else {
-                viewModel.startFailure = .noRoute
-                return
-            }
-            await start(place, resolved: resolved)
-        }
-    }
-
-    private func startCandidate(_ candidate: TrainCandidate?) {
-        if let candidate {
-            viewModel.startJourney(candidate: candidate)
-        } else {
-            viewModel.startFailure = .noRoute
-        }
+        FavoriteDeparture.resolve(place, lines: viewModel.availableLines)
     }
 
     // MARK: - Departure computation
@@ -551,7 +439,7 @@ struct FavoritesSection: View {
     }
 
     /// Only trains that reach the favorite's destination, matching what tapping it can start.
-    private static func departuresReaching(
+    nonisolated private static func departuresReaching(
         lineId: String,
         fromId: String,
         toId: String,
@@ -572,7 +460,7 @@ struct FavoritesSection: View {
             .sorted()
     }
 
-    private static func timetable(
+    nonisolated private static func timetable(
         line: StaticTrainLine,
         fromId: String,
         towardId: String,

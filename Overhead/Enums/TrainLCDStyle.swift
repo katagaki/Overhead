@@ -39,6 +39,14 @@ enum TrainLCDStyle: String, CaseIterable, Identifiable {
         }
     }
 
+    /// The rest show their own fixed languages whatever the selection.
+    var followsLanguageSelection: Bool {
+        switch self {
+        case .joban, .keihinTohoku, .yamanote, .tokyoMetro, .rinkai, .tsukubaExpress, .keisei: return true
+        case .ledMatrix, .kivotos, .shinkansen, .hankyu, .tube, .find, .neon, .galaxy: return false
+        }
+    }
+
     /// Japanese aesthetic label, shown verbatim.
     var label: String {
         switch self {

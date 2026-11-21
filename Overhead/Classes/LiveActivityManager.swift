@@ -184,7 +184,7 @@ final class LiveActivityManager {
             originNameEn: stations.first?.nameEn ?? "",
             destinationName: stations.last?.name ?? "",
             destinationNameEn: stations.last?.nameEn ?? "",
-            trainType: journey.service.trainType.displayNameJa,
+            trainType: journey.service.trainType.localizedDisplayName,
             stationNames: stations.map(\.name),
             stationNamesEn: stations.map(\.nameEn),
             stationCount: stations.count,

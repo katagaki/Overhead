@@ -1448,6 +1448,41 @@
         }
       }
     },
+    "ウィジェットを編集" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit widget"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ウィジェットを編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "위젯 편집"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "编辑小组件"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編輯小工具"
+          }
+        }
+      }
+    },
     "一路線の発車案内" : {
       "comment" : "Display name of the single-line departure widget.",
       "localizations" : {
@@ -1899,6 +1934,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "立即開始所選的收藏路線。"
+          }
+        }
+      }
+    },
+    "選んだ駅が見つかりません。ウィジェットを編集してください" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The chosen station is gone. Edit the widget to pick another."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選んだ駅が見つかりません。ウィジェットを編集してください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "선택한 역을 찾을 수 없습니다. 위젯을 편집하세요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "找不到所选车站。请编辑小组件。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "找不到所選車站。請編輯小工具。"
           }
         }
       }
