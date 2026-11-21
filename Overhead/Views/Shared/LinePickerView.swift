@@ -406,6 +406,8 @@ struct StationPickerView: View {
         let trainType: TrainService.TrainType
         let minutes: Int
         let isFirstTrain: Bool
+        /// Set when today's trains are done here and this is the next day's first.
+        var nextDayDeparture: Date? = nil
     }
 
     @ViewBuilder
@@ -416,6 +418,15 @@ struct StationPickerView: View {
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
                     .foregroundColor(.primary)
                 HStack(spacing: 4) {
+                    if let departure = next.nextDayDeparture {
+                        Text(NextDayLabel.key(departing: departure))
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 2)
+                            .background(Color(.tertiarySystemFill))
+                            .clipShape(Capsule())
+                    }
                     if next.isFirstTrain {
                         Text("StationTimetable.FirstTrain")
                             .font(.system(size: 10, weight: .bold))
@@ -471,12 +482,22 @@ struct StationPickerView: View {
             }
         }
 
-        let tomorrow = day.adding(days: 1).scheduleCalendar
+        let nextDay = day.adding(days: 1)
+        let tomorrow = nextDay.scheduleCalendar
         var tomorrowFirst: [String: NextArrival] = [:]
-        let tomorrowServices = tomorrow == calendar
-            ? services
-            : (StaticTimetableGenerator.services(forLineId: lineId, calendar: tomorrow) ?? [])
+        // A 改正 starting tomorrow changes its first trains.
+        let revisedTomorrow = StaticTrainData.upcomingRevisions(forLineId: lineId, on: now)
+            .contains { $0.validFromDayKey == nextDay.key }
+        let tomorrowServices: [TrainService]
+        if revisedTomorrow, let revisedLine = StaticTrainData.line(withId: lineId, on: nextDay.midday) {
+            tomorrowServices = StaticTimetableGenerator.services(for: revisedLine, calendar: tomorrow)
                 .filter { ($0.direction == .outbound) == ascending }
+        } else {
+            tomorrowServices = tomorrow == calendar
+                ? services
+                : (StaticTimetableGenerator.services(forLineId: lineId, calendar: tomorrow) ?? [])
+                    .filter { ($0.direction == .outbound) == ascending }
+        }
         for service in tomorrowServices {
             let serviceOrigin = service.timetable.first?.stationId
             for entry in service.timetable {
@@ -489,7 +510,8 @@ struct StationPickerView: View {
                     time: timeStr,
                     trainType: service.trainType,
                     minutes: minutes,
-                    isFirstTrain: entry.stationId == serviceOrigin
+                    isFirstTrain: entry.stationId == serviceOrigin,
+                    nextDayDeparture: nextDay.date(atRailSeconds: secs)
                 )
             }
         }
