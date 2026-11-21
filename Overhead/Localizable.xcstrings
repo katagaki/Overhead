@@ -5637,6 +5637,41 @@
         }
       }
     },
+    "LCD.Languages.FixedStyle %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ always shows its own languages. Your choice applies to the other styles."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@は決まった言語で表示されます。選んだ言語はほかのスタイルで使われます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 스타일은 정해진 언어로 표시됩니다. 선택한 언어는 다른 스타일에 적용됩니다."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@始终以固定语言显示。所选语言用于其他样式。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@始終以固定語言顯示。所選語言用於其他樣式。"
+          }
+        }
+      }
+    },
     "LineData.AppTooOld" : {
       "extractionState" : "manual",
       "localizations" : {
