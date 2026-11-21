@@ -56,7 +56,7 @@ final class LineDataAutoUpdater {
         case .authorized, .provisional, .ephemeral:
             return true
         case .notDetermined:
-            return (try? await center.requestAuthorization(options: [.alert])) ?? false
+            return (try? await center.requestAuthorization(options: [.alert, .sound])) ?? false
         default:
             return false
         }

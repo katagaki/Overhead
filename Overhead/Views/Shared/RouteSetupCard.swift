@@ -1,4 +1,5 @@
 import SwiftUI
+import UserNotifications
 import Backbone
 
 // MARK: - Route Setup Card
@@ -29,6 +30,8 @@ struct RouteSetupCard: View {
     private var notificationLeadMinutes = JourneyNotificationManager.defaultLeadMinutes
     @AppStorage(NotificationSound.storageKey) private var notificationSound = NotificationSound.system
     @State private var pickerTarget: PickerTarget?
+    @State private var notificationsDenied = false
+    @Environment(\.scenePhase) private var scenePhase
     @State private var showAvoidLinesSheet = false
 
     static let maxViaCount = 3
@@ -455,6 +458,15 @@ struct RouteSetupCard: View {
 
     private var notificationsItem: some View {
         Menu {
+            if notificationsDenied {
+                Section("Settings.Notifications.Denied") {
+                    if let url = URL(string: UIApplication.openNotificationSettingsURLString) {
+                        Link(destination: url) {
+                            Label("Button.OpenSettings", systemImage: "gear")
+                        }
+                    }
+                }
+            }
             Picker("Settings.Section.Notifications", selection: notificationLeadBinding) {
                 Text("Settings.Notifications.Off").tag(0)
                 ForEach(JourneyNotificationManager.leadMinuteOptions, id: \.self) { minutes in
@@ -464,12 +476,17 @@ struct RouteSetupCard: View {
             notificationSoundMenu
         } label: {
             CustomizationItem(
-                icon: notificationsEnabled ? "bell.badge" : "bell.slash",
+                icon: notificationsEnabled && !notificationsDenied ? "bell.badge" : "bell.slash",
                 label: "Settings.Section.Notifications",
-                active: notificationsEnabled
+                active: notificationsEnabled && !notificationsDenied
             )
         }
         .buttonStyle(.plain)
+        .task(id: scenePhase) {
+            guard scenePhase == .active else { return }
+            let status = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+            notificationsDenied = status == .denied
+        }
     }
 }
 
