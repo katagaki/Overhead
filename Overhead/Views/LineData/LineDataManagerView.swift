@@ -47,6 +47,10 @@ struct LineDataManagerView: View {
                 }
             }
 
+            if !installer.failedLines.isEmpty {
+                failedSection
+            }
+
             Section {
                 LabeledContent("LineData.Version") {
                     Text(installer.installedVersion)
@@ -166,6 +170,31 @@ struct LineDataManagerView: View {
                     .foregroundStyle(.secondary)
                     .padding(.top, shown.isEmpty ? 0 : 4)
             }
+        }
+    }
+
+    // MARK: Failed lines
+
+    private var failedSection: some View {
+        Section {
+            ForEach(installer.failedLines) { line in
+                HStack(spacing: 10) {
+                    if !line.symbol.isEmpty {
+                        LineSymbolBadge(symbol: line.symbol, color: Color(hex: line.colorHex),
+                                        dimension: Self.plateDimension, styleOverride: line.badgeStyle,
+                                        lineId: line.id)
+                    }
+                    Text(line.localizedName)
+                }
+            }
+            Button("LineData.Failed.Redownload") {
+                Task { await model.redownloadFailedLines() }
+            }
+            .disabled(installer.isBusy)
+        } header: {
+            Text("LineData.Failed.Title")
+        } footer: {
+            Text("LineData.Failed.Footer")
         }
     }
 

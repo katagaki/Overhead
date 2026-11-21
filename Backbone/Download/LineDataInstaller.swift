@@ -89,6 +89,8 @@ public final class LineDataInstaller: ObservableObject {
     @Published public private(set) var lastChecked: Date?
     /// How many of the catalog's lines are on the device.
     @Published public private(set) var installedCount = 0
+    /// Lines on disk that this build could not read.
+    @Published public private(set) var failedLines: [CatalogLine] = []
     /// The version the data on disk answers to. The catalog file lands during
     /// the check, ahead of the lines it describes, so its own version runs on
     /// in front of what the device actually holds.
@@ -341,25 +343,30 @@ public final class LineDataInstaller: ObservableObject {
     /// whose hash still matches is not fetched again.
     public func recomputePending() async {
         let lines = Catalog.current.lines
-        let result = await Task.detached(priority: .utility) { () -> ([PendingLine], Int) in
+        let result = await Task.detached(priority: .utility) { () -> ([PendingLine], Int, [CatalogLine]) in
             var work: [PendingLine] = []
             var installed = 0
+            var failed: [CatalogLine] = []
+            let undecodable = StaticTrainData.undecodableFolders()
             for line in lines {
                 let lineURL = LineDataStore.installedURL(folder: line.folder, file: "Line.json")
                 let badgeURL = LineDataStore.installedURL(folder: line.folder, file: "Badge.json")
                 let lineData = try? Data(contentsOf: lineURL)
                 let badgeData = try? Data(contentsOf: badgeURL)
-                if lineData != nil { installed += 1 }
+                if lineData != nil {
+                    if undecodable.contains(line.folder) { failed.append(line) } else { installed += 1 }
+                }
                 let needsLine = lineData.map { Self.hash($0) != line.sha256 } ?? true
                 let needsBadge = badgeData.map { Self.hash($0) != line.badgeSha256 } ?? true
                 if needsLine || needsBadge {
                     work.append(PendingLine(line: line, needsLine: needsLine, needsBadge: needsBadge))
                 }
             }
-            return (work, installed)
+            return (work, installed, failed)
         }.value
         pending = result.0
         installedCount = result.1
+        failedLines = result.2
         // Nothing outstanding means the disk matches the catalog, so the
         // catalog's version is now the installed one.
         if result.0.isEmpty {
@@ -445,8 +452,7 @@ public final class LineDataInstaller: ObservableObject {
                     try write(item.line, lineData: lineData, badgeData: badgeData)
                     if badgeData != nil { badgesChanged = true }
                     if let lineData {
-                        installed.append(contentsOf:
-                            (try? JSONDecoder().decode([StaticTrainLine].self, from: lineData)) ?? [])
+                        installed.append(contentsOf: LineStore.decode(lineData, folder: item.line.folder) ?? [])
                     }
                 case .failure(let error):
                     failures.append(error)
@@ -469,6 +475,18 @@ public final class LineDataInstaller: ObservableObject {
         }
 
         if let first = failures.first { throw first }
+    }
+
+    /// Removes the unreadable copies so the next sync fetches them afresh.
+    public func redownloadFailedLines() async throws {
+        await wipeTask?.value
+        guard !isDownloading else { return }
+        for line in failedLines {
+            try? FileManager.default.removeItem(
+                at: LineDataStore.installedURL(folder: line.folder, file: "Line.json"))
+        }
+        await recomputePending()
+        try await sync()
     }
 
     /// Throws away everything that was downloaded — lines, the catalog, the
