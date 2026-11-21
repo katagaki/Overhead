@@ -22,10 +22,22 @@ struct NearbyStationsSection: View {
     @State private var timetableTarget: NearbyTimetableTarget?
 
     private static let directionChoicesKey = "nearby.directionChoices"
-    /// All cards share one height (3 visible rows); longer lists scroll inside it.
-    @ScaledMetric(relativeTo: .body) private var cardHeight: CGFloat = 182
+    /// Placeholder until the header and rows are measured.
+    @ScaledMetric(relativeTo: .body) private var estimatedCardHeight: CGFloat = 196
+    @State private var measuredHeaderHeight: CGFloat = 0
+    @State private var measuredRowHeight: CGFloat = 0
+    private static let cardTopInset: CGFloat = 13
+    private static let headerSpacing: CGFloat = 9
+    private static let rowsBottomMargin: CGFloat = 10
     @ScaledMetric(relativeTo: .body) private var scaledCardWidth: CGFloat = 196
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    /// All cards share one height that fits exactly 3 rows; longer lists scroll inside it.
+    private var cardHeight: CGFloat {
+        guard measuredHeaderHeight > 0, measuredRowHeight > 0 else { return estimatedCardHeight }
+        return (Self.cardTopInset + measuredHeaderHeight + Self.headerSpacing
+            + measuredRowHeight * 3 + Self.rowsBottomMargin).rounded(.up)
+    }
 
     /// Grows with the text but always leaves the next card peeking in.
     private var cardWidth: CGFloat { min(scaledCardWidth, 320) }
@@ -48,6 +60,10 @@ struct NearbyStationsSection: View {
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active, !viewModel.availableLines.isEmpty else { return }
             refreshUnlessJourneyActive()
+        }
+        .onChange(of: dynamicTypeSize) {
+            measuredHeaderHeight = 0
+            measuredRowHeight = 0
         }
         .task(id: provider.nearestGroups.map(\.id).joined(separator: "|")) {
             await recomputeTimetables()
@@ -209,46 +225,56 @@ struct NearbyStationsSection: View {
     // MARK: - Station card
 
     private func stationCard(_ group: NearbyStationGroup) -> some View {
-        VStack(alignment: .leading, spacing: 9) {
-            if dynamicTypeSize.isAccessibilitySize {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(group.station.localizedName)
-                        .scaledFont(size: 17, weight: .bold)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.7)
-                    if !provider.isReducedAccuracy {
-                        walkLabel(meters: group.distanceMeters)
+        VStack(alignment: .leading, spacing: Self.headerSpacing) {
+            Group {
+                if dynamicTypeSize.isAccessibilitySize {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(group.station.localizedName)
+                            .scaledFont(size: 17, weight: .bold)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.7)
+                        if !provider.isReducedAccuracy {
+                            walkLabel(meters: group.distanceMeters)
+                        }
+                    }
+                } else {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(group.station.localizedName)
+                            .scaledFont(size: 17, weight: .bold)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                        Spacer()
+                        if !provider.isReducedAccuracy {
+                            walkLabel(meters: group.distanceMeters)
+                        }
                     }
                 }
-            } else {
-                HStack(alignment: .firstTextBaseline) {
-                    Text(group.station.localizedName)
-                        .scaledFont(size: 17, weight: .bold)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-                    Spacer()
-                    if !provider.isReducedAccuracy {
-                        walkLabel(meters: group.distanceMeters)
-                    }
-                }
+            }
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: {
+                measuredHeaderHeight = max(measuredHeaderHeight, $0)
             }
             // Every line is reachable by scrolling within the fixed card height.
             ScrollView(.vertical, showsIndicators: false) {
                 TimelineView(.everyMinute) { context in
                     VStack(spacing: 0) {
                         ForEach(Array(group.hits.enumerated()), id: \.element.id) { index, hit in
-                            if index > 0 { Divider() }
-                            lineRow(group: group, hit: hit, at: context.date)
+                            VStack(spacing: 0) {
+                                if index > 0 { Divider() }
+                                lineRow(group: group, hit: hit, at: context.date)
+                            }
+                            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: {
+                                measuredRowHeight = max(measuredRowHeight, $0)
+                            }
                         }
                     }
                 }
             }
             // Breathing room at the end of the list, not mid-scroll.
-            .contentMargins(.bottom, 10, for: .scrollContent)
+            .contentMargins(.bottom, Self.rowsBottomMargin, for: .scrollContent)
             .scrollDisabled(group.hits.count <= 3 && dynamicTypeSize <= .large)
         }
         // No bottom inset: rows emerge from under the rounded corner.
-        .padding(EdgeInsets(top: 13, leading: 13, bottom: 0, trailing: 13))
+        .padding(EdgeInsets(top: Self.cardTopInset, leading: 13, bottom: 0, trailing: 13))
         .frame(width: cardWidth, height: cardHeight, alignment: .topLeading)
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
